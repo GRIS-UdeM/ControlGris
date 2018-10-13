@@ -1,0 +1,87 @@
+SpatGris 2.0 - détails et questions
+===================================
+
+Section Trajectories
+--------------------
+
+1 - Movements: [menu] ==> Type de lien entre les sources (Movements ne me semble pas le bon terme).
+
+2 - [menu Circle] [menu Clockwise] ==> Type de trajectoire, direction.
+
+3 - [nombre] [menu Second(s)] per cycle ==> Durée d'un cycle
+
+4 - [nombre] cycle(s) ==> Nombre de cycles.
+
+5 - [nombre] turn(s) ==> Nombre de tours.
+
+6 - [Bouton Ready] ==> Active la trajectoire (Ready ne me semble pas le bon terme).
+
+7 - [Slider ] Speed ==> Modificateur de la vitesse de la trajectoire.
+
+
+Commentaires:
+
+1) Les contrôle 3, 4, 5 et 7 se chevauchent tous dune façon ou d'une autre. Je suis convaincu qu'on peut réduire le nombre de contrôles sans enlever de fonctionnalités.
+
+2) Le menu [Clockwise/Counter Clockwise] entre en contradiction avec le slider de vitesse qui, s'il est dans le négatif, renverse le sens de la trajectoire.
+
+
+Questions:
+
+1) Est-ce que l'on veut vraiment un nombre fini de tours de trajectoires? On ne voudrait pas plutôt que lorsque la trajectoire est activée, elle tourne jusqu'au moment où elle est désactivée. Je ne vois pas le bouton Ready dans les automations de la track (Reaper sous linux). J'enlèverais le nombre de cycles et j'automatiserais le bouton Ready à la place.
+
+
+Section Settings
+----------------
+
+1 - Param smoothing (ms) [slider] ==> lissage des mouvements.
+
+2 - [Toggle] Show grid lines ==> Affiche la grille dans les interfaces 2D.
+
+3 - Process mode [menu] ==> Menu pour déterminer le format de sortie (ServerGris, Zirkonium, etc.).
+
+4 - Max span volume [slider] ==> ???
+
+
+Questions:
+
+1) Le toggle "Show grid lines" est-il vraiment nécessaire ? Ne pourrait-on pas les afficher en tout temps et éliminer un bouton ?
+
+2) À quoi sert le slider "Max span volume" ?
+
+
+Section Sources
+---------------
+
+1 - Source placement [menu] ==> Positionnement automatique des sources.
+
+2 - Bouton [Apply] ==> Effectue le positionnement.
+
+3 - Set RA position [menu] ==> Sélectionne la source à modifier.
+
+4 - Ray [nombre] ==> Longueur du rayon de la source sélectionnée.
+
+5 - Angle [nombre] ==> Angle de la source sélectionnée.
+
+
+Questions:
+    
+1) Pourquoi un bouton [Apply] ? Cela devrait être implicite à la sélection d'un item dans le menu...
+
+2) "Set RA position", que veut dire "RA" ?
+
+
+Section Interfaces
+------------------
+
+1 - OSC/Leap source [menu] ==> Sélection de l'interface.
+
+2 - [Toggle] Receive on IP:port [Text] [Text] ==> Canal de communication en réception.
+
+3 - [Toggle] Send on IP:port [Text] [Text] ==> Canal de communication en envoie.
+
+
+Questions:
+
+
+1) Que représente les nombres dans le menu "OSC/Leap source" ?

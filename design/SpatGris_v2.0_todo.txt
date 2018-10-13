@@ -1,0 +1,22 @@
+SpatGris:
+    
+2 Vues:
+3 sliders (azimuth, elevation, radius)
+3 sliders (X, Y, Z)
+
+C'est les sliders qui communiquent avec le DAW
+
+
+2 Plans:
+azimuth - elevation
+azimuth - radius
+
+Un toggle pour activer/désactiver le clipping sur le cercle dans les plans 2D (le LBAP peut aller dans les coins).
+
+
+La section "Output parameters" disparait.
+
+
+Process mode devient un choix de format (Zirkonium, ServerGris, etc.)
+
+Les tabs "Volume & Filters" et "Speakers" disparaissent.
