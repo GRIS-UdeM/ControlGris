@@ -16,6 +16,10 @@
 #include "FieldComponent.h"
 #include "BannerComponent.h"
 #include "ParametersBoxComponent.h"
+#include "TrajectoryBoxComponent.h"
+#include "SettingsBoxComponent.h"
+#include "SourceBoxComponent.h"
+#include "InterfaceBoxComponent.h"
 
 //==============================================================================
 /**
@@ -48,7 +52,11 @@ private:
     FieldComponent  azimuthElevationField;
     FieldComponent  radiusField;
 
-    ParametersBoxComponent parametersBox;
+    ParametersBoxComponent  parametersBox;
+    TrajectoryBoxComponent  trajectoryBox;
+    SettingsBoxComponent    settingsBox;
+    SourceBoxComponent      sourceBox;
+    InterfaceBoxComponent   interfaceBox;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGris2AudioProcessorEditor)
 };

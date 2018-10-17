@@ -41,6 +41,10 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     addAndMakeVisible(&radiusField);
 
     addAndMakeVisible(&parametersBox);
+    addAndMakeVisible(&trajectoryBox);
+    addAndMakeVisible(&settingsBox);
+    addAndMakeVisible(&sourceBox);
+    addAndMakeVisible(&interfaceBox);
 }
 
 SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor()
@@ -72,4 +76,8 @@ void SpatGris2AudioProcessorEditor::resized() {
     radiusField.setBounds(0, 390, 350, 350);
 
     parametersBox.setBounds(350, 20, rightComponentWidth, 130);
+    trajectoryBox.setBounds(350, 170, rightComponentWidth, 130);
+    settingsBox.setBounds(350, 320, rightComponentWidth, 130);
+    sourceBox.setBounds(350, 470, rightComponentWidth, 130);
+    interfaceBox.setBounds(350, 620, rightComponentWidth, 130);
 }

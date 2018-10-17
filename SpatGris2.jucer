@@ -4,6 +4,22 @@
               pluginFormats="buildAU,buildVST" version="2.0.0">
   <MAINGROUP id="gDqxm3" name="SpatGris2">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
+      <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
+            file="Source/InterfaceBoxComponent.cpp"/>
+      <FILE id="lmO3cO" name="InterfaceBoxComponent.h" compile="0" resource="0"
+            file="Source/InterfaceBoxComponent.h"/>
+      <FILE id="HI1dem" name="SettingsBoxComponent.cpp" compile="1" resource="0"
+            file="Source/SettingsBoxComponent.cpp"/>
+      <FILE id="tr9Qib" name="SourceBoxComponent.cpp" compile="1" resource="0"
+            file="Source/SourceBoxComponent.cpp"/>
+      <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
+            file="Source/SourceBoxComponent.h"/>
+      <FILE id="qBqct9" name="SettingsBoxComponent.h" compile="0" resource="0"
+            file="Source/SettingsBoxComponent.h"/>
+      <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
+            file="Source/TrajectoryBoxComponent.cpp"/>
+      <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"
+            file="Source/TrajectoryBoxComponent.h"/>
       <FILE id="tMh8VU" name="ParametersBoxComponent.cpp" compile="1" resource="0"
             file="Source/ParametersBoxComponent.cpp"/>
       <FILE id="qmk3iz" name="ParametersBoxComponent.h" compile="0" resource="0"
