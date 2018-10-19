@@ -3,12 +3,14 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
 
-class ParametersBoxComponent : public Component
+class ParametersBoxComponent : public Component,
+                               public Button::Listener
 {
 public:
     ParametersBoxComponent();
     ~ParametersBoxComponent();
 
+    void buttonClicked(Button *button);
     void paint(Graphics&) override;
     void resized() override;
 
@@ -26,6 +28,22 @@ private:
     Label           radiusLabel;
     ToggleButton    radiusLinkButton;
     Slider          radiusSlider;
+
+    //-------------------------------------
+
+    Label           xLabel;
+    ToggleButton    xLinkButton;
+    Slider          xSlider;
+
+    Label           yLabel;
+    ToggleButton    yLinkButton;
+    Slider          ySlider;
+
+    Label           zLabel;
+    ToggleButton    zLinkButton;
+    Slider          zSlider;
+
+    //-------------------------------------
 
     Label           azimuthSpanLabel;
     ToggleButton    azimuthSpanLinkButton;
