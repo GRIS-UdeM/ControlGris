@@ -33,6 +33,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
 }
 
 TrajectoryBoxComponent::~TrajectoryBoxComponent() {
+    setLookAndFeel(nullptr);
 }
 
 void TrajectoryBoxComponent::paint(Graphics& g) {

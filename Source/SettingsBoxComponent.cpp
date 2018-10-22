@@ -34,6 +34,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
 }
 
 SettingsBoxComponent::~SettingsBoxComponent() {
+    setLookAndFeel(nullptr);
 }
 
 void SettingsBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {

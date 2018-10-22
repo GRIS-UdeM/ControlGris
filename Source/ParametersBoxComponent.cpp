@@ -91,6 +91,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
 }
 
 ParametersBoxComponent::~ParametersBoxComponent() {
+    setLookAndFeel(nullptr);
 }
 
 void ParametersBoxComponent::buttonClicked(Button *button) {

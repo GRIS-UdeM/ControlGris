@@ -37,6 +37,7 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     addAndMakeVisible(&sourceBanner);
     addAndMakeVisible(&interfaceBanner);
 
+    azimuthElevationField.addListener(this);
     addAndMakeVisible(&azimuthElevationField);
     addAndMakeVisible(&radiusField);
 
@@ -45,10 +46,29 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     addAndMakeVisible(&settingsBox);
     addAndMakeVisible(&sourceBox);
     addAndMakeVisible(&interfaceBox);
+
+    Random random = Random();
+    m_numOfSources = 8;
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setAzimuth(random.nextDouble() * 360.0);
+        sources[i].setElevation(random.nextDouble() * 90.0);
+    }
+
+    azimuthElevationField.setSources(sources, m_numOfSources);
+
+    if (! oscSender.connect("127.0.0.1", 18032)) {
+        std::cout << "Error: could not connect to UDP port 18032." << std::endl;
+    }
+
 }
 
-SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor()
-{
+SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor() {
+    setLookAndFeel(nullptr);
+    oscSender.disconnect();
+}
+
+Source * SpatGris2AudioProcessorEditor::getSources() {
+    return sources;
 }
 
 //==============================================================================
@@ -80,4 +100,32 @@ void SpatGris2AudioProcessorEditor::resized() {
     settingsBox.setBounds(350, 320, rightComponentWidth, 130);
     sourceBox.setBounds(350, 470, rightComponentWidth, 130);
     interfaceBox.setBounds(350, 620, rightComponentWidth, 130);
+
 }
+
+//==============================================================================
+void SpatGris2AudioProcessorEditor::sourcePositionChanged(int sourceId) {
+    std::cout << sourceId << " " << sources[sourceId].getAzimuth() << " " << sources[sourceId].getElevation() << std::endl;
+
+    OSCAddressPattern oscPattern("/spat/serv");
+    OSCMessage message(oscPattern);
+
+    float azim = -sources[sourceId].getAzimuth() / 360.0 * M_PI * 2.0 + M_PI;
+    float elev = (M_PI / 2.0) - (sources[sourceId].getElevation() / 360.0 * M_PI * 2.0);
+    
+    std::cout << azim << std::endl;
+    message.addInt32(sourceId);
+    message.addFloat32(azim);
+    message.addFloat32(elev);
+    message.addFloat32(0.0);
+    message.addFloat32(0.0);
+    message.addFloat32(1.0);
+    message.addFloat32(0.0);
+
+    if (!oscSender.send(message)) {
+        std::cout << "Error: could not send OSC message." << std::endl;
+        return;
+    }
+}
+
+

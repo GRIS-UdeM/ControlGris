@@ -42,6 +42,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
 }
 
 InterfaceBoxComponent::~InterfaceBoxComponent() {
+    setLookAndFeel(nullptr);
 }
 
 void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {

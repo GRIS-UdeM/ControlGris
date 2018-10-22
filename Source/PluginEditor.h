@@ -20,11 +20,15 @@
 #include "SettingsBoxComponent.h"
 #include "SourceBoxComponent.h"
 #include "InterfaceBoxComponent.h"
+#include "Source.h"
+
+const int MaxNumOfSources = 36;
 
 //==============================================================================
 /**
 */
-class SpatGris2AudioProcessorEditor  : public AudioProcessorEditor
+class SpatGris2AudioProcessorEditor  : public AudioProcessorEditor,
+                                       public FieldComponent::Listener
 {
 public:
     SpatGris2AudioProcessorEditor (SpatGris2AudioProcessor&);
@@ -33,6 +37,11 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+
+    //==============================================================================
+    void sourcePositionChanged(int sourceId) override;
+
+    Source * getSources();
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -57,6 +66,11 @@ private:
     SettingsBoxComponent    settingsBox;
     SourceBoxComponent      sourceBox;
     InterfaceBoxComponent   interfaceBox;
+
+    Source sources[MaxNumOfSources];
+    int m_numOfSources;
+
+    OSCSender oscSender;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGris2AudioProcessorEditor)
 };
