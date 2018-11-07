@@ -12,7 +12,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProcessor& p)
+ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
     setSize (900, 740);
@@ -64,26 +64,26 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
 
 }
 
-SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor() {
+ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
     setLookAndFeel(nullptr);
     oscSender.disconnect();
 }
 
-Source * SpatGris2AudioProcessorEditor::getSources() {
+Source * ControlGrisAudioProcessorEditor::getSources() {
     return sources;
 }
 
-int SpatGris2AudioProcessorEditor::getSelectedSource() {
+int ControlGrisAudioProcessorEditor::getSelectedSource() {
     return m_selectedSource;
 }
 
 //==============================================================================
-void SpatGris2AudioProcessorEditor::paint (Graphics& g) {
+void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
     // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 }
 
-void SpatGris2AudioProcessorEditor::resized() {
+void ControlGrisAudioProcessorEditor::resized() {
     double width = getWidth();
     double height = getHeight();
  
@@ -106,7 +106,7 @@ void SpatGris2AudioProcessorEditor::resized() {
 }
 
 //==============================================================================
-void SpatGris2AudioProcessorEditor::parameterChanged(int parameterId, double value) {
+void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
     switch (parameterId) {
         case 0:
             sources[m_selectedSource].setAzimuth(value * 360.0); break;
@@ -130,7 +130,7 @@ void SpatGris2AudioProcessorEditor::parameterChanged(int parameterId, double val
     azimuthElevationField.repaint();
 }
 
-void SpatGris2AudioProcessorEditor::sourcePositionChanged(int sourceId) {
+void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&sources[sourceId]);

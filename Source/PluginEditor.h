@@ -27,13 +27,13 @@ const int MaxNumOfSources = 36;
 //==============================================================================
 /**
 */
-class SpatGris2AudioProcessorEditor  : public AudioProcessorEditor,
+class ControlGrisAudioProcessorEditor  : public AudioProcessorEditor,
                                        public FieldComponent::Listener,
                                        public ParametersBoxComponent::Listener
 {
 public:
-    SpatGris2AudioProcessorEditor (SpatGris2AudioProcessor&);
-    ~SpatGris2AudioProcessorEditor();
+    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&);
+    ~ControlGrisAudioProcessorEditor();
 
     //==============================================================================
     void paint (Graphics&) override;
@@ -49,7 +49,7 @@ public:
 private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
-    SpatGris2AudioProcessor& processor;
+    ControlGrisAudioProcessor& processor;
 
     GrisLookAndFeel mGrisFeel;
 
@@ -77,5 +77,5 @@ private:
 
     OSCSender oscSender;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGris2AudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)
 };

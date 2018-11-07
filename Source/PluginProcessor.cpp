@@ -12,7 +12,7 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-SpatGris2AudioProcessor::SpatGris2AudioProcessor()
+ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 #ifndef JucePlugin_PreferredChannelConfigurations
      : AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
@@ -26,17 +26,17 @@ SpatGris2AudioProcessor::SpatGris2AudioProcessor()
 {
 }
 
-SpatGris2AudioProcessor::~SpatGris2AudioProcessor()
+ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
 }
 
 //==============================================================================
-const String SpatGris2AudioProcessor::getName() const
+const String ControlGrisAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
 
-bool SpatGris2AudioProcessor::acceptsMidi() const
+bool ControlGrisAudioProcessor::acceptsMidi() const
 {
    #if JucePlugin_WantsMidiInput
     return true;
@@ -45,7 +45,7 @@ bool SpatGris2AudioProcessor::acceptsMidi() const
    #endif
 }
 
-bool SpatGris2AudioProcessor::producesMidi() const
+bool ControlGrisAudioProcessor::producesMidi() const
 {
    #if JucePlugin_ProducesMidiOutput
     return true;
@@ -54,7 +54,7 @@ bool SpatGris2AudioProcessor::producesMidi() const
    #endif
 }
 
-bool SpatGris2AudioProcessor::isMidiEffect() const
+bool ControlGrisAudioProcessor::isMidiEffect() const
 {
    #if JucePlugin_IsMidiEffect
     return true;
@@ -63,50 +63,50 @@ bool SpatGris2AudioProcessor::isMidiEffect() const
    #endif
 }
 
-double SpatGris2AudioProcessor::getTailLengthSeconds() const
+double ControlGrisAudioProcessor::getTailLengthSeconds() const
 {
     return 0.0;
 }
 
-int SpatGris2AudioProcessor::getNumPrograms()
+int ControlGrisAudioProcessor::getNumPrograms()
 {
     return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
                 // so this should be at least 1, even if you're not really implementing programs.
 }
 
-int SpatGris2AudioProcessor::getCurrentProgram()
+int ControlGrisAudioProcessor::getCurrentProgram()
 {
     return 0;
 }
 
-void SpatGris2AudioProcessor::setCurrentProgram (int index)
+void ControlGrisAudioProcessor::setCurrentProgram (int index)
 {
 }
 
-const String SpatGris2AudioProcessor::getProgramName (int index)
+const String ControlGrisAudioProcessor::getProgramName (int index)
 {
     return {};
 }
 
-void SpatGris2AudioProcessor::changeProgramName (int index, const String& newName)
+void ControlGrisAudioProcessor::changeProgramName (int index, const String& newName)
 {
 }
 
 //==============================================================================
-void SpatGris2AudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
 }
 
-void SpatGris2AudioProcessor::releaseResources()
+void ControlGrisAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool SpatGris2AudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
 {
   #if JucePlugin_IsMidiEffect
     ignoreUnused (layouts);
@@ -129,7 +129,7 @@ bool SpatGris2AudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts
 }
 #endif
 
-void SpatGris2AudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
+void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
 {
     ScopedNoDenormals noDenormals;
     auto totalNumInputChannels  = getTotalNumInputChannels();
@@ -159,25 +159,25 @@ void SpatGris2AudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuff
 }
 
 //==============================================================================
-bool SpatGris2AudioProcessor::hasEditor() const
+bool ControlGrisAudioProcessor::hasEditor() const
 {
     return true; // (change this to false if you choose to not supply an editor)
 }
 
-AudioProcessorEditor* SpatGris2AudioProcessor::createEditor()
+AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 {
-    return new SpatGris2AudioProcessorEditor (*this);
+    return new ControlGrisAudioProcessorEditor (*this);
 }
 
 //==============================================================================
-void SpatGris2AudioProcessor::getStateInformation (MemoryBlock& destData)
+void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
 }
 
-void SpatGris2AudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
@@ -187,5 +187,5 @@ void SpatGris2AudioProcessor::setStateInformation (const void* data, int sizeInB
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
-    return new SpatGris2AudioProcessor();
+    return new ControlGrisAudioProcessor();
 }

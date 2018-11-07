@@ -15,12 +15,12 @@
 //==============================================================================
 /**
 */
-class SpatGris2AudioProcessor  : public AudioProcessor
+class ControlGrisAudioProcessor  : public AudioProcessor
 {
 public:
     //==============================================================================
-    SpatGris2AudioProcessor();
-    ~SpatGris2AudioProcessor();
+    ControlGrisAudioProcessor();
+    ~ControlGrisAudioProcessor();
 
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override;
@@ -57,5 +57,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SpatGris2AudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)
 };
