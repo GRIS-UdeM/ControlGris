@@ -10,6 +10,8 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&azimuthLinkButton);
 
     azimuthSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    azimuthSlider.setRange(0.0, 1.0);
+    azimuthSlider.addListener(this);
     addAndMakeVisible(&azimuthSlider);
 
     elevationLabel.setText("Elevation", NotificationType::dontSendNotification);
@@ -19,6 +21,8 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&elevationLinkButton);
 
     elevationSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    elevationSlider.setRange(0.0, 1.0);
+    elevationSlider.addListener(this);
     addAndMakeVisible(&elevationSlider);
 
     radiusLabel.setText("Radius", NotificationType::dontSendNotification);
@@ -30,6 +34,8 @@ ParametersBoxComponent::ParametersBoxComponent() {
     radiusLinkButton.setEnabled(false);
 
     radiusSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    radiusSlider.setRange(0.0, 1.0);
+    radiusSlider.addListener(this);
     addAndMakeVisible(&radiusSlider);
     radiusSlider.setEnabled(false);
 
@@ -42,6 +48,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addChildComponent(&xLinkButton);
 
     xSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    xSlider.addListener(this);
     addChildComponent(&xSlider);
 
     yLabel.setText("Y", NotificationType::dontSendNotification);
@@ -51,6 +58,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addChildComponent(&yLinkButton);
 
     ySlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    ySlider.addListener(this);
     addChildComponent(&ySlider);
 
     zLabel.setText("Z", NotificationType::dontSendNotification);
@@ -62,6 +70,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     zLinkButton.setEnabled(false);
 
     zSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    zSlider.addListener(this);
     addChildComponent(&zSlider);
     zSlider.setEnabled(false);
 
@@ -74,6 +83,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&azimuthSpanLinkButton);
 
     azimuthSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    azimuthSpanSlider.addListener(this);
     addAndMakeVisible(&azimuthSpanSlider);
 
     elevationSpanLabel.setText("Elevation Span", NotificationType::dontSendNotification);
@@ -83,6 +93,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&elevationSpanLinkButton);
 
     elevationSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    elevationSpanSlider.addListener(this);
     addAndMakeVisible(&elevationSpanSlider);
 
     activatorXYZ.setButtonText("X-Y-Z");
@@ -92,6 +103,13 @@ ParametersBoxComponent::ParametersBoxComponent() {
 
 ParametersBoxComponent::~ParametersBoxComponent() {
     setLookAndFeel(nullptr);
+}
+
+void ParametersBoxComponent::setSelectedSource(Source *source) {
+    selectedSource = source;
+    azimuthSlider.setValue(selectedSource->getAzimuth() / 360.0);
+    elevationSlider.setValue(selectedSource->getElevation() / 90.0);
+    repaint();
 }
 
 void ParametersBoxComponent::buttonClicked(Button *button) {
@@ -138,7 +156,38 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
     }
 }
 
-void ParametersBoxComponent::paint(Graphics& g) {}
+void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
+    int parameterId;
+    if (slider == &azimuthSlider) {
+        parameterId = 0;
+    } else if (slider == &elevationSlider) {
+        parameterId = 1;    
+    } else if (slider == &radiusSlider) {
+        parameterId = 2;
+    } else if (slider == &xSlider) {
+        parameterId = 3;
+    } else if (slider == &ySlider) {
+        parameterId = 4;
+    } else if (slider == &zSlider) {
+        parameterId = 5;
+    } else if (slider == &azimuthSpanSlider) {
+        parameterId = 6;
+    } else if (slider == &elevationSpanSlider) {
+        parameterId = 7;
+    }
+
+    listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, slider->getValue()); });
+}
+
+void ParametersBoxComponent::paint(Graphics& g) {
+    float x = getWidth() - 30;
+    float y = getHeight() - 30;
+
+    g.setColour(selectedSource->getColour());
+    g.drawEllipse(x, y, 20, 20, 3);
+    g.setColour(Colours::white);
+    g.drawText(String(selectedSource->getId()+1), x, y, 20, 20, Justification(Justification::centred), false);
+}
 
 void ParametersBoxComponent::resized() {
     double width = getWidth();

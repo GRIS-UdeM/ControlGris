@@ -15,8 +15,6 @@
 SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
-    // Make sure that before the constructor has finished, you've set the
-    // editor's size to whatever you need it to be.
     setSize (900, 740);
 
     setLookAndFeel(&mGrisFeel);
@@ -41,6 +39,7 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     addAndMakeVisible(&azimuthElevationField);
     addAndMakeVisible(&radiusField);
 
+    parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
     addAndMakeVisible(&trajectoryBox);
     addAndMakeVisible(&settingsBox);
@@ -50,6 +49,7 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     Random random = Random();
     m_numOfSources = 8;
     for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setId(i);
         sources[i].setAzimuth(random.nextDouble() * 360.0);
         sources[i].setElevation(random.nextDouble() * 90.0);
     }
@@ -60,6 +60,9 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
         std::cout << "Error: could not connect to UDP port 18032." << std::endl;
     }
 
+    m_selectedSource = 0;
+    parametersBox.setSelectedSource(&sources[m_selectedSource]);
+
 }
 
 SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor() {
@@ -69,6 +72,10 @@ SpatGris2AudioProcessorEditor::~SpatGris2AudioProcessorEditor() {
 
 Source * SpatGris2AudioProcessorEditor::getSources() {
     return sources;
+}
+
+int SpatGris2AudioProcessorEditor::getSelectedSource() {
+    return m_selectedSource;
 }
 
 //==============================================================================
@@ -104,8 +111,34 @@ void SpatGris2AudioProcessorEditor::resized() {
 }
 
 //==============================================================================
+void SpatGris2AudioProcessorEditor::parameterChanged(int parameterId, double value) {
+    switch (parameterId) {
+        case 0:
+            sources[m_selectedSource].setAzimuth(value * 360.0); break;
+        case 1:
+            sources[m_selectedSource].setElevation(value * 90.0); break;
+        case 2:
+            sources[m_selectedSource].setRadius(value); break;
+/*
+        case 3:
+            sources[m_selectedSource].setX(value); break;
+        case 4:
+            sources[m_selectedSource].setY(value); break;
+        case 5:
+            sources[m_selectedSource].setZ(value); break;
+        case 6:
+            sources[m_selectedSource].setAzimuthSpan(value); break;
+        case 7:
+            sources[m_selectedSource].setElevationSpan(value); break;
+*/
+    }
+    azimuthElevationField.repaint();
+}
+
 void SpatGris2AudioProcessorEditor::sourcePositionChanged(int sourceId) {
-    std::cout << sourceId << " " << sources[sourceId].getAzimuth() << " " << sources[sourceId].getElevation() << std::endl;
+
+    m_selectedSource = sourceId;
+    parametersBox.setSelectedSource(&sources[sourceId]);
 
     OSCAddressPattern oscPattern("/spat/serv");
     OSCMessage message(oscPattern);
@@ -113,7 +146,6 @@ void SpatGris2AudioProcessorEditor::sourcePositionChanged(int sourceId) {
     float azim = -sources[sourceId].getAzimuth() / 360.0 * M_PI * 2.0 + M_PI;
     float elev = (M_PI / 2.0) - (sources[sourceId].getElevation() / 360.0 * M_PI * 2.0);
     
-    std::cout << azim << std::endl;
     message.addInt32(sourceId);
     message.addFloat32(azim);
     message.addFloat32(elev);

@@ -28,7 +28,8 @@ const int MaxNumOfSources = 36;
 /**
 */
 class SpatGris2AudioProcessorEditor  : public AudioProcessorEditor,
-                                       public FieldComponent::Listener
+                                       public FieldComponent::Listener,
+                                       public ParametersBoxComponent::Listener
 {
 public:
     SpatGris2AudioProcessorEditor (SpatGris2AudioProcessor&);
@@ -40,8 +41,10 @@ public:
 
     //==============================================================================
     void sourcePositionChanged(int sourceId) override;
+    void parameterChanged(int parameterId, double value) override;
 
     Source * getSources();
+    int getSelectedSource();
 
 private:
     // This reference is provided as a quick way for your editor to
@@ -69,6 +72,7 @@ private:
 
     Source sources[MaxNumOfSources];
     int m_numOfSources;
+    int m_selectedSource;
 
     OSCSender oscSender;
 

@@ -43,7 +43,15 @@ Point <float> FieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth) {
 void FieldComponent::setSources(Source *sources, int numberOfSources) {
     m_sources = sources;
     m_numberOfSources = numberOfSources;
-    m_selectedSourceId = -1;
+    m_selectedSourceId = 0;
+    for (int i = 0; i < m_numberOfSources; i++) {
+        float hue = (float)i / m_numberOfSources + 0.577251;
+        if (hue > 1) {
+            hue -= 1;
+        }
+        m_sources[i].setColour(Colour::fromHSV(hue, 1.0, 1, 0.5));
+    }
+    listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
 }
 
 void FieldComponent::paint(Graphics& g) {
@@ -107,17 +115,12 @@ void FieldComponent::paint(Graphics& g) {
             lineThickness = 2;
             saturation = 0.5;
         }
-        float hue = (float)i / m_numberOfSources + 0.577251;
-        if (hue > 1){
-            hue -= 1;
-        }
         Point<float> pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, fieldWidth);
-        g.setColour(Colour::fromHSV(hue, saturation, 1, 0.5));
+        g.setColour(m_sources[i].getColour().withSaturation(saturation));
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.setColour(Colours::white);
         g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
     }
-   
 }
 
 void FieldComponent::mouseDown(const MouseEvent &event) {    
@@ -130,6 +133,7 @@ void FieldComponent::mouseDown(const MouseEvent &event) {
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
+            listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
             break;
         }
     }

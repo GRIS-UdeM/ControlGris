@@ -4,6 +4,17 @@ Source::Source() {
     m_azimuth = 0.0;
     m_elevation = 0.0;
     m_radius = 1.0;
+    colour = Colours::black;
+}
+
+Source::~Source() {}
+
+void Source::setId(int id) {
+    m_id = id;
+}
+
+int Source::getId() {
+    return m_id;
 }
 
 void Source::setAzimuth(float azimuth) {
@@ -36,4 +47,10 @@ float Source::getRadius() {
     return m_radius;
 }
 
-Source::~Source() {}
+void Source::setColour(Colour col) {
+    colour = col;
+}
+
+Colour Source::getColour() {
+    return colour;
+}
