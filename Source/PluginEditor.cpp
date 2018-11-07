@@ -18,22 +18,18 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     setSize (900, 740);
 
     setLookAndFeel(&mGrisFeel);
-
+ 
     azimuthElevationBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
     radiusBanner.setText("Radius", NotificationType::dontSendNotification);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
-    settingsBanner.setText("Settings", NotificationType::dontSendNotification);
-    sourceBanner.setText("Sources", NotificationType::dontSendNotification);
-    interfaceBanner.setText("Interfaces", NotificationType::dontSendNotification);
+    settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
 
     addAndMakeVisible(&azimuthElevationBanner);
     addAndMakeVisible(&radiusBanner);
     addAndMakeVisible(&parametersBanner);
     addAndMakeVisible(&trajectoryBanner);
     addAndMakeVisible(&settingsBanner);
-    addAndMakeVisible(&sourceBanner);
-    addAndMakeVisible(&interfaceBanner);
 
     azimuthElevationField.addListener(this);
     addAndMakeVisible(&azimuthElevationField);
@@ -42,9 +38,12 @@ SpatGris2AudioProcessorEditor::SpatGris2AudioProcessorEditor (SpatGris2AudioProc
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
     addAndMakeVisible(&trajectoryBox);
-    addAndMakeVisible(&settingsBox);
-    addAndMakeVisible(&sourceBox);
-    addAndMakeVisible(&interfaceBox);
+
+    addAndMakeVisible(configurationComponent);
+    Colour bg = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
+    configurationComponent.addTab ("Settings", bg, &settingsBox, false);
+    configurationComponent.addTab ("Source", bg, &sourceBox, false);
+    configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
 
     Random random = Random();
     m_numOfSources = 8;
@@ -87,7 +86,7 @@ void SpatGris2AudioProcessorEditor::paint (Graphics& g) {
 void SpatGris2AudioProcessorEditor::resized() {
     double width = getWidth();
     double height = getHeight();
-
+ 
     double rightComponentWidth = width - 350;
 
     azimuthElevationBanner.setBounds(0, 0, 350, 20);
@@ -96,18 +95,14 @@ void SpatGris2AudioProcessorEditor::resized() {
     parametersBanner.setBounds(350, 0, rightComponentWidth, 20);
     trajectoryBanner.setBounds(350, 150, rightComponentWidth, 20);
     settingsBanner.setBounds(350, 300, rightComponentWidth, 20);
-    sourceBanner.setBounds(350, 450, rightComponentWidth, 20);
-    interfaceBanner.setBounds(350, 600, rightComponentWidth, 20);
 
     azimuthElevationField.setBounds(0, 20, 350, 350);
     radiusField.setBounds(0, 390, 350, 350);
 
     parametersBox.setBounds(350, 20, rightComponentWidth, 130);
     trajectoryBox.setBounds(350, 170, rightComponentWidth, 130);
-    settingsBox.setBounds(350, 320, rightComponentWidth, 130);
-    sourceBox.setBounds(350, 470, rightComponentWidth, 130);
-    interfaceBox.setBounds(350, 620, rightComponentWidth, 130);
 
+    configurationComponent.setBounds(350, 320, rightComponentWidth, 160);
 }
 
 //==============================================================================

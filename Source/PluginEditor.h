@@ -58,14 +58,15 @@ private:
     BannerComponent parametersBanner;
     BannerComponent trajectoryBanner;
     BannerComponent settingsBanner;
-    BannerComponent sourceBanner;
-    BannerComponent interfaceBanner;
 
     FieldComponent  azimuthElevationField;
     FieldComponent  radiusField;
 
+    TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
+
     ParametersBoxComponent  parametersBox;
     TrajectoryBoxComponent  trajectoryBox;
+
     SettingsBoxComponent    settingsBox;
     SourceBoxComponent      sourceBox;
     InterfaceBoxComponent   interfaceBox;
