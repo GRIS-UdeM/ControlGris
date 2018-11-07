@@ -1,2 +1,2 @@
-# SpatGris2
-Spatialization plugin version 2
+# ControlGris
+Spatialization plugin (SpatGris version 2)
