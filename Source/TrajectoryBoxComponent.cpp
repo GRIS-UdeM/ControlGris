@@ -41,23 +41,23 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
     double height = getHeight();
 
     g.setColour(mGrisFeel.getEditBackgroundColour().withAlpha(0.25f));
-    g.fillRect(325, 5, width - 330, height - 10);
+    g.fillRect(290, 5, width - 295, height - 10);
 }
 
 void TrajectoryBoxComponent::resized() {
     double width = getWidth();
 
-    sourceLinkLabel.setBounds(5, 5, 150, 15);
+    sourceLinkLabel.setBounds(5, 5, 150, 20);
     sourceLinkCombo.setBounds(120, 5, 150, 20);
 
-    trajectoryTypeLabel.setBounds(5, 30, 150, 15);
-    trajectoryTypeCombo.setBounds(120, 30, 150, 20);
+    trajectoryTypeLabel.setBounds(5, 35, 150, 20);
+    trajectoryTypeCombo.setBounds(120, 35, 150, 20);
 
-    timeScaleLabel.setBounds(5, 55, 150, 15);
-    timeScaleCombo.setBounds(120, 55, 150, 20);
+    timeScaleLabel.setBounds(5, 65, 150, 20);
+    timeScaleCombo.setBounds(120, 65, 150, 20);
 
-    cycleSpeedLabel.setBounds(5, 80, 150, 15);
-    cycleSpeedSlider.setBounds(115, 80, 200, 20);
+    cycleSpeedLabel.setBounds(5, 95, 150, 20);
+    cycleSpeedSlider.setBounds(115, 95, 165, 20);
 
-    activateButton.setBounds(5, 105, 150, 20);
+    activateButton.setBounds(8, 125, 150, 20);
 }

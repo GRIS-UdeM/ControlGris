@@ -180,8 +180,8 @@ void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {
-    float x = getWidth() - 30;
-    float y = getHeight() - 30;
+    float x = 270;
+    float y = 270;
 
     g.setColour(selectedSource->getColour());
     g.drawEllipse(x, y, 20, 20, 3);
@@ -192,41 +192,41 @@ void ParametersBoxComponent::paint(Graphics& g) {
 void ParametersBoxComponent::resized() {
     double width = getWidth();
 
-    azimuthLabel.setBounds(5, 5, 150, 15);
-    azimuthLinkButton.setBounds(5, 20, 45, 20);
-    azimuthSlider.setBounds(55, 20, 150, 20);
+    azimuthLabel.setBounds(5, 20, 150, 20);
+    azimuthLinkButton.setBounds(5, 40, 45, 20);
+    azimuthSlider.setBounds(55, 40, 175, 20);
 
-    elevationLabel.setBounds(5, 45, 150, 15);
-    elevationLinkButton.setBounds(5, 60, 45, 20);
-    elevationSlider.setBounds(55, 60, 150, 20);
+    elevationLabel.setBounds(5, 70, 150, 20);
+    elevationLinkButton.setBounds(5, 90, 45, 20);
+    elevationSlider.setBounds(55, 90, 175, 20);
 
-    radiusLabel.setBounds(5, 85, 150, 15);
-    radiusLinkButton.setBounds(5, 100, 45, 20);
-    radiusSlider.setBounds(55, 100, 150, 20);
-
-    //---------------------------------------------------------------------------------
-
-    xLabel.setBounds(5, 5, 150, 15);
-    xLinkButton.setBounds(5, 20, 45, 20);
-    xSlider.setBounds(55, 20, 150, 20);
-
-    yLabel.setBounds(5, 45, 150, 15);
-    yLinkButton.setBounds(5, 60, 45, 20);
-    ySlider.setBounds(55, 60, 150, 20);
-
-    zLabel.setBounds(5, 85, 150, 15);
-    zLinkButton.setBounds(5, 100, 45, 20);
-    zSlider.setBounds(55, 100, 150, 20);
+    radiusLabel.setBounds(5, 120, 150, 20);
+    radiusLinkButton.setBounds(5, 140, 45, 20);
+    radiusSlider.setBounds(55, 140, 175, 20);
 
     //---------------------------------------------------------------------------------
 
-    azimuthSpanLabel.setBounds(240, 5, 150, 15);
-    azimuthSpanLinkButton.setBounds(240, 20, 45, 20);
-    azimuthSpanSlider.setBounds(290, 20, 150, 20);
+    xLabel.setBounds(5, 20, 150, 20);
+    xLinkButton.setBounds(5, 40, 45, 20);
+    xSlider.setBounds(55, 40, 175, 20);
 
-    elevationSpanLabel.setBounds(240, 45, 150, 15);
-    elevationSpanLinkButton.setBounds(240, 60, 45, 20);
-    elevationSpanSlider.setBounds(290, 60, 150, 20);
+    yLabel.setBounds(5, 70, 150, 20);
+    yLinkButton.setBounds(5, 90, 45, 20);
+    ySlider.setBounds(55, 90, 175, 20);
 
-    activatorXYZ.setBounds(width - 65, 5, 60, 20);
+    zLabel.setBounds(5, 120, 150, 20);
+    zLinkButton.setBounds(5, 140, 45, 20);
+    zSlider.setBounds(55, 140, 175, 20);
+
+    //---------------------------------------------------------------------------------
+
+    azimuthSpanLabel.setBounds(5, 170, 150, 20);
+    azimuthSpanLinkButton.setBounds(5, 190, 45, 20);
+    azimuthSpanSlider.setBounds(55, 190, 175, 20);
+
+    elevationSpanLabel.setBounds(5, 220, 150, 20);
+    elevationSpanLinkButton.setBounds(5, 240, 45, 20);
+    elevationSpanSlider.setBounds(55, 240, 175, 20);
+
+    activatorXYZ.setBounds(240, 5, 60, 20);
 }

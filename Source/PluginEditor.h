@@ -27,9 +27,11 @@ const int MaxNumOfSources = 36;
 //==============================================================================
 /**
 */
-class ControlGrisAudioProcessorEditor  : public AudioProcessorEditor,
-                                       public FieldComponent::Listener,
-                                       public ParametersBoxComponent::Listener
+class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
+                                        private Value::Listener,
+                                        public FieldComponent::Listener,
+                                        public ParametersBoxComponent::Listener,
+                                        public SettingsBoxComponent::Listener
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&);
@@ -38,10 +40,12 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+    void valueChanged (Value&) override;
 
     //==============================================================================
     void sourcePositionChanged(int sourceId) override;
     void parameterChanged(int parameterId, double value) override;
+    void oscFormatChanged(int selectedId) override;
 
     Source * getSources();
     int getSelectedSource();
@@ -74,8 +78,12 @@ private:
     Source sources[MaxNumOfSources];
     int m_numOfSources;
     int m_selectedSource;
+    int m_selectedOscFormat;
 
-    OSCSender oscSender;
+    // these are used to persist the UI's size - the values are stored along with the
+    // filter's other parameters, and the UI component will update them when it gets
+    // resized.
+    Value lastUIWidth, lastUIHeight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)
 };

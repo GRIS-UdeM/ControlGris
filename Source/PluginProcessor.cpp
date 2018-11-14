@@ -11,23 +11,41 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
+    using Parameter = AudioProcessorValueTreeState::Parameter;
+
+    std::vector<std::unique_ptr<Parameter>> parameters;
+
+    return { parameters.begin(), parameters.end() };
+}
+
 //==============================================================================
 ControlGrisAudioProcessor::ControlGrisAudioProcessor()
+     :
 #ifndef JucePlugin_PreferredChannelConfigurations
-     : AudioProcessor (BusesProperties()
+     AudioProcessor (BusesProperties()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
                       #endif
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
                      #endif
-                       )
+                       ),
 #endif
+    parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 {
+
+        // Add a sub-tree to store the state of our UI
+        parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
+
+    if (! oscSender.connect("127.0.0.1", 18032)) {
+        std::cout << "Error: could not connect to UDP port 18032." << std::endl;
+    }
 }
 
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
+    oscSender.disconnect();
 }
 
 //==============================================================================
@@ -172,15 +190,21 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // You should use this method to store your parameters in the memory block.
-    // You could do that either as raw data, or use the XML or ValueTree classes
-    // as intermediaries to make it easy to save and load complex data.
+    // Store an xml representation of our state.
+    std::unique_ptr<XmlElement> xmlState (parameters.copyState().createXml());
+
+    if (xmlState.get() != nullptr)
+        copyXmlToBinary (*xmlState, destData);
+
 }
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // You should use this method to restore your parameters from this memory block,
-    // whose contents will have been created by the getStateInformation() call.
+    // Restore our plug-in's state from the xml representation stored in the above method.
+    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+
+    if (xmlState.get() != nullptr)
+        parameters.replaceState (ValueTree::fromXml (*xmlState));
 }
 
 //==============================================================================

@@ -4,6 +4,7 @@
 
 //==============================================================================
 FieldComponent::FieldComponent() {
+    m_enabled = true;
     setLookAndFeel(&mGrisFeel);
 }
 
@@ -40,6 +41,11 @@ Point <float> FieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth) {
 }
 
 //------------------------------------------------------------------------------
+void FieldComponent::enable(bool shouldBeEnabled) {
+    m_enabled = shouldBeEnabled;
+    repaint();
+}
+
 void FieldComponent::setSources(Source *sources, int numberOfSources) {
     m_sources = sources;
     m_numberOfSources = numberOfSources;
@@ -62,6 +68,8 @@ void FieldComponent::paint(Graphics& g) {
 	
     g.setColour(mGrisFeel.getFieldColour());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
+    g.setColour(Colours::black);
+	g.drawRect(0, 0, fieldWidth, fieldHeight);
 	
     // - - - - - - - - - - - -
 	// draw big background circles
@@ -120,6 +128,11 @@ void FieldComponent::paint(Graphics& g) {
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.setColour(Colours::white);
         g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
+    }
+
+    if (! m_enabled) {
+        g.setColour(Colour((uint8)255, (uint8)255, (uint8)255, 0.5f));
+        g.fillRect(0, 0, fieldWidth, fieldHeight);
     }
 }
 

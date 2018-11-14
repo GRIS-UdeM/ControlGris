@@ -14,7 +14,21 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    void onNewOscFormat();
+
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void oscFormatChanged(int selectedId) = 0;
+    };
+
+    void addListener(Listener* l) { listeners.add (l); }
+    void removeListener(Listener* l) { listeners.remove (l); }
+
 private:
+    ListenerList<Listener> listeners;
+
     GrisLookAndFeel mGrisFeel;
 
     Label           oscFormatLabel;

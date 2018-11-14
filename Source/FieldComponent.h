@@ -31,6 +31,8 @@ public:
  	void mouseDrag (const MouseEvent &event);
  	void mouseUp (const MouseEvent &event);
 
+    void enable(bool shouldBeEnabled);
+
     void setSources(Source *sources, int numberOfSources);
 
     struct Listener
@@ -57,6 +59,8 @@ private:
     Source *m_sources;
     int m_numberOfSources;
     int m_selectedSourceId;
+
+    bool m_enabled;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
 };

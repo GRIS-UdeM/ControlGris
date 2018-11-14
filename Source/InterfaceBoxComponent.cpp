@@ -54,18 +54,18 @@ void InterfaceBoxComponent::paint(Graphics& g) {}
 void InterfaceBoxComponent::resized() {
     double width = getWidth();
 
-    oscSourceLabel.setBounds(5, 5, 150, 15);
-    oscSourceCombo.setBounds(120, 5, 150, 20);
+    oscSourceLabel.setBounds(5, 10, 90, 20);
+    oscSourceCombo.setBounds(95, 10, 150, 20);
 
-    enableLeapToggle.setBounds(5, 55, 200, 20);
-    enableJoystickToggle.setBounds(5, 85, 200, 20);
+    enableLeapToggle.setBounds(5, 35, 120, 20);
+    enableJoystickToggle.setBounds(125, 35, 150, 20);
 
-    oscReceiveToggle.setBounds(205, 55, 200, 20);
-    oscSendToggle.setBounds(205, 85, 200, 20);
+    oscReceiveToggle.setBounds(5, 65, 200, 20);
+    oscSendToggle.setBounds(5, 95, 200, 20);
 
-    oscReceiveIpEditor.setBounds(355, 55, 120, 20);
-    oscReceivePortEditor.setBounds(480, 55, 60, 20);
+    oscReceiveIpEditor.setBounds(150, 65, 120, 20);
+    oscReceivePortEditor.setBounds(280, 65, 60, 20);
 
-    oscSendIpEditor.setBounds(355, 85, 120, 20);
-    oscSendPortEditor.setBounds(480, 85, 60, 20);
+    oscSendIpEditor.setBounds(150, 95, 120, 20);
+    oscSendPortEditor.setBounds(280, 95, 60, 20);
 }

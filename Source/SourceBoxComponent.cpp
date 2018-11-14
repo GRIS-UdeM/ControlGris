@@ -42,14 +42,14 @@ void SourceBoxComponent::resized() {
     double width = getWidth();
 
     sourcePlacementLabel.setBounds(5, 10, 150, 15);
-    sourcePlacementCombo.setBounds(120, 10, 150, 20);
+    sourcePlacementCombo.setBounds(130, 10, 150, 20);
 
     sourceNumberLabel.setBounds(5, 40, 150, 15);
-    sourceNumberCombo.setBounds(120, 40, 150, 20);
+    sourceNumberCombo.setBounds(130, 40, 150, 20);
 
     rayLengthLabel.setBounds(5, 70, 150, 15);
-    rayLengthSlider.setBounds(115, 70, 200, 20);
+    rayLengthSlider.setBounds(125, 70, 200, 20);
 
     angleLabel.setBounds(5, 100, 150, 15);
-    angleSlider.setBounds(115, 100, 200, 20);
+    angleSlider.setBounds(125, 100, 200, 20);
 }

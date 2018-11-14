@@ -6,6 +6,10 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscFormatLabel);
 
+    oscFormatCombo.addItem("VBAP - ServerGris", 1);
+    oscFormatCombo.addItem("LBAP - ServerGris", 2);
+    oscFormatCombo.onChange = [this] { onNewOscFormat(); };
+    oscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&oscFormatCombo);
 
     oscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
@@ -41,22 +45,26 @@ void SettingsBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
     unfocusAllComponents();
 }
 
+void SettingsBoxComponent::onNewOscFormat() {
+    listeners.call([&] (Listener& l) { l.oscFormatChanged(oscFormatCombo.getSelectedId()); });
+}
+
 void SettingsBoxComponent::paint(Graphics& g) {}
 
 void SettingsBoxComponent::resized() {
     double width = getWidth();
 
-    oscFormatLabel.setBounds(5, 10, 150, 15);
-    oscFormatCombo.setBounds(120, 10, 150, 20);
+    oscFormatLabel.setBounds(5, 10, 90, 15);
+    oscFormatCombo.setBounds(95, 10, 150, 20);
 
-    oscPortLabel.setBounds(5, 40, 150, 15);
-    oscPortCombo.setBounds(120, 40, 150, 20);
+    oscPortLabel.setBounds(5, 40, 90, 15);
+    oscPortCombo.setBounds(95, 40, 150, 20);
 
-    numOfSourcesLabel.setBounds(330, 10, 150, 15);
-    numOfSourcesEditor.setBounds(width - 50, 10, 40, 15);
+    numOfSourcesLabel.setBounds(265, 10, 130, 15);
+    numOfSourcesEditor.setBounds(395, 10, 40, 15);
 
-    firstSourceIdLabel.setBounds(330, 40, 150, 15);
-    firstSourceIdEditor.setBounds(width - 50, 40, 40, 15);
+    firstSourceIdLabel.setBounds(265, 40, 130, 15);
+    firstSourceIdEditor.setBounds(395, 40, 40, 15);
 
     clipSourceInCircle.setBounds(5, 105, 200, 20);
 }

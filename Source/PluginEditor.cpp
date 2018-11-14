@@ -15,10 +15,10 @@
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p)
     : AudioProcessorEditor (&p), processor (p)
 {
-    setSize (900, 740);
-
     setLookAndFeel(&mGrisFeel);
  
+    m_selectedOscFormat = 1;
+
     azimuthElevationBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
     radiusBanner.setText("Radius", NotificationType::dontSendNotification);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
@@ -39,6 +39,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     addAndMakeVisible(&parametersBox);
     addAndMakeVisible(&trajectoryBox);
 
+    settingsBox.addListener(this);
     addAndMakeVisible(configurationComponent);
     Colour bg = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
     configurationComponent.addTab ("Settings", bg, &settingsBox, false);
@@ -55,18 +56,25 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     azimuthElevationField.setSources(sources, m_numOfSources);
 
-    if (! oscSender.connect("127.0.0.1", 18032)) {
-        std::cout << "Error: could not connect to UDP port 18032." << std::endl;
-    }
-
     m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
+
+    //setResizable(true, true);
+    setResizeLimits(300, 320, 1800, 1300);
+
+    lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
+    lastUIHeight.referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
+
+    // set our component's initial size to be the last one that was stored in the filter's settings
+    setSize(lastUIWidth.getValue(), lastUIHeight.getValue());
+
+    lastUIWidth.addListener(this);
+    lastUIHeight.addListener(this);
 
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
     setLookAndFeel(nullptr);
-    oscSender.disconnect();
 }
 
 Source * ControlGrisAudioProcessorEditor::getSources() {
@@ -86,26 +94,47 @@ void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
 void ControlGrisAudioProcessorEditor::resized() {
     double width = getWidth();
     double height = getHeight();
- 
-    double rightComponentWidth = width - 350;
 
-    azimuthElevationBanner.setBounds(0, 0, 350, 20);
-    radiusBanner.setBounds(0, 370, 350, 20);
+    azimuthElevationBanner.setBounds(0, 0, 300, 20);
+    azimuthElevationField.setBounds(0, 20, 300, 300);
 
-    parametersBanner.setBounds(350, 0, rightComponentWidth, 20);
-    trajectoryBanner.setBounds(350, 150, rightComponentWidth, 20);
-    settingsBanner.setBounds(350, 300, rightComponentWidth, 20);
+    if (m_selectedOscFormat == 2) {
+        radiusBanner.setVisible(true);
+        radiusField.setVisible(true);
+        radiusBanner.setBounds(300, 0, 300, 20);
+        radiusField.setBounds(300, 20, 300, 300);
+        parametersBanner.setBounds(600, 0, width-600, 20);
+        parametersBox.setBounds(600, 20, width-600, 300);
+    } else {
+        radiusBanner.setVisible(false);
+        radiusField.setVisible(false);
+        parametersBanner.setBounds(300, 0, width-300, 20);
+        parametersBox.setBounds(300, 20, width-300, 300);
+    }
 
-    azimuthElevationField.setBounds(0, 20, 350, 350);
-    radiusField.setBounds(0, 390, 350, 350);
+    int sash = width > 900 ? width - 450 : 450;
 
-    parametersBox.setBounds(350, 20, rightComponentWidth, 130);
-    trajectoryBox.setBounds(350, 170, rightComponentWidth, 130);
+    trajectoryBanner.setBounds(0, 320, sash, 20);
+    trajectoryBox.setBounds(0, 340, sash, 160);
 
-    configurationComponent.setBounds(350, 320, rightComponentWidth, 160);
+    settingsBanner.setBounds(sash, 320, 450, 20);
+    configurationComponent.setBounds(sash, 340, 450, 160);
+
+    lastUIWidth  = getWidth();
+    lastUIHeight = getHeight();
 }
 
 //==============================================================================
+// called when the stored window size changes
+void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
+    setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+}
+
+void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
+    m_selectedOscFormat = selectedId;
+    resized();
+}
+
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
     switch (parameterId) {
         case 0:
@@ -149,7 +178,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     message.addFloat32(1.0);
     message.addFloat32(0.0);
 
-    if (!oscSender.send(message)) {
+    if (!processor.oscSender.send(message)) {
         std::cout << "Error: could not send OSC message." << std::endl;
         return;
     }
