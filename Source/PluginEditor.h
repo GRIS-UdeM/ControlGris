@@ -57,13 +57,13 @@ private:
 
     GrisLookAndFeel mGrisFeel;
 
-    BannerComponent azimuthElevationBanner;
+    BannerComponent mainBanner;
     BannerComponent radiusBanner;
     BannerComponent parametersBanner;
     BannerComponent trajectoryBanner;
     BannerComponent settingsBanner;
 
-    FieldComponent  azimuthElevationField;
+    FieldComponent  mainField;
     FieldComponent  radiusField;
 
     TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };

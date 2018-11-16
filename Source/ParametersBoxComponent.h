@@ -18,6 +18,7 @@ public:
     void resized() override;
 
     void setSelectedSource(Source *source);
+    void setDistanceEnabled(bool shouldBeEnabled);
 
     struct Listener
     {
@@ -44,9 +45,9 @@ private:
     ToggleButton    elevationLinkButton;
     Slider          elevationSlider;
 
-    Label           radiusLabel;
-    ToggleButton    radiusLinkButton;
-    Slider          radiusSlider;
+    Label           distanceLabel;
+    ToggleButton    distanceLinkButton;
+    Slider          distanceSlider;
 
     //-------------------------------------
 

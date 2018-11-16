@@ -19,20 +19,20 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
  
     m_selectedOscFormat = 1;
 
-    azimuthElevationBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-    radiusBanner.setText("Radius", NotificationType::dontSendNotification);
+    mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
+    radiusBanner.setText("Elevation", NotificationType::dontSendNotification);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
 
-    addAndMakeVisible(&azimuthElevationBanner);
+    addAndMakeVisible(&mainBanner);
     addAndMakeVisible(&radiusBanner);
     addAndMakeVisible(&parametersBanner);
     addAndMakeVisible(&trajectoryBanner);
     addAndMakeVisible(&settingsBanner);
 
-    azimuthElevationField.addListener(this);
-    addAndMakeVisible(&azimuthElevationField);
+    mainField.addListener(this);
+    addAndMakeVisible(&mainField);
     addAndMakeVisible(&radiusField);
 
     parametersBox.addListener(this);
@@ -54,7 +54,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
         sources[i].setElevation(random.nextDouble() * 90.0);
     }
 
-    azimuthElevationField.setSources(sources, m_numOfSources);
+    mainField.setSources(sources, m_numOfSources);
 
     m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
@@ -95,30 +95,35 @@ void ControlGrisAudioProcessorEditor::resized() {
     double width = getWidth();
     double height = getHeight();
 
-    azimuthElevationBanner.setBounds(0, 0, 300, 20);
-    azimuthElevationField.setBounds(0, 20, 300, 300);
+    double fieldSize = height - 200;
+    if (fieldSize < 300) { fieldSize = 300; }
+
+    mainBanner.setBounds(0, 0, fieldSize, 20);
+    mainField.setBounds(0, 20, fieldSize, fieldSize);
 
     if (m_selectedOscFormat == 2) {
+        mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         radiusBanner.setVisible(true);
         radiusField.setVisible(true);
-        radiusBanner.setBounds(300, 0, 300, 20);
-        radiusField.setBounds(300, 20, 300, 300);
-        parametersBanner.setBounds(600, 0, width-600, 20);
-        parametersBox.setBounds(600, 20, width-600, 300);
+        radiusBanner.setBounds(fieldSize, 0, fieldSize, 20);
+        radiusField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+        parametersBanner.setBounds(fieldSize*2, 0, width-fieldSize*2, 20);
+        parametersBox.setBounds(fieldSize*2, 20, width-fieldSize*2, fieldSize);
     } else {
+        mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
         radiusBanner.setVisible(false);
         radiusField.setVisible(false);
-        parametersBanner.setBounds(300, 0, width-300, 20);
-        parametersBox.setBounds(300, 20, width-300, 300);
+        parametersBanner.setBounds(fieldSize, 0, width-fieldSize, 20);
+        parametersBox.setBounds(fieldSize, 20, width-fieldSize, fieldSize);
     }
 
     int sash = width > 900 ? width - 450 : 450;
 
-    trajectoryBanner.setBounds(0, 320, sash, 20);
-    trajectoryBox.setBounds(0, 340, sash, 160);
+    trajectoryBanner.setBounds(0, fieldSize+20, sash, 20);
+    trajectoryBox.setBounds(0, fieldSize+40, sash, 160);
 
-    settingsBanner.setBounds(sash, 320, 450, 20);
-    configurationComponent.setBounds(sash, 340, 450, 160);
+    settingsBanner.setBounds(sash, fieldSize+20, 450, 20);
+    configurationComponent.setBounds(sash, fieldSize+40, 450, 160);
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();
@@ -132,6 +137,7 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 
 void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     m_selectedOscFormat = selectedId;
+    parametersBox.setDistanceEnabled(m_selectedOscFormat == 2);
     resized();
 }
 
@@ -156,7 +162,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
             sources[m_selectedSource].setElevationSpan(value); break;
 */
     }
-    azimuthElevationField.repaint();
+    mainField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {

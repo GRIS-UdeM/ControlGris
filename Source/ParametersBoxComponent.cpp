@@ -25,19 +25,19 @@ ParametersBoxComponent::ParametersBoxComponent() {
     elevationSlider.addListener(this);
     addAndMakeVisible(&elevationSlider);
 
-    radiusLabel.setText("Radius", NotificationType::dontSendNotification);
-    addAndMakeVisible(&radiusLabel);
-    radiusLabel.setEnabled(false);
+    distanceLabel.setText("Distance", NotificationType::dontSendNotification);
+    addAndMakeVisible(&distanceLabel);
+    distanceLabel.setEnabled(false);
 
-    radiusLinkButton.setButtonText("Link");
-    addAndMakeVisible(&radiusLinkButton);
-    radiusLinkButton.setEnabled(false);
+    distanceLinkButton.setButtonText("Link");
+    addAndMakeVisible(&distanceLinkButton);
+    distanceLinkButton.setEnabled(false);
 
-    radiusSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    radiusSlider.setRange(0.0, 1.0);
-    radiusSlider.addListener(this);
-    addAndMakeVisible(&radiusSlider);
-    radiusSlider.setEnabled(false);
+    distanceSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    distanceSlider.setRange(0.0, 1.0);
+    distanceSlider.addListener(this);
+    addAndMakeVisible(&distanceSlider);
+    distanceSlider.setEnabled(false);
 
     //---------------------------------------------------------------------------------
 
@@ -112,6 +112,15 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     repaint();
 }
 
+void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
+    distanceLabel.setEnabled(shouldBeEnabled);
+    distanceLinkButton.setEnabled(shouldBeEnabled);
+    distanceSlider.setEnabled(shouldBeEnabled);
+    zLabel.setEnabled(shouldBeEnabled);
+    zLinkButton.setEnabled(shouldBeEnabled);
+    zSlider.setEnabled(shouldBeEnabled);
+}
+
 void ParametersBoxComponent::buttonClicked(Button *button) {
     if (button == &activatorXYZ) {
         if (activatorXYZ.getToggleState()) {
@@ -130,9 +139,9 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
             elevationLabel.setVisible(false);
             elevationLinkButton.setVisible(false);
             elevationSlider.setVisible(false);
-            radiusLabel.setVisible(false);
-            radiusLinkButton.setVisible(false);
-            radiusSlider.setVisible(false);
+            distanceLabel.setVisible(false);
+            distanceLinkButton.setVisible(false);
+            distanceSlider.setVisible(false);
         } else {
             xLabel.setVisible(false);
             xLinkButton.setVisible(false);
@@ -149,9 +158,9 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
             elevationLabel.setVisible(true);
             elevationLinkButton.setVisible(true);
             elevationSlider.setVisible(true);
-            radiusLabel.setVisible(true);
-            radiusLinkButton.setVisible(true);
-            radiusSlider.setVisible(true);
+            distanceLabel.setVisible(true);
+            distanceLinkButton.setVisible(true);
+            distanceSlider.setVisible(true);
         }
     }
 }
@@ -162,7 +171,7 @@ void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
         parameterId = 0;
     } else if (slider == &elevationSlider) {
         parameterId = 1;    
-    } else if (slider == &radiusSlider) {
+    } else if (slider == &distanceSlider) {
         parameterId = 2;
     } else if (slider == &xSlider) {
         parameterId = 3;
@@ -200,9 +209,9 @@ void ParametersBoxComponent::resized() {
     elevationLinkButton.setBounds(5, 90, 45, 20);
     elevationSlider.setBounds(55, 90, 175, 20);
 
-    radiusLabel.setBounds(5, 120, 150, 20);
-    radiusLinkButton.setBounds(5, 140, 45, 20);
-    radiusSlider.setBounds(55, 140, 175, 20);
+    distanceLabel.setBounds(5, 120, 150, 20);
+    distanceLinkButton.setBounds(5, 140, 45, 20);
+    distanceSlider.setBounds(55, 140, 175, 20);
 
     //---------------------------------------------------------------------------------
 
