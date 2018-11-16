@@ -3,7 +3,7 @@
 Source::Source() {
     m_azimuth = 0.0;
     m_elevation = 0.0;
-    m_radius = 1.0;
+    m_distance = 1.0;
     colour = Colours::black;
 }
 
@@ -39,12 +39,12 @@ float Source::getElevation() {
     return m_elevation;
 }
 
-void Source::setRadius(float radius) {
-    m_radius = radius;
+void Source::setDistance(float distance) {
+    m_distance = distance;
 }
 
-float Source::getRadius() {
-    return m_radius;
+float Source::getDistance() {
+    return m_distance;
 }
 
 void Source::setColour(Colour col) {

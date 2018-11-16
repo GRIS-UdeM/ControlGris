@@ -20,20 +20,21 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     m_selectedOscFormat = 1;
 
     mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-    radiusBanner.setText("Elevation", NotificationType::dontSendNotification);
+    elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
 
     addAndMakeVisible(&mainBanner);
-    addAndMakeVisible(&radiusBanner);
+    addAndMakeVisible(&elevationBanner);
     addAndMakeVisible(&parametersBanner);
     addAndMakeVisible(&trajectoryBanner);
     addAndMakeVisible(&settingsBanner);
 
     mainField.addListener(this);
     addAndMakeVisible(&mainField);
-    addAndMakeVisible(&radiusField);
+    elevationField.addListener(this);
+    addAndMakeVisible(&elevationField);
 
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
@@ -52,9 +53,11 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
         sources[i].setId(i);
         sources[i].setAzimuth(random.nextDouble() * 360.0);
         sources[i].setElevation(random.nextDouble() * 90.0);
+        sources[i].setDistance(random.nextDouble());
     }
 
     mainField.setSources(sources, m_numOfSources);
+    elevationField.setSources(sources, m_numOfSources);
 
     m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
@@ -103,16 +106,16 @@ void ControlGrisAudioProcessorEditor::resized() {
 
     if (m_selectedOscFormat == 2) {
         mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
-        radiusBanner.setVisible(true);
-        radiusField.setVisible(true);
-        radiusBanner.setBounds(fieldSize, 0, fieldSize, 20);
-        radiusField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+        elevationBanner.setVisible(true);
+        elevationField.setVisible(true);
+        elevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
+        elevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
         parametersBanner.setBounds(fieldSize*2, 0, width-fieldSize*2, 20);
         parametersBox.setBounds(fieldSize*2, 20, width-fieldSize*2, fieldSize);
     } else {
         mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-        radiusBanner.setVisible(false);
-        radiusField.setVisible(false);
+        elevationBanner.setVisible(false);
+        elevationField.setVisible(false);
         parametersBanner.setBounds(fieldSize, 0, width-fieldSize, 20);
         parametersBox.setBounds(fieldSize, 20, width-fieldSize, fieldSize);
     }
@@ -138,6 +141,7 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     m_selectedOscFormat = selectedId;
     parametersBox.setDistanceEnabled(m_selectedOscFormat == 2);
+    mainField.setDrawElevation(m_selectedOscFormat != 2);
     resized();
 }
 
@@ -148,7 +152,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
         case 1:
             sources[m_selectedSource].setElevation(value * 90.0); break;
         case 2:
-            sources[m_selectedSource].setRadius(value); break;
+            sources[m_selectedSource].setDistance(value); break;
 /*
         case 3:
             sources[m_selectedSource].setX(value); break;
@@ -163,11 +167,16 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
 */
     }
     mainField.repaint();
+    if (m_selectedOscFormat == 2) {
+        elevationField.repaint();
+    }
 }
 
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
     m_selectedSource = sourceId;
+    mainField.setSelectedSource(m_selectedSource);
+    elevationField.setSelectedSource(m_selectedSource);
     parametersBox.setSelectedSource(&sources[sourceId]);
 
     OSCAddressPattern oscPattern("/spat/serv");
@@ -181,7 +190,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     message.addFloat32(elev);
     message.addFloat32(0.0);
     message.addFloat32(0.0);
-    message.addFloat32(1.0);
+    message.addFloat32(sources[sourceId].getDistance());
     message.addFloat32(0.0);
 
     if (!processor.oscSender.send(message)) {
@@ -189,5 +198,3 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
         return;
     }
 }
-
-

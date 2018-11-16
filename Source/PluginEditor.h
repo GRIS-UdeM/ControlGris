@@ -58,13 +58,13 @@ private:
     GrisLookAndFeel mGrisFeel;
 
     BannerComponent mainBanner;
-    BannerComponent radiusBanner;
+    BannerComponent elevationBanner;
     BannerComponent parametersBanner;
     BannerComponent trajectoryBanner;
     BannerComponent settingsBanner;
 
-    FieldComponent  mainField;
-    FieldComponent  radiusField;
+    MainFieldComponent  mainField;
+    ElevationFieldComponent  elevationField;
 
     TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
 

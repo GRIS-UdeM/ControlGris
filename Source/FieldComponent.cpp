@@ -3,46 +3,12 @@
 #include "FieldComponent.h"
 
 //==============================================================================
-FieldComponent::FieldComponent() {
-    m_enabled = true;
-    setLookAndFeel(&mGrisFeel);
-}
+FieldComponent::FieldComponent() {}
 
 FieldComponent::~FieldComponent() {}
 
-//this is NOT a duplicate of one of the convert functions in processor.h
-FPoint FieldComponent::convertSourceRT(float r, float t) {
-	const int fieldWidth = getWidth();
-	FPoint p(r * cosf(t), r * sinf(t));
-	return FPoint((((p.x + kRadiusMax) / (kRadiusMax * 2)) * (fieldWidth - kSourceDiameter) + kSourceRadius), 
-                     fieldWidth - (((p.y + kRadiusMax) / (kRadiusMax * 2)) * (fieldWidth - kSourceDiameter) + kSourceRadius));
-}
-
-Point <float> FieldComponent::degreeToXy(Point <float> p, int p_iFieldWidth) {
-    float x, y;
-    float distance = (p_iFieldWidth - kSourceDiameter) / 2.0;
-    float radius = (90.0 - p.getY()) / 90.0;
-    x = distance * radius * sinf(degreeToRadian(p.getX())) + distance;
-    y = distance * radius * cosf(degreeToRadian(p.getX())) + distance;
-    return Point <float> (x, y);
-}
-
-Point <float> FieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth) {
-    float ang, rad;
-    float half = p_iFieldWidth / 2;
-    float x = (p.getX() - half) / half;
-    float y = (p_iFieldWidth - p.getY() - half) / half;
-    ang = atan2f(x, y) / M_PI * 180.0;
-    if (ang < 0) {
-        ang = 360.0 + ang;
-    }
-    rad = 90.0 - (sqrtf(x*x + y*y) * 90.0);
-    return Point <float> (ang, rad);
-}
-
-//------------------------------------------------------------------------------
-void FieldComponent::enable(bool shouldBeEnabled) {
-    m_enabled = shouldBeEnabled;
+void FieldComponent::setSelectedSource(int selectedId) {
+    m_selectedSourceId = selectedId;
     repaint();
 }
 
@@ -60,7 +26,53 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
 }
 
-void FieldComponent::paint(Graphics& g) {
+void FieldComponent::mouseUp(const MouseEvent &event) {
+    repaint();
+}
+
+//==============================================================================
+MainFieldComponent::MainFieldComponent() {
+    m_drawElevation = true;
+    setLookAndFeel(&mGrisFeel);
+}
+
+MainFieldComponent::~MainFieldComponent() {}
+
+Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iFieldWidth) {
+    float x, y, distance;
+    float radius = (p_iFieldWidth - kSourceDiameter) / 2.0;
+    if (m_drawElevation) {
+        distance = (90.0 - p.getY()) / 90.0;
+    } else {
+        distance = p.getY();
+    }
+    x = radius * distance * sinf(degreeToRadian(p.getX())) + radius;
+    y = radius * distance * cosf(degreeToRadian(p.getX())) + radius;
+    return Point <float> (x, y);
+}
+
+Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth) {
+    float ang, rad;
+    float half = p_iFieldWidth / 2;
+    float x = (p.getX() - half) / half;
+    float y = (p_iFieldWidth - p.getY() - half) / half;
+    ang = atan2f(x, y) / M_PI * 180.0;
+    if (ang < 0) {
+        ang = 360.0 + ang;
+    }
+    rad = sqrtf(x*x + y*y);
+    if (m_drawElevation) {
+        rad = 90.0 - rad * 90.0;
+    }
+    return Point <float> (ang, rad);
+}
+
+void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
+    m_drawElevation = shouldDrawElevation;
+    repaint();
+}
+
+void MainFieldComponent::paint(Graphics& g) {
 	const int fieldWidth = getWidth();
 	const int fieldHeight = getHeight();
     float fFieldCenter = fieldWidth / 2;
@@ -70,7 +82,21 @@ void FieldComponent::paint(Graphics& g) {
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
     g.setColour(Colours::black);
 	g.drawRect(0, 0, fieldWidth, fieldHeight);
-	
+		
+	// - - - - - - - - - - - -
+	// draw the grid
+	// - - - - - - - - - - - -
+	if (true) {
+		g.setColour(Colour::fromRGB(55, 56, 57));
+		const int gridCount = 8;
+		for (int i = 1; i < gridCount; i++) {
+			g.drawLine(fieldWidth * i / gridCount, 0, fieldHeight * i / gridCount, fieldHeight);
+			g.drawLine(0, fieldHeight * i / gridCount, fieldWidth, fieldHeight * i / gridCount);
+		}
+        g.drawLine(0, 0, fieldHeight, fieldHeight);
+        g.drawLine(0, fieldHeight, fieldHeight, 0);
+	}
+
     // - - - - - - - - - - - -
 	// draw big background circles
 	// - - - - - - - - - - - -
@@ -88,25 +114,10 @@ void FieldComponent::paint(Graphics& g) {
     w = (0.025 / kRadiusMax) * (fieldWidth - kSourceDiameter);
     x = (fieldWidth - w) / 2;
     g.drawEllipse(x, x, w, w, 1);
-		
-	// - - - - - - - - - - - -
-	// draw the grid
-	// - - - - - - - - - - - -
-	if (true) {
-		g.setColour(Colour::fromRGB(55, 56, 57));
-		const int gridCount = 8;
-		for (int i = 1; i < gridCount; i++) {
-			g.drawLine(fieldWidth * i / gridCount, 0, fieldHeight * i / gridCount, fieldHeight);
-			g.drawLine(0, fieldHeight * i / gridCount, fieldWidth, fieldHeight * i / gridCount);
-		}
-        g.drawLine(0, 0, fieldHeight , fieldHeight);
-        g.drawLine(0, fieldHeight, fieldHeight , 0);
-	}
     
     // - - - - - - - - - - - -
-    // draw cross if in kOscSpatMode
+    // draw cross
     // - - - - - - - - - - - -
-    g.setColour(Colours::white);
     g.drawLine(fFieldCenter, kSourceRadius, fFieldCenter, fieldHeight-kSourceRadius);
     g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
 
@@ -123,26 +134,31 @@ void FieldComponent::paint(Graphics& g) {
             lineThickness = 2;
             saturation = 0.5;
         }
-        Point<float> pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, fieldWidth);
+        Point<float> pos;
+        if (m_drawElevation) {
+            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, fieldWidth);
+        } else {
+            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getDistance()}, fieldWidth);
+        }
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.setColour(Colours::white);
         g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
     }
-
-    if (! m_enabled) {
-        g.setColour(Colour((uint8)255, (uint8)255, (uint8)255, 0.5f));
-        g.fillRect(0, 0, fieldWidth, fieldHeight);
-    }
 }
 
-void FieldComponent::mouseDown(const MouseEvent &event) {    
+void MainFieldComponent::mouseDown(const MouseEvent &event) {    
 	int fieldWidth = getWidth();
 	int fieldHeight = getHeight();
 
-    // Do we click on a source ?
+    // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
-        Point<float> pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, fieldWidth);
+        Point<float> pos;
+        if (m_drawElevation) {
+            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, fieldWidth);
+        } else {
+            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getDistance()}, fieldWidth);
+        }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
@@ -153,21 +169,110 @@ void FieldComponent::mouseDown(const MouseEvent &event) {
     repaint();
 }
 
-void FieldComponent::mouseDrag(const MouseEvent &event) {    
+void MainFieldComponent::mouseDrag(const MouseEvent &event) {    
 	int fieldWidth = getWidth();
 	int fieldHeight = getHeight();
 
-    if (m_selectedSourceId >= 0) {
-        Point<int> mouseLocation(event.x, fieldHeight - event.y);	
-        Point<float> pos = xyToDegree(mouseLocation.toFloat(), fieldWidth);
-        m_sources[m_selectedSourceId].setAzimuth(pos.x);
+    Point<int> mouseLocation(event.x, fieldHeight - event.y);
+    Point<float> pos = xyToDegree(mouseLocation.toFloat(), fieldWidth);
+    m_sources[m_selectedSourceId].setAzimuth(pos.x);
+    if (m_drawElevation) {
         m_sources[m_selectedSourceId].setElevation(pos.y);
-        repaint();
-        listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
+    } else {
+        m_sources[m_selectedSourceId].setDistance(pos.y);
+    }
+    repaint();
+    listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
+}
+
+//==============================================================================
+ElevationFieldComponent::ElevationFieldComponent() {
+    setLookAndFeel(&mGrisFeel);
+}
+
+ElevationFieldComponent::~ElevationFieldComponent() {}
+
+void ElevationFieldComponent::paint(Graphics& g) {
+	const int fieldWidth = getWidth();
+	const int fieldHeight = getHeight();
+    float fFieldCenter = fieldWidth / 2;
+    float w, x;
+	
+    g.setColour(mGrisFeel.getFieldColour());
+	g.fillRect(0, 0, fieldWidth, fieldHeight);
+    g.setColour(Colours::black);
+	g.drawRect(0, 0, fieldWidth, fieldHeight);
+
+	// - - - - - - - - - - - -
+	// draw the grid
+	// - - - - - - - - - - - -
+	if (true) {
+		g.setColour(Colour::fromRGB(55, 56, 57));
+		const int gridCount = 8;
+		for (int i = 1; i < gridCount; i++) {
+			g.drawLine(fieldWidth * i / gridCount, 0, fieldHeight * i / gridCount, fieldHeight);
+			g.drawLine(0, fieldHeight * i / gridCount, fieldWidth, fieldHeight * i / gridCount);
+		}
+        g.drawLine(0, 0, fieldHeight, fieldHeight);
+        g.drawLine(0, fieldHeight, fieldHeight, 0);
+	}
+    
+    // - - - - - - - - - - - -
+    // draw guide lines
+    // - - - - - - - - - - - -
+	g.setColour(mGrisFeel.getLightColour());
+    g.drawVerticalLine(5, 5, fieldHeight-5);
+    g.drawHorizontalLine(fieldHeight-5, 5, fieldWidth-5);
+
+    // - - - - - - - - - - - - 
+    // draw sources
+    // - - - - - - - - - - - - 
+    for (int i = 0; i < m_numberOfSources; i++) {
+        int lineThickness;
+        float saturation;
+        if (i == m_selectedSourceId) {
+            lineThickness = 4;
+            saturation = 1.0;
+        } else {
+            lineThickness = 2;
+            saturation = 0.5;
+        }
+        float x = (float)i / m_numberOfSources * (fieldWidth - 10) + 10;
+        float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (fieldHeight - 35) + 5;
+        Point<float> pos = Point<float> {x, y};
+        g.setColour(m_sources[i].getColour().withSaturation(saturation));
+        g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
+        g.drawLine(pos.x + kSourceRadius, pos.y + kSourceDiameter, pos.x + kSourceRadius, fieldHeight - 5, lineThickness);
+        g.setColour(Colours::white);
+        g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
     }
 }
 
-void FieldComponent::mouseUp(const MouseEvent &event) {
-    m_selectedSourceId = -1;
+void ElevationFieldComponent::mouseDown(const MouseEvent &event) {    
+	int fieldWidth = getWidth();
+	int fieldHeight = getHeight();
+
+    // Check if we click on a new source.
+    for (int i = 0; i < m_numberOfSources; i++) {
+        float x = (float)i / m_numberOfSources * (fieldWidth - 10) + 10;
+        float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (fieldHeight - 35) + 5;
+        Point<float> pos = Point<float> {x, y};
+        Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        if (area.contains(event.getMouseDownPosition().toFloat())) {
+            m_selectedSourceId = i;
+            listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
+            break;
+        }
+    }
     repaint();
+}
+
+void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
+	float fieldWidth = getWidth();
+	float fieldHeight = getHeight();
+
+    float elevation = (fieldHeight - event.y) / fieldHeight * 90.0;
+    m_sources[m_selectedSourceId].setElevation(elevation);
+    repaint();
+    listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
 }

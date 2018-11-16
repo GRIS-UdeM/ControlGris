@@ -109,6 +109,7 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
     azimuthSlider.setValue(selectedSource->getAzimuth() / 360.0);
     elevationSlider.setValue(selectedSource->getElevation() / 90.0);
+    distanceSlider.setValue(selectedSource->getDistance());
     repaint();
 }
 
