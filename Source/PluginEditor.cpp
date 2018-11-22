@@ -148,7 +148,7 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
     switch (parameterId) {
         case 0:
-            sources[m_selectedSource].setAzimuth(value * 360.0); break;
+            sources[m_selectedSource].setNormalizedAzimuth(value); break;
         case 1:
             sources[m_selectedSource].setElevation(value * 90.0); break;
         case 2:
@@ -160,11 +160,11 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
             sources[m_selectedSource].setY(value); break;
         case 5:
             sources[m_selectedSource].setZ(value); break;
+*/
         case 6:
             sources[m_selectedSource].setAzimuthSpan(value); break;
         case 7:
             sources[m_selectedSource].setElevationSpan(value); break;
-*/
     }
     mainField.repaint();
     if (m_selectedOscFormat == 2) {

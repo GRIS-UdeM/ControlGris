@@ -83,6 +83,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&azimuthSpanLinkButton);
 
     azimuthSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    azimuthSpanSlider.setRange(0.0, 1.0);
     azimuthSpanSlider.addListener(this);
     addAndMakeVisible(&azimuthSpanSlider);
 
@@ -93,6 +94,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addAndMakeVisible(&elevationSpanLinkButton);
 
     elevationSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    elevationSpanSlider.setRange(0.0, 1.0);
     elevationSpanSlider.addListener(this);
     addAndMakeVisible(&elevationSpanSlider);
 
@@ -110,6 +112,8 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     azimuthSlider.setValue(selectedSource->getAzimuth() / 360.0);
     elevationSlider.setValue(selectedSource->getElevation() / 90.0);
     distanceSlider.setValue(selectedSource->getDistance());
+    azimuthSpanSlider.setValue(selectedSource->getAzimuthSpan());
+    elevationSpanSlider.setValue(selectedSource->getElevationSpan());
     repaint();
 }
 

@@ -40,7 +40,8 @@ MainFieldComponent::~MainFieldComponent() {}
 
 Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iFieldWidth) {
     float x, y, distance;
-    float radius = (p_iFieldWidth - kSourceDiameter) / 2.0;
+    float effectiveWidth = p_iFieldWidth - kSourceDiameter;
+    float radius = effectiveWidth / 2.0;
     if (m_drawElevation) {
         distance = (90.0 - p.getY()) / 90.0;
     } else {
@@ -48,23 +49,23 @@ Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iFieldWidth)
     }
     x = radius * distance * sinf(degreeToRadian(p.getX())) + radius;
     y = radius * distance * cosf(degreeToRadian(p.getX())) + radius;
-    return Point <float> (x, y);
+    return Point <float> (effectiveWidth - x, effectiveWidth - y);
 }
 
 Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth) {
     float ang, rad;
     float half = p_iFieldWidth / 2;
     float x = (p.getX() - half) / half;
-    float y = (p_iFieldWidth - p.getY() - half) / half;
+    float y = (p.getY() - half) / half;
     ang = atan2f(x, y) / M_PI * 180.0;
-    if (ang < 0) {
-        ang = 360.0 + ang;
+    if (ang < 180) {
+        ang += 360.0;
     }
     rad = sqrtf(x*x + y*y);
     if (m_drawElevation) {
         rad = 90.0 - rad * 90.0;
     }
-    return Point <float> (ang, rad);
+    return Point <float> (-ang, rad);
 }
 
 void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
@@ -75,7 +76,7 @@ void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
 void MainFieldComponent::paint(Graphics& g) {
 	const int fieldWidth = getWidth();
 	const int fieldHeight = getHeight();
-    float fFieldCenter = fieldWidth / 2;
+    float fieldCenter = fieldWidth / 2;
     float w, x;
 	
     g.setColour(mGrisFeel.getFieldColour());
@@ -118,7 +119,7 @@ void MainFieldComponent::paint(Graphics& g) {
     // - - - - - - - - - - - -
     // draw cross
     // - - - - - - - - - - - -
-    g.drawLine(fFieldCenter, kSourceRadius, fFieldCenter, fieldHeight-kSourceRadius);
+    g.drawLine(fieldCenter, kSourceRadius, fieldCenter, fieldHeight-kSourceRadius);
     g.drawLine(kSourceRadius, fieldHeight/2, fieldWidth-kSourceRadius, fieldHeight/2);
 
     // - - - - - - - - - - - - 
@@ -144,6 +145,57 @@ void MainFieldComponent::paint(Graphics& g) {
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.setColour(Colours::white);
         g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
+
+        // - - - - - - - - -
+        // draw spanning
+        // - - - - - - - - -
+
+        // Get current values in degrees.
+        float azimuth = m_sources[i].getAzimuth();
+        float elevation = m_sources[i].getElevation();
+        float azimuthSpan = 180.f * m_sources[i].getAzimuthSpan();
+        float elevationSpan = 45.0f * m_sources[i].getElevationSpan();
+
+        // Calculate min and max elevation in degrees.
+        Point<float> minElev = {azimuth, elevation - elevationSpan};
+        Point<float> maxElev = {azimuth, elevation + elevationSpan};
+
+        if (minElev.getY() < 0) {
+            maxElev.setY(maxElev.getY() - minElev.getY());
+            minElev.setY(0);
+        }
+        if (maxElev.getY() > 89.99) {
+            minElev.setY(minElev.getY() + maxElev.getY() - 89.99);
+            maxElev.setY(89.99);
+        }
+
+        // Convert min and max elevation to xy position.
+        float halfWidth = (fieldWidth - kSourceDiameter) / 2.0f;
+        Point<float> minElevPos = {-halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
+                                    -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f};
+        Point<float> maxElevPos = {-halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
+                                    -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f};
+
+        // Calculate min and max radius.
+        float minRadius = sqrtf(minElevPos.getX()*minElevPos.getX() + minElevPos.getY()*minElevPos.getY());
+        float maxRadius = sqrtf(maxElevPos.getX()*maxElevPos.getX() + maxElevPos.getY()*maxElevPos.getY());
+
+        // Draw the path for spanning.
+        Path myPath;
+        myPath.startNewSubPath(fieldCenter + minElevPos.getX(), fieldCenter + minElevPos.getY());
+        myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0,
+                             degreeToRadian(-azimuth), degreeToRadian(-azimuth + azimuthSpan));
+        myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0,
+                             degreeToRadian(-azimuth+azimuthSpan), degreeToRadian(-azimuth-azimuthSpan));
+        myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0,
+                             degreeToRadian(-azimuth-azimuthSpan), degreeToRadian(-azimuth));
+        myPath.closeSubPath();
+
+        g.setColour(m_sources[i].getColour().withAlpha(0.1f));
+        g.fillPath(myPath);
+        g.setColour(m_sources[i].getColour().withAlpha(0.5f));
+        PathStrokeType strokeType = PathStrokeType(1.5);
+        g.strokePath(myPath, strokeType);
     }
 }
 
@@ -195,8 +247,6 @@ ElevationFieldComponent::~ElevationFieldComponent() {}
 void ElevationFieldComponent::paint(Graphics& g) {
 	const int fieldWidth = getWidth();
 	const int fieldHeight = getHeight();
-    float fFieldCenter = fieldWidth / 2;
-    float w, x;
 	
     g.setColour(mGrisFeel.getFieldColour());
 	g.fillRect(0, 0, fieldWidth, fieldHeight);
