@@ -207,8 +207,6 @@ void ParametersBoxComponent::paint(Graphics& g) {
 }
 
 void ParametersBoxComponent::resized() {
-    double width = getWidth();
-
     azimuthLabel.setBounds(5, 20, 150, 20);
     azimuthLinkButton.setBounds(5, 40, 45, 20);
     azimuthSlider.setBounds(55, 40, 175, 20);

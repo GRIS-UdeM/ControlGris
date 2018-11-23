@@ -201,7 +201,6 @@ void MainFieldComponent::paint(Graphics& g) {
 
 void MainFieldComponent::mouseDown(const MouseEvent &event) {    
 	int fieldWidth = getWidth();
-	int fieldHeight = getHeight();
 
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
@@ -318,7 +317,6 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 }
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
-	float fieldWidth = getWidth();
 	float fieldHeight = getHeight();
 
     float elevation = (fieldHeight - event.y) / fieldHeight * 90.0;

@@ -52,8 +52,6 @@ void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
 void InterfaceBoxComponent::paint(Graphics& g) {}
 
 void InterfaceBoxComponent::resized() {
-    double width = getWidth();
-
     oscSourceLabel.setBounds(5, 10, 90, 20);
     oscSourceCombo.setBounds(95, 10, 150, 20);
 

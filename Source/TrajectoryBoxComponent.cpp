@@ -45,8 +45,6 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
 }
 
 void TrajectoryBoxComponent::resized() {
-    double width = getWidth();
-
     sourceLinkLabel.setBounds(5, 5, 150, 20);
     sourceLinkCombo.setBounds(120, 5, 150, 20);
 

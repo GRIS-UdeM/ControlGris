@@ -12,8 +12,8 @@ public:
     ParametersBoxComponent();
     ~ParametersBoxComponent();
 
-    void buttonClicked(Button *button);
-    void sliderValueChanged(Slider *slider);
+    void buttonClicked(Button *button) override;
+    void sliderValueChanged(Slider *slider) override;
     void paint(Graphics&) override;
     void resized() override;
 

@@ -39,8 +39,6 @@ SourceBoxComponent::~SourceBoxComponent() {
 void SourceBoxComponent::paint(Graphics& g) {}
 
 void SourceBoxComponent::resized() {
-    double width = getWidth();
-
     sourcePlacementLabel.setBounds(5, 10, 150, 15);
     sourcePlacementCombo.setBounds(130, 10, 150, 20);
 

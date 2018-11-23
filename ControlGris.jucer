@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" jucerVersion="5.4.1"
-              pluginFormats="buildAU,buildVST" version="2.0.0" bundleIdentifier="com.gris.umontreal.controlgris">
+              pluginFormats="buildVST" version="2.0.0" bundleIdentifier="com.gris.umontreal.controlgris">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
       <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
@@ -142,6 +142,7 @@
   </MODULES>
   <LIVE_SETTINGS>
     <LINUX/>
+    <OSX/>
   </LIVE_SETTINGS>
   <JUCEOPTIONS/>
 </JUCERPROJECT>

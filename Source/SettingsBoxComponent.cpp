@@ -52,8 +52,6 @@ void SettingsBoxComponent::onNewOscFormat() {
 void SettingsBoxComponent::paint(Graphics& g) {}
 
 void SettingsBoxComponent::resized() {
-    double width = getWidth();
-
     oscFormatLabel.setBounds(5, 10, 90, 15);
     oscFormatCombo.setBounds(95, 10, 150, 20);
 
