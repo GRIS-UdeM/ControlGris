@@ -48,6 +48,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addChildComponent(&xLinkButton);
 
     xSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    xSlider.setRange(0.0, 1.0);
     xSlider.addListener(this);
     addChildComponent(&xSlider);
 
@@ -58,6 +59,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     addChildComponent(&yLinkButton);
 
     ySlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    ySlider.setRange(0.0, 1.0);
     ySlider.addListener(this);
     addChildComponent(&ySlider);
 
@@ -70,6 +72,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     zLinkButton.setEnabled(false);
 
     zSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    zSlider.setRange(0.0, 1.0);
     zSlider.addListener(this);
     addChildComponent(&zSlider);
     zSlider.setEnabled(false);

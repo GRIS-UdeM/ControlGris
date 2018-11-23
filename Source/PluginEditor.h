@@ -22,7 +22,7 @@
 #include "InterfaceBoxComponent.h"
 #include "Source.h"
 
-const int MaxNumOfSources = 36;
+const int MaxNumOfSources = 8;
 
 //==============================================================================
 /**
