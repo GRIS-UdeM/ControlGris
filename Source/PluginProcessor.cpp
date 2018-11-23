@@ -15,54 +15,51 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     using Parameter = AudioProcessorValueTreeState::Parameter;
 
     std::vector<std::unique_ptr<Parameter>> parameters;
-    std::vector<std::unique_ptr<AudioProcessorParameterGroup>> groups;
 
     for (int i = 0; i < MaxNumOfSources; i++) {
-        groups.push_back(std::make_unique<AudioProcessorParameterGroup>(
-                         String("source_") + String(i+1), String("Source ") + String(i+1), String(""),
-                         std::make_unique<Parameter>(
-                                         String("azimuth_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Azimuth"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("elevation_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Elevation"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("distance_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Distance"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("azimuthSpan_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Azimuth Span"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("elevationSpan_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Elevation Span"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("x_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" X"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("y_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Y"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false),
-                         std::make_unique<Parameter>(
-                                         String("z_") + String(i+1),
-                                         String("Source ") + String(i+1) + String(" Z"),
-                                         String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                         nullptr, nullptr, false, false)));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("azimuth_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Azimuth"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("elevation_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Elevation"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("distance_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Distance"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("azimuthSpan_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Azimuth Span"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("elevationSpan_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Elevation Span"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("x_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" X"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("y_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Y"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
+        parameters.push_back(std::make_unique<Parameter>(
+                                 String("z_") + String(i+1),
+                                 String("Source ") + String(i+1) + String(" Z"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
+                                 nullptr, nullptr, false, false));
     }
 
-    return { groups.begin(), groups.end() };
+    return { parameters.begin(), parameters.end() };
 }
 
 //==============================================================================
