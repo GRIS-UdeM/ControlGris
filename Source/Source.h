@@ -17,6 +17,8 @@ public:
     void setId(int id);
     int getId();
 
+    void setRadiusIsElevation(bool shouldBeElevation);
+
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);
     float getAzimuth();
@@ -29,15 +31,29 @@ public:
     void setElevationSpan(float elevationSpan);
     float getElevationSpan();
 
+    void setX(float x);
+    float getX();
+    void setY(float y);
+    float getY();
+
+    void computeXY();
+    void computeAzimuthElevation();
+
     void setColour(Colour col);
     Colour getColour();
 
 private:
     int m_id;
+    bool m_radiusIsElevation;
     float m_azimuth;
     float m_elevation;
     float m_distance;
     float m_aziSpan;
     float m_eleSpan;
+    float m_x;
+    float m_y;
     Colour colour;
+
+    inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
+
 };

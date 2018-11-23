@@ -35,6 +35,8 @@ private:
 
     GrisLookAndFeel mGrisFeel;
 
+    bool m_distanceEnabled;
+
     Source *selectedSource;
 
     Label           azimuthLabel;
@@ -59,10 +61,6 @@ private:
     ToggleButton    yLinkButton;
     Slider          ySlider;
 
-    Label           zLabel;
-    ToggleButton    zLinkButton;
-    Slider          zSlider;
-
     //-------------------------------------
 
     Label           azimuthSpanLabel;
@@ -73,7 +71,7 @@ private:
     ToggleButton    elevationSpanLinkButton;
     Slider          elevationSpanSlider;
 
-    ToggleButton    activatorXYZ;
+    ToggleButton    activatorXY;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParametersBoxComponent)
 };

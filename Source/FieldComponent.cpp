@@ -58,7 +58,7 @@ Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iFieldWidth)
     float x = (p.getX() - half) / half;
     float y = (p.getY() - half) / half;
     ang = atan2f(x, y) / M_PI * 180.0;
-    if (ang < 180) {
+    if (ang <= -180) {
         ang += 360.0;
     }
     rad = sqrtf(x*x + y*y);

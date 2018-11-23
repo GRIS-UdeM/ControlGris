@@ -12,8 +12,9 @@
 #include "PluginEditor.h"
 
 //==============================================================================
-ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p)
-    : AudioProcessorEditor (&p), processor (p)
+ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
+                                                                   AudioProcessorValueTreeState& vts)
+    : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
 {
     setLookAndFeel(&mGrisFeel);
  
@@ -61,6 +62,16 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
+
+    for (int i = 0; i < MaxNumOfSources; i++) {
+        valueTreeState.addParameterListener(String("azimuth_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("elevation_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("distance_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("azimuthSpan_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("elevationSpan_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("x_") + String(i+1), this);
+        valueTreeState.addParameterListener(String("y_") + String(i+1), this);
+    }
 
     //setResizable(true, true);
     setResizeLimits(300, 320, 1800, 1300);
@@ -142,6 +153,9 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     m_selectedOscFormat = selectedId;
     parametersBox.setDistanceEnabled(m_selectedOscFormat == 2);
     mainField.setDrawElevation(m_selectedOscFormat != 2);
+    for (int i = 0; i < MaxNumOfSources; i++) {
+        sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
+    }
     resized();
 }
 
@@ -153,19 +167,43 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
             sources[m_selectedSource].setElevation(value * 90.0); break;
         case 2:
             sources[m_selectedSource].setDistance(value); break;
-/*
         case 3:
             sources[m_selectedSource].setX(value); break;
         case 4:
             sources[m_selectedSource].setY(value); break;
         case 5:
-            sources[m_selectedSource].setZ(value); break;
-*/
-        case 6:
             sources[m_selectedSource].setAzimuthSpan(value); break;
-        case 7:
+        case 6:
             sources[m_selectedSource].setElevationSpan(value); break;
     }
+    mainField.repaint();
+    if (m_selectedOscFormat == 2) {
+        elevationField.repaint();
+    }
+}
+
+void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID, float newValue) {
+    int sourceId = parameterID.getTrailingIntValue() - 1;
+    if (parameterID.startsWith("azimuth_")) {
+        sources[sourceId].setNormalizedAzimuth(newValue);
+    } else if (parameterID.startsWith("elevation_")) {
+        sources[sourceId].setElevation(newValue * 90.0);
+    } else if (parameterID.startsWith("distance_")) {
+        sources[sourceId].setDistance(newValue);
+    } else if (parameterID.startsWith("azimuthSpan_")) {
+        sources[sourceId].setAzimuthSpan(newValue);
+    } else if (parameterID.startsWith("elevationSpan_")) {
+        sources[sourceId].setElevationSpan(newValue);
+    } else if (parameterID.startsWith("x_")) {
+        sources[sourceId].setX(newValue);
+    } else if (parameterID.startsWith("y_")) {
+        sources[sourceId].setY(newValue);
+    }
+
+    if (sourceId == m_selectedSource) {
+        parametersBox.setSelectedSource(&sources[sourceId]);
+    }
+
     mainField.repaint();
     if (m_selectedOscFormat == 2) {
         elevationField.repaint();

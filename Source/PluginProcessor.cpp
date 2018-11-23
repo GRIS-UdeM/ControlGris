@@ -52,11 +52,6 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                  String("Source ") + String(i+1) + String(" Y"),
                                  String(), NormalisableRange<float>(0.f, 1.f), 0.f,
                                  nullptr, nullptr, false, false));
-        parameters.push_back(std::make_unique<Parameter>(
-                                 String("z_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Z"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
     }
 
     return { parameters.begin(), parameters.end() };
@@ -202,7 +197,7 @@ bool ControlGrisAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 {
-    return new ControlGrisAudioProcessorEditor (*this);
+    return new ControlGrisAudioProcessorEditor (*this, parameters);
 }
 
 //==============================================================================

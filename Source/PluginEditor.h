@@ -28,13 +28,14 @@ const int MaxNumOfSources = 8;
 /**
 */
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
+                                        public AudioProcessorValueTreeState::Listener,
                                         private Value::Listener,
                                         public FieldComponent::Listener,
                                         public ParametersBoxComponent::Listener,
                                         public SettingsBoxComponent::Listener
 {
 public:
-    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&);
+    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&, AudioProcessorValueTreeState& vts);
     ~ControlGrisAudioProcessorEditor();
 
     //==============================================================================
@@ -44,7 +45,8 @@ public:
 
     //==============================================================================
     void sourcePositionChanged(int sourceId) override;
-    void parameterChanged(int parameterId, double value) override;
+    void parameterChanged(int parameterId, double value) override; // Value::Listener
+    void parameterChanged(const String &parameterID, float newValue) override; // AudioProcessorValueTreeState::Listener
     void oscFormatChanged(int selectedId) override;
 
     Source * getSources();
@@ -54,6 +56,9 @@ private:
     // This reference is provided as a quick way for your editor to
     // access the processor object that created it.
     ControlGrisAudioProcessor& processor;
+
+    // Reference to the parameter tree state.
+    AudioProcessorValueTreeState& valueTreeState;
 
     GrisLookAndFeel mGrisFeel;
 
