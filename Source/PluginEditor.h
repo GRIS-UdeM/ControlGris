@@ -49,6 +49,8 @@ public:
     void parameterChanged(const String &parameterID, float newValue) override; // AudioProcessorValueTreeState::Listener
     void oscFormatChanged(int selectedId) override;
 
+    void sendOscMessage();
+
     Source * getSources();
     int getSelectedSource();
 

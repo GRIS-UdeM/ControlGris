@@ -49,7 +49,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
 
     Random random = Random();
-    m_numOfSources = 8;
+    m_numOfSources = 2;
     for (int i = 0; i < m_numOfSources; i++) {
         sources[i].setId(i);
         sources[i].setAzimuth(random.nextDouble() * 360.0);
@@ -63,7 +63,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
 
-    for (int i = 0; i < MaxNumOfSources; i++) {
+    for (int i = 0; i < m_numOfSources; i++) {
         valueTreeState.addParameterListener(String("azimuth_") + String(i+1), this);
         valueTreeState.addParameterListener(String("elevation_") + String(i+1), this);
         valueTreeState.addParameterListener(String("distance_") + String(i+1), this);
@@ -153,7 +153,7 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     m_selectedOscFormat = selectedId;
     parametersBox.setDistanceEnabled(m_selectedOscFormat == 2);
     mainField.setDrawElevation(m_selectedOscFormat != 2);
-    for (int i = 0; i < MaxNumOfSources; i++) {
+    for (int i = 0; i < m_numOfSources; i++) {
         sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
     }
     resized();
@@ -180,6 +180,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
     if (m_selectedOscFormat == 2) {
         elevationField.repaint();
     }
+    sendOscMessage();
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID, float newValue) {
@@ -208,6 +209,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID
     if (m_selectedOscFormat == 2) {
         elevationField.repaint();
     }
+    sendOscMessage();
 }
 
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
@@ -216,23 +218,31 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     parametersBox.setSelectedSource(&sources[sourceId]);
+    sendOscMessage();
+}
 
+void ControlGrisAudioProcessorEditor::sendOscMessage() {
     OSCAddressPattern oscPattern("/spat/serv");
     OSCMessage message(oscPattern);
 
-    float azim = -sources[sourceId].getAzimuth() / 360.0 * M_PI * 2.0 + M_PI;
-    float elev = (M_PI / 2.0) - (sources[sourceId].getElevation() / 360.0 * M_PI * 2.0);
-    
-    message.addInt32(sourceId);
-    message.addFloat32(azim);
-    message.addFloat32(elev);
-    message.addFloat32(0.0);
-    message.addFloat32(0.0);
-    message.addFloat32(sources[sourceId].getDistance());
-    message.addFloat32(0.0);
+    for (int i = 0; i < m_numOfSources; i++) {
+        if (sources[i].getChanged()) {
+            message.clear();
+            float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
+            float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
+            message.addInt32(i);
+            message.addFloat32(azim);
+            message.addFloat32(elev);
+            message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
+            message.addFloat32(sources[i].getElevationSpan() * 0.5);
+            message.addFloat32(sources[i].getDistance());
+            message.addFloat32(0.0);
 
-    if (!processor.oscSender.send(message)) {
-        std::cout << "Error: could not send OSC message." << std::endl;
-        return;
+            if (!processor.oscSender.send(message)) {
+                std::cout << "Error: could not send OSC message." << std::endl;
+                return;
+            }
+            sources[i].setChanged(false);
+        }
     }
 }

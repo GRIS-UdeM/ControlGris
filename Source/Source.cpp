@@ -1,6 +1,7 @@
 #include "Source.h"
 
 Source::Source() {
+    m_changed = false;
     m_radiusIsElevation = true;
     m_azimuth = 0.0;
     m_elevation = 0.0;
@@ -20,6 +21,14 @@ void Source::setId(int id) {
 
 int Source::getId() {
     return m_id;
+}
+
+void Source::setChanged(bool changed) {
+    m_changed = changed;
+}
+
+bool Source::getChanged() {
+    return m_changed;
 }
 
 void Source::setRadiusIsElevation(bool shouldBeElevation) {
@@ -61,6 +70,7 @@ float Source::getElevation() {
 
 void Source::setDistance(float distance) {
     m_distance = distance;
+    computeXY();
 }
 
 float Source::getDistance() {
@@ -69,6 +79,7 @@ float Source::getDistance() {
 
 void Source::setAzimuthSpan(float azimuthSpan) {
     m_aziSpan = azimuthSpan;
+    m_changed = true;
 }
 
 float Source::getAzimuthSpan() {
@@ -77,6 +88,7 @@ float Source::getAzimuthSpan() {
 
 void Source::setElevationSpan(float elevationSpan) {
     m_eleSpan = elevationSpan;
+    m_changed = true;
 }
 
 float Source::getElevationSpan() {
@@ -112,6 +124,7 @@ void Source::computeXY() {
     m_x = -m_x * 0.5 + 0.5;
     m_y = radius * cosf(degreeToRadian(m_azimuth));
     m_y = m_y * 0.5 + 0.5;
+    m_changed = true;
 }
 
 void Source::computeAzimuthElevation() {
@@ -129,6 +142,7 @@ void Source::computeAzimuthElevation() {
     } else {                    // azimuth - distance
         m_distance = rad;
     }
+    m_changed = true;
 }
 
 void Source::setColour(Colour col) {

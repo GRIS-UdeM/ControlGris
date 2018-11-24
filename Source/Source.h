@@ -17,6 +17,9 @@ public:
     void setId(int id);
     int getId();
 
+    void setChanged(bool changed);
+    bool getChanged();
+
     void setRadiusIsElevation(bool shouldBeElevation);
 
     void setAzimuth(float azimuth);
@@ -44,6 +47,7 @@ public:
 
 private:
     int m_id;
+    bool m_changed;
     bool m_radiusIsElevation;
     float m_azimuth;
     float m_elevation;
