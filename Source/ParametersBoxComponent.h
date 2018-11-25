@@ -18,6 +18,7 @@ public:
 
     void setValue(double value);
     bool getLinkState();
+    void setLinkState(bool state);
 
     struct Listener
     {
@@ -59,6 +60,7 @@ public:
     void setSelectedSource(Source *source);
     void setDistanceEnabled(bool shouldBeEnabled);
     bool getLinkState(int parameterId);
+    void setLinkState(int parameterId, bool state);
 
     struct Listener
     {

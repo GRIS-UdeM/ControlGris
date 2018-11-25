@@ -48,14 +48,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
 
-    Random random = Random();
     m_numOfSources = 2;
-    for (int i = 0; i < m_numOfSources; i++) {
-        sources[i].setId(i);
-        sources[i].setAzimuth(random.nextDouble() * 360.0);
-        sources[i].setElevation(random.nextDouble() * 90.0);
-        sources[i].setDistance(random.nextDouble());
-    }
 
     mainField.setSources(sources, m_numOfSources);
     elevationField.setSources(sources, m_numOfSources);
@@ -71,9 +64,15 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
         valueTreeState.addParameterListener(String("elevationSpan_") + String(i+1), this);
         valueTreeState.addParameterListener(String("x_") + String(i+1), this);
         valueTreeState.addParameterListener(String("y_") + String(i+1), this);
+        parametersBox.setLinkState(SOURCE_ID_AZIMUTH, valueTreeState.state.getProperty("azimuthLink", false));
+        parametersBox.setLinkState(SOURCE_ID_ELEVATION, valueTreeState.state.getProperty("elevationLink", false));
+        parametersBox.setLinkState(SOURCE_ID_DISTANCE, valueTreeState.state.getProperty("distanceLink", false));
+        parametersBox.setLinkState(SOURCE_ID_X, valueTreeState.state.getProperty("xLink", false));
+        parametersBox.setLinkState(SOURCE_ID_Y, valueTreeState.state.getProperty("yLink", false));
+        parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
+        parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
     }
 
-    //setResizable(true, true);
     setResizeLimits(300, 320, 1800, 1300);
 
     lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
@@ -97,6 +96,14 @@ Source * ControlGrisAudioProcessorEditor::getSources() {
 
 int ControlGrisAudioProcessorEditor::getSelectedSource() {
     return m_selectedSource;
+}
+
+bool ControlGrisAudioProcessorEditor::getParameterLinkState(int parameterId) {
+    return parametersBox.getLinkState(parameterId);
+}
+
+void ControlGrisAudioProcessorEditor::setParameterLinkState(int parameterId, bool state) {
+    parametersBox.setLinkState(parameterId, state);
 }
 
 //==============================================================================

@@ -53,6 +53,9 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
+    bool getParameterLinkState(int parameterId);
+    void setParameterLinkState(int parameterId, bool state);
+
     Source * getSources();
     int getSelectedSource();
 

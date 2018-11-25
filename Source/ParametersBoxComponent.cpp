@@ -41,6 +41,10 @@ bool ParameterComponent::getLinkState() {
     return linkButton.getToggleState();
 }
 
+void ParameterComponent::setLinkState(bool state) {
+    linkButton.setToggleState(state, NotificationType::sendNotificationAsync);
+}
+
 //-------------------------------------------------------------------
 ParametersBoxComponent::ParametersBoxComponent() :
     p_azimuth(SOURCE_ID_AZIMUTH, "Azimuth", this),
@@ -106,6 +110,24 @@ bool ParametersBoxComponent::getLinkState(int parameterId) {
         return p_azimuthSpan.getLinkState();
     } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
         return p_elevationSpan.getLinkState();
+    }
+}
+
+void ParametersBoxComponent::setLinkState(int parameterId, bool state) {
+    if (parameterId == SOURCE_ID_AZIMUTH) {
+        p_azimuth.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_ELEVATION) {
+        p_elevation.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_DISTANCE) {
+        p_distance.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_X) {
+        p_x.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_Y) {
+        p_y.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
+        p_azimuthSpan.setLinkState(state);
+    } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
+        p_elevationSpan.setLinkState(state);
     }
 }
 

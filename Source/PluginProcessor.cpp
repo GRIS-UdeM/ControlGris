@@ -203,7 +203,19 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+
     auto state = parameters.copyState();
+
+    if (editor != nullptr) {
+        state.setProperty("azimuthLink", editor->getParameterLinkState(SOURCE_ID_AZIMUTH), nullptr);
+        state.setProperty("elevationLink", editor->getParameterLinkState(SOURCE_ID_ELEVATION), nullptr);
+        state.setProperty("distanceLink", editor->getParameterLinkState(SOURCE_ID_DISTANCE), nullptr);
+        state.setProperty("xLink", editor->getParameterLinkState(SOURCE_ID_X), nullptr);
+        state.setProperty("yLink", editor->getParameterLinkState(SOURCE_ID_Y), nullptr);
+        state.setProperty("azimuthSpanLink", editor->getParameterLinkState(SOURCE_ID_AZIMUTH_SPAN), nullptr);
+        state.setProperty("elevationSpanLink", editor->getParameterLinkState(SOURCE_ID_ELEVATION_SPAN), nullptr);
+    }
     std::unique_ptr<XmlElement> xmlState (state.createXml());
 
     if (xmlState.get() != nullptr)
@@ -213,10 +225,22 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
         parameters.replaceState (ValueTree::fromXml (*xmlState));
+
+    if (editor != nullptr) {
+        editor->setParameterLinkState(SOURCE_ID_AZIMUTH, parameters.state.getProperty("azimuthLink", false));
+        editor->setParameterLinkState(SOURCE_ID_ELEVATION, parameters.state.getProperty("elevationLink", false));
+        editor->setParameterLinkState(SOURCE_ID_DISTANCE, parameters.state.getProperty("distanceLink", false));
+        editor->setParameterLinkState(SOURCE_ID_X, parameters.state.getProperty("xLink", false));
+        editor->setParameterLinkState(SOURCE_ID_Y, parameters.state.getProperty("yLink", false));
+        editor->setParameterLinkState(SOURCE_ID_AZIMUTH_SPAN, parameters.state.getProperty("azimuthSpanLink", false));
+        editor->setParameterLinkState(SOURCE_ID_ELEVATION_SPAN, parameters.state.getProperty("elevationSpanLink", false));
+    }
 }
 
 //==============================================================================
