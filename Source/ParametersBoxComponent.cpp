@@ -1,7 +1,7 @@
 #include "ParametersBoxComponent.h"
 
 //-------------------------------------------------------------------
-ParameterComponent::ParameterComponent(int parameterId, String label) {
+ParameterComponent::ParameterComponent(int parameterId, String label, Component *parent) {
     m_parameterId = parameterId;
 
     parameterLabel.setText(label, NotificationType::dontSendNotification);
@@ -14,6 +14,9 @@ ParameterComponent::ParameterComponent(int parameterId, String label) {
     slider.setRange(0.0, 1.0);
     slider.addListener(this);
     addAndMakeVisible(&slider);
+
+    addListener(dynamic_cast<ParameterComponent::Listener *>(parent));
+    parent->addAndMakeVisible(this);
 }
 
 ParameterComponent::~ParameterComponent() {}
@@ -40,34 +43,21 @@ bool ParameterComponent::getLinkState() {
 
 //-------------------------------------------------------------------
 ParametersBoxComponent::ParametersBoxComponent() :
-    p_azimuth(SOURCE_ID_AZIMUTH, "Azimuth"),
-    p_elevation(SOURCE_ID_ELEVATION, "Elevation"),
-    p_distance(SOURCE_ID_DISTANCE, "Distance"),
-    p_x(SOURCE_ID_X, "X"),
-    p_y(SOURCE_ID_Y, "Y"),
-    p_azimuthSpan(SOURCE_ID_AZIMUTH_SPAN, "Azimuth Span"),
-    p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span")
+    p_azimuth(SOURCE_ID_AZIMUTH, "Azimuth", this),
+    p_elevation(SOURCE_ID_ELEVATION, "Elevation", this),
+    p_distance(SOURCE_ID_DISTANCE, "Distance", this),
+    p_x(SOURCE_ID_X, "X", this),
+    p_y(SOURCE_ID_Y, "Y", this),
+    p_azimuthSpan(SOURCE_ID_AZIMUTH_SPAN, "Azimuth Span", this),
+    p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span", this)
 {
     setLookAndFeel(&mGrisFeel);
 
     m_distanceEnabled = false;
 
-    p_azimuth.addListener(this);
-    p_elevation.addListener(this);
-    p_distance.addListener(this);
-    p_x.addListener(this);
-    p_y.addListener(this);
-    p_azimuthSpan.addListener(this);
-    p_elevationSpan.addListener(this);
-
-    addAndMakeVisible(&p_azimuth);
-    addAndMakeVisible(&p_elevation);
-    addAndMakeVisible(&p_distance);
     p_distance.setEnabled(false);
-    addChildComponent(&p_x);
-    addChildComponent(&p_y);
-    addAndMakeVisible(&p_azimuthSpan);
-    addAndMakeVisible(&p_elevationSpan);
+    p_x.setVisible(false);
+    p_y.setVisible(false);
 
     // Azimuth-Elevation / X-Y switch
     activatorXY.setButtonText("X-Y");

@@ -9,7 +9,7 @@ class ParameterComponent : public Component,
                            public Slider::Listener
 {
 public:
-    ParameterComponent(int ParameterId, String label);
+    ParameterComponent(int ParameterId, String label, Component *parent);
     ~ParameterComponent();
 
     void sliderValueChanged(Slider *slider) override;

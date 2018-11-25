@@ -203,8 +203,8 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    // Store an xml representation of our state.
-    std::unique_ptr<XmlElement> xmlState (parameters.copyState().createXml());
+    auto state = parameters.copyState();
+    std::unique_ptr<XmlElement> xmlState (state.createXml());
 
     if (xmlState.get() != nullptr)
         copyXmlToBinary (*xmlState, destData);
@@ -213,7 +213,6 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    // Restore our plug-in's state from the xml representation stored in the above method.
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
