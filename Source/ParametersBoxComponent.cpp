@@ -1,100 +1,73 @@
 #include "ParametersBoxComponent.h"
 
-ParametersBoxComponent::ParametersBoxComponent() {
+//-------------------------------------------------------------------
+ParameterComponent::ParameterComponent(int parameterId, String label) {
+    m_parameterId = parameterId;
+
+    parameterLabel.setText(label, NotificationType::dontSendNotification);
+    addAndMakeVisible(&parameterLabel);
+
+    linkButton.setButtonText("Link");
+    addAndMakeVisible(&linkButton);
+
+    slider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    slider.setRange(0.0, 1.0);
+    slider.addListener(this);
+    addAndMakeVisible(&slider);
+}
+
+ParameterComponent::~ParameterComponent() {}
+
+void ParameterComponent::paint(Graphics&) {}
+
+void ParameterComponent::resized() {
+    parameterLabel.setBounds(0, 0, 150, 20);
+    linkButton.setBounds(0, 20, 45, 20);
+    slider.setBounds(50, 20, 175, 20);
+}
+
+void ParameterComponent::sliderValueChanged(Slider *slider) {
+    listeners.call([&] (Listener& l) { l.parameterChanged(m_parameterId, slider->getValue()); });
+}
+
+void ParameterComponent::setValue(double value) {
+    slider.setValue(value, NotificationType::dontSendNotification);
+}
+
+bool ParameterComponent::getLinkState() {
+    return linkButton.getToggleState();
+}
+
+//-------------------------------------------------------------------
+ParametersBoxComponent::ParametersBoxComponent() :
+    p_azimuth(SOURCE_ID_AZIMUTH, "Azimuth"),
+    p_elevation(SOURCE_ID_ELEVATION, "Elevation"),
+    p_distance(SOURCE_ID_DISTANCE, "Distance"),
+    p_x(SOURCE_ID_X, "X"),
+    p_y(SOURCE_ID_Y, "Y"),
+    p_azimuthSpan(SOURCE_ID_AZIMUTH_SPAN, "Azimuth Span"),
+    p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span")
+{
     setLookAndFeel(&mGrisFeel);
 
     m_distanceEnabled = false;
 
-    // Azimuth
-    azimuthLabel.setText("Azimuth", NotificationType::dontSendNotification);
-    addAndMakeVisible(&azimuthLabel);
+    p_azimuth.addListener(this);
+    p_elevation.addListener(this);
+    p_distance.addListener(this);
+    p_x.addListener(this);
+    p_y.addListener(this);
+    p_azimuthSpan.addListener(this);
+    p_elevationSpan.addListener(this);
 
-    azimuthLinkButton.setButtonText("Link");
-    addAndMakeVisible(&azimuthLinkButton);
-
-    azimuthSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    azimuthSlider.setRange(0.0, 1.0);
-    azimuthSlider.addListener(this);
-    addAndMakeVisible(&azimuthSlider);
-
-    // Elevation
-    elevationLabel.setText("Elevation", NotificationType::dontSendNotification);
-    addAndMakeVisible(&elevationLabel);
-
-    elevationLinkButton.setButtonText("Link");
-    addAndMakeVisible(&elevationLinkButton);
-
-    elevationSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    elevationSlider.setRange(0.0, 1.0);
-    elevationSlider.addListener(this);
-    addAndMakeVisible(&elevationSlider);
-
-    // Distance
-    distanceLabel.setText("Distance", NotificationType::dontSendNotification);
-    addAndMakeVisible(&distanceLabel);
-    distanceLabel.setEnabled(false);
-
-    distanceLinkButton.setButtonText("Link");
-    addAndMakeVisible(&distanceLinkButton);
-    distanceLinkButton.setEnabled(false);
-
-    distanceSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    distanceSlider.setRange(0.0, 1.0);
-    distanceSlider.addListener(this);
-    addAndMakeVisible(&distanceSlider);
-    distanceSlider.setEnabled(false);
-
-    //---------------------------------------------------------------------------------
-
-    // X
-    xLabel.setText("X", NotificationType::dontSendNotification);
-    addChildComponent(&xLabel);
-
-    xLinkButton.setButtonText("Link");
-    addChildComponent(&xLinkButton);
-
-    xSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    xSlider.setRange(0.0, 1.0);
-    xSlider.addListener(this);
-    addChildComponent(&xSlider);
-
-    // Y
-    yLabel.setText("Y", NotificationType::dontSendNotification);
-    addChildComponent(&yLabel);
-
-    yLinkButton.setButtonText("Link");
-    addChildComponent(&yLinkButton);
-
-    ySlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    ySlider.setRange(0.0, 1.0);
-    ySlider.addListener(this);
-    addChildComponent(&ySlider);
-
-    //---------------------------------------------------------------------------------
-
-    // Azimuth Span
-    azimuthSpanLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
-    addAndMakeVisible(&azimuthSpanLabel);
-
-    azimuthSpanLinkButton.setButtonText("Link");
-    addAndMakeVisible(&azimuthSpanLinkButton);
-
-    azimuthSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    azimuthSpanSlider.setRange(0.0, 1.0);
-    azimuthSpanSlider.addListener(this);
-    addAndMakeVisible(&azimuthSpanSlider);
-
-    // Elevation Span
-    elevationSpanLabel.setText("Elevation Span", NotificationType::dontSendNotification);
-    addAndMakeVisible(&elevationSpanLabel);
-
-    elevationSpanLinkButton.setButtonText("Link");
-    addAndMakeVisible(&elevationSpanLinkButton);
-
-    elevationSpanSlider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    elevationSpanSlider.setRange(0.0, 1.0);
-    elevationSpanSlider.addListener(this);
-    addAndMakeVisible(&elevationSpanSlider);
+    addAndMakeVisible(&p_azimuth);
+    addAndMakeVisible(&p_elevation);
+    addAndMakeVisible(&p_distance);
+    p_distance.setEnabled(false);
+    addChildComponent(&p_x);
+    addChildComponent(&p_y);
+    addAndMakeVisible(&p_azimuthSpan);
+    addAndMakeVisible(&p_elevationSpan);
 
     // Azimuth-Elevation / X-Y switch
     activatorXY.setButtonText("X-Y");
@@ -110,20 +83,18 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
     float normalizedAzimuth = selectedSource->getAzimuth()  / 360.0;
     normalizedAzimuth = normalizedAzimuth >= 0 ? normalizedAzimuth : normalizedAzimuth + 1.0;
-    azimuthSlider.setValue(normalizedAzimuth, NotificationType::dontSendNotification);
-    elevationSlider.setValue(selectedSource->getElevation() / 90.0f, NotificationType::dontSendNotification);
-    distanceSlider.setValue(selectedSource->getDistance(), NotificationType::dontSendNotification);
-    azimuthSpanSlider.setValue(selectedSource->getAzimuthSpan(), NotificationType::dontSendNotification);
-    elevationSpanSlider.setValue(selectedSource->getElevationSpan(), NotificationType::dontSendNotification);
-    xSlider.setValue(selectedSource->getX(), NotificationType::dontSendNotification);
-    ySlider.setValue(selectedSource->getY(), NotificationType::dontSendNotification);
+    p_azimuth.setValue(normalizedAzimuth);
+    p_elevation.setValue(selectedSource->getElevation() / 90.0f);
+    p_distance.setValue(selectedSource->getDistance());
+    p_x.setValue(selectedSource->getX());
+    p_y.setValue(selectedSource->getY());
+    p_azimuthSpan.setValue(selectedSource->getAzimuthSpan());
+    p_elevationSpan.setValue(selectedSource->getElevationSpan());
     repaint();
 }
 
 void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
-    distanceLabel.setEnabled(shouldBeEnabled);
-    distanceLinkButton.setEnabled(shouldBeEnabled);
-    distanceSlider.setEnabled(shouldBeEnabled);
+    p_distance.setEnabled(shouldBeEnabled);
     m_distanceEnabled = shouldBeEnabled;
     resized();
     activatorXY.triggerClick();
@@ -132,85 +103,46 @@ void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
 
 bool ParametersBoxComponent::getLinkState(int parameterId) {
     if (parameterId == SOURCE_ID_AZIMUTH) {
-        return azimuthLinkButton.getToggleState();
+        return p_azimuth.getLinkState();
     } else if (parameterId == SOURCE_ID_ELEVATION) {
-        return elevationLinkButton.getToggleState();
+        return p_elevation.getLinkState();
     } else if (parameterId == SOURCE_ID_DISTANCE) {
-        return distanceLinkButton.getToggleState();
+        return p_distance.getLinkState();
     } else if (parameterId == SOURCE_ID_X) {
-        return xLinkButton.getToggleState();
+        return p_x.getLinkState();
     } else if (parameterId == SOURCE_ID_Y) {
-        return yLinkButton.getToggleState();
+        return p_y.getLinkState();
     } else if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
-        return azimuthSpanLinkButton.getToggleState();
+        return p_azimuthSpan.getLinkState();
     } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
-        return elevationSpanLinkButton.getToggleState();
+        return p_elevationSpan.getLinkState();
     }
 }
 
 void ParametersBoxComponent::buttonClicked(Button *button) {
     if (button == &activatorXY) {
         if (activatorXY.getToggleState()) {
-            xLabel.setVisible(true);
-            xLinkButton.setVisible(true);
-            xSlider.setVisible(true);
-            yLabel.setVisible(true);
-            yLinkButton.setVisible(true);
-            ySlider.setVisible(true);
-            azimuthLabel.setVisible(false);
-            azimuthLinkButton.setVisible(false);
-            azimuthSlider.setVisible(false);
-            distanceLabel.setVisible(false);
-            distanceLinkButton.setVisible(false);
-            distanceSlider.setVisible(false);
+            p_x.setVisible(true);
+            p_y.setVisible(true);
+            p_azimuth.setVisible(false);
+            p_distance.setVisible(false);
             if (m_distanceEnabled) {
-                elevationLabel.setVisible(true);
-                elevationLinkButton.setVisible(true);
-                elevationSlider.setVisible(true);
+                p_elevation.setVisible(true);
             } else {
-                elevationLabel.setVisible(false);
-                elevationLinkButton.setVisible(false);
-                elevationSlider.setVisible(false);
+                p_elevation.setVisible(false);
             }
         } else {
-            xLabel.setVisible(false);
-            xLinkButton.setVisible(false);
-            xSlider.setVisible(false);
-            yLabel.setVisible(false);
-            yLinkButton.setVisible(false);
-            ySlider.setVisible(false);
-            azimuthLabel.setVisible(true);
-            azimuthLinkButton.setVisible(true);
-            azimuthSlider.setVisible(true);
-            elevationLabel.setVisible(true);
-            elevationLinkButton.setVisible(true);
-            elevationSlider.setVisible(true);
-            distanceLabel.setVisible(true);
-            distanceLinkButton.setVisible(true);
-            distanceSlider.setVisible(true);
+            p_x.setVisible(false);
+            p_y.setVisible(false);
+            p_azimuth.setVisible(true);
+            p_elevation.setVisible(true);
+            p_distance.setVisible(true);
         }
     }
 }
 
-void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
-    int parameterId;
-    if (slider == &azimuthSlider) {
-        parameterId = SOURCE_ID_AZIMUTH;
-    } else if (slider == &elevationSlider) {
-        parameterId = SOURCE_ID_ELEVATION;
-    } else if (slider == &distanceSlider) {
-        parameterId = SOURCE_ID_DISTANCE;
-    } else if (slider == &xSlider) {
-        parameterId = SOURCE_ID_X;
-    } else if (slider == &ySlider) {
-        parameterId = SOURCE_ID_Y;
-    } else if (slider == &azimuthSpanSlider) {
-        parameterId = SOURCE_ID_AZIMUTH_SPAN;
-    } else if (slider == &elevationSpanSlider) {
-        parameterId = SOURCE_ID_ELEVATION_SPAN;
-    }
-
-    listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, slider->getValue()); });
+void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
+    listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, value); });
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {
@@ -224,47 +156,17 @@ void ParametersBoxComponent::paint(Graphics& g) {
 }
 
 void ParametersBoxComponent::resized() {
-    azimuthLabel.setBounds(5, 20, 150, 20);
-    azimuthLinkButton.setBounds(5, 40, 45, 20);
-    azimuthSlider.setBounds(55, 40, 175, 20);
-
+    p_azimuth.setBounds(5, 20, 225, 40);
     if (m_distanceEnabled) {
-        distanceLabel.setBounds(5, 70, 150, 20);
-        distanceLinkButton.setBounds(5, 90, 45, 20);
-        distanceSlider.setBounds(55, 90, 175, 20);
-
-        elevationLabel.setBounds(5, 120, 150, 20);
-        elevationLinkButton.setBounds(5, 140, 45, 20);
-        elevationSlider.setBounds(55, 140, 175, 20);
+        p_distance.setBounds(5, 70, 225, 40);
+        p_elevation.setBounds(5, 120, 225, 40);
     } else {
-        elevationLabel.setBounds(5, 70, 150, 20);
-        elevationLinkButton.setBounds(5, 90, 45, 20);
-        elevationSlider.setBounds(55, 90, 175, 20);
-
-        distanceLabel.setBounds(5, 120, 150, 20);
-        distanceLinkButton.setBounds(5, 140, 45, 20);
-        distanceSlider.setBounds(55, 140, 175, 20);
+        p_elevation.setBounds(5, 70, 225, 40);
+        p_distance.setBounds(5, 120, 225, 40);
     }
-
-    //---------------------------------------------------------------------------------
-
-    xLabel.setBounds(5, 20, 150, 20);
-    xLinkButton.setBounds(5, 40, 45, 20);
-    xSlider.setBounds(55, 40, 175, 20);
-
-    yLabel.setBounds(5, 70, 150, 20);
-    yLinkButton.setBounds(5, 90, 45, 20);
-    ySlider.setBounds(55, 90, 175, 20);
-
-    //---------------------------------------------------------------------------------
-
-    azimuthSpanLabel.setBounds(5, 170, 150, 20);
-    azimuthSpanLinkButton.setBounds(5, 190, 45, 20);
-    azimuthSpanSlider.setBounds(55, 190, 175, 20);
-
-    elevationSpanLabel.setBounds(5, 220, 150, 20);
-    elevationSpanLinkButton.setBounds(5, 240, 45, 20);
-    elevationSpanSlider.setBounds(55, 240, 175, 20);
-
+    p_x.setBounds(5, 20, 225, 40);
+    p_y.setBounds(5, 70, 225, 40);
+    p_azimuthSpan.setBounds(5, 170, 225, 40);
+    p_elevationSpan.setBounds(5, 220, 225, 40);
     activatorXY.setBounds(240, 5, 60, 20);
 }
