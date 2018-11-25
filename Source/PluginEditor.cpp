@@ -160,22 +160,7 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
-    switch (parameterId) {
-        case 0:
-            sources[m_selectedSource].setNormalizedAzimuth(value); break;
-        case 1:
-            sources[m_selectedSource].setElevation(value * 90.0); break;
-        case 2:
-            sources[m_selectedSource].setDistance(value); break;
-        case 3:
-            sources[m_selectedSource].setX(value); break;
-        case 4:
-            sources[m_selectedSource].setY(value); break;
-        case 5:
-            sources[m_selectedSource].setAzimuthSpan(value); break;
-        case 6:
-            sources[m_selectedSource].setElevationSpan(value); break;
-    }
+    setSourceParameterValue(m_selectedSource, parameterId, value);
     mainField.repaint();
     if (m_selectedOscFormat == 2) {
         elevationField.repaint();
@@ -184,22 +169,24 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID, float newValue) {
+    int parameterId;
     int sourceId = parameterID.getTrailingIntValue() - 1;
     if (parameterID.startsWith("azimuth_")) {
-        sources[sourceId].setNormalizedAzimuth(newValue);
+        parameterId = SOURCE_ID_AZIMUTH;
     } else if (parameterID.startsWith("elevation_")) {
-        sources[sourceId].setElevation(newValue * 90.0);
+        parameterId = SOURCE_ID_ELEVATION;
     } else if (parameterID.startsWith("distance_")) {
-        sources[sourceId].setDistance(newValue);
-    } else if (parameterID.startsWith("azimuthSpan_")) {
-        sources[sourceId].setAzimuthSpan(newValue);
-    } else if (parameterID.startsWith("elevationSpan_")) {
-        sources[sourceId].setElevationSpan(newValue);
+        parameterId = SOURCE_ID_DISTANCE;
     } else if (parameterID.startsWith("x_")) {
-        sources[sourceId].setX(newValue);
+        parameterId = SOURCE_ID_X;
     } else if (parameterID.startsWith("y_")) {
-        sources[sourceId].setY(newValue);
+        parameterId = SOURCE_ID_Y;
+    } else if (parameterID.startsWith("azimuthSpan_")) {
+        parameterId = SOURCE_ID_AZIMUTH_SPAN;
+    } else if (parameterID.startsWith("elevationSpan_")) {
+        parameterId = SOURCE_ID_ELEVATION_SPAN;
     }
+    setSourceParameterValue(sourceId, parameterId, newValue);
 
     if (sourceId == m_selectedSource) {
         parametersBox.setSelectedSource(&sources[sourceId]);
@@ -213,12 +200,73 @@ void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID
 }
 
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
-
     m_selectedSource = sourceId;
+    parametersBox.setSelectedSource(&sources[sourceId]);
+    setLinkedParameterValue(sourceId, -1);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
-    parametersBox.setSelectedSource(&sources[sourceId]);
     sendOscMessage();
+}
+
+void ControlGrisAudioProcessorEditor::setSourceParameterValue(int sourceId, int parameterId, double value) {
+    switch (parameterId) {
+        case SOURCE_ID_AZIMUTH:
+            sources[sourceId].setNormalizedAzimuth(value); break;
+        case SOURCE_ID_ELEVATION:
+            sources[sourceId].setElevation(value * 90.0); break;
+        case SOURCE_ID_DISTANCE:
+            sources[sourceId].setDistance(value); break;
+        case SOURCE_ID_X:
+            sources[sourceId].setX(value); break;
+        case SOURCE_ID_Y:
+            sources[sourceId].setY(value); break;
+        case SOURCE_ID_AZIMUTH_SPAN:
+            sources[sourceId].setAzimuthSpan(value); break;
+        case SOURCE_ID_ELEVATION_SPAN:
+            sources[sourceId].setElevationSpan(value); break;
+    }
+    setLinkedParameterValue(sourceId, parameterId);
+}
+
+void ControlGrisAudioProcessorEditor::setLinkedParameterValue(int sourceId, int parameterId) {
+    bool linkAzimuth = false, linkElevation = false, linkDistance = false, linkX = false, linkY = false;
+    bool linkAzimuthSpan = (parameterId == SOURCE_ID_AZIMUTH_SPAN && parametersBox.getLinkState(SOURCE_ID_AZIMUTH_SPAN));
+    bool linkElevationSpan = (parameterId == SOURCE_ID_ELEVATION_SPAN && parametersBox.getLinkState(SOURCE_ID_ELEVATION_SPAN));
+    if (parameterId < SOURCE_ID_AZIMUTH) { // Source changed from 2D field view.
+        linkAzimuth = parametersBox.getLinkState(SOURCE_ID_AZIMUTH);
+        linkElevation = parametersBox.getLinkState(SOURCE_ID_ELEVATION);
+        linkDistance = parametersBox.getLinkState(SOURCE_ID_DISTANCE);
+        linkX = parametersBox.getLinkState(SOURCE_ID_X);
+        linkY = parametersBox.getLinkState(SOURCE_ID_Y);
+    } else if (parameterId < SOURCE_ID_X) {
+        linkAzimuth = (parameterId == SOURCE_ID_AZIMUTH && parametersBox.getLinkState(SOURCE_ID_AZIMUTH));
+        linkElevation = (parameterId == SOURCE_ID_ELEVATION && parametersBox.getLinkState(SOURCE_ID_ELEVATION));
+        linkDistance = (parameterId == SOURCE_ID_DISTANCE && parametersBox.getLinkState(SOURCE_ID_DISTANCE));
+        linkX = (parametersBox.getLinkState(SOURCE_ID_X));
+        linkY = (parametersBox.getLinkState(SOURCE_ID_Y));
+    } else if (parameterId < SOURCE_ID_AZIMUTH_SPAN) {
+        linkX = (parameterId == SOURCE_ID_X && parametersBox.getLinkState(SOURCE_ID_X));
+        linkY = (parameterId == SOURCE_ID_Y && parametersBox.getLinkState(SOURCE_ID_Y));
+        linkAzimuth = (parametersBox.getLinkState(SOURCE_ID_AZIMUTH));
+        linkElevation = (parametersBox.getLinkState(SOURCE_ID_ELEVATION));
+        linkDistance = (parametersBox.getLinkState(SOURCE_ID_DISTANCE));
+    }
+    for (int i = 0; i < m_numOfSources; i++) {
+        if (linkAzimuth)
+            sources[i].setAzimuth(sources[sourceId].getAzimuth());
+        if (linkElevation)
+            sources[i].setElevation(sources[sourceId].getElevation());
+        if (linkDistance)
+            sources[i].setDistance(sources[sourceId].getDistance());
+        if (linkX)
+            sources[i].setX(sources[sourceId].getX());
+        if (linkY)
+            sources[i].setY(sources[sourceId].getY());
+        if (linkAzimuthSpan)
+            sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
+        if (linkElevationSpan)
+            sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
+    }
 }
 
 void ControlGrisAudioProcessorEditor::sendOscMessage() {

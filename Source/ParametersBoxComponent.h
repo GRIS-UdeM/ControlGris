@@ -19,6 +19,7 @@ public:
 
     void setSelectedSource(Source *source);
     void setDistanceEnabled(bool shouldBeEnabled);
+    bool getLinkState(int parameterId);
 
     struct Listener
     {

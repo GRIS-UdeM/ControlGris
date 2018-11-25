@@ -2,6 +2,14 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#define SOURCE_ID_AZIMUTH 0
+#define SOURCE_ID_ELEVATION 1
+#define SOURCE_ID_DISTANCE 2
+#define SOURCE_ID_X 3
+#define SOURCE_ID_Y 4
+#define SOURCE_ID_AZIMUTH_SPAN 5
+#define SOURCE_ID_ELEVATION_SPAN 6
+
 static const float kRadiusMax = 2;
 static const float kSourceRadius = 10;
 static const float kSourceDiameter = kSourceRadius * 2;

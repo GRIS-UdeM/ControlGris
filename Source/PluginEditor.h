@@ -45,11 +45,13 @@ public:
 
     //==============================================================================
     void sourcePositionChanged(int sourceId) override;
-    void parameterChanged(int parameterId, double value) override; // Value::Listener
-    void parameterChanged(const String &parameterID, float newValue) override; // AudioProcessorValueTreeState::Listener
+    void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent::Listener
+    void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState::Listener
     void oscFormatChanged(int selectedId) override;
 
     void sendOscMessage();
+    void setSourceParameterValue(int sourceId, int parameterId, double value);
+    void setLinkedParameterValue(int sourceId, int parameterId);
 
     Source * getSources();
     int getSelectedSource();

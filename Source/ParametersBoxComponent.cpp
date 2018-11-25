@@ -5,6 +5,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
 
     m_distanceEnabled = false;
 
+    // Azimuth
     azimuthLabel.setText("Azimuth", NotificationType::dontSendNotification);
     addAndMakeVisible(&azimuthLabel);
 
@@ -16,6 +17,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     azimuthSlider.addListener(this);
     addAndMakeVisible(&azimuthSlider);
 
+    // Elevation
     elevationLabel.setText("Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationLabel);
 
@@ -27,6 +29,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     elevationSlider.addListener(this);
     addAndMakeVisible(&elevationSlider);
 
+    // Distance
     distanceLabel.setText("Distance", NotificationType::dontSendNotification);
     addAndMakeVisible(&distanceLabel);
     distanceLabel.setEnabled(false);
@@ -43,6 +46,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
 
     //---------------------------------------------------------------------------------
 
+    // X
     xLabel.setText("X", NotificationType::dontSendNotification);
     addChildComponent(&xLabel);
 
@@ -54,6 +58,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     xSlider.addListener(this);
     addChildComponent(&xSlider);
 
+    // Y
     yLabel.setText("Y", NotificationType::dontSendNotification);
     addChildComponent(&yLabel);
 
@@ -67,6 +72,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
 
     //---------------------------------------------------------------------------------
 
+    // Azimuth Span
     azimuthSpanLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
     addAndMakeVisible(&azimuthSpanLabel);
 
@@ -78,6 +84,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     azimuthSpanSlider.addListener(this);
     addAndMakeVisible(&azimuthSpanSlider);
 
+    // Elevation Span
     elevationSpanLabel.setText("Elevation Span", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationSpanLabel);
 
@@ -89,6 +96,7 @@ ParametersBoxComponent::ParametersBoxComponent() {
     elevationSpanSlider.addListener(this);
     addAndMakeVisible(&elevationSpanSlider);
 
+    // Azimuth-Elevation / X-Y switch
     activatorXY.setButtonText("X-Y");
     activatorXY.addListener(this);
     addAndMakeVisible(&activatorXY);
@@ -120,6 +128,24 @@ void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
     resized();
     activatorXY.triggerClick();
     activatorXY.triggerClick();
+}
+
+bool ParametersBoxComponent::getLinkState(int parameterId) {
+    if (parameterId == SOURCE_ID_AZIMUTH) {
+        return azimuthLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_ELEVATION) {
+        return elevationLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_DISTANCE) {
+        return distanceLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_X) {
+        return xLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_Y) {
+        return yLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
+        return azimuthSpanLinkButton.getToggleState();
+    } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
+        return elevationSpanLinkButton.getToggleState();
+    }
 }
 
 void ParametersBoxComponent::buttonClicked(Button *button) {
@@ -169,19 +195,19 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
 void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
     int parameterId;
     if (slider == &azimuthSlider) {
-        parameterId = 0;
+        parameterId = SOURCE_ID_AZIMUTH;
     } else if (slider == &elevationSlider) {
-        parameterId = 1;    
+        parameterId = SOURCE_ID_ELEVATION;
     } else if (slider == &distanceSlider) {
-        parameterId = 2;
+        parameterId = SOURCE_ID_DISTANCE;
     } else if (slider == &xSlider) {
-        parameterId = 3;
+        parameterId = SOURCE_ID_X;
     } else if (slider == &ySlider) {
-        parameterId = 4;
+        parameterId = SOURCE_ID_Y;
     } else if (slider == &azimuthSpanSlider) {
-        parameterId = 5;
+        parameterId = SOURCE_ID_AZIMUTH_SPAN;
     } else if (slider == &elevationSpanSlider) {
-        parameterId = 6;
+        parameterId = SOURCE_ID_ELEVATION_SPAN;
     }
 
     listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, slider->getValue()); });
