@@ -8,6 +8,7 @@ ParameterComponent::ParameterComponent(int parameterId, String label, Component 
     addAndMakeVisible(&parameterLabel);
 
     linkButton.setButtonText("Link");
+    linkButton.addListener(this);
     addAndMakeVisible(&linkButton);
 
     slider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -27,6 +28,10 @@ void ParameterComponent::resized() {
     parameterLabel.setBounds(0, 0, 150, 20);
     linkButton.setBounds(0, 20, 45, 20);
     slider.setBounds(50, 20, 175, 20);
+}
+
+void ParameterComponent::buttonClicked(Button *button) {
+    listeners.call([&] (Listener& l) { l.parameterLinkChanged(m_parameterId, button->getToggleState()); });
 }
 
 void ParameterComponent::sliderValueChanged(Slider *slider) {
@@ -155,6 +160,10 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
 
 void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
     listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, value); });
+}
+
+void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
+    listeners.call([&] (Listener& l) { l.parameterLinkChanged(parameterId, value); });
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {

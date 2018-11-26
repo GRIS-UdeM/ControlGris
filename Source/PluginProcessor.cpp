@@ -75,6 +75,13 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
         // Add a sub-tree to store the state of our UI
         parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
+        parameters.state.setProperty("azimuthLink", false, nullptr);
+        parameters.state.setProperty("elevationLink", false, nullptr);
+        parameters.state.setProperty("distanceLink", false, nullptr);
+        parameters.state.setProperty("xLink", false, nullptr);
+        parameters.state.setProperty("yLink", false, nullptr);
+        parameters.state.setProperty("azimuthSpanLink", false, nullptr);
+        parameters.state.setProperty("elevationSpanLink", false, nullptr);
 
     if (! oscSender.connect("127.0.0.1", 18032)) {
         std::cout << "Error: could not connect to UDP port 18032." << std::endl;
@@ -203,24 +210,11 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-
     auto state = parameters.copyState();
-
-    if (editor != nullptr) {
-        state.setProperty("azimuthLink", editor->getParameterLinkState(SOURCE_ID_AZIMUTH), nullptr);
-        state.setProperty("elevationLink", editor->getParameterLinkState(SOURCE_ID_ELEVATION), nullptr);
-        state.setProperty("distanceLink", editor->getParameterLinkState(SOURCE_ID_DISTANCE), nullptr);
-        state.setProperty("xLink", editor->getParameterLinkState(SOURCE_ID_X), nullptr);
-        state.setProperty("yLink", editor->getParameterLinkState(SOURCE_ID_Y), nullptr);
-        state.setProperty("azimuthSpanLink", editor->getParameterLinkState(SOURCE_ID_AZIMUTH_SPAN), nullptr);
-        state.setProperty("elevationSpanLink", editor->getParameterLinkState(SOURCE_ID_ELEVATION_SPAN), nullptr);
-    }
     std::unique_ptr<XmlElement> xmlState (state.createXml());
 
     if (xmlState.get() != nullptr)
         copyXmlToBinary (*xmlState, destData);
-
 }
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
@@ -232,15 +226,8 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
     if (xmlState.get() != nullptr)
         parameters.replaceState (ValueTree::fromXml (*xmlState));
 
-    if (editor != nullptr) {
-        editor->setParameterLinkState(SOURCE_ID_AZIMUTH, parameters.state.getProperty("azimuthLink", false));
-        editor->setParameterLinkState(SOURCE_ID_ELEVATION, parameters.state.getProperty("elevationLink", false));
-        editor->setParameterLinkState(SOURCE_ID_DISTANCE, parameters.state.getProperty("distanceLink", false));
-        editor->setParameterLinkState(SOURCE_ID_X, parameters.state.getProperty("xLink", false));
-        editor->setParameterLinkState(SOURCE_ID_Y, parameters.state.getProperty("yLink", false));
-        editor->setParameterLinkState(SOURCE_ID_AZIMUTH_SPAN, parameters.state.getProperty("azimuthSpanLink", false));
-        editor->setParameterLinkState(SOURCE_ID_ELEVATION_SPAN, parameters.state.getProperty("elevationSpanLink", false));
-    }
+    if (editor != nullptr)
+        editor->setPluginState();
 }
 
 //==============================================================================

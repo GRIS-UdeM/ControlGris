@@ -46,6 +46,7 @@ public:
     //==============================================================================
     void sourcePositionChanged(int sourceId) override;
     void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent::Listener
+    void parameterLinkChanged(int parameterId, bool value) override;
     void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState::Listener
     void oscFormatChanged(int selectedId) override;
 
@@ -55,6 +56,8 @@ public:
 
     bool getParameterLinkState(int parameterId);
     void setParameterLinkState(int parameterId, bool state);
+
+    void setPluginState();
 
     Source * getSources();
     int getSelectedSource();

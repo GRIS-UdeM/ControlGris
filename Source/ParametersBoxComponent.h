@@ -6,12 +6,14 @@
 
 //-------------------------------------------------------------------
 class ParameterComponent : public Component,
+                           public Button::Listener,
                            public Slider::Listener
 {
 public:
     ParameterComponent(int ParameterId, String label, Component *parent);
     ~ParameterComponent();
 
+    void buttonClicked(Button *button) override;
     void sliderValueChanged(Slider *slider) override;
     void paint(Graphics&) override;
     void resized() override;
@@ -25,6 +27,7 @@ public:
         virtual ~Listener() {}
 
         virtual void parameterChanged(int parameterId, double value) = 0;
+        virtual void parameterLinkChanged(int parameterId, bool value) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -54,6 +57,7 @@ public:
 
     void buttonClicked(Button *button) override;
     void parameterChanged(int parameterId, double value) override;
+    void parameterLinkChanged(int parameterId, bool value) override;
     void paint(Graphics&) override;
     void resized() override;
 
@@ -67,6 +71,7 @@ public:
         virtual ~Listener() {}
 
         virtual void parameterChanged(int parameterId, double value) = 0;
+        virtual void parameterLinkChanged(int parameterId, bool value) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

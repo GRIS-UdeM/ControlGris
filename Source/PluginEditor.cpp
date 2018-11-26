@@ -53,10 +53,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     mainField.setSources(sources, m_numOfSources);
     elevationField.setSources(sources, m_numOfSources);
 
-    m_selectedSource = 0;
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
-
     for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setId(i);
         valueTreeState.addParameterListener(String("azimuth_") + String(i+1), this);
         valueTreeState.addParameterListener(String("elevation_") + String(i+1), this);
         valueTreeState.addParameterListener(String("distance_") + String(i+1), this);
@@ -64,14 +62,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
         valueTreeState.addParameterListener(String("elevationSpan_") + String(i+1), this);
         valueTreeState.addParameterListener(String("x_") + String(i+1), this);
         valueTreeState.addParameterListener(String("y_") + String(i+1), this);
-        parametersBox.setLinkState(SOURCE_ID_AZIMUTH, valueTreeState.state.getProperty("azimuthLink", false));
-        parametersBox.setLinkState(SOURCE_ID_ELEVATION, valueTreeState.state.getProperty("elevationLink", false));
-        parametersBox.setLinkState(SOURCE_ID_DISTANCE, valueTreeState.state.getProperty("distanceLink", false));
-        parametersBox.setLinkState(SOURCE_ID_X, valueTreeState.state.getProperty("xLink", false));
-        parametersBox.setLinkState(SOURCE_ID_Y, valueTreeState.state.getProperty("yLink", false));
-        parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
-        parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
     }
+
+    m_selectedSource = 0;
+    parametersBox.setSelectedSource(&sources[m_selectedSource]);
 
     setResizeLimits(300, 320, 1800, 1300);
 
@@ -84,6 +78,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     lastUIWidth.addListener(this);
     lastUIHeight.addListener(this);
 
+    setPluginState();
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
@@ -104,6 +99,16 @@ bool ControlGrisAudioProcessorEditor::getParameterLinkState(int parameterId) {
 
 void ControlGrisAudioProcessorEditor::setParameterLinkState(int parameterId, bool state) {
     parametersBox.setLinkState(parameterId, state);
+}
+
+void ControlGrisAudioProcessorEditor::setPluginState() {
+    parametersBox.setLinkState(SOURCE_ID_AZIMUTH, valueTreeState.state.getProperty("azimuthLink", false));
+    parametersBox.setLinkState(SOURCE_ID_ELEVATION, valueTreeState.state.getProperty("elevationLink", false));
+    parametersBox.setLinkState(SOURCE_ID_DISTANCE, valueTreeState.state.getProperty("distanceLink", false));
+    parametersBox.setLinkState(SOURCE_ID_X, valueTreeState.state.getProperty("xLink", false));
+    parametersBox.setLinkState(SOURCE_ID_Y, valueTreeState.state.getProperty("yLink", false));
+    parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
+    parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
 }
 
 //==============================================================================
@@ -164,6 +169,25 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
         sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
     }
     resized();
+}
+
+void ControlGrisAudioProcessorEditor::parameterLinkChanged(int parameterId, bool value) {
+    switch (parameterId) {
+        case SOURCE_ID_AZIMUTH:
+            valueTreeState.state.setProperty("azimuthLink", value, nullptr); break;
+        case SOURCE_ID_ELEVATION:
+            valueTreeState.state.setProperty("elevationLink", value, nullptr); break;
+        case SOURCE_ID_DISTANCE:
+            valueTreeState.state.setProperty("distanceLink", value, nullptr); break;
+        case SOURCE_ID_X:
+            valueTreeState.state.setProperty("xLink", value, nullptr); break;
+        case SOURCE_ID_Y:
+            valueTreeState.state.setProperty("yLink", value, nullptr); break;
+        case SOURCE_ID_AZIMUTH_SPAN:
+            valueTreeState.state.setProperty("azimuthSpanLink", value, nullptr); break;
+        case SOURCE_ID_ELEVATION_SPAN:
+            valueTreeState.state.setProperty("elevationSpanLink", value, nullptr); break;
+    }
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
