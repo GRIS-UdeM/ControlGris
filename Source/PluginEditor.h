@@ -44,16 +44,14 @@ public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&, AudioProcessorValueTreeState& vts);
     ~ControlGrisAudioProcessorEditor();
 
-    //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
     void valueChanged (Value&) override;
 
-    //==============================================================================
     void sourcePositionChanged(int sourceId) override;
     void parameterLinkChanged(int parameterId, bool value) override;
-    void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent::Listener
-    void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState::Listener
+    void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent
+    void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState
     void oscFormatChanged(int selectedId) override;
 
     void sendOscMessage();

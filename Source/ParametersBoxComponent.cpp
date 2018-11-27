@@ -87,7 +87,6 @@ ParametersBoxComponent::ParametersBoxComponent() :
     p_x.setVisible(false);
     p_y.setVisible(false);
 
-    // Azimuth-Elevation / X-Y switch
     activatorXY.setButtonText("X-Y");
     activatorXY.addListener(this);
     addAndMakeVisible(&activatorXY);
@@ -101,6 +100,7 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
     float normalizedAzimuth = selectedSource->getAzimuth()  / 360.0;
     normalizedAzimuth = normalizedAzimuth >= 0 ? normalizedAzimuth : normalizedAzimuth + 1.0;
+
     p_azimuth.setValue(normalizedAzimuth);
     p_elevation.setValue(selectedSource->getElevation() / 90.0f);
     p_distance.setValue(selectedSource->getDistance());
@@ -108,6 +108,7 @@ void ParametersBoxComponent::setSelectedSource(Source *source) {
     p_y.setValue(selectedSource->getY());
     p_azimuthSpan.setValue(selectedSource->getAzimuthSpan());
     p_elevationSpan.setValue(selectedSource->getElevationSpan());
+
     repaint();
 }
 
@@ -191,6 +192,7 @@ void ParametersBoxComponent::paint(Graphics& g) {
 
     g.setColour(selectedSource->getColour());
     g.drawEllipse(x, y, 20, 20, 3);
+
     g.setColour(Colours::white);
     g.drawText(String(selectedSource->getId()+1), x, y, 20, 20, Justification(Justification::centred), false);
 }

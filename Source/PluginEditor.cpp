@@ -27,40 +27,45 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 {
     setLookAndFeel(&mGrisFeel);
  
+    m_numOfSources = 2;
+    m_selectedSource = 0;
     m_selectedOscFormat = 1;
 
     mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-    elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
-    parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
-    trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
-    settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
-
     addAndMakeVisible(&mainBanner);
+
+    elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationBanner);
+
+    parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     addAndMakeVisible(&parametersBanner);
+
+    trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryBanner);
+
+    settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
     addAndMakeVisible(&settingsBanner);
 
+    mainField.setSources(sources, m_numOfSources);
     mainField.addListener(this);
     addAndMakeVisible(&mainField);
+
+    elevationField.setSources(sources, m_numOfSources);
     elevationField.addListener(this);
     addAndMakeVisible(&elevationField);
 
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
+
     addAndMakeVisible(&trajectoryBox);
 
     settingsBox.addListener(this);
-    addAndMakeVisible(configurationComponent);
+
     Colour bg = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
     configurationComponent.addTab ("Settings", bg, &settingsBox, false);
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
-
-    m_numOfSources = 2;
-
-    mainField.setSources(sources, m_numOfSources);
-    elevationField.setSources(sources, m_numOfSources);
+    addAndMakeVisible(configurationComponent);
 
     for (int i = 0; i < m_numOfSources; i++) {
         sources[i].setId(i);
@@ -73,7 +78,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
         valueTreeState.addParameterListener(String("y_") + String(i+1), this);
     }
 
-    m_selectedSource = 0;
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
 
     setResizeLimits(300, 320, 1800, 1300);
@@ -122,7 +126,6 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
-    // (Our component is opaque, so we must completely fill the background with a solid colour)
     g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
 }
 
@@ -142,8 +145,8 @@ void ControlGrisAudioProcessorEditor::resized() {
         elevationField.setVisible(true);
         elevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
         elevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
-        parametersBanner.setBounds(fieldSize*2, 0, width-fieldSize*2, 20);
-        parametersBox.setBounds(fieldSize*2, 20, width-fieldSize*2, fieldSize);
+        parametersBanner.setBounds(fieldSize * 2, 0, width - fieldSize * 2, 20);
+        parametersBox.setBounds(fieldSize * 2, 20, width-fieldSize * 2, fieldSize);
     } else {
         mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
         elevationBanner.setVisible(false);
@@ -154,11 +157,11 @@ void ControlGrisAudioProcessorEditor::resized() {
 
     int sash = width > 900 ? width - 450 : 450;
 
-    trajectoryBanner.setBounds(0, fieldSize+20, sash, 20);
-    trajectoryBox.setBounds(0, fieldSize+40, sash, 160);
+    trajectoryBanner.setBounds(0, fieldSize + 20, sash, 20);
+    trajectoryBox.setBounds(0, fieldSize + 40, sash, 160);
 
-    settingsBanner.setBounds(sash, fieldSize+20, 450, 20);
-    configurationComponent.setBounds(sash, fieldSize+40, 450, 160);
+    settingsBanner.setBounds(sash, fieldSize + 20, 450, 20);
+    configurationComponent.setBounds(sash, fieldSize + 40, 450, 160);
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();

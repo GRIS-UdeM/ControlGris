@@ -23,6 +23,17 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
+// This file defines the classes used to construct the Parameters panel.
+// The Parameters panel allow the user to control the coordinates of 
+// the currently selected source.
+// Classes:
+//   ParameterComponent : The base class for a parameter. It contains the
+//                        label, the link button and the slider.
+//   ParametersBoxComponent : This is the Parameters panel that is shown
+//                            in the interface. It is the bridge for the
+//                            communication between the plugin and the 
+//                            parameters.
+ 
 //-------------------------------------------------------------------
 class ParameterComponent : public Component,
                            public Button::Listener,
@@ -38,8 +49,8 @@ public:
     void resized() override;
 
     void setValue(double value);
-    bool getLinkState();
     void setLinkState(bool state);
+    bool getLinkState();
 
     struct Listener
     {
@@ -65,7 +76,6 @@ private:
 };
 
 //-----------------------------------------------------------------
-
 class ParametersBoxComponent : public Component,
                                public Button::Listener,
                                public ParameterComponent::Listener
@@ -82,8 +92,8 @@ public:
 
     void setSelectedSource(Source *source);
     void setDistanceEnabled(bool shouldBeEnabled);
-    bool getLinkState(int parameterId);
     void setLinkState(int parameterId, bool state);
+    bool getLinkState(int parameterId);
 
     struct Listener
     {

@@ -22,6 +22,18 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
+// This file defines the classes that implement the 2D view (azimuth-elevation
+// or azimuth-distance) and the elevation view.
+// Classes:
+//   FieldComponent : The base class. Implements the common attributes and 
+//                    methods of the two views.
+//   MainFieldComponent : The 2D view as a cartesian plane. It is used to show
+//                        and control two parameters, azimuth-elevation for the
+//                        VBAP algorithm and azimuth-distance for the LBAP
+//                        algorithm.
+//   ElevationFieldComponent : The 1D view used to show and control the elevation
+//                             parameter for the LBAP algorithm.
+
 //==============================================================================
 class FieldComponent : public Component
 {
@@ -30,6 +42,8 @@ public:
     ~FieldComponent();
 
  	void mouseUp (const MouseEvent &event);
+
+    void drawFieldBackground(Graphics&, bool isMainField);
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
