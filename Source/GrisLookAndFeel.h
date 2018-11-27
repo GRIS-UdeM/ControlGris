@@ -1,42 +1,25 @@
-/*
- ==============================================================================
- 
- This file is part of the JUCE library.
- Copyright (c) 2015 - ROLI Ltd.
- 
- Permission is granted to use this software under the terms of either:
- a) the GPL v2 (or any later version)
- b) the Affero GPL v3
- 
- Details of these licenses can be found at: www.gnu.org/licenses
- 
- JUCE is distributed in the hope that it will be useful, but WITHOUT ANY
- WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR
- A PARTICULAR PURPOSE.  See the GNU General Public License for more details.
- 
- ------------------------------------------------------------------------------
- 
- To release a closed-source product which uses JUCE, commercial licenses are
- available: visit www.juce.com for more information.
- 
- ==============================================================================
- */
-
-#ifndef GRISLOOKANDFEEL_H_INCLUDED
-#define GRISLOOKANDFEEL_H_INCLUDED
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
+#pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-
-//==============================================================================
-/** Custom Look And Feel subclasss.
- 
- Simply override the methods you need to, anything else will be inherited from the base class.
- It's a good idea not to hard code your colours, use the findColour method along with appropriate
- ColourIds so you can set these on a per-component basis.
- */
-
-
-
 
 class GrisLookAndFeel    : public LookAndFeel_V3 {
 private:
@@ -578,6 +561,3 @@ public:
         g.strokePath (outlineArc, PathStrokeType (lineThickness));
     }
 };
-
-#endif
-
