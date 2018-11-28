@@ -256,7 +256,7 @@ void ControlGrisAudioProcessorEditor::setSourceParameterValue(int sourceId, int 
         case SOURCE_ID_AZIMUTH:
             sources[sourceId].setNormalizedAzimuth(value); break;
         case SOURCE_ID_ELEVATION:
-            sources[sourceId].setElevation(value * 90.0); break;
+            sources[sourceId].setNormalizedElevation(value); break;
         case SOURCE_ID_DISTANCE:
             sources[sourceId].setDistance(value); break;
         case SOURCE_ID_X:

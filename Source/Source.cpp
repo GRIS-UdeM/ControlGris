@@ -83,6 +83,10 @@ void Source::setElevation(float elevation) {
     computeXY();
 }
 
+void Source::setNormalizedElevation(float value) {
+    setElevation(value * 90.0);
+}
+
 float Source::getElevation() {
     return m_elevation;
 }

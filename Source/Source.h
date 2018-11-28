@@ -52,6 +52,7 @@ public:
     void setNormalizedAzimuth(float value);
     float getAzimuth();
     void setElevation(float elevation);
+    void setNormalizedElevation(float value);
     float getElevation();
     void setDistance(float distance);
     float getDistance();
