@@ -91,6 +91,15 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         parameters.state.setProperty("yLink", false, nullptr);
         parameters.state.setProperty("azimuthSpanLink", false, nullptr);
         parameters.state.setProperty("elevationSpanLink", false, nullptr);
+        for (int i = 0; i < 8; i++) {
+            parameters.state.setProperty(String("p_azimuth_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_elevation_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_distance_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_x_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_y_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_azimuthSpan_") + String(i+1), 0.0, nullptr);
+            parameters.state.setProperty(String("p_elevationSpan_") + String(i+1), 0.0, nullptr);
+        }
 
     if (! oscSender.connect("127.0.0.1", 18032)) {
         std::cout << "Error: could not connect to UDP port 18032." << std::endl;
@@ -228,15 +237,10 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
     if (xmlState.get() != nullptr)
         parameters.replaceState (ValueTree::fromXml (*xmlState));
-
-    if (editor != nullptr)
-        editor->setPluginState();
 }
 
 //==============================================================================

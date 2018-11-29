@@ -98,11 +98,9 @@ ParametersBoxComponent::~ParametersBoxComponent() {
 
 void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
-    float normalizedAzimuth = selectedSource->getAzimuth()  / 360.0;
-    normalizedAzimuth = normalizedAzimuth >= 0 ? normalizedAzimuth : normalizedAzimuth + 1.0;
 
-    p_azimuth.setValue(normalizedAzimuth);
-    p_elevation.setValue(selectedSource->getElevation() / 90.0f);
+    p_azimuth.setValue(selectedSource->getNormalizedAzimuth());
+    p_elevation.setValue(selectedSource->getNormalizedElevation());
     p_distance.setValue(selectedSource->getDistance());
     p_x.setValue(selectedSource->getX());
     p_y.setValue(selectedSource->getY());

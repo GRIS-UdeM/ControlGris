@@ -122,6 +122,17 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     parametersBox.setLinkState(SOURCE_ID_Y, valueTreeState.state.getProperty("yLink", false));
     parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
     parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setNormalizedAzimuth(valueTreeState.state.getProperty(String("p_azimuth_") + String(i+1)));
+        sources[i].setNormalizedElevation(valueTreeState.state.getProperty(String("p_elevation_") + String(i+1)));
+        sources[i].setDistance(valueTreeState.state.getProperty(String("p_distance_") + String(i+1)));
+        sources[i].setAzimuthSpan(valueTreeState.state.getProperty(String("p_azimuthSpan_") + String(i+1)));
+        sources[i].setElevationSpan(valueTreeState.state.getProperty(String("p_elevationSpan_") + String(i+1)));
+    }
+    parametersBox.setSelectedSource(&sources[m_selectedSource]);
+    mainField.setSelectedSource(m_selectedSource);
+    elevationField.setSelectedSource(m_selectedSource);
+    sendOscMessage();
 }
 
 //==============================================================================
@@ -203,6 +214,7 @@ void ControlGrisAudioProcessorEditor::parameterLinkChanged(int parameterId, bool
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
+    // Called from ParametersBox.
     setSourceParameterValue(m_selectedSource, parameterId, value);
     mainField.repaint();
     if (m_selectedOscFormat == 2) {
@@ -212,6 +224,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID, float newValue) {
+    // Called from automations.
     int parameterId;
     int sourceId = parameterID.getTrailingIntValue() - 1;
     if (parameterID.startsWith("azimuth_")) {
@@ -243,6 +256,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID
 }
 
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
+    // Called from the 2D view.
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&sources[sourceId]);
     setLinkedParameterValue(sourceId, -1);
@@ -254,24 +268,42 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 void ControlGrisAudioProcessorEditor::setSourceParameterValue(int sourceId, int parameterId, double value) {
     switch (parameterId) {
         case SOURCE_ID_AZIMUTH:
-            sources[sourceId].setNormalizedAzimuth(value); break;
+            sources[sourceId].setNormalizedAzimuth(value);
+            valueTreeState.state.setProperty("p_azimuth_" + String(sourceId + 1), value, nullptr);
+            break;
         case SOURCE_ID_ELEVATION:
-            sources[sourceId].setNormalizedElevation(value); break;
+            sources[sourceId].setNormalizedElevation(value);
+            valueTreeState.state.setProperty(String("p_elevation_") + String(sourceId+1), value, nullptr);
+            break;
         case SOURCE_ID_DISTANCE:
-            sources[sourceId].setDistance(value); break;
+            sources[sourceId].setDistance(value);
+            valueTreeState.state.setProperty(String("p_distance_") + String(sourceId+1), value, nullptr);
+            break;
         case SOURCE_ID_X:
-            sources[sourceId].setX(value); break;
+            sources[sourceId].setX(value);
+            break;
         case SOURCE_ID_Y:
-            sources[sourceId].setY(value); break;
+            sources[sourceId].setY(value);
+            break;
         case SOURCE_ID_AZIMUTH_SPAN:
-            sources[sourceId].setAzimuthSpan(value); break;
+            sources[sourceId].setAzimuthSpan(value);
+            valueTreeState.state.setProperty(String("p_azimuthSpan_") + String(sourceId+1), value, nullptr);
+            break;
         case SOURCE_ID_ELEVATION_SPAN:
-            sources[sourceId].setElevationSpan(value); break;
+            sources[sourceId].setElevationSpan(value);
+            valueTreeState.state.setProperty(String("p_elevationSpan_") + String(sourceId+1), value, nullptr);
+            break;
     }
     setLinkedParameterValue(sourceId, parameterId);
 }
 
 void ControlGrisAudioProcessorEditor::setLinkedParameterValue(int sourceId, int parameterId) {
+    if (parameterId == -1) {
+        valueTreeState.state.setProperty("p_azimuth_" + String(sourceId + 1), sources[sourceId].getNormalizedAzimuth(), nullptr);
+        valueTreeState.state.setProperty("p_elevation_" + String(sourceId + 1), sources[sourceId].getNormalizedElevation(), nullptr);
+        valueTreeState.state.setProperty("p_distance_" + String(sourceId + 1), sources[sourceId].getDistance(), nullptr);
+    }
+
     bool linkAzimuth = false, linkElevation = false, linkDistance = false, linkX = false, linkY = false;
     bool linkAzimuthSpan = (parameterId == SOURCE_ID_AZIMUTH_SPAN && parametersBox.getLinkState(SOURCE_ID_AZIMUTH_SPAN));
     bool linkElevationSpan = (parameterId == SOURCE_ID_ELEVATION_SPAN && parametersBox.getLinkState(SOURCE_ID_ELEVATION_SPAN));
@@ -295,20 +327,32 @@ void ControlGrisAudioProcessorEditor::setLinkedParameterValue(int sourceId, int 
         linkDistance = (parametersBox.getLinkState(SOURCE_ID_DISTANCE));
     }
     for (int i = 0; i < m_numOfSources; i++) {
-        if (linkAzimuth)
+        if (linkAzimuth) {
             sources[i].setAzimuth(sources[sourceId].getAzimuth());
-        if (linkElevation)
+            valueTreeState.state.setProperty("p_azimuth_" + String(i + 1), sources[i].getNormalizedAzimuth(), nullptr);
+        }
+        if (linkElevation) {
             sources[i].setElevation(sources[sourceId].getElevation());
-        if (linkDistance)
+            valueTreeState.state.setProperty(String("p_elevation_") + String(i+1), sources[i].getNormalizedElevation(), nullptr);
+        }
+        if (linkDistance) {
             sources[i].setDistance(sources[sourceId].getDistance());
-        if (linkX)
+            valueTreeState.state.setProperty(String("p_distance_") + String(i+1), sources[i].getDistance(), nullptr);
+        }
+        if (linkX) {
             sources[i].setX(sources[sourceId].getX());
-        if (linkY)
+        }
+        if (linkY) {
             sources[i].setY(sources[sourceId].getY());
-        if (linkAzimuthSpan)
+        }
+        if (linkAzimuthSpan) {
             sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
-        if (linkElevationSpan)
+            valueTreeState.state.setProperty(String("p_azimuthSpan_") + String(i+1), sources[i].getAzimuthSpan(), nullptr);
+        }
+        if (linkElevationSpan) {
             sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
+            valueTreeState.state.setProperty(String("p_elevationSpan_") + String(i+1), sources[i].getElevationSpan(), nullptr);
+        }
     }
 }
 

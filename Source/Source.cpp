@@ -72,6 +72,11 @@ float Source::getAzimuth() {
     return m_azimuth;
 }
 
+float Source::getNormalizedAzimuth() {
+    float azimuth = m_azimuth  / 360.0;
+    return azimuth >= 0 ? azimuth : azimuth + 1.0;
+}
+
 void Source::setElevation(float elevation) {
     if (elevation < 0.0) {
         m_elevation = 0.0;
@@ -89,6 +94,10 @@ void Source::setNormalizedElevation(float value) {
 
 float Source::getElevation() {
     return m_elevation;
+}
+
+float Source::getNormalizedElevation() {
+    return m_elevation / 90.0;
 }
 
 void Source::setDistance(float distance) {

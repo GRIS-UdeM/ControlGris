@@ -51,9 +51,11 @@ public:
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);
     float getAzimuth();
+    float getNormalizedAzimuth();
     void setElevation(float elevation);
     void setNormalizedElevation(float value);
     float getElevation();
+    float getNormalizedElevation();
     void setDistance(float distance);
     float getDistance();
     void setAzimuthSpan(float azimuthSpan);

@@ -41,7 +41,6 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
         }
         m_sources[i].setColour(Colour::fromHSV(hue, 1.0, 1, 0.5));
     }
-    listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
 }
 
 void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
