@@ -84,6 +84,7 @@ public:
     ParametersBoxComponent();
     ~ParametersBoxComponent();
 
+ 	void mouseDown(const MouseEvent &event);
     void buttonClicked(Button *button) override;
     void parameterChanged(int parameterId, double value) override;
     void parameterLinkChanged(int parameterId, bool value) override;
@@ -99,6 +100,7 @@ public:
     {
         virtual ~Listener() {}
 
+        virtual void selectedSourceClicked() = 0;
         virtual void parameterChanged(int parameterId, double value) = 0;
         virtual void parameterLinkChanged(int parameterId, bool value) = 0;
     };

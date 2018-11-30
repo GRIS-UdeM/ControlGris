@@ -22,24 +22,27 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
 
-class SettingsBoxComponent : public Component,
-                             public TextEditor::Listener
+// Osc port should be a TextEditor.
+// Missing a button to activate/deactivate OSC output.
+class SettingsBoxComponent : public Component
 {
 public:
     SettingsBoxComponent();
-    ~SettingsBoxComponent();
+    ~SettingsBoxComponent() {};
 
-    void textEditorReturnKeyPressed(TextEditor &editor) override;
-    void paint(Graphics&) override;
+    void paint(Graphics&) override {};
     void resized() override;
 
-    void onNewOscFormat();
+    void setNumberOfSources(int numOfSources);
+    void setFirstSourceId(int firstSourceId);
 
     struct Listener
     {
         virtual ~Listener() {}
 
         virtual void oscFormatChanged(int selectedId) = 0;
+        virtual void numberOfSourcesChanged(int numOfSources) = 0;
+        virtual void firstSourceIdChanged(int firstSourceId) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -61,8 +64,6 @@ private:
 
     Label           firstSourceIdLabel;
     TextEditor      firstSourceIdEditor;
-
-    ToggleButton    clipSourceInCircle;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsBoxComponent)
 };

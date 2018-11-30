@@ -41,6 +41,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
         }
         m_sources[i].setColour(Colour::fromHSV(hue, 1.0, 1, 0.5));
     }
+    repaint();
 }
 
 void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
@@ -158,7 +159,7 @@ void MainFieldComponent::paint(Graphics& g) {
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.setColour(Colours::white);
-        g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
+        g.drawText(String(m_sources[i].getId()+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
 
         // Draw spanning.
         float azimuth = m_sources[i].getAzimuth();
@@ -270,7 +271,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
         g.drawLine(pos.x + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2, pos.x + kSourceRadius, height - 5, lineThickness);
         g.setColour(Colours::white);
-        g.drawText(String(i+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
+        g.drawText(String(m_sources[i].getId()+1), pos.x + 1, pos.y + 1, kSourceDiameter, kSourceDiameter, Justification(Justification::centred), false);
     }
 }
 

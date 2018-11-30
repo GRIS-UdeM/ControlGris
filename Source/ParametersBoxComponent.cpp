@@ -176,6 +176,14 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
     }
 }
 
+void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
+    // Area where the selected source is shown.
+    Rectangle<float> area = Rectangle<float>(265, 265, 30, 30);
+    if (area.contains(event.getMouseDownPosition().toFloat())) {
+        listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
+    }
+}
+
 void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
     listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, value); });
 }

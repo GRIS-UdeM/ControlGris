@@ -26,41 +26,29 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     std::vector<std::unique_ptr<Parameter>> parameters;
 
     for (int i = 0; i < MaxNumOfSources; i++) {
+        String id(i);
+        String id1(i + 1);
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("azimuth_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Azimuth"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("azimuth_") + id, String("Source ") + id1 + String(" Azimuth"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("elevation_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Elevation"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("elevation_") + id, String("Source ") + id1 + String(" Elevation"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("distance_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Distance"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("distance_") + id, String("Source ") + id1 + String(" Distance"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("azimuthSpan_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Azimuth Span"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("azimuthSpan_") + id, String("Source ") + id1 + String(" Azimuth Span"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("elevationSpan_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Elevation Span"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("elevationSpan_") + id, String("Source ") + id1 + String(" Elevation Span"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("x_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" X"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("x_") + id, String("Source ") + id1 + String(" X"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
         parameters.push_back(std::make_unique<Parameter>(
-                                 String("y_") + String(i+1),
-                                 String("Source ") + String(i+1) + String(" Y"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f,
-                                 nullptr, nullptr, false, false));
+                                 String("y_") + id, String("Source ") + id1 + String(" Y"),
+                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
     }
 
     return { parameters.begin(), parameters.end() };
@@ -81,9 +69,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 #endif
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 {
-
         // Add a sub-tree to store the state of our UI
         parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
+        parameters.state.setProperty("numberOfSources", 2, nullptr);
+        parameters.state.setProperty("firstSourceId", 1, nullptr);
         parameters.state.setProperty("azimuthLink", false, nullptr);
         parameters.state.setProperty("elevationLink", false, nullptr);
         parameters.state.setProperty("distanceLink", false, nullptr);
@@ -91,14 +80,15 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         parameters.state.setProperty("yLink", false, nullptr);
         parameters.state.setProperty("azimuthSpanLink", false, nullptr);
         parameters.state.setProperty("elevationSpanLink", false, nullptr);
-        for (int i = 0; i < 8; i++) {
-            parameters.state.setProperty(String("p_azimuth_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_elevation_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_distance_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_x_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_y_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_azimuthSpan_") + String(i+1), 0.0, nullptr);
-            parameters.state.setProperty(String("p_elevationSpan_") + String(i+1), 0.0, nullptr);
+        for (int i = 0; i < MaxNumOfSources; i++) {
+            String id(i);
+            parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_distance_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_azimuthSpan_") + id, 0.0, nullptr);
+            parameters.state.setProperty(String("p_elevationSpan_") + id, 0.0, nullptr);
         }
 
     if (! oscSender.connect("127.0.0.1", 18032)) {

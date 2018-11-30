@@ -27,7 +27,9 @@ SettingsBoxComponent::SettingsBoxComponent() {
 
     oscFormatCombo.addItem("VBAP - ServerGris", 1);
     oscFormatCombo.addItem("LBAP - ServerGris", 2);
-    oscFormatCombo.onChange = [this] { onNewOscFormat(); };
+    oscFormatCombo.onChange = [this] {
+            listeners.call([&] (Listener& l) { l.oscFormatChanged(oscFormatCombo.getSelectedId()); });
+        };
     oscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&oscFormatCombo);
 
@@ -39,36 +41,43 @@ SettingsBoxComponent::SettingsBoxComponent() {
     numOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
     addAndMakeVisible(&numOfSourcesLabel);
 
-    numOfSourcesEditor.setText("8");
-    numOfSourcesEditor.setInputRestrictions(2, "0123456789");
-    numOfSourcesEditor.addListener(this);
+    numOfSourcesEditor.setText("2");
+    numOfSourcesEditor.setSelectAllWhenFocused(true);
+    numOfSourcesEditor.setInputRestrictions(1, "12345678");
+    numOfSourcesEditor.onReturnKey = [this] {
+            if (! numOfSourcesEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(numOfSourcesEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(1); numOfSourcesEditor.setText("1"); });
+            }
+            numOfSourcesEditor.moveKeyboardFocusToSibling(true);
+        };
     addAndMakeVisible(&numOfSourcesEditor);
 
     firstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
     addAndMakeVisible(&firstSourceIdLabel);
 
     firstSourceIdEditor.setText("1");
+    firstSourceIdEditor.setSelectAllWhenFocused(true);
     firstSourceIdEditor.setInputRestrictions(2, "0123456789");
-    firstSourceIdEditor.addListener(this);
+    firstSourceIdEditor.onReturnKey = [this] {
+            if (! firstSourceIdEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.firstSourceIdChanged(firstSourceIdEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.firstSourceIdChanged(1); firstSourceIdEditor.setText("1"); });
+            }
+            firstSourceIdEditor.moveKeyboardFocusToSibling(true);
+        };
     addAndMakeVisible(&firstSourceIdEditor);
-
-    clipSourceInCircle.setButtonText("Clip Sources Inside Circle");
-    addAndMakeVisible(&clipSourceInCircle);
 }
 
-SettingsBoxComponent::~SettingsBoxComponent() {
-    setLookAndFeel(nullptr);
+void SettingsBoxComponent::setNumberOfSources(int numOfSources) {
+    numOfSourcesEditor.setText(String(numOfSources));
 }
 
-void SettingsBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
-    unfocusAllComponents();
+void SettingsBoxComponent::setFirstSourceId(int firstSourceId) {
+    firstSourceIdEditor.setText(String(firstSourceId));
 }
-
-void SettingsBoxComponent::onNewOscFormat() {
-    listeners.call([&] (Listener& l) { l.oscFormatChanged(oscFormatCombo.getSelectedId()); });
-}
-
-void SettingsBoxComponent::paint(Graphics& g) {}
 
 void SettingsBoxComponent::resized() {
     oscFormatLabel.setBounds(5, 10, 90, 15);
@@ -82,6 +91,4 @@ void SettingsBoxComponent::resized() {
 
     firstSourceIdLabel.setBounds(265, 40, 130, 15);
     firstSourceIdEditor.setBounds(395, 40, 40, 15);
-
-    clipSourceInCircle.setBounds(5, 105, 200, 20);
 }

@@ -49,17 +49,17 @@ public:
     void valueChanged (Value&) override;
 
     void sourcePositionChanged(int sourceId) override;
+    void selectedSourceClicked() override;
     void parameterLinkChanged(int parameterId, bool value) override;
     void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent
     void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState
     void oscFormatChanged(int selectedId) override;
+    void numberOfSourcesChanged(int numOfSources) override;
+    void firstSourceIdChanged(int firstSourceId) override;
 
     void sendOscMessage();
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
-
-    bool getParameterLinkState(int parameterId);
-    void setParameterLinkState(int parameterId, bool state);
 
     void setPluginState();
 
@@ -97,6 +97,7 @@ private:
     Source sources[MaxNumOfSources];
     int m_numOfSources;
     int m_selectedSource;
+    int m_firstSourceId;
     int m_selectedOscFormat;
 
     // These are used to persist the UI's size - the values are stored along with the
