@@ -20,8 +20,6 @@
 #include "SettingsBoxComponent.h"
 
 SettingsBoxComponent::SettingsBoxComponent() {
-    setLookAndFeel(&mGrisFeel);
-
     oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscFormatLabel);
 
@@ -36,21 +34,35 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscPortLabel);
 
-    addAndMakeVisible(&oscPortCombo);
+    String defaultPort("18032");
+    oscPortEditor.setText(defaultPort);
+    oscPortEditor.setInputRestrictions(5, "0123456789");
+    oscPortEditor.onReturnKey = [this] {
+            oscFormatCombo.grabKeyboardFocus();
+        };
+    oscPortEditor.onFocusLost = [this, defaultPort] {
+            if (! oscPortEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.oscPortNumberChanged(oscPortEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.oscPortNumberChanged(defaultPort.getIntValue()); oscPortEditor.setText(defaultPort); });
+            }
+        };
+    addAndMakeVisible(&oscPortEditor);
 
     numOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
     addAndMakeVisible(&numOfSourcesLabel);
 
     numOfSourcesEditor.setText("2");
-    numOfSourcesEditor.setSelectAllWhenFocused(true);
     numOfSourcesEditor.setInputRestrictions(1, "12345678");
     numOfSourcesEditor.onReturnKey = [this] {
+            oscFormatCombo.grabKeyboardFocus();
+        };
+    numOfSourcesEditor.onFocusLost = [this] {
             if (! numOfSourcesEditor.isEmpty()) {
                 listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(numOfSourcesEditor.getText().getIntValue()); });
             } else {
                 listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(1); numOfSourcesEditor.setText("1"); });
             }
-            numOfSourcesEditor.moveKeyboardFocusToSibling(true);
         };
     addAndMakeVisible(&numOfSourcesEditor);
 
@@ -58,17 +70,32 @@ SettingsBoxComponent::SettingsBoxComponent() {
     addAndMakeVisible(&firstSourceIdLabel);
 
     firstSourceIdEditor.setText("1");
-    firstSourceIdEditor.setSelectAllWhenFocused(true);
     firstSourceIdEditor.setInputRestrictions(2, "0123456789");
     firstSourceIdEditor.onReturnKey = [this] {
+            oscFormatCombo.grabKeyboardFocus();
+        };
+    firstSourceIdEditor.onFocusLost = [this] {
             if (! firstSourceIdEditor.isEmpty()) {
                 listeners.call([&] (Listener& l) { l.firstSourceIdChanged(firstSourceIdEditor.getText().getIntValue()); });
             } else {
                 listeners.call([&] (Listener& l) { l.firstSourceIdChanged(1); firstSourceIdEditor.setText("1"); });
             }
-            firstSourceIdEditor.moveKeyboardFocusToSibling(true);
         };
     addAndMakeVisible(&firstSourceIdEditor);
+
+    activateButton.setButtonText("Activate OSC");
+    activateButton.onClick = [this] {
+            listeners.call([&] (Listener& l) { l.oscActivated(activateButton.getToggleState()); });
+        };
+    addAndMakeVisible(activateButton);
+}
+
+void SettingsBoxComponent::setOscFormat(int oscFormatIndex) {
+    oscFormatCombo.setSelectedId(oscFormatIndex, NotificationType::dontSendNotification);
+}
+
+void SettingsBoxComponent::setOscPortNumber(int oscPortNumber) {
+    oscPortEditor.setText(String(oscPortNumber));
 }
 
 void SettingsBoxComponent::setNumberOfSources(int numOfSources) {
@@ -79,16 +106,28 @@ void SettingsBoxComponent::setFirstSourceId(int firstSourceId) {
     firstSourceIdEditor.setText(String(firstSourceId));
 }
 
+void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn) {
+    activateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
+}
+
+void SettingsBoxComponent::paint(Graphics& g) {
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+}
+
 void SettingsBoxComponent::resized() {
     oscFormatLabel.setBounds(5, 10, 90, 15);
     oscFormatCombo.setBounds(95, 10, 150, 20);
 
     oscPortLabel.setBounds(5, 40, 90, 15);
-    oscPortCombo.setBounds(95, 40, 150, 20);
+    oscPortEditor.setBounds(95, 40, 150, 20);
 
     numOfSourcesLabel.setBounds(265, 10, 130, 15);
     numOfSourcesEditor.setBounds(395, 10, 40, 15);
 
     firstSourceIdLabel.setBounds(265, 40, 130, 15);
     firstSourceIdEditor.setBounds(395, 40, 40, 15);
+
+    activateButton.setBounds(5, 70, 150, 20);
 }

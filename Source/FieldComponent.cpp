@@ -49,8 +49,11 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
 	const int height = getHeight();
     float fieldCenter = width / 2;
 
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+
 	// Draw the background.
-    g.setColour(mGrisFeel.getFieldColour());
+    g.setColour(lookAndFeel->getFieldColour());
 	g.fillRect(0, 0, width, height);
     g.setColour(Colours::black);
 	g.drawRect(0, 0, width, height);
@@ -69,7 +72,7 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
 
     if (isMainField) {
         // Draw big background circles.
-        g.setColour(mGrisFeel.getLightColour());
+        g.setColour(lookAndFeel->getLightColour());
         for (int i = 1; i < 3; i++) {
             float w = i / 2.0 * (width - kSourceDiameter);
             float x = (width - w) / 2;
@@ -86,7 +89,7 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
         g.drawLine(kSourceRadius, height/2, width-kSourceRadius, height/2);
     } else {
         // Draw guide lines
-        g.setColour(mGrisFeel.getLightColour());
+        g.setColour(lookAndFeel->getLightColour());
         g.drawVerticalLine(5, 5, height - 5);
         g.drawHorizontalLine(height - 5, 5, width - 5);
     }
@@ -99,7 +102,6 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 //==============================================================================
 MainFieldComponent::MainFieldComponent() {
     m_drawElevation = true;
-    setLookAndFeel(&mGrisFeel);
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -248,9 +250,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 }
 
 //==============================================================================
-ElevationFieldComponent::ElevationFieldComponent() {
-    setLookAndFeel(&mGrisFeel);
-}
+ElevationFieldComponent::ElevationFieldComponent() {}
 
 ElevationFieldComponent::~ElevationFieldComponent() {}
 

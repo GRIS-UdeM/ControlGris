@@ -20,8 +20,6 @@
 #include "TrajectoryBoxComponent.h"
 
 TrajectoryBoxComponent::TrajectoryBoxComponent() {
-    setLookAndFeel(&mGrisFeel);
-
     sourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
     addAndMakeVisible(&sourceLinkLabel);
 
@@ -51,15 +49,18 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     addAndMakeVisible(&activateButton);
 }
 
-TrajectoryBoxComponent::~TrajectoryBoxComponent() {
-    setLookAndFeel(nullptr);
-}
+TrajectoryBoxComponent::~TrajectoryBoxComponent() {}
 
 void TrajectoryBoxComponent::paint(Graphics& g) {
     double width = getWidth();
     double height = getHeight();
 
-    g.setColour(mGrisFeel.getEditBackgroundColour().withAlpha(0.25f));
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+
+    g.setColour(lookAndFeel->getEditBackgroundColour().withAlpha(0.25f));
     g.fillRect(290, 5, width - 295, height - 10);
 }
 

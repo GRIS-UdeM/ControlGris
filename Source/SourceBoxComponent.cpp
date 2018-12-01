@@ -20,8 +20,6 @@
 #include "SourceBoxComponent.h"
 
 SourceBoxComponent::SourceBoxComponent() {
-    setLookAndFeel(&mGrisFeel);
-
     sourcePlacementLabel.setText("Source Placement:", NotificationType::dontSendNotification);
     addAndMakeVisible(&sourcePlacementLabel);
 
@@ -51,11 +49,13 @@ SourceBoxComponent::SourceBoxComponent() {
     addAndMakeVisible(&angleSlider);
 }
 
-SourceBoxComponent::~SourceBoxComponent() {
-    setLookAndFeel(nullptr);
-}
+SourceBoxComponent::~SourceBoxComponent() {}
 
-void SourceBoxComponent::paint(Graphics& g) {}
+void SourceBoxComponent::paint(Graphics& g) {
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+}
 
 void SourceBoxComponent::resized() {
     sourcePlacementLabel.setBounds(5, 10, 150, 15);

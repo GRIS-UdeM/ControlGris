@@ -34,7 +34,6 @@
 const int MaxNumOfSources = 8;
 
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
-                                        public AudioProcessorValueTreeState::Listener,
                                         private Value::Listener,
                                         public FieldComponent::Listener,
                                         public ParametersBoxComponent::Listener,
@@ -51,9 +50,11 @@ public:
     void sourcePositionChanged(int sourceId) override;
     void selectedSourceClicked() override;
     void parameterLinkChanged(int parameterId, bool value) override;
-    void parameterChanged(int parameterId, double value) override;              // ParametersBoxComponent
-    void parameterChanged(const String &parameterID, float newValue) override;  // AudioProcessorValueTreeState
+    void parameterChanged(int parameterId, double value) override;
+    void parameterChangedFromProcessor(int sourceId, int paramId, double newValue);
     void oscFormatChanged(int selectedId) override;
+    void oscPortNumberChanged(int oscPort) override;
+    void oscActivated(bool state) override;
     void numberOfSourcesChanged(int numOfSources) override;
     void firstSourceIdChanged(int firstSourceId) override;
 
@@ -99,6 +100,7 @@ private:
     int m_selectedSource;
     int m_firstSourceId;
     int m_selectedOscFormat;
+    int m_currentOSCPort;
 
     // These are used to persist the UI's size - the values are stored along with the
     // filter's other parameters, and the UI component will update them when it gets resized.

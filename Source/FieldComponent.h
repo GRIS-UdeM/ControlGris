@@ -61,8 +61,6 @@ public:
     ListenerList<Listener> listeners;
 
 protected:
-    GrisLookAndFeel mGrisFeel;
-
     Source *m_sources;
     int m_numberOfSources;
     int m_selectedSourceId;

@@ -111,8 +111,6 @@ public:
 private:
     ListenerList<Listener> listeners;
 
-    GrisLookAndFeel mGrisFeel;
-
     bool m_distanceEnabled;
 
     Source *selectedSource;

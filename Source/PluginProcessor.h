@@ -22,7 +22,9 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Source.h"
 
-class ControlGrisAudioProcessor  : public AudioProcessor
+class ControlGrisAudioProcessor  : public AudioProcessor,
+                                   public AudioProcessorValueTreeState::Listener
+
 {
 public:
     //==============================================================================
@@ -62,11 +64,18 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    void parameterChanged(const String &parameterID, float newValue) override;
+
     OSCSender oscSender;
+    bool createOscConnection(int oscPort);
+    bool disconnectOSC();
+    bool getOscConnected();
 
     AudioProcessorValueTreeState parameters;
 
 private:
+    bool m_oscConnected;
+
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)
 };

@@ -34,8 +34,6 @@ public:
     void resized() override;
 
 private:
-    GrisLookAndFeel mGrisFeel;
-
     Label           oscSourceLabel;
     ComboBox        oscSourceCombo;
 

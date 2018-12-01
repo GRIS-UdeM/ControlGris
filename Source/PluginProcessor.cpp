@@ -69,36 +69,98 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 #endif
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 {
-        // Add a sub-tree to store the state of our UI
-        parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
-        parameters.state.setProperty("numberOfSources", 2, nullptr);
-        parameters.state.setProperty("firstSourceId", 1, nullptr);
-        parameters.state.setProperty("azimuthLink", false, nullptr);
-        parameters.state.setProperty("elevationLink", false, nullptr);
-        parameters.state.setProperty("distanceLink", false, nullptr);
-        parameters.state.setProperty("xLink", false, nullptr);
-        parameters.state.setProperty("yLink", false, nullptr);
-        parameters.state.setProperty("azimuthSpanLink", false, nullptr);
-        parameters.state.setProperty("elevationSpanLink", false, nullptr);
-        for (int i = 0; i < MaxNumOfSources; i++) {
-            String id(i);
-            parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_distance_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_azimuthSpan_") + id, 0.0, nullptr);
-            parameters.state.setProperty(String("p_elevationSpan_") + id, 0.0, nullptr);
-        }
+    m_oscConnected = false;
 
-    if (! oscSender.connect("127.0.0.1", 18032)) {
-        std::cout << "Error: could not connect to UDP port 18032." << std::endl;
+    // Size of the plugin window.
+    parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
+
+    // Global parameters.
+    parameters.state.setProperty("oscFormat", 1, nullptr);
+    parameters.state.setProperty("oscPortNumber", 18032, nullptr);
+    parameters.state.setProperty("oscConnected", true, nullptr);
+    parameters.state.setProperty("numberOfSources", 2, nullptr);
+    parameters.state.setProperty("firstSourceId", 1, nullptr);
+    parameters.state.setProperty("azimuthLink", false, nullptr);
+    parameters.state.setProperty("elevationLink", false, nullptr);
+    parameters.state.setProperty("distanceLink", false, nullptr);
+    parameters.state.setProperty("xLink", false, nullptr);
+    parameters.state.setProperty("yLink", false, nullptr);
+    parameters.state.setProperty("azimuthSpanLink", false, nullptr);
+    parameters.state.setProperty("elevationSpanLink", false, nullptr);
+
+    // Per source parameters. Because there is no attachment to the automatable
+    // parameters, we need to keep track of the current parameter values to be
+    // able to reload the last state of the plugin when we close/open the UI.
+    for (int i = 0; i < MaxNumOfSources; i++) {
+        String id(i);
+        parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_distance_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_azimuthSpan_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_elevationSpan_") + id, 0.0, nullptr);
+
+        parameters.addParameterListener(String("azimuth_") + id, this);
+        parameters.addParameterListener(String("elevation_") + id, this);
+        parameters.addParameterListener(String("distance_") + id, this);
+        parameters.addParameterListener(String("azimuthSpan_") + id, this);
+        parameters.addParameterListener(String("elevationSpan_") + id, this);
+        parameters.addParameterListener(String("x_") + id, this);
+        parameters.addParameterListener(String("y_") + id, this);
     }
 }
 
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
-    oscSender.disconnect();
+    disconnectOSC();
+}
+
+bool ControlGrisAudioProcessor::createOscConnection(int oscPort) {
+    disconnectOSC();
+
+    m_oscConnected = oscSender.connect("127.0.0.1", oscPort);
+    if (!m_oscConnected)
+        std::cout << "Error: could not connect to UDP port " << oscPort << "." << std::endl;
+
+    return m_oscConnected;
+}
+
+bool ControlGrisAudioProcessor::disconnectOSC() {
+    if (m_oscConnected) {
+        if (oscSender.disconnect()) {
+            m_oscConnected = false;
+        }
+    }
+    return !m_oscConnected;
+}
+
+bool ControlGrisAudioProcessor::getOscConnected() {
+    return m_oscConnected;
+}
+
+void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
+    int paramId, sourceId = parameterID.getTrailingIntValue();
+    if (parameterID.startsWith("azimuth_")) {
+        paramId = SOURCE_ID_AZIMUTH;
+    } else if (parameterID.startsWith("elevation_")) {
+        paramId = SOURCE_ID_ELEVATION;
+    } else if (parameterID.startsWith("distance_")) {
+        paramId = SOURCE_ID_DISTANCE;
+    } else if (parameterID.startsWith("x_")) {
+        paramId = SOURCE_ID_X;
+    } else if (parameterID.startsWith("y_")) {
+        paramId = SOURCE_ID_Y;
+    } else if (parameterID.startsWith("azimuthSpan_")) {
+        paramId = SOURCE_ID_AZIMUTH_SPAN;
+    } else if (parameterID.startsWith("elevationSpan_")) {
+        paramId = SOURCE_ID_ELEVATION_SPAN;
+    }
+
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    if (editor != nullptr) {
+        editor->parameterChangedFromProcessor(sourceId, paramId, newValue);
+    }
 }
 
 //==============================================================================

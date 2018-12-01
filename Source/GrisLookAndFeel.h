@@ -55,6 +55,7 @@ public:
         this->redColor                  = Colour::fromRGB(220,  48,  35);
         
         setColour(PopupMenu::highlightedBackgroundColourId, this->onColor);
+        setColour(TextEditor::textColourId, this->lightColour);
         setColour(TextEditor::backgroundColourId, this->editBgcolor);
         setColour(TextEditor::highlightColourId, this->hlBgcolor);
         setColour(TextEditor::shadowColourId, this->editBgcolor);

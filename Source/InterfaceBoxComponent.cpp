@@ -20,8 +20,6 @@
 #include "InterfaceBoxComponent.h"
 
 InterfaceBoxComponent::InterfaceBoxComponent() {
-    setLookAndFeel(&mGrisFeel);
-
     oscSourceLabel.setText("OSC Source:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscSourceLabel);
 
@@ -60,15 +58,17 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     addAndMakeVisible(&oscSendPortEditor);
 }
 
-InterfaceBoxComponent::~InterfaceBoxComponent() {
-    setLookAndFeel(nullptr);
-}
+InterfaceBoxComponent::~InterfaceBoxComponent() {}
 
 void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
     unfocusAllComponents();
 }
 
-void InterfaceBoxComponent::paint(Graphics& g) {}
+void InterfaceBoxComponent::paint(Graphics& g) {
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+}
 
 void InterfaceBoxComponent::resized() {
     oscSourceLabel.setBounds(5, 10, 90, 20);

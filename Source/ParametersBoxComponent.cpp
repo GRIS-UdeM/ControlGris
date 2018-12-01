@@ -41,7 +41,11 @@ ParameterComponent::ParameterComponent(int parameterId, String label, Component 
 
 ParameterComponent::~ParameterComponent() {}
 
-void ParameterComponent::paint(Graphics&) {}
+void ParameterComponent::paint(Graphics& g) {
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+}
 
 void ParameterComponent::resized() {
     parameterLabel.setBounds(0, 0, 150, 20);
@@ -66,7 +70,8 @@ bool ParameterComponent::getLinkState() {
 }
 
 void ParameterComponent::setLinkState(bool state) {
-    linkButton.setToggleState(state, NotificationType::sendNotificationAsync);
+    linkButton.setToggleState(state, NotificationType::dontSendNotification);
+    listeners.call([&] (Listener& l) { l.parameterLinkChanged(m_parameterId, state); });
 }
 
 //-------------------------------------------------------------------
@@ -79,8 +84,6 @@ ParametersBoxComponent::ParametersBoxComponent() :
     p_azimuthSpan(SOURCE_ID_AZIMUTH_SPAN, "Azimuth Span", this),
     p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span", this)
 {
-    setLookAndFeel(&mGrisFeel);
-
     m_distanceEnabled = false;
 
     p_distance.setEnabled(false);
@@ -92,9 +95,7 @@ ParametersBoxComponent::ParametersBoxComponent() :
     addAndMakeVisible(&activatorXY);
 }
 
-ParametersBoxComponent::~ParametersBoxComponent() {
-    setLookAndFeel(nullptr);
-}
+ParametersBoxComponent::~ParametersBoxComponent() {}
 
 void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
@@ -178,7 +179,7 @@ void ParametersBoxComponent::buttonClicked(Button *button) {
 
 void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     // Area where the selected source is shown.
-    Rectangle<float> area = Rectangle<float>(265, 265, 30, 30);
+    Rectangle<float> area = Rectangle<float>(245, 245, 30, 30);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
     }
@@ -193,8 +194,12 @@ void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {
-    float x = 270;
-    float y = 270;
+    float x = 250;
+    float y = 250;
+
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
 
     g.setColour(selectedSource->getColour());
     g.drawEllipse(x, y, 20, 20, 3);

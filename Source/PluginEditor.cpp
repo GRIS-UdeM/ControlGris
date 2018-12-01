@@ -20,49 +20,69 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+//******************************************************************************
+// FIXME ASAP!
+// OSC send must be in the processor, not the editor, in order to continue to
+// send automation when the UI is closed.
+//******************************************************************************
+
 //==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
                                                                    AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
-{
-    setLookAndFeel(&mGrisFeel);
- 
+{ 
     m_numOfSources = 1;
     m_selectedSource = 0;
     m_firstSourceId = 1;
     m_selectedOscFormat = 1;
+    m_currentOSCPort = 18032;
 
     // Set up the interface.
     //----------------------
+    mainBanner.setLookAndFeel(&mGrisFeel);
     mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&mainBanner);
 
+    elevationBanner.setLookAndFeel(&mGrisFeel);
     elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationBanner);
 
+    parametersBanner.setLookAndFeel(&mGrisFeel);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     addAndMakeVisible(&parametersBanner);
 
+    trajectoryBanner.setLookAndFeel(&mGrisFeel);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryBanner);
 
+    settingsBanner.setLookAndFeel(&mGrisFeel);
     settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
     addAndMakeVisible(&settingsBanner);
 
+    mainField.setLookAndFeel(&mGrisFeel);
     mainField.addListener(this);
     addAndMakeVisible(&mainField);
 
+    elevationField.setLookAndFeel(&mGrisFeel);
     elevationField.addListener(this);
     addAndMakeVisible(&elevationField);
 
+    parametersBox.setLookAndFeel(&mGrisFeel);
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
 
+    trajectoryBox.setLookAndFeel(&mGrisFeel);
     addAndMakeVisible(&trajectoryBox);
 
+    settingsBox.setLookAndFeel(&mGrisFeel);
     settingsBox.addListener(this);
 
-    Colour bg = getLookAndFeel().findColour (ResizableWindow::backgroundColourId);
+    sourceBox.setLookAndFeel(&mGrisFeel);
+    interfaceBox.setLookAndFeel(&mGrisFeel);
+
+    Colour bg = mGrisFeel.findColour (ResizableWindow::backgroundColourId);
+    configurationComponent.setLookAndFeel(&mGrisFeel);
+    configurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
     configurationComponent.addTab ("Settings", bg, &settingsBox, false);
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
@@ -73,18 +93,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     mainField.setSources(sources, m_numOfSources);
     elevationField.setSources(sources, m_numOfSources);
 
-    // Initialize sources and add ParameterListener(s).
-    //-------------------------------------------------
+    // Initialize sources.
+    //--------------------
     for (int i = 0; i < MaxNumOfSources; i++) {
-        String id(i);
         sources[i].setId(i + m_firstSourceId - 1);
-        valueTreeState.addParameterListener(String("azimuth_") + id, this);
-        valueTreeState.addParameterListener(String("elevation_") + id, this);
-        valueTreeState.addParameterListener(String("distance_") + id, this);
-        valueTreeState.addParameterListener(String("azimuthSpan_") + id, this);
-        valueTreeState.addParameterListener(String("elevationSpan_") + id, this);
-        valueTreeState.addParameterListener(String("x_") + id, this);
-        valueTreeState.addParameterListener(String("y_") + id, this);
     }
 
     parametersBox.setSelectedSource(&sources[m_selectedSource]);
@@ -105,11 +117,13 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     // Load the last saved state of the plugin.
     //-----------------------------------------
     setPluginState();
+
+    // Start the OSC sender connection.
+    //---------------------------------
+    oscActivated(true);
 }
 
-ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
-    setLookAndFeel(nullptr);
-}
+ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
 
 Source * ControlGrisAudioProcessorEditor::getSources() {
     return sources;
@@ -132,6 +146,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     // Set global settings values.
     //----------------------------
+    // FIXME: Should be called only if needed.
+    oscFormatChanged(valueTreeState.state.getProperty("oscFormat", 1));
+    oscPortNumberChanged(valueTreeState.state.getProperty("oscPortNumber", 18032));
+    oscActivated(valueTreeState.state.getProperty("oscConnected", true));
     numberOfSourcesChanged(valueTreeState.state.getProperty("numberOfSources", 1));
     firstSourceIdChanged(valueTreeState.state.getProperty("firstSourceId", 1));
 
@@ -165,6 +183,8 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 //------------------------------------------
 void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     m_selectedOscFormat = selectedId;
+    settingsBox.setOscFormat(m_selectedOscFormat);
+    valueTreeState.state.setProperty("oscFormat", m_selectedOscFormat, nullptr);
     bool selectionIsLBAP = m_selectedOscFormat == 2;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
     mainField.setDrawElevation(!selectionIsLBAP);
@@ -172,6 +192,24 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
         sources[i].setRadiusIsElevation(!selectionIsLBAP);
     }
     resized();
+}
+
+void ControlGrisAudioProcessorEditor::oscPortNumberChanged(int oscPort) {
+    m_currentOSCPort = oscPort;
+    settingsBox.setOscPortNumber(m_currentOSCPort);
+    valueTreeState.state.setProperty("oscPortNumber", m_currentOSCPort, nullptr);
+}
+
+void ControlGrisAudioProcessorEditor::oscActivated(bool state) {
+    bool retval;
+    if (state) {
+        retval = processor.createOscConnection(m_currentOSCPort);
+        settingsBox.setActivateButtonState(retval);
+    } else {
+        retval = processor.disconnectOSC();
+        settingsBox.setActivateButtonState(!retval);
+    }
+    valueTreeState.state.setProperty("oscConnected", processor.getOscConnected(), nullptr);
 }
 
 void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
@@ -232,25 +270,10 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
     elevationField.setSelectedSource(m_selectedSource);
 }
 
-// AudioProcessorValueTreeState::Listener callback.
-//-------------------------------------------------
-void ControlGrisAudioProcessorEditor::parameterChanged(const String &parameterID, float newValue) {
-    int paramId, sourceId = parameterID.getTrailingIntValue();
-    if (parameterID.startsWith("azimuth_")) {
-        paramId = SOURCE_ID_AZIMUTH;
-    } else if (parameterID.startsWith("elevation_")) {
-        paramId = SOURCE_ID_ELEVATION;
-    } else if (parameterID.startsWith("distance_")) {
-        paramId = SOURCE_ID_DISTANCE;
-    } else if (parameterID.startsWith("x_")) {
-        paramId = SOURCE_ID_X;
-    } else if (parameterID.startsWith("y_")) {
-        paramId = SOURCE_ID_Y;
-    } else if (parameterID.startsWith("azimuthSpan_")) {
-        paramId = SOURCE_ID_AZIMUTH_SPAN;
-    } else if (parameterID.startsWith("elevationSpan_")) {
-        paramId = SOURCE_ID_ELEVATION_SPAN;
-    }
+// Called by the processor to update the UI when there are parameter automations.
+//-------------------------------------------------------------------------------
+void ControlGrisAudioProcessorEditor::parameterChangedFromProcessor(int sourceId, int paramId, double newValue) {
+    const MessageManagerLock mmLock;
 
     setSourceParameterValue(sourceId, paramId, newValue);
 
@@ -381,6 +404,9 @@ void ControlGrisAudioProcessorEditor::setLinkedParameterValue(int sourceId, int 
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::sendOscMessage() {
+    if (! processor.getOscConnected())
+        return;
+
     OSCAddressPattern oscPattern("/spat/serv");
     OSCMessage message(oscPattern);
 

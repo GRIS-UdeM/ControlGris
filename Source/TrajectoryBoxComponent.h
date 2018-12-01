@@ -32,8 +32,6 @@ public:
     void resized() override;
 
 private:
-    GrisLookAndFeel mGrisFeel;
-
     Label           sourceLinkLabel;
     ComboBox        sourceLinkCombo;
 
