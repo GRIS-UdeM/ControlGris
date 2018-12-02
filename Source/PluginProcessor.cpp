@@ -25,7 +25,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
 
     std::vector<std::unique_ptr<Parameter>> parameters;
 
-    for (int i = 0; i < MaxNumOfSources; i++) {
+    for (int i = 0; i < MaxNumberOfSources; i++) {
         String id(i);
         String id1(i + 1);
         parameters.push_back(std::make_unique<Parameter>(
@@ -69,6 +69,11 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 #endif
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 {
+    m_numOfSources = 1;
+    m_firstSourceId = 1;
+    m_selectedOscFormat = 1;
+    m_currentOSCPort = 18032;
+    m_lastConnectedOSCPort = -1;
     m_oscConnected = false;
 
     // Size of the plugin window.
@@ -91,7 +96,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Per source parameters. Because there is no attachment to the automatable
     // parameters, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
-    for (int i = 0; i < MaxNumOfSources; i++) {
+    for (int i = 0; i < MaxNumberOfSources; i++) {
         String id(i);
         parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
@@ -108,37 +113,17 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         parameters.addParameterListener(String("elevationSpan_") + id, this);
         parameters.addParameterListener(String("x_") + id, this);
         parameters.addParameterListener(String("y_") + id, this);
+
+        // Gives the source an initial id.
+        sources[i].setId(i + m_firstSourceId - 1);
     }
 }
 
-ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
-{
+ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
     disconnectOSC();
 }
 
-bool ControlGrisAudioProcessor::createOscConnection(int oscPort) {
-    disconnectOSC();
-
-    m_oscConnected = oscSender.connect("127.0.0.1", oscPort);
-    if (!m_oscConnected)
-        std::cout << "Error: could not connect to UDP port " << oscPort << "." << std::endl;
-
-    return m_oscConnected;
-}
-
-bool ControlGrisAudioProcessor::disconnectOSC() {
-    if (m_oscConnected) {
-        if (oscSender.disconnect()) {
-            m_oscConnected = false;
-        }
-    }
-    return !m_oscConnected;
-}
-
-bool ControlGrisAudioProcessor::getOscConnected() {
-    return m_oscConnected;
-}
-
+//==============================================================================
 void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
     int paramId, sourceId = parameterID.getTrailingIntValue();
     if (parameterID.startsWith("azimuth_")) {
@@ -157,10 +142,269 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
         paramId = SOURCE_ID_ELEVATION_SPAN;
     }
 
+    setSourceParameterValue(sourceId, paramId, newValue);
+
+    sendOscMessage();
+
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
     if (editor != nullptr) {
         editor->parameterChangedFromProcessor(sourceId, paramId, newValue);
     }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOscFormat(int oscFormat) {
+    m_selectedOscFormat = oscFormat;
+    parameters.state.setProperty("oscFormat", m_selectedOscFormat, nullptr);
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
+    }
+}
+
+int ControlGrisAudioProcessor::getOscFormat() {
+    return m_selectedOscFormat;
+}
+
+void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber) {
+    m_currentOSCPort = oscPortNumber;
+    parameters.state.setProperty("oscPortNumber", m_currentOSCPort, nullptr);
+}
+
+int ControlGrisAudioProcessor::getOscPortNumber() {
+    return m_currentOSCPort;
+}
+
+void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate) {
+    m_firstSourceId = firstSourceId;
+    parameters.state.setProperty("firstSourceId", m_firstSourceId, nullptr);
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].setId(i + m_firstSourceId - 1);
+    }
+
+    if (propagate)
+        sendOscMessage();
+}
+
+int ControlGrisAudioProcessor::getFirstSourceId() {
+    return m_firstSourceId;
+}
+
+void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propagate) {
+    m_numOfSources = numOfSources;
+    parameters.state.setProperty("numberOfSources", m_numOfSources, nullptr);
+
+    if (propagate)
+        sendOscMessage();
+}
+
+int ControlGrisAudioProcessor::getNumberOfSources() {
+    return m_numOfSources;
+}
+
+Source * ControlGrisAudioProcessor::getSources() {
+    return sources;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::createOscConnection(int oscPort) {
+    disconnectOSC();
+
+    m_oscConnected = oscSender.connect("127.0.0.1", oscPort);
+    if (!m_oscConnected)
+        std::cout << "Error: could not connect to UDP port " << oscPort << "." << std::endl;
+    else
+        m_lastConnectedOSCPort = oscPort;
+
+    return m_oscConnected;
+}
+
+bool ControlGrisAudioProcessor::disconnectOSC() {
+    if (m_oscConnected) {
+        if (oscSender.disconnect()) {
+            m_oscConnected = false;
+            m_lastConnectedOSCPort = -1;
+        }
+    }
+    return !m_oscConnected;
+}
+
+bool ControlGrisAudioProcessor::getOscConnected() {
+    return m_oscConnected;
+}
+
+void ControlGrisAudioProcessor::handleOscConnection(bool state) {
+    if (state) {
+        if (m_lastConnectedOSCPort != m_currentOSCPort) {
+            createOscConnection(m_currentOSCPort);
+        }
+    } else {
+        disconnectOSC();
+    }
+    parameters.state.setProperty("oscConnected", getOscConnected(), nullptr);
+}
+
+void ControlGrisAudioProcessor::sendOscMessage() {
+    if (! m_oscConnected)
+        return;
+
+    OSCAddressPattern oscPattern("/spat/serv");
+    OSCMessage message(oscPattern);
+
+    for (int i = 0; i < m_numOfSources; i++) {
+        if (sources[i].getChanged()) {
+            message.clear();
+            float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
+            float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
+            message.addInt32(sources[i].getId());
+            message.addFloat32(azim);
+            message.addFloat32(elev);
+            message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
+            message.addFloat32(sources[i].getElevationSpan() * 0.5);
+            message.addFloat32(sources[i].getDistance());
+            message.addFloat32(0.0);
+
+            if (!oscSender.send(message)) {
+                std::cout << "Error: could not send OSC message." << std::endl;
+                return;
+            }
+            sources[i].setChanged(false);
+        }
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setPluginState() {
+    // Set global settings values.
+    //----------------------------
+    setOscFormat(parameters.state.getProperty("oscFormat", 1));
+    setOscPortNumber(parameters.state.getProperty("oscPortNumber", 18032));
+    handleOscConnection(parameters.state.getProperty("oscConnected", true));
+    setNumberOfSources(parameters.state.getProperty("numberOfSources", 1), false);
+    setFirstSourceId(parameters.state.getProperty("firstSourceId", 1));
+
+    // Set parameter values for sources.
+    //----------------------------------
+    for (int i = 0; i < m_numOfSources; i++) {
+        String id(i);
+        sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
+        sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
+        sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
+        sources[i].setAzimuthSpan(parameters.state.getProperty(String("p_azimuthSpan_") + id));
+        sources[i].setElevationSpan(parameters.state.getProperty(String("p_elevationSpan_") + id));
+    }
+
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    if (editor != nullptr) {
+        editor->setPluginState();
+    }
+
+    sendOscMessage();
+}
+
+// Called whenever a source has changed.
+//--------------------------------------
+void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parameterId, double value) {
+    String id(sourceId);
+    switch (parameterId) {
+        case SOURCE_ID_AZIMUTH:
+            sources[sourceId].setNormalizedAzimuth(value);
+            parameters.state.setProperty("p_azimuth_" + id, value, nullptr);
+            break;
+        case SOURCE_ID_ELEVATION:
+            sources[sourceId].setNormalizedElevation(value);
+            parameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
+            break;
+        case SOURCE_ID_DISTANCE:
+            sources[sourceId].setDistance(value);
+            parameters.state.setProperty(String("p_distance_") + id, value, nullptr);
+            break;
+        case SOURCE_ID_X:
+            sources[sourceId].setX(value);
+            break;
+        case SOURCE_ID_Y:
+            sources[sourceId].setY(value);
+            break;
+        case SOURCE_ID_AZIMUTH_SPAN:
+            sources[sourceId].setAzimuthSpan(value);
+            parameters.state.setProperty(String("p_azimuthSpan_") + id, value, nullptr);
+            break;
+        case SOURCE_ID_ELEVATION_SPAN:
+            sources[sourceId].setElevationSpan(value);
+            parameters.state.setProperty(String("p_elevationSpan_") + id, value, nullptr);
+            break;
+    }
+
+    sendOscMessage();
+
+    setLinkedParameterValue(sourceId, parameterId);
+}
+
+// Checks if link buttons are on and update sources consequently.
+//---------------------------------------------------------------
+void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parameterId) {
+    String id(sourceId);
+    if (parameterId == -1) {
+        parameters.state.setProperty("p_azimuth_" + id, sources[sourceId].getNormalizedAzimuth(), nullptr);
+        parameters.state.setProperty("p_elevation_" + id, sources[sourceId].getNormalizedElevation(), nullptr);
+        parameters.state.setProperty("p_distance_" + id, sources[sourceId].getDistance(), nullptr);
+    }
+
+    bool linkAzimuth = false, linkElevation = false, linkDistance = false, linkX = false, linkY = false;
+    bool linkAzimuthSpan = (parameterId == SOURCE_ID_AZIMUTH_SPAN && parameters.state.getProperty("azimuthSpanLink", false));
+    bool linkElevationSpan = (parameterId == SOURCE_ID_ELEVATION_SPAN && parameters.state.getProperty("elevationSpanLink", false));
+    if (parameterId < SOURCE_ID_AZIMUTH) {
+        // Source changed from 2D field view.
+        linkAzimuth = parameters.state.getProperty("azimuthLink", false);
+        linkElevation = parameters.state.getProperty("elevationLink", false);
+        linkDistance = parameters.state.getProperty("distanceLink", false);
+        linkX = parameters.state.getProperty("xLink", false);
+        linkY = parameters.state.getProperty("yLink", false);
+    } else if (parameterId < SOURCE_ID_X) {
+        // Source changed from polar coordinates.
+        linkAzimuth = (parameterId == SOURCE_ID_AZIMUTH && parameters.state.getProperty("azimuthLink", false));
+        linkElevation = (parameterId == SOURCE_ID_ELEVATION && parameters.state.getProperty("elevationLink", false));
+        linkDistance = (parameterId == SOURCE_ID_DISTANCE && parameters.state.getProperty("distanceLink", false));
+        linkX = parameters.state.getProperty("xLink", false);
+        linkY = parameters.state.getProperty("yLink", false);
+    } else if (parameterId < SOURCE_ID_AZIMUTH_SPAN) {
+        // Source changed from cartesian coordinates.
+        linkX = (parameterId == SOURCE_ID_X && parameters.state.getProperty("xLink", false));
+        linkY = (parameterId == SOURCE_ID_Y && parameters.state.getProperty("yLink", false));
+        linkAzimuth = parameters.state.getProperty("azimuthLink", false);
+        linkElevation = parameters.state.getProperty("elevationLink", false);
+        linkDistance = parameters.state.getProperty("distanceLink", false);
+    }
+    for (int i = 0; i < m_numOfSources; i++) {
+        String id(i);
+        if (linkAzimuth) {
+            sources[i].setAzimuth(sources[sourceId].getAzimuth());
+            parameters.state.setProperty("p_azimuth_" + id, sources[i].getNormalizedAzimuth(), nullptr);
+        }
+        if (linkElevation) {
+            sources[i].setElevation(sources[sourceId].getElevation());
+            parameters.state.setProperty(String("p_elevation_") + id, sources[i].getNormalizedElevation(), nullptr);
+        }
+        if (linkDistance) {
+            sources[i].setDistance(sources[sourceId].getDistance());
+            parameters.state.setProperty(String("p_distance_") + id, sources[i].getDistance(), nullptr);
+        }
+        if (linkX) {
+            sources[i].setX(sources[sourceId].getX());
+        }
+        if (linkY) {
+            sources[i].setY(sources[sourceId].getY());
+        }
+        if (linkAzimuthSpan) {
+            sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
+            parameters.state.setProperty(String("p_azimuthSpan_") + id, sources[i].getAzimuthSpan(), nullptr);
+        }
+        if (linkElevationSpan) {
+            sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
+            parameters.state.setProperty(String("p_elevationSpan_") + id, sources[i].getElevationSpan(), nullptr);
+        }
+    }
+
+    sendOscMessage();
 }
 
 //==============================================================================
@@ -281,6 +525,7 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     auto state = parameters.copyState();
+
     std::unique_ptr<XmlElement> xmlState (state.createXml());
 
     if (xmlState.get() != nullptr)
@@ -293,6 +538,8 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
 
     if (xmlState.get() != nullptr)
         parameters.replaceState (ValueTree::fromXml (*xmlState));
+
+    setPluginState();
 }
 
 //==============================================================================

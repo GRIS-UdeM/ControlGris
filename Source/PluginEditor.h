@@ -31,8 +31,6 @@
 #include "InterfaceBoxComponent.h"
 #include "Source.h"
 
-const int MaxNumOfSources = 8;
-
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         private Value::Listener,
                                         public FieldComponent::Listener,
@@ -51,31 +49,22 @@ public:
     void selectedSourceClicked() override;
     void parameterLinkChanged(int parameterId, bool value) override;
     void parameterChanged(int parameterId, double value) override;
-    void parameterChangedFromProcessor(int sourceId, int paramId, double newValue);
     void oscFormatChanged(int selectedId) override;
     void oscPortNumberChanged(int oscPort) override;
     void oscActivated(bool state) override;
     void numberOfSourcesChanged(int numOfSources) override;
     void firstSourceIdChanged(int firstSourceId) override;
 
-    void sendOscMessage();
-    void setSourceParameterValue(int sourceId, int parameterId, double value);
-    void setLinkedParameterValue(int sourceId, int parameterId);
+    void parameterChangedFromProcessor(int sourceId, int paramId, double newValue);
 
     void setPluginState();
 
-    Source * getSources();
-    int getSelectedSource();
-
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
     ControlGrisAudioProcessor& processor;
 
-    // Reference to the parameter tree state.
     AudioProcessorValueTreeState& valueTreeState;
 
-    GrisLookAndFeel mGrisFeel;
+    GrisLookAndFeel grisLookAndFeel;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
@@ -86,24 +75,17 @@ private:
     MainFieldComponent  mainField;
     ElevationFieldComponent  elevationField;
 
-    TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
-
     ParametersBoxComponent  parametersBox;
     TrajectoryBoxComponent  trajectoryBox;
+
+    TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
 
     SettingsBoxComponent    settingsBox;
     SourceBoxComponent      sourceBox;
     InterfaceBoxComponent   interfaceBox;
 
-    Source sources[MaxNumOfSources];
-    int m_numOfSources;
     int m_selectedSource;
-    int m_firstSourceId;
-    int m_selectedOscFormat;
-    int m_currentOSCPort;
 
-    // These are used to persist the UI's size - the values are stored along with the
-    // filter's other parameters, and the UI component will update them when it gets resized.
     Value lastUIWidth, lastUIHeight;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)

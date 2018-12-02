@@ -20,86 +20,69 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-//******************************************************************************
-// FIXME ASAP!
-// OSC send must be in the processor, not the editor, in order to continue to
-// send automation when the UI is closed.
-//******************************************************************************
-
-//==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
                                                                    AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
 { 
-    m_numOfSources = 1;
     m_selectedSource = 0;
-    m_firstSourceId = 1;
-    m_selectedOscFormat = 1;
-    m_currentOSCPort = 18032;
 
     // Set up the interface.
     //----------------------
-    mainBanner.setLookAndFeel(&mGrisFeel);
+    mainBanner.setLookAndFeel(&grisLookAndFeel);
     mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&mainBanner);
 
-    elevationBanner.setLookAndFeel(&mGrisFeel);
+    elevationBanner.setLookAndFeel(&grisLookAndFeel);
     elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationBanner);
 
-    parametersBanner.setLookAndFeel(&mGrisFeel);
+    parametersBanner.setLookAndFeel(&grisLookAndFeel);
     parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
     addAndMakeVisible(&parametersBanner);
 
-    trajectoryBanner.setLookAndFeel(&mGrisFeel);
+    trajectoryBanner.setLookAndFeel(&grisLookAndFeel);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryBanner);
 
-    settingsBanner.setLookAndFeel(&mGrisFeel);
+    settingsBanner.setLookAndFeel(&grisLookAndFeel);
     settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
     addAndMakeVisible(&settingsBanner);
 
-    mainField.setLookAndFeel(&mGrisFeel);
+    mainField.setLookAndFeel(&grisLookAndFeel);
     mainField.addListener(this);
     addAndMakeVisible(&mainField);
 
-    elevationField.setLookAndFeel(&mGrisFeel);
+    elevationField.setLookAndFeel(&grisLookAndFeel);
     elevationField.addListener(this);
     addAndMakeVisible(&elevationField);
 
-    parametersBox.setLookAndFeel(&mGrisFeel);
+    parametersBox.setLookAndFeel(&grisLookAndFeel);
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
 
-    trajectoryBox.setLookAndFeel(&mGrisFeel);
+    trajectoryBox.setLookAndFeel(&grisLookAndFeel);
     addAndMakeVisible(&trajectoryBox);
 
-    settingsBox.setLookAndFeel(&mGrisFeel);
+    settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
 
-    sourceBox.setLookAndFeel(&mGrisFeel);
-    interfaceBox.setLookAndFeel(&mGrisFeel);
+    sourceBox.setLookAndFeel(&grisLookAndFeel);
+    interfaceBox.setLookAndFeel(&grisLookAndFeel);
 
-    Colour bg = mGrisFeel.findColour (ResizableWindow::backgroundColourId);
-    configurationComponent.setLookAndFeel(&mGrisFeel);
+    Colour bg = grisLookAndFeel.findColour (ResizableWindow::backgroundColourId);
+    configurationComponent.setLookAndFeel(&grisLookAndFeel);
     configurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
     configurationComponent.addTab ("Settings", bg, &settingsBox, false);
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
     addAndMakeVisible(configurationComponent);
 
-    // Add sources to the field.
-    //--------------------------
-    mainField.setSources(sources, m_numOfSources);
-    elevationField.setSources(sources, m_numOfSources);
+    // Add sources to the fields.
+    //---------------------------
+    mainField.setSources(processor.getSources(), processor.getNumberOfSources());
+    elevationField.setSources(processor.getSources(), processor.getNumberOfSources());
 
-    // Initialize sources.
-    //--------------------
-    for (int i = 0; i < MaxNumOfSources; i++) {
-        sources[i].setId(i + m_firstSourceId - 1);
-    }
-
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
@@ -117,21 +100,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     // Load the last saved state of the plugin.
     //-----------------------------------------
     setPluginState();
-
-    // Start the OSC sender connection.
-    //---------------------------------
-    oscActivated(true);
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
-
-Source * ControlGrisAudioProcessorEditor::getSources() {
-    return sources;
-}
-
-int ControlGrisAudioProcessorEditor::getSelectedSource() {
-    return m_selectedSource;
-}
 
 void ControlGrisAudioProcessorEditor::setPluginState() {
     // Set state for the link buttons.
@@ -146,31 +117,17 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     // Set global settings values.
     //----------------------------
-    // FIXME: Should be called only if needed.
-    oscFormatChanged(valueTreeState.state.getProperty("oscFormat", 1));
-    oscPortNumberChanged(valueTreeState.state.getProperty("oscPortNumber", 18032));
-    oscActivated(valueTreeState.state.getProperty("oscConnected", true));
-    numberOfSourcesChanged(valueTreeState.state.getProperty("numberOfSources", 1));
-    firstSourceIdChanged(valueTreeState.state.getProperty("firstSourceId", 1));
-
-    // Set parameter values for sources.
-    //----------------------------------
-    for (int i = 0; i < m_numOfSources; i++) {
-        String id(i);
-        sources[i].setNormalizedAzimuth(valueTreeState.state.getProperty(String("p_azimuth_") + id));
-        sources[i].setNormalizedElevation(valueTreeState.state.getProperty(String("p_elevation_") + id));
-        sources[i].setDistance(valueTreeState.state.getProperty(String("p_distance_") + id));
-        sources[i].setAzimuthSpan(valueTreeState.state.getProperty(String("p_azimuthSpan_") + id));
-        sources[i].setElevationSpan(valueTreeState.state.getProperty(String("p_elevationSpan_") + id));
-    }
+    oscFormatChanged(processor.getOscFormat());
+    oscPortNumberChanged(processor.getOscPortNumber());
+    oscActivated(processor.getOscConnected());
+    numberOfSourcesChanged(processor.getNumberOfSources());
+    firstSourceIdChanged(processor.getFirstSourceId());
 
     // Update the interface.
     //----------------------
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
-
-    sendOscMessage();
 }
 
 // Value::Listener callback. Called when the stored window size changes.
@@ -182,67 +139,41 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 // SettingsBoxComponent::Listener callbacks.
 //------------------------------------------
 void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
-    m_selectedOscFormat = selectedId;
-    settingsBox.setOscFormat(m_selectedOscFormat);
-    valueTreeState.state.setProperty("oscFormat", m_selectedOscFormat, nullptr);
-    bool selectionIsLBAP = m_selectedOscFormat == 2;
+    processor.setOscFormat(selectedId);
+    settingsBox.setOscFormat(selectedId);
+    bool selectionIsLBAP = selectedId == 2;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
     mainField.setDrawElevation(!selectionIsLBAP);
-    for (int i = 0; i < m_numOfSources; i++) {
-        sources[i].setRadiusIsElevation(!selectionIsLBAP);
-    }
     resized();
 }
 
 void ControlGrisAudioProcessorEditor::oscPortNumberChanged(int oscPort) {
-    m_currentOSCPort = oscPort;
-    settingsBox.setOscPortNumber(m_currentOSCPort);
-    valueTreeState.state.setProperty("oscPortNumber", m_currentOSCPort, nullptr);
+    processor.setOscPortNumber(oscPort);
+    settingsBox.setOscPortNumber(oscPort);
 }
 
 void ControlGrisAudioProcessorEditor::oscActivated(bool state) {
-    bool retval;
-    if (state) {
-        retval = processor.createOscConnection(m_currentOSCPort);
-        settingsBox.setActivateButtonState(retval);
-    } else {
-        retval = processor.disconnectOSC();
-        settingsBox.setActivateButtonState(!retval);
-    }
-    valueTreeState.state.setProperty("oscConnected", processor.getOscConnected(), nullptr);
+    processor.handleOscConnection(state);
+    settingsBox.setActivateButtonState(processor.getOscConnected());
 }
 
 void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
     m_selectedSource = 0;
-    m_numOfSources = numOfSources;
-    settingsBox.setNumberOfSources(m_numOfSources);
-
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
-
-    mainField.setSources(sources, m_numOfSources);
-    elevationField.setSources(sources, m_numOfSources);
-
-    valueTreeState.state.setProperty("numberOfSources", numOfSources, nullptr);
-
-    sendOscMessage();
+    processor.setNumberOfSources(numOfSources);
+    settingsBox.setNumberOfSources(numOfSources);
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+    mainField.setSources(processor.getSources(), numOfSources);
+    elevationField.setSources(processor.getSources(), numOfSources);
 }
 
 void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
-    m_firstSourceId = firstSourceId;
-    settingsBox.setFirstSourceId(m_firstSourceId);
-    for (int i = 0; i < m_numOfSources; i++) {
-        sources[i].setId(i + m_firstSourceId - 1);
-    }
-
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
-
-    valueTreeState.state.setProperty("firstSourceId", firstSourceId, nullptr);
+    processor.setFirstSourceId(firstSourceId);
+    settingsBox.setFirstSourceId(firstSourceId);
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
     mainField.repaint();
-    if (m_selectedOscFormat == 2)
+    if (processor.getOscFormat() == 2)
         elevationField.repaint();
-
-    sendOscMessage();
 }
 
 // ParametersBoxComponent::Listener callbacks.
@@ -254,18 +185,16 @@ void ControlGrisAudioProcessorEditor::parameterLinkChanged(int parameterId, bool
 }
 
 void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
-    setSourceParameterValue(m_selectedSource, parameterId, value);
+    processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
     mainField.repaint();
-    if (m_selectedOscFormat == 2)
+    if (processor.getOscFormat() == 2)
         elevationField.repaint();
-
-    sendOscMessage();
 }
 
 void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
-    m_selectedSource = (m_selectedSource + 1) % m_numOfSources;
-    parametersBox.setSelectedSource(&sources[m_selectedSource]);
+    m_selectedSource = (m_selectedSource + 1) % processor.getNumberOfSources();
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
 }
@@ -275,161 +204,22 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
 void ControlGrisAudioProcessorEditor::parameterChangedFromProcessor(int sourceId, int paramId, double newValue) {
     const MessageManagerLock mmLock;
 
-    setSourceParameterValue(sourceId, paramId, newValue);
-
-    if (sourceId == m_selectedSource) {
-        parametersBox.setSelectedSource(&sources[sourceId]);
-    }
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
     mainField.repaint();
-    if (m_selectedOscFormat == 2)
+    if (processor.getOscFormat() == 2)
         elevationField.repaint();
-
-    sendOscMessage();
 }
 
 // FieldComponent::Listener callback.
 //-----------------------------------
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     m_selectedSource = sourceId;
-    parametersBox.setSelectedSource(&sources[sourceId]);
-    setLinkedParameterValue(sourceId, -1);
+    parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
+    processor.setLinkedParameterValue(sourceId, -1);
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
-
-    sendOscMessage();
-}
-
-// Called whenever a source has changed.
-//--------------------------------------
-void ControlGrisAudioProcessorEditor::setSourceParameterValue(int sourceId, int parameterId, double value) {
-    String id(sourceId);
-    switch (parameterId) {
-        case SOURCE_ID_AZIMUTH:
-            sources[sourceId].setNormalizedAzimuth(value);
-            valueTreeState.state.setProperty("p_azimuth_" + id, value, nullptr);
-            break;
-        case SOURCE_ID_ELEVATION:
-            sources[sourceId].setNormalizedElevation(value);
-            valueTreeState.state.setProperty(String("p_elevation_") + id, value, nullptr);
-            break;
-        case SOURCE_ID_DISTANCE:
-            sources[sourceId].setDistance(value);
-            valueTreeState.state.setProperty(String("p_distance_") + id, value, nullptr);
-            break;
-        case SOURCE_ID_X:
-            sources[sourceId].setX(value);
-            break;
-        case SOURCE_ID_Y:
-            sources[sourceId].setY(value);
-            break;
-        case SOURCE_ID_AZIMUTH_SPAN:
-            sources[sourceId].setAzimuthSpan(value);
-            valueTreeState.state.setProperty(String("p_azimuthSpan_") + id, value, nullptr);
-            break;
-        case SOURCE_ID_ELEVATION_SPAN:
-            sources[sourceId].setElevationSpan(value);
-            valueTreeState.state.setProperty(String("p_elevationSpan_") + id, value, nullptr);
-            break;
-    }
-    setLinkedParameterValue(sourceId, parameterId);
-}
-
-// Checks if link buttons are on and update sources consequently.
-//---------------------------------------------------------------
-void ControlGrisAudioProcessorEditor::setLinkedParameterValue(int sourceId, int parameterId) {
-    String id(sourceId);
-    if (parameterId == -1) {
-        valueTreeState.state.setProperty("p_azimuth_" + id, sources[sourceId].getNormalizedAzimuth(), nullptr);
-        valueTreeState.state.setProperty("p_elevation_" + id, sources[sourceId].getNormalizedElevation(), nullptr);
-        valueTreeState.state.setProperty("p_distance_" + id, sources[sourceId].getDistance(), nullptr);
-    }
-
-    bool linkAzimuth = false, linkElevation = false, linkDistance = false, linkX = false, linkY = false;
-    bool linkAzimuthSpan = (parameterId == SOURCE_ID_AZIMUTH_SPAN && parametersBox.getLinkState(SOURCE_ID_AZIMUTH_SPAN));
-    bool linkElevationSpan = (parameterId == SOURCE_ID_ELEVATION_SPAN && parametersBox.getLinkState(SOURCE_ID_ELEVATION_SPAN));
-    if (parameterId < SOURCE_ID_AZIMUTH) {
-        // Source changed from 2D field view.
-        linkAzimuth = parametersBox.getLinkState(SOURCE_ID_AZIMUTH);
-        linkElevation = parametersBox.getLinkState(SOURCE_ID_ELEVATION);
-        linkDistance = parametersBox.getLinkState(SOURCE_ID_DISTANCE);
-        linkX = parametersBox.getLinkState(SOURCE_ID_X);
-        linkY = parametersBox.getLinkState(SOURCE_ID_Y);
-    } else if (parameterId < SOURCE_ID_X) {
-        // Source changed from polar coordinates.
-        linkAzimuth = (parameterId == SOURCE_ID_AZIMUTH && parametersBox.getLinkState(SOURCE_ID_AZIMUTH));
-        linkElevation = (parameterId == SOURCE_ID_ELEVATION && parametersBox.getLinkState(SOURCE_ID_ELEVATION));
-        linkDistance = (parameterId == SOURCE_ID_DISTANCE && parametersBox.getLinkState(SOURCE_ID_DISTANCE));
-        linkX = (parametersBox.getLinkState(SOURCE_ID_X));
-        linkY = (parametersBox.getLinkState(SOURCE_ID_Y));
-    } else if (parameterId < SOURCE_ID_AZIMUTH_SPAN) {
-        // Source changed from cartesian coordinates.
-        linkX = (parameterId == SOURCE_ID_X && parametersBox.getLinkState(SOURCE_ID_X));
-        linkY = (parameterId == SOURCE_ID_Y && parametersBox.getLinkState(SOURCE_ID_Y));
-        linkAzimuth = (parametersBox.getLinkState(SOURCE_ID_AZIMUTH));
-        linkElevation = (parametersBox.getLinkState(SOURCE_ID_ELEVATION));
-        linkDistance = (parametersBox.getLinkState(SOURCE_ID_DISTANCE));
-    }
-    for (int i = 0; i < m_numOfSources; i++) {
-        String id(i);
-        if (linkAzimuth) {
-            sources[i].setAzimuth(sources[sourceId].getAzimuth());
-            valueTreeState.state.setProperty("p_azimuth_" + id, sources[i].getNormalizedAzimuth(), nullptr);
-        }
-        if (linkElevation) {
-            sources[i].setElevation(sources[sourceId].getElevation());
-            valueTreeState.state.setProperty(String("p_elevation_") + id, sources[i].getNormalizedElevation(), nullptr);
-        }
-        if (linkDistance) {
-            sources[i].setDistance(sources[sourceId].getDistance());
-            valueTreeState.state.setProperty(String("p_distance_") + id, sources[i].getDistance(), nullptr);
-        }
-        if (linkX) {
-            sources[i].setX(sources[sourceId].getX());
-        }
-        if (linkY) {
-            sources[i].setY(sources[sourceId].getY());
-        }
-        if (linkAzimuthSpan) {
-            sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
-            valueTreeState.state.setProperty(String("p_azimuthSpan_") + id, sources[i].getAzimuthSpan(), nullptr);
-        }
-        if (linkElevationSpan) {
-            sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
-            valueTreeState.state.setProperty(String("p_elevationSpan_") + id, sources[i].getElevationSpan(), nullptr);
-        }
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::sendOscMessage() {
-    if (! processor.getOscConnected())
-        return;
-
-    OSCAddressPattern oscPattern("/spat/serv");
-    OSCMessage message(oscPattern);
-
-    for (int i = 0; i < m_numOfSources; i++) {
-        if (sources[i].getChanged()) {
-            message.clear();
-            float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
-            float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
-            message.addInt32(sources[i].getId());
-            message.addFloat32(azim);
-            message.addFloat32(elev);
-            message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
-            message.addFloat32(sources[i].getElevationSpan() * 0.5);
-            message.addFloat32(sources[i].getDistance());
-            message.addFloat32(0.0);
-
-            if (!processor.oscSender.send(message)) {
-                std::cout << "Error: could not send OSC message." << std::endl;
-                return;
-            }
-            sources[i].setChanged(false);
-        }
-    }
 }
 
 //==============================================================================
@@ -447,7 +237,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     mainBanner.setBounds(0, 0, fieldSize, 20);
     mainField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (m_selectedOscFormat == 2) {
+    if (processor.getOscFormat() == 2) {
         mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         elevationBanner.setVisible(true);
         elevationField.setVisible(true);

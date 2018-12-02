@@ -70,7 +70,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     addAndMakeVisible(&firstSourceIdLabel);
 
     firstSourceIdEditor.setText("1");
-    firstSourceIdEditor.setInputRestrictions(2, "0123456789");
+    firstSourceIdEditor.setInputRestrictions(3, "0123456789");
     firstSourceIdEditor.onReturnKey = [this] {
             oscFormatCombo.grabKeyboardFocus();
         };

@@ -205,7 +205,8 @@ void ParametersBoxComponent::paint(Graphics& g) {
     g.drawEllipse(x, y, 20, 20, 3);
 
     g.setColour(Colours::white);
-    g.drawText(String(selectedSource->getId()+1), x, y, 20, 20, Justification(Justification::centred), false);
+    g.drawFittedText(String(selectedSource->getId()+1), x, y, kSourceDiameter - 2, kSourceDiameter,
+                     Justification(Justification::centred), 1);
 }
 
 void ParametersBoxComponent::resized() {
