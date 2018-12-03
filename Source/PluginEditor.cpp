@@ -100,6 +100,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     // Load the last saved state of the plugin.
     //-----------------------------------------
     setPluginState();
+
+    // The timer's callback update the interface if anything has changed.
+    //-------------------------------------------------------------------
+    startTimerHz(30);
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
@@ -199,16 +203,18 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
     elevationField.setSelectedSource(m_selectedSource);
 }
 
-// Called by the processor to update the UI when there are parameter automations.
-//-------------------------------------------------------------------------------
-void ControlGrisAudioProcessorEditor::parameterChangedFromProcessor(int sourceId, int paramId, double newValue) {
-    const MessageManagerLock mmLock;
+// Timer callback. Update the interface if anything has changed (mostly automations).
+//-----------------------------------------------------------------------------------
+void ControlGrisAudioProcessorEditor::timerCallback() {
+    if (processor.isSomethingChanged()) {
+        parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+        mainField.repaint();
+        if (processor.getOscFormat() == 2)
+            elevationField.repaint();
 
-    mainField.repaint();
-    if (processor.getOscFormat() == 2)
-        elevationField.repaint();
+        processor.newEventConsumed();
+    }
 }
 
 // FieldComponent::Listener callback.

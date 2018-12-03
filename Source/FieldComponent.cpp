@@ -143,7 +143,6 @@ void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
 
 void MainFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
-	const int height = getHeight();
     float fieldCenter = width / 2;
 
     drawFieldBackground(g, true);

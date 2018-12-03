@@ -35,7 +35,8 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         private Value::Listener,
                                         public FieldComponent::Listener,
                                         public ParametersBoxComponent::Listener,
-                                        public SettingsBoxComponent::Listener
+                                        public SettingsBoxComponent::Listener,
+                                        public Timer
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&, AudioProcessorValueTreeState& vts);
@@ -44,6 +45,7 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void valueChanged (Value&) override;
+    void timerCallback() override;
 
     void sourcePositionChanged(int sourceId) override;
     void selectedSourceClicked() override;
@@ -54,8 +56,6 @@ public:
     void oscActivated(bool state) override;
     void numberOfSourcesChanged(int numOfSources) override;
     void firstSourceIdChanged(int firstSourceId) override;
-
-    void parameterChangedFromProcessor(int sourceId, int paramId, double newValue);
 
     void setPluginState();
 

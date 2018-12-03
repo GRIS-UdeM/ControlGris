@@ -84,7 +84,7 @@ public:
     ParametersBoxComponent();
     ~ParametersBoxComponent();
 
- 	void mouseDown(const MouseEvent &event);
+ 	void mouseDown(const MouseEvent &event) override;
     void buttonClicked(Button *button) override;
     void parameterChanged(int parameterId, double value) override;
     void parameterLinkChanged(int parameterId, bool value) override;

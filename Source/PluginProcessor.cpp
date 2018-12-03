@@ -69,6 +69,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 #endif
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 {
+    m_somethingChanged = false;
     m_numOfSources = 1;
     m_firstSourceId = 1;
     m_selectedOscFormat = 1;
@@ -125,7 +126,7 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
-    int paramId, sourceId = parameterID.getTrailingIntValue();
+    int paramId = 0, sourceId = parameterID.getTrailingIntValue();
     if (parameterID.startsWith("azimuth_")) {
         paramId = SOURCE_ID_AZIMUTH;
     } else if (parameterID.startsWith("elevation_")) {
@@ -146,10 +147,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     sendOscMessage();
 
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-    if (editor != nullptr) {
-        editor->parameterChangedFromProcessor(sourceId, paramId, newValue);
-    }
+    m_somethingChanged = true;
 }
 
 //==============================================================================
@@ -405,6 +403,14 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
     }
 
     sendOscMessage();
+}
+
+void ControlGrisAudioProcessor::newEventConsumed() {
+    m_somethingChanged = false;
+}
+
+bool ControlGrisAudioProcessor::isSomethingChanged() {
+    return m_somethingChanged;
 }
 
 //==============================================================================

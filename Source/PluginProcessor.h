@@ -96,6 +96,9 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
+    void newEventConsumed();
+    bool isSomethingChanged();
+
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
@@ -106,6 +109,7 @@ private:
     int m_selectedOscFormat;
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
+    bool m_somethingChanged;
 
     Source sources[MaxNumberOfSources];
 
