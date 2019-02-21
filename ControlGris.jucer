@@ -2,7 +2,8 @@
 
 <JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" jucerVersion="5.4.3"
               pluginFormats="buildAU,buildVST,buildVST3" version="1.0.0" bundleIdentifier="com.gris.umontreal.controlgris"
-              companyName="GRIS" companyCopyright="GRIS - UdeM" aaxIdentifier="com.udem.GRIS.ControlGris">
+              companyName="UdeM" aaxIdentifier="com.udem.GRIS.ControlGris"
+              pluginManufacturer="UdeM" pluginManufacturerCode="UdeM" pluginCode="Xzz1">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
       <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
@@ -51,7 +52,8 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" osxArchitecture="64BitUniversal"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" osxArchitecture="64BitUniversal"
+                       auBinaryLocation="$(HOME)/Library/Audio/Plug-Ins/Components/"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris" osxArchitecture="64BitUniversal"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
