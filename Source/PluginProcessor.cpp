@@ -75,7 +75,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_selectedOscFormat = 1;
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
-    m_oscConnected = false;
+    m_oscConnected = true;
 
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  900 }, { "height", 500 } }, {} }, -1, nullptr);
@@ -118,6 +118,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id.
         sources[i].setId(i + m_firstSourceId - 1);
     }
+
+    // The timer's callback send OSC messages periodically.
+    //-----------------------------------------------------
+    startTimerHz(60);
 }
 
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
@@ -144,8 +148,6 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     }
 
     setSourceParameterValue(sourceId, paramId, newValue);
-
-    sendOscMessage();
 
     m_somethingChanged = true;
 }
@@ -249,25 +251,26 @@ void ControlGrisAudioProcessor::sendOscMessage() {
     OSCMessage message(oscPattern);
 
     for (int i = 0; i < m_numOfSources; i++) {
-        if (sources[i].getChanged()) {
-            message.clear();
-            float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
-            float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
-            message.addInt32(sources[i].getId());
-            message.addFloat32(azim);
-            message.addFloat32(elev);
-            message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
-            message.addFloat32(sources[i].getElevationSpan() * 0.5);
-            message.addFloat32(sources[i].getDistance());
-            message.addFloat32(0.0);
+        message.clear();
+        float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
+        float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
+        message.addInt32(sources[i].getId());
+        message.addFloat32(azim);
+        message.addFloat32(elev);
+        message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
+        message.addFloat32(sources[i].getElevationSpan() * 0.5);
+        message.addFloat32(sources[i].getDistance());
+        message.addFloat32(0.0);
 
-            if (!oscSender.send(message)) {
-                std::cout << "Error: could not send OSC message." << std::endl;
-                return;
-            }
-            sources[i].setChanged(false);
+        if (!oscSender.send(message)) {
+            std::cout << "Error: could not send OSC message." << std::endl;
+            return;
         }
     }
+}
+
+void ControlGrisAudioProcessor::timerCallback() {
+    sendOscMessage();
 }
 
 //==============================================================================
@@ -331,8 +334,6 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
             parameters.state.setProperty(String("p_elevationSpan_") + id, value, nullptr);
             break;
     }
-
-    sendOscMessage();
 
     setLinkedParameterValue(sourceId, parameterId);
 }
@@ -401,8 +402,6 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
             parameters.state.setProperty(String("p_elevationSpan_") + id, sources[i].getElevationSpan(), nullptr);
         }
     }
-
-    sendOscMessage();
 }
 
 void ControlGrisAudioProcessor::newEventConsumed() {

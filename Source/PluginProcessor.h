@@ -25,7 +25,8 @@
 const int MaxNumberOfSources = 8;
 
 class ControlGrisAudioProcessor  : public AudioProcessor,
-                                   public AudioProcessorValueTreeState::Listener
+                                   public AudioProcessorValueTreeState::Listener,
+                                   public Timer
 {
 public:
     //==============================================================================
@@ -89,6 +90,8 @@ public:
     bool getOscConnected();
     void handleOscConnection(bool state);
     void sendOscMessage();
+
+    void timerCallback() override;
 
     //==============================================================================
     void setPluginState();

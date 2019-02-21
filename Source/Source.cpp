@@ -42,14 +42,6 @@ int Source::getId() {
     return m_id;
 }
 
-void Source::setChanged(bool changed) {
-    m_changed = changed;
-}
-
-bool Source::getChanged() {
-    return m_changed;
-}
-
 void Source::setRadiusIsElevation(bool shouldBeElevation) {
     m_radiusIsElevation = shouldBeElevation;
 }
