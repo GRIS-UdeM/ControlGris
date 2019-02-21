@@ -122,9 +122,11 @@ Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) {
 
 Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
     float ang, rad;
-    float half = p_iwidth / 2;
-    float x = (p.getX() - half) / half;
-    float y = (p.getY() - half) / half;
+    float k2 = kSourceDiameter / 2.0;
+    float effectiveWidth = p_iwidth - kSourceDiameter;
+    float half = effectiveWidth / 2;
+    float x = (p.getX() - k2 - half) / half;
+    float y = (p.getY() - k2 - half) / half;
     ang = atan2f(x, y) / M_PI * 180.0;
     if (ang <= -180) {
         ang += 360.0;
@@ -298,7 +300,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
 	float height = getHeight();
 
-    float elevation = (height - event.y) / height * 90.0;
+    float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
     m_sources[m_selectedSourceId].setElevation(elevation);
     repaint();
     listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
