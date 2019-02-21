@@ -121,12 +121,22 @@ Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) {
 }
 
 Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
-    float ang, rad;
+    float ang, rad, px, py;
     float k2 = kSourceDiameter / 2.0;
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float half = effectiveWidth / 2;
-    float x = (p.getX() - k2 - half) / half;
-    float y = (p.getY() - k2 - half) / half;
+
+    if (! m_drawElevation) {
+        // Limits for the LBAP algorithm
+        px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
+        py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
+    } else {
+        px = p.getX();
+        py = p.getY();
+    }
+
+    float x = (px - k2 - half) / half;
+    float y = (py - k2 - half) / half;
     ang = atan2f(x, y) / M_PI * 180.0;
     if (ang <= -180) {
         ang += 360.0;
