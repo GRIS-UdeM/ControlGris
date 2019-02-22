@@ -310,28 +310,35 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
         case SOURCE_ID_AZIMUTH:
             sources[sourceId].setNormalizedAzimuth(value);
             parameters.state.setProperty("p_azimuth_" + id, value, nullptr);
+            parameters.getParameterAsValue("azimuth_" + id).setValue(value);
             break;
         case SOURCE_ID_ELEVATION:
             sources[sourceId].setNormalizedElevation(value);
             parameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
+            parameters.getParameterAsValue("elevation_" + id).setValue(value);
             break;
         case SOURCE_ID_DISTANCE:
             sources[sourceId].setDistance(value);
             parameters.state.setProperty(String("p_distance_") + id, value, nullptr);
+            parameters.getParameterAsValue("distance_" + id).setValue(value);
             break;
         case SOURCE_ID_X:
             sources[sourceId].setX(value);
+            parameters.getParameterAsValue("x_" + id).setValue(value);
             break;
         case SOURCE_ID_Y:
             sources[sourceId].setY(value);
+            parameters.getParameterAsValue("y_" + id).setValue(value);
             break;
         case SOURCE_ID_AZIMUTH_SPAN:
             sources[sourceId].setAzimuthSpan(value);
             parameters.state.setProperty(String("p_azimuthSpan_") + id, value, nullptr);
+            parameters.getParameterAsValue("azimuthSpan_" + id).setValue(value);
             break;
         case SOURCE_ID_ELEVATION_SPAN:
             sources[sourceId].setElevationSpan(value);
             parameters.state.setProperty(String("p_elevationSpan_") + id, value, nullptr);
+            parameters.getParameterAsValue("elevationSpan_" + id).setValue(value);
             break;
     }
 
@@ -378,28 +385,35 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
         if (linkAzimuth) {
             sources[i].setAzimuth(sources[sourceId].getAzimuth());
             parameters.state.setProperty("p_azimuth_" + id, sources[i].getNormalizedAzimuth(), nullptr);
+            parameters.getParameterAsValue("azimuth_" + id).setValue(sources[i].getNormalizedAzimuth());
         }
         if (linkElevation) {
             sources[i].setElevation(sources[sourceId].getElevation());
             parameters.state.setProperty(String("p_elevation_") + id, sources[i].getNormalizedElevation(), nullptr);
+            parameters.getParameterAsValue("elevation_" + id).setValue(sources[i].getNormalizedElevation());
         }
         if (linkDistance) {
             sources[i].setDistance(sources[sourceId].getDistance());
             parameters.state.setProperty(String("p_distance_") + id, sources[i].getDistance(), nullptr);
+            parameters.getParameterAsValue("distance_" + id).setValue(sources[i].getDistance());
         }
         if (linkX) {
             sources[i].setX(sources[sourceId].getX());
+            parameters.getParameterAsValue("x_" + id).setValue(sources[i].getX());
         }
         if (linkY) {
             sources[i].setY(sources[sourceId].getY());
+            parameters.getParameterAsValue("y_" + id).setValue(sources[i].getY());
         }
         if (linkAzimuthSpan) {
             sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
             parameters.state.setProperty(String("p_azimuthSpan_") + id, sources[i].getAzimuthSpan(), nullptr);
+            parameters.getParameterAsValue("azimuthSpan_" + id).setValue(sources[i].getAzimuthSpan());
         }
         if (linkElevationSpan) {
             sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
             parameters.state.setProperty(String("p_elevationSpan_") + id, sources[i].getElevationSpan(), nullptr);
+            parameters.getParameterAsValue("elevationSpan_" + id).setValue(sources[i].getElevationSpan());
         }
     }
 }

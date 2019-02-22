@@ -222,7 +222,7 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
-    processor.setLinkedParameterValue(sourceId, -1);
+    //processor.setLinkedParameterValue(sourceId, -1);
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);

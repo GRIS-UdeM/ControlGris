@@ -62,7 +62,7 @@ void ParameterComponent::sliderValueChanged(Slider *slider) {
 }
 
 void ParameterComponent::setValue(double value) {
-    slider.setValue(value, NotificationType::dontSendNotification);
+    slider.setValue(value, NotificationType::sendNotificationAsync);
 }
 
 bool ParameterComponent::getLinkState() {
