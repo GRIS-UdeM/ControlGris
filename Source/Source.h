@@ -32,8 +32,6 @@
 static const float kSourceRadius = 10;
 static const float kSourceDiameter = kSourceRadius * 2;
 
-typedef Point<float> FPoint;
-
 class Source
 {
 public:
@@ -64,6 +62,7 @@ public:
     float getX();
     void setY(float y);
     float getY();
+    Point<float> getPos();
 
     void computeXY();
     void computeAzimuthElevation();

@@ -43,7 +43,7 @@ public:
 
  	void mouseUp (const MouseEvent &event);
 
-    void drawFieldBackground(Graphics&, bool isMainField);
+    void drawFieldBackground(Graphics&, bool isMainField, bool drawElevation = true);
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
@@ -88,6 +88,8 @@ private:
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
     Point <float> degreeToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToDegree(Point <float> p, int p_iFieldWidth);
+    Point <float> posToXy(Point <float> p, int p_iFieldWidth);
+    Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
 
     bool m_drawElevation; // true for elevation, false for distance
 

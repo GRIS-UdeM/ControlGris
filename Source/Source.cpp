@@ -137,6 +137,10 @@ float Source::getY() {
     return m_y;
 }
 
+Point<float> Source::getPos() {
+    return Point<float> {m_x, m_y};
+}
+
 void Source::computeXY() {
     float radius;
     if (m_radiusIsElevation) {  // azimuth - elevation
@@ -160,8 +164,8 @@ void Source::computeAzimuthElevation() {
     }
     m_azimuth = -ang;
     float rad = sqrtf(x*x + y*y);
-    rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
     if (m_radiusIsElevation) {  // azimuth - elevation
+        rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
         m_elevation = 90.0 - rad * 90.0;
     } else {                    // azimuth - distance
         m_distance = rad;

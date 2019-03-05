@@ -44,7 +44,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
+void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, bool drawElevation) {
 	const int width = getWidth();
 	const int height = getHeight();
     float fieldCenter = width / 2;
@@ -71,19 +71,27 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField) {
 	}
 
     if (isMainField) {
-        // Draw big background circles.
         g.setColour(lookAndFeel->getLightColour());
-        for (int i = 1; i < 3; i++) {
-            float w = i / 2.0 * (width - kSourceDiameter);
+        if (drawElevation) {
+            // Draw big background circles.
+            for (int i = 1; i < 3; i++) {
+                float w = i / 2.0 * (width - kSourceDiameter);
+                float x = (width - w) / 2;
+                g.drawEllipse(x, x, w, w, 1);
+            }
+
+            // Draw center dot.
+            float w = 0.0125 * (width - kSourceDiameter);
             float x = (width - w) / 2;
             g.drawEllipse(x, x, w, w, 1);
+        } else {
+            // Draw big background squares.
+            float offset = width * 0.2;
+            float size = width * 0.6;
+            g.drawRect(offset, offset, size, size);
+            g.drawRect(10, 10, width - 20, width - 20);
         }
-        
-        // Draw center dot.
-        float w = 0.0125 * (width - kSourceDiameter);
-        float x = (width - w) / 2;
-        g.drawEllipse(x, x, w, w, 1);
-        
+
         // Draw cross.
         g.drawLine(fieldCenter, kSourceRadius, fieldCenter, height-kSourceRadius);
         g.drawLine(kSourceRadius, height/2, width-kSourceRadius, height/2);
@@ -107,45 +115,47 @@ MainFieldComponent::MainFieldComponent() {
 MainFieldComponent::~MainFieldComponent() {}
 
 Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) {
-    float x, y, distance;
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float radius = effectiveWidth / 2.0;
-    if (m_drawElevation) {
-        distance = (90.0 - p.getY()) / 90.0;
-    } else {
-        distance = p.getY();
-    }
-    x = radius * distance * sinf(degreeToRadian(p.getX())) + radius;
-    y = radius * distance * cosf(degreeToRadian(p.getX())) + radius;
+    float distance = (90.0 - p.getY()) / 90.0;
+    float x = radius * distance * sinf(degreeToRadian(p.getX())) + radius;
+    float y = radius * distance * cosf(degreeToRadian(p.getX())) + radius;
     return Point <float> (effectiveWidth - x, effectiveWidth - y);
 }
 
 Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
-    float ang, rad, px, py;
     float k2 = kSourceDiameter / 2.0;
-    float effectiveWidth = p_iwidth - kSourceDiameter;
-    float half = effectiveWidth / 2;
-
-    if (! m_drawElevation) {
-        // Limits for the LBAP algorithm
-        px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
-        py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
-    } else {
-        px = p.getX();
-        py = p.getY();
-    }
-
-    float x = (px - k2 - half) / half;
-    float y = (py - k2 - half) / half;
-    ang = atan2f(x, y) / M_PI * 180.0;
+    float half = (p_iwidth - kSourceDiameter) / 2;
+    float x = (p.getX() - k2 - half) / half;
+    float y = (p.getY() - k2 - half) / half;
+    float ang = atan2f(x, y) / M_PI * 180.0;
     if (ang <= -180) {
         ang += 360.0;
     }
-    rad = sqrtf(x*x + y*y);
-    if (m_drawElevation) {
-        rad = 90.0 - rad * 90.0;
-    }
+    float rad = sqrtf(x*x + y*y);
+    rad = 90.0 - rad * 90.0;
     return Point <float> (-ang, rad);
+}
+
+Point <float> MainFieldComponent::posToXy(Point <float> p, int p_iwidth) {
+    float effectiveWidth = p_iwidth - kSourceDiameter;
+    float x = p.getX() * effectiveWidth;
+    float y = p.getY() * effectiveWidth;
+    return Point <float> (x, effectiveWidth - y);
+}
+
+Point <float> MainFieldComponent::xyToPos(Point <float> p, int p_iwidth) {
+    float k2 = kSourceDiameter / 2.0;
+    float half = (p_iwidth - kSourceDiameter) / 2;
+
+    // Limits for the LBAP algorithm
+    float px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
+    float py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
+
+    float x = (px - k2 - half) / half * 0.5 + 0.5;
+    float y = (py - k2 - half) / half * 0.5 + 0.5;
+
+    return Point <float> (x, y);
 }
 
 void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
@@ -157,7 +167,7 @@ void MainFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
     float fieldCenter = width / 2;
 
-    drawFieldBackground(g, true);
+    drawFieldBackground(g, true, m_drawElevation);
 
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
@@ -167,7 +177,7 @@ void MainFieldComponent::paint(Graphics& g) {
         if (m_drawElevation) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
-            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getDistance()}, width);
+            pos = posToXy(m_sources[i].getPos(), width);
         }
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
         g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
@@ -233,7 +243,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         if (m_drawElevation) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
-            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getDistance()}, width);
+            pos = m_sources[i].getPos() * width;
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
@@ -250,12 +260,14 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 	int height = getHeight();
 
     Point<int> mouseLocation(event.x, height - event.y);
-    Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
-    m_sources[m_selectedSourceId].setAzimuth(pos.x);
     if (m_drawElevation) {
+        Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
+        m_sources[m_selectedSourceId].setAzimuth(pos.x);
         m_sources[m_selectedSourceId].setElevation(pos.y);
     } else {
-        m_sources[m_selectedSourceId].setDistance(pos.y);
+        Point<float> pos = xyToPos(mouseLocation.toFloat(), width);
+        m_sources[m_selectedSourceId].setX(pos.x);
+        m_sources[m_selectedSourceId].setY(pos.y);
     }
     repaint();
     listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });

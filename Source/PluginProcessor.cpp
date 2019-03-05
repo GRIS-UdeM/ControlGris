@@ -259,7 +259,11 @@ void ControlGrisAudioProcessor::sendOscMessage() {
         message.addFloat32(elev);
         message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
         message.addFloat32(sources[i].getElevationSpan() * 0.5);
-        message.addFloat32(sources[i].getDistance());
+        if (m_selectedOscFormat == 2) {
+            message.addFloat32(sources[i].getDistance() / 0.6);
+        } else {
+            message.addFloat32(sources[i].getDistance());
+        }
         message.addFloat32(0.0);
 
         if (!oscSender.send(message)) {
