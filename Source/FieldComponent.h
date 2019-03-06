@@ -20,10 +20,12 @@
 #pragma once
 
 #include "GrisLookAndFeel.h"
+#include "SettingsBoxComponent.h"
 #include "Source.h"
 
 // This file defines the classes that implement the 2D view (azimuth-elevation
 // or azimuth-distance) and the elevation view.
+//
 // Classes:
 //   FieldComponent : The base class. Implements the common attributes and 
 //                    methods of the two views.
@@ -43,7 +45,7 @@ public:
 
  	void mouseUp (const MouseEvent &event);
 
-    void drawFieldBackground(Graphics&, bool isMainField, bool drawElevation = true);
+    void drawFieldBackground(Graphics&, bool isMainField, SpatModeEnum spatMode = SPAT_MODE_VBAP);
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
@@ -82,7 +84,7 @@ public:
 	void mouseDown (const MouseEvent &event);
  	void mouseDrag (const MouseEvent &event);
 
-    void setDrawElevation(bool shouldDrawElevation);
+    void setSpatMode(SpatModeEnum spatMode);
 
 private:
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
@@ -91,7 +93,7 @@ private:
     Point <float> posToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
 
-    bool m_drawElevation; // true for elevation, false for distance
+    SpatModeEnum m_spatMode;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };

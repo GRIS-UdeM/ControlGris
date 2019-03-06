@@ -147,7 +147,7 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     settingsBox.setOscFormat(selectedId);
     bool selectionIsLBAP = selectedId == 2;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
-    mainField.setDrawElevation(!selectionIsLBAP);
+    mainField.setSpatMode((SpatModeEnum)(selectedId - 1));
     resized();
 }
 

@@ -44,7 +44,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, bool drawElevation) {
+void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatModeEnum spatMode) {
 	const int width = getWidth();
 	const int height = getHeight();
     float fieldCenter = width / 2;
@@ -72,7 +72,7 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, bool dra
 
     if (isMainField) {
         g.setColour(lookAndFeel->getLightColour());
-        if (drawElevation) {
+        if (spatMode == SPAT_MODE_VBAP) {
             // Draw big background circles.
             for (int i = 1; i < 3; i++) {
                 float w = i / 2.0 * (width - kSourceDiameter);
@@ -109,7 +109,7 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 
 //==============================================================================
 MainFieldComponent::MainFieldComponent() {
-    m_drawElevation = true;
+    m_spatMode = SPAT_MODE_VBAP;
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -158,8 +158,8 @@ Point <float> MainFieldComponent::xyToPos(Point <float> p, int p_iwidth) {
     return Point <float> (x, y);
 }
 
-void MainFieldComponent::setDrawElevation(bool shouldDrawElevation) {
-    m_drawElevation = shouldDrawElevation;
+void MainFieldComponent::setSpatMode(SpatModeEnum spatMode) {
+    m_spatMode = spatMode;
     repaint();
 }
 
@@ -167,14 +167,14 @@ void MainFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
     float fieldCenter = width / 2;
 
-    drawFieldBackground(g, true, m_drawElevation);
+    drawFieldBackground(g, true, m_spatMode);
 
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
         int lineThickness = (i == m_selectedSourceId) ? 4 : 2;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
         Point<float> pos;
-        if (m_drawElevation) {
+        if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
@@ -240,7 +240,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
         Point<float> pos;
-        if (m_drawElevation) {
+        if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = m_sources[i].getPos() * width;
@@ -260,7 +260,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 	int height = getHeight();
 
     Point<int> mouseLocation(event.x, height - event.y);
-    if (m_drawElevation) {
+    if (m_spatMode == SPAT_MODE_VBAP) {
         Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
         m_sources[m_selectedSourceId].setAzimuth(pos.x);
         m_sources[m_selectedSourceId].setElevation(pos.y);
