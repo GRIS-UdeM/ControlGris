@@ -243,7 +243,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
-            pos = m_sources[i].getPos() * width;
+            pos = posToXy(m_sources[i].getPos(), width);
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
