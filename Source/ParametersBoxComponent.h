@@ -77,7 +77,6 @@ private:
 
 //-----------------------------------------------------------------
 class ParametersBoxComponent : public Component,
-                               public Button::Listener,
                                public ParameterComponent::Listener
 {
 public:
@@ -85,7 +84,6 @@ public:
     ~ParametersBoxComponent();
 
  	void mouseDown(const MouseEvent &event) override;
-    void buttonClicked(Button *button) override;
     void parameterChanged(int parameterId, double value) override;
     void parameterLinkChanged(int parameterId, bool value) override;
     void paint(Graphics&) override;
@@ -115,15 +113,8 @@ private:
 
     Source *selectedSource;
 
-    ParameterComponent p_azimuth;
-    ParameterComponent p_elevation;
-    ParameterComponent p_distance;
-    ParameterComponent p_x;
-    ParameterComponent p_y;
     ParameterComponent p_azimuthSpan;
     ParameterComponent p_elevationSpan;
-
-    ToggleButton activatorXY;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParametersBoxComponent)
 };
