@@ -68,7 +68,6 @@ private:
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
-    BannerComponent parametersBanner;
     BannerComponent trajectoryBanner;
     BannerComponent settingsBanner;
 

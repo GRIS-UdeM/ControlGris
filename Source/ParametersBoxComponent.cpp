@@ -115,8 +115,11 @@ void ParametersBoxComponent::setLinkState(int parameterId, bool state) {
 }
 
 void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
+    float x = getWidth() - 35;
+    float y = 15;
+
     // Area where the selected source is shown.
-    Rectangle<float> area = Rectangle<float>(245, 245, 30, 30);
+    Rectangle<float> area = Rectangle<float>(x-5, y-5, 30, 30);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
     }
@@ -131,8 +134,8 @@ void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {
-    float x = 250;
-    float y = 250;
+    float x = getWidth() - 35;
+    float y = 15;
 
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
@@ -147,6 +150,6 @@ void ParametersBoxComponent::paint(Graphics& g) {
 }
 
 void ParametersBoxComponent::resized() {
-    p_azimuthSpan.setBounds(5, 170, 225, 40);
-    p_elevationSpan.setBounds(5, 220, 225, 40);
+    p_azimuthSpan.setBounds(5, 3, 225, 40);
+    p_elevationSpan.setBounds(240, 3, 225, 40);
 }

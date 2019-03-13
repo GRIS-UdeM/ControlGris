@@ -36,10 +36,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
     addAndMakeVisible(&elevationBanner);
 
-    parametersBanner.setLookAndFeel(&grisLookAndFeel);
-    parametersBanner.setText("Source Parameters", NotificationType::dontSendNotification);
-    addAndMakeVisible(&parametersBanner);
-
     trajectoryBanner.setLookAndFeel(&grisLookAndFeel);
     trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryBanner);
@@ -222,7 +218,9 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
 void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
-    //processor.setLinkedParameterValue(sourceId, -1);
+    processor.setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, processor.getSources()[sourceId].getNormalizedAzimuth());
+    processor.setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, processor.getSources()[sourceId].getNormalizedElevation());
+    processor.setSourceParameterValue(sourceId, SOURCE_ID_DISTANCE, processor.getSources()[sourceId].getDistance());
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
@@ -237,7 +235,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     double width = getWidth();
     double height = getHeight();
 
-    double fieldSize = height - 200;
+    double fieldSize = width / 2;
     if (fieldSize < 300) { fieldSize = 300; }
 
     mainBanner.setBounds(0, 0, fieldSize, 20);
@@ -249,23 +247,19 @@ void ControlGrisAudioProcessorEditor::resized() {
         elevationField.setVisible(true);
         elevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
         elevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
-        parametersBanner.setBounds(fieldSize * 2, 0, width - fieldSize * 2, 20);
-        parametersBox.setBounds(fieldSize * 2, 20, width-fieldSize * 2, fieldSize);
     } else {
         mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
         elevationBanner.setVisible(false);
         elevationField.setVisible(false);
-        parametersBanner.setBounds(fieldSize, 0, width-fieldSize, 20);
-        parametersBox.setBounds(fieldSize, 20, width-fieldSize, fieldSize);
     }
 
-    int sash = width > 900 ? width - 450 : 450;
+    parametersBox.setBounds(0, fieldSize + 20, width, 50);
 
-    trajectoryBanner.setBounds(0, fieldSize + 20, sash, 20);
-    trajectoryBox.setBounds(0, fieldSize + 40, sash, 160);
+    trajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
+    trajectoryBox.setBounds(0, fieldSize + 90, width, 160);
 
-    settingsBanner.setBounds(sash, fieldSize + 20, 450, 20);
-    configurationComponent.setBounds(sash, fieldSize + 40, 450, 160);
+    settingsBanner.setBounds(0, fieldSize + 250, width, 20);
+    configurationComponent.setBounds(0, fieldSize + 270, width, 130);
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();
