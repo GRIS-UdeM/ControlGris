@@ -75,8 +75,17 @@ private:
     ElevationFieldComponent  elevationField;
 
     ParametersBoxComponent  parametersBox;
-    TrajectoryBoxComponent  trajectoryBox;
 
+    TrajectoryBoxComponent  trajectoryBox1;
+    TrajectoryBoxComponent  trajectoryBox2;
+    TrajectoryBoxComponent  trajectoryBox3;
+    TrajectoryBoxComponent  trajectoryBox4;
+    TrajectoryBoxComponent  trajectoryBox5;
+    TrajectoryBoxComponent  trajectoryBox6;
+    TrajectoryBoxComponent  trajectoryBox7;
+    TrajectoryBoxComponent  trajectoryBox8;
+
+    TabbedComponent trajectoryComponent { TabbedButtonBar::Orientation::TabsAtTop };
     TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
 
     SettingsBoxComponent    settingsBox;

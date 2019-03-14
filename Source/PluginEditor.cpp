@@ -25,6 +25,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
 { 
     m_selectedSource = 0;
+    setLookAndFeel(&grisLookAndFeel);
 
     // Set up the interface.
     //----------------------
@@ -56,8 +57,14 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     parametersBox.addListener(this);
     addAndMakeVisible(&parametersBox);
 
-    trajectoryBox.setLookAndFeel(&grisLookAndFeel);
-    addAndMakeVisible(&trajectoryBox);
+    trajectoryBox1.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox2.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox3.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox4.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox5.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox6.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox7.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox8.setLookAndFeel(&grisLookAndFeel);
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
@@ -66,6 +73,19 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     interfaceBox.setLookAndFeel(&grisLookAndFeel);
 
     Colour bg = grisLookAndFeel.findColour (ResizableWindow::backgroundColourId);
+
+    trajectoryComponent.setLookAndFeel(&grisLookAndFeel);
+    trajectoryComponent.setColour(TabbedComponent::backgroundColourId, bg);
+    trajectoryComponent.addTab ("Auto 1", bg, &trajectoryBox1, false);
+    trajectoryComponent.addTab ("Auto 2", bg, &trajectoryBox2, false);
+    trajectoryComponent.addTab ("Auto 3", bg, &trajectoryBox3, false);
+    trajectoryComponent.addTab ("Auto 4", bg, &trajectoryBox4, false);
+    trajectoryComponent.addTab ("Auto 5", bg, &trajectoryBox5, false);
+    trajectoryComponent.addTab ("Auto 6", bg, &trajectoryBox6, false);
+    trajectoryComponent.addTab ("Auto 7", bg, &trajectoryBox7, false);
+    trajectoryComponent.addTab ("Auto 8", bg, &trajectoryBox8, false);
+    addAndMakeVisible(trajectoryComponent);
+
     configurationComponent.setLookAndFeel(&grisLookAndFeel);
     configurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
     configurationComponent.addTab ("Settings", bg, &settingsBox, false);
@@ -144,6 +164,7 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     bool selectionIsLBAP = selectedId == 2;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
     mainField.setSpatMode((SpatModeEnum)(selectedId - 1));
+    repaint();
     resized();
 }
 
@@ -228,7 +249,9 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
-    g.fillAll (getLookAndFeel().findColour (ResizableWindow::backgroundColourId));
+    GrisLookAndFeel *lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
 }
 
 void ControlGrisAudioProcessorEditor::resized() {
@@ -256,7 +279,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     parametersBox.setBounds(0, fieldSize + 20, width, 50);
 
     trajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
-    trajectoryBox.setBounds(0, fieldSize + 90, width, 160);
+    trajectoryComponent.setBounds(0, fieldSize + 90, width, 160);
 
     settingsBanner.setBounds(0, fieldSize + 250, width, 20);
     configurationComponent.setBounds(0, fieldSize + 270, width, 130);

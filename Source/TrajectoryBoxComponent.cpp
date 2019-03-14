@@ -52,16 +52,9 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
 TrajectoryBoxComponent::~TrajectoryBoxComponent() {}
 
 void TrajectoryBoxComponent::paint(Graphics& g) {
-    double width = getWidth();
-    double height = getHeight();
-
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
-
     g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
-
-    g.setColour(lookAndFeel->getEditBackgroundColour().withAlpha(0.25f));
-    g.fillRect(290, 5, width - 295, height - 10);
 }
 
 void TrajectoryBoxComponent::resized() {
@@ -77,5 +70,5 @@ void TrajectoryBoxComponent::resized() {
     cycleSpeedLabel.setBounds(5, 95, 150, 20);
     cycleSpeedSlider.setBounds(115, 95, 165, 20);
 
-    activateButton.setBounds(8, 125, 150, 20);
+    activateButton.setBounds(300, 5, 150, 20);
 }

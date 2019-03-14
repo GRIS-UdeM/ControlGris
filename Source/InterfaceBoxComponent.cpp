@@ -77,12 +77,11 @@ void InterfaceBoxComponent::resized() {
     enableLeapToggle.setBounds(5, 35, 120, 20);
     enableJoystickToggle.setBounds(125, 35, 150, 20);
 
-    oscReceiveToggle.setBounds(5, 65, 200, 20);
-    oscSendToggle.setBounds(5, 95, 200, 20);
+    oscReceiveToggle.setBounds(255, 10, 200, 20);
+    oscReceiveIpEditor.setBounds(400, 10, 120, 20);
+    oscReceivePortEditor.setBounds(530, 10, 60, 20);
 
-    oscReceiveIpEditor.setBounds(150, 65, 120, 20);
-    oscReceivePortEditor.setBounds(280, 65, 60, 20);
-
-    oscSendIpEditor.setBounds(150, 95, 120, 20);
-    oscSendPortEditor.setBounds(280, 95, 60, 20);
+    oscSendToggle.setBounds(255, 35, 200, 20);
+    oscSendIpEditor.setBounds(400, 35, 120, 20);
+    oscSendPortEditor.setBounds(530, 35, 60, 20);
 }
