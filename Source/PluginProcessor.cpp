@@ -20,6 +20,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+// The parameter Layout creates the automatable parameters.
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     using Parameter = AudioProcessorValueTreeState::Parameter;
 
@@ -65,7 +66,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 700 } }, {} }, -1, nullptr);
 
-    // Global parameters.
+    // Global setting parameters.
     parameters.state.setProperty("oscFormat", 1, nullptr);
     parameters.state.setProperty("oscPortNumber", 18032, nullptr);
     parameters.state.setProperty("oscConnected", true, nullptr);
@@ -84,13 +85,12 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // able to reload the last state of the plugin when we close/open the UI.
     for (int i = 0; i < MaxNumberOfSources; i++) {
         String id(i);
+        // Non-automatable, per source, parameters.
         parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_distance_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
-        parameters.state.setProperty(String("p_azimuthSpan_") + id, 0.0, nullptr);
-        parameters.state.setProperty(String("p_elevationSpan_") + id, 0.0, nullptr);
 
         // Automatable, per source, parameters.
         parameters.addParameterListener(String("azimuthSpan_") + id, this);
@@ -268,8 +268,6 @@ void ControlGrisAudioProcessor::setPluginState() {
         sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
         sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
         sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
-        sources[i].setAzimuthSpan(parameters.state.getProperty(String("p_azimuthSpan_") + id));
-        sources[i].setElevationSpan(parameters.state.getProperty(String("p_elevationSpan_") + id));
     }
 
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -305,12 +303,10 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
             break;
         case SOURCE_ID_AZIMUTH_SPAN:
             sources[sourceId].setAzimuthSpan(value);
-            parameters.state.setProperty(String("p_azimuthSpan_") + id, value, nullptr);
             parameters.getParameterAsValue("azimuthSpan_" + id).setValue(value);
             break;
         case SOURCE_ID_ELEVATION_SPAN:
             sources[sourceId].setElevationSpan(value);
-            parameters.state.setProperty(String("p_elevationSpan_") + id, value, nullptr);
             parameters.getParameterAsValue("elevationSpan_" + id).setValue(value);
             break;
     }
@@ -327,12 +323,10 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
         String id(i);
         if (linkAzimuthSpan) {
             sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
-            parameters.state.setProperty(String("p_azimuthSpan_") + id, sources[i].getAzimuthSpan(), nullptr);
             parameters.getParameterAsValue("azimuthSpan_" + id).setValue(sources[i].getAzimuthSpan());
         }
         if (linkElevationSpan) {
             sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
-            parameters.state.setProperty(String("p_elevationSpan_") + id, sources[i].getElevationSpan(), nullptr);
             parameters.getParameterAsValue("elevationSpan_" + id).setValue(sources[i].getElevationSpan());
         }
     }
