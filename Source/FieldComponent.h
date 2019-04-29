@@ -79,6 +79,8 @@ public:
     MainFieldComponent();
     ~MainFieldComponent();
     
+    void createSpanPathVBAP(Graphics& g, int i);
+    void createSpanPathLBAP(Graphics& g, int i);
     void paint (Graphics&);
 	
 	void mouseDown (const MouseEvent &event);
