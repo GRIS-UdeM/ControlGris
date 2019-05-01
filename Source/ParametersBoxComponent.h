@@ -110,6 +110,7 @@ private:
     ListenerList<Listener> listeners;
 
     bool m_distanceEnabled;
+    bool m_spanLinked;
 
     Source *selectedSource;
 

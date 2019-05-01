@@ -80,6 +80,7 @@ ParametersBoxComponent::ParametersBoxComponent() :
     p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span", this)
 {
     m_distanceEnabled = false;
+    m_spanLinked = false;
 }
 
 ParametersBoxComponent::~ParametersBoxComponent() {}
@@ -118,8 +119,16 @@ void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     float x = getWidth() - 35;
     float y = 15;
 
+    // Area where the spanLinked arrow is shown.
+    Rectangle<float> area = Rectangle<float>(245.f, 25.f, 45.f, 25.f);
+    if (area.contains(event.getMouseDownPosition().toFloat())) {
+        m_spanLinked = ! m_spanLinked;
+        repaint();
+        //listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
+    }
+
     // Area where the selected source is shown.
-    Rectangle<float> area = Rectangle<float>(x-5, y-5, 30, 30);
+    area = Rectangle<float>(x-5, y-5, 30, 30);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
     }
@@ -141,6 +150,13 @@ void ParametersBoxComponent::paint(Graphics& g) {
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
     g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
 
+    if (m_spanLinked)
+        g.setColour(Colours::orange);
+    else
+        g.setColour(Colours::black);
+    g.drawArrow(Line<float>(285, 34, 245, 34), 4, 10, 10);
+    g.drawArrow(Line<float>(250, 34, 290, 34), 4, 10, 10);
+
     g.setColour(selectedSource->getColour());
     g.drawEllipse(x, y, 20, 20, 3);
 
@@ -151,5 +167,6 @@ void ParametersBoxComponent::paint(Graphics& g) {
 
 void ParametersBoxComponent::resized() {
     p_azimuthSpan.setBounds(5, 3, 225, 40);
-    p_elevationSpan.setBounds(240, 3, 225, 40);
+    p_elevationSpan.setBounds(305, 3, 225, 40);
 }
+
