@@ -136,6 +136,15 @@ void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
 
 void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
     listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, value); });
+    if (m_spanLinked) {
+        if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
+            p_elevationSpan.setValue(value);
+            listeners.call([&] (Listener& l) { l.parameterChanged(SOURCE_ID_ELEVATION_SPAN, value); });
+        } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
+            p_azimuthSpan.setValue(value);
+            listeners.call([&] (Listener& l) { l.parameterChanged(SOURCE_ID_AZIMUTH_SPAN, value); });
+        }
+    }
 }
 
 void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
@@ -161,8 +170,8 @@ void ParametersBoxComponent::paint(Graphics& g) {
     g.drawEllipse(x, y, 20, 20, 3);
 
     g.setColour(Colours::white);
-    g.drawFittedText(String(selectedSource->getId()+1), x, y, kSourceDiameter - 2, kSourceDiameter,
-                     Justification(Justification::centred), 1);
+    g.drawFittedText(String(selectedSource->getId()+1), x, y, kSourceDiameter - 2,
+                     kSourceDiameter, Justification(Justification::centred), 1);
 }
 
 void ParametersBoxComponent::resized() {
