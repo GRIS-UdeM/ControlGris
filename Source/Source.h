@@ -58,6 +58,8 @@ public:
     void setElevationSpan(float elevationSpan);
     float getElevationSpan();
 
+    void setCoordinates(float azimuth, float elevation, float distance);
+
     void setX(float x);
     float getX();
     void setY(float y);

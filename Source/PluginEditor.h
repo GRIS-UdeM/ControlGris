@@ -36,6 +36,7 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public FieldComponent::Listener,
                                         public ParametersBoxComponent::Listener,
                                         public SettingsBoxComponent::Listener,
+                                        public SourceBoxComponent::Listener,
                                         public Timer
 {
 public:
@@ -56,6 +57,9 @@ public:
     void oscActivated(bool state) override;
     void numberOfSourcesChanged(int numOfSources) override;
     void firstSourceIdChanged(int firstSourceId) override;
+    // SourceBoxComponent::Listeners
+    void sourcePlacementChanged(int value) override;
+    void sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) override;
 
     void setPluginState();
 

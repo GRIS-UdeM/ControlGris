@@ -64,6 +64,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     settingsBox.addListener(this);
 
     sourceBox.setLookAndFeel(&grisLookAndFeel);
+    sourceBox.addListener(this);
+
     interfaceBox.setLookAndFeel(&grisLookAndFeel);
 
     Colour bg = grisLookAndFeel.findColour (ResizableWindow::backgroundColourId);
@@ -167,6 +169,7 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSources(processor.getSources(), numOfSources);
     elevationField.setSources(processor.getSources(), numOfSources);
+    sourceBox.setNumberOfSources(numOfSources);
 }
 
 void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
@@ -177,6 +180,59 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
     mainField.repaint();
     if (processor.getOscFormat() == 2)
         elevationField.repaint();
+}
+
+// SourceBoxComponent::Listener callbacks.
+//----------------------------------------
+void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
+    float azimuth;
+    int numOfSources = processor.getNumberOfSources();
+    const float azims4[4] = {-22.5f, 22.5f, -157.5f, 157.5f};
+    const float azims6[6] = {-22.5f, 22.5f, -90.0f, 90.0f, -157.5f, 157.5f};
+    const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
+
+    switch(value) {
+        case 1:
+            for (int i = 0; i < numOfSources; i++) {
+                if (numOfSources <= 4)
+                    processor.getSources()[i].setCoordinates(-azims4[i], 0.0f, 1.0f);
+                else if (numOfSources <= 6)
+                    processor.getSources()[i].setCoordinates(-azims6[i], 0.0f, 1.0f);
+                else
+                    processor.getSources()[i].setCoordinates(-azims8[i], 0.0f, 1.0f);
+            }
+            break;
+        case 2:
+            for (int i = 0; i < numOfSources; i++) {
+                if (numOfSources <= 4)
+                    processor.getSources()[i].setCoordinates(azims4[i], 0.0f, 1.0f);
+                else if (numOfSources <= 6)
+                    processor.getSources()[i].setCoordinates(azims6[i], 0.0f, 1.0f);
+                else
+                    processor.getSources()[i].setCoordinates(azims8[i], 0.0f, 1.0f);
+            }
+            break;
+        case 3:
+            for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, 1.0f);
+            }
+            break;
+        case 4:
+            for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, 1.0f);
+            }
+            break;
+    }
+    repaint();
+}
+
+void ControlGrisAudioProcessorEditor::sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) {
+    if (processor.getOscFormat() == 2) {
+        processor.getSources()[sourceNum-1].setCoordinates(angle, 0.0f, rayLen * 1.4f);
+    } else {
+        processor.getSources()[sourceNum-1].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
+    }
+    repaint();
 }
 
 // ParametersBoxComponent::Listener callbacks.

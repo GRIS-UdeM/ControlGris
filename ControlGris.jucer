@@ -6,6 +6,8 @@
               pluginManufacturer="UdeM" pluginManufacturerCode="UdeM" pluginCode="Xzz1">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
+      <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
+            file="Source/ControlGrisConstants.h"/>
       <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
       <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
       <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"

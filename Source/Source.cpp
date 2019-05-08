@@ -101,6 +101,14 @@ float Source::getDistance() {
     return m_distance;
 }
 
+void Source::setCoordinates(float azimuth, float elevation, float distance) {
+    m_azimuth = azimuth;
+    m_elevation = elevation;
+    m_distance = distance;
+    computeXY();
+    computeAzimuthElevation();
+}
+
 void Source::setAzimuthSpan(float azimuthSpan) {
     m_aziSpan = azimuthSpan;
     m_changed = true;
@@ -150,8 +158,10 @@ void Source::computeXY() {
     }
     m_x = radius * sinf(degreeToRadian(m_azimuth));
     m_x = -m_x * 0.5 + 0.5;
+    m_x = m_x < 0.0 ? 0.0 : m_x > 1.0 ? 1.0 : m_x;
     m_y = radius * cosf(degreeToRadian(m_azimuth));
     m_y = m_y * 0.5 + 0.5;
+    m_y = m_y < 0.0 ? 0.0 : m_y > 1.0 ? 1.0 : m_y;
     m_changed = true;
 }
 
