@@ -187,14 +187,19 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
 void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
     float azimuth;
     int numOfSources = processor.getNumberOfSources();
-    const float azims4[4] = {-22.5f, 22.5f, -157.5f, 157.5f};
-    const float azims6[6] = {-22.5f, 22.5f, -90.0f, 90.0f, -157.5f, 157.5f};
+    const float azims2[2] = {-90.0f, 90.0f};
+    const float azims4[4] = {-45.0f, 45.0f, -135.0f, 135.0f};
+    const float azims6[6] = {-30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f};
     const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
+
+    float offset = 360.0f / numOfSources / 2.0f;
 
     switch(value) {
         case 1:
             for (int i = 0; i < numOfSources; i++) {
-                if (numOfSources <= 4)
+                if (numOfSources <= 2)
+                    processor.getSources()[i].setCoordinates(-azims2[i], 0.0f, 1.0f);
+                else if (numOfSources <= 4)
                     processor.getSources()[i].setCoordinates(-azims4[i], 0.0f, 1.0f);
                 else if (numOfSources <= 6)
                     processor.getSources()[i].setCoordinates(-azims6[i], 0.0f, 1.0f);
@@ -204,7 +209,9 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
             break;
         case 2:
             for (int i = 0; i < numOfSources; i++) {
-                if (numOfSources <= 4)
+                if (numOfSources <= 2)
+                    processor.getSources()[i].setCoordinates(azims2[i], 0.0f, 1.0f);
+                else if (numOfSources <= 4)
                     processor.getSources()[i].setCoordinates(azims4[i], 0.0f, 1.0f);
                 else if (numOfSources <= 6)
                     processor.getSources()[i].setCoordinates(azims6[i], 0.0f, 1.0f);
@@ -214,12 +221,32 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
             break;
         case 3:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, 0.0f, 1.0f);
             }
             break;
         case 4:
             for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, 0.0f, 1.0f);
+            }
+            break;
+        case 5:
+            for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, 0.0f, 1.0f);
+            }
+            break;
+        case 6:
+            for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, 0.0f, 1.0f);
+            }
+            break;
+        case 7:
+            for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, 1.0f);
+            }
+            break;
+        case 8:
+            for (int i = 0; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, 1.0f);
             }
             break;
     }

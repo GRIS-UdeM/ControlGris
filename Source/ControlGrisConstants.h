@@ -20,4 +20,6 @@
 #pragma once
 
 const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Right Alternate"),
-                                           String("Left Clockwise"), String("Left Counter Clockwise")};
+                                           String("Left Clockwise"), String("Left Counter Clockwise"),
+                                           String("Right Clockwise"), String("Right Counter Clockwise"),
+                                           String("Top Clockwise"), String("Top Counter Clockwise")};
