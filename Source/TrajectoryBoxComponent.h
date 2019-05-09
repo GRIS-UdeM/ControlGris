@@ -38,8 +38,9 @@ private:
     Label           trajectoryTypeLabel;
     ComboBox        trajectoryTypeCombo;
 
-    Label           timeScaleLabel;
-    ComboBox        timeScaleCombo;
+    Label           durationLabel;
+    TextEditor      durationEditor;
+    ComboBox        durationUnitCombo;
 
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;

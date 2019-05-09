@@ -66,6 +66,7 @@ protected:
     Source *m_sources;
     int m_numberOfSources;
     int m_selectedSourceId;
+    int m_oldSelectedSourceId;
 
 private:
 
@@ -85,6 +86,7 @@ public:
 	
 	void mouseDown (const MouseEvent &event);
  	void mouseDrag (const MouseEvent &event);
+ 	void mouseUp (const MouseEvent &event);
 
     void setSpatMode(SpatModeEnum spatMode);
 
@@ -96,6 +98,9 @@ private:
     Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
 
     SpatModeEnum m_spatMode;
+
+    Source recordTrajectory;
+    Array<Point<float>> trajectoryPoints;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };

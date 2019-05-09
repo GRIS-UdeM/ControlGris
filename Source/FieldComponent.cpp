@@ -26,14 +26,14 @@ FieldComponent::FieldComponent() {}
 FieldComponent::~FieldComponent() {}
 
 void FieldComponent::setSelectedSource(int selectedId) {
-    m_selectedSourceId = selectedId;
+    m_oldSelectedSourceId = m_selectedSourceId = selectedId;
     repaint();
 }
 
 void FieldComponent::setSources(Source *sources, int numberOfSources) {
     m_sources = sources;
     m_numberOfSources = numberOfSources;
-    m_selectedSourceId = 0;
+    m_oldSelectedSourceId = m_selectedSourceId = 0;
     for (int i = 0; i < m_numberOfSources; i++) {
         float hue = (float)i / m_numberOfSources + 0.577251;
         if (hue > 1) {
@@ -110,6 +110,8 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 //==============================================================================
 MainFieldComponent::MainFieldComponent() {
     m_spatMode = SPAT_MODE_VBAP;
+    recordTrajectory.setX(0.5f);
+    recordTrajectory.setY(0.5f);
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -233,6 +235,31 @@ void MainFieldComponent::paint(Graphics& g) {
 
     drawFieldBackground(g, true, m_spatMode);
 
+    // Draw recording trajectory.
+    Point<float> rpos;
+    if (m_spatMode == SPAT_MODE_VBAP) {
+        rpos = degreeToXy(Point<float> {recordTrajectory.getAzimuth(), recordTrajectory.getElevation()}, width);
+    } else {
+        rpos = posToXy(recordTrajectory.getPos(), width);
+    }
+    g.setColour(Colours::grey);
+    g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);
+    g.setColour(Colours::white);
+    g.drawFittedText(String("X"), rpos.x + 1, rpos.y + 1, kSourceDiameter - 2,
+                     kSourceDiameter, Justification(Justification::centred), 1);
+
+    if (trajectoryPoints.size() > 1) {
+        Path trajectoryPath;
+        trajectoryPath.startNewSubPath(trajectoryPoints[0]);
+        for (int i = 1; i < trajectoryPoints.size(); i++) {
+            trajectoryPath.lineTo(trajectoryPoints[i]);
+        }
+        // If we want to close the path
+        // trajectoryPath.closeSubPath();
+        g.setColour(Colours::lightgrey);
+        g.strokePath(trajectoryPath, PathStrokeType(.75f));
+    }
+
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
         int lineThickness = (i == m_selectedSourceId) ? 4 : 2;
@@ -261,15 +288,32 @@ void MainFieldComponent::paint(Graphics& g) {
 void MainFieldComponent::mouseDown(const MouseEvent &event) {    
 	int width = getWidth();
 
+    Point<float> pos;
+    Rectangle<float> area;
+
+    // Check if we click on a recording trajectory.
+    if (m_spatMode == SPAT_MODE_VBAP) {
+        pos = degreeToXy(Point<float> {recordTrajectory.getAzimuth(), recordTrajectory.getElevation()}, width);
+    } else {
+        pos = posToXy(recordTrajectory.getPos(), width);
+    }
+    area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+    if (area.contains(event.getMouseDownPosition().toFloat())) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        trajectoryPoints.clear();
+        repaint();
+        return;
+    }
+
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
-        Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
-        Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
             listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
@@ -284,17 +328,36 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 	int height = getHeight();
 
     Point<int> mouseLocation(event.x, height - event.y);
+
+    Source *selectedSource;
+    if (m_selectedSourceId == -1) {
+        selectedSource = &recordTrajectory;
+    } else {
+        selectedSource = &m_sources[m_selectedSourceId];
+    }
+
     if (m_spatMode == SPAT_MODE_VBAP) {
         Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
-        m_sources[m_selectedSourceId].setAzimuth(pos.x);
-        m_sources[m_selectedSourceId].setElevation(pos.y);
+        selectedSource->setAzimuth(pos.x);
+        selectedSource->setElevation(pos.y);
     } else {
         Point<float> pos = xyToPos(mouseLocation.toFloat(), width);
-        m_sources[m_selectedSourceId].setX(pos.x);
-        m_sources[m_selectedSourceId].setY(pos.y);
+        selectedSource->setX(pos.x);
+        selectedSource->setY(pos.y);
+    }
+    if (m_selectedSourceId == -1) {
+        trajectoryPoints.add(Point<float>(event.x, event.y));
+    } else {
+        listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
     }
     repaint();
-    listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
+}
+
+void MainFieldComponent::mouseUp(const MouseEvent &event) {
+    if (m_selectedSourceId == -1) {
+        m_selectedSourceId = m_oldSelectedSourceId;
+        repaint();
+    }
 }
 
 //==============================================================================

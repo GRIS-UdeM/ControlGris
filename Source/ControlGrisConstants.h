@@ -23,3 +23,11 @@ const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Rig
                                            String("Left Clockwise"), String("Left Counter Clockwise"),
                                            String("Right Clockwise"), String("Right Counter Clockwise"),
                                            String("Top Clockwise"), String("Top Counter Clockwise")};
+
+const StringArray SOURCE_LINK_TYPES       {String("Independant"), String("Circular"),
+                                           String("Circular Fixed Radius"), String("Circular Fixed Angle"),
+                                           String("Circular Fully Fixed"), String("Delta Lock")};
+
+const StringArray TRAJECTORY_TYPES        {String("Drawing"), String("Circle Clockwise"),
+                                           String("Circle Counter Clockwise"), String("Ellipse Clockwise"),
+                                           String("Ellipse Counter Clockwise"), String("Spiral Clockwise")};
