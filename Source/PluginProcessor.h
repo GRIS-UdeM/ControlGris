@@ -102,6 +102,9 @@ public:
     void newEventConsumed();
     bool isSomethingChanged();
 
+    double getInitTimeOnPlay();
+    double getCurrentTime();
+
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
@@ -113,6 +116,10 @@ private:
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
     bool m_somethingChanged;
+
+    bool m_needInitialization;
+    double m_initTimeOnPlay;
+    double m_currentTime;
 
     Source sources[MaxNumberOfSources];
 

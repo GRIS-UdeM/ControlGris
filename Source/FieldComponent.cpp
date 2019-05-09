@@ -112,6 +112,7 @@ MainFieldComponent::MainFieldComponent() {
     m_spatMode = SPAT_MODE_VBAP;
     recordTrajectory.setX(0.5f);
     recordTrajectory.setY(0.5f);
+    m_trajectoryDeltaTime = 0.0;
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -162,6 +163,11 @@ Point <float> MainFieldComponent::xyToPos(Point <float> p, int p_iwidth) {
 
 void MainFieldComponent::setSpatMode(SpatModeEnum spatMode) {
     m_spatMode = spatMode;
+    repaint();
+}
+
+void MainFieldComponent::setTrajectoryDeltaTime(double t) {
+    m_trajectoryDeltaTime = t;
     repaint();
 }
 
@@ -258,6 +264,18 @@ void MainFieldComponent::paint(Graphics& g) {
         // trajectoryPath.closeSubPath();
         g.setColour(Colours::lightgrey);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
+
+        if (m_trajectoryDeltaTime < 10.0) {
+            double delta = m_trajectoryDeltaTime / 10.0 * trajectoryPoints.size();
+            int index = (int)delta;
+            double frac = delta - index;
+            Point<float> p1 = trajectoryPoints[index];
+            Point<float> p2 = trajectoryPoints[index+1];
+            Point<float> dpos ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+            g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
+        } else {
+            g.fillEllipse(trajectoryPoints[0].x - 4, trajectoryPoints[0].y - 4, 8, 8);
+        }
     }
 
     // Draw sources.

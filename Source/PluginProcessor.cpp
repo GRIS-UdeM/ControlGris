@@ -63,6 +63,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
 
+    m_initTimeOnPlay = m_currentTime = 0.0;
+
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
 
@@ -340,6 +342,14 @@ bool ControlGrisAudioProcessor::isSomethingChanged() {
     return m_somethingChanged;
 }
 
+double ControlGrisAudioProcessor::getInitTimeOnPlay() {
+    return m_initTimeOnPlay;
+}
+
+double ControlGrisAudioProcessor::getCurrentTime() {
+    return m_currentTime;
+}
+
 //==============================================================================
 const String ControlGrisAudioProcessor::getName() const
 {
@@ -405,8 +415,7 @@ void ControlGrisAudioProcessor::changeProgramName (int index, const String& newN
 //==============================================================================
 void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
-    // Use this method as the place to do any pre-playback
-    // initialisation that you need..
+    m_needInitialization = true;
 }
 
 void ControlGrisAudioProcessor::releaseResources()
@@ -439,8 +448,18 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
-void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages)
-{
+void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
+    AudioPlayHead* phead = getPlayHead();
+    if (phead != nullptr) {
+        AudioPlayHead::CurrentPositionInfo playposinfo;
+        phead->getCurrentPosition(playposinfo);
+        if (m_needInitialization) {
+            m_initTimeOnPlay = playposinfo.timeInSeconds;
+            m_needInitialization = false;
+        } else {
+            m_currentTime = playposinfo.timeInSeconds;
+        }
+    }
 }
 
 //==============================================================================

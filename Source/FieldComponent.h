@@ -89,6 +89,7 @@ public:
  	void mouseUp (const MouseEvent &event);
 
     void setSpatMode(SpatModeEnum spatMode);
+    void setTrajectoryDeltaTime(double t);
 
 private:
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
@@ -101,6 +102,7 @@ private:
 
     Source recordTrajectory;
     Array<Point<float>> trajectoryPoints;
+    double m_trajectoryDeltaTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };

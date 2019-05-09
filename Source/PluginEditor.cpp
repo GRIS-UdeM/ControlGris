@@ -24,8 +24,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
                                                                    AudioProcessorValueTreeState& vts)
     : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
 { 
-    m_selectedSource = 0;
     setLookAndFeel(&grisLookAndFeel);
+
+    m_selectedSource = 0;
 
     // Set up the interface.
     //----------------------
@@ -297,6 +298,8 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
 
         processor.newEventConsumed();
     }
+    double deltaTime = processor.getCurrentTime() - processor.getInitTimeOnPlay();
+    mainField.setTrajectoryDeltaTime(deltaTime);
 }
 
 // FieldComponent::Listener callback.
