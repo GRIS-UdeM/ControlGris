@@ -149,6 +149,12 @@ Point<float> Source::getPos() {
     return Point<float> {m_x, m_y};
 }
 
+void Source::setPos(Point<float> pos) {
+    m_x = pos.x;
+    m_y = pos.y;
+    computeAzimuthElevation();
+}
+
 void Source::computeXY() {
     float radius;
     if (m_radiusIsElevation) {  // azimuth - elevation

@@ -31,6 +31,9 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    double getDuration();
+    bool getActivated();
+
 private:
     Label           sourceLinkLabel;
     ComboBox        sourceLinkCombo;
@@ -41,6 +44,9 @@ private:
     Label           durationLabel;
     TextEditor      durationEditor;
     ComboBox        durationUnitCombo;
+
+    Label           numOfCycleLabel;
+    TextEditor      numOfCycleEditor;
 
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;

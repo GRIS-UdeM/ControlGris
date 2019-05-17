@@ -26,6 +26,11 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
 
     std::vector<std::unique_ptr<Parameter>> parameters;
 
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_x"), String("Recording Trajectory X"),
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"), String("Recording Trajectory Y"),
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+
     for (int i = 0; i < MaxNumberOfSources; i++) {
         String id(i);
         String id1(i + 1);
@@ -62,6 +67,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
+
+    autoRecordTrajectory = Point<float> (-1.0f, -1.0f);
 
     m_initTimeOnPlay = m_currentTime = 0.0;
 
@@ -102,6 +109,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         sources[i].setId(i + m_firstSourceId - 1);
     }
 
+    // Automation values for the recording trajectory.
+    parameters.addParameterListener(String("recordingTrajectory_x"), this);
+    parameters.addParameterListener(String("recordingTrajectory_y"), this);
+
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(60);
@@ -114,6 +125,13 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
 //==============================================================================
 void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
     int paramId, sourceId = parameterID.getTrailingIntValue();
+
+    if (parameterID.compare("recordingTrajectory_x") == 0) {
+        autoRecordTrajectory.x = newValue;
+    } else if (parameterID.compare("recordingTrajectory_y") == 0) {
+        autoRecordTrajectory.y = newValue;
+    }
+
     if (parameterID.startsWith("azimuthSpan_")) {
         paramId = SOURCE_ID_AZIMUTH_SPAN;
     } else if (parameterID.startsWith("elevationSpan_")) {
@@ -332,6 +350,11 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
             parameters.getParameterAsValue("elevationSpan_" + id).setValue(sources[i].getElevationSpan());
         }
     }
+}
+
+void ControlGrisAudioProcessor::setRecordTrajectoryValue(Point<float> value) {
+    parameters.getParameterAsValue("recordingTrajectory_x").setValue(value.x);
+    parameters.getParameterAsValue("recordingTrajectory_y").setValue(value.y);
 }
 
 void ControlGrisAudioProcessor::newEventConsumed() {

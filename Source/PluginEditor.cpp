@@ -27,6 +27,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     setLookAndFeel(&grisLookAndFeel);
 
     m_selectedSource = 0;
+    m_lastTime = 0.0;
 
     // Set up the interface.
     //----------------------
@@ -298,8 +299,17 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
 
         processor.newEventConsumed();
     }
-    double deltaTime = processor.getCurrentTime() - processor.getInitTimeOnPlay();
-    mainField.setTrajectoryDeltaTime(deltaTime);
+
+    // TODO: duration should not be pulled every tick. There should be TrajectoryBoxComponent::Listener callbacks.
+    if (trajectoryBox.getActivated()) {
+        if (m_lastTime != processor.getCurrentTime()) {
+            double deltaTime = (processor.getCurrentTime() - processor.getInitTimeOnPlay()) / trajectoryBox.getDuration();
+            mainField.setTrajectoryDeltaTime(deltaTime);
+            m_lastTime = processor.getCurrentTime();
+        }
+    } else if (processor.autoRecordTrajectory.x != -1.0 && processor.autoRecordTrajectory.y != -1.0) {
+        mainField.setTrajectoryPosition(processor.autoRecordTrajectory);
+    }
 }
 
 // FieldComponent::Listener callback.
@@ -313,6 +323,12 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryPositionChanged(Point<float> position) {
+    if (trajectoryBox.getActivated()) {
+        processor.setRecordTrajectoryValue(position);
+    }
 }
 
 //==============================================================================

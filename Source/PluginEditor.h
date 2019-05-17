@@ -49,6 +49,7 @@ public:
     void timerCallback() override;
 
     void sourcePositionChanged(int sourceId) override;
+    void trajectoryPositionChanged(Point<float> position) override;
     void selectedSourceClicked() override;
     void parameterLinkChanged(int parameterId, bool value) override;
     void parameterChanged(int parameterId, double value) override;
@@ -89,6 +90,8 @@ private:
     InterfaceBoxComponent   interfaceBox;
 
     int m_selectedSource;
+
+    double m_lastTime;
 
     Value lastUIWidth, lastUIHeight;
 

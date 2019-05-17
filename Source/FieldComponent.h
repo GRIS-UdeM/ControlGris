@@ -55,6 +55,7 @@ public:
         virtual ~Listener() {}
 
         virtual void sourcePositionChanged(int sourceId) = 0;
+        virtual void trajectoryPositionChanged(Point<float> position) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -90,6 +91,7 @@ public:
 
     void setSpatMode(SpatModeEnum spatMode);
     void setTrajectoryDeltaTime(double t);
+    void setTrajectoryPosition(Point<float> pos);
 
 private:
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
@@ -97,11 +99,14 @@ private:
     Point <float> xyToDegree(Point <float> p, int p_iFieldWidth);
     Point <float> posToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
+    Point <int> clipRecordingPosition(Point<int> pos);
+    Point <float> smoothRecordingPosition(Point<float> pos);
 
     SpatModeEnum m_spatMode;
 
     Source recordTrajectory;
     Array<Point<float>> trajectoryPoints;
+    Point<float> lastRecordingPoint;
     double m_trajectoryDeltaTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)

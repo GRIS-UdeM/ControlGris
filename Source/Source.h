@@ -65,6 +65,7 @@ public:
     void setY(float y);
     float getY();
     Point<float> getPos();
+    void setPos(Point<float> pos);
 
     void computeXY();
     void computeAzimuthElevation();

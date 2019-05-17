@@ -99,6 +99,8 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
+    void setRecordTrajectoryValue(Point<float> value);
+
     void newEventConsumed();
     bool isSomethingChanged();
 
@@ -107,6 +109,8 @@ public:
 
     //==============================================================================
     AudioProcessorValueTreeState parameters;
+
+    Point<float> autoRecordTrajectory;
 
 private:
     bool m_oscConnected;

@@ -35,7 +35,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     trajectoryTypeCombo.setSelectedId(1);
     addAndMakeVisible(&trajectoryTypeCombo);
 
-    durationLabel.setText("Duration:", NotificationType::dontSendNotification);
+    durationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
     addAndMakeVisible(&durationLabel);
 
     addAndMakeVisible(&durationEditor);
@@ -45,9 +45,18 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
 
     addAndMakeVisible(&durationUnitCombo);
-    durationUnitCombo.addItem("Second(s)", 1);
+    durationUnitCombo.addItem("Sec(s)", 1);
     durationUnitCombo.addItem("Beat(s)", 2);
     durationUnitCombo.setSelectedId(1);
+
+    numOfCycleLabel.setText("Number of Cycles:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&numOfCycleLabel);
+
+    addAndMakeVisible(&numOfCycleEditor);
+    numOfCycleEditor.setTextToShowWhenEmpty ("1", Colours::white);
+    numOfCycleEditor.setText("1", false);
+    numOfCycleEditor.setInputRestrictions (6, "0123456789");
+    numOfCycleEditor.onReturnKey = [this] { cycleSpeedSlider.grabKeyboardFocus(); };
 
     cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
     addAndMakeVisible(&cycleSpeedLabel);
@@ -72,18 +81,30 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
 }
 
 void TrajectoryBoxComponent::resized() {
-    sourceLinkLabel.setBounds(5, 5, 150, 20);
-    sourceLinkCombo.setBounds(120, 5, 150, 20);
+    sourceLinkLabel.setBounds(5, 10, 150, 20);
+    sourceLinkCombo.setBounds(120, 10, 160, 20);
 
-    trajectoryTypeLabel.setBounds(5, 35, 150, 20);
-    trajectoryTypeCombo.setBounds(120, 35, 150, 20);
+    trajectoryTypeLabel.setBounds(5, 40, 150, 20);
+    trajectoryTypeCombo.setBounds(120, 40, 160, 20);
 
-    durationLabel.setBounds(5, 65, 150, 20);
-    durationEditor.setBounds(120, 65, 100, 20);
-    durationUnitCombo.setBounds(225, 65, 100, 20);
+    durationLabel.setBounds(5, 70, 150, 20);
+    durationEditor.setBounds(120, 70, 90, 20);
+    durationUnitCombo.setBounds(215, 70, 65, 20);
 
-    cycleSpeedLabel.setBounds(5, 95, 150, 20);
-    cycleSpeedSlider.setBounds(115, 95, 165, 20);
+    cycleSpeedLabel.setBounds(5, 100, 150, 20);
+    cycleSpeedSlider.setBounds(115, 100, 165, 20);
 
-    activateButton.setBounds(300, 5, 150, 20);
+    numOfCycleLabel.setBounds(300, 10, 100, 20);
+    numOfCycleEditor.setBounds(400, 10, 50, 20);
+
+    activateButton.setBounds(getWidth() - 120, 100, 100, 20);
 }
+
+double TrajectoryBoxComponent::getDuration() {
+    return durationEditor.getText().getDoubleValue();
+}
+
+bool TrajectoryBoxComponent::getActivated() {
+    return activateButton.getToggleState();
+}
+
