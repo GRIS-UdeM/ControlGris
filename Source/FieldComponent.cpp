@@ -112,7 +112,7 @@ MainFieldComponent::MainFieldComponent(AutomationManager& automan)
     : automationManager (automan) 
 {
     m_spatMode = SPAT_MODE_VBAP;
-    m_trajectoryDeltaTime = 0.0;
+    m_isPlaying = false;
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -166,9 +166,8 @@ void MainFieldComponent::setSpatMode(SpatModeEnum spatMode) {
     repaint();
 }
 
-void MainFieldComponent::setTrajectoryDeltaTime(double t) {
-    m_trajectoryDeltaTime = t;
-    repaint();
+void MainFieldComponent::setIsPlaying(bool state) {
+    m_isPlaying = state;
 }
 
 void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) {
@@ -241,35 +240,32 @@ void MainFieldComponent::paint(Graphics& g) {
 
     drawFieldBackground(g, true, m_spatMode);
 
-    // Draw recording trajectory.
-    Point<float> rpos;
-    if (automationManager.getRecordingTrajectorySize() > 1) {
-        rpos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
-    } else if (m_spatMode == SPAT_MODE_VBAP) {
-        rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
-    } else {
-        rpos = posToXy(automationManager.getSource().getPos(), width);
+    // Draw recording trajectory handle.
+    if (!m_isPlaying) {
+        Point<float> rpos;
+        if (automationManager.getRecordingTrajectorySize() > 1) {
+            rpos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+        } else {
+            rpos = Point<float> (150 - kSourceRadius, 150 - kSourceRadius);
+        }
+        g.setColour(Colours::grey);
+        g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);
+        g.setColour(Colours::white);
+        g.drawFittedText(String("X"), rpos.x + 1, rpos.y + 1, kSourceDiameter - 2,
+                         kSourceDiameter, Justification(Justification::centred), 1);
     }
-    g.setColour(Colours::grey);
-    g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);
-    g.setColour(Colours::white);
-    g.drawFittedText(String("X"), rpos.x + 1, rpos.y + 1, kSourceDiameter - 2,
-                     kSourceDiameter, Justification(Justification::centred), 1);
 
-    // Does not work if we want to see the automation. Really need a class to handle everything about recording trajectory!
+    // Draw recording trajectory current position dot.
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
-        g.setColour(Colours::lightgrey);
+        g.setColour(Colours::blueviolet);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
-
-        if (m_trajectoryDeltaTime < 1.0) {
-            Point<float> dpos = automationManager.getRecordingPointFromDeltaTime(m_trajectoryDeltaTime);
-            automationManager.setSourcePosition(Point<float>(dpos.x / width, 1.0 - dpos.y / width));
-            g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
-        } else {
-            g.fillEllipse(automationManager.getSourcePosition().x  * width - 4, (1.0 - automationManager.getSourcePosition().y) * width - 4, 8, 8);
-        }
+    }
+    if (m_isPlaying && !isMouseButtonDown()) {
+        Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
+        automationManager.setSourcePosition(Point<float>(dpos.x / width, 1.0 - dpos.y / width));
+        g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
 
     // Draw sources.
@@ -304,18 +300,22 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     Rectangle<float> area;
 
     // Check if we click on a recording trajectory.
-    if (m_spatMode == SPAT_MODE_VBAP) {
-        pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
-    } else {
-        pos = posToXy(automationManager.getSourcePosition(), width);
-    }
-    area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
-    if (area.contains(event.getMouseDownPosition().toFloat())) {
-        m_oldSelectedSourceId = m_selectedSourceId;
-        m_selectedSourceId = -1;
-        automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-        repaint();
-        return;
+    if (automationManager.getDrawingType() == 1) {
+        if (automationManager.getRecordingTrajectorySize() > 1) {
+            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+        } else if (m_spatMode == SPAT_MODE_VBAP) {
+            pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
+        } else {
+            pos = posToXy(automationManager.getSourcePosition(), width);
+        }
+        area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        if (area.contains(event.getMouseDownPosition().toFloat())) {
+            m_oldSelectedSourceId = m_selectedSourceId;
+            m_selectedSourceId = -1;
+            automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            repaint();
+            return;
+        }
     }
 
     // Check if we click on a new source.

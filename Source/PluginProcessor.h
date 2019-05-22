@@ -107,6 +107,8 @@ public:
     double getInitTimeOnPlay();
     double getCurrentTime();
 
+    bool getIsPlaying();
+
     void trajectoryPositionChanged(Point<float> position) override;
 
     //==============================================================================
@@ -126,6 +128,8 @@ private:
     bool m_needInitialization;
     double m_initTimeOnPlay;
     double m_currentTime;
+
+    bool m_isPlaying;
 
     Source sources[MaxNumberOfSources];
 

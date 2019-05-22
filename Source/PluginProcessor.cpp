@@ -353,7 +353,6 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position) {
-    // Does not record anymore...
     if (automationManager.getActivateState()) {
         parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
         parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
@@ -374,6 +373,10 @@ double ControlGrisAudioProcessor::getInitTimeOnPlay() {
 
 double ControlGrisAudioProcessor::getCurrentTime() {
     return m_currentTime;
+}
+
+bool ControlGrisAudioProcessor::getIsPlaying() {
+    return m_isPlaying;
 }
 
 //==============================================================================
@@ -479,6 +482,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
     if (phead != nullptr) {
         AudioPlayHead::CurrentPositionInfo playposinfo;
         phead->getCurrentPosition(playposinfo);
+        m_isPlaying = playposinfo.isPlaying;
         if (m_needInitialization) {
             m_initTimeOnPlay = playposinfo.timeInSeconds;
             m_needInitialization = false;

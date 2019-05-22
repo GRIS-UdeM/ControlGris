@@ -43,8 +43,12 @@ public:
     void addRecordingPoint(Point<float> pos);
     int getRecordingTrajectorySize();
     Point<float> getLastRecordingPoint();
-    Point<float> getRecordingPointFromDeltaTime(double delta);
+    Point<float> getCurrentTrajectoryPoint();
     void createRecordingPath(Path& path);
+    void setTrajectoryDeltaTime(double relativeTimeFromPlay);
+
+    void setDrawingType(int type);
+    int getDrawingType();
 
     Source& getSource();
     void setSourcePosition(Point<float> pos);
@@ -63,12 +67,15 @@ public:
 private:
     ListenerList<Listener> listeners;
 
+    int             drawingType;
+
     bool            activateState;
     double          playbackDuration;
     Point<float>    playbackPosition;
 
     Source source;
 
+    double              trajectoryDeltaTime;
     Array<Point<float>> trajectoryPoints;
     Point<float>        lastRecordingPoint;
 

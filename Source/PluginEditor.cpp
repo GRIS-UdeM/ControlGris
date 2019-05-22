@@ -291,6 +291,11 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
 
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
+void ControlGrisAudioProcessorEditor::trajectoryBoxTypeChanged(int value) {
+    automationManager.setDrawingType(value);
+    mainField.repaint();
+}
+
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double value) {
     automationManager.setPlaybackDuration(value);
 }
@@ -299,30 +304,40 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
     automationManager.setActivateState(value);
 }
 
+void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
+    automationManager.resetRecordingTrajectory(Point<float> (150 - kSourceRadius, 150 - kSourceRadius));
+    mainField.repaint();
+}
+
 // Timer callback. Update the interface if anything has changed (mostly automations).
 //-----------------------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::timerCallback() {
+    bool needRepaint = false;
     if (processor.isSomethingChanged()) {
         parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
-        mainField.repaint();
+        needRepaint = true;
         if (processor.getOscFormat() == 2)
             elevationField.repaint();
 
         processor.newEventConsumed();
     }
 
-    // TODO: duration should not be pulled every tick. There should be TrajectoryBoxComponent::Listener callbacks.
+    mainField.setIsPlaying(processor.getIsPlaying());
+
     if (automationManager.getActivateState()) {
         if (m_lastTime != processor.getCurrentTime()) {
-            double deltaTime = (processor.getCurrentTime() - processor.getInitTimeOnPlay()) / automationManager.getPlaybackDuration();
-            mainField.setTrajectoryDeltaTime(deltaTime);
+            automationManager.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
             m_lastTime = processor.getCurrentTime();
+            needRepaint = true;
         }
     } else if (automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-        mainField.repaint();
+        needRepaint = true;
     }
+
+    if (needRepaint)
+        mainField.repaint();
 }
 
 // FieldComponent::Listener callback.

@@ -20,12 +20,13 @@
 #include "AutomationManager.h"
 
 AutomationManager::AutomationManager() {
+    drawingType = 1;
     activateState = false;
     source.setX(0.5f);
     source.setY(0.5f);
-    playbackDuration = 1.0;
+    playbackDuration = 5.0;
     playbackPosition = Point<float> (-1.0f, -1.0f);
-
+    trajectoryDeltaTime = 0.0;
 }
 
 AutomationManager::~AutomationManager() {}
@@ -93,22 +94,31 @@ void AutomationManager::createRecordingPath(Path& path) {
     }
 }
 
-Point<float> AutomationManager::getRecordingPointFromDeltaTime(double delta) {
-    delta *= trajectoryPoints.size();
-    int index = (int)delta;
-    if (index + 1 < trajectoryPoints.size()) {
-        double frac = delta - index;
-        Point<float> p1 = trajectoryPoints[index];
-        Point<float> p2 = trajectoryPoints[index+1];
-        return Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
+    trajectoryDeltaTime = relativeTimeFromPlay / playbackDuration;
+}
+
+Point<float> AutomationManager::getCurrentTrajectoryPoint() {
+    if (activateState) {
+        double delta = trajectoryDeltaTime * trajectoryPoints.size();
+        int index = (int)delta;
+        if (index + 1 < trajectoryPoints.size()) {
+            double frac = delta - index;
+            Point<float> p1 = trajectoryPoints[index];
+            Point<float> p2 = trajectoryPoints[index+1];
+            return Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+        } else {
+            return Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
+        }
     } else {
-        return Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
+        return getSourcePosition() * 300;
     }
 }
 
 void AutomationManager::setSourcePosition(Point<float> pos) {
     source.setPos(pos);
-    listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(pos); }); // AutomationManager::Listener
+    if (activateState)
+        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(pos); });
 }
 
 Source& AutomationManager::getSource() {
@@ -119,3 +129,30 @@ Point<float> AutomationManager::getSourcePosition() {
     return source.getPos();
 }
 
+void AutomationManager::setDrawingType(int type) {
+    drawingType = type;
+    switch (drawingType) {
+        case 1:
+            break;
+        case 2:
+            trajectoryPoints.clear();
+            for (int i = 0; i < 200; i++) {
+                float x = sinf(2.0 * M_PI * i / 199) * 140 + 150;
+                float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case 3:
+            trajectoryPoints.clear();
+            for (int i = 0; i < 200; i++) {
+                float x = -sinf(2.0 * M_PI * i / 199) * 140 + 150;
+                float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+    }
+}
+
+int AutomationManager::getDrawingType() {
+    return drawingType;
+}

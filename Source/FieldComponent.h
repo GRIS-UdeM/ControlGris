@@ -90,8 +90,7 @@ public:
  	void mouseUp (const MouseEvent &event);
 
     void setSpatMode(SpatModeEnum spatMode);
-
-    void setTrajectoryDeltaTime(double t);
+    void setIsPlaying(bool state);
 
 private:
     AutomationManager& automationManager;
@@ -105,7 +104,7 @@ private:
 
     SpatModeEnum m_spatMode;
 
-    double m_trajectoryDeltaTime;
+    bool m_isPlaying;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };

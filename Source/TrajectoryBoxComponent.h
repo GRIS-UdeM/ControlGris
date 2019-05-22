@@ -35,8 +35,10 @@ public:
     {
         virtual ~Listener() {}
 
+        virtual void trajectoryBoxTypeChanged(int value) = 0;
         virtual void trajectoryBoxDurationChanged(double value) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
+        virtual void trajectoryBoxClearButtonClicked() = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -61,6 +63,7 @@ private:
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;
 
+    TextButton      clearButton;
     TextButton      activateButton;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrajectoryBoxComponent)
