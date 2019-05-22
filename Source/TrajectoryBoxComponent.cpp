@@ -42,7 +42,9 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationEditor.setTextToShowWhenEmpty ("1", Colours::white);
     durationEditor.setText("5", false);
     durationEditor.setInputRestrictions (10, "0123456789.");
-    durationEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
+    durationEditor.onReturnKey = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue()); });
+            durationUnitCombo.grabKeyboardFocus(); };
 
     addAndMakeVisible(&durationUnitCombo);
     durationUnitCombo.addItem("Sec(s)", 1);
@@ -67,9 +69,12 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     cycleSpeedSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&cycleSpeedSlider);
 
+    addAndMakeVisible(&activateButton);
     activateButton.setButtonText("Activate");
     activateButton.setClickingTogglesState(true);
-    addAndMakeVisible(&activateButton);
+    activateButton.onClick = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
+            durationUnitCombo.grabKeyboardFocus(); };
 }
 
 TrajectoryBoxComponent::~TrajectoryBoxComponent() {}
@@ -99,12 +104,3 @@ void TrajectoryBoxComponent::resized() {
 
     activateButton.setBounds(getWidth() - 120, 100, 100, 20);
 }
-
-double TrajectoryBoxComponent::getDuration() {
-    return durationEditor.getText().getDoubleValue();
-}
-
-bool TrajectoryBoxComponent::getActivated() {
-    return activateButton.getToggleState();
-}
-

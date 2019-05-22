@@ -30,6 +30,7 @@
 #include "SourceBoxComponent.h"
 #include "InterfaceBoxComponent.h"
 #include "Source.h"
+#include "AutomationManager.h"
 
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         private Value::Listener,
@@ -37,10 +38,13 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public ParametersBoxComponent::Listener,
                                         public SettingsBoxComponent::Listener,
                                         public SourceBoxComponent::Listener,
+                                        public TrajectoryBoxComponent::Listener,
                                         public Timer
 {
 public:
-    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&, AudioProcessorValueTreeState& vts);
+    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
+                                     AudioProcessorValueTreeState& vts,
+                                     AutomationManager& automan);
     ~ControlGrisAudioProcessorEditor();
 
     void paint (Graphics&) override;
@@ -49,7 +53,6 @@ public:
     void timerCallback() override;
 
     void sourcePositionChanged(int sourceId) override;
-    void trajectoryPositionChanged(Point<float> position) override;
     void selectedSourceClicked() override;
     void parameterLinkChanged(int parameterId, bool value) override;
     void parameterChanged(int parameterId, double value) override;
@@ -61,6 +64,9 @@ public:
     // SourceBoxComponent::Listeners
     void sourcePlacementChanged(int value) override;
     void sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) override;
+    // TrajectoryBoxComponent::Listeners
+    void trajectoryBoxDurationChanged(double value) override;
+    void trajectoryBoxActivateChanged(bool value) override;
 
     void setPluginState();
 
@@ -68,6 +74,8 @@ private:
     ControlGrisAudioProcessor& processor;
 
     AudioProcessorValueTreeState& valueTreeState;
+
+    AutomationManager& automationManager;
 
     GrisLookAndFeel grisLookAndFeel;
 

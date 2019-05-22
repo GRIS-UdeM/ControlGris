@@ -68,8 +68,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
 
-    autoRecordTrajectory = Point<float> (-1.0f, -1.0f);
-
     m_initTimeOnPlay = m_currentTime = 0.0;
 
     // Size of the plugin window.
@@ -113,6 +111,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.addParameterListener(String("recordingTrajectory_x"), this);
     parameters.addParameterListener(String("recordingTrajectory_y"), this);
 
+    automationManager.addListener(this);
+
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(60);
@@ -127,9 +127,9 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     int paramId, sourceId = parameterID.getTrailingIntValue();
 
     if (parameterID.compare("recordingTrajectory_x") == 0) {
-        autoRecordTrajectory.x = newValue;
+        automationManager.setPlaybackPositionX(newValue);
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
-        autoRecordTrajectory.y = newValue;
+        automationManager.setPlaybackPositionY(newValue);
     }
 
     if (parameterID.startsWith("azimuthSpan_")) {
@@ -352,9 +352,12 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
     }
 }
 
-void ControlGrisAudioProcessor::setRecordTrajectoryValue(Point<float> value) {
-    parameters.getParameterAsValue("recordingTrajectory_x").setValue(value.x);
-    parameters.getParameterAsValue("recordingTrajectory_y").setValue(value.y);
+void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position) {
+    // Does not record anymore...
+    if (automationManager.getActivateState()) {
+        parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
+        parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+    }
 }
 
 void ControlGrisAudioProcessor::newEventConsumed() {
@@ -493,7 +496,7 @@ bool ControlGrisAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 {
-    return new ControlGrisAudioProcessorEditor (*this, parameters);
+    return new ControlGrisAudioProcessorEditor (*this, parameters, automationManager);
 }
 
 //==============================================================================

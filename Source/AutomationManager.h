@@ -20,23 +20,41 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
+#include "Source.h"
 
-class TrajectoryBoxComponent : public Component
+class AutomationManager
 {
 public:
-    TrajectoryBoxComponent();
-    ~TrajectoryBoxComponent();
+    AutomationManager();
+    ~AutomationManager();
 
-    void paint(Graphics&) override;
-    void resized() override;
+    void setActivateState(bool state);
+    bool getActivateState();
+
+    void setPlaybackDuration(double value);
+    double getPlaybackDuration();
+
+    void setPlaybackPositionX(float value);
+    void setPlaybackPositionY(float value);
+    bool hasValidPlaybackPosition();
+    Point<float> getPlaybackPosition();
+
+    void resetRecordingTrajectory(Point<float> currentPosition);
+    void addRecordingPoint(Point<float> pos);
+    int getRecordingTrajectorySize();
+    Point<float> getLastRecordingPoint();
+    Point<float> getRecordingPointFromDeltaTime(double delta);
+    void createRecordingPath(Path& path);
+
+    Source& getSource();
+    void setSourcePosition(Point<float> pos);
+    Point<float> getSourcePosition();
 
     struct Listener
     {
         virtual ~Listener() {}
 
-        virtual void trajectoryBoxDurationChanged(double value) = 0;
-        virtual void trajectoryBoxActivateChanged(bool value) = 0;
+        virtual void trajectoryPositionChanged(Point<float> position) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -45,23 +63,16 @@ public:
 private:
     ListenerList<Listener> listeners;
 
-    Label           sourceLinkLabel;
-    ComboBox        sourceLinkCombo;
+    bool            activateState;
+    double          playbackDuration;
+    Point<float>    playbackPosition;
 
-    Label           trajectoryTypeLabel;
-    ComboBox        trajectoryTypeCombo;
+    Source source;
 
-    Label           durationLabel;
-    TextEditor      durationEditor;
-    ComboBox        durationUnitCombo;
+    Array<Point<float>> trajectoryPoints;
+    Point<float>        lastRecordingPoint;
 
-    Label           numOfCycleLabel;
-    TextEditor      numOfCycleEditor;
+    Point <float> smoothRecordingPosition(Point<float> pos);
 
-    Label           cycleSpeedLabel;
-    Slider          cycleSpeedSlider;
-
-    TextButton      activateButton;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrajectoryBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationManager)
 };

@@ -21,11 +21,13 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Source.h"
+#include "AutomationManager.h"
 
 const int MaxNumberOfSources = 8;
 
 class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,
+                                   public AutomationManager::Listener,
                                    public Timer
 {
 public:
@@ -99,18 +101,18 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
-    void setRecordTrajectoryValue(Point<float> value);
-
     void newEventConsumed();
     bool isSomethingChanged();
 
     double getInitTimeOnPlay();
     double getCurrentTime();
 
+    void trajectoryPositionChanged(Point<float> position) override;
+
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
-    Point<float> autoRecordTrajectory;
+    AutomationManager automationManager;
 
 private:
     bool m_oscConnected;

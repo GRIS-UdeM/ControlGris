@@ -108,10 +108,10 @@ void FieldComponent::mouseUp(const MouseEvent &event) {
 }
 
 //==============================================================================
-MainFieldComponent::MainFieldComponent() {
+MainFieldComponent::MainFieldComponent(AutomationManager& automan)
+    : automationManager (automan) 
+{
     m_spatMode = SPAT_MODE_VBAP;
-    recordTrajectory.setX(0.5f);
-    recordTrajectory.setY(0.5f);
     m_trajectoryDeltaTime = 0.0;
 }
 
@@ -168,11 +168,6 @@ void MainFieldComponent::setSpatMode(SpatModeEnum spatMode) {
 
 void MainFieldComponent::setTrajectoryDeltaTime(double t) {
     m_trajectoryDeltaTime = t;
-    repaint();
-}
-
-void MainFieldComponent::setTrajectoryPosition(Point<float> pos) {
-    recordTrajectory.setPos(pos);
     repaint();
 }
 
@@ -248,12 +243,12 @@ void MainFieldComponent::paint(Graphics& g) {
 
     // Draw recording trajectory.
     Point<float> rpos;
-    if (trajectoryPoints.size() > 1) {
-        rpos = Point<float> (trajectoryPoints.getLast().x - kSourceRadius, trajectoryPoints.getLast().y - kSourceRadius);
+    if (automationManager.getRecordingTrajectorySize() > 1) {
+        rpos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
     } else if (m_spatMode == SPAT_MODE_VBAP) {
-        rpos = degreeToXy(Point<float> {recordTrajectory.getAzimuth(), recordTrajectory.getElevation()}, width);
+        rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
     } else {
-        rpos = posToXy(recordTrajectory.getPos(), width);
+        rpos = posToXy(automationManager.getSource().getPos(), width);
     }
     g.setColour(Colours::grey);
     g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);
@@ -262,33 +257,18 @@ void MainFieldComponent::paint(Graphics& g) {
                      kSourceDiameter, Justification(Justification::centred), 1);
 
     // Does not work if we want to see the automation. Really need a class to handle everything about recording trajectory!
-    if (trajectoryPoints.size() > 1) {
+    if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
-        trajectoryPath.startNewSubPath(trajectoryPoints[0]);
-        for (int i = 1; i < trajectoryPoints.size(); i++) {
-            trajectoryPath.lineTo(trajectoryPoints[i]);
-        }
-        // If we want to close the path
-        // trajectoryPath.closeSubPath();
+        automationManager.createRecordingPath(trajectoryPath);
         g.setColour(Colours::lightgrey);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
 
         if (m_trajectoryDeltaTime < 1.0) {
-            double delta = m_trajectoryDeltaTime * trajectoryPoints.size();
-            int index = (int)delta;
-            if (index + 1 < trajectoryPoints.size()) {
-                double frac = delta - index;
-                Point<float> p1 = trajectoryPoints[index];
-                Point<float> p2 = trajectoryPoints[index+1];
-                Point<float> dpos ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
-                recordTrajectory.setPos(Point<float>(dpos.x / width, 1.0 - dpos.y / width));
-                listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(recordTrajectory.getPos()); });
-                g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
-            } else {
-                g.fillEllipse(recordTrajectory.getPos().x * width - 4, (1.0 - recordTrajectory.getPos().y) * width - 4, 8, 8);
-            }
+            Point<float> dpos = automationManager.getRecordingPointFromDeltaTime(m_trajectoryDeltaTime);
+            automationManager.setSourcePosition(Point<float>(dpos.x / width, 1.0 - dpos.y / width));
+            g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
         } else {
-            g.fillEllipse(recordTrajectory.getPos().x  * width - 4, (1.0 - recordTrajectory.getPos().y) * width - 4, 8, 8);
+            g.fillEllipse(automationManager.getSourcePosition().x  * width - 4, (1.0 - automationManager.getSourcePosition().y) * width - 4, 8, 8);
         }
     }
 
@@ -325,16 +305,15 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
 
     // Check if we click on a recording trajectory.
     if (m_spatMode == SPAT_MODE_VBAP) {
-        pos = degreeToXy(Point<float> {recordTrajectory.getAzimuth(), recordTrajectory.getElevation()}, width);
+        pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
     } else {
-        pos = posToXy(recordTrajectory.getPos(), width);
+        pos = posToXy(automationManager.getSourcePosition(), width);
     }
     area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
-        trajectoryPoints.clear();
-        lastRecordingPoint = event.getMouseDownPosition().toFloat();
+        automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
         repaint();
         return;
     }
@@ -364,7 +343,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 
     Source *selectedSource;
     if (m_selectedSourceId == -1) {
-        selectedSource = &recordTrajectory;
+        selectedSource = &automationManager.getSource();
     } else {
         selectedSource = &m_sources[m_selectedSourceId];
     }
@@ -379,7 +358,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         selectedSource->setY(pos.y);
     }
     if (m_selectedSourceId == -1) {
-        trajectoryPoints.add(smoothRecordingPosition(clipRecordingPosition(event.getPosition()).toFloat()));
+        automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
     } else {
         listeners.call([&] (Listener& l) { l.sourcePositionChanged(m_selectedSourceId); });
     }
@@ -388,7 +367,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 
 void MainFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        trajectoryPoints.add(trajectoryPoints.getLast());
+        automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
         m_selectedSourceId = m_oldSelectedSourceId;
         repaint();
     }
@@ -402,13 +381,6 @@ Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {
     clipped.y = pos.y < 10 ? 10 : pos.y > max ? max : pos.y;
 
     return clipped;
-}
-
-Point<float> MainFieldComponent::smoothRecordingPosition(Point<float> pos) {
-    Point<float> smoothed;
-    smoothed.x = lastRecordingPoint.x = pos.x + (lastRecordingPoint.x - pos.x) * 0.8f;
-    smoothed.y = lastRecordingPoint.y = pos.y + (lastRecordingPoint.y - pos.y) * 0.8f;
-    return smoothed;
 }
 
 //==============================================================================

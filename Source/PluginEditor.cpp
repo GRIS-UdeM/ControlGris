@@ -21,8 +21,9 @@
 #include "PluginEditor.h"
 
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
-                                                                   AudioProcessorValueTreeState& vts)
-    : AudioProcessorEditor (&p), processor (p), valueTreeState (vts)
+                                                                  AudioProcessorValueTreeState& vts,
+                                                                  AutomationManager& automan)
+    : AudioProcessorEditor (&p), processor (p), valueTreeState (vts), automationManager (automan), mainField (automan)
 { 
     setLookAndFeel(&grisLookAndFeel);
 
@@ -60,6 +61,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     addAndMakeVisible(&parametersBox);
 
     trajectoryBox.setLookAndFeel(&grisLookAndFeel);
+    trajectoryBox.addListener(this);
     addAndMakeVisible(trajectoryBox);
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
@@ -287,6 +289,16 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
     elevationField.setSelectedSource(m_selectedSource);
 }
 
+// TrajectoryBoxComponent::Listener callbacks.
+//--------------------------------------------
+void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double value) {
+    automationManager.setPlaybackDuration(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
+    automationManager.setActivateState(value);
+}
+
 // Timer callback. Update the interface if anything has changed (mostly automations).
 //-----------------------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::timerCallback() {
@@ -301,14 +313,15 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
     }
 
     // TODO: duration should not be pulled every tick. There should be TrajectoryBoxComponent::Listener callbacks.
-    if (trajectoryBox.getActivated()) {
+    if (automationManager.getActivateState()) {
         if (m_lastTime != processor.getCurrentTime()) {
-            double deltaTime = (processor.getCurrentTime() - processor.getInitTimeOnPlay()) / trajectoryBox.getDuration();
+            double deltaTime = (processor.getCurrentTime() - processor.getInitTimeOnPlay()) / automationManager.getPlaybackDuration();
             mainField.setTrajectoryDeltaTime(deltaTime);
             m_lastTime = processor.getCurrentTime();
         }
-    } else if (processor.autoRecordTrajectory.x != -1.0 && processor.autoRecordTrajectory.y != -1.0) {
-        mainField.setTrajectoryPosition(processor.autoRecordTrajectory);
+    } else if (automationManager.hasValidPlaybackPosition()) {
+        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
+        mainField.repaint();
     }
 }
 
@@ -323,12 +336,6 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
-}
-
-void ControlGrisAudioProcessorEditor::trajectoryPositionChanged(Point<float> position) {
-    if (trajectoryBox.getActivated()) {
-        processor.setRecordTrajectoryValue(position);
-    }
 }
 
 //==============================================================================

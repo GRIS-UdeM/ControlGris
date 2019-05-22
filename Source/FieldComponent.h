@@ -22,6 +22,7 @@
 #include "GrisLookAndFeel.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"
+#include "AutomationManager.h"
 
 // This file defines the classes that implement the 2D view (azimuth-elevation
 // or azimuth-distance) and the elevation view.
@@ -55,7 +56,6 @@ public:
         virtual ~Listener() {}
 
         virtual void sourcePositionChanged(int sourceId) = 0;
-        virtual void trajectoryPositionChanged(Point<float> position) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -78,7 +78,7 @@ private:
 class MainFieldComponent : public FieldComponent
 {
 public:
-    MainFieldComponent();
+    MainFieldComponent(AutomationManager& automan);
     ~MainFieldComponent();
     
     void createSpanPathVBAP(Graphics& g, int i);
@@ -90,23 +90,21 @@ public:
  	void mouseUp (const MouseEvent &event);
 
     void setSpatMode(SpatModeEnum spatMode);
+
     void setTrajectoryDeltaTime(double t);
-    void setTrajectoryPosition(Point<float> pos);
 
 private:
+    AutomationManager& automationManager;
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
     Point <float> degreeToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToDegree(Point <float> p, int p_iFieldWidth);
     Point <float> posToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
+
     Point <int> clipRecordingPosition(Point<int> pos);
-    Point <float> smoothRecordingPosition(Point<float> pos);
 
     SpatModeEnum m_spatMode;
 
-    Source recordTrajectory;
-    Array<Point<float>> trajectoryPoints;
-    Point<float> lastRecordingPoint;
     double m_trajectoryDeltaTime;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
