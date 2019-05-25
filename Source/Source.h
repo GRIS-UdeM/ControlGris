@@ -70,6 +70,9 @@ public:
     void computeXY();
     void computeAzimuthElevation();
 
+    void fixSourcePosition(bool shouldBeFixed);
+    void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
+
     void setColour(Colour col);
     Colour getColour();
 
@@ -77,6 +80,7 @@ private:
     int m_id;
     bool m_changed;
     bool m_radiusIsElevation;
+
     float m_azimuth;
     float m_elevation;
     float m_distance;
@@ -84,7 +88,12 @@ private:
     float m_eleSpan;
     float m_x;
     float m_y;
+
     Colour colour;
+
+    float fixedAzimuth;
+    float fixedElevation;
+    float fixedDistance;
 
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
 

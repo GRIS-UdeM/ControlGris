@@ -34,6 +34,8 @@ public:
     void setPlaybackDuration(double value);
     double getPlaybackDuration();
 
+    void setNumberOfCycles(int value);
+
     void setPlaybackPositionX(float value);
     void setPlaybackPositionY(float value);
     bool hasValidPlaybackPosition();
@@ -47,6 +49,8 @@ public:
     void createRecordingPath(Path& path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
 
+    void setSourceLink(int value);
+    int getSourceLink();
     void setDrawingType(int type);
     int getDrawingType();
 
@@ -67,7 +71,11 @@ public:
 private:
     ListenerList<Listener> listeners;
 
+    int             sourceLink;
     int             drawingType;
+
+    int             numOfCycles;
+    int             currentCycle;
 
     bool            activateState;
     double          playbackDuration;
@@ -77,8 +85,10 @@ private:
 
     double              trajectoryDeltaTime;
     Array<Point<float>> trajectoryPoints;
+    Point<float>        currentTrajectoryPoint;
     Point<float>        lastRecordingPoint;
 
+    void computeCurrentTrajectoryPoint();
     Point <float> smoothRecordingPosition(Point<float> pos);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationManager)

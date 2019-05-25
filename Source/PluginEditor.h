@@ -65,8 +65,10 @@ public:
     void sourcePlacementChanged(int value) override;
     void sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) override;
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxTypeChanged(int value) override;
+    void trajectoryBoxSourceLinkChanged(int value) override;
+    void trajectoryBoxTrajectoryTypeChanged(int value) override;
     void trajectoryBoxDurationChanged(double value) override;
+    void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;
     void trajectoryBoxClearButtonClicked() override;
 

@@ -63,6 +63,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_somethingChanged = false;
     m_numOfSources = 1;
     m_firstSourceId = 1;
+    m_selectedSourceId = 1;
     m_selectedOscFormat = 1;
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
@@ -189,6 +190,10 @@ void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propag
 
     if (propagate)
         sendOscMessage();
+}
+
+void ControlGrisAudioProcessor::setSelectedSourceId(int id) {
+    m_selectedSourceId = id;
 }
 
 int ControlGrisAudioProcessor::getNumberOfSources() {
@@ -353,9 +358,21 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position) {
-    if (automationManager.getActivateState()) {
-        parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
-        parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+    parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
+    parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+    switch (automationManager.getSourceLink()) {
+        case 1:
+            sources[m_selectedSourceId].setPos(automationManager.getSourcePosition());
+            break;
+        case 2:
+        case 3:
+            float deltaAzimuth = automationManager.getSource().getAzimuth();
+            float deltaElevation = automationManager.getSource().getElevation();
+            float deltaDistance = automationManager.getSource().getDistance();
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, deltaDistance);
+            }
+            break;
     }
 }
 
@@ -484,7 +501,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         phead->getCurrentPosition(playposinfo);
         m_isPlaying = playposinfo.isPlaying;
         if (m_needInitialization) {
-            m_initTimeOnPlay = playposinfo.timeInSeconds;
+            m_initTimeOnPlay = m_currentTime = playposinfo.timeInSeconds;
             m_needInitialization = false;
         } else {
             m_currentTime = playposinfo.timeInSeconds;

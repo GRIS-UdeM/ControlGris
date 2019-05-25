@@ -29,6 +29,9 @@ Source::Source() {
     m_eleSpan = 0.0;
     m_x = 0.0;
     m_y = 0.0;
+    fixedAzimuth = -1.0;
+    fixedElevation = -1.0;
+    fixedDistance = -1.0;
     colour = Colours::black;
 }
 
@@ -187,6 +190,28 @@ void Source::computeAzimuthElevation() {
         m_distance = rad;
     }
     m_changed = true;
+}
+
+void Source::fixSourcePosition(bool shouldBeFixed) {
+    if (shouldBeFixed) {
+        fixedAzimuth = m_azimuth;
+        fixedElevation = m_elevation;
+        fixedDistance = m_distance;
+    } else {
+        fixedAzimuth = -1.0;
+        fixedElevation = -1.0;
+        fixedDistance = -1.0;
+    }
+}
+
+void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
+    if (m_radiusIsElevation) {  // azimuth - elevation
+        setAzimuth(fixedAzimuth + deltaAzimuth);
+    } else {                    // azimuth - distance
+        setAzimuth(fixedAzimuth + deltaAzimuth);
+        //setDistance(fixedDistance - deltaDistance);
+    }
+    computeXY();
 }
 
 void Source::setColour(Colour col) {

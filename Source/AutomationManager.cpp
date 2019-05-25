@@ -20,11 +20,15 @@
 #include "AutomationManager.h"
 
 AutomationManager::AutomationManager() {
+    sourceLink = 1;
     drawingType = 1;
+    numOfCycles = 1;
+    currentCycle = 0;
     activateState = false;
     source.setX(0.5f);
     source.setY(0.5f);
     playbackDuration = 5.0;
+    currentTrajectoryPoint = Point<float> (140, 140);
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryDeltaTime = 0.0;
 }
@@ -45,6 +49,10 @@ void AutomationManager::setPlaybackDuration(double value) {
 
 double AutomationManager::getPlaybackDuration() {
     return playbackDuration;
+}
+
+void AutomationManager::setNumberOfCycles(int value) {
+    numOfCycles = value;
 }
 
 void AutomationManager::setPlaybackPositionX(float value) {
@@ -95,21 +103,37 @@ void AutomationManager::createRecordingPath(Path& path) {
 }
 
 void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
-    trajectoryDeltaTime = relativeTimeFromPlay / playbackDuration;
+    trajectoryDeltaTime = relativeTimeFromPlay / (playbackDuration * numOfCycles);
+    computeCurrentTrajectoryPoint();
 }
 
-Point<float> AutomationManager::getCurrentTrajectoryPoint() {
-    if (activateState) {
-        double delta = trajectoryDeltaTime * trajectoryPoints.size();
+void AutomationManager::computeCurrentTrajectoryPoint() {
+    if (trajectoryDeltaTime < 1.0) {
+        double delta = trajectoryDeltaTime * numOfCycles * trajectoryPoints.size();
+        if (delta + 1 >= trajectoryPoints.size()) {
+            delta = std::fmod(delta, trajectoryPoints.size());
+        }
         int index = (int)delta;
         if (index + 1 < trajectoryPoints.size()) {
             double frac = delta - index;
             Point<float> p1 = trajectoryPoints[index];
             Point<float> p2 = trajectoryPoints[index+1];
-            return Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+            currentTrajectoryPoint = Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
         } else {
-            return Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
+            currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
         }
+    } else {
+        currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
+    }
+
+    if (activateState) {
+        setSourcePosition(Point<float> (currentTrajectoryPoint.x / 300, 1.0 - currentTrajectoryPoint.y / 300));
+    }
+}
+
+Point<float> AutomationManager::getCurrentTrajectoryPoint() {
+    if (activateState) {
+        return currentTrajectoryPoint;
     } else {
         return getSourcePosition() * 300;
     }
@@ -131,11 +155,11 @@ Point<float> AutomationManager::getSourcePosition() {
 
 void AutomationManager::setDrawingType(int type) {
     drawingType = type;
+    trajectoryPoints.clear();
     switch (drawingType) {
         case 1:
             break;
         case 2:
-            trajectoryPoints.clear();
             for (int i = 0; i < 200; i++) {
                 float x = sinf(2.0 * M_PI * i / 199) * 140 + 150;
                 float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
@@ -143,7 +167,6 @@ void AutomationManager::setDrawingType(int type) {
             }
             break;
         case 3:
-            trajectoryPoints.clear();
             for (int i = 0; i < 200; i++) {
                 float x = -sinf(2.0 * M_PI * i / 199) * 140 + 150;
                 float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
@@ -155,4 +178,12 @@ void AutomationManager::setDrawingType(int type) {
 
 int AutomationManager::getDrawingType() {
     return drawingType;
+}
+
+void AutomationManager::setSourceLink(int value) {
+    sourceLink = value;
+}
+
+int AutomationManager::getSourceLink() {
+    return sourceLink;
 }

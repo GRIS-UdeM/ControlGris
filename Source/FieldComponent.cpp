@@ -259,12 +259,11 @@ void MainFieldComponent::paint(Graphics& g) {
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
-        g.setColour(Colours::blueviolet);
+        g.setColour(Colours::yellow);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
-        automationManager.setSourcePosition(Point<float>(dpos.x / width, 1.0 - dpos.y / width));
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
 

@@ -35,8 +35,10 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void trajectoryBoxTypeChanged(int value) = 0;
+        virtual void trajectoryBoxSourceLinkChanged(int value) = 0;
+        virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
         virtual void trajectoryBoxDurationChanged(double value) = 0;
+        virtual void trajectoryBoxNumOfCycleChanged(int value) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
         virtual void trajectoryBoxClearButtonClicked() = 0;
     };

@@ -27,6 +27,8 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     sourceLinkCombo.addItemList(SOURCE_LINK_TYPES, 1);
     sourceLinkCombo.setSelectedId(1);
     addAndMakeVisible(&sourceLinkCombo);
+    sourceLinkCombo.onChange = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkChanged(sourceLinkCombo.getSelectedId()); }); };
 
     trajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryTypeLabel);
@@ -35,7 +37,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     trajectoryTypeCombo.setSelectedId(1);
     addAndMakeVisible(&trajectoryTypeCombo);
     trajectoryTypeCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxTypeChanged(trajectoryTypeCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeChanged(trajectoryTypeCombo.getSelectedId()); }); };
 
     durationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
     addAndMakeVisible(&durationLabel);
@@ -60,7 +62,9 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     numOfCycleEditor.setTextToShowWhenEmpty ("1", Colours::white);
     numOfCycleEditor.setText("1", false);
     numOfCycleEditor.setInputRestrictions (6, "0123456789");
-    numOfCycleEditor.onReturnKey = [this] { cycleSpeedSlider.grabKeyboardFocus(); };
+    numOfCycleEditor.onReturnKey = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
+            cycleSpeedSlider.grabKeyboardFocus(); };
 
     cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
     addAndMakeVisible(&cycleSpeedLabel);

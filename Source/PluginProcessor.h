@@ -81,6 +81,8 @@ public:
     void setFirstSourceId(int firstSourceId, bool propagate=true);
     int getFirstSourceId();
 
+    void setSelectedSourceId(int id);
+
     void setNumberOfSources(int numOfSources, bool propagate=true);
     int getNumberOfSources();
 
@@ -120,6 +122,7 @@ private:
     bool m_oscConnected;
     int m_firstSourceId;
     int m_numOfSources;
+    int m_selectedSourceId;
     int m_selectedOscFormat;
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;

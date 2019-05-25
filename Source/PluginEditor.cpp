@@ -87,6 +87,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     elevationField.setSources(processor.getSources(), processor.getNumberOfSources());
 
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+    processor.setSelectedSourceId(m_selectedSource);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
@@ -107,7 +108,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     // The timer's callback update the interface if anything has changed.
     //-------------------------------------------------------------------
-    startTimerHz(30);
+    startTimerHz(50);
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
@@ -136,6 +137,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
+    processor.setSelectedSourceId(m_selectedSource);
 }
 
 // Value::Listener callback. Called when the stored window size changes.
@@ -169,6 +171,7 @@ void ControlGrisAudioProcessorEditor::oscActivated(bool state) {
 void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
     m_selectedSource = 0;
     processor.setNumberOfSources(numOfSources);
+    processor.setSelectedSourceId(m_selectedSource);
     settingsBox.setNumberOfSources(numOfSources);
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSources(processor.getSources(), numOfSources);
@@ -287,17 +290,44 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
+    processor.setSelectedSourceId(m_selectedSource);
 }
 
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::trajectoryBoxTypeChanged(int value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
+    int numOfSources = processor.getNumberOfSources();
+
+    if (value == 3) {
+        if (processor.getOscFormat() == 2) {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
+            }
+        } else {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
+            }
+        }
+    }
+
+    for (int i = 0; i < numOfSources; i++) {
+        processor.getSources()[i].fixSourcePosition(value);
+    }
+    automationManager.setSourceLink(value);
+    mainField.repaint();
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
     automationManager.setDrawingType(value);
     mainField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double value) {
     automationManager.setPlaybackDuration(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) {
+    automationManager.setNumberOfCycles(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
@@ -328,9 +358,9 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
     if (automationManager.getActivateState()) {
         if (m_lastTime != processor.getCurrentTime()) {
             automationManager.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
-            m_lastTime = processor.getCurrentTime();
             needRepaint = true;
         }
+        m_lastTime = processor.getCurrentTime();
     } else if (automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
         needRepaint = true;
@@ -351,6 +381,24 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
+    processor.setSelectedSourceId(m_selectedSource);
+
+    // Test fixed radius...
+    if (automationManager.getSourceLink() == 3) {
+        int numOfSources = processor.getNumberOfSources();
+        if (processor.getOscFormat() == 2) {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
+            }
+        } else {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
+            }
+        }
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].fixSourcePosition(automationManager.getSourceLink());
+        }
+    }
 }
 
 //==============================================================================
