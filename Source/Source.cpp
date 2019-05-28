@@ -197,21 +197,44 @@ void Source::fixSourcePosition(bool shouldBeFixed) {
         fixedAzimuth = m_azimuth;
         fixedElevation = m_elevation;
         fixedDistance = m_distance;
+        fixedX = m_x;
+        fixedY = m_y;
     } else {
         fixedAzimuth = -1.0;
         fixedElevation = -1.0;
         fixedDistance = -1.0;
+        fixedX = -1.0;
+        fixedY = -1.0;
     }
 }
 
 void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
     if (m_radiusIsElevation) {  // azimuth - elevation
         setAzimuth(fixedAzimuth + deltaAzimuth);
+        setElevation(fixedElevation + deltaElevation);
     } else {                    // azimuth - distance
         setAzimuth(fixedAzimuth + deltaAzimuth);
-        //setDistance(fixedDistance - deltaDistance);
+        setDistance(fixedDistance + deltaDistance);
     }
     computeXY();
+}
+
+void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {
+    float x = fixedX + deltaX;
+    float y = fixedY + deltaY;
+    x = x < 0.0f ? 0.0f : x > 1.0f ? 1.0f : x;
+    y = y < 0.0f ? 0.0f : y > 1.0f ? 1.0f : y;
+    setX(x);
+    setY(y);
+    computeAzimuthElevation();
+}
+
+float Source::getDeltaX() {
+    return m_x - fixedX;
+}
+
+float Source::getDeltaY() {
+    return m_y - fixedY;
 }
 
 void Source::setColour(Colour col) {

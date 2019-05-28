@@ -72,6 +72,10 @@ public:
 
     void fixSourcePosition(bool shouldBeFixed);
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
+    void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
+
+    float getDeltaX();
+    float getDeltaY();
 
     void setColour(Colour col);
     Colour getColour();
@@ -94,6 +98,8 @@ private:
     float fixedAzimuth;
     float fixedElevation;
     float fixedDistance;
+    float fixedX;
+    float fixedY;
 
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
 

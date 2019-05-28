@@ -360,17 +360,26 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
 void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position) {
     parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
     parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+
+    float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
     switch (automationManager.getSourceLink()) {
         case 1:
             sources[m_selectedSourceId].setPos(automationManager.getSourcePosition());
             break;
         case 2:
         case 3:
-            float deltaAzimuth = automationManager.getSource().getAzimuth();
-            float deltaElevation = automationManager.getSource().getElevation();
-            float deltaDistance = automationManager.getSource().getDistance();
+        case 4:
+        case 5:
+            deltaAzimuth = automationManager.getSource().getAzimuth();
             for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, deltaDistance);
+                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0f, 0.0f);
+            }
+            break;
+        case 6:
+            deltaX = automationManager.getSource().getX() - 0.5;
+            deltaY = automationManager.getSource().getY() - 0.5;
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
             }
             break;
     }

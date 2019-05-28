@@ -298,7 +298,8 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
     int numOfSources = processor.getNumberOfSources();
 
-    if (value == 3) {
+    // Fixed radius.
+    if (value == 3 || value == 5) {
         if (processor.getOscFormat() == 2) {
             for (int i = 1; i < numOfSources; i++) {
                 processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
@@ -310,9 +311,17 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
+    // Fixed angle.
+    if (value == 4 || value == 5) {
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i);
+        }
+    }
+
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(value);
     }
+
     automationManager.setSourceLink(value);
     mainField.repaint();
 }
@@ -383,9 +392,11 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
 
-    // Test fixed radius...
-    if (automationManager.getSourceLink() == 3) {
-        int numOfSources = processor.getNumberOfSources();
+    int numOfSources = processor.getNumberOfSources();
+    int sourceLink = automationManager.getSourceLink();
+
+    // Fixed radius.
+    if (sourceLink == 3 || sourceLink == 5) {
         if (processor.getOscFormat() == 2) {
             for (int i = 1; i < numOfSources; i++) {
                 processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
@@ -395,6 +406,27 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
                 processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
             }
         }
+    }
+
+    // Fixed angle.
+    if (sourceLink == 4 || sourceLink == 5) {
+        for (int i = 1; i < numOfSources; i++) {
+            float offset = processor.getSources()[0].getAzimuth();
+            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i + offset);
+        }
+    }
+
+    // Delta lock.
+    if (sourceLink == 6) {
+        float deltaX = processor.getSources()[0].getDeltaX();
+        float deltaY = processor.getSources()[0].getDeltaY();
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+        }
+    }
+
+    // Fix source positions.
+    if (2 <= sourceLink < 7) {
         for (int i = 0; i < numOfSources; i++) {
             processor.getSources()[i].fixSourcePosition(automationManager.getSourceLink());
         }
