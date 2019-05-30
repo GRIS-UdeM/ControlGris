@@ -318,6 +318,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
+    automationManager.fixSourcePosition(value);
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(value);
     }
@@ -341,6 +342,16 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) 
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
     automationManager.setActivateState(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
+    int numOfSources = processor.getNumberOfSources();
+    int sourceLink = automationManager.getSourceLink();
+
+    automationManager.fixSourcePosition(sourceLink);
+    for (int i = 0; i < numOfSources; i++) {
+        processor.getSources()[i].fixSourcePosition(sourceLink);
+    }
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
@@ -426,9 +437,10 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     }
 
     // Fix source positions.
+    automationManager.fixSourcePosition(sourceLink);
     if (2 <= sourceLink < 7) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].fixSourcePosition(automationManager.getSourceLink());
+            processor.getSources()[i].fixSourcePosition(sourceLink);
         }
     }
 }

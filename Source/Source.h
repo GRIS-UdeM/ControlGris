@@ -71,11 +71,11 @@ public:
     void computeAzimuthElevation();
 
     void fixSourcePosition(bool shouldBeFixed);
-    void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
-    void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
-
     float getDeltaX();
     float getDeltaY();
+
+    void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
+    void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
 
     void setColour(Colour col);
     Colour getColour();

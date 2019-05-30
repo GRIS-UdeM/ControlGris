@@ -127,10 +127,17 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
 void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
     int paramId, sourceId = parameterID.getTrailingIntValue();
 
+    bool needToLinkSourcePositions = false;
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         automationManager.setPlaybackPositionX(newValue);
+        needToLinkSourcePositions = true;
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         automationManager.setPlaybackPositionY(newValue);
+        needToLinkSourcePositions = true;
+    }
+
+    if (needToLinkSourcePositions) {
+        linkSourcePositions();
     }
 
     if (parameterID.startsWith("azimuthSpan_")) {
@@ -361,6 +368,10 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position)
     parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
     parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
 
+    linkSourcePositions();
+}
+
+void ControlGrisAudioProcessor::linkSourcePositions() {
     float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
     switch (automationManager.getSourceLink()) {
         case 1:
@@ -376,8 +387,8 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position)
             }
             break;
         case 6:
-            deltaX = automationManager.getSource().getX() - 0.5;
-            deltaY = automationManager.getSource().getY() - 0.5;
+            deltaX = automationManager.getSource().getDeltaX();
+            deltaY = automationManager.getSource().getDeltaY();
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
             }

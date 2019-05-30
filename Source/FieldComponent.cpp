@@ -245,8 +245,10 @@ void MainFieldComponent::paint(Graphics& g) {
         Point<float> rpos;
         if (automationManager.getRecordingTrajectorySize() > 1) {
             rpos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+        } else if (m_spatMode == SPAT_MODE_VBAP) {
+            rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
         } else {
-            rpos = Point<float> (150 - kSourceRadius, 150 - kSourceRadius);
+            rpos = posToXy(automationManager.getSourcePosition(), width);
         }
         g.setColour(Colours::grey);
         g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);

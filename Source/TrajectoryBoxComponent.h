@@ -40,6 +40,7 @@ public:
         virtual void trajectoryBoxDurationChanged(double value) = 0;
         virtual void trajectoryBoxNumOfCycleChanged(int value) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
+        virtual void trajectoryBoxFixSourceButtonClicked() = 0;
         virtual void trajectoryBoxClearButtonClicked() = 0;
     };
 
@@ -65,6 +66,7 @@ private:
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;
 
+    TextButton      fixSourceButton;
     TextButton      clearButton;
     TextButton      activateButton;
 

@@ -113,6 +113,8 @@ public:
 
     void trajectoryPositionChanged(Point<float> position) override;
 
+    void linkSourcePositions();
+
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 

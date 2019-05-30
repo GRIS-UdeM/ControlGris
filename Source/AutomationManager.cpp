@@ -28,7 +28,7 @@ AutomationManager::AutomationManager() {
     source.setX(0.5f);
     source.setY(0.5f);
     playbackDuration = 5.0;
-    currentTrajectoryPoint = Point<float> (140, 140);
+    currentTrajectoryPoint = Point<float> (150, 150);
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryDeltaTime = 0.0;
 }
@@ -135,7 +135,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() {
     if (activateState) {
         return currentTrajectoryPoint;
     } else {
-        return getSourcePosition() * 300;
+        return Point<float> (getSourcePosition().x * 300, (1.0 - getSourcePosition().y) * 300);
     }
 }
 
@@ -151,6 +151,10 @@ Source& AutomationManager::getSource() {
 
 Point<float> AutomationManager::getSourcePosition() {
     return source.getPos();
+}
+
+void AutomationManager::fixSourcePosition(bool shouldBeFixed) {
+    source.fixSourcePosition(shouldBeFixed);
 }
 
 void AutomationManager::setDrawingType(int type) {

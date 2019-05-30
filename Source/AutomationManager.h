@@ -57,6 +57,7 @@ public:
     Source& getSource();
     void setSourcePosition(Point<float> pos);
     Point<float> getSourcePosition();
+    void fixSourcePosition(bool shouldBeFixed);
 
     struct Listener
     {

@@ -70,6 +70,7 @@ public:
     void trajectoryBoxDurationChanged(double value) override;
     void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;
+    void trajectoryBoxFixSourceButtonClicked() override;
     void trajectoryBoxClearButtonClicked() override;
 
     void setPluginState();
