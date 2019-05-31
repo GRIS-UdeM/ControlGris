@@ -98,9 +98,9 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void selectedSourceClicked() = 0;
-        virtual void parameterChanged(int parameterId, double value) = 0;
-        virtual void parameterLinkChanged(int parameterId, bool value) = 0;
+        virtual void parametersBoxSelectedSourceClicked() = 0;
+        virtual void parametersBoxParameterChanged(int parameterId, double value) = 0;
+        virtual void parametersBoxLinkChanged(int parameterId, bool value) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

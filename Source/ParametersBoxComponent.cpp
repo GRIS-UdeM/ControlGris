@@ -124,31 +124,30 @@ void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         m_spanLinked = ! m_spanLinked;
         repaint();
-        //listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
     }
 
     // Area where the selected source is shown.
     area = Rectangle<float>(x-5, y-5, 30, 30);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
-        listeners.call([&] (Listener& l) { l.selectedSourceClicked(); });
+        listeners.call([&] (Listener& l) { l.parametersBoxSelectedSourceClicked(); });
     }
 }
 
 void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
-    listeners.call([&] (Listener& l) { l.parameterChanged(parameterId, value); });
+    listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(parameterId, value); });
     if (m_spanLinked) {
         if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
             p_elevationSpan.setValue(value);
-            listeners.call([&] (Listener& l) { l.parameterChanged(SOURCE_ID_ELEVATION_SPAN, value); });
+            listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(SOURCE_ID_ELEVATION_SPAN, value); });
         } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
             p_azimuthSpan.setValue(value);
-            listeners.call([&] (Listener& l) { l.parameterChanged(SOURCE_ID_AZIMUTH_SPAN, value); });
+            listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(SOURCE_ID_AZIMUTH_SPAN, value); });
         }
     }
 }
 
 void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
-    listeners.call([&] (Listener& l) { l.parameterLinkChanged(parameterId, value); });
+    listeners.call([&] (Listener& l) { l.parametersBoxLinkChanged(parameterId, value); });
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {

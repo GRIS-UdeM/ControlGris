@@ -22,9 +22,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
 
-class SourceBoxComponent : public Component,
-                           public ComboBox::Listener,
-                           public Slider::Listener
+class SourceBoxComponent : public Component
 {
 public:
     SourceBoxComponent();
@@ -32,8 +30,6 @@ public:
 
     void paint(Graphics&) override;
     void resized() override;
-    void comboBoxChanged(ComboBox *combo) override;
-    void sliderValueChanged(Slider *slider) override;
 
     void setNumberOfSources(int numOfSources);
 
@@ -41,8 +37,8 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void sourcePlacementChanged(int value) = 0;
-        virtual void sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) = 0;
+        virtual void sourceBoxPlacementChanged(int value) = 0;
+        virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

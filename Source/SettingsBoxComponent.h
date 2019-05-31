@@ -50,11 +50,11 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void oscFormatChanged(int selectedId) = 0;
-        virtual void oscPortNumberChanged(int oscPort) = 0;
-        virtual void oscActivated(bool state) = 0;
-        virtual void numberOfSourcesChanged(int numOfSources) = 0;
-        virtual void firstSourceIdChanged(int firstSourceId) = 0;
+        virtual void settingsBoxOscFormatChanged(int selectedId) = 0;
+        virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
+        virtual void settingsBoxOscActivated(bool state) = 0;
+        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
+        virtual void settingsBoxFirstSourceIdChanged(int firstSourceId) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

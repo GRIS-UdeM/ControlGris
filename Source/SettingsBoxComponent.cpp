@@ -26,7 +26,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatCombo.addItem("VBAP - ServerGris", 1);
     oscFormatCombo.addItem("LBAP - ServerGris", 2);
     oscFormatCombo.onChange = [this] {
-            listeners.call([&] (Listener& l) { l.oscFormatChanged(oscFormatCombo.getSelectedId()); });
+            listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged(oscFormatCombo.getSelectedId()); });
         };
     oscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&oscFormatCombo);
@@ -42,9 +42,9 @@ SettingsBoxComponent::SettingsBoxComponent() {
         };
     oscPortEditor.onFocusLost = [this, defaultPort] {
             if (! oscPortEditor.isEmpty()) {
-                listeners.call([&] (Listener& l) { l.oscPortNumberChanged(oscPortEditor.getText().getIntValue()); });
+                listeners.call([&] (Listener& l) { l.settingsBoxOscPortNumberChanged(oscPortEditor.getText().getIntValue()); });
             } else {
-                listeners.call([&] (Listener& l) { l.oscPortNumberChanged(defaultPort.getIntValue()); oscPortEditor.setText(defaultPort); });
+                listeners.call([&] (Listener& l) { l.settingsBoxOscPortNumberChanged(defaultPort.getIntValue()); oscPortEditor.setText(defaultPort); });
             }
         };
     addAndMakeVisible(&oscPortEditor);
@@ -59,9 +59,9 @@ SettingsBoxComponent::SettingsBoxComponent() {
         };
     numOfSourcesEditor.onFocusLost = [this] {
             if (! numOfSourcesEditor.isEmpty()) {
-                listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(numOfSourcesEditor.getText().getIntValue()); });
+                listeners.call([&] (Listener& l) { l.settingsBoxNumberOfSourcesChanged(numOfSourcesEditor.getText().getIntValue()); });
             } else {
-                listeners.call([&] (Listener& l) { l.numberOfSourcesChanged(1); numOfSourcesEditor.setText("1"); });
+                listeners.call([&] (Listener& l) { l.settingsBoxNumberOfSourcesChanged(1); numOfSourcesEditor.setText("1"); });
             }
         };
     addAndMakeVisible(&numOfSourcesEditor);
@@ -76,16 +76,16 @@ SettingsBoxComponent::SettingsBoxComponent() {
         };
     firstSourceIdEditor.onFocusLost = [this] {
             if (! firstSourceIdEditor.isEmpty()) {
-                listeners.call([&] (Listener& l) { l.firstSourceIdChanged(firstSourceIdEditor.getText().getIntValue()); });
+                listeners.call([&] (Listener& l) { l.settingsBoxFirstSourceIdChanged(firstSourceIdEditor.getText().getIntValue()); });
             } else {
-                listeners.call([&] (Listener& l) { l.firstSourceIdChanged(1); firstSourceIdEditor.setText("1"); });
+                listeners.call([&] (Listener& l) { l.settingsBoxFirstSourceIdChanged(1); firstSourceIdEditor.setText("1"); });
             }
         };
     addAndMakeVisible(&firstSourceIdEditor);
 
     activateButton.setButtonText("Activate OSC");
     activateButton.onClick = [this] {
-            listeners.call([&] (Listener& l) { l.oscActivated(activateButton.getToggleState()); });
+            listeners.call([&] (Listener& l) { l.settingsBoxOscActivated(activateButton.getToggleState()); });
         };
     addAndMakeVisible(activateButton);
 }

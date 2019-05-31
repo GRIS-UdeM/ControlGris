@@ -127,11 +127,11 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     // Set global settings values.
     //----------------------------
-    oscFormatChanged(processor.getOscFormat());
-    oscPortNumberChanged(processor.getOscPortNumber());
-    oscActivated(processor.getOscConnected());
-    numberOfSourcesChanged(processor.getNumberOfSources());
-    firstSourceIdChanged(processor.getFirstSourceId());
+    settingsBoxOscFormatChanged(processor.getOscFormat());
+    settingsBoxOscPortNumberChanged(processor.getOscPortNumber());
+    settingsBoxOscActivated(processor.getOscConnected());
+    settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources());
+    settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
 
     // Update the interface.
     //----------------------
@@ -149,7 +149,7 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 
 // SettingsBoxComponent::Listener callbacks.
 //------------------------------------------
-void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(int selectedId) {
     processor.setOscFormat(selectedId);
     settingsBox.setOscFormat(selectedId);
     bool selectionIsLBAP = selectedId == 2;
@@ -159,17 +159,17 @@ void ControlGrisAudioProcessorEditor::oscFormatChanged(int selectedId) {
     resized();
 }
 
-void ControlGrisAudioProcessorEditor::oscPortNumberChanged(int oscPort) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscPortNumberChanged(int oscPort) {
     processor.setOscPortNumber(oscPort);
     settingsBox.setOscPortNumber(oscPort);
 }
 
-void ControlGrisAudioProcessorEditor::oscActivated(bool state) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
     processor.handleOscConnection(state);
     settingsBox.setActivateButtonState(processor.getOscConnected());
 }
 
-void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
+void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
     m_selectedSource = 0;
     processor.setNumberOfSources(numOfSources);
     processor.setSelectedSourceId(m_selectedSource);
@@ -180,7 +180,7 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChanged(int numOfSources) {
     sourceBox.setNumberOfSources(numOfSources);
 }
 
-void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
+void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId) {
     processor.setFirstSourceId(firstSourceId);
     settingsBox.setFirstSourceId(firstSourceId);
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
@@ -192,7 +192,7 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
 
 // SourceBoxComponent::Listener callbacks.
 //----------------------------------------
-void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
+void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     int numOfSources = processor.getNumberOfSources();
     const float azims2[2] = {-90.0f, 90.0f};
     const float azims4[4] = {-45.0f, 45.0f, -135.0f, 135.0f};
@@ -261,7 +261,7 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
     repaint();
 }
 
-void ControlGrisAudioProcessorEditor::sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) {
+void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) {
     if (processor.getOscFormat() == 2) {
         processor.getSources()[sourceNum-1].setCoordinates(angle, 0.0f, rayLen * 1.4f);
     } else {
@@ -272,13 +272,13 @@ void ControlGrisAudioProcessorEditor::sourceNumberPositionChanged(int sourceNum,
 
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::parameterLinkChanged(int parameterId, bool value) {
+void ControlGrisAudioProcessorEditor::parametersBoxLinkChanged(int parameterId, bool value) {
     StringArray parameterNames({"azimuthLink", "elevationLink", "distanceLink", "xLink",
                                 "yLink", "azimuthSpanLink", "elevationSpanLink"});
     valueTreeState.state.setProperty(parameterNames[parameterId], value, nullptr);
 }
 
-void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double value) {
+void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value) {
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
     mainField.repaint();
@@ -286,7 +286,7 @@ void ControlGrisAudioProcessorEditor::parameterChanged(int parameterId, double v
         elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::selectedSourceClicked() {
+void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
     m_selectedSource = (m_selectedSource + 1) % processor.getNumberOfSources();
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
@@ -396,7 +396,7 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
 
 // FieldComponent::Listener callback.
 //-----------------------------------
-void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
     processor.setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, processor.getSources()[sourceId].getNormalizedAzimuth());

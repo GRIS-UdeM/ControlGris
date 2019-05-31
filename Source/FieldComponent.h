@@ -55,7 +55,7 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void sourcePositionChanged(int sourceId) = 0;
+        virtual void fieldSourcePositionChanged(int sourceId) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

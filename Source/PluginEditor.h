@@ -52,18 +52,25 @@ public:
     void valueChanged (Value&) override;
     void timerCallback() override;
 
-    void sourcePositionChanged(int sourceId) override;
-    void selectedSourceClicked() override;
-    void parameterLinkChanged(int parameterId, bool value) override;
-    void parameterChanged(int parameterId, double value) override;
-    void oscFormatChanged(int selectedId) override;
-    void oscPortNumberChanged(int oscPort) override;
-    void oscActivated(bool state) override;
-    void numberOfSourcesChanged(int numOfSources) override;
-    void firstSourceIdChanged(int firstSourceId) override;
+    // FieldComponent::Listeners
+    void fieldSourcePositionChanged(int sourceId) override;
+
+    // ParametersBoxComponent::Listeners
+    void parametersBoxSelectedSourceClicked() override;
+    void parametersBoxLinkChanged(int parameterId, bool value) override;
+    void parametersBoxParameterChanged(int parameterId, double value) override;
+
+    // SettingsBoxComponent::Listeners
+    void settingsBoxOscFormatChanged(int selectedId) override;
+    void settingsBoxOscPortNumberChanged(int oscPort) override;
+    void settingsBoxOscActivated(bool state) override;
+    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
+    void settingsBoxFirstSourceIdChanged(int firstSourceId) override;
+
     // SourceBoxComponent::Listeners
-    void sourcePlacementChanged(int value) override;
-    void sourceNumberPositionChanged(int sourceNum, float angle, float rayLen) override;
+    void sourceBoxPlacementChanged(int value) override;
+    void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) override;
+
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxSourceLinkChanged(int value) override;
     void trajectoryBoxTrajectoryTypeChanged(int value) override;

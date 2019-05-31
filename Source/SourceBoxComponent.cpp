@@ -31,7 +31,9 @@ SourceBoxComponent::SourceBoxComponent() {
     addAndMakeVisible(&sourcePlacementCombo);
     sourcePlacementCombo.setTextWhenNothingSelected("Choose a source placement...");
     sourcePlacementCombo.addItemList(SOURCE_PLACEMENT_SKETCH, 1);
-    sourcePlacementCombo.addListener(this);
+    sourcePlacementCombo.onChange = [this] { 
+            listeners.call([&] (Listener& l) { l.sourceBoxPlacementChanged(sourcePlacementCombo.getSelectedId()); });
+        };
 
     sourceNumberLabel.setText("Source Number:", NotificationType::dontSendNotification);
     addAndMakeVisible(&sourceNumberLabel);
@@ -42,7 +44,7 @@ SourceBoxComponent::SourceBoxComponent() {
         sourceNumberCombo.addItem(String(i), i);
     }
     sourceNumberCombo.setSelectedId(selectedSourceNumber);
-    sourceNumberCombo.addListener(this);
+    sourceNumberCombo.onChange = [this] { selectedSourceNumber = sourceNumberCombo.getSelectedId(); };
 
     rayLengthLabel.setText("Ray Length:", NotificationType::dontSendNotification);
     addAndMakeVisible(&rayLengthLabel);
@@ -51,8 +53,11 @@ SourceBoxComponent::SourceBoxComponent() {
     rayLengthSlider.setValue(1.0, NotificationType::sendNotificationAsync);
     rayLengthSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
     rayLengthSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
-    rayLengthSlider.addListener(this);
     addAndMakeVisible(&rayLengthSlider);
+    rayLengthSlider.onValueChange = [this] { 
+            currentRayLength = (float)rayLengthSlider.getValue();
+            listeners.call([&] (Listener& l) { l.sourceBoxPositionChanged(selectedSourceNumber, currentAngle, currentRayLength); });
+        };
 
     angleLabel.setText("Angle:", NotificationType::dontSendNotification);
     addAndMakeVisible(&angleLabel);
@@ -61,8 +66,11 @@ SourceBoxComponent::SourceBoxComponent() {
     angleSlider.setValue(90.0, NotificationType::sendNotificationAsync);
     angleSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
     angleSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
-    angleSlider.addListener(this);
     addAndMakeVisible(&angleSlider);
+    angleSlider.onValueChange = [this] { 
+            currentAngle = (float)angleSlider.getValue();
+            listeners.call([&] (Listener& l) { l.sourceBoxPositionChanged(selectedSourceNumber, currentAngle, currentRayLength); });
+        };
 }
 
 SourceBoxComponent::~SourceBoxComponent() {}
@@ -85,23 +93,6 @@ void SourceBoxComponent::resized() {
 
     angleLabel.setBounds(305, 70, 150, 15);
     angleSlider.setBounds(380, 70, 200, 20);
-}
-
-void SourceBoxComponent::comboBoxChanged(ComboBox *combo) {
-    if (combo == &sourcePlacementCombo) {
-        listeners.call([&] (Listener& l) { l.sourcePlacementChanged(combo->getSelectedId()); });
-    } else if (combo == &sourceNumberCombo) {
-        selectedSourceNumber = combo->getSelectedId();
-    }
-}
-
-void SourceBoxComponent::sliderValueChanged(Slider *slider) {
-    if (slider == &rayLengthSlider) {
-        currentRayLength = (float)slider->getValue();
-    } else if (slider == &angleSlider) {
-        currentAngle = (float)slider->getValue();
-    }
-    listeners.call([&] (Listener& l) { l.sourceNumberPositionChanged(selectedSourceNumber, currentAngle, currentRayLength); });
 }
 
 void SourceBoxComponent::setNumberOfSources(int numOfSources) {
