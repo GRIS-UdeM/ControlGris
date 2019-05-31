@@ -19,6 +19,7 @@
  *************************************************************************/
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
+#include "ControlGrisConstants.h"
 
 //==============================================================================
 FieldComponent::FieldComponent() {}
@@ -301,7 +302,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     Rectangle<float> area;
 
     // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == 1) {
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
         if (automationManager.getRecordingTrajectorySize() > 1) {
             pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
         } else if (m_spatMode == SPAT_MODE_VBAP) {

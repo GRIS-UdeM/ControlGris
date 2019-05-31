@@ -19,6 +19,7 @@
  *************************************************************************/
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ControlGrisConstants.h"
 
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
                                                                   AudioProcessorValueTreeState& vts,
@@ -192,7 +193,6 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChanged(int firstSourceId) {
 // SourceBoxComponent::Listener callbacks.
 //----------------------------------------
 void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
-    float azimuth;
     int numOfSources = processor.getNumberOfSources();
     const float azims2[2] = {-90.0f, 90.0f};
     const float azims4[4] = {-45.0f, 45.0f, -135.0f, 135.0f};
@@ -202,7 +202,7 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
     float offset = 360.0f / numOfSources / 2.0f;
 
     switch(value) {
-        case 1:
+        case SOURCE_PLACEMENT_LEFT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
                     processor.getSources()[i].setCoordinates(-azims2[i], 0.0f, 1.0f);
@@ -214,7 +214,7 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
                     processor.getSources()[i].setCoordinates(-azims8[i], 0.0f, 1.0f);
             }
             break;
-        case 2:
+        case SOURCE_PLACEMENT_RIGHT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
                     processor.getSources()[i].setCoordinates(azims2[i], 0.0f, 1.0f);
@@ -226,37 +226,38 @@ void ControlGrisAudioProcessorEditor::sourcePlacementChanged(int value) {
                     processor.getSources()[i].setCoordinates(azims8[i], 0.0f, 1.0f);
             }
             break;
-        case 3:
+        case SOURCE_PLACEMENT_LEFT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, 0.0f, 1.0f);
             }
             break;
-        case 4:
+        case SOURCE_PLACEMENT_LEFT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, 0.0f, 1.0f);
             }
             break;
-        case 5:
+        case SOURCE_PLACEMENT_RIGHT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, 0.0f, 1.0f);
             }
             break;
-        case 6:
+        case SOURCE_PLACEMENT_RIGHT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, 0.0f, 1.0f);
             }
             break;
-        case 7:
+        case SOURCE_PLACEMENT_TOP_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, 1.0f);
             }
             break;
-        case 8:
+        case SOURCE_PLACEMENT_TOP_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, 1.0f);
             }
             break;
     }
+
     repaint();
 }
 
@@ -299,7 +300,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     int numOfSources = processor.getNumberOfSources();
 
     // Fixed radius.
-    if (value == 3 || value == 5) {
+    if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         if (processor.getOscFormat() == 2) {
             for (int i = 1; i < numOfSources; i++) {
                 processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
@@ -312,18 +313,20 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     }
 
     // Fixed angle.
-    if (value == 4 || value == 5) {
+    if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         for (int i = 0; i < numOfSources; i++) {
             processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i);
         }
     }
 
-    automationManager.fixSourcePosition(value);
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    automationManager.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(value);
+        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
 
     automationManager.setSourceLink(value);
+
     mainField.repaint();
 }
 
@@ -348,9 +351,10 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
-    automationManager.fixSourcePosition(sourceLink);
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    automationManager.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(sourceLink);
+        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
 }
 
@@ -407,7 +411,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     int sourceLink = automationManager.getSourceLink();
 
     // Fixed radius.
-    if (sourceLink == 3 || sourceLink == 5) {
+    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         if (processor.getOscFormat() == 2) {
             for (int i = 1; i < numOfSources; i++) {
                 processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
@@ -420,7 +424,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     }
 
     // Fixed angle.
-    if (sourceLink == 4 || sourceLink == 5) {
+    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         for (int i = 1; i < numOfSources; i++) {
             float offset = processor.getSources()[0].getAzimuth();
             processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i + offset);
@@ -428,7 +432,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     }
 
     // Delta lock.
-    if (sourceLink == 6) {
+    if (sourceLink == SOURCE_LINK_DELTA_LOCK) {
         float deltaX = processor.getSources()[0].getDeltaX();
         float deltaY = processor.getSources()[0].getDeltaY();
         for (int i = 1; i < numOfSources; i++) {
@@ -437,10 +441,11 @@ void ControlGrisAudioProcessorEditor::sourcePositionChanged(int sourceId) {
     }
 
     // Fix source positions.
-    automationManager.fixSourcePosition(sourceLink);
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    automationManager.fixSourcePosition(shouldBeFixed);
     if (2 <= sourceLink < 7) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].fixSourcePosition(sourceLink);
+            processor.getSources()[i].fixSourcePosition(shouldBeFixed);
         }
     }
 }

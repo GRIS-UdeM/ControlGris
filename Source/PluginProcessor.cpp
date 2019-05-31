@@ -19,6 +19,7 @@
  *************************************************************************/
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "ControlGrisConstants.h"
 
 // The parameter Layout creates the automatable parameters.
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
@@ -373,20 +374,21 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position)
 
 void ControlGrisAudioProcessor::linkSourcePositions() {
     float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
+
     switch (automationManager.getSourceLink()) {
-        case 1:
+        case SOURCE_LINK_INDEPENDANT:
             sources[m_selectedSourceId].setPos(automationManager.getSourcePosition());
             break;
-        case 2:
-        case 3:
-        case 4:
-        case 5:
+        case SOURCE_LINK_CIRCULAR:
+        case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
+        case SOURCE_LINK_CIRCULAR_FIXED_ANGLE:
+        case SOURCE_LINK_CIRCULAR_FULLY_FIXED:
             deltaAzimuth = automationManager.getSource().getAzimuth();
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0f, 0.0f);
             }
             break;
-        case 6:
+        case SOURCE_LINK_DELTA_LOCK:
             deltaX = automationManager.getSource().getDeltaX();
             deltaY = automationManager.getSource().getDeltaY();
             for (int i = 0; i < m_numOfSources; i++) {

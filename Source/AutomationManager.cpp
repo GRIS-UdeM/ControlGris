@@ -18,10 +18,11 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "AutomationManager.h"
+#include "ControlGrisConstants.h"
 
 AutomationManager::AutomationManager() {
-    sourceLink = 1;
-    drawingType = 1;
+    sourceLink = SOURCE_LINK_INDEPENDANT;
+    drawingType = TRAJECTORY_TYPE_DRAWING;
     numOfCycles = 1;
     currentCycle = 0;
     activateState = false;
@@ -159,18 +160,20 @@ void AutomationManager::fixSourcePosition(bool shouldBeFixed) {
 
 void AutomationManager::setDrawingType(int type) {
     drawingType = type;
+
     trajectoryPoints.clear();
+
     switch (drawingType) {
-        case 1:
+        case TRAJECTORY_TYPE_DRAWING:
             break;
-        case 2:
+        case TRAJECTORY_TYPE_CIRCLE_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
                 float x = sinf(2.0 * M_PI * i / 199) * 140 + 150;
                 float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case 3:
+        case TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
                 float x = -sinf(2.0 * M_PI * i / 199) * 140 + 150;
                 float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
