@@ -19,6 +19,11 @@
  *************************************************************************/
 #pragma once
 
+// Global variables.
+//------------------
+const int FIELD_WIDTH = 300;
+const int MAX_NUMBER_OF_SOURCES = 8;
+
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
 enum SOURCE_PLACEMENT_ENUM {    SOURCE_PLACEMENT_LEFT_ALTERNATE = 1,

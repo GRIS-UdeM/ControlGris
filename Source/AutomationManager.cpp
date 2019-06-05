@@ -29,7 +29,7 @@ AutomationManager::AutomationManager() {
     source.setX(0.5f);
     source.setY(0.5f);
     playbackDuration = 5.0;
-    currentTrajectoryPoint = Point<float> (150, 150);
+    currentTrajectoryPoint = Point<float> (FIELD_WIDTH / 2, FIELD_WIDTH / 2);
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryDeltaTime = 0.0;
 }
@@ -128,7 +128,7 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
     }
 
     if (activateState) {
-        setSourcePosition(Point<float> (currentTrajectoryPoint.x / 300, 1.0 - currentTrajectoryPoint.y / 300));
+        setSourcePosition(Point<float> (currentTrajectoryPoint.x / FIELD_WIDTH, 1.0 - currentTrajectoryPoint.y / FIELD_WIDTH));
     }
 }
 
@@ -136,7 +136,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() {
     if (activateState) {
         return currentTrajectoryPoint;
     } else {
-        return Point<float> (getSourcePosition().x * 300, (1.0 - getSourcePosition().y) * 300);
+        return Point<float> (getSourcePosition().x * FIELD_WIDTH, (1.0 - getSourcePosition().y) * FIELD_WIDTH);
     }
 }
 
@@ -163,20 +163,22 @@ void AutomationManager::setDrawingType(int type) {
 
     trajectoryPoints.clear();
 
+    int offset = FIELD_WIDTH / 2;
+    int radius = offset - 10;
     switch (drawingType) {
         case TRAJECTORY_TYPE_DRAWING:
             break;
         case TRAJECTORY_TYPE_CIRCLE_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = sinf(2.0 * M_PI * i / 199) * 140 + 150;
-                float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
+                float x = sinf(2.0 * M_PI * i / 199) * radius + offset;
+                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = -sinf(2.0 * M_PI * i / 199) * 140 + 150;
-                float y = -cosf(2.0 * M_PI * i / 199) * 140 + 150;
+                float x = -sinf(2.0 * M_PI * i / 199) * radius + offset;
+                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;

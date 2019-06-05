@@ -19,7 +19,6 @@
  *************************************************************************/
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
-#include "ControlGrisConstants.h"
 
 // The parameter Layout creates the automatable parameters.
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
@@ -32,7 +31,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"), String("Recording Trajectory Y"),
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
 
-    for (int i = 0; i < MaxNumberOfSources; i++) {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
         String id1(i + 1);
         parameters.push_back(std::make_unique<Parameter>(
@@ -87,7 +86,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Per source parameters. Because there is no attachment to the automatable
     // parameters, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
-    for (int i = 0; i < MaxNumberOfSources; i++) {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
         // Non-automatable, per source, parameters.
         parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);

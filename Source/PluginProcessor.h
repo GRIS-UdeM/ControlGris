@@ -22,8 +22,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "Source.h"
 #include "AutomationManager.h"
-
-const int MaxNumberOfSources = 8;
+#include "ControlGrisConstants.h"
 
 class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,
@@ -136,7 +135,7 @@ private:
 
     bool m_isPlaying;
 
-    Source sources[MaxNumberOfSources];
+    Source sources[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
 

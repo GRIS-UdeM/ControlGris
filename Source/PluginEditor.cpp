@@ -92,7 +92,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
-    setResizeLimits(300, 320, 1800, 1300);
+    setResizeLimits(FIELD_WIDTH, FIELD_WIDTH + 20, 1800, 1300);
 
     lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
     lastUIHeight.referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
@@ -353,7 +353,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
-    automationManager.resetRecordingTrajectory(Point<float> (150 - kSourceRadius, 150 - kSourceRadius));
+    float center = FIELD_WIDTH / 2.0 - kSourceRadius;
+    automationManager.resetRecordingTrajectory(Point<float> (center, center));
     mainField.repaint();
 }
 
@@ -456,7 +457,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     double height = getHeight();
 
     double fieldSize = width / 2;
-    if (fieldSize < 300) { fieldSize = 300; }
+    if (fieldSize < FIELD_WIDTH) { fieldSize = FIELD_WIDTH; }
 
     mainBanner.setBounds(0, 0, fieldSize, 20);
     mainField.setBounds(0, 20, fieldSize, fieldSize);
