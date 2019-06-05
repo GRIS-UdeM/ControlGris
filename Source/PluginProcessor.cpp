@@ -81,11 +81,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("oscConnected", true, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
-    parameters.state.setProperty("azimuthLink", false, nullptr);
-    parameters.state.setProperty("elevationLink", false, nullptr);
-    parameters.state.setProperty("distanceLink", false, nullptr);
-    parameters.state.setProperty("xLink", false, nullptr);
-    parameters.state.setProperty("yLink", false, nullptr);
     parameters.state.setProperty("azimuthSpanLink", false, nullptr);
     parameters.state.setProperty("elevationSpanLink", false, nullptr);
 

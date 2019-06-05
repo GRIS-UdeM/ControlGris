@@ -117,11 +117,6 @@ ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
 void ControlGrisAudioProcessorEditor::setPluginState() {
     // Set state for the link buttons.
     //--------------------------------
-    parametersBox.setLinkState(SOURCE_ID_AZIMUTH, valueTreeState.state.getProperty("azimuthLink", false));
-    parametersBox.setLinkState(SOURCE_ID_ELEVATION, valueTreeState.state.getProperty("elevationLink", false));
-    parametersBox.setLinkState(SOURCE_ID_DISTANCE, valueTreeState.state.getProperty("distanceLink", false));
-    parametersBox.setLinkState(SOURCE_ID_X, valueTreeState.state.getProperty("xLink", false));
-    parametersBox.setLinkState(SOURCE_ID_Y, valueTreeState.state.getProperty("yLink", false));
     parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
     parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
 
@@ -273,8 +268,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::parametersBoxLinkChanged(int parameterId, bool value) {
-    StringArray parameterNames({"azimuthLink", "elevationLink", "distanceLink", "xLink",
-                                "yLink", "azimuthSpanLink", "elevationSpanLink"});
+    StringArray parameterNames({"", "", "", "", "", "azimuthSpanLink", "elevationSpanLink"});
     valueTreeState.state.setProperty(parameterNames[parameterId], value, nullptr);
 }
 
