@@ -208,6 +208,25 @@ void Source::fixSourcePosition(bool shouldBeFixed) {
     }
 }
 
+void Source::setFixedPosition(float x, float y) {
+    fixedX = x;
+    fixedY = y;
+    float fx = fixedX * 2.0 - 1.0;
+    float fy = fixedY * 2.0 - 1.0;
+    float ang = atan2f(fx, fy) / M_PI * 180.0;
+    if (ang <= -180) {
+        ang += 360.0;
+    }
+    fixedAzimuth = -ang;
+    float rad = sqrtf(fx*fx + fy*fy);
+    if (m_radiusIsElevation) {  // azimuth - elevation
+        rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
+        fixedElevation = 90.0 - rad * 90.0;
+    } else {                    // azimuth - distance
+        fixedDistance = rad;
+    }
+}
+
 void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
     if (m_radiusIsElevation) {  // azimuth - elevation
         setAzimuth(fixedAzimuth + deltaAzimuth);

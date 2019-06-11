@@ -26,4 +26,6 @@ BannerComponent::BannerComponent() {
     setColour(Label::textColourId, Colour::fromRGB(255, 255, 255));
 }
 
-BannerComponent::~BannerComponent() {}
+BannerComponent::~BannerComponent() {
+    setLookAndFeel(nullptr);
+}

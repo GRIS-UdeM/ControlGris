@@ -58,7 +58,9 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     addAndMakeVisible(&oscSendPortEditor);
 }
 
-InterfaceBoxComponent::~InterfaceBoxComponent() {}
+InterfaceBoxComponent::~InterfaceBoxComponent() {
+    setLookAndFeel(nullptr);
+}
 
 void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
     unfocusAllComponents();

@@ -24,7 +24,9 @@
 //==============================================================================
 FieldComponent::FieldComponent() {}
 
-FieldComponent::~FieldComponent() {}
+FieldComponent::~FieldComponent() {
+    setLookAndFeel(nullptr);
+}
 
 void FieldComponent::setSelectedSource(int selectedId) {
     m_oldSelectedSourceId = m_selectedSourceId = selectedId;

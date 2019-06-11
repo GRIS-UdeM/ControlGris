@@ -95,7 +95,9 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             durationUnitCombo.grabKeyboardFocus(); };
 }
 
-TrajectoryBoxComponent::~TrajectoryBoxComponent() {}
+TrajectoryBoxComponent::~TrajectoryBoxComponent() {
+    setLookAndFeel(nullptr);
+}
 
 void TrajectoryBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;

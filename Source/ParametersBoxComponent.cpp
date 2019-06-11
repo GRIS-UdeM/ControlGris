@@ -39,7 +39,9 @@ ParameterComponent::ParameterComponent(int parameterId, String label, Component 
     parent->addAndMakeVisible(this);
 }
 
-ParameterComponent::~ParameterComponent() {}
+ParameterComponent::~ParameterComponent() {
+    setLookAndFeel(nullptr);
+}
 
 void ParameterComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;

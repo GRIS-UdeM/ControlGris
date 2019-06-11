@@ -33,7 +33,7 @@ class SettingsBoxComponent : public Component
 {
 public:
     SettingsBoxComponent();
-    ~SettingsBoxComponent() {};
+    ~SettingsBoxComponent();
 
     void paint(Graphics&) override;
     void resized() override;

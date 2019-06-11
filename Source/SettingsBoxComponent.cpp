@@ -90,6 +90,10 @@ SettingsBoxComponent::SettingsBoxComponent() {
     addAndMakeVisible(activateButton);
 }
 
+SettingsBoxComponent::~SettingsBoxComponent() {
+    setLookAndFeel(nullptr);
+}
+
 void SettingsBoxComponent::setOscFormat(int oscFormatIndex) {
     oscFormatCombo.setSelectedId(oscFormatIndex, NotificationType::dontSendNotification);
 }

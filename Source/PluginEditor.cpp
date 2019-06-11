@@ -112,7 +112,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     startTimerHz(50);
 }
 
-ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {}
+ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
+    configurationComponent.setLookAndFeel(nullptr);
+    setLookAndFeel(nullptr);
+}
 
 void ControlGrisAudioProcessorEditor::setPluginState() {
     // Set state for the link buttons.
@@ -313,11 +316,11 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
-    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed);
-    for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    }
+    //bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    //automationManager.fixSourcePosition(shouldBeFixed);
+    //for (int i = 0; i < numOfSources; i++) {
+    //    processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+    //}
 
     automationManager.setSourceLink(value);
 
@@ -346,10 +349,12 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int sourceLink = automationManager.getSourceLink();
 
     bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed);
+    automationManager.fixSourcePosition(shouldBeFixed); // not sure...
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
+
+    processor.addNewFixPosition();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
@@ -436,13 +441,13 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     }
 
     // Fix source positions.
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed);
-    if (2 <= sourceLink < 7) {
-        for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-        }
-    }
+    //bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    //automationManager.fixSourcePosition(shouldBeFixed);
+    //if (2 <= sourceLink < 7) {
+    //    for (int i = 0; i < numOfSources; i++) {
+    //        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+    //    }
+    //}
 }
 
 //==============================================================================

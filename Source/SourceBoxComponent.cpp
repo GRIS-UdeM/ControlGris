@@ -73,7 +73,9 @@ SourceBoxComponent::SourceBoxComponent() {
         };
 }
 
-SourceBoxComponent::~SourceBoxComponent() {}
+SourceBoxComponent::~SourceBoxComponent() {
+    setLookAndFeel(nullptr);
+}
 
 void SourceBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;

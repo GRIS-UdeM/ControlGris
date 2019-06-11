@@ -58,7 +58,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                      #endif
                        ),
 #endif
-    parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
+    parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
+    fixPositionData (FIX_POSITION_DATA_TAG)
 {
     m_somethingChanged = false;
     m_numOfSources = 1;
@@ -68,8 +69,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
+    m_currentFixPosition = -1;
 
     m_initTimeOnPlay = m_currentTime = 0.0;
+    m_lastTime = 10000000.0;
 
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
@@ -392,6 +395,27 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
     }
 }
 
+void ControlGrisAudioProcessor::addNewFixPosition() {
+    // Find insertion point.
+    int insertPoint = 0;
+    if (fixPositionData.getNumChildElements() > 0) {
+        forEachXmlChildElement (fixPositionData, element) {
+            if (element->getDoubleAttribute("Time") > getCurrentTime()) {
+                break;
+            }
+            insertPoint++;
+        }
+    }
+
+    XmlElement *newData = new XmlElement("ITEM");
+    newData->setAttribute("Time", getCurrentTime());
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+        newData->setAttribute(String("Src_") + String(i+1) + String("_X"), sources[i].getX());
+        newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), sources[i].getY());
+    }
+    fixPositionData.insertChildElement(newData, insertPoint);
+}
+
 void ControlGrisAudioProcessor::newEventConsumed() {
     m_somethingChanged = false;
 }
@@ -510,6 +534,15 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
+void ControlGrisAudioProcessor::setSourceFixPosition() {
+    float x, y;
+    for (int i = 0; i < m_numOfSources; i++) {
+        x = currentFixPosition->getDoubleAttribute(String("Src_") + String(i+1) + String("_X"));
+        y = currentFixPosition->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y"));
+        sources[i].setFixedPosition(x, y);
+    }
+}
+
 void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
     AudioPlayHead* phead = getPlayHead();
     if (phead != nullptr) {
@@ -523,6 +556,28 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             m_currentTime = playposinfo.timeInSeconds;
         }
     }
+
+    // Check if we need to update the fix positions.
+    int numFixPositions = fixPositionData.getNumChildElements();
+    if (numFixPositions > 0) {
+        if (! currentFixPosition) {
+            currentFixPosition = fixPositionData.getFirstChildElement();
+        }
+        if (m_currentTime < m_lastTime) {
+            currentFixPosition = fixPositionData.getFirstChildElement();
+            while (currentFixPosition && currentFixPosition->getDoubleAttribute("Time") < m_currentTime) {
+                currentFixPosition = currentFixPosition->getNextElement();
+            }
+            setSourceFixPosition(); // may need to check "shouldBeFixed".
+        } else if (m_currentTime >= m_lastTime) {
+            XmlElement *nextElement = currentFixPosition->getNextElement();
+            if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
+                currentFixPosition = nextElement;
+                setSourceFixPosition();
+            }
+        }
+    }
+    m_lastTime = m_currentTime;
 }
 
 //==============================================================================
@@ -543,16 +598,53 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
     std::unique_ptr<XmlElement> xmlState (state.createXml());
 
-    if (xmlState.get() != nullptr)
+    if (xmlState.get() != nullptr) {
+        if (fixPositionData.getNumChildElements() > 0) {
+            // Replace if it already exists.
+            XmlElement *childExist = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
+            if (childExist) {
+                xmlState->removeChildElement(childExist, true);
+            }
+            XmlElement *positionData = xmlState->createNewChildElement(FIX_POSITION_DATA_TAG);
+            forEachXmlChildElement (fixPositionData, element) {
+                XmlElement *newData = new XmlElement("ITEM");
+                newData->setAttribute("Time", element->getDoubleAttribute("Time"));
+                for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+                    newData->setAttribute(String("Src_") + String(i+1) + String("_X"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_X")));
+                    newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y")));
+                }
+                positionData->addChildElement(newData);
+            }
+        }
         copyXmlToBinary (*xmlState, destData);
+        //std::cout << xmlState->createDocument(String()) << std::endl;
+    }
 }
 
 void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
-    if (xmlState.get() != nullptr)
+    if (xmlState.get() != nullptr) {
+        XmlElement *positionData = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
+        if (positionData) {
+            fixPositionData.deleteAllChildElements();
+            forEachXmlChildElement (*positionData, element) {
+                XmlElement *newData = new XmlElement("ITEM");
+                newData->setAttribute("Time", element->getDoubleAttribute("Time"));
+                for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+                    newData->setAttribute(String("Src_") + String(i+1) + String("_X"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_X")));
+                    newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y")));
+                }
+                fixPositionData.addChildElement(newData);
+            }
+        }
         parameters.replaceState (ValueTree::fromXml (*xmlState));
+    }
+
+    if (fixPositionData.getNumChildElements() > 0) {
+        currentFixPosition = fixPositionData.getFirstChildElement();
+    }
 
     setPluginState();
 }

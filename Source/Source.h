@@ -70,6 +70,7 @@ public:
     void computeXY();
     void computeAzimuthElevation();
 
+    void setFixedPosition(float x, float y);
     void fixSourcePosition(bool shouldBeFixed);
     float getDeltaX();
     float getDeltaY();

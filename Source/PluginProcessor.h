@@ -114,6 +114,9 @@ public:
 
     void linkSourcePositions();
 
+    void addNewFixPosition();
+    void setSourceFixPosition();
+
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
@@ -132,12 +135,17 @@ private:
     bool m_needInitialization;
     double m_initTimeOnPlay;
     double m_currentTime;
+    double m_lastTime;
 
     bool m_isPlaying;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
+
+    XmlElement fixPositionData;
+    XmlElement *currentFixPosition = nullptr;
+    int m_currentFixPosition;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)
