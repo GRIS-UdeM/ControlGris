@@ -116,6 +116,7 @@ public:
 
     void addNewFixPosition();
     void setSourceFixPosition();
+    void copyFixPositionXmlElement(XmlElement *src, XmlElement *dest);
 
     //==============================================================================
     AudioProcessorValueTreeState parameters;
@@ -145,7 +146,6 @@ private:
 
     XmlElement fixPositionData;
     XmlElement *currentFixPosition = nullptr;
-    int m_currentFixPosition;
 
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)

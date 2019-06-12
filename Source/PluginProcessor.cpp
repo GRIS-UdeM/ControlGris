@@ -20,6 +20,13 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+String getFixPosSourceName(int index, int dimension) {
+    if (dimension == 0)
+        return String("Src_") + String(index + 1) + String("_X");
+    else if (dimension == 1)
+        return String("Src_") + String(index + 1) + String("_Y");
+}
+
 // The parameter Layout creates the automatable parameters.
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     using Parameter = AudioProcessorValueTreeState::Parameter;
@@ -69,7 +76,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
-    m_currentFixPosition = -1;
 
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = 10000000.0;
@@ -410,8 +416,8 @@ void ControlGrisAudioProcessor::addNewFixPosition() {
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("Time", getCurrentTime());
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-        newData->setAttribute(String("Src_") + String(i+1) + String("_X"), sources[i].getX());
-        newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), sources[i].getY());
+        newData->setAttribute(getFixPosSourceName(i, 0), sources[i].getX());
+        newData->setAttribute(getFixPosSourceName(i, 1), sources[i].getY());
     }
     fixPositionData.insertChildElement(newData, insertPoint);
 }
@@ -537,8 +543,8 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 void ControlGrisAudioProcessor::setSourceFixPosition() {
     float x, y;
     for (int i = 0; i < m_numOfSources; i++) {
-        x = currentFixPosition->getDoubleAttribute(String("Src_") + String(i+1) + String("_X"));
-        y = currentFixPosition->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y"));
+        x = currentFixPosition->getDoubleAttribute(getFixPosSourceName(i, 0));
+        y = currentFixPosition->getDoubleAttribute(getFixPosSourceName(i, 1));
         sources[i].setFixedPosition(x, y);
     }
 }
@@ -592,6 +598,18 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 }
 
 //==============================================================================
+void ControlGrisAudioProcessor::copyFixPositionXmlElement(XmlElement *src, XmlElement *dest) {
+    forEachXmlChildElement (*src, element) {
+        XmlElement *newData = new XmlElement("ITEM");
+        newData->setAttribute("Time", element->getDoubleAttribute("Time"));
+        for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+            newData->setAttribute(getFixPosSourceName(i, 0), element->getDoubleAttribute(getFixPosSourceName(i, 0)));
+            newData->setAttribute(getFixPosSourceName(i, 1), element->getDoubleAttribute(getFixPosSourceName(i, 1)));
+        }
+        dest->addChildElement(newData);
+    }
+}
+
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     auto state = parameters.copyState();
@@ -600,24 +618,15 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
     if (xmlState.get() != nullptr) {
         if (fixPositionData.getNumChildElements() > 0) {
-            // Replace if it already exists.
+            // Replace if `fix position` child already exists.
             XmlElement *childExist = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
             if (childExist) {
                 xmlState->removeChildElement(childExist, true);
             }
             XmlElement *positionData = xmlState->createNewChildElement(FIX_POSITION_DATA_TAG);
-            forEachXmlChildElement (fixPositionData, element) {
-                XmlElement *newData = new XmlElement("ITEM");
-                newData->setAttribute("Time", element->getDoubleAttribute("Time"));
-                for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-                    newData->setAttribute(String("Src_") + String(i+1) + String("_X"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_X")));
-                    newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y")));
-                }
-                positionData->addChildElement(newData);
-            }
+            copyFixPositionXmlElement(&fixPositionData, positionData);
         }
         copyXmlToBinary (*xmlState, destData);
-        //std::cout << xmlState->createDocument(String()) << std::endl;
     }
 }
 
@@ -629,15 +638,7 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
         XmlElement *positionData = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
         if (positionData) {
             fixPositionData.deleteAllChildElements();
-            forEachXmlChildElement (*positionData, element) {
-                XmlElement *newData = new XmlElement("ITEM");
-                newData->setAttribute("Time", element->getDoubleAttribute("Time"));
-                for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-                    newData->setAttribute(String("Src_") + String(i+1) + String("_X"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_X")));
-                    newData->setAttribute(String("Src_") + String(i+1) + String("_Y"), element->getDoubleAttribute(String("Src_") + String(i+1) + String("_Y")));
-                }
-                fixPositionData.addChildElement(newData);
-            }
+            copyFixPositionXmlElement(positionData, &fixPositionData);
         }
         parameters.replaceState (ValueTree::fromXml (*xmlState));
     }
