@@ -109,14 +109,15 @@ public:
     double getCurrentTime();
 
     bool getIsPlaying();
+    double getBPM();
 
     void trajectoryPositionChanged(Point<float> position) override;
 
     void linkSourcePositions();
 
-    void addNewFixPosition();
-    void setSourceFixPosition();
-    void copyFixPositionXmlElement(XmlElement *src, XmlElement *dest);
+    void addNewFixedPosition();
+    void setSourceFixedPosition();
+    void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
 
     //==============================================================================
     AudioProcessorValueTreeState parameters;
@@ -139,6 +140,7 @@ private:
     double m_lastTime;
 
     bool m_isPlaying;
+    double m_bpm;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
 

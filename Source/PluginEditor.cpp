@@ -316,11 +316,11 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
-    //bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
-    //automationManager.fixSourcePosition(shouldBeFixed);
-    //for (int i = 0; i < numOfSources; i++) {
-    //    processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    //}
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    automationManager.fixSourcePosition(shouldBeFixed);
+    for (int i = 0; i < numOfSources; i++) {
+        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+    }
 
     automationManager.setSourceLink(value);
 
@@ -332,8 +332,12 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int val
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double value) {
-    automationManager.setPlaybackDuration(value);
+void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double duration, int mode) {
+    if (mode == 1) {
+        automationManager.setPlaybackDuration(duration);
+    } else {
+        automationManager.setPlaybackDuration(duration * 60.0 / processor.getBPM());
+    }
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) {
@@ -354,7 +358,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
 
-    processor.addNewFixPosition();
+    processor.addNewFixedPosition();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {

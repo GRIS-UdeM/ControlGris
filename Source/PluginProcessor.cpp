@@ -20,7 +20,7 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-String getFixPosSourceName(int index, int dimension) {
+String getFixedPosSourceName(int index, int dimension) {
     if (dimension == 0)
         return String("Src_") + String(index + 1) + String("_X");
     else if (dimension == 1)
@@ -66,7 +66,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                        ),
 #endif
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
-    fixPositionData (FIX_POSITION_DATA_TAG)
+    fixPositionData (FIXED_POSITION_DATA_TAG)
 {
     m_somethingChanged = false;
     m_numOfSources = 1;
@@ -401,7 +401,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
     }
 }
 
-void ControlGrisAudioProcessor::addNewFixPosition() {
+void ControlGrisAudioProcessor::addNewFixedPosition() {
     // Find insertion point.
     int insertPoint = 0;
     if (fixPositionData.getNumChildElements() > 0) {
@@ -416,8 +416,8 @@ void ControlGrisAudioProcessor::addNewFixPosition() {
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("Time", getCurrentTime());
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-        newData->setAttribute(getFixPosSourceName(i, 0), sources[i].getX());
-        newData->setAttribute(getFixPosSourceName(i, 1), sources[i].getY());
+        newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
+        newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
     }
     fixPositionData.insertChildElement(newData, insertPoint);
 }
@@ -440,6 +440,10 @@ double ControlGrisAudioProcessor::getCurrentTime() {
 
 bool ControlGrisAudioProcessor::getIsPlaying() {
     return m_isPlaying;
+}
+
+double ControlGrisAudioProcessor::getBPM() {
+    return m_bpm;
 }
 
 //==============================================================================
@@ -540,11 +544,11 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
-void ControlGrisAudioProcessor::setSourceFixPosition() {
+void ControlGrisAudioProcessor::setSourceFixedPosition() {
     float x, y;
     for (int i = 0; i < m_numOfSources; i++) {
-        x = currentFixPosition->getDoubleAttribute(getFixPosSourceName(i, 0));
-        y = currentFixPosition->getDoubleAttribute(getFixPosSourceName(i, 1));
+        x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
+        y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
         sources[i].setFixedPosition(x, y);
     }
 }
@@ -555,6 +559,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         AudioPlayHead::CurrentPositionInfo playposinfo;
         phead->getCurrentPosition(playposinfo);
         m_isPlaying = playposinfo.isPlaying;
+        m_bpm = playposinfo.bpm;
         if (m_needInitialization) {
             m_initTimeOnPlay = m_currentTime = playposinfo.timeInSeconds;
             m_needInitialization = false;
@@ -574,12 +579,12 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             while (currentFixPosition && currentFixPosition->getDoubleAttribute("Time") < m_currentTime) {
                 currentFixPosition = currentFixPosition->getNextElement();
             }
-            setSourceFixPosition(); // may need to check "shouldBeFixed".
+            setSourceFixedPosition(); // may need to check "shouldBeFixed".
         } else if (m_currentTime >= m_lastTime) {
             XmlElement *nextElement = currentFixPosition->getNextElement();
             if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
                 currentFixPosition = nextElement;
-                setSourceFixPosition();
+                setSourceFixedPosition();
             }
         }
     }
@@ -598,13 +603,13 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::copyFixPositionXmlElement(XmlElement *src, XmlElement *dest) {
+void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
     forEachXmlChildElement (*src, element) {
         XmlElement *newData = new XmlElement("ITEM");
         newData->setAttribute("Time", element->getDoubleAttribute("Time"));
         for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-            newData->setAttribute(getFixPosSourceName(i, 0), element->getDoubleAttribute(getFixPosSourceName(i, 0)));
-            newData->setAttribute(getFixPosSourceName(i, 1), element->getDoubleAttribute(getFixPosSourceName(i, 1)));
+            newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
+            newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
         }
         dest->addChildElement(newData);
     }
@@ -618,13 +623,13 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
     if (xmlState.get() != nullptr) {
         if (fixPositionData.getNumChildElements() > 0) {
-            // Replace if `fix position` child already exists.
-            XmlElement *childExist = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
+            // Replace if `fixed position` child already exists.
+            XmlElement *childExist = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
             if (childExist) {
                 xmlState->removeChildElement(childExist, true);
             }
-            XmlElement *positionData = xmlState->createNewChildElement(FIX_POSITION_DATA_TAG);
-            copyFixPositionXmlElement(&fixPositionData, positionData);
+            XmlElement *positionData = xmlState->createNewChildElement(FIXED_POSITION_DATA_TAG);
+            copyFixedPositionXmlElement(&fixPositionData, positionData);
         }
         copyXmlToBinary (*xmlState, destData);
     }
@@ -635,10 +640,10 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
     if (xmlState.get() != nullptr) {
-        XmlElement *positionData = xmlState->getChildByName(FIX_POSITION_DATA_TAG);
+        XmlElement *positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
         if (positionData) {
             fixPositionData.deleteAllChildElements();
-            copyFixPositionXmlElement(positionData, &fixPositionData);
+            copyFixedPositionXmlElement(positionData, &fixPositionData);
         }
         parameters.replaceState (ValueTree::fromXml (*xmlState));
     }

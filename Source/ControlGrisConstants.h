@@ -68,14 +68,14 @@ const StringArray TRAJECTORY_TYPES        {String("Drawing"), String("Circle Clo
 
 // Fix position data headers.
 //---------------------------
-const StringArray FIX_POSITION_DATA_HEADERS {String("Delete"), String("Time"),
-                                             String("Src_1_X"), String("Src_1_Y"), String("Src_1_Z"),
-                                             String("Src_2_X"), String("Src_2_Y"), String("Src_2_Z"),
-                                             String("Src_3_X"), String("Src_3_Y"), String("Src_3_Z"),
-                                             String("Src_4_X"), String("Src_4_Y"), String("Src_4_Z"),
-                                             String("Src_5_X"), String("Src_5_Y"), String("Src_5_Z"),
-                                             String("Src_6_X"), String("Src_6_Y"), String("Src_6_Z"),
-                                             String("Src_7_X"), String("Src_7_Y"), String("Src_7_Z"),
-                                             String("Src_8_X"), String("Src_8_Y"), String("Src_8_Z")};
+const StringArray FIXED_POSITION_DATA_HEADERS { String("Delete"), String("Time"),
+                                                String("Src_1_X"), String("Src_1_Y"), String("Src_1_Z"),
+                                                String("Src_2_X"), String("Src_2_Y"), String("Src_2_Z"),
+                                                String("Src_3_X"), String("Src_3_Y"), String("Src_3_Z"),
+                                                String("Src_4_X"), String("Src_4_Y"), String("Src_4_Z"),
+                                                String("Src_5_X"), String("Src_5_Y"), String("Src_5_Z"),
+                                                String("Src_6_X"), String("Src_6_Y"), String("Src_6_Z"),
+                                                String("Src_7_X"), String("Src_7_Y"), String("Src_7_Z"),
+                                                String("Src_8_X"), String("Src_8_Y"), String("Src_8_Z")};
 
-const String FIX_POSITION_DATA_TAG ("Fix_Position_Data");
+const String FIXED_POSITION_DATA_TAG ("Fix_Position_Data");

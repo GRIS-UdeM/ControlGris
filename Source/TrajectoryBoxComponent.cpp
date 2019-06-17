@@ -47,13 +47,15 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationEditor.setText("5", false);
     durationEditor.setInputRestrictions (10, "0123456789.");
     durationEditor.onReturnKey = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue()); });
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
     addAndMakeVisible(&durationUnitCombo);
     durationUnitCombo.addItem("Sec(s)", 1);
     durationUnitCombo.addItem("Beat(s)", 2);
     durationUnitCombo.setSelectedId(1);
+    durationUnitCombo.onChange = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); }); };
 
     numOfCycleLabel.setText("Number of Cycles:", NotificationType::dontSendNotification);
     addAndMakeVisible(&numOfCycleLabel);

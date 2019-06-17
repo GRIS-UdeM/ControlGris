@@ -37,7 +37,7 @@ public:
 
         virtual void trajectoryBoxSourceLinkChanged(int value) = 0;
         virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
-        virtual void trajectoryBoxDurationChanged(double value) = 0;
+        virtual void trajectoryBoxDurationChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxNumOfCycleChanged(int value) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
         virtual void trajectoryBoxFixSourceButtonClicked() = 0;

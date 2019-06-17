@@ -74,7 +74,7 @@ public:
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxSourceLinkChanged(int value) override;
     void trajectoryBoxTrajectoryTypeChanged(int value) override;
-    void trajectoryBoxDurationChanged(double value) override;
+    void trajectoryBoxDurationChanged(double duration, int mode) override;
     void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;
     void trajectoryBoxFixSourceButtonClicked() override;
