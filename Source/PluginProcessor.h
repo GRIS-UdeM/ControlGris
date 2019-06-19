@@ -23,30 +23,7 @@
 #include "Source.h"
 #include "AutomationManager.h"
 #include "ControlGrisConstants.h"
-
-class DataSorter
-{
-public:
-    DataSorter (const String& attributeToSortBy, bool forwards)
-        : attributeToSort (attributeToSortBy), direction (forwards ? 1 : -1)
-    {}
-
-    int compareElements (XmlElement* first, XmlElement* second) const {
-        int result;
-        if (first->getDoubleAttribute(attributeToSort) < second->getDoubleAttribute(attributeToSort))
-            result = -1;
-        else if (first->getDoubleAttribute(attributeToSort) > second->getDoubleAttribute(attributeToSort))
-            result = 1;
-        else
-            result = 0;
-
-        return direction * result;
-    }
-
-private:
-    String attributeToSort;
-    int direction;
-};
+#include "ControlGrisUtilities.h"
 
 class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,

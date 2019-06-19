@@ -18,10 +18,7 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "FixedPositionEditor.h"
-
-static double getFloatPrecision(double value, double precision) {
-    return (floor((value * pow(10, precision) + 0.5)) / pow(10, precision));
-}
+#include "ControlGrisUtilities.h"
 
 FixedPositionEditor::FixedPositionEditor() {
     table.setModel(this);
@@ -67,17 +64,12 @@ void FixedPositionEditor::paintRowBackground(Graphics& g, int rowNumber, int /*w
     }
 }
 
-void FixedPositionEditor::paintCell(Graphics& g, int rowNumber, int columnId,
-                                    int width, int height, bool rowIsSelected) {
+void FixedPositionEditor::paintCell(Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) {
     g.setColour (Colours::black);
     g.setFont (font);
 
-    if (auto* rowElement = dataList->getChildElement (rowNumber))
-    {
-        //float val = getFloatPrecision(rowElement->getDoubleAttribute(table.getHeader().getColumnName(columnId)), 3);
-        //auto text = String(val); //rowElement->getStringAttribute (table.getHeader().getColumnName(columnId));
+    if (auto* rowElement = dataList->getChildElement (rowNumber)) {
         String text = getText(columnId, rowNumber);
-        
         g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
     }
 
@@ -139,13 +131,11 @@ void FixedPositionEditor::loadData(XmlElement *data) {
     table.updateContent();
 }
 
-String FixedPositionEditor::getText (const int columnNumber, const int rowNumber) const
-{
-    return String(dataList->getChildElement (rowNumber)->getDoubleAttribute(table.getHeader().getColumnName(columnNumber)), 3);
+String FixedPositionEditor::getText (const int columnNumber, const int rowNumber) const {
+    return String(dataList->getChildElement(rowNumber)->getDoubleAttribute(table.getHeader().getColumnName(columnNumber)), 3);
 }
 
-void FixedPositionEditor::setText (const int columnNumber, const int rowNumber, const String& newText)
-{
+void FixedPositionEditor::setText (const int columnNumber, const int rowNumber, const String& newText) {
     float val = getFloatPrecision(newText.getFloatValue(), 3);
     listeners.call([&] (Listener& l) { l.fixedPositionEditorCellChanged(rowNumber, columnNumber, val); });    
 }

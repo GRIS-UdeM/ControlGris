@@ -25,6 +25,8 @@ String getFixedPosSourceName(int index, int dimension) {
         return String("S") + String(index + 1) + String("_X");
     else if (dimension == 1)
         return String("S") + String(index + 1) + String("_Y");
+    else if (dimension == 2)
+        return String("S") + String(index + 1) + String("_Z");
 }
 
 // The parameter Layout creates the automatable parameters.
@@ -411,20 +413,20 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
     }
     fixPositionData.addChildElement(newData);
-    DataSorter sorter("Time", true);
+    XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
 }
 
 void ControlGrisAudioProcessor::changeFixedPosition(int row, int column, double value) {
     fixPositionData.getChildElement(row-1)->setAttribute(FIXED_POSITION_DATA_HEADERS[column-1], value);
-    DataSorter sorter("Time", true);
+    XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
 }
 
 void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
     while (m_lock) {}
     fixPositionData.removeChildElement(fixPositionData.getChildElement(row), true);
-    DataSorter sorter("Time", true);
+    XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
 }
 
