@@ -50,7 +50,7 @@ SourceBoxComponent::SourceBoxComponent() {
     addAndMakeVisible(&rayLengthLabel);
 
     rayLengthSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
-    rayLengthSlider.setValue(1.0, NotificationType::sendNotificationAsync);
+    rayLengthSlider.setValue(1.0, NotificationType::dontSendNotification);
     rayLengthSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
     rayLengthSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&rayLengthSlider);
@@ -63,7 +63,7 @@ SourceBoxComponent::SourceBoxComponent() {
     addAndMakeVisible(&angleLabel);
 
     angleSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
-    angleSlider.setValue(90.0, NotificationType::sendNotificationAsync);
+    angleSlider.setValue(90.0, NotificationType::dontSendNotification);
     angleSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
     angleSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&angleSlider);
