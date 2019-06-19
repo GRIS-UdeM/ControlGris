@@ -31,6 +31,7 @@
 #include "InterfaceBoxComponent.h"
 #include "Source.h"
 #include "AutomationManager.h"
+#include "FixedPositionEditor.h"
 
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         private Value::Listener,
@@ -39,6 +40,7 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public SettingsBoxComponent::Listener,
                                         public SourceBoxComponent::Listener,
                                         public TrajectoryBoxComponent::Listener,
+                                        public FixedPositionEditor::Listener,
                                         public Timer
 {
 public:
@@ -77,19 +79,27 @@ public:
     void trajectoryBoxDurationChanged(double duration, int mode) override;
     void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;
+    void trajectoryBoxEditFixedSourceButtonClicked() override;
     void trajectoryBoxFixSourceButtonClicked() override;
     void trajectoryBoxClearButtonClicked() override;
+
+    // FixedPositionEditor::Listeners
+    void fixedPositionEditorCellChanged(int row, int column, double value);
+    void fixedPositionEditorCellDeleted(int row, int column);
+    void fixedPositionEditorClosed();
 
     void setPluginState();
 
 private:
     ControlGrisAudioProcessor& processor;
 
+    GrisLookAndFeel grisLookAndFeel;
+
     AudioProcessorValueTreeState& valueTreeState;
 
     AutomationManager& automationManager;
 
-    GrisLookAndFeel grisLookAndFeel;
+    FixedPositionEditor fixedPositionEditor;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
@@ -109,6 +119,7 @@ private:
     SourceBoxComponent      sourceBox;
     InterfaceBoxComponent   interfaceBox;
 
+    bool m_fixedSourcesWindowVisible;
     int m_selectedSource;
 
     double m_lastTime;

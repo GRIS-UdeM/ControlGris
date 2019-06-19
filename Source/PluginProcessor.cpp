@@ -22,9 +22,9 @@
 
 String getFixedPosSourceName(int index, int dimension) {
     if (dimension == 0)
-        return String("Src_") + String(index + 1) + String("_X");
+        return String("S") + String(index + 1) + String("_X");
     else if (dimension == 1)
-        return String("Src_") + String(index + 1) + String("_Y");
+        return String("S") + String(index + 1) + String("_Y");
 }
 
 // The parameter Layout creates the automatable parameters.
@@ -68,6 +68,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
     fixPositionData (FIXED_POSITION_DATA_TAG)
 {
+    m_lock = false;
     m_somethingChanged = false;
     m_numOfSources = 1;
     m_firstSourceId = 1;
@@ -402,24 +403,29 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
 }
 
 void ControlGrisAudioProcessor::addNewFixedPosition() {
-    // Find insertion point.
-    int insertPoint = 0;
-    if (fixPositionData.getNumChildElements() > 0) {
-        forEachXmlChildElement (fixPositionData, element) {
-            if (element->getDoubleAttribute("Time") > getCurrentTime()) {
-                break;
-            }
-            insertPoint++;
-        }
-    }
-
+    // Should we replace an item if the new one has the same time as one already saved?
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("Time", getCurrentTime());
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
     }
-    fixPositionData.insertChildElement(newData, insertPoint);
+    fixPositionData.addChildElement(newData);
+    DataSorter sorter("Time", true);
+    fixPositionData.sortChildElements(sorter);
+}
+
+void ControlGrisAudioProcessor::changeFixedPosition(int row, int column, double value) {
+    fixPositionData.getChildElement(row-1)->setAttribute(FIXED_POSITION_DATA_HEADERS[column-1], value);
+    DataSorter sorter("Time", true);
+    fixPositionData.sortChildElements(sorter);
+}
+
+void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
+    while (m_lock) {}
+    fixPositionData.removeChildElement(fixPositionData.getChildElement(row), true);
+    DataSorter sorter("Time", true);
+    fixPositionData.sortChildElements(sorter);
 }
 
 void ControlGrisAudioProcessor::newEventConsumed() {
@@ -554,6 +560,7 @@ void ControlGrisAudioProcessor::setSourceFixedPosition() {
 }
 
 void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
+    m_lock = true;
     AudioPlayHead* phead = getPlayHead();
     if (phead != nullptr) {
         AudioPlayHead::CurrentPositionInfo playposinfo;
@@ -589,6 +596,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         }
     }
     m_lastTime = m_currentTime;
+    m_lock = false;
 }
 
 //==============================================================================
@@ -604,6 +612,9 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 
 //==============================================================================
 void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
+    if (dest == nullptr)
+        dest = new XmlElement(FIXED_POSITION_DATA_TAG);
+
     forEachXmlChildElement (*src, element) {
         XmlElement *newData = new XmlElement("ITEM");
         newData->setAttribute("Time", element->getDoubleAttribute("Time"));
@@ -613,6 +624,10 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
         }
         dest->addChildElement(newData);
     }
+}
+
+XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
+    return &fixPositionData;
 }
 
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)

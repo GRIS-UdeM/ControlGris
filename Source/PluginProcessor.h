@@ -24,6 +24,30 @@
 #include "AutomationManager.h"
 #include "ControlGrisConstants.h"
 
+class DataSorter
+{
+public:
+    DataSorter (const String& attributeToSortBy, bool forwards)
+        : attributeToSort (attributeToSortBy), direction (forwards ? 1 : -1)
+    {}
+
+    int compareElements (XmlElement* first, XmlElement* second) const {
+        int result;
+        if (first->getDoubleAttribute(attributeToSort) < second->getDoubleAttribute(attributeToSort))
+            result = -1;
+        else if (first->getDoubleAttribute(attributeToSort) > second->getDoubleAttribute(attributeToSort))
+            result = 1;
+        else
+            result = 0;
+
+        return direction * result;
+    }
+
+private:
+    String attributeToSort;
+    int direction;
+};
+
 class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,
                                    public AutomationManager::Listener,
@@ -118,6 +142,9 @@ public:
     void addNewFixedPosition();
     void setSourceFixedPosition();
     void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
+    XmlElement * getFixedPositionData();
+    void changeFixedPosition(int row, int column, double value);
+    void deleteFixedPosition(int row, int column);
 
     //==============================================================================
     AudioProcessorValueTreeState parameters;
@@ -139,6 +166,7 @@ private:
     double m_currentTime;
     double m_lastTime;
 
+    bool m_lock;
     bool m_isPlaying;
     double m_bpm;
 

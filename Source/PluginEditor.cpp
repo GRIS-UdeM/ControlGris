@@ -28,6 +28,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 { 
     setLookAndFeel(&grisLookAndFeel);
 
+    m_fixedSourcesWindowVisible = false;
     m_selectedSource = 0;
     m_lastTime = 0.0;
 
@@ -81,6 +82,11 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
     addAndMakeVisible(configurationComponent);
+
+    fixedPositionEditor.setLookAndFeel(&grisLookAndFeel);
+    fixedPositionEditor.loadData(processor.getFixedPositionData());
+    fixedPositionEditor.addListener(this);
+    addChildComponent(&fixedPositionEditor);
 
     // Add sources to the fields.
     //---------------------------
@@ -348,6 +354,12 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
     automationManager.setActivateState(value);
 }
 
+void ControlGrisAudioProcessorEditor::trajectoryBoxEditFixedSourceButtonClicked() {
+    fixedPositionEditor.loadData(processor.getFixedPositionData());
+    m_fixedSourcesWindowVisible = ! m_fixedSourcesWindowVisible;
+    resized();
+}
+
 void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
@@ -394,7 +406,7 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
         needRepaint = true;
     }
 
-    if (needRepaint)
+    if (needRepaint && ! m_fixedSourcesWindowVisible)
         mainField.repaint();
 }
 
@@ -454,6 +466,23 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     //}
 }
 
+// FixedPositionEditor::Listener callback.
+//----------------------------------------
+void ControlGrisAudioProcessorEditor::fixedPositionEditorCellChanged(int row, int column, double value) {
+    processor.changeFixedPosition(row, column, value);
+    fixedPositionEditor.loadData(processor.getFixedPositionData());
+}
+
+void ControlGrisAudioProcessorEditor::fixedPositionEditorCellDeleted(int row, int column) {
+    processor.deleteFixedPosition(row, column);
+    fixedPositionEditor.loadData(processor.getFixedPositionData());
+}
+
+void ControlGrisAudioProcessorEditor::fixedPositionEditorClosed() {
+    m_fixedSourcesWindowVisible = false;
+    resized();
+}
+
 //==============================================================================
 void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
@@ -493,4 +522,11 @@ void ControlGrisAudioProcessorEditor::resized() {
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();
+
+    if (m_fixedSourcesWindowVisible) {
+        fixedPositionEditor.setVisible(true);
+        fixedPositionEditor.setBounds(0, 0, width, height);
+    } else {
+        fixedPositionEditor.setVisible(false);
+    }
 }
