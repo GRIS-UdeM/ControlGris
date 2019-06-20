@@ -21,6 +21,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
+#include "ControlGrisConstants.h"
 
 class TrajectoryBoxComponent : public Component
 {
@@ -31,11 +32,14 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    void setSpatMode(SPAT_MODE_ENUM spatMode);
+
     struct Listener
     {
         virtual ~Listener() {}
 
         virtual void trajectoryBoxSourceLinkChanged(int value) = 0;
+        virtual void trajectoryBoxSourceLinkAltChanged(int value) = 0;
         virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
         virtual void trajectoryBoxDurationChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxNumOfCycleChanged(int value) = 0;
@@ -51,8 +55,11 @@ public:
 private:
     ListenerList<Listener> listeners;
 
+    SPAT_MODE_ENUM  m_spatMode;
+
     Label           sourceLinkLabel;
     ComboBox        sourceLinkCombo;
+    ComboBox        sourceLinkAltCombo;
 
     Label           trajectoryTypeLabel;
     ComboBox        trajectoryTypeCombo;

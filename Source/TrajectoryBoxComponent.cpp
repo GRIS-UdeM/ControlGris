@@ -21,6 +21,8 @@
 #include "ControlGrisConstants.h"
 
 TrajectoryBoxComponent::TrajectoryBoxComponent() {
+    m_spatMode = SPAT_MODE_VBAP;
+
     sourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
     addAndMakeVisible(&sourceLinkLabel);
 
@@ -29,6 +31,12 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     addAndMakeVisible(&sourceLinkCombo);
     sourceLinkCombo.onChange = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkChanged(sourceLinkCombo.getSelectedId()); }); };
+
+    sourceLinkAltCombo.addItemList(SOURCE_LINK_ALT_TYPES, 1);
+    sourceLinkAltCombo.setSelectedId(1);
+    addChildComponent(&sourceLinkAltCombo);
+    sourceLinkAltCombo.onChange = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkAltChanged(sourceLinkAltCombo.getSelectedId()); }); };
 
     trajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryTypeLabel);
@@ -106,6 +114,11 @@ TrajectoryBoxComponent::~TrajectoryBoxComponent() {
     setLookAndFeel(nullptr);
 }
 
+void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
+    m_spatMode = spatMode;
+    resized();
+}
+
 void TrajectoryBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
@@ -115,6 +128,13 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
 void TrajectoryBoxComponent::resized() {
     sourceLinkLabel.setBounds(5, 10, 150, 20);
     sourceLinkCombo.setBounds(120, 10, 160, 20);
+
+    if (m_spatMode == SPAT_MODE_LBAP) {
+        sourceLinkAltCombo.setVisible(true);
+        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
+    } else {
+        sourceLinkAltCombo.setVisible(false);
+    }
 
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(120, 40, 160, 20);
@@ -126,8 +146,8 @@ void TrajectoryBoxComponent::resized() {
     cycleSpeedLabel.setBounds(5, 100, 150, 20);
     cycleSpeedSlider.setBounds(115, 100, 165, 20);
 
-    numOfCycleLabel.setBounds(300, 10, 100, 20);
-    numOfCycleEditor.setBounds(400, 10, 50, 20);
+    numOfCycleLabel.setBounds(300, 70, 100, 20);
+    numOfCycleEditor.setBounds(410, 70, 50, 20);
 
     editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
     fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);

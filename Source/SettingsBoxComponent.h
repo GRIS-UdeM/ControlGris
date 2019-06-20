@@ -21,13 +21,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
-
-// These identifiers should be used elsewhere in the code to identify
-// the current OSC output format.
-enum SpatModeEnum {
-    SPAT_MODE_VBAP = 0,
-    SPAT_MODE_LBAP
-};
+#include "ControlGrisConstants.h"
 
 class SettingsBoxComponent : public Component
 {

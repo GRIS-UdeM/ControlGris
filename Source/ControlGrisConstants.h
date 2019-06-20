@@ -24,6 +24,13 @@
 const int FIELD_WIDTH = 300;
 const int MAX_NUMBER_OF_SOURCES = 8;
 
+// Spatialisation modes.
+//----------------------
+enum SPAT_MODE_ENUM {
+    SPAT_MODE_VBAP = 0,
+    SPAT_MODE_LBAP
+};
+
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
 enum SOURCE_PLACEMENT_ENUM {    SOURCE_PLACEMENT_LEFT_ALTERNATE = 1,
@@ -52,6 +59,15 @@ enum SOURCE_LINK_ENUM { SOURCE_LINK_INDEPENDANT = 1,
 const StringArray SOURCE_LINK_TYPES       {String("Independant"), String("Circular"),
                                            String("Circular Fixed Radius"), String("Circular Fixed Angle"),
                                            String("Circular Fully Fixed"), String("Delta Lock")};
+
+enum SOURCE_LINK_ALT_ENUM { SOURCE_LINK_ALT_INDEPENDANT = 1,
+                            SOURCE_LINK_ALT_FIXED_ELEVATION,
+                            SOURCE_LINK_ALT_LINEAR_MIN,
+                            SOURCE_LINK_ALT_LINEAR_MAX,
+                            SOURCE_LINK_ALT_DELTA_LOCK
+                      };
+const StringArray SOURCE_LINK_ALT_TYPES   {String("Independant"), String("Fixed Elevation"),
+                                           String("Linear Min"), String("Linear Max"), String("Delta Lock")};
 
 // Trajectories -> Trajectory Type popup choices.
 //-----------------------------------------------

@@ -22,10 +22,17 @@
 #include "ControlGrisConstants.h"
 
 //==============================================================================
-FieldComponent::FieldComponent() {}
+FieldComponent::FieldComponent()
+{
+    m_isPlaying = false;
+}
 
 FieldComponent::~FieldComponent() {
     setLookAndFeel(nullptr);
+}
+
+void FieldComponent::setIsPlaying(bool state) {
+    m_isPlaying = state;
 }
 
 void FieldComponent::setSelectedSource(int selectedId) {
@@ -47,7 +54,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatModeEnum spatMode) {
+void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SPAT_MODE_ENUM spatMode) {
 	const int width = getWidth();
 	const int height = getHeight();
     float fieldCenter = width / 2;
@@ -115,7 +122,6 @@ MainFieldComponent::MainFieldComponent(AutomationManager& automan)
     : automationManager (automan) 
 {
     m_spatMode = SPAT_MODE_VBAP;
-    m_isPlaying = false;
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -164,13 +170,9 @@ Point <float> MainFieldComponent::xyToPos(Point <float> p, int p_iwidth) {
     return Point <float> (x, y);
 }
 
-void MainFieldComponent::setSpatMode(SpatModeEnum spatMode) {
+void MainFieldComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     m_spatMode = spatMode;
     repaint();
-}
-
-void MainFieldComponent::setIsPlaying(bool state) {
-    m_isPlaying = state;
 }
 
 void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) {
@@ -253,11 +255,13 @@ void MainFieldComponent::paint(Graphics& g) {
         } else {
             rpos = posToXy(automationManager.getSourcePosition(), width);
         }
+        Rectangle<float> rarea (rpos.x, rpos.y, kSourceDiameter, kSourceDiameter);
         g.setColour(Colours::grey);
-        g.drawEllipse(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter, 2);
+        g.fillEllipse(rarea);
+        g.setColour(Colour::fromRGB(64, 64, 84));
+        g.drawEllipse(rarea, 1);
         g.setColour(Colours::white);
-        g.drawFittedText(String("X"), rpos.x + 1, rpos.y + 1, kSourceDiameter - 2,
-                         kSourceDiameter, Justification(Justification::centred), 1);
+        g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
     }
 
     // Draw recording trajectory current position dot.
@@ -274,7 +278,7 @@ void MainFieldComponent::paint(Graphics& g) {
 
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
-        int lineThickness = (i == m_selectedSourceId) ? 4 : 2;
+        int lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
         Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
@@ -283,10 +287,11 @@ void MainFieldComponent::paint(Graphics& g) {
             pos = posToXy(m_sources[i].getPos(), width);
         }
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
-        g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
+        Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        area.expand(lineThickness, lineThickness);
+        g.fillEllipse(area);
         g.setColour(Colours::white);
-        g.drawFittedText(String(m_sources[i].getId()+1), pos.x + 1, pos.y + 1, kSourceDiameter - 2,
-                         kSourceDiameter, Justification(Justification::centred), 1);
+        g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
 
         // Draw spanning.
         if (m_spatMode == SPAT_MODE_VBAP) {
@@ -388,30 +393,50 @@ Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {
 }
 
 //==============================================================================
-ElevationFieldComponent::ElevationFieldComponent() {}
+ElevationFieldComponent::ElevationFieldComponent() {
+    recordingTrajectoryPos = 0.0;
+}
 
 ElevationFieldComponent::~ElevationFieldComponent() {}
 
 void ElevationFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
 	const int height = getHeight();
+    int lineThickness;
 
     drawFieldBackground(g, false);
 
+    // Draw recording trajectory handle.
+    if (!m_isPlaying) {
+        lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
+        float rpos = (1.0 - recordingTrajectoryPos) * (height - 35) + 5;
+        Rectangle<float> rarea (10, rpos, kSourceDiameter, kSourceDiameter);
+        g.setColour(Colours::grey);
+        g.drawLine(10 + kSourceRadius, rpos + kSourceDiameter + lineThickness / 2,
+                   10 + kSourceRadius, height - 5, lineThickness);
+        g.setColour(Colours::grey);
+        g.fillEllipse(rarea);
+        g.setColour(Colour::fromRGB(64, 64, 84));
+        g.drawEllipse(rarea, 1);
+        g.setColour(Colours::white);
+        g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
+    }
+
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
-        int lineThickness = (i == m_selectedSourceId) ? 4 : 2;
+        lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
-        float x = (float)i / m_numberOfSources * (width - 25) + 25;
+        float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         Point<float> pos = Point<float> {x, y};
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
-        g.drawEllipse(pos.x, pos.y, kSourceDiameter, kSourceDiameter, lineThickness);
+        Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        area.expand(lineThickness, lineThickness);
+        g.fillEllipse(area);
         g.drawLine(pos.x + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
                    pos.x + kSourceRadius, height - 5, lineThickness);
         g.setColour(Colours::white);
-        g.drawFittedText(String(m_sources[i].getId()+1), pos.x + 1, pos.y + 1, kSourceDiameter - 2,
-                         kSourceDiameter, Justification(Justification::centred), 1);
+        g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
 
         // Draw spanning.
         float elevationSpan = 50.0f * m_sources[i].getElevationSpan();
@@ -428,9 +453,22 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 	int width = getWidth();
 	int height = getHeight();
 
+    // Check if we click on a recording trajectory.
+    if (true) { //(automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        float rpos = (1.0 - recordingTrajectoryPos) * (height - 35) + 5;
+        Rectangle<float> rarea = Rectangle<float>(10, rpos, kSourceDiameter, kSourceDiameter);
+        if (rarea.contains(event.getMouseDownPosition().toFloat())) {
+            m_oldSelectedSourceId = m_selectedSourceId;
+            m_selectedSourceId = -1;
+            //automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            repaint();
+            return;
+        }
+    }
+
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
-        float x = (float)i / m_numberOfSources * (width - 25) + 25;
+        float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         Point<float> pos = Point<float> {x, y};
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
@@ -446,8 +484,13 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
 	float height = getHeight();
 
-    float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
-    m_sources[m_selectedSourceId].setElevation(elevation);
+    if (m_selectedSourceId == -1) {
+        float pos = (height - event.y - kSourceDiameter) / (height - 35);
+        recordingTrajectoryPos = pos < 0.0 ? 0.0 : pos > 1.0 ? 1.0 : pos;
+    } else {
+        float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
+        m_sources[m_selectedSourceId].setElevation(elevation);
+        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
+    }
     repaint();
-    listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
 }

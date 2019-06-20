@@ -46,10 +46,12 @@ public:
 
  	void mouseUp (const MouseEvent &event);
 
-    void drawFieldBackground(Graphics&, bool isMainField, SpatModeEnum spatMode = SPAT_MODE_VBAP);
+    void drawFieldBackground(Graphics&, bool isMainField, SPAT_MODE_ENUM spatMode = SPAT_MODE_VBAP);
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
+
+    void setIsPlaying(bool state);
 
     struct Listener
     {
@@ -65,6 +67,8 @@ public:
 
 protected:
     Source *m_sources;
+
+    bool m_isPlaying;
     int m_numberOfSources;
     int m_selectedSourceId;
     int m_oldSelectedSourceId;
@@ -89,8 +93,7 @@ public:
  	void mouseDrag (const MouseEvent &event);
  	void mouseUp (const MouseEvent &event);
 
-    void setSpatMode(SpatModeEnum spatMode);
-    void setIsPlaying(bool state);
+    void setSpatMode(SPAT_MODE_ENUM spatMode);
 
 private:
     AutomationManager& automationManager;
@@ -102,9 +105,7 @@ private:
 
     Point <int> clipRecordingPosition(Point<int> pos);
 
-    SpatModeEnum m_spatMode;
-
-    bool m_isPlaying;
+    SPAT_MODE_ENUM m_spatMode;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };
@@ -122,6 +123,8 @@ public:
  	void mouseDrag (const MouseEvent &event);
 
 private:
+
+    float recordingTrajectoryPos;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElevationFieldComponent)
 };

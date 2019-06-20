@@ -168,11 +168,12 @@ void ParametersBoxComponent::paint(Graphics& g) {
     g.drawArrow(Line<float>(250, 34, 290, 34), 4, 10, 10);
 
     g.setColour(selectedSource->getColour());
-    g.drawEllipse(x, y, 20, 20, 3);
+    Rectangle<float> area(x, y, 20, 20);
+    area.expand(3, 3);
+    g.fillEllipse(area);
 
     g.setColour(Colours::white);
-    g.drawFittedText(String(selectedSource->getId()+1), x, y, kSourceDiameter - 2,
-                     kSourceDiameter, Justification(Justification::centred), 1);
+    g.drawFittedText(String(selectedSource->getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
 }
 
 void ParametersBoxComponent::resized() {

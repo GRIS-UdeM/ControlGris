@@ -158,7 +158,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(int selectedId
     settingsBox.setOscFormat(selectedId);
     bool selectionIsLBAP = selectedId == 2;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
-    mainField.setSpatMode((SpatModeEnum)(selectedId - 1));
+    mainField.setSpatMode((SPAT_MODE_ENUM)(selectedId - 1));
+    trajectoryBox.setSpatMode((SPAT_MODE_ENUM)(selectedId - 1));
     repaint();
     resized();
 }
@@ -262,6 +263,12 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
             break;
     }
 
+    for (int i = 0; i < numOfSources; i++) {
+        processor.setSourceParameterValue(i, SOURCE_ID_AZIMUTH, processor.getSources()[i].getNormalizedAzimuth());
+        processor.setSourceParameterValue(i, SOURCE_ID_ELEVATION, processor.getSources()[i].getNormalizedElevation());
+        processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
+    }
+
     repaint();
 }
 
@@ -322,6 +329,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
+    // Do we really need this ?
     bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
     automationManager.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
@@ -331,6 +339,10 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     automationManager.setSourceLink(value);
 
     mainField.repaint();
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
+    int numOfSources = processor.getNumberOfSources();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
