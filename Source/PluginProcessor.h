@@ -112,9 +112,10 @@ public:
     bool getIsPlaying();
     double getBPM();
 
-    void trajectoryPositionChanged(Point<float> position) override;
+    void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) override;
 
     void linkSourcePositions();
+    void linkSourcePositionsAlt();
 
     void addNewFixedPosition();
     void setSourceFixedPosition();
@@ -127,6 +128,7 @@ public:
     AudioProcessorValueTreeState parameters;
 
     AutomationManager automationManager;
+    AutomationManager automationManagerAlt;
 
 private:
     bool m_oscConnected;

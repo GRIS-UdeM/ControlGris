@@ -39,6 +39,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"), String("Recording Trajectory Y"),
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"), String("Recording Trajectory Z"),
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
@@ -118,8 +120,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Automation values for the recording trajectory.
     parameters.addParameterListener(String("recordingTrajectory_x"), this);
     parameters.addParameterListener(String("recordingTrajectory_y"), this);
+    parameters.addParameterListener(String("recordingTrajectory_z"), this);
 
     automationManager.addListener(this);
+    automationManagerAlt.addListener(this);
 
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
@@ -141,6 +145,9 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         automationManager.setPlaybackPositionY(newValue);
         needToLinkSourcePositions = true;
+    } else if (parameterID.compare("recordingTrajectory_z") == 0 && m_selectedOscFormat == SPAT_MODE_LBAP) {
+        automationManagerAlt.setPlaybackPositionY(newValue);
+        linkSourcePositionsAlt();
     }
 
     if (needToLinkSourcePositions) {
@@ -371,11 +378,15 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
     }
 }
 
-void ControlGrisAudioProcessor::trajectoryPositionChanged(Point<float> position) {
-    parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
-    parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
-
-    linkSourcePositions();
+void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
+    if (manager == &automationManager) {
+        parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
+        parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+        linkSourcePositions();
+    } else if (manager == &automationManagerAlt) {
+        parameters.getParameterAsValue("recordingTrajectory_z").setValue(position.y);
+        linkSourcePositionsAlt();
+    }
 }
 
 void ControlGrisAudioProcessor::linkSourcePositions() {
@@ -404,6 +415,21 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
     }
 }
 
+void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
+    float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
+
+    switch (automationManagerAlt.getSourceLink()) {
+        case SOURCE_LINK_ALT_INDEPENDANT:
+            sources[m_selectedSourceId].setNormalizedElevation((automationManagerAlt.getSourcePosition().y));
+            break;
+        case SOURCE_LINK_ALT_FIXED_ELEVATION:
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setNormalizedElevation((automationManagerAlt.getSourcePosition().y));
+            }
+            break;
+    }
+}
+
 void ControlGrisAudioProcessor::addNewFixedPosition() {
     // Should we replace an item if the new one has the same time as one already saved?
     XmlElement *newData = new XmlElement("ITEM");
@@ -411,6 +437,9 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
+        if (m_selectedOscFormat == SPAT_MODE_LBAP) {
+            newData->setAttribute(getFixedPosSourceName(i, 2), sources[i].getNormalizedElevation());
+        }
     }
     fixPositionData.addChildElement(newData);
     XmlElementDataSorter sorter("Time", true);
@@ -609,7 +638,7 @@ bool ControlGrisAudioProcessor::hasEditor() const
 
 AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 {
-    return new ControlGrisAudioProcessorEditor (*this, parameters, automationManager);
+    return new ControlGrisAudioProcessorEditor (*this, parameters, automationManager, automationManagerAlt);
 }
 
 //==============================================================================
@@ -623,6 +652,7 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
         for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
             newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
             newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
+            newData->setAttribute(getFixedPosSourceName(i, 2), element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
         }
         dest->addChildElement(newData);
     }

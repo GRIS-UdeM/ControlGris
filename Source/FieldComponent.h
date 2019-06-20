@@ -44,9 +44,10 @@ public:
     FieldComponent();
     ~FieldComponent();
 
- 	void mouseUp (const MouseEvent &event);
-
     void drawFieldBackground(Graphics&, bool isMainField, SPAT_MODE_ENUM spatMode = SPAT_MODE_VBAP);
+
+    Point <float> posToXy(Point <float> p, int p_iFieldWidth);
+    Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
@@ -100,8 +101,6 @@ private:
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
     Point <float> degreeToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToDegree(Point <float> p, int p_iFieldWidth);
-    Point <float> posToXy(Point <float> p, int p_iFieldWidth);
-    Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
 
     Point <int> clipRecordingPosition(Point<int> pos);
 
@@ -114,17 +113,17 @@ private:
 class ElevationFieldComponent : public FieldComponent
 {
 public:
-    ElevationFieldComponent();
+    ElevationFieldComponent(AutomationManager& automan);
     ~ElevationFieldComponent();
     
     void paint (Graphics&);
 	
 	void mouseDown (const MouseEvent &event);
  	void mouseDrag (const MouseEvent &event);
+ 	void mouseUp (const MouseEvent &event);
 
 private:
-
-    float recordingTrajectoryPos;
+    AutomationManager& automationManager;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElevationFieldComponent)
 };

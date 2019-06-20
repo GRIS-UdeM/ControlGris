@@ -113,8 +113,25 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SPAT_MOD
     }
 }
 
-void FieldComponent::mouseUp(const MouseEvent &event) {
-    repaint();
+Point <float> FieldComponent::posToXy(Point <float> p, int p_iwidth) {
+    float effectiveWidth = p_iwidth - kSourceDiameter;
+    float x = p.getX() * effectiveWidth;
+    float y = p.getY() * effectiveWidth;
+    return Point <float> (x, effectiveWidth - y);
+}
+
+Point <float> FieldComponent::xyToPos(Point <float> p, int p_iwidth) {
+    float k2 = kSourceDiameter / 2.0;
+    float half = (p_iwidth - kSourceDiameter) / 2;
+
+    // Limits for the LBAP algorithm
+    float px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
+    float py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
+
+    float x = (px - k2 - half) / half * 0.5 + 0.5;
+    float y = (py - k2 - half) / half * 0.5 + 0.5;
+
+    return Point <float> (x, y);
 }
 
 //==============================================================================
@@ -147,27 +164,6 @@ Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
     float rad = sqrtf(x*x + y*y);
     rad = 90.0 - rad * 90.0;
     return Point <float> (-ang, rad);
-}
-
-Point <float> MainFieldComponent::posToXy(Point <float> p, int p_iwidth) {
-    float effectiveWidth = p_iwidth - kSourceDiameter;
-    float x = p.getX() * effectiveWidth;
-    float y = p.getY() * effectiveWidth;
-    return Point <float> (x, effectiveWidth - y);
-}
-
-Point <float> MainFieldComponent::xyToPos(Point <float> p, int p_iwidth) {
-    float k2 = kSourceDiameter / 2.0;
-    float half = (p_iwidth - kSourceDiameter) / 2;
-
-    // Limits for the LBAP algorithm
-    float px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
-    float py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
-
-    float x = (px - k2 - half) / half * 0.5 + 0.5;
-    float y = (py - k2 - half) / half * 0.5 + 0.5;
-
-    return Point <float> (x, y);
 }
 
 void MainFieldComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
@@ -264,7 +260,7 @@ void MainFieldComponent::paint(Graphics& g) {
         g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
     }
 
-    // Draw recording trajectory current position dot.
+    // Draw recording trajectory path and current position dot.
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
@@ -393,26 +389,30 @@ Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {
 }
 
 //==============================================================================
-ElevationFieldComponent::ElevationFieldComponent() {
-    recordingTrajectoryPos = 0.0;
-}
+ElevationFieldComponent::ElevationFieldComponent(AutomationManager& automan) 
+    : automationManager (automan) {}
 
 ElevationFieldComponent::~ElevationFieldComponent() {}
 
 void ElevationFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
 	const int height = getHeight();
+    Point<float> pos;
     int lineThickness;
 
     drawFieldBackground(g, false);
 
     // Draw recording trajectory handle.
     if (!m_isPlaying) {
+        if (automationManager.getRecordingTrajectorySize() > 0) {
+            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+        } else {
+            pos = posToXy(automationManager.getSourcePosition(), width);
+        }
         lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
-        float rpos = (1.0 - recordingTrajectoryPos) * (height - 35) + 5;
-        Rectangle<float> rarea (10, rpos, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> rarea (10, pos.y, kSourceDiameter, kSourceDiameter);
         g.setColour(Colours::grey);
-        g.drawLine(10 + kSourceRadius, rpos + kSourceDiameter + lineThickness / 2,
+        g.drawLine(10 + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
                    10 + kSourceRadius, height - 5, lineThickness);
         g.setColour(Colours::grey);
         g.fillEllipse(rarea);
@@ -422,13 +422,25 @@ void ElevationFieldComponent::paint(Graphics& g) {
         g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
     }
 
+    // Draw recording trajectory path and current position dot.
+    if (automationManager.getRecordingTrajectorySize() > 1) {
+        Path trajectoryPath;
+        automationManager.createRecordingPath(trajectoryPath);
+        g.setColour(Colours::yellow);
+        g.strokePath(trajectoryPath, PathStrokeType(.75f));
+    }
+    if (m_isPlaying && !isMouseButtonDown()) {
+        Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
+        g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
+    }
+
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
         lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
-        Point<float> pos = Point<float> {x, y};
+        pos = Point<float> {x, y};
         g.setColour(m_sources[i].getColour().withSaturation(saturation));
         Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         area.expand(lineThickness, lineThickness);
@@ -452,15 +464,23 @@ void ElevationFieldComponent::paint(Graphics& g) {
 void ElevationFieldComponent::mouseDown(const MouseEvent &event) {    
 	int width = getWidth();
 	int height = getHeight();
+    Point<float> pos;
 
     // Check if we click on a recording trajectory.
-    if (true) { //(automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
-        float rpos = (1.0 - recordingTrajectoryPos) * (height - 35) + 5;
-        Rectangle<float> rarea = Rectangle<float>(10, rpos, kSourceDiameter, kSourceDiameter);
-        if (rarea.contains(event.getMouseDownPosition().toFloat())) {
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        if (automationManager.getRecordingTrajectorySize() > 1) {
+            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+        } else {
+            pos = posToXy(automationManager.getSourcePosition(), width);
+        }
+        Rectangle<float> rarea = Rectangle<float>(10, pos.y, kSourceDiameter, kSourceDiameter);
+        if (rarea.contains(event.getPosition().toFloat())) {
             m_oldSelectedSourceId = m_selectedSourceId;
             m_selectedSourceId = -1;
-            //automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            float y = event.getPosition().toFloat().y;
+            y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+            automationManager.resetRecordingTrajectory(Point<float> (10.0 + kSourceRadius, y));
+            automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), width));
             repaint();
             return;
         }
@@ -470,7 +490,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     for (int i = 0; i < m_numberOfSources; i++) {
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
-        Point<float> pos = Point<float> {x, y};
+        pos = Point<float> {x, y};
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
@@ -485,8 +505,11 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
 	float height = getHeight();
 
     if (m_selectedSourceId == -1) {
-        float pos = (height - event.y - kSourceDiameter) / (height - 35);
-        recordingTrajectoryPos = pos < 0.0 ? 0.0 : pos > 1.0 ? 1.0 : pos;
+        float x = 10.0 + kSourceRadius;
+        float y = event.getPosition().toFloat().y;
+        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+        automationManager.addRecordingPoint(Point<float> (x, y));
+        automationManager.setSourcePosition(xyToPos(Point<float> (x, height - event.getPosition().toFloat().y), height));
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
@@ -494,3 +517,12 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
     }
     repaint();
 }
+
+void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
+    if (m_selectedSourceId == -1) {
+        automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
+        m_selectedSourceId = m_oldSelectedSourceId;
+        repaint();
+    }
+}
+

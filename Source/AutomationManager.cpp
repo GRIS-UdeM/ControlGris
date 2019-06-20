@@ -143,7 +143,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() {
 void AutomationManager::setSourcePosition(Point<float> pos) {
     source.setPos(pos);
     if (activateState)
-        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(pos); });
+        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, pos); });
 }
 
 Source& AutomationManager::getSource() {

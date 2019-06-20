@@ -63,7 +63,7 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void trajectoryPositionChanged(Point<float> position) = 0;
+        virtual void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

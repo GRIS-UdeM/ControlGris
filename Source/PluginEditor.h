@@ -46,7 +46,8 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
                                      AudioProcessorValueTreeState& vts,
-                                     AutomationManager& automan);
+                                     AutomationManager& automan,
+                                     AutomationManager& automanAlt);
     ~ControlGrisAudioProcessorEditor();
 
     void paint (Graphics&) override;
@@ -99,6 +100,7 @@ private:
     AudioProcessorValueTreeState& valueTreeState;
 
     AutomationManager& automationManager;
+    AutomationManager& automationManagerAlt;
 
     FixedPositionEditor fixedPositionEditor;
 

@@ -23,8 +23,15 @@
 
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
                                                                   AudioProcessorValueTreeState& vts,
-                                                                  AutomationManager& automan)
-    : AudioProcessorEditor (&p), processor (p), valueTreeState (vts), automationManager (automan), mainField (automan)
+                                                                  AutomationManager& automan,
+                                                                  AutomationManager& automanAlt)
+    : AudioProcessorEditor (&p),
+      processor (p),
+      valueTreeState (vts), 
+      automationManager (automan), 
+      automationManagerAlt (automanAlt), 
+      mainField (automan),
+      elevationField (automanAlt)
 { 
     setLookAndFeel(&grisLookAndFeel);
 
@@ -343,6 +350,17 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
     int numOfSources = processor.getNumberOfSources();
+
+    // Fixed elevation.
+    if (value == SOURCE_LINK_ALT_FIXED_ELEVATION) {
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
+        }
+    }
+
+    automationManagerAlt.setSourceLink(value);
+
+    elevationField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
@@ -351,19 +369,22 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int val
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double duration, int mode) {
-    if (mode == 1) {
-        automationManager.setPlaybackDuration(duration);
-    } else {
-        automationManager.setPlaybackDuration(duration * 60.0 / processor.getBPM());
+    double dur = duration;
+    if (mode == 2) {
+        dur = duration * 60.0 / processor.getBPM();
     }
+    automationManager.setPlaybackDuration(dur);
+    automationManagerAlt.setPlaybackDuration(dur);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) {
     automationManager.setNumberOfCycles(value);
+    automationManagerAlt.setNumberOfCycles(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
     automationManager.setActivateState(value);
+    automationManagerAlt.setActivateState(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxEditFixedSourceButtonClicked() {
@@ -376,11 +397,14 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
+    // not sure this is necessary...
     bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed); // not sure...
+    automationManager.fixSourcePosition(shouldBeFixed);
+    automationManagerAlt.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
+    //------------------------------
 
     processor.addNewFixedPosition();
 }
@@ -388,6 +412,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
     float center = FIELD_WIDTH / 2.0 - kSourceRadius;
     automationManager.resetRecordingTrajectory(Point<float> (center, center));
+    automationManagerAlt.resetRecordingTrajectory(Point<float> (center, center));
     mainField.repaint();
 }
 
@@ -397,29 +422,42 @@ void ControlGrisAudioProcessorEditor::timerCallback() {
     bool needRepaint = false;
     if (processor.isSomethingChanged()) {
         parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-
-        needRepaint = true;
-        if (processor.getOscFormat() == 2)
-            elevationField.repaint();
-
         processor.newEventConsumed();
+        needRepaint = true;
     }
 
     mainField.setIsPlaying(processor.getIsPlaying());
+    elevationField.setIsPlaying(processor.getIsPlaying());
 
+    // MainField automation.
     if (automationManager.getActivateState()) {
         if (m_lastTime != processor.getCurrentTime()) {
             automationManager.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
             needRepaint = true;
         }
-        m_lastTime = processor.getCurrentTime();
     } else if (automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
         needRepaint = true;
     }
 
-    if (needRepaint && ! m_fixedSourcesWindowVisible)
+    // ElevationField automation.
+    if (processor.getOscFormat() == 2 && automationManagerAlt.getActivateState()) {
+        if (m_lastTime != processor.getCurrentTime()) {
+            automationManagerAlt.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
+            needRepaint = true;
+        }
+    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
+        automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
+        needRepaint = true;
+    }
+
+    m_lastTime = processor.getCurrentTime();
+
+    if (needRepaint && ! m_fixedSourcesWindowVisible) {
         mainField.repaint();
+        if (processor.getOscFormat() == 2)
+            elevationField.repaint();
+    }
 }
 
 // FieldComponent::Listener callback.
