@@ -77,6 +77,7 @@ public:
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
+    void setElevationFromFixedSource(float deltaY);
 
     void setColour(Colour col);
     Colour getColour();

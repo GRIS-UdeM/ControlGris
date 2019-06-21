@@ -427,6 +427,12 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
                 sources[i].setNormalizedElevation((automationManagerAlt.getSourcePosition().y));
             }
             break;
+        case SOURCE_LINK_ALT_DELTA_LOCK:
+            deltaY = automationManagerAlt.getSource().getDeltaY();
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setElevationFromFixedSource(deltaY);
+            }
+            break;
     }
 }
 

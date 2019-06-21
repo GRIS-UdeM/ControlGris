@@ -248,6 +248,10 @@ void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {
     computeAzimuthElevation();
 }
 
+void Source::setElevationFromFixedSource(float deltaY) {
+    setElevation(fixedElevation + deltaY * 90.0f);
+}
+
 float Source::getDeltaX() {
     return m_x - fixedX;
 }

@@ -336,7 +336,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
-    // Do we really need this ?
     bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
     automationManager.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
@@ -356,6 +355,12 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
         for (int i = 1; i < numOfSources; i++) {
             processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
         }
+    }
+
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    automationManagerAlt.fixSourcePosition(shouldBeFixed);
+    for (int i = 0; i < numOfSources; i++) {
+        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
 
     automationManagerAlt.setSourceLink(value);
