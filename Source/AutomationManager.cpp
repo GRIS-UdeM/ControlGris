@@ -73,6 +73,7 @@ Point<float> AutomationManager::getPlaybackPosition() {
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
+    playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryPoints.clear();
     lastRecordingPoint = currentPosition;
 }
@@ -109,22 +110,24 @@ void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
 }
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
-    if (trajectoryDeltaTime < 1.0) {
-        double delta = trajectoryDeltaTime * numOfCycles * trajectoryPoints.size();
-        if (delta + 1 >= trajectoryPoints.size()) {
-            delta = std::fmod(delta, trajectoryPoints.size());
-        }
-        int index = (int)delta;
-        if (index + 1 < trajectoryPoints.size()) {
-            double frac = delta - index;
-            Point<float> p1 = trajectoryPoints[index];
-            Point<float> p2 = trajectoryPoints[index+1];
-            currentTrajectoryPoint = Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+    if (trajectoryPoints.size() > 0) {
+        if (trajectoryDeltaTime < 1.0) {
+            double delta = trajectoryDeltaTime * numOfCycles * trajectoryPoints.size();
+            if (delta + 1 >= trajectoryPoints.size()) {
+                delta = std::fmod(delta, trajectoryPoints.size());
+            }
+            int index = (int)delta;
+            if (index + 1 < trajectoryPoints.size()) {
+                double frac = delta - index;
+                Point<float> p1 = trajectoryPoints[index];
+                Point<float> p2 = trajectoryPoints[index+1];
+                currentTrajectoryPoint = Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
+            } else {
+                currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
+            }
         } else {
             currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
         }
-    } else {
-        currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
     }
 
     if (activateState) {
@@ -142,8 +145,9 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() {
 
 void AutomationManager::setSourcePosition(Point<float> pos) {
     source.setPos(pos);
-    if (activateState)
+    if (activateState) {
         listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, pos); });
+    }
 }
 
 Source& AutomationManager::getSource() {

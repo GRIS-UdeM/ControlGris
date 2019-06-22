@@ -357,6 +357,20 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
         }
     }
 
+    // Linear min.
+    if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setElevation(90.0 / numOfSources * i);
+        }
+    }
+
+    // Linear max.
+    if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setElevation(90.0 - (90.0 / numOfSources * i));
+        }
+    }
+
     bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
     automationManagerAlt.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
@@ -402,7 +416,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
-    // not sure this is necessary...
+    // Should be independant...
     bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
     automationManager.fixSourcePosition(shouldBeFixed);
     automationManagerAlt.fixSourcePosition(shouldBeFixed);

@@ -136,8 +136,11 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
-    int paramId, sourceId = parameterID.getTrailingIntValue();
+    if (std::isnan(newValue) || std::isinf(newValue)) {
+        return;
+    }
 
+    int paramId, sourceId = parameterID.getTrailingIntValue();
     bool needToLinkSourcePositions = false;
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         automationManager.setPlaybackPositionX(newValue);
@@ -145,7 +148,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         automationManager.setPlaybackPositionY(newValue);
         needToLinkSourcePositions = true;
-    } else if (parameterID.compare("recordingTrajectory_z") == 0 && m_selectedOscFormat == SPAT_MODE_LBAP) {
+    } else if (parameterID.compare("recordingTrajectory_z") == 0 && m_selectedOscFormat == 2) {
         automationManagerAlt.setPlaybackPositionY(newValue);
         linkSourcePositionsAlt();
     }
@@ -427,6 +430,8 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
                 sources[i].setNormalizedElevation((automationManagerAlt.getSourcePosition().y));
             }
             break;
+        case SOURCE_LINK_ALT_LINEAR_MIN:
+        case SOURCE_LINK_ALT_LINEAR_MAX:
         case SOURCE_LINK_ALT_DELTA_LOCK:
             deltaY = automationManagerAlt.getSource().getDeltaY();
             for (int i = 0; i < m_numOfSources; i++) {

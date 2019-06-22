@@ -430,7 +430,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()) {
-        Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
+        Point<float> dpos (10 + kSourceRadius, automationManager.getCurrentTrajectoryPoint().y);
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
 
