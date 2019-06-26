@@ -107,8 +107,8 @@ Component * FixedPositionEditor::refreshComponentForCell (int rowNumber, int col
 }
 
 void FixedPositionEditor::resized() {
-    table.setBounds(1, 1, getWidth() - 1, getHeight() - 25);
-    closeButton.setBounds(1, getHeight() - 25, getWidth() - 1, 24);
+    table.setBounds(1, 1, getWidth() - 1, getHeight() - 35);
+    closeButton.setBounds(5, getHeight() - 30, getWidth() - 10, 25);
 }
 
 void FixedPositionEditor::paint(Graphics& g) {
