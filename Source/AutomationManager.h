@@ -54,6 +54,7 @@ public:
     int getSourceLink();
     void setDrawingType(int type);
     int getDrawingType();
+    void setDrawingTypeAlt(int type);
 
     Source& getSource();
     void setSourcePosition(Point<float> pos);

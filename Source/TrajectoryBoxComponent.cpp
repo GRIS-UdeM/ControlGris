@@ -41,11 +41,17 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     trajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryTypeLabel);
 
-    trajectoryTypeCombo.addItemList(TRAJECTORY_TYPES, 1);
+    trajectoryTypeCombo.addItemList(TRAJECTORY_TYPE_TYPES, 1);
     trajectoryTypeCombo.setSelectedId(1);
     addAndMakeVisible(&trajectoryTypeCombo);
     trajectoryTypeCombo.onChange = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeChanged(trajectoryTypeCombo.getSelectedId()); }); };
+
+    trajectoryTypeAltCombo.addItemList(TRAJECTORY_TYPE_ALT_TYPES, 1);
+    trajectoryTypeAltCombo.setSelectedId(1);
+    addAndMakeVisible(&trajectoryTypeAltCombo);
+    trajectoryTypeAltCombo.onChange = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeAltChanged(trajectoryTypeAltCombo.getSelectedId()); }); };
 
     durationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
     addAndMakeVisible(&durationLabel);
@@ -129,15 +135,18 @@ void TrajectoryBoxComponent::resized() {
     sourceLinkLabel.setBounds(5, 10, 150, 20);
     sourceLinkCombo.setBounds(120, 10, 160, 20);
 
-    if (m_spatMode == SPAT_MODE_LBAP) {
-        sourceLinkAltCombo.setVisible(true);
-        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
-    } else {
-        sourceLinkAltCombo.setVisible(false);
-    }
-
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(120, 40, 160, 20);
+
+    if (m_spatMode == SPAT_MODE_LBAP) {
+        sourceLinkAltCombo.setVisible(true);
+        trajectoryTypeAltCombo.setVisible(true);
+        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
+        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
+    } else {
+        sourceLinkAltCombo.setVisible(false);
+        trajectoryTypeAltCombo.setVisible(false);
+    }
 
     durationLabel.setBounds(5, 70, 150, 20);
     durationEditor.setBounds(120, 70, 90, 20);

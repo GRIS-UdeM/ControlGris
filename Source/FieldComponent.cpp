@@ -467,7 +467,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     Point<float> pos;
 
     // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
         if (automationManager.getRecordingTrajectorySize() > 1) {
             pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
         } else {

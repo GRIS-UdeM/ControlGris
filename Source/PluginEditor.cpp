@@ -360,14 +360,14 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
     // Linear min.
     if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(90.0 / numOfSources * i);
+            processor.getSources()[i].setElevation(45.0 / numOfSources * i);
         }
     }
 
     // Linear max.
     if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(90.0 - (90.0 / numOfSources * i));
+            processor.getSources()[i].setElevation(90.0 - (45.0 / numOfSources * i));
         }
     }
 
@@ -385,6 +385,11 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
     automationManager.setDrawingType(value);
     mainField.repaint();
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(int value) {
+    automationManagerAlt.setDrawingTypeAlt(value);
+    elevationField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double duration, int mode) {

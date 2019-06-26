@@ -78,6 +78,7 @@ public:
     void trajectoryBoxSourceLinkChanged(int value) override;
     void trajectoryBoxSourceLinkAltChanged(int value) override;
     void trajectoryBoxTrajectoryTypeChanged(int value) override;
+    void trajectoryBoxTrajectoryTypeAltChanged(int value) override;
     void trajectoryBoxDurationChanged(double duration, int mode) override;
     void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;

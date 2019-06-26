@@ -235,6 +235,54 @@ void AutomationManager::setDrawingType(int type) {
     }
 }
 
+void AutomationManager::setDrawingTypeAlt(int type) {
+    drawingType = type;
+
+    trajectoryPoints.clear();
+
+    float x = 10.0 + kSourceRadius;
+    float minPos = 15.0, maxPos = FIELD_WIDTH - 20.0;
+
+    switch (drawingType) {
+        case TRAJECTORY_TYPE_ALT_DRAWING:
+            break;
+        case TRAJECTORY_TYPE_ALT_DOWN_UP:
+            for (int i = 0; i < 200; i++) {
+                float y = (i / 199.0) * (maxPos - minPos) + minPos;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_ALT_UP_DOWN:
+            for (int i = 0; i < 200; i++) {
+                float y = (1.0 - i / 199.0) * (maxPos - minPos) + minPos;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_UP:
+            for (int i = 0; i < 200; i++) {
+                float y;
+                if (i < 100) {
+                    y = (i / 99.0) * (maxPos - minPos) + minPos;
+                } else {
+                    y = ((200 - i) / 99.0) * (maxPos - minPos) + minPos;
+                }
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_DOWN:
+            for (int i = 0; i < 200; i++) {
+                float y;
+                if (i < 100) {
+                    y = (1.0 - i / 99.0) * (maxPos - minPos) + minPos;
+                } else {
+                    y = (1.0 - (200 - i) / 99.0) * (maxPos - minPos) + minPos;
+                }
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+    }
+}
+
 int AutomationManager::getDrawingType() {
     return drawingType;
 }
