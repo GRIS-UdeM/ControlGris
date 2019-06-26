@@ -44,6 +44,7 @@ public:
     void resetRecordingTrajectory(Point<float> currentPosition);
     void addRecordingPoint(Point<float> pos);
     int getRecordingTrajectorySize();
+    Point<float> getFirstRecordingPoint();
     Point<float> getLastRecordingPoint();
     Point<float> getCurrentTrajectoryPoint();
     void createRecordingPath(Path& path);

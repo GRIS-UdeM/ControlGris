@@ -93,6 +93,10 @@ int AutomationManager::getRecordingTrajectorySize() {
     return trajectoryPoints.size();
 }
 
+Point<float> AutomationManager::getFirstRecordingPoint() {
+    return trajectoryPoints.getFirst();
+}
+
 Point<float> AutomationManager::getLastRecordingPoint() {
     return trajectoryPoints.getLast();
 }
@@ -183,6 +187,48 @@ void AutomationManager::setDrawingType(int type) {
             for (int i = 0; i < 200; i++) {
                 float x = -sinf(2.0 * M_PI * i / 199) * radius + offset;
                 float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_ELLIPSE_CLOCKWISE:
+            for (int i = 0; i < 200; i++) {
+                float x = sinf(2.0 * M_PI * i / 199) * radius * 0.5 + offset;
+                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_ELLIPSE_COUNTER_CLOCKWISE:
+            for (int i = 0; i < 200; i++) {
+                float x = -sinf(2.0 * M_PI * i / 199) * radius * 0.5 + offset;
+                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_OUT_IN:
+            for (int i = 0; i < 300; i++) {
+                float x = sinf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                float y = -cosf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_OUT_IN:
+            for (int i = 0; i < 300; i++) {
+                float x = -sinf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                float y = -cosf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT:
+            for (int i = 0; i < 300; i++) {
+                float x = sinf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
+                float y = -cosf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
+                trajectoryPoints.add(Point<float> (x, y));
+            }
+            break;
+        case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT:
+            for (int i = 0; i < 300; i++) {
+                float x = -sinf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
+                float y = -cosf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
