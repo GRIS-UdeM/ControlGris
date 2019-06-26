@@ -162,7 +162,8 @@ Point<float> AutomationManager::getSourcePosition() {
     return source.getPos();
 }
 
-void AutomationManager::fixSourcePosition(bool shouldBeFixed) {
+void AutomationManager::fixSourcePosition() {
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
     source.fixSourcePosition(shouldBeFixed);
 }
 

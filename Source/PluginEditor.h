@@ -82,9 +82,11 @@ public:
     void trajectoryBoxDurationChanged(double duration, int mode) override;
     void trajectoryBoxNumOfCycleChanged(int value) override;
     void trajectoryBoxActivateChanged(bool value) override;
+    void trajectoryBoxActivateAltChanged(bool value) override;
     void trajectoryBoxEditFixedSourceButtonClicked() override;
     void trajectoryBoxFixSourceButtonClicked() override;
     void trajectoryBoxClearButtonClicked() override;
+    void trajectoryBoxClearAltButtonClicked() override;
 
     // FixedPositionEditor::Listeners
     void fixedPositionEditorCellChanged(int row, int column, double value);
@@ -129,6 +131,11 @@ private:
     double m_lastTime;
 
     Value lastUIWidth, lastUIHeight;
+
+    // These are called after a source has changed from mouse movement in a field.
+    //----------------------------------------------------------------------------
+    void validateSourcePositions();
+    void validateSourcePositionsAlt();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)
 };

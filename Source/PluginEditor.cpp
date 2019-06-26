@@ -336,13 +336,13 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
         }
     }
 
+    automationManager.setSourceLink(value);
+    automationManager.fixSourcePosition();
+
     bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed);
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
-
-    automationManager.setSourceLink(value);
 
     mainField.repaint();
 }
@@ -360,24 +360,24 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
     // Linear min.
     if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(45.0 / numOfSources * i);
+            processor.getSources()[i].setElevation(60.0 / numOfSources * i);
         }
     }
 
     // Linear max.
     if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(90.0 - (45.0 / numOfSources * i));
+            processor.getSources()[i].setElevation(90.0 - (60.0 / numOfSources * i));
         }
     }
 
-    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
-    automationManagerAlt.fixSourcePosition(shouldBeFixed);
+    automationManagerAlt.setSourceLink(value);
+    automationManagerAlt.fixSourcePosition();
+
+    bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
-
-    automationManagerAlt.setSourceLink(value);
 
     elevationField.repaint();
 }
@@ -408,6 +408,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) 
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
     automationManager.setActivateState(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value) {
     automationManagerAlt.setActivateState(value);
 }
 
@@ -419,16 +422,16 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxEditFixedSourceButtonClicked(
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     int numOfSources = processor.getNumberOfSources();
-    int sourceLink = automationManager.getSourceLink();
+    int link = automationManager.getSourceLink();
+    int linkAlt = automationManagerAlt.getSourceLink();
 
-    // Should be independant...
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
-    automationManager.fixSourcePosition(shouldBeFixed);
-    automationManagerAlt.fixSourcePosition(shouldBeFixed);
+    automationManager.fixSourcePosition();
+    automationManagerAlt.fixSourcePosition();
+
+    bool shouldBeFixed = link != SOURCE_LINK_INDEPENDANT || linkAlt != SOURCE_LINK_ALT_INDEPENDANT;
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
-    //------------------------------
 
     processor.addNewFixedPosition();
 }
@@ -436,8 +439,13 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
 void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
     float center = FIELD_WIDTH / 2.0 - kSourceRadius;
     automationManager.resetRecordingTrajectory(Point<float> (center, center));
-    automationManagerAlt.resetRecordingTrajectory(Point<float> (center, center));
     mainField.repaint();
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxClearAltButtonClicked() {
+    float center = FIELD_WIDTH / 2.0 - kSourceRadius;
+    automationManagerAlt.resetRecordingTrajectory(Point<float> (center, center));
+    elevationField.repaint();
 }
 
 // Timer callback. Update the interface if anything has changed (mostly automations).
@@ -497,47 +505,10 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
 
-    int numOfSources = processor.getNumberOfSources();
-    int sourceLink = automationManager.getSourceLink();
-
-    // Fixed radius.
-    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        if (processor.getOscFormat() == 2) {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
-            }
-        } else {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
-            }
-        }
+    validateSourcePositions();
+    if (processor.getOscFormat() == 2) {
+        validateSourcePositionsAlt();
     }
-
-    // Fixed angle.
-    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        for (int i = 1; i < numOfSources; i++) {
-            float offset = processor.getSources()[0].getAzimuth();
-            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i + offset);
-        }
-    }
-
-    // Delta lock.
-    if (sourceLink == SOURCE_LINK_DELTA_LOCK) {
-        float deltaX = processor.getSources()[0].getDeltaX();
-        float deltaY = processor.getSources()[0].getDeltaY();
-        for (int i = 1; i < numOfSources; i++) {
-            processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
-        }
-    }
-
-    // Fix source positions.
-    //bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
-    //automationManager.fixSourcePosition(shouldBeFixed);
-    //if (2 <= sourceLink < 7) {
-    //    for (int i = 0; i < numOfSources; i++) {
-    //        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    //    }
-    //}
 }
 
 // FixedPositionEditor::Listener callback.
@@ -602,5 +573,95 @@ void ControlGrisAudioProcessorEditor::resized() {
         fixedPositionEditor.setBounds(0, 0, width, height);
     } else {
         fixedPositionEditor.setVisible(false);
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::validateSourcePositions() {
+    int numOfSources = processor.getNumberOfSources();
+    int sourceLink = automationManager.getSourceLink();
+
+    // Fixed radius.
+    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+        if (processor.getOscFormat() == 2) {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
+            }
+        } else {
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
+            }
+        }
+    }
+
+    // Fixed angle.
+    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+        for (int i = 1; i < numOfSources; i++) {
+            float offset = processor.getSources()[0].getAzimuth();
+            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i + offset);
+        }
+    }
+
+    // Delta lock.
+    if (sourceLink == SOURCE_LINK_DELTA_LOCK) {
+        float deltaX = processor.getSources()[0].getDeltaX();
+        float deltaY = processor.getSources()[0].getDeltaY();
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+        }
+    }
+
+    // Fix source positions.
+    automationManager.fixSourcePosition(); // not sure...
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    if (sourceLink >= 2 && sourceLink < 6) {
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+        }
+    }
+}
+
+void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
+    int numOfSources = processor.getNumberOfSources();
+    int sourceLink = automationManagerAlt.getSourceLink();
+
+    // Fixed elevation.
+    if (sourceLink == SOURCE_LINK_ALT_FIXED_ELEVATION) {
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
+        }
+    }
+
+    // Linear min.
+    if (sourceLink == SOURCE_LINK_ALT_LINEAR_MIN) {
+        for (int i = 1; i < numOfSources; i++) {
+            float offset = processor.getSources()[0].getElevation();
+            processor.getSources()[i].setElevation(60.0 / numOfSources * i + offset);
+        }
+    }
+
+    // Linear max.
+    if (sourceLink == SOURCE_LINK_ALT_LINEAR_MAX) {
+        for (int i = 1; i < numOfSources; i++) {
+            float offset = 90.0 - processor.getSources()[0].getElevation();
+            processor.getSources()[i].setElevation(90.0 - (60.0 / numOfSources * i) - offset);
+        }
+    }
+
+    // Delta lock.
+    if (sourceLink == SOURCE_LINK_ALT_DELTA_LOCK) {
+        float deltaY = processor.getSources()[0].getDeltaElevation();
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setElevationFromFixedSource(deltaY);
+        }
+    }
+
+    // Fix source positions.
+    automationManagerAlt.fixSourcePosition(); // not sure...
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_ALT_INDEPENDANT;
+    if (sourceLink >= 2 && sourceLink < 5) {
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+        }
     }
 }

@@ -49,7 +49,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
 
     trajectoryTypeAltCombo.addItemList(TRAJECTORY_TYPE_ALT_TYPES, 1);
     trajectoryTypeAltCombo.setSelectedId(1);
-    addAndMakeVisible(&trajectoryTypeAltCombo);
+    addChildComponent(&trajectoryTypeAltCombo);
     trajectoryTypeAltCombo.onChange = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeAltChanged(trajectoryTypeAltCombo.getSelectedId()); }); };
 
@@ -108,11 +108,24 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxClearButtonClicked(); });
             durationUnitCombo.grabKeyboardFocus(); };
 
+    addChildComponent(&clearAltButton);
+    clearAltButton.setButtonText("Clear");
+    clearAltButton.onClick = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxClearAltButtonClicked(); });
+            durationUnitCombo.grabKeyboardFocus(); };
+
     addAndMakeVisible(&activateButton);
-    activateButton.setButtonText("Activate");
+    activateButton.setButtonText("Active");
     activateButton.setClickingTogglesState(true);
     activateButton.onClick = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
+            durationUnitCombo.grabKeyboardFocus(); };
+
+    addChildComponent(&activateAltButton);
+    activateAltButton.setButtonText("Active");
+    activateAltButton.setClickingTogglesState(true);
+    activateAltButton.onClick = [this] { 
+            listeners.call([&] (Listener& l) { l.trajectoryBoxActivateAltChanged(activateAltButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
 }
 
@@ -138,16 +151,6 @@ void TrajectoryBoxComponent::resized() {
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(120, 40, 160, 20);
 
-    if (m_spatMode == SPAT_MODE_LBAP) {
-        sourceLinkAltCombo.setVisible(true);
-        trajectoryTypeAltCombo.setVisible(true);
-        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
-        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
-    } else {
-        sourceLinkAltCombo.setVisible(false);
-        trajectoryTypeAltCombo.setVisible(false);
-    }
-
     durationLabel.setBounds(5, 70, 150, 20);
     durationEditor.setBounds(120, 70, 90, 20);
     durationUnitCombo.setBounds(215, 70, 65, 20);
@@ -160,6 +163,23 @@ void TrajectoryBoxComponent::resized() {
 
     editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
     fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);
-    clearButton.setBounds(getWidth() - 120, 70, 100, 20);
-    activateButton.setBounds(getWidth() - 120, 100, 100, 20);
+    clearButton.setBounds(getWidth() - 120, 70, 48, 20);
+    activateButton.setBounds(getWidth() - 120, 100, 48, 20);
+
+    if (m_spatMode == SPAT_MODE_LBAP) {
+        sourceLinkAltCombo.setVisible(true);
+        trajectoryTypeAltCombo.setVisible(true);
+        clearAltButton.setVisible(true);
+        activateAltButton.setVisible(true);
+        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
+        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
+        clearAltButton.setBounds(getWidth() - 68, 70, 48, 20);
+        activateAltButton.setBounds(getWidth() - 68, 100, 48, 20);
+    } else {
+        sourceLinkAltCombo.setVisible(false);
+        trajectoryTypeAltCombo.setVisible(false);
+        clearAltButton.setVisible(false);
+        activateAltButton.setVisible(false);
+    }
+
 }

@@ -260,6 +260,10 @@ float Source::getDeltaY() {
     return m_y - fixedY;
 }
 
+float Source::getDeltaElevation() {
+    return (m_elevation - fixedElevation) / 90.0;
+}
+
 void Source::setColour(Colour col) {
     colour = col;
 }
