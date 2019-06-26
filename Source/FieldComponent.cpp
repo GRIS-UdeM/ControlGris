@@ -264,7 +264,7 @@ void MainFieldComponent::paint(Graphics& g) {
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
-        g.setColour(Colours::yellow);
+        g.setColour(Colour::fromRGB(176, 176, 176));
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()) {
@@ -426,7 +426,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
-        g.setColour(Colours::yellow);
+        g.setColour(Colour::fromRGB(176, 176, 176));
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()) {
