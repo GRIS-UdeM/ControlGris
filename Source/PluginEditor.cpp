@@ -158,6 +158,14 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     processor.setSelectedSourceId(m_selectedSource);
 }
 
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
+    trajectoryBox.sourceLinkCombo.setSelectedId(value, NotificationType::dontSendNotification);
+}
+
+void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
+    trajectoryBox.sourceLinkAltCombo.setSelectedId(value, NotificationType::dontSendNotification);
+}
+
 // Value::Listener callback. Called when the stored window size changes.
 //----------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
@@ -320,70 +328,23 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
-    int numOfSources = processor.getNumberOfSources();
-
-    // Fixed radius.
-    if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        if (processor.getOscFormat() == 2) {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
-            }
-        } else {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
-            }
-        }
-    }
-
-    // Fixed angle.
-    if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i);
-        }
-    }
-
     automationManager.setSourceLink(value);
     automationManager.fixSourcePosition();
 
-    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
-    for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    }
+    processor.onSourceLinkChanged(value);
+
+    valueTreeState.getParameterAsValue("sourceLink").setValue((value - 1) / 5.f);
 
     mainField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
-    int numOfSources = processor.getNumberOfSources();
-
-    // Fixed elevation.
-    if (value == SOURCE_LINK_ALT_FIXED_ELEVATION) {
-        for (int i = 1; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
-        }
-    }
-
-    // Linear min.
-    if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
-        for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(60.0 / numOfSources * i);
-        }
-    }
-
-    // Linear max.
-    if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
-        for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].setElevation(90.0 - (60.0 / numOfSources * i));
-        }
-    }
-
     automationManagerAlt.setSourceLink(value);
     automationManagerAlt.fixSourcePosition();
 
-    bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
-    for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    }
+    processor.onSourceLinkAltChanged(value);
+
+    valueTreeState.getParameterAsValue("sourceLinkAlt").setValue((value - 1) / 4.f);
 
     elevationField.repaint();
 }

@@ -114,6 +114,9 @@ public:
 
     void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) override;
 
+    void onSourceLinkChanged(int value);
+    void onSourceLinkAltChanged(int value);
+
     void linkSourcePositions();
     void linkSourcePositionsAlt();
 
@@ -148,6 +151,9 @@ private:
     bool m_lock;
     bool m_isPlaying;
     double m_bpm;
+
+    int m_sourceLink;
+    int m_sourceLinkAlt;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
 

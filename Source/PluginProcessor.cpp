@@ -44,6 +44,11 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"), String("Recording Trajectory Z"),
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
 
+    parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
+                                                     NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
+                                                     NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
         String id1(i + 1);
@@ -53,7 +58,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
         parameters.push_back(std::make_unique<Parameter>(
                                  String("elevationSpan_") + id, String("Source ") + id1 + String(" Elevation Span"),
                                  String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
-}
+    }
 
     return { parameters.begin(), parameters.end() };
 }
@@ -86,6 +91,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = 10000000.0;
+
+    m_sourceLink = m_sourceLinkAlt = 0;
 
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
@@ -127,6 +134,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.addParameterListener(String("recordingTrajectory_x"), this);
     parameters.addParameterListener(String("recordingTrajectory_y"), this);
     parameters.addParameterListener(String("recordingTrajectory_z"), this);
+    parameters.addParameterListener(String("sourceLink"), this);
+    parameters.addParameterListener(String("sourceLinkAlt"), this);
 
     automationManager.addListener(this);
     automationManagerAlt.addListener(this);
@@ -163,6 +172,34 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
         linkSourcePositions();
     }
 
+    if (parameterID.compare("sourceLink") == 0) {
+        int val = (int)(newValue * 5) + 1;
+        if (val != m_sourceLink) {
+            m_sourceLink = val;
+            automationManager.setSourceLink(val);
+            automationManager.fixSourcePosition();
+            onSourceLinkChanged(val);
+            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            if (ed != nullptr) {
+                ed->updateSourceLinkCombo(val);
+            }
+        }
+    }
+
+    if (parameterID.compare("sourceLinkAlt") == 0) {
+        int val = (int)(newValue * 4) + 1;
+        if (val != m_sourceLinkAlt) {
+            m_sourceLinkAlt = val;
+            automationManagerAlt.setSourceLink(val);
+            automationManagerAlt.fixSourcePosition();
+            onSourceLinkAltChanged(val);
+            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            if (ed != nullptr) {
+                ed->updateSourceLinkAltCombo(val);
+            }
+        }
+    }
+
     if (parameterID.startsWith("azimuthSpan_")) {
         paramId = SOURCE_ID_AZIMUTH_SPAN;
     } else if (parameterID.startsWith("elevationSpan_")) {
@@ -174,6 +211,61 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     if (paramId != -1) {
         setSourceParameterValue(sourceId, paramId, newValue);
         m_somethingChanged = true;
+    }
+}
+
+void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
+    // Fixed radius.
+    if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+        if (m_selectedOscFormat == 2) {
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setDistance(sources[0].getDistance());
+            }
+        } else {
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setElevation(sources[0].getElevation());
+            }
+        }
+    }
+
+    // Fixed angle.
+    if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setAzimuth(-360.0 / m_numOfSources * i);
+        }
+    }
+
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].fixSourcePosition(shouldBeFixed);
+    }
+}
+
+void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
+    // Fixed elevation.
+    if (value == SOURCE_LINK_ALT_FIXED_ELEVATION) {
+        for (int i = 1; i < m_numOfSources; i++) {
+            sources[i].setElevation(sources[0].getElevation());
+        }
+    }
+
+    // Linear min.
+    if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setElevation(60.0 / m_numOfSources * i);
+        }
+    }
+
+    // Linear max.
+    if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i));
+        }
+    }
+
+    bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
+    for (int i = 0; i < m_numOfSources; i++) {
+        sources[i].fixSourcePosition(shouldBeFixed);
     }
 }
 

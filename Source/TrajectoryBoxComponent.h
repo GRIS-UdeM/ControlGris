@@ -58,14 +58,15 @@ public:
     void addListener(Listener* l) { listeners.add (l); }
     void removeListener(Listener* l) { listeners.remove (l); }
 
+    ComboBox        sourceLinkCombo;
+    ComboBox        sourceLinkAltCombo;
+
 private:
     ListenerList<Listener> listeners;
 
     SPAT_MODE_ENUM  m_spatMode;
 
     Label           sourceLinkLabel;
-    ComboBox        sourceLinkCombo;
-    ComboBox        sourceLinkAltCombo;
 
     Label           trajectoryTypeLabel;
     ComboBox        trajectoryTypeCombo;

@@ -29,7 +29,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     sourceLinkCombo.addItemList(SOURCE_LINK_TYPES, 1);
     sourceLinkCombo.setSelectedId(1);
     addAndMakeVisible(&sourceLinkCombo);
-    sourceLinkCombo.onChange = [this] { 
+    sourceLinkCombo.onChange = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkChanged(sourceLinkCombo.getSelectedId()); }); };
 
     sourceLinkAltCombo.addItemList(SOURCE_LINK_ALT_TYPES, 1);

@@ -94,6 +94,8 @@ public:
     void fixedPositionEditorClosed() override;
 
     void setPluginState();
+    void updateSourceLinkCombo(int value);
+    void updateSourceLinkAltCombo(int value);
 
 private:
     ControlGrisAudioProcessor& processor;
