@@ -27,6 +27,8 @@ String getFixedPosSourceName(int index, int dimension) {
         return String("S") + String(index + 1) + String("_Y");
     else if (dimension == 2)
         return String("S") + String(index + 1) + String("_Z");
+    else
+        return String();
 }
 
 // The parameter Layout creates the automatable parameters.
@@ -419,7 +421,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
 }
 
 void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
-    float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
+    float deltaY = 0.0f;
 
     switch (automationManagerAlt.getSourceLink()) {
         case SOURCE_LINK_ALT_INDEPENDANT:

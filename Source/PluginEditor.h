@@ -89,9 +89,9 @@ public:
     void trajectoryBoxClearAltButtonClicked() override;
 
     // FixedPositionEditor::Listeners
-    void fixedPositionEditorCellChanged(int row, int column, double value);
-    void fixedPositionEditorCellDeleted(int row, int column);
-    void fixedPositionEditorClosed();
+    void fixedPositionEditorCellChanged(int row, int column, double value) override;
+    void fixedPositionEditorCellDeleted(int row, int column) override;
+    void fixedPositionEditorClosed() override;
 
     void setPluginState();
 

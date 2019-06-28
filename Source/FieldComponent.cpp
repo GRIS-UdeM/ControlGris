@@ -237,7 +237,6 @@ void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) {
 
 void MainFieldComponent::paint(Graphics& g) {
 	const int width = getWidth();
-    float fieldCenter = width / 2;
 
     drawFieldBackground(g, true, m_spatMode);
 

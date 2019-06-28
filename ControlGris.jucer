@@ -66,9 +66,9 @@
   <EXPORTFORMATS>
     <XCODE_MAC targetFolder="Builds/MacOSX">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" osxArchitecture="64BitUniversal"
+        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" osxArchitecture="Native"
                        auBinaryLocation="$(HOME)/Library/Audio/Plug-Ins/Components/"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris" osxArchitecture="64BitUniversal"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris" osxArchitecture="Native"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../JUCE/modules"/>
