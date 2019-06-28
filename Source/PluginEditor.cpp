@@ -144,6 +144,12 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources());
     settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
 
+    // Set state for trajectory box persistent values.
+    //------------------------------------------------
+    trajectoryBox.setNumOfCycles(valueTreeState.state.getProperty("numOfCycles", 1));
+    trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
+    trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
+
     // Update the interface.
     //----------------------
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
@@ -393,6 +399,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(int 
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double duration, int mode) {
+    processor.parameters.state.setProperty("cycleDuration", duration, nullptr);
+    processor.parameters.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
         dur = duration * 60.0 / processor.getBPM();
@@ -402,6 +410,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double durati
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxNumOfCycleChanged(int value) {
+    processor.parameters.state.setProperty("numOfCycles", value, nullptr);
     automationManager.setNumberOfCycles(value);
     automationManagerAlt.setNumberOfCycles(value);
 }

@@ -98,6 +98,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("firstSourceId", 1, nullptr);
     parameters.state.setProperty("azimuthSpanLink", false, nullptr);
     parameters.state.setProperty("elevationSpanLink", false, nullptr);
+    // Trajectory box persitent settings.
+    parameters.state.setProperty("cycleDuration", 5, nullptr);
+    parameters.state.setProperty("durationUnit", 1, nullptr);
+    parameters.state.setProperty("numOfCycles", 1, nullptr);
 
     // Per source parameters. Because there is no attachment to the automatable
     // parameters, we need to keep track of the current parameter values to be

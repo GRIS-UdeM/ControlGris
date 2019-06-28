@@ -80,7 +80,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     numOfCycleEditor.setInputRestrictions (6, "0123456789");
     numOfCycleEditor.onReturnKey = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
-            cycleSpeedSlider.grabKeyboardFocus(); };
+            durationUnitCombo.grabKeyboardFocus(); };
 
     cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
     addAndMakeVisible(&cycleSpeedLabel);
@@ -115,7 +115,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             durationUnitCombo.grabKeyboardFocus(); };
 
     addAndMakeVisible(&activateButton);
-    activateButton.setButtonText("Active");
+    activateButton.setButtonText("Activate");
     activateButton.setClickingTogglesState(true);
     activateButton.onClick = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
@@ -138,6 +138,21 @@ void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     resized();
 }
 
+void TrajectoryBoxComponent::setCycleDuration(double value) {
+    durationEditor.setText(String(value));
+    listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
+}
+
+void TrajectoryBoxComponent::setDurationUnit(int value) {
+    durationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
+    listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
+}
+
+void TrajectoryBoxComponent::setNumOfCycles(int value) {
+    numOfCycleEditor.setText(String(value));
+    listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
+}
+
 void TrajectoryBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
@@ -158,13 +173,18 @@ void TrajectoryBoxComponent::resized() {
     cycleSpeedLabel.setBounds(5, 100, 150, 20);
     cycleSpeedSlider.setBounds(115, 100, 165, 20);
 
+    activateButton.setBounds(10, 100, 100, 20);
+    clearButton.setBounds(120, 100, 50, 20);
+
+    // Hide Cycle Speed slider until we found the good way to handle it!
+    cycleSpeedLabel.setVisible(false);
+    cycleSpeedSlider.setVisible(false);
+
     numOfCycleLabel.setBounds(300, 70, 100, 20);
     numOfCycleEditor.setBounds(410, 70, 50, 20);
 
     editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
     fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);
-    clearButton.setBounds(getWidth() - 120, 70, 48, 20);
-    activateButton.setBounds(getWidth() - 120, 100, 48, 20);
 
     if (m_spatMode == SPAT_MODE_LBAP) {
         sourceLinkAltCombo.setVisible(true);
@@ -173,8 +193,8 @@ void TrajectoryBoxComponent::resized() {
         activateAltButton.setVisible(true);
         sourceLinkAltCombo.setBounds(300, 10, 160, 20);
         trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
-        clearAltButton.setBounds(getWidth() - 68, 70, 48, 20);
-        activateAltButton.setBounds(getWidth() - 68, 100, 48, 20);
+        activateAltButton.setBounds(300, 100, 100, 20);
+        clearAltButton.setBounds(410, 100, 50, 20);
     } else {
         sourceLinkAltCombo.setVisible(false);
         trajectoryTypeAltCombo.setVisible(false);

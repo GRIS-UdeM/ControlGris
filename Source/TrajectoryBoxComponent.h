@@ -33,6 +33,9 @@ public:
     void resized() override;
 
     void setSpatMode(SPAT_MODE_ENUM spatMode);
+    void setCycleDuration(double value);
+    void setDurationUnit(int value);
+    void setNumOfCycles(int value);
 
     struct Listener
     {
