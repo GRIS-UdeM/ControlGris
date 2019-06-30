@@ -713,6 +713,21 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
 
+    // If Activate is on and there is not a fixed position for the current timestamp, add one.
+    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
+        bool found = false;
+        XmlElement *fpos = fixPositionData.getFirstChildElement();
+        while (fpos) {
+            if (approximatelyEqual(fpos->getDoubleAttribute("Time"), m_currentTime)) {
+                found = true;
+                break;
+            }
+            fpos = fpos->getNextElement();
+        }
+        if (! found) {
+            addNewFixedPosition();
+        }
+    }
 }
 
 void ControlGrisAudioProcessor::releaseResources()
@@ -837,12 +852,11 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
     std::unique_ptr<XmlElement> xmlState (state.createXml());
 
     if (xmlState.get() != nullptr) {
+        XmlElement *childExist = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
+        if (childExist) {
+            xmlState->removeChildElement(childExist, true);
+        }
         if (fixPositionData.getNumChildElements() > 0) {
-            // Replace if `fixed position` child already exists.
-            XmlElement *childExist = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
-            if (childExist) {
-                xmlState->removeChildElement(childExist, true);
-            }
             XmlElement *positionData = xmlState->createNewChildElement(FIXED_POSITION_DATA_TAG);
             copyFixedPositionXmlElement(&fixPositionData, positionData);
         }
