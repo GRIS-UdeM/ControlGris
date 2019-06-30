@@ -103,9 +103,6 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
-    void newEventConsumed();
-    bool isSomethingChanged();
-
     double getInitTimeOnPlay();
     double getCurrentTime();
 

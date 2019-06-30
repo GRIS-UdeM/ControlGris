@@ -391,8 +391,8 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 
 void ControlGrisAudioProcessor::timerCallback() {
     bool needRepaint = false;
-    if (isSomethingChanged()) {
-        newEventConsumed();
+    if (m_somethingChanged) {
+        m_somethingChanged = false;
         needRepaint = true;
     }
 
@@ -606,14 +606,6 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
     fixPositionData.removeChildElement(fixPositionData.getChildElement(row), true);
     XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
-}
-
-void ControlGrisAudioProcessor::newEventConsumed() {
-    m_somethingChanged = false;
-}
-
-bool ControlGrisAudioProcessor::isSomethingChanged() {
-    return m_somethingChanged;
 }
 
 double ControlGrisAudioProcessor::getInitTimeOnPlay() {
