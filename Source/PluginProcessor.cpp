@@ -698,6 +698,8 @@ void ControlGrisAudioProcessor::changeProgramName (int index, const String& newN
 void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
     m_needInitialization = true;
+    m_lastTime = m_lastTimerTime = 10000000.0;
+
 }
 
 void ControlGrisAudioProcessor::releaseResources()
