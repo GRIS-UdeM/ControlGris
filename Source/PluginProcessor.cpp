@@ -580,9 +580,11 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 }
 
 void ControlGrisAudioProcessor::addNewFixedPosition() {
-    // Should we replace an item if the new one has the same time as one already saved?
+    while (m_lock) {}
+
+    // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
-    newData->setAttribute("Time", getCurrentTime());
+    newData->setAttribute("Time", m_currentTime);
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
@@ -590,9 +592,27 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
             newData->setAttribute(getFixedPosSourceName(i, 2), sources[i].getNormalizedElevation());
         }
     }
-    fixPositionData.addChildElement(newData);
+
+    // Replace an element if the new one has the same time as one already saved.
+    bool found = false;
+    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    while (fpos) {
+        if (approximatelyEqual(fpos->getDoubleAttribute("Time"), m_currentTime)) {
+            found = true;
+            break;
+        }
+        fpos = fpos->getNextElement();
+    }
+
+    if (found) {
+        fixPositionData.replaceChildElement(fpos, newData);
+    } else {
+        fixPositionData.addChildElement(newData);
+    }
+
     XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
+    currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
 void ControlGrisAudioProcessor::changeFixedPosition(int row, int column, double value) {
@@ -606,6 +626,7 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
     fixPositionData.removeChildElement(fixPositionData.getChildElement(row), true);
     XmlElementDataSorter sorter("Time", true);
     fixPositionData.sortChildElements(sorter);
+    currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
 double ControlGrisAudioProcessor::getInitTimeOnPlay() {
@@ -725,6 +746,9 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 #endif
 
 void ControlGrisAudioProcessor::setSourceFixedPosition() {
+    if (currentFixPosition == nullptr)
+        return;
+
     float x, y;
     for (int i = 0; i < m_numOfSources; i++) {
         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
@@ -760,7 +784,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             while (currentFixPosition && currentFixPosition->getDoubleAttribute("Time") < m_currentTime) {
                 currentFixPosition = currentFixPosition->getNextElement();
             }
-            setSourceFixedPosition(); // may need to check "shouldBeFixed".
+            setSourceFixedPosition();
         } else if (m_currentTime >= m_lastTime) {
             XmlElement *nextElement = currentFixPosition->getNextElement();
             if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
@@ -769,6 +793,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             }
         }
     }
+
     m_lastTime = m_currentTime;
     m_lock = false;
 }
