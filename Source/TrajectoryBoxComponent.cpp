@@ -60,7 +60,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationEditor.setTextToShowWhenEmpty ("1", Colours::white);
     durationEditor.setText("5", false);
     durationEditor.setInputRestrictions (10, "0123456789.");
-    durationEditor.onReturnKey = [this] { 
+    durationEditor.onFocusLost = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
@@ -78,7 +78,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     numOfCycleEditor.setTextToShowWhenEmpty ("1", Colours::white);
     numOfCycleEditor.setText("1", false);
     numOfCycleEditor.setInputRestrictions (6, "0123456789");
-    numOfCycleEditor.onReturnKey = [this] { 
+    numOfCycleEditor.onFocusLost = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
