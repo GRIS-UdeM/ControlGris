@@ -138,6 +138,14 @@ void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     resized();
 }
 
+void TrajectoryBoxComponent::setSourceLink(int value) {
+    sourceLinkCombo.setSelectedId(value);
+}
+
+void TrajectoryBoxComponent::setSourceLinkAlt(int value) {
+    sourceLinkAltCombo.setSelectedId(value);
+}
+
 void TrajectoryBoxComponent::setCycleDuration(double value) {
     durationEditor.setText(String(value));
     listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });

@@ -37,7 +37,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     m_fixedSourcesWindowVisible = false;
     m_selectedSource = 0;
-    m_lastTime = 0.0;
 
     // Set up the interface.
     //----------------------
@@ -72,6 +71,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     trajectoryBox.setLookAndFeel(&grisLookAndFeel);
     trajectoryBox.addListener(this);
     addAndMakeVisible(trajectoryBox);
+    trajectoryBox.setSourceLink(automationManager.getSourceLink());
+    trajectoryBox.setSourceLinkAlt(automationManagerAlt.getSourceLink());
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
@@ -119,10 +120,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     // Load the last saved state of the plugin.
     //-----------------------------------------
     setPluginState();
-
-    // The timer's callback update the interface if anything has changed.
-    //-------------------------------------------------------------------
-    startTimerHz(50);
 }
 
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
@@ -418,44 +415,15 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxClearAltButtonClicked() {
     elevationField.repaint();
 }
 
-// Timer callback. Update the interface if anything has changed (mostly automations).
-//-----------------------------------------------------------------------------------
-void ControlGrisAudioProcessorEditor::timerCallback() {
-    bool needRepaint = false;
-    if (processor.isSomethingChanged()) {
-        parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-        processor.newEventConsumed();
-        needRepaint = true;
-    }
+// Update the interface if anything has changed (mostly automations).
+//-------------------------------------------------------------------
+void ControlGrisAudioProcessorEditor::refresh() {
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
 
     mainField.setIsPlaying(processor.getIsPlaying());
     elevationField.setIsPlaying(processor.getIsPlaying());
 
-    // MainField automation.
-    if (automationManager.getActivateState()) {
-        if (m_lastTime != processor.getCurrentTime()) {
-            automationManager.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
-            needRepaint = true;
-        }
-    } else if (automationManager.hasValidPlaybackPosition()) {
-        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-        needRepaint = true;
-    }
-
-    // ElevationField automation.
-    if (processor.getOscFormat() == 2 && automationManagerAlt.getActivateState()) {
-        if (m_lastTime != processor.getCurrentTime()) {
-            automationManagerAlt.setTrajectoryDeltaTime(processor.getCurrentTime() - processor.getInitTimeOnPlay());
-            needRepaint = true;
-        }
-    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
-        automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
-        needRepaint = true;
-    }
-
-    m_lastTime = processor.getCurrentTime();
-
-    if (needRepaint && ! m_fixedSourcesWindowVisible) {
+    if (! m_fixedSourcesWindowVisible) {
         mainField.repaint();
         if (processor.getOscFormat() == 2)
             elevationField.repaint();

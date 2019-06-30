@@ -147,6 +147,7 @@ private:
     double m_initTimeOnPlay;
     double m_currentTime;
     double m_lastTime;
+    double m_lastTimerTime;
 
     bool m_lock;
     bool m_isPlaying;

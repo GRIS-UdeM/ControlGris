@@ -40,8 +40,7 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public SettingsBoxComponent::Listener,
                                         public SourceBoxComponent::Listener,
                                         public TrajectoryBoxComponent::Listener,
-                                        public FixedPositionEditor::Listener,
-                                        public Timer
+                                        public FixedPositionEditor::Listener
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
@@ -53,7 +52,6 @@ public:
     void paint (Graphics&) override;
     void resized() override;
     void valueChanged (Value&) override;
-    void timerCallback() override;
 
     // FieldComponent::Listeners
     void fieldSourcePositionChanged(int sourceId) override;
@@ -97,6 +95,8 @@ public:
     void updateSourceLinkCombo(int value);
     void updateSourceLinkAltCombo(int value);
 
+    void refresh();
+
 private:
     ControlGrisAudioProcessor& processor;
 
@@ -129,8 +129,6 @@ private:
 
     bool m_fixedSourcesWindowVisible;
     int m_selectedSource;
-
-    double m_lastTime;
 
     Value lastUIWidth, lastUIHeight;
 

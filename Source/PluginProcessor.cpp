@@ -90,7 +90,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_oscConnected = true;
 
     m_initTimeOnPlay = m_currentTime = 0.0;
-    m_lastTime = 10000000.0;
+    m_lastTime = m_lastTimerTime = 10000000.0;
 
     m_sourceLink = m_sourceLinkAlt = 0;
 
@@ -142,7 +142,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
-    startTimerHz(60);
+    startTimerHz(50);
 }
 
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
@@ -155,7 +155,6 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
         return;
     }
 
-    int paramId, sourceId = parameterID.getTrailingIntValue();
     bool needToLinkSourcePositions = false;
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         automationManager.setPlaybackPositionX(newValue);
@@ -200,18 +199,14 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
         }
     }
 
+    int sourceId = parameterID.getTrailingIntValue();
     if (parameterID.startsWith("azimuthSpan_")) {
-        paramId = SOURCE_ID_AZIMUTH_SPAN;
+        setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH_SPAN, newValue);
     } else if (parameterID.startsWith("elevationSpan_")) {
-        paramId = SOURCE_ID_ELEVATION_SPAN;
-    } else {
-        paramId = -1;
+        setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION_SPAN, newValue);
     }
 
-    if (paramId != -1) {
-        setSourceParameterValue(sourceId, paramId, newValue);
-        m_somethingChanged = true;
-    }
+    m_somethingChanged = true;
 }
 
 void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
@@ -395,6 +390,41 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 }
 
 void ControlGrisAudioProcessor::timerCallback() {
+    bool needRepaint = false;
+    if (isSomethingChanged()) {
+        newEventConsumed();
+        needRepaint = true;
+    }
+
+    // MainField automation.
+    if (automationManager.getActivateState()) {
+        if (m_lastTimerTime != getCurrentTime()) {
+            automationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
+            needRepaint = true;
+        }
+    } else if (automationManager.hasValidPlaybackPosition()) {
+        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
+        needRepaint = true;
+    }
+
+    // ElevationField automation.
+    if (getOscFormat() == 2 && automationManagerAlt.getActivateState()) {
+        if (m_lastTimerTime != getCurrentTime()) {
+            automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
+            needRepaint = true;
+        }
+    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
+        automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
+        needRepaint = true;
+    }
+
+    m_lastTimerTime = getCurrentTime();
+
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    if (editor != nullptr) {
+        editor->refresh();
+    }
+
     sendOscMessage();
 }
 

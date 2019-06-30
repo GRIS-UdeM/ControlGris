@@ -33,6 +33,8 @@ public:
     void resized() override;
 
     void setSpatMode(SPAT_MODE_ENUM spatMode);
+    void setSourceLink(int value);
+    void setSourceLinkAlt(int value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
     void setNumOfCycles(int value);
