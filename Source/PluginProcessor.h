@@ -139,8 +139,8 @@ private:
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
     bool m_somethingChanged;
-
     bool m_needInitialization;
+
     double m_initTimeOnPlay;
     double m_currentTime;
     double m_lastTime;
@@ -150,9 +150,6 @@ private:
     bool m_isPlaying;
     double m_bpm;
 
-    int m_sourceLink;
-    int m_sourceLinkAlt;
-
     Source sources[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
@@ -160,6 +157,5 @@ private:
     XmlElement fixPositionData;
     XmlElement *currentFixPosition = nullptr;
 
-    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)
 };

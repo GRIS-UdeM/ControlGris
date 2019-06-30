@@ -92,8 +92,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = m_lastTimerTime = 10000000.0;
 
-    m_sourceLink = m_sourceLinkAlt = 0;
-
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
 
@@ -173,8 +171,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     if (parameterID.compare("sourceLink") == 0) {
         int val = (int)(newValue * 5) + 1;
-        if (val != m_sourceLink) {
-            m_sourceLink = val;
+        if (val != automationManager.getSourceLink()) {
             automationManager.setSourceLink(val);
             automationManager.fixSourcePosition();
             onSourceLinkChanged(val);
@@ -187,8 +184,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     if (parameterID.compare("sourceLinkAlt") == 0) {
         int val = (int)(newValue * 4) + 1;
-        if (val != m_sourceLinkAlt) {
-            m_sourceLinkAlt = val;
+        if (val != automationManagerAlt.getSourceLink()) {
             automationManagerAlt.setSourceLink(val);
             automationManagerAlt.fixSourcePosition();
             onSourceLinkAltChanged(val);
