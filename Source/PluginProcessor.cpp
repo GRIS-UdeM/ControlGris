@@ -197,9 +197,9 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     int sourceId = parameterID.getTrailingIntValue();
     if (parameterID.startsWith("azimuthSpan_")) {
-        setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH_SPAN, newValue);
+        sources[sourceId].setAzimuthSpan(newValue);
     } else if (parameterID.startsWith("elevationSpan_")) {
-        setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION_SPAN, newValue);
+        sources[sourceId].setElevationSpan(newValue);
     }
 
     m_somethingChanged = true;
@@ -476,11 +476,15 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
             break;
         case SOURCE_ID_AZIMUTH_SPAN:
             sources[sourceId].setAzimuthSpan(value);
-            parameters.getParameterAsValue("azimuthSpan_" + id).setValue(value);
+            parameters.getParameter("azimuthSpan_" + id)->beginChangeGesture();
+            parameters.getParameter("azimuthSpan_" + id)->setValueNotifyingHost(value);
+            parameters.getParameter("azimuthSpan_" + id)->endChangeGesture();
             break;
         case SOURCE_ID_ELEVATION_SPAN:
             sources[sourceId].setElevationSpan(value);
-            parameters.getParameterAsValue("elevationSpan_" + id).setValue(value);
+            parameters.getParameter("elevationSpan_" + id)->beginChangeGesture();
+            parameters.getParameter("elevationSpan_" + id)->setValueNotifyingHost(value);
+            parameters.getParameter("elevationSpan_" + id)->endChangeGesture();
             break;
     }
 
@@ -496,22 +500,32 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
         String id(i);
         if (linkAzimuthSpan) {
             sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
-            parameters.getParameterAsValue("azimuthSpan_" + id).setValue(sources[i].getAzimuthSpan());
+            parameters.getParameter("azimuthSpan_" + id)->beginChangeGesture();
+            parameters.getParameter("azimuthSpan_" + id)->setValueNotifyingHost(sources[i].getAzimuthSpan());
+            parameters.getParameter("azimuthSpan_" + id)->endChangeGesture();
         }
         if (linkElevationSpan) {
             sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
-            parameters.getParameterAsValue("elevationSpan_" + id).setValue(sources[i].getElevationSpan());
+            parameters.getParameter("elevationSpan_" + id)->beginChangeGesture();
+            parameters.getParameter("elevationSpan_" + id)->setValueNotifyingHost(sources[i].getElevationSpan());
+            parameters.getParameter("elevationSpan_" + id)->endChangeGesture();
         }
     }
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
     if (manager == &automationManager) {
-        parameters.getParameterAsValue("recordingTrajectory_x").setValue(position.x);
-        parameters.getParameterAsValue("recordingTrajectory_y").setValue(position.y);
+        parameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
+        parameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(position.x);
+        parameters.getParameter("recordingTrajectory_x")->endChangeGesture();
+        parameters.getParameter("recordingTrajectory_y")->beginChangeGesture();
+        parameters.getParameter("recordingTrajectory_y")->setValueNotifyingHost(position.y);
+        parameters.getParameter("recordingTrajectory_y")->endChangeGesture();
         linkSourcePositions();
     } else if (manager == &automationManagerAlt) {
-        parameters.getParameterAsValue("recordingTrajectory_z").setValue(position.y);
+        parameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
+        parameters.getParameter("recordingTrajectory_z")->setValueNotifyingHost(position.y);
+        parameters.getParameter("recordingTrajectory_z")->endChangeGesture();
         linkSourcePositionsAlt();
     }
 }
