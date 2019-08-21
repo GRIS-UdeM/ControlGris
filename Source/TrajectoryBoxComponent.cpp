@@ -122,7 +122,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             durationUnitCombo.grabKeyboardFocus(); };
 
     addChildComponent(&activateAltButton);
-    activateAltButton.setButtonText("Active");
+    activateAltButton.setButtonText("Activate");
     activateAltButton.setClickingTogglesState(true);
     activateAltButton.onClick = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateAltChanged(activateAltButton.getToggleState()); });

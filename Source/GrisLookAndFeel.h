@@ -205,17 +205,22 @@ public:
         const float lineThickness = cornerSize * 0.1f;
         const float halfThickness = lineThickness * 0.5f;
         Path outline;
+        Colour colour;
+
         outline.addRectangle(0.5f + halfThickness, 0.5f + halfThickness, width - lineThickness, height - lineThickness);
-        g.setColour (button.findColour(TextButton::buttonColourId));
-        if (isButtonDown || isMouseOverButton){
-            g.setColour (this->onColorOver);
+
+        if (isButtonDown) {
+            colour = this->onColorDown;
+        } else if (button.getToggleState()) {
+            colour = this->onColor;
+        } else {
+            colour = button.findColour(TextButton::buttonColourId);
         }
-        if ( button.getToggleState()) {
-            g.setColour (this->onColor);//outlineColour
+
+        if (isMouseOverButton) {
+            colour = colour.withAlpha(0.8f);
         }
-        if(button.isEnabled() && button.isMouseButtonDown()){
-            g.setColour (this->onColorDown);
-        }
+        g.setColour (colour);
         g.fillPath (outline);
     }
     
