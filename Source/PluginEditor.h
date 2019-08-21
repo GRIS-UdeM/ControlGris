@@ -69,6 +69,7 @@ public:
     void settingsBoxFirstSourceIdChanged(int firstSourceId) override;
 
     // SourceBoxComponent::Listeners
+    void sourceBoxSelectionChanged(int sourceNum) override;
     void sourceBoxPlacementChanged(int value) override;
     void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) override;
 

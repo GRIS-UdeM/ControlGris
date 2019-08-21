@@ -21,6 +21,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
+#include "ControlGrisConstants.h"
+#include "Source.h"
 
 class SourceBoxComponent : public Component
 {
@@ -31,13 +33,15 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
-    void setNumberOfSources(int numOfSources);
+    void setNumberOfSources(int numOfSources, int firstSourceId);
+    void updateSelectedSource(Source *source, int sourceIndex, SPAT_MODE_ENUM spatMode);
 
     struct Listener
     {
         virtual ~Listener() {}
 
         virtual void sourceBoxPlacementChanged(int value) = 0;
+        virtual void sourceBoxSelectionChanged(int sourceNum) = 0;
         virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
     };
 

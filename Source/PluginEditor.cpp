@@ -153,6 +153,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
 }
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
@@ -200,13 +201,14 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSources(processor.getSources(), numOfSources);
     elevationField.setSources(processor.getSources(), numOfSources);
-    sourceBox.setNumberOfSources(numOfSources);
+    sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
 }
 
 void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId) {
     processor.setFirstSourceId(firstSourceId);
     settingsBox.setFirstSourceId(firstSourceId);
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+    sourceBox.setNumberOfSources(processor.getNumberOfSources(), firstSourceId);
 
     mainField.repaint();
     if (processor.getOscFormat() == 2)
@@ -215,6 +217,16 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
 
 // SourceBoxComponent::Listener callbacks.
 //----------------------------------------
+void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum) {
+    m_selectedSource = sourceNum;
+
+    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+    mainField.setSelectedSource(m_selectedSource);
+    elevationField.setSelectedSource(m_selectedSource);
+    processor.setSelectedSourceId(m_selectedSource);
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+}
+
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     int numOfSources = processor.getNumberOfSources();
     const float azims2[2] = {-90.0f, 90.0f};
@@ -223,60 +235,61 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
 
     float offset = 360.0f / numOfSources / 2.0f;
+    float distance = processor.getOscFormat() == 2 ? 0.7f : 1.0f;
 
     switch(value) {
         case SOURCE_PLACEMENT_LEFT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(-azims2[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(-azims2[i], 0.0f, distance);
                 else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(-azims4[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(-azims4[i], 0.0f, distance);
                 else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(-azims6[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(-azims6[i], 0.0f, distance);
                 else
-                    processor.getSources()[i].setCoordinates(-azims8[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(-azims8[i], 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(azims2[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(azims2[i], 0.0f, distance);
                 else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(azims4[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(azims4[i], 0.0f, distance);
                 else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(azims6[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(azims6[i], 0.0f, distance);
                 else
-                    processor.getSources()[i].setCoordinates(azims8[i], 0.0f, 1.0f);
+                    processor.getSources()[i].setCoordinates(azims8[i], 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_LEFT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_LEFT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_TOP_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_TOP_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, 1.0f);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, distance);
             }
             break;
     }
@@ -287,14 +300,17 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
         processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
     }
 
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+
     repaint();
 }
 
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) {
     if (processor.getOscFormat() == 2) {
-        processor.getSources()[sourceNum-1].setCoordinates(angle, 0.0f, rayLen * 1.4f);
+        float currentElevation = processor.getSources()[sourceNum].getElevation();
+        processor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
     } else {
-        processor.getSources()[sourceNum-1].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
+        processor.getSources()[sourceNum].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
     }
     repaint();
 }
@@ -320,6 +336,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
 }
 
 // TrajectoryBoxComponent::Listener callbacks.
@@ -419,6 +436,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxClearAltButtonClicked() {
 //-------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::refresh() {
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
 
     mainField.setIsPlaying(processor.getIsPlaying());
     elevationField.setIsPlaying(processor.getIsPlaying());
@@ -442,6 +460,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
 
     validateSourcePositions();
     if (processor.getOscFormat() == 2) {

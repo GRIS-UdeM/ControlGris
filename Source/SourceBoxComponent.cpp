@@ -21,7 +21,7 @@
 #include "ControlGrisConstants.h"
 
 SourceBoxComponent::SourceBoxComponent() {
-    selectedSourceNumber = 1;
+    selectedSourceNumber = 0;
     currentAngle = 0.0f;
     currentRayLength = 1.0f;
 
@@ -40,11 +40,13 @@ SourceBoxComponent::SourceBoxComponent() {
 
     addAndMakeVisible(&sourceNumberCombo);
     sourceNumberCombo.setTextWhenNothingSelected("Choose a source...");
-    for (int i = 1; i <= 8; i++) {
+    for (int i = 0; i < 8; i++) {
         sourceNumberCombo.addItem(String(i), i);
     }
     sourceNumberCombo.setSelectedId(selectedSourceNumber);
-    sourceNumberCombo.onChange = [this] { selectedSourceNumber = sourceNumberCombo.getSelectedId(); };
+    sourceNumberCombo.onChange = [this] { selectedSourceNumber = sourceNumberCombo.getSelectedItemIndex(); 
+            listeners.call([&] (Listener& l) { l.sourceBoxSelectionChanged(selectedSourceNumber); });
+        };
 
     rayLengthLabel.setText("Ray Length:", NotificationType::dontSendNotification);
     addAndMakeVisible(&rayLengthLabel);
@@ -63,7 +65,7 @@ SourceBoxComponent::SourceBoxComponent() {
     addAndMakeVisible(&angleLabel);
 
     angleSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
-    angleSlider.setValue(90.0, NotificationType::dontSendNotification);
+    angleSlider.setValue(0.0, NotificationType::dontSendNotification);
     angleSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
     angleSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&angleSlider);
@@ -97,12 +99,29 @@ void SourceBoxComponent::resized() {
     angleSlider.setBounds(380, 70, 200, 20);
 }
 
-void SourceBoxComponent::setNumberOfSources(int numOfSources) {
+void SourceBoxComponent::setNumberOfSources(int numOfSources, int firstSourceId) {
     sourceNumberCombo.clear();
-    for (int i = 1; i <= numOfSources; i++) {
+    for (int i = firstSourceId; i < firstSourceId + numOfSources; i++) {
         sourceNumberCombo.addItem(String(i), i);
     }
-    if (selectedSourceNumber > numOfSources)
-        selectedSourceNumber = 1;
-    sourceNumberCombo.setSelectedId(selectedSourceNumber);
+    if (selectedSourceNumber >= numOfSources)
+        selectedSourceNumber = 0;
+    sourceNumberCombo.setSelectedItemIndex(selectedSourceNumber);
+}
+
+void SourceBoxComponent::updateSelectedSource(Source *source, int sourceIndex, SPAT_MODE_ENUM spatMode) {
+    selectedSourceNumber = sourceIndex;
+    sourceNumberCombo.setSelectedItemIndex(selectedSourceNumber);
+    if (spatMode == SPAT_MODE_LBAP) {
+        currentAngle = source->getAzimuth();
+        currentRayLength = source->getDistance();
+    } else {
+        currentAngle = source->getAzimuth();
+        currentRayLength = 1.0f - source->getNormalizedElevation();
+    }
+    if (currentAngle < 0.0f) {
+        currentAngle += 360.0f;
+    }
+    angleSlider.setValue(currentAngle, NotificationType::dontSendNotification);
+    rayLengthSlider.setValue(currentRayLength, NotificationType::dontSendNotification);
 }
