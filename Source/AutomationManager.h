@@ -34,8 +34,6 @@ public:
     void setPlaybackDuration(double value);
     double getPlaybackDuration();
 
-    void setNumberOfCycles(int value);
-
     void setPlaybackPositionX(float value);
     void setPlaybackPositionY(float value);
     bool hasValidPlaybackPosition();
@@ -76,9 +74,6 @@ private:
 
     int             sourceLink;
     int             drawingType;
-
-    int             numOfCycles;
-    int             currentCycle;
 
     bool            activateState;
     double          playbackDuration;

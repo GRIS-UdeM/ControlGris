@@ -23,8 +23,6 @@
 AutomationManager::AutomationManager() {
     sourceLink = SOURCE_LINK_INDEPENDANT;
     drawingType = TRAJECTORY_TYPE_DRAWING;
-    numOfCycles = 1;
-    currentCycle = 0;
     activateState = false;
     source.setX(0.5f);
     source.setY(0.5f);
@@ -52,16 +50,14 @@ double AutomationManager::getPlaybackDuration() {
     return playbackDuration;
 }
 
-void AutomationManager::setNumberOfCycles(int value) {
-    numOfCycles = value;
-}
-
 void AutomationManager::setPlaybackPositionX(float value) {
     playbackPosition.x = value;
+    source.setX(value);
 }
 
 void AutomationManager::setPlaybackPositionY(float value) {
     playbackPosition.y = value;
+    source.setY(value);
 }
 
 bool AutomationManager::hasValidPlaybackPosition() {
@@ -109,26 +105,23 @@ void AutomationManager::createRecordingPath(Path& path) {
 }
 
 void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
-    trajectoryDeltaTime = relativeTimeFromPlay / (playbackDuration * numOfCycles);
+    trajectoryDeltaTime = relativeTimeFromPlay / playbackDuration;
+    trajectoryDeltaTime = std::fmod(trajectoryDeltaTime, 1.0f);
     computeCurrentTrajectoryPoint();
 }
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
     if (trajectoryPoints.size() > 0) {
-        if (trajectoryDeltaTime < 1.0) {
-            double delta = trajectoryDeltaTime * numOfCycles * trajectoryPoints.size();
-            if (delta + 1 >= trajectoryPoints.size()) {
-                delta = std::fmod(delta, trajectoryPoints.size());
-            }
-            int index = (int)delta;
-            if (index + 1 < trajectoryPoints.size()) {
-                double frac = delta - index;
-                Point<float> p1 = trajectoryPoints[index];
-                Point<float> p2 = trajectoryPoints[index+1];
-                currentTrajectoryPoint = Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
-            } else {
-                currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
-            }
+        double delta = trajectoryDeltaTime * trajectoryPoints.size();
+        if (delta + 1 >= trajectoryPoints.size()) {
+            delta = std::fmod(delta, trajectoryPoints.size());
+        }
+        int index = (int)delta;
+        if (index + 1 < trajectoryPoints.size()) {
+            double frac = delta - index;
+            Point<float> p1 = trajectoryPoints[index];
+            Point<float> p2 = trajectoryPoints[index+1];
+            currentTrajectoryPoint = Point<float> ((p1.x + (p2.x - p1.x) * frac), (p1.y + (p2.y - p1.y) * frac));
         } else {
             currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
         }

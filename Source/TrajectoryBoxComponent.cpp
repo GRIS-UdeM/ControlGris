@@ -74,20 +74,6 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationUnitCombo.onChange = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); }); };
 
-    numOfCycleLabel.setText("Number of Cycles:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&numOfCycleLabel);
-
-    addAndMakeVisible(&numOfCycleEditor);
-    numOfCycleEditor.setTextToShowWhenEmpty ("1", Colours::white);
-    numOfCycleEditor.setText("1", false);
-    numOfCycleEditor.setInputRestrictions (6, "0123456789");
-    numOfCycleEditor.onReturnKey = [this] {
-            durationUnitCombo.grabKeyboardFocus();
-        };
-    numOfCycleEditor.onFocusLost = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
-            durationUnitCombo.grabKeyboardFocus(); };
-
     cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
     addAndMakeVisible(&cycleSpeedLabel);
 
@@ -162,11 +148,6 @@ void TrajectoryBoxComponent::setDurationUnit(int value) {
     listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
 }
 
-void TrajectoryBoxComponent::setNumOfCycles(int value) {
-    numOfCycleEditor.setText(String(value));
-    listeners.call([&] (Listener& l) { l.trajectoryBoxNumOfCycleChanged(numOfCycleEditor.getText().getIntValue()); });
-}
-
 void TrajectoryBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
@@ -193,9 +174,7 @@ void TrajectoryBoxComponent::resized() {
     // Hide Cycle Speed slider until we found the good way to handle it!
     cycleSpeedLabel.setVisible(false);
     cycleSpeedSlider.setVisible(false);
-
-    numOfCycleLabel.setBounds(300, 70, 100, 20);
-    numOfCycleEditor.setBounds(410, 70, 50, 20);
+    //------------------------------------------------------------------
 
     editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
     fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);

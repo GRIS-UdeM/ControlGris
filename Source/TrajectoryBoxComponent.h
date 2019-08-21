@@ -37,7 +37,6 @@ public:
     void setSourceLinkAlt(int value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
-    void setNumOfCycles(int value);
 
     struct Listener
     {
@@ -48,7 +47,6 @@ public:
         virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
         virtual void trajectoryBoxTrajectoryTypeAltChanged(int value) = 0;
         virtual void trajectoryBoxDurationChanged(double duration, int mode) = 0;
-        virtual void trajectoryBoxNumOfCycleChanged(int value) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
         virtual void trajectoryBoxActivateAltChanged(bool value) = 0;
         virtual void trajectoryBoxEditFixedSourceButtonClicked() = 0;
@@ -77,9 +75,6 @@ private:
     Label           durationLabel;
     TextEditor      durationEditor;
     ComboBox        durationUnitCombo;
-
-    Label           numOfCycleLabel;
-    TextEditor      numOfCycleEditor;
 
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;

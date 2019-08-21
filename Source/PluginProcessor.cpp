@@ -106,7 +106,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Trajectory box persitent settings.
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
-    parameters.state.setProperty("numOfCycles", 1, nullptr);
 
     // Per source parameters. Because there is no attachment to the automatable
     // parameters, we need to keep track of the current parameter values to be
@@ -811,6 +810,22 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                 currentFixPosition = currentFixPosition->getNextElement();
             }
             setSourceFixedPosition();
+
+            // Force source positions on time 0.
+            if (currentFixPosition != nullptr) {
+                if (m_currentTime == 0.0f && currentFixPosition->getDoubleAttribute("Time") == 0.0) {
+                    float x, y;
+                    for (int i = 0; i < m_numOfSources; i++) {
+                        x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
+                        y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
+                        sources[i].setPos(Point<float> (x, y));
+                    }
+                    linkSourcePositions();
+                    if (getOscFormat() == 2) {
+                        linkSourcePositionsAlt();
+                    }
+                }
+            }
         } else if (m_currentTime >= m_lastTime) {
             XmlElement *nextElement = currentFixPosition->getNextElement();
             if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
