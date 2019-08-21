@@ -221,8 +221,9 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
 
     // Fixed angle.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+        float angleOffset = sources[0].getAzimuth();
         for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setAzimuth(-360.0 / m_numOfSources * i);
+            sources[i].setAzimuth(-360.0 / m_numOfSources * i + angleOffset);
         }
     }
 

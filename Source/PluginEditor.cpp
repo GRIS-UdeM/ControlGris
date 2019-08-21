@@ -302,6 +302,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
 
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
 
+    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
+        processor.addNewFixedPosition();
+    }
+
     repaint();
 }
 
@@ -312,6 +316,11 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
     } else {
         processor.getSources()[sourceNum].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
     }
+
+    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
+        processor.addNewFixedPosition();
+    }
+
     repaint();
 }
 
