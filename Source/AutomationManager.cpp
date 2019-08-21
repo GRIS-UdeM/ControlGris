@@ -52,12 +52,10 @@ double AutomationManager::getPlaybackDuration() {
 
 void AutomationManager::setPlaybackPositionX(float value) {
     playbackPosition.x = value;
-    source.setX(value);
 }
 
 void AutomationManager::setPlaybackPositionY(float value) {
     playbackPosition.y = value;
-    source.setY(value);
 }
 
 bool AutomationManager::hasValidPlaybackPosition() {
@@ -227,6 +225,9 @@ void AutomationManager::setDrawingType(int type) {
             }
             break;
     }
+
+    setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+
 }
 
 void AutomationManager::setDrawingTypeAlt(int type) {
@@ -275,6 +276,8 @@ void AutomationManager::setDrawingTypeAlt(int type) {
             }
             break;
     }
+
+    setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
 }
 
 int AutomationManager::getDrawingType() {

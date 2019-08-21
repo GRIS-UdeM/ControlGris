@@ -244,7 +244,7 @@ void MainFieldComponent::paint(Graphics& g) {
     if (!m_isPlaying) {
         Point<float> rpos;
         if (automationManager.getRecordingTrajectorySize() > 1) {
-            rpos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+            rpos = Point<float> (automationManager.getFirstRecordingPoint().x - kSourceRadius, automationManager.getFirstRecordingPoint().y - kSourceRadius);
         } else if (m_spatMode == SPAT_MODE_VBAP) {
             rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
         } else {
@@ -404,7 +404,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
     // Draw recording trajectory handle.
     if (!m_isPlaying) {
         if (automationManager.getRecordingTrajectorySize() > 0) {
-            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
+            pos = Point<float> (automationManager.getFirstRecordingPoint().x - kSourceRadius, automationManager.getFirstRecordingPoint().y - kSourceRadius);
         } else {
             pos = posToXy(automationManager.getSourcePosition(), width);
         }

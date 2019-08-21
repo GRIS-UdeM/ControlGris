@@ -591,7 +591,6 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 
 void ControlGrisAudioProcessor::addNewFixedPosition() {
     while (m_lock) {}
-
     // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("Time", m_currentTime);
@@ -820,9 +819,30 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                         y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
                         sources[i].setPos(Point<float> (x, y));
                     }
-                    linkSourcePositions();
+                    if (automationManager.hasValidPlaybackPosition()) {
+                        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
+                    }
+                    if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
+                        // Ugly hack to make the DELTA_LOCK link working.
+                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDANT);
+                        automationManager.fixSourcePosition();
+                        automationManager.setSourceLink(SOURCE_LINK_DELTA_LOCK);
+                        automationManager.fixSourcePosition();
+                    } else {
+                        linkSourcePositions();
+                    }
                     if (getOscFormat() == 2) {
-                        linkSourcePositionsAlt();
+                        if (automationManagerAlt.hasValidPlaybackPosition()) {
+                            automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
+                        }
+                        if (automationManagerAlt.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
+                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDANT);
+                            automationManagerAlt.fixSourcePosition();
+                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_DELTA_LOCK);
+                            automationManagerAlt.fixSourcePosition();
+                        } else {
+                            linkSourcePositionsAlt();
+                        }
                     }
                 }
             }

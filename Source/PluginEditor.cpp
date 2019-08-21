@@ -354,6 +354,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     automationManager.fixSourcePosition();
 
     processor.onSourceLinkChanged(value);
+    //processor.addNewFixedPosition();
 
     valueTreeState.getParameterAsValue("sourceLink").setValue((value - 1) / 5.f);
 
@@ -365,6 +366,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
     automationManagerAlt.fixSourcePosition();
 
     processor.onSourceLinkAltChanged(value);
+    //processor.addNewFixedPosition();
 
     valueTreeState.getParameterAsValue("sourceLinkAlt").setValue((value - 1) / 4.f);
 
@@ -418,7 +420,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
-
     processor.addNewFixedPosition();
 }
 

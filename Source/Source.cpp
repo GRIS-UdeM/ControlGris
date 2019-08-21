@@ -29,6 +29,8 @@ Source::Source() {
     m_eleSpan = 0.0;
     m_x = 0.0;
     m_y = 0.0;
+    fixedX = 0.0;
+    fixedY = 0.0;
     fixedAzimuth = -1.0;
     fixedElevation = -1.0;
     fixedDistance = -1.0;
