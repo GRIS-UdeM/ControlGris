@@ -264,7 +264,7 @@ void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
 void ControlGrisAudioProcessor::setOscFormat(int oscFormat) {
     m_selectedOscFormat = oscFormat;
     parameters.state.setProperty("oscFormat", m_selectedOscFormat, nullptr);
-    for (int i = 0; i < m_numOfSources; i++) {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
     }
 }
@@ -285,7 +285,7 @@ int ControlGrisAudioProcessor::getOscPortNumber() {
 void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate) {
     m_firstSourceId = firstSourceId;
     parameters.state.setProperty("firstSourceId", m_firstSourceId, nullptr);
-    for (int i = 0; i < m_numOfSources; i++) {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         sources[i].setId(i + m_firstSourceId - 1);
     }
 
