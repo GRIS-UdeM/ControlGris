@@ -152,7 +152,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 }
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
@@ -171,13 +171,13 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 
 // SettingsBoxComponent::Listener callbacks.
 //------------------------------------------
-void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(int selectedId) {
-    processor.setOscFormat(selectedId);
-    settingsBox.setOscFormat(selectedId);
-    bool selectionIsLBAP = selectedId == 2;
+void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) {
+    settingsBox.setOscFormat(mode);
+    processor.setOscFormat(mode);
+    bool selectionIsLBAP = mode == SPAT_MODE_LBAP;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
-    mainField.setSpatMode((SPAT_MODE_ENUM)(selectedId - 1));
-    trajectoryBox.setSpatMode((SPAT_MODE_ENUM)(selectedId - 1));
+    mainField.setSpatMode(mode);
+    trajectoryBox.setSpatMode(mode);
     repaint();
     resized();
 }
@@ -210,7 +210,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
     sourceBox.setNumberOfSources(processor.getNumberOfSources(), firstSourceId);
 
     mainField.repaint();
-    if (processor.getOscFormat() == 2)
+    if (processor.getOscFormat() == SPAT_MODE_LBAP)
         elevationField.repaint();
 }
 
@@ -223,7 +223,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum) {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 }
 
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
@@ -234,7 +234,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
 
     float offset = 360.0f / numOfSources / 2.0f;
-    float distance = processor.getOscFormat() == 2 ? 0.7f : 1.0f;
+    float distance = processor.getOscFormat() == SPAT_MODE_LBAP ? 0.7f : 1.0f;
 
     switch(value) {
         case SOURCE_PLACEMENT_LEFT_ALTERNATE:
@@ -299,7 +299,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
         processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
     }
 
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
         processor.addNewFixedPosition();
@@ -309,7 +309,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
 }
 
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) {
-    if (processor.getOscFormat() == 2) {
+    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
         float currentElevation = processor.getSources()[sourceNum].getElevation();
         processor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
     } else {
@@ -334,7 +334,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int paramete
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
     mainField.repaint();
-    if (processor.getOscFormat() == 2)
+    if (processor.getOscFormat() == SPAT_MODE_LBAP)
         elevationField.repaint();
 }
 
@@ -344,7 +344,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 }
 
 // TrajectoryBoxComponent::Listener callbacks.
@@ -354,7 +354,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     automationManager.fixSourcePosition();
 
     processor.onSourceLinkChanged(value);
-    //processor.addNewFixedPosition();
+    if (automationManager.getActivateState()) {
+        processor.addNewFixedPosition();
+    }
 
     valueTreeState.getParameterAsValue("sourceLink").setValue((value - 1) / 5.f);
 
@@ -366,7 +368,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
     automationManagerAlt.fixSourcePosition();
 
     processor.onSourceLinkAltChanged(value);
-    //processor.addNewFixedPosition();
+    if (automationManagerAlt.getActivateState()) {
+        processor.addNewFixedPosition();
+    }
 
     valueTreeState.getParameterAsValue("sourceLinkAlt").setValue((value - 1) / 4.f);
 
@@ -439,14 +443,14 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxClearAltButtonClicked() {
 //-------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::refresh() {
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     mainField.setIsPlaying(processor.getIsPlaying());
     elevationField.setIsPlaying(processor.getIsPlaying());
 
     if (! m_fixedSourcesWindowVisible) {
         mainField.repaint();
-        if (processor.getOscFormat() == 2)
+        if (processor.getOscFormat() == SPAT_MODE_LBAP)
             elevationField.repaint();
     }
 }
@@ -463,10 +467,10 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, (SPAT_MODE_ENUM)(processor.getOscFormat()-1));
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     validateSourcePositions();
-    if (processor.getOscFormat() == 2) {
+    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
         validateSourcePositionsAlt();
     }
 }
@@ -505,7 +509,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     mainBanner.setBounds(0, 0, fieldSize, 20);
     mainField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (processor.getOscFormat() == 2) {
+    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
         mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         elevationBanner.setVisible(true);
         elevationField.setVisible(true);
@@ -543,7 +547,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
 
     // Fixed radius.
     if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        if (processor.getOscFormat() == 2) {
+        if (processor.getOscFormat() == SPAT_MODE_LBAP) {
             for (int i = 1; i < numOfSources; i++) {
                 processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
             }

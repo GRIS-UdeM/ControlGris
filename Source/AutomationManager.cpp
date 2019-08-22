@@ -69,7 +69,9 @@ Point<float> AutomationManager::getPlaybackPosition() {
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryPoints.clear();
+    trajectoryPoints.add(currentPosition);
     lastRecordingPoint = currentPosition;
+    setSourcePosition(Point<float> (currentPosition.x / FIELD_WIDTH, 1.0 - currentPosition.y / FIELD_WIDTH));
 }
 
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> pos) {

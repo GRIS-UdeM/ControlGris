@@ -304,22 +304,13 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     Rectangle<float> area;
 
     // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
-        if (automationManager.getRecordingTrajectorySize() > 1) {
-            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
-        } else if (m_spatMode == SPAT_MODE_VBAP) {
-            pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
-        } else {
-            pos = posToXy(automationManager.getSourcePosition(), width);
-        }
-        area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
-        if (area.contains(event.getMouseDownPosition().toFloat())) {
-            m_oldSelectedSourceId = m_selectedSourceId;
-            m_selectedSourceId = -1;
-            automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-            repaint();
-            return;
-        }
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && 
+        event.mods.isShiftDown()) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+        repaint();
+        return;
     }
 
     // Check if we click on a new source.

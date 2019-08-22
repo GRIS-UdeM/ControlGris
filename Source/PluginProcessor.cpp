@@ -84,7 +84,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_numOfSources = 1;
     m_firstSourceId = 1;
     m_selectedSourceId = 1;
-    m_selectedOscFormat = 1;
+    m_selectedOscFormat = (SPAT_MODE_ENUM)0;
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
@@ -96,7 +96,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
 
     // Global setting parameters.
-    parameters.state.setProperty("oscFormat", 1, nullptr);
+    parameters.state.setProperty("oscFormat", 0, nullptr);
     parameters.state.setProperty("oscPortNumber", 18032, nullptr);
     parameters.state.setProperty("oscConnected", true, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
@@ -159,7 +159,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         automationManager.setPlaybackPositionY(newValue);
         needToLinkSourcePositions = true;
-    } else if (parameterID.compare("recordingTrajectory_z") == 0 && m_selectedOscFormat == 2) {
+    } else if (parameterID.compare("recordingTrajectory_z") == 0 && m_selectedOscFormat == SPAT_MODE_LBAP) {
         automationManagerAlt.setPlaybackPositionY(newValue);
         linkSourcePositionsAlt();
     }
@@ -207,7 +207,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
     // Fixed radius.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        if (m_selectedOscFormat == 2) {
+        if (m_selectedOscFormat == SPAT_MODE_LBAP) {
             for (int i = 1; i < m_numOfSources; i++) {
                 sources[i].setDistance(sources[0].getDistance());
             }
@@ -261,15 +261,15 @@ void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setOscFormat(int oscFormat) {
+void ControlGrisAudioProcessor::setOscFormat(SPAT_MODE_ENUM oscFormat) {
     m_selectedOscFormat = oscFormat;
     parameters.state.setProperty("oscFormat", m_selectedOscFormat, nullptr);
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-        sources[i].setRadiusIsElevation(m_selectedOscFormat != 2);
+        sources[i].setRadiusIsElevation(m_selectedOscFormat != SPAT_MODE_LBAP);
     }
 }
 
-int ControlGrisAudioProcessor::getOscFormat() {
+SPAT_MODE_ENUM ControlGrisAudioProcessor::getOscFormat() {
     return m_selectedOscFormat;
 }
 
@@ -371,7 +371,7 @@ void ControlGrisAudioProcessor::sendOscMessage() {
         message.addFloat32(elev);
         message.addFloat32(sources[i].getAzimuthSpan() * 2.0);
         message.addFloat32(sources[i].getElevationSpan() * 0.5);
-        if (m_selectedOscFormat == 2) {
+        if (m_selectedOscFormat == SPAT_MODE_LBAP) {
             message.addFloat32(sources[i].getDistance() / 0.6);
         } else {
             message.addFloat32(sources[i].getDistance());
@@ -404,7 +404,7 @@ void ControlGrisAudioProcessor::timerCallback() {
     }
 
     // ElevationField automation.
-    if (getOscFormat() == 2 && automationManagerAlt.getActivateState()) {
+    if (getOscFormat() == SPAT_MODE_LBAP && automationManagerAlt.getActivateState()) {
         if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
             needRepaint = true;
@@ -428,7 +428,7 @@ void ControlGrisAudioProcessor::timerCallback() {
 void ControlGrisAudioProcessor::setPluginState() {
     // Set global settings values.
     //----------------------------
-    setOscFormat(parameters.state.getProperty("oscFormat", 1));
+    setOscFormat((SPAT_MODE_ENUM)(int)parameters.state.getProperty("oscFormat", 0));
     setOscPortNumber(parameters.state.getProperty("oscPortNumber", 18032));
     handleOscConnection(parameters.state.getProperty("oscConnected", true));
     setNumberOfSources(parameters.state.getProperty("numberOfSources", 1), false);
@@ -831,7 +831,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                     } else {
                         linkSourcePositions();
                     }
-                    if (getOscFormat() == 2) {
+                    if (getOscFormat() == SPAT_MODE_LBAP) {
                         if (automationManagerAlt.hasValidPlaybackPosition()) {
                             automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
                         }

@@ -26,7 +26,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatCombo.addItem("VBAP - ServerGris", 1);
     oscFormatCombo.addItem("LBAP - ServerGris", 2);
     oscFormatCombo.onChange = [this] {
-            listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged(oscFormatCombo.getSelectedId()); });
+            listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged((SPAT_MODE_ENUM)(oscFormatCombo.getSelectedId()-1)); });
         };
     oscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&oscFormatCombo);
@@ -94,8 +94,8 @@ SettingsBoxComponent::~SettingsBoxComponent() {
     setLookAndFeel(nullptr);
 }
 
-void SettingsBoxComponent::setOscFormat(int oscFormatIndex) {
-    oscFormatCombo.setSelectedId(oscFormatIndex, NotificationType::dontSendNotification);
+void SettingsBoxComponent::setOscFormat(SPAT_MODE_ENUM mode) {
+    oscFormatCombo.setSelectedId((int)(mode+1), NotificationType::dontSendNotification);
 }
 
 void SettingsBoxComponent::setOscPortNumber(int oscPortNumber) {

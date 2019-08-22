@@ -72,8 +72,8 @@ public:
     void parameterChanged(const String &parameterID, float newValue) override;
 
     //==============================================================================
-    void setOscFormat(int oscFormat);
-    int getOscFormat();
+    void setOscFormat(SPAT_MODE_ENUM oscFormat);
+    SPAT_MODE_ENUM getOscFormat();
 
     void setOscPortNumber(int oscPortNumber);
     int getOscPortNumber();
@@ -131,11 +131,11 @@ public:
     AutomationManager automationManagerAlt;
 
 private:
+    SPAT_MODE_ENUM m_selectedOscFormat;
     bool m_oscConnected;
     int m_firstSourceId;
     int m_numOfSources;
     int m_selectedSourceId;
-    int m_selectedOscFormat;
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
     bool m_somethingChanged;

@@ -62,7 +62,7 @@ public:
     void parametersBoxParameterChanged(int parameterId, double value) override;
 
     // SettingsBoxComponent::Listeners
-    void settingsBoxOscFormatChanged(int selectedId) override;
+    void settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) override;
     void settingsBoxOscPortNumberChanged(int oscPort) override;
     void settingsBoxOscActivated(bool state) override;
     void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
