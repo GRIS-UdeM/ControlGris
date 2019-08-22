@@ -312,6 +312,10 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
 
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDANT && i > 0) {
+            break;
+        }
+
         Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
@@ -469,6 +473,9 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDANT && i > 0) {
+            break;
+        }
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         Point<float> pos = Point<float> {x, y};
