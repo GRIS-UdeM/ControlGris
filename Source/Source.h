@@ -74,7 +74,9 @@ public:
     void fixSourcePosition(bool shouldBeFixed);
     float getDeltaX();
     float getDeltaY();
+    float getDeltaAzimuth();
     float getDeltaElevation();
+    float getDeltaDistance();
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);

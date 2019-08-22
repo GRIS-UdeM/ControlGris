@@ -545,29 +545,19 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
-    // Fixed radius.
-    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        if (processor.getOscFormat() == SPAT_MODE_LBAP) {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setDistance(processor.getSources()[0].getDistance());
-            }
-        } else {
-            for (int i = 1; i < numOfSources; i++) {
-                processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
-            }
-        }
-    }
+    // Nothing to do for independant mode.
 
-    // Fixed angle.
-    if (sourceLink == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || sourceLink == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+    // All circular modes.
+    if (sourceLink >= SOURCE_LINK_CIRCULAR && sourceLink < SOURCE_LINK_DELTA_LOCK) {
+        float deltaAzimuth = processor.getSources()[0].getDeltaAzimuth();
+        float deltaElevation = processor.getSources()[0].getDeltaElevation();
+        float deltaDistance = processor.getSources()[0].getDeltaDistance();
         for (int i = 1; i < numOfSources; i++) {
-            float offset = processor.getSources()[0].getAzimuth();
-            processor.getSources()[i].setAzimuth(-360.0 / numOfSources * i + offset);
+            processor.getSources()[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, deltaDistance);
         }
-    }
-
-    // Delta lock.
-    if (sourceLink == SOURCE_LINK_DELTA_LOCK) {
+    } 
+    // Delta Lock mode.
+    else if (sourceLink == SOURCE_LINK_DELTA_LOCK) {
         float deltaX = processor.getSources()[0].getDeltaX();
         float deltaY = processor.getSources()[0].getDeltaY();
         for (int i = 1; i < numOfSources; i++) {
@@ -576,7 +566,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     }
 
     // Fix source positions.
-    automationManager.fixSourcePosition(); // not sure...
+    automationManager.fixSourcePosition();
     bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
     if (sourceLink >= 2 && sourceLink < 6) {
         for (int i = 0; i < numOfSources; i++) {
@@ -595,25 +585,22 @@ void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
             processor.getSources()[i].setElevation(processor.getSources()[0].getElevation());
         }
     }
-
     // Linear min.
-    if (sourceLink == SOURCE_LINK_ALT_LINEAR_MIN) {
+    else if (sourceLink == SOURCE_LINK_ALT_LINEAR_MIN) {
         for (int i = 1; i < numOfSources; i++) {
             float offset = processor.getSources()[0].getElevation();
             processor.getSources()[i].setElevation(60.0 / numOfSources * i + offset);
         }
     }
-
     // Linear max.
-    if (sourceLink == SOURCE_LINK_ALT_LINEAR_MAX) {
+    else if (sourceLink == SOURCE_LINK_ALT_LINEAR_MAX) {
         for (int i = 1; i < numOfSources; i++) {
             float offset = 90.0 - processor.getSources()[0].getElevation();
             processor.getSources()[i].setElevation(90.0 - (60.0 / numOfSources * i) - offset);
         }
     }
-
     // Delta lock.
-    if (sourceLink == SOURCE_LINK_ALT_DELTA_LOCK) {
+    else if (sourceLink == SOURCE_LINK_ALT_DELTA_LOCK) {
         float deltaY = processor.getSources()[0].getDeltaElevation();
         for (int i = 1; i < numOfSources; i++) {
             processor.getSources()[i].setElevationFromFixedSource(deltaY);

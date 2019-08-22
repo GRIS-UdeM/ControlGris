@@ -262,8 +262,16 @@ float Source::getDeltaY() {
     return m_y - fixedY;
 }
 
+float Source::getDeltaAzimuth() {
+    return (m_azimuth - fixedAzimuth);
+}
+
 float Source::getDeltaElevation() {
     return (m_elevation - fixedElevation) / 90.0;
+}
+
+float Source::getDeltaDistance() {
+    return (m_distance - fixedDistance);
 }
 
 void Source::setColour(Colour col) {
