@@ -110,6 +110,16 @@ void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
     computeCurrentTrajectoryPoint();
 }
 
+void AutomationManager::compressTrajectoryXValues(int maxValue) {
+    int offset = 10.0 + kSourceRadius;
+    maxValue -= offset;
+    int size = getRecordingTrajectorySize();
+    float delta = maxValue / (size + 1.0);
+    for (int i = 0; i < size; i++) {
+        trajectoryPoints.data()[i].setX(i * delta + offset);
+    }
+}
+
 void AutomationManager::computeCurrentTrajectoryPoint() {
     if (trajectoryPoints.size() > 0) {
         double delta = trajectoryDeltaTime * trajectoryPoints.size();

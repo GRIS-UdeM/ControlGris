@@ -47,6 +47,7 @@ public:
     Point<float> getCurrentTrajectoryPoint();
     void createRecordingPath(Path& path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
+    void compressTrajectoryXValues(int maxValue);
 
     void setSourceLink(int value);
     int getSourceLink();

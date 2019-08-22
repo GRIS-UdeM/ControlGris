@@ -300,9 +300,6 @@ void MainFieldComponent::paint(Graphics& g) {
 void MainFieldComponent::mouseDown(const MouseEvent &event) {    
 	int width = getWidth();
 
-    Point<float> pos;
-    Rectangle<float> area;
-
     // Check if we click on a recording trajectory.
     if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && 
         event.mods.isShiftDown()) {
@@ -315,12 +312,13 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
 
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
+        Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
-        area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
             listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
@@ -420,7 +418,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()) {
-        Point<float> dpos (10 + kSourceRadius, automationManager.getCurrentTrajectoryPoint().y);
+        Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
 
@@ -454,33 +452,26 @@ void ElevationFieldComponent::paint(Graphics& g) {
 void ElevationFieldComponent::mouseDown(const MouseEvent &event) {    
 	int width = getWidth();
 	int height = getHeight();
-    Point<float> pos;
 
     // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
-        if (automationManager.getRecordingTrajectorySize() > 1) {
-            pos = Point<float> (automationManager.getLastRecordingPoint().x - kSourceRadius, automationManager.getLastRecordingPoint().y - kSourceRadius);
-        } else {
-            pos = posToXy(automationManager.getSourcePosition(), width);
-        }
-        Rectangle<float> rarea = Rectangle<float>(10, pos.y, kSourceDiameter, kSourceDiameter);
-        if (rarea.contains(event.getPosition().toFloat())) {
-            m_oldSelectedSourceId = m_selectedSourceId;
-            m_selectedSourceId = -1;
-            float y = event.getPosition().toFloat().y;
-            y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-            automationManager.resetRecordingTrajectory(Point<float> (10.0 + kSourceRadius, y));
-            automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), width));
-            repaint();
-            return;
-        }
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && 
+        event.mods.isShiftDown()) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        currentRecordingPositionX = 10.0 + kSourceRadius;
+        float y = event.getPosition().toFloat().y;
+        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+        automationManager.resetRecordingTrajectory(Point<float> (currentRecordingPositionX, y));
+        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), width));
+        repaint();
+        return;
     }
 
     // Check if we click on a new source.
     for (int i = 0; i < m_numberOfSources; i++) {
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
-        pos = Point<float> {x, y};
+        Point<float> pos = Point<float> {x, y};
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
@@ -495,11 +486,15 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
 	float height = getHeight();
 
     if (m_selectedSourceId == -1) {
-        float x = 10.0 + kSourceRadius;
+        currentRecordingPositionX += 1;
+        if (currentRecordingPositionX >= height) {
+            currentRecordingPositionX = height;
+            automationManager.compressTrajectoryXValues(height);
+        }
         float y = event.getPosition().toFloat().y;
         y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-        automationManager.addRecordingPoint(Point<float> (x, y));
-        automationManager.setSourcePosition(xyToPos(Point<float> (x, height - event.getPosition().toFloat().y), height));
+        automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
+        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
