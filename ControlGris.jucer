@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" jucerVersion="5.4.3"
+<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" jucerVersion="5.4.4"
               pluginFormats="buildAU,buildVST,buildVST3" version="1.0.0-b2"
               bundleIdentifier="com.gris.umontreal.controlgris" companyName="UdeM"
               aaxIdentifier="com.udem.GRIS.ControlGris" pluginManufacturer="UdeM"
