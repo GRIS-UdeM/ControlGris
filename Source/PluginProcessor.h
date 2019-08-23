@@ -118,7 +118,7 @@ public:
     void linkSourcePositionsAlt();
 
     void addNewFixedPosition();
-    void setSourceFixedPosition();
+    void recallFixedPosition();
     void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
     XmlElement * getFixedPositionData();
     void changeFixedPosition(int row, int column, double value);

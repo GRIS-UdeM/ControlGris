@@ -632,7 +632,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
     currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
-void ControlGrisAudioProcessor::setSourceFixedPosition() {
+void ControlGrisAudioProcessor::recallFixedPosition() {
     if (currentFixPosition == nullptr)
         return;
 
@@ -854,7 +854,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             while (currentFixPosition && currentFixPosition->getDoubleAttribute("Time") < m_currentTime) {
                 currentFixPosition = currentFixPosition->getNextElement();
             }
-            setSourceFixedPosition();
+            recallFixedPosition();
 
             // Force source positions on time 0.
             if (currentFixPosition != nullptr) {
@@ -897,7 +897,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             XmlElement *nextElement = currentFixPosition->getNextElement();
             if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
                 currentFixPosition = nextElement;
-                setSourceFixedPosition();
+                recallFixedPosition();
             }
         }
     }
