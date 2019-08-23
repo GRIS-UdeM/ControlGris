@@ -31,16 +31,13 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     enableJoystickToggle.setButtonText("Enable Joystick");
     addAndMakeVisible(&enableJoystickToggle);
 
-    oscReceiveToggle.setButtonText("Receive on IP : port");
+    oscReceiveToggle.setButtonText("Receive on port");
     addAndMakeVisible(&oscReceiveToggle);
+    oscReceiveToggle.onClick = [this] {
+            listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue()); }); };
 
-    oscSendToggle.setButtonText("Send on IP : port");
+    oscSendToggle.setButtonText("Send on port : IP");
     addAndMakeVisible(&oscSendToggle);
-
-    oscReceiveIpEditor.setText("192.168.1.2");
-    oscReceiveIpEditor.setInputRestrictions(16, ".0123456789");
-    oscReceiveIpEditor.addListener(this);
-    addAndMakeVisible(&oscReceiveIpEditor);
 
     oscReceivePortEditor.setText("8000");
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
@@ -66,6 +63,10 @@ void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
     unfocusAllComponents();
 }
 
+void InterfaceBoxComponent::setOscReceiveToggleState(bool state) {
+    oscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
+}
+
 void InterfaceBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
@@ -80,10 +81,9 @@ void InterfaceBoxComponent::resized() {
     enableJoystickToggle.setBounds(125, 35, 150, 20);
 
     oscReceiveToggle.setBounds(255, 10, 200, 20);
-    oscReceiveIpEditor.setBounds(400, 10, 120, 20);
-    oscReceivePortEditor.setBounds(530, 10, 60, 20);
+    oscReceivePortEditor.setBounds(400, 10, 60, 20);
 
     oscSendToggle.setBounds(255, 35, 200, 20);
-    oscSendIpEditor.setBounds(400, 35, 120, 20);
-    oscSendPortEditor.setBounds(530, 35, 60, 20);
+    oscSendPortEditor.setBounds(400, 35, 60, 20);
+    oscSendIpEditor.setBounds(470, 35, 120, 20);
 }

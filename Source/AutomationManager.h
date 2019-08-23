@@ -57,6 +57,8 @@ public:
 
     Source& getSource();
     void setSourcePosition(Point<float> pos);
+    void setSourcePositionX(float x);
+    void setSourcePositionY(float y);
     Point<float> getSourcePosition();
     void fixSourcePosition();
 

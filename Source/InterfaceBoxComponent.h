@@ -33,7 +33,21 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    void setOscReceiveToggleState(bool state);
+
+    struct Listener
+    {
+        virtual ~Listener() {}
+
+        virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
+    };
+
+    void addListener(Listener* l) { listeners.add (l); }
+    void removeListener(Listener* l) { listeners.remove (l); }
+
 private:
+    ListenerList<Listener> listeners;
+
     Label           oscSourceLabel;
     ComboBox        oscSourceCombo;
 
@@ -42,7 +56,6 @@ private:
     ToggleButton    oscReceiveToggle;
     ToggleButton    oscSendToggle;
 
-    TextEditor      oscReceiveIpEditor;
     TextEditor      oscReceivePortEditor;
     TextEditor      oscSendIpEditor;
     TextEditor      oscSendPortEditor;

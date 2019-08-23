@@ -81,6 +81,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     sourceBox.addListener(this);
 
     interfaceBox.setLookAndFeel(&grisLookAndFeel);
+    interfaceBox.addListener(this);
 
     Colour bg = grisLookAndFeel.findColour (ResizableWindow::backgroundColourId);
 
@@ -140,6 +141,8 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     settingsBoxOscActivated(processor.getOscConnected());
     settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources());
     settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
+
+    interfaceBox.setOscReceiveToggleState(valueTreeState.state.getProperty("oscInputConnected", false));
 
     // Set state for trajectory box persistent values.
     //------------------------------------------------
@@ -478,6 +481,16 @@ void ControlGrisAudioProcessorEditor::fixedPositionEditorCellDeleted(int row, in
 void ControlGrisAudioProcessorEditor::fixedPositionEditorClosed() {
     m_fixedSourcesWindowVisible = false;
     resized();
+}
+
+// InterfaceBoxComponent::Listener callback.
+//------------------------------------------
+void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int oscPort) {
+    if (state) {
+        processor.createOscInputConnection(oscPort);
+    } else {
+        processor.disconnectOSCInput();
+    }
 }
 
 //==============================================================================

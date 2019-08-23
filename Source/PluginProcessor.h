@@ -28,7 +28,8 @@
 class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,
                                    public AutomationManager::Listener,
-                                   public Timer
+                                   public Timer,
+                                   private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback>
 {
 public:
     //==============================================================================
@@ -95,6 +96,11 @@ public:
     void handleOscConnection(bool state);
     void sendOscMessage();
 
+    bool createOscInputConnection(int oscPort);
+    bool disconnectOSCInput();
+    bool getOscInputConnected();
+    void oscMessageReceived (const OSCMessage& message) override;
+
     void timerCallback() override;
 
     //==============================================================================
@@ -133,11 +139,13 @@ public:
 private:
     SPAT_MODE_ENUM m_selectedOscFormat;
     bool m_oscConnected;
+    bool m_oscInputConnected;
     int m_firstSourceId;
     int m_numOfSources;
     int m_selectedSourceId;
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
+    int m_currentOSCInputPort;
     bool m_somethingChanged;
     bool m_needInitialization;
 
@@ -153,6 +161,7 @@ private:
     Source sources[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
+    OSCReceiver oscReceiver;
 
     XmlElement fixPositionData;
     XmlElement *currentFixPosition = nullptr;

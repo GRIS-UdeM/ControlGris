@@ -40,7 +40,8 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public SettingsBoxComponent::Listener,
                                         public SourceBoxComponent::Listener,
                                         public TrajectoryBoxComponent::Listener,
-                                        public FixedPositionEditor::Listener
+                                        public FixedPositionEditor::Listener,
+                                        public InterfaceBoxComponent::Listener
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
@@ -88,6 +89,9 @@ public:
     void fixedPositionEditorCellChanged(int row, int column, double value) override;
     void fixedPositionEditorCellDeleted(int row, int column) override;
     void fixedPositionEditorClosed() override;
+
+    // InterfaceBoxComponent::Listeners
+    void oscInputConnectionChanged(bool state, int oscPort);
 
     void setPluginState();
     void updateSourceLinkCombo(int value);

@@ -88,6 +88,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
+    m_oscInputConnected = false;
+    m_currentOSCInputPort = 8000;
 
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = m_lastTimerTime = 10000000.0;
@@ -98,7 +100,9 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Global setting parameters.
     parameters.state.setProperty("oscFormat", 0, nullptr);
     parameters.state.setProperty("oscPortNumber", 18032, nullptr);
+    parameters.state.setProperty("oscInputPortNumber", 8000, nullptr);
     parameters.state.setProperty("oscConnected", true, nullptr);
+    parameters.state.setProperty("oscInputConnected", false, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
     parameters.state.setProperty("azimuthSpanLink", false, nullptr);
@@ -385,6 +389,65 @@ void ControlGrisAudioProcessor::sendOscMessage() {
     }
 }
 
+bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
+    disconnectOSCInput();
+
+    m_oscInputConnected = oscReceiver.connect(oscPort);
+    if (!m_oscInputConnected) {
+        std::cout << "Error: could not connect to UDP input port " << oscPort << "." << std::endl;
+    } else {
+        oscReceiver.addListener (this, "/controlgris/traj/1/x");
+        oscReceiver.addListener (this, "/controlgris/traj/1/y");
+        oscReceiver.addListener (this, "/controlgris/traj/1/z");
+        oscReceiver.addListener (this, "/controlgris/traj/1/xy");
+        oscReceiver.addListener (this, "/controlgris/traj/1/xyz");
+        m_currentOSCInputPort = oscPort;
+        parameters.state.setProperty("oscInputPortNumber", oscPort, nullptr);
+    }
+
+    parameters.state.setProperty("oscInputConnected", getOscInputConnected(), nullptr);
+
+    return m_oscInputConnected;
+}
+
+bool ControlGrisAudioProcessor::disconnectOSCInput() {
+    if (m_oscInputConnected) {
+        if (oscReceiver.disconnect()) {
+            m_oscInputConnected = false;
+        }
+    }
+
+    parameters.state.setProperty("oscInputConnected", getOscInputConnected(), nullptr);
+
+    return !m_oscInputConnected;
+}
+
+bool ControlGrisAudioProcessor::getOscInputConnected() {
+    return m_oscInputConnected;
+}
+
+void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
+    String address = message.getAddressPattern().toString().toStdString();
+    if (address == "/controlgris/traj/1/x" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        automationManager.setSourcePositionX(message[0].getFloat32());
+    } else if (address == "/controlgris/traj/1/y" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        automationManager.setSourcePositionY(message[0].getFloat32());
+    } else if (address == "/controlgris/traj/1/z" && automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        automationManagerAlt.setSourcePositionY(message[0].getFloat32());
+    } else if (address == "/controlgris/traj/1/xy" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        automationManager.setSourcePositionX(message[0].getFloat32());
+        automationManager.setSourcePositionY(message[1].getFloat32());
+    } else if (address == "/controlgris/traj/1/xyz") {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+            automationManager.setSourcePositionX(message[0].getFloat32());
+            automationManager.setSourcePositionY(message[1].getFloat32());
+        }
+        if (automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+            automationManagerAlt.setSourcePositionY(message[2].getFloat32());
+        }
+    }
+}
+
 void ControlGrisAudioProcessor::timerCallback() {
     bool needRepaint = false;
     if (m_somethingChanged) {
@@ -437,6 +500,10 @@ void ControlGrisAudioProcessor::setPluginState() {
     handleOscConnection(parameters.state.getProperty("oscConnected", true));
     setNumberOfSources(parameters.state.getProperty("numberOfSources", 1), false);
     setFirstSourceId(parameters.state.getProperty("firstSourceId", 1));
+
+    if (parameters.state.getProperty("oscInputConnected", false)) {
+        createOscInputConnection(parameters.state.getProperty("oscInputPortNumber", 8000));
+    }
 
     // Set parameter values for sources.
     //----------------------------------

@@ -157,6 +157,20 @@ void AutomationManager::setSourcePosition(Point<float> pos) {
     }
 }
 
+void AutomationManager::setSourcePositionX(float x) {
+    source.setX(x);
+    if (activateState) {
+        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
+    }
+}
+
+void AutomationManager::setSourcePositionY(float y) {
+    source.setY(y);
+    if (activateState) {
+        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
+    }
+}
+
 Source& AutomationManager::getSource() {
     return source;
 }
