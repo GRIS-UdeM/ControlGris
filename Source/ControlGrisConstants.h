@@ -96,8 +96,8 @@ enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_REALTIME = 1,
                                 TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_DOWN
                               };
 const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Drawing"), String("Down Up"),
-                                                String("Up Down"), String("Back and Forth Up"),
-                                                String("Back and Forth Down")};
+                                                String("Up Down"), String("Back and Forth Down"),
+                                                String("Back and Forth Up")};
 
 // Fix position data headers.
 //---------------------------
@@ -109,6 +109,8 @@ const StringArray FIXED_POSITION_DATA_HEADERS { String("Del"), String("Time"),
                                                 String("S5_X"), String("S5_Y"), String("S5_Z"),
                                                 String("S6_X"), String("S6_Y"), String("S6_Z"),
                                                 String("S7_X"), String("S7_Y"), String("S7_Z"),
-                                                String("S8_X"), String("S8_Y"), String("S8_Z")};
+                                                String("S8_X"), String("S8_Y"), String("S8_Z"),
+                                                String("T1_X"), String("T1_Y"), String("T1_Z"),
+                                                String("T2_X"), String("T2_Y"), String("T2_Z")};
 
 const String FIXED_POSITION_DATA_TAG ("Fix_Position_Data");

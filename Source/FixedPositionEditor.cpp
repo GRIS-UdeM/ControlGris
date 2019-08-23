@@ -28,7 +28,7 @@ FixedPositionEditor::FixedPositionEditor() {
 
     table.getHeader().addColumn(FIXED_POSITION_DATA_HEADERS[index++], 1, 40, 40, 40, TableHeaderComponent::notSortable);
     table.getHeader().addColumn(FIXED_POSITION_DATA_HEADERS[index++], 2, 80, 60, 100, TableHeaderComponent::notSortable);
-    for (int i = 1; i <= 8; i++) {
+    for (int i = 1; i <= 10; i++) {
         table.getHeader().addColumn(FIXED_POSITION_DATA_HEADERS[index++], i*3, 50, 50, 75, TableHeaderComponent::notSortable);
         table.getHeader().addColumn(FIXED_POSITION_DATA_HEADERS[index++], i*3+1, 50, 50, 75, TableHeaderComponent::notSortable);
         table.getHeader().addColumn(FIXED_POSITION_DATA_HEADERS[index++], i*3+2, 50, 50, 75, TableHeaderComponent::notSortable);

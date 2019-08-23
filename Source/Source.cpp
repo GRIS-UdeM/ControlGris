@@ -229,6 +229,10 @@ void Source::setFixedPosition(float x, float y) {
     }
 }
 
+void Source::setFixedElevation(float z) {
+    fixedElevation = 90.0 - z * 90.0;
+}
+
 void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
     if (m_radiusIsElevation) {  // azimuth - elevation
         setAzimuth(fixedAzimuth + deltaAzimuth);

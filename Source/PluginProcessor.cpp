@@ -400,14 +400,14 @@ void ControlGrisAudioProcessor::timerCallback() {
             automationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
             needRepaint = true;
         }
-    } else if (automationManager.hasValidPlaybackPosition()) {
+    } else if (m_isPlaying && automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
         needRepaint = true;
     }
 
     // ElevationField automation.
     if (getOscFormat() == SPAT_MODE_LBAP && automationManagerAlt.getActivateState()) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        if (automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
@@ -539,7 +539,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
 
     switch (automationManager.getSourceLink()) {
         case SOURCE_LINK_INDEPENDANT:
-            sources[m_selectedSourceId].setPos(automationManager.getSourcePosition());
+            sources[0].setPos(automationManager.getSourcePosition());
             break;
         case SOURCE_LINK_CIRCULAR:
         case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
@@ -565,7 +565,7 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 
     switch (automationManagerAlt.getSourceLink()) {
         case SOURCE_LINK_ALT_INDEPENDANT:
-            sources[m_selectedSourceId].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
+            sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
             break;
         case SOURCE_LINK_ALT_FIXED_ELEVATION:
             for (int i = 0; i < m_numOfSources; i++) {
@@ -593,6 +593,7 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
     }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::addNewFixedPosition() {
     while (m_lock) {}
     // Build a new fixed position element.
@@ -605,6 +606,9 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
             newData->setAttribute(getFixedPosSourceName(i, 2), sources[i].getNormalizedElevation());
         }
     }
+    newData->setAttribute("T1_X", automationManager.getSourcePosition().x);
+    newData->setAttribute("T1_Y", automationManager.getSourcePosition().y);
+    newData->setAttribute("T1_Z", automationManagerAlt.getSourcePosition().y);
 
     // Replace an element if the new one has the same time as one already saved.
     bool found = false;
@@ -628,6 +632,55 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
     currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
+void ControlGrisAudioProcessor::setSourceFixedPosition() {
+    if (currentFixPosition == nullptr)
+        return;
+
+    float x, y, z = 0.0;
+    for (int i = 0; i < m_numOfSources; i++) {
+        x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
+        y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
+        sources[i].setFixedPosition(x, y);
+        if (m_selectedOscFormat == SPAT_MODE_LBAP) {
+            z = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 2));
+            sources[i].setFixedElevation(z);
+        }
+    }
+
+    x = currentFixPosition->getDoubleAttribute("T1_X");
+    y = currentFixPosition->getDoubleAttribute("T1_Y");
+    automationManager.setSourcePosition(Point<float> (x, y));
+    if (getOscFormat() == SPAT_MODE_LBAP) {
+        z = currentFixPosition->getDoubleAttribute("T1_Z");
+        automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
+    }
+}
+
+void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
+    if (dest == nullptr)
+        dest = new XmlElement(FIXED_POSITION_DATA_TAG);
+
+    forEachXmlChildElement (*src, element) {
+        XmlElement *newData = new XmlElement("ITEM");
+        newData->setAttribute("Time", element->getDoubleAttribute("Time"));
+        for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+            newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
+            newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
+            newData->setAttribute(getFixedPosSourceName(i, 2), element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
+        }
+
+        newData->setAttribute("T1_X", element->getDoubleAttribute("T1_X"));
+        newData->setAttribute("T1_Y", element->getDoubleAttribute("T1_Y"));
+        newData->setAttribute("T1_Z", element->getDoubleAttribute("T1_Z"));
+
+        dest->addChildElement(newData);
+    }
+}
+
+XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
+    return &fixPositionData;
+}
+
 void ControlGrisAudioProcessor::changeFixedPosition(int row, int column, double value) {
     fixPositionData.getChildElement(row-1)->setAttribute(FIXED_POSITION_DATA_HEADERS[column-1], value);
     XmlElementDataSorter sorter("Time", true);
@@ -642,6 +695,7 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
     currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
+//==============================================================================
 double ControlGrisAudioProcessor::getInitTimeOnPlay() {
     return m_initTimeOnPlay;
 }
@@ -773,18 +827,6 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 }
 #endif
 
-void ControlGrisAudioProcessor::setSourceFixedPosition() {
-    if (currentFixPosition == nullptr)
-        return;
-
-    float x, y;
-    for (int i = 0; i < m_numOfSources; i++) {
-        x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
-        y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
-        sources[i].setFixedPosition(x, y);
-    }
-}
-
 void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
     m_lock = true;
     AudioPlayHead* phead = getPlayHead();
@@ -817,15 +859,17 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             // Force source positions on time 0.
             if (currentFixPosition != nullptr) {
                 if (m_currentTime == 0.0f && currentFixPosition->getDoubleAttribute("Time") == 0.0) {
-                    float x, y;
+                    float x, y, z = 0.0;
                     for (int i = 0; i < m_numOfSources; i++) {
                         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
                         y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
                         sources[i].setPos(Point<float> (x, y));
                     }
-                    if (automationManager.hasValidPlaybackPosition()) {
-                        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-                    }
+
+                    x = currentFixPosition->getDoubleAttribute("T1_X");
+                    y = currentFixPosition->getDoubleAttribute("T1_Y");
+                    automationManager.setSourcePosition(Point<float> (x, y));
+
                     if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
                         // Ugly hack to make the DELTA_LOCK link working.
                         automationManager.setSourceLink(SOURCE_LINK_INDEPENDANT);
@@ -836,9 +880,8 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                         linkSourcePositions();
                     }
                     if (getOscFormat() == SPAT_MODE_LBAP) {
-                        if (automationManagerAlt.hasValidPlaybackPosition()) {
-                            automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
-                        }
+                        z = currentFixPosition->getDoubleAttribute("T1_Z");
+                        automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
                         if (automationManagerAlt.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
                             automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDANT);
                             automationManagerAlt.fixSourcePosition();
@@ -875,26 +918,6 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
-    if (dest == nullptr)
-        dest = new XmlElement(FIXED_POSITION_DATA_TAG);
-
-    forEachXmlChildElement (*src, element) {
-        XmlElement *newData = new XmlElement("ITEM");
-        newData->setAttribute("Time", element->getDoubleAttribute("Time"));
-        for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-            newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
-            newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
-            newData->setAttribute(getFixedPosSourceName(i, 2), element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
-        }
-        dest->addChildElement(newData);
-    }
-}
-
-XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
-    return &fixPositionData;
-}
-
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
     auto state = parameters.copyState();
