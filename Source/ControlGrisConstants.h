@@ -71,7 +71,8 @@ const StringArray SOURCE_LINK_ALT_TYPES   {String("Independant"), String("Fixed 
 
 // Trajectories -> Trajectory Type popup choices.
 //-----------------------------------------------
-enum TRAJECTORY_TYPE_ENUM { TRAJECTORY_TYPE_DRAWING = 1,
+enum TRAJECTORY_TYPE_ENUM { TRAJECTORY_TYPE_REALTIME = 1,
+                            TRAJECTORY_TYPE_DRAWING,
                             TRAJECTORY_TYPE_CIRCLE_CLOCKWISE,
                             TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE,
                             TRAJECTORY_TYPE_ELLIPSE_CLOCKWISE,
@@ -81,20 +82,22 @@ enum TRAJECTORY_TYPE_ENUM { TRAJECTORY_TYPE_DRAWING = 1,
                             TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT,
                             TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT
                           };
-const StringArray TRAJECTORY_TYPE_TYPES   {String("Drawing"), String("Circle Clockwise"),
+const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing"), String("Circle Clockwise"),
                                            String("Circle Counter Clockwise"), String("Ellipse Clockwise"),
                                            String("Ellipse Counter Clockwise"), String("Spiral Clockwise Out In"),
                                            String("Spiral Counter Clockwise Out In"), String("Spiral Clockwise In Out"),
                                            String("Spiral Counter Clockwise In Out")};
 
-enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_DRAWING = 1,
+enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_REALTIME = 1,
+                                TRAJECTORY_TYPE_ALT_DRAWING,
                                 TRAJECTORY_TYPE_ALT_DOWN_UP,
                                 TRAJECTORY_TYPE_ALT_UP_DOWN,
                                 TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_UP,
                                 TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_DOWN
                               };
-const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Drawing"), String("Down Up"), String("Up Down"),
-                                                String("Back and Forth Up"), String("Back and Forth Down")};
+const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Drawing"), String("Down Up"),
+                                                String("Up Down"), String("Back and Forth Up"),
+                                                String("Back and Forth Down")};
 
 // Fix position data headers.
 //---------------------------

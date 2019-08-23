@@ -178,7 +178,11 @@ void AutomationManager::setDrawingType(int type) {
     int offset = FIELD_WIDTH / 2;
     int radius = offset - 10;
     switch (drawingType) {
+        case TRAJECTORY_TYPE_REALTIME:
+            playbackPosition = Point<float> (-1.0f, -1.0f);
+            break;
         case TRAJECTORY_TYPE_DRAWING:
+            playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
         case TRAJECTORY_TYPE_CIRCLE_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
@@ -238,8 +242,9 @@ void AutomationManager::setDrawingType(int type) {
             break;
     }
 
-    setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
-
+    if (drawingType > TRAJECTORY_TYPE_DRAWING) {
+        setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+    }
 }
 
 void AutomationManager::setDrawingTypeAlt(int type) {
@@ -251,7 +256,11 @@ void AutomationManager::setDrawingTypeAlt(int type) {
     float minPos = 15.0, maxPos = FIELD_WIDTH - 20.0;
 
     switch (drawingType) {
+        case TRAJECTORY_TYPE_ALT_REALTIME:
+            playbackPosition = Point<float> (-1.0f, -1.0f);
+            break;
         case TRAJECTORY_TYPE_ALT_DRAWING:
+            playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
         case TRAJECTORY_TYPE_ALT_DOWN_UP:
             for (int i = 0; i < 200; i++) {
@@ -289,7 +298,9 @@ void AutomationManager::setDrawingTypeAlt(int type) {
             break;
     }
 
-    setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+    if (drawingType > TRAJECTORY_TYPE_ALT_DRAWING) {
+        setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+    }
 }
 
 int AutomationManager::getDrawingType() {

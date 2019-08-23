@@ -394,7 +394,9 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     // MainField automation.
     if (automationManager.getActivateState()) {
-        if (m_lastTimerTime != getCurrentTime()) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+            //...
+        } else if (m_lastTimerTime != getCurrentTime()) {
             automationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
             needRepaint = true;
         }
@@ -405,7 +407,9 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     // ElevationField automation.
     if (getOscFormat() == SPAT_MODE_LBAP && automationManagerAlt.getActivateState()) {
-        if (m_lastTimerTime != getCurrentTime()) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+            //...
+        } else if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
             needRepaint = true;
         }

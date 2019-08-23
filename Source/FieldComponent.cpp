@@ -241,11 +241,9 @@ void MainFieldComponent::paint(Graphics& g) {
     drawFieldBackground(g, true, m_spatMode);
 
     // Draw recording trajectory handle.
-    if (!m_isPlaying) {
+    if (!m_isPlaying || automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         Point<float> rpos;
-        if (automationManager.getRecordingTrajectorySize() > 1) {
-            rpos = Point<float> (automationManager.getFirstRecordingPoint().x - kSourceRadius, automationManager.getFirstRecordingPoint().y - kSourceRadius);
-        } else if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SPAT_MODE_VBAP) {
             rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
         } else {
             rpos = posToXy(automationManager.getSourcePosition(), width);
@@ -266,7 +264,7 @@ void MainFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown()) {
+    if (m_isPlaying && !isMouseButtonDown() && !automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -300,8 +298,25 @@ void MainFieldComponent::paint(Graphics& g) {
 void MainFieldComponent::mouseDown(const MouseEvent &event) {    
 	int width = getWidth();
 
-    // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && 
+    // Realtime movements.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        Source *selectedSource = &automationManager.getSource();
+        if (m_spatMode == SPAT_MODE_VBAP) {
+            Point<float> pos = xyToDegree(event.getMouseDownPosition().toFloat(), width);
+            selectedSource->setAzimuth(pos.x);
+            selectedSource->setElevation(pos.y);
+        } else {
+            Point<float> pos = xyToPos(event.getMouseDownPosition().toFloat(), width);
+            selectedSource->setX(pos.x);
+            selectedSource->setY(pos.y);
+        }
+        repaint();
+        return;
+    }
+    // Check if we record a trajectory.
+    else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && 
         event.mods.isShiftDown()) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
@@ -355,7 +370,11 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         selectedSource->setY(pos.y);
     }
     if (m_selectedSourceId == -1) {
-        automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && event.mods.isShiftDown()) {
+            automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+            automationManager.setSourcePosition(automationManager.getSourcePosition());
+        }
     } else {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
     }
@@ -364,8 +383,10 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 
 void MainFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
-        m_selectedSourceId = m_oldSelectedSourceId;
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+            automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
+            m_selectedSourceId = m_oldSelectedSourceId;
+        }
         repaint();
     }
 }
@@ -395,12 +416,8 @@ void ElevationFieldComponent::paint(Graphics& g) {
     drawFieldBackground(g, false);
 
     // Draw recording trajectory handle.
-    if (!m_isPlaying) {
-        if (automationManager.getRecordingTrajectorySize() > 0) {
-            pos = Point<float> (automationManager.getFirstRecordingPoint().x - kSourceRadius, automationManager.getFirstRecordingPoint().y - kSourceRadius);
-        } else {
-            pos = posToXy(automationManager.getSourcePosition(), width);
-        }
+    if (!m_isPlaying || automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        pos = posToXy(automationManager.getSourcePosition(), width);
         lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
         Rectangle<float> rarea (10, pos.y, kSourceDiameter, kSourceDiameter);
         g.setColour(Colours::grey);
@@ -421,7 +438,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown()) {
+    if (m_isPlaying && !isMouseButtonDown() && !automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -457,8 +474,20 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
 	int width = getWidth();
 	int height = getHeight();
 
+    // Realtime movements.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        Source *selectedSource = &automationManager.getSource();
+        float y = event.getPosition().toFloat().y;
+        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+        selectedSource->setX(10.0 + kSourceRadius);
+        selectedSource->setY(y);
+        repaint();
+        return;
+    }
     // Check if we click on a recording trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && 
+    else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && 
         event.mods.isShiftDown()) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
@@ -500,8 +529,13 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
         }
         float y = event.getPosition().toFloat().y;
         y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-        automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
-        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
+        //automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
+        //automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && event.mods.isShiftDown()) {
+            automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+            automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
+        }
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
@@ -512,8 +546,10 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
 
 void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
-        m_selectedSourceId = m_oldSelectedSourceId;
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+            automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
+            m_selectedSourceId = m_oldSelectedSourceId;
+        }
         repaint();
     }
 }
