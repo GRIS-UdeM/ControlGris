@@ -51,8 +51,6 @@ public:
         virtual void trajectoryBoxActivateAltChanged(bool value) = 0;
         virtual void trajectoryBoxEditFixedSourceButtonClicked() = 0;
         virtual void trajectoryBoxFixSourceButtonClicked() = 0;
-        virtual void trajectoryBoxClearButtonClicked() = 0;
-        virtual void trajectoryBoxClearAltButtonClicked() = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -81,8 +79,6 @@ private:
 
     TextButton      editFixedSourceButton;
     TextButton      fixSourceButton;
-    TextButton      clearButton;
-    TextButton      clearAltButton;
     TextButton      activateButton;
     TextButton      activateAltButton;
 

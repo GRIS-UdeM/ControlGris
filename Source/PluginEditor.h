@@ -83,8 +83,6 @@ public:
     void trajectoryBoxActivateAltChanged(bool value) override;
     void trajectoryBoxEditFixedSourceButtonClicked() override;
     void trajectoryBoxFixSourceButtonClicked() override;
-    void trajectoryBoxClearButtonClicked() override;
-    void trajectoryBoxClearAltButtonClicked() override;
 
     // FixedPositionEditor::Listeners
     void fixedPositionEditorCellChanged(int row, int column, double value) override;

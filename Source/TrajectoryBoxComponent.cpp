@@ -94,18 +94,6 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxFixSourceButtonClicked(); });
             durationUnitCombo.grabKeyboardFocus(); };
 
-    addAndMakeVisible(&clearButton);
-    clearButton.setButtonText("Clear");
-    clearButton.onClick = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxClearButtonClicked(); });
-            durationUnitCombo.grabKeyboardFocus(); };
-
-    addChildComponent(&clearAltButton);
-    clearAltButton.setButtonText("Clear");
-    clearAltButton.onClick = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxClearAltButtonClicked(); });
-            durationUnitCombo.grabKeyboardFocus(); };
-
     addAndMakeVisible(&activateButton);
     activateButton.setButtonText("Activate");
     activateButton.setClickingTogglesState(true);
@@ -157,42 +145,34 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
 void TrajectoryBoxComponent::resized() {
     sourceLinkLabel.setBounds(5, 10, 150, 20);
     sourceLinkCombo.setBounds(120, 10, 160, 20);
-
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(120, 40, 160, 20);
+    activateButton.setBounds(10, 70, 100, 20);
 
-    durationLabel.setBounds(5, 70, 150, 20);
-    durationEditor.setBounds(120, 70, 90, 20);
-    durationUnitCombo.setBounds(215, 70, 65, 20);
+    if (m_spatMode == SPAT_MODE_LBAP) {
+        sourceLinkAltCombo.setVisible(true);
+        trajectoryTypeAltCombo.setVisible(true);
+        activateAltButton.setVisible(true);
+        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
+        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
+        activateAltButton.setBounds(300, 70, 100, 20);
+    } else {
+        sourceLinkAltCombo.setVisible(false);
+        trajectoryTypeAltCombo.setVisible(false);
+        activateAltButton.setVisible(false);
+    }
 
-    cycleSpeedLabel.setBounds(5, 100, 150, 20);
-    cycleSpeedSlider.setBounds(115, 100, 165, 20);
-
-    activateButton.setBounds(10, 100, 100, 20);
-    clearButton.setBounds(120, 100, 50, 20);
+    durationLabel.setBounds(5, 100, 150, 20);
+    durationEditor.setBounds(120, 100, 90, 20);
+    durationUnitCombo.setBounds(215, 100, 65, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
+    cycleSpeedLabel.setBounds(5, 100, 150, 20);
+    cycleSpeedSlider.setBounds(115, 100, 165, 20);
     cycleSpeedLabel.setVisible(false);
     cycleSpeedSlider.setVisible(false);
     //------------------------------------------------------------------
 
     editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
     fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);
-
-    if (m_spatMode == SPAT_MODE_LBAP) {
-        sourceLinkAltCombo.setVisible(true);
-        trajectoryTypeAltCombo.setVisible(true);
-        clearAltButton.setVisible(true);
-        activateAltButton.setVisible(true);
-        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
-        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
-        activateAltButton.setBounds(300, 100, 100, 20);
-        clearAltButton.setBounds(410, 100, 50, 20);
-    } else {
-        sourceLinkAltCombo.setVisible(false);
-        trajectoryTypeAltCombo.setVisible(false);
-        clearAltButton.setVisible(false);
-        activateAltButton.setVisible(false);
-    }
-
 }

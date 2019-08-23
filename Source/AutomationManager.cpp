@@ -244,6 +244,8 @@ void AutomationManager::setDrawingType(int type) {
 
     if (drawingType > TRAJECTORY_TYPE_DRAWING) {
         setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+    } else {
+        setSourcePosition(Point<float> (0.5f, 0.5f));
     }
 }
 
@@ -305,6 +307,8 @@ void AutomationManager::setDrawingTypeAlt(int type) {
 
     if (drawingType > TRAJECTORY_TYPE_ALT_DRAWING) {
         setSourcePosition(Point<float> (trajectoryPoints[0].x / FIELD_WIDTH, 1.0 - trajectoryPoints[0].y / FIELD_WIDTH));
+    } else {
+        setSourcePosition(Point<float> (0.5f, 0.5f));
     }
 }
 

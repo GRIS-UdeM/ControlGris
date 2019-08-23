@@ -427,18 +427,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     processor.addNewFixedPosition();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxClearButtonClicked() {
-    float center = FIELD_WIDTH / 2.0 - kSourceRadius;
-    automationManager.resetRecordingTrajectory(Point<float> (center, center));
-    mainField.repaint();
-}
-
-void ControlGrisAudioProcessorEditor::trajectoryBoxClearAltButtonClicked() {
-    float center = FIELD_WIDTH / 2.0 - kSourceRadius;
-    automationManagerAlt.resetRecordingTrajectory(Point<float> (center, center));
-    elevationField.repaint();
-}
-
 // Update the interface if anything has changed (mostly automations).
 //-------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::refresh() {
