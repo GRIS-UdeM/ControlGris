@@ -91,7 +91,7 @@ public:
     void fixedPositionEditorClosed() override;
 
     // InterfaceBoxComponent::Listeners
-    void oscInputConnectionChanged(bool state, int oscPort);
+    void oscInputConnectionChanged(bool state, int oscPort) override;
 
     void setPluginState();
     void updateSourceLinkCombo(int value);
