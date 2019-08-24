@@ -40,7 +40,7 @@ SourceBoxComponent::SourceBoxComponent() {
 
     addAndMakeVisible(&sourceNumberCombo);
     sourceNumberCombo.setTextWhenNothingSelected("Choose a source...");
-    for (int i = 0; i < 8; i++) {
+    for (int i = 1; i <= 8; i++) {
         sourceNumberCombo.addItem(String(i), i);
     }
     sourceNumberCombo.setSelectedId(selectedSourceNumber);

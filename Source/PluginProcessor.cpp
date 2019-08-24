@@ -383,7 +383,7 @@ void ControlGrisAudioProcessor::sendOscMessage() {
         message.addFloat32(0.0);
 
         if (!oscSender.send(message)) {
-            std::cout << "Error: could not send OSC message." << std::endl;
+            //std::cout << "Error: could not send OSC message." << std::endl;
             return;
         }
     }
@@ -847,6 +847,8 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
 
+    // FIXME: We can't assume m_currentTime will hold the correct time on every OSes. Just strip this out for now.
+    /*
     // If Activate is on and there is not a fixed position for the current timestamp, add one.
     if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
         bool found = false;
@@ -862,6 +864,7 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
             addNewFixedPosition();
         }
     }
+    */
 }
 
 void ControlGrisAudioProcessor::releaseResources()
