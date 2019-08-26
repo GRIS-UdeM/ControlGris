@@ -317,7 +317,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
-            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
+            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
             clickOnSource = true;
             break;
         }
@@ -383,7 +383,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
             automationManager.setSourcePosition(automationManager.getSourcePosition());
         }
     } else {
-        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
+        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
     repaint();
 }
@@ -493,7 +493,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
-            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
+            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
             clickOnSource = true;
             break;
         }
@@ -549,7 +549,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
-        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId); });
+        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
     repaint();
 }

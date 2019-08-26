@@ -210,6 +210,14 @@ void Source::fixSourcePosition(bool shouldBeFixed) {
     }
 }
 
+void Source::fixSourcePositionElevation(bool shouldBeFixed) {
+    if (shouldBeFixed) {
+        fixedElevation = m_elevation;
+    } else {
+        fixedElevation = -1.0;
+    }
+}
+
 void Source::setFixedPosition(float x, float y) {
     fixedX = x;
     fixedY = y;

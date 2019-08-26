@@ -448,20 +448,30 @@ void ControlGrisAudioProcessorEditor::refresh() {
 
 // FieldComponent::Listener callback.
 //-----------------------------------
-void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId) {
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, int whichField) {
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
-    processor.setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, processor.getSources()[sourceId].getNormalizedAzimuth());
-    processor.setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, processor.getSources()[sourceId].getNormalizedElevation());
-    processor.setSourceParameterValue(sourceId, SOURCE_ID_DISTANCE, processor.getSources()[sourceId].getDistance());
+    if (whichField == 0) {
+        if (processor.getOscFormat() == SPAT_MODE_LBAP) {
+            processor.setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, processor.getSources()[sourceId].getNormalizedAzimuth());
+            processor.setSourceParameterValue(sourceId, SOURCE_ID_DISTANCE, processor.getSources()[sourceId].getDistance());
+        } else {
+            processor.setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, processor.getSources()[sourceId].getNormalizedAzimuth());
+            processor.setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, processor.getSources()[sourceId].getNormalizedElevation());
+        }
+    } else {
+        processor.setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, processor.getSources()[sourceId].getNormalizedElevation());
+    }
 
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
-    validateSourcePositions();
-    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
+    if (whichField == 0) {
+        validateSourcePositions();
+    }
+    if (whichField == 1 && processor.getOscFormat() == SPAT_MODE_LBAP) {
         validateSourcePositionsAlt();
     }
 }
@@ -550,11 +560,18 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
 
     // All circular modes.
     if (sourceLink >= SOURCE_LINK_CIRCULAR && sourceLink < SOURCE_LINK_DELTA_LOCK) {
-        float deltaAzimuth = processor.getSources()[0].getDeltaAzimuth();
-        float deltaElevation = processor.getSources()[0].getDeltaElevation();
-        float deltaDistance = processor.getSources()[0].getDeltaDistance();
-        for (int i = 1; i < numOfSources; i++) {
-            processor.getSources()[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, deltaDistance);
+        if (processor.getOscFormat() == SPAT_MODE_LBAP) {
+            float deltaAzimuth = processor.getSources()[0].getDeltaAzimuth();
+            float deltaDistance = processor.getSources()[0].getDeltaDistance();
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0, deltaDistance);
+            }
+        } else {
+            float deltaAzimuth = processor.getSources()[0].getDeltaAzimuth();
+            float deltaElevation = processor.getSources()[0].getDeltaElevation();
+            for (int i = 1; i < numOfSources; i++) {
+                processor.getSources()[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
+            }
         }
     } 
     // Delta Lock mode.
@@ -613,7 +630,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
     bool shouldBeFixed = sourceLink != SOURCE_LINK_ALT_INDEPENDANT;
     if (sourceLink >= 2 && sourceLink < 5) {
         for (int i = 0; i < numOfSources; i++) {
-            processor.getSources()[i].fixSourcePosition(shouldBeFixed);
+            processor.getSources()[i].fixSourcePositionElevation(shouldBeFixed);
         }
     }
 }

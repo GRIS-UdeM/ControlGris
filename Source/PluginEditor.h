@@ -55,7 +55,7 @@ public:
     void valueChanged (Value&) override;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(int sourceId) override;
+    void fieldSourcePositionChanged(int sourceId, int whichField) override;
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() override;

@@ -73,6 +73,7 @@ public:
     void setFixedPosition(float x, float y);
     void setFixedElevation(float z);
     void fixSourcePosition(bool shouldBeFixed);
+    void fixSourcePositionElevation(bool shouldBeFixed);
     float getDeltaX();
     float getDeltaY();
     float getDeltaAzimuth();
