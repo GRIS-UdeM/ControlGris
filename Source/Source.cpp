@@ -244,7 +244,7 @@ void Source::setFixedElevation(float z) {
 void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
     if (m_radiusIsElevation) {  // azimuth - elevation
         setAzimuth(fixedAzimuth + deltaAzimuth);
-        setElevation(fixedElevation + deltaElevation);
+        setElevation(fixedElevation + deltaElevation * 90.0f);
     } else {                    // azimuth - distance
         setAzimuth(fixedAzimuth + deltaAzimuth);
         setDistance(fixedDistance + deltaDistance);
