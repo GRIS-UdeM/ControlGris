@@ -23,6 +23,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscFormatLabel);
 
+    numOfSourcesEditor.setExplicitFocusOrder(1);
     oscFormatCombo.addItem("VBAP - ServerGris", 1);
     oscFormatCombo.addItem("LBAP - ServerGris", 2);
     oscFormatCombo.onChange = [this] {
@@ -35,6 +36,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     addAndMakeVisible(&oscPortLabel);
 
     String defaultPort("18032");
+    oscPortEditor.setExplicitFocusOrder(4);
     oscPortEditor.setText(defaultPort);
     oscPortEditor.setInputRestrictions(5, "0123456789");
     oscPortEditor.onReturnKey = [this] {
@@ -52,6 +54,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     numOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
     addAndMakeVisible(&numOfSourcesLabel);
 
+    numOfSourcesEditor.setExplicitFocusOrder(2);
     numOfSourcesEditor.setText("2");
     numOfSourcesEditor.setInputRestrictions(1, "12345678");
     numOfSourcesEditor.onReturnKey = [this] {
@@ -69,6 +72,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     firstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
     addAndMakeVisible(&firstSourceIdLabel);
 
+    firstSourceIdEditor.setExplicitFocusOrder(3);
     firstSourceIdEditor.setText("1");
     firstSourceIdEditor.setInputRestrictions(3, "0123456789");
     firstSourceIdEditor.onReturnKey = [this] {
@@ -83,6 +87,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
         };
     addAndMakeVisible(&firstSourceIdEditor);
 
+    activateButton.setExplicitFocusOrder(5);
     activateButton.setButtonText("Activate OSC");
     activateButton.onClick = [this] {
             listeners.call([&] (Listener& l) { l.settingsBoxOscActivated(activateButton.getToggleState()); });
