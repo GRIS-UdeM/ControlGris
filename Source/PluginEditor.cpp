@@ -304,6 +304,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
 
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
+    for (int i = 0; i < numOfSources; i++) {
+        processor.getSources()[i].fixSourcePosition(true);
+    }
+
     if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
         processor.addNewFixedPosition();
     }
@@ -318,6 +322,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
     } else {
         processor.getSources()[sourceNum].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
     }
+
+    processor.getSources()[sourceNum].fixSourcePosition(true);
 
     if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
         processor.addNewFixedPosition();
