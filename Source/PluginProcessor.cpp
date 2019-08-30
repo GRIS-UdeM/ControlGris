@@ -237,30 +237,32 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
 }
 
 void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
-    // Fixed elevation.
-    if (value == SOURCE_LINK_ALT_FIXED_ELEVATION) {
-        for (int i = 1; i < m_numOfSources; i++) {
-            sources[i].setElevation(sources[0].getElevation());
+    if (getOscFormat() == SPAT_MODE_LBAP) {
+        // Fixed elevation.
+        if (value == SOURCE_LINK_ALT_FIXED_ELEVATION) {
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setElevation(sources[0].getElevation());
+            }
         }
-    }
 
-    // Linear min.
-    if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
+        // Linear min.
+        if (value == SOURCE_LINK_ALT_LINEAR_MIN) {
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setElevation(60.0 / m_numOfSources * i);
+            }
+        }
+
+        // Linear max.
+        if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i));
+            }
+        }
+
+        bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
         for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setElevation(60.0 / m_numOfSources * i);
+            sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
-    }
-
-    // Linear max.
-    if (value == SOURCE_LINK_ALT_LINEAR_MAX) {
-        for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i));
-        }
-    }
-
-    bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
-    for (int i = 0; i < m_numOfSources; i++) {
-        sources[i].fixSourcePosition(shouldBeFixed);
     }
 }
 
