@@ -429,7 +429,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
     automationManager.fixSourcePosition();
     automationManagerAlt.fixSourcePosition();
 
-    bool shouldBeFixed = link != SOURCE_LINK_INDEPENDANT || linkAlt != SOURCE_LINK_ALT_INDEPENDANT;
+    bool shouldBeFixed = link != SOURCE_LINK_INDEPENDENT || linkAlt != SOURCE_LINK_ALT_INDEPENDENT;
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(shouldBeFixed);
     }
@@ -562,7 +562,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
-    // Nothing to do for independant mode.
+    // Nothing to do for independent mode.
 
     // All circular modes.
     if (sourceLink >= SOURCE_LINK_CIRCULAR && sourceLink < SOURCE_LINK_DELTA_LOCK) {
@@ -591,7 +591,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
 
     // Fix source positions.
     automationManager.fixSourcePosition();
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDENT;
     if (sourceLink >= 2 && sourceLink < 6) {
         for (int i = 0; i < numOfSources; i++) {
             processor.getSources()[i].fixSourcePosition(shouldBeFixed);
@@ -633,7 +633,7 @@ void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
 
     // Fix source positions.
     automationManagerAlt.fixSourcePosition(); // not sure...
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_ALT_INDEPENDANT;
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_ALT_INDEPENDENT;
     if (sourceLink >= 2 && sourceLink < 5) {
         for (int i = 0; i < numOfSources; i++) {
             processor.getSources()[i].fixSourcePositionElevation(shouldBeFixed);

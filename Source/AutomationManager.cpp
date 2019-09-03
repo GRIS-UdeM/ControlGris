@@ -21,7 +21,7 @@
 #include "ControlGrisConstants.h"
 
 AutomationManager::AutomationManager() {
-    sourceLink = SOURCE_LINK_INDEPENDANT;
+    sourceLink = SOURCE_LINK_INDEPENDENT;
     drawingType = TRAJECTORY_TYPE_DRAWING;
     activateState = false;
     source.setX(0.5f);
@@ -180,7 +180,7 @@ Point<float> AutomationManager::getSourcePosition() {
 }
 
 void AutomationManager::fixSourcePosition() {
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDANT;
+    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDENT;
     source.fixSourcePosition(shouldBeFixed);
 }
 

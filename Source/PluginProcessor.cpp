@@ -257,7 +257,7 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
         }
     }
 
-    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDENT;
     for (int i = 0; i < m_numOfSources; i++) {
         sources[i].fixSourcePosition(shouldBeFixed);
     }
@@ -286,7 +286,7 @@ void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
             }
         }
 
-        bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
+        bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDENT;
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
@@ -634,7 +634,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
     float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
 
     switch (automationManager.getSourceLink()) {
-        case SOURCE_LINK_INDEPENDANT:
+        case SOURCE_LINK_INDEPENDENT:
             sources[0].setPos(automationManager.getSourcePosition());
             break;
         case SOURCE_LINK_CIRCULAR:
@@ -660,7 +660,7 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
     float deltaY = 0.0f;
 
     switch (automationManagerAlt.getSourceLink()) {
-        case SOURCE_LINK_ALT_INDEPENDANT:
+        case SOURCE_LINK_ALT_INDEPENDENT:
             sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
             break;
         case SOURCE_LINK_ALT_FIXED_ELEVATION:
@@ -971,7 +971,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
 
                     if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
                         // Ugly hack to make the DELTA_LOCK link working.
-                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDANT);
+                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDENT);
                         automationManager.fixSourcePosition();
                         automationManager.setSourceLink(SOURCE_LINK_DELTA_LOCK);
                         automationManager.fixSourcePosition();
@@ -982,7 +982,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                         z = currentFixPosition->getDoubleAttribute("T1_Z");
                         automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
                         if (automationManagerAlt.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
-                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDANT);
+                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDENT);
                             automationManagerAlt.fixSourcePosition();
                             automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_DELTA_LOCK);
                             automationManagerAlt.fixSourcePosition();

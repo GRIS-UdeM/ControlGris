@@ -304,7 +304,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDANT && i > 0) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && i > 0) {
             break;
         }
 
@@ -484,7 +484,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDANT && i > 0) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDENT && i > 0) {
             break;
         }
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
