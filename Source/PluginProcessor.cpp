@@ -208,6 +208,17 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     m_somethingChanged = true;
 }
 
+//== Tools for sorting sources based on azimuth values. ==
+struct Sorter {
+    int index;
+    float value;
+};
+
+bool compareLessThan(const Sorter &a, const Sorter &b) {
+    return a.value <= b.value;
+}
+//========================================================
+
 void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
     // Fixed radius.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
@@ -224,9 +235,25 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
 
     // Fixed angle.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        float angleOffset = sources[0].getDeltaAzimuth();
+        Sorter tosort[m_numOfSources];
         for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setAzimuth(sources[i].getAzimuth() + angleOffset);
+            tosort[i].index = i;
+            tosort[i].value = sources[i].getAzimuth();
+        }
+        std::sort(tosort, tosort + m_numOfSources, compareLessThan);
+
+        int posOfFirstSource;
+        for (int i = 0; i < m_numOfSources; i++) {
+            if (tosort[i].index == 0) {
+                posOfFirstSource = i;
+            }
+        }
+
+        float currentPos = sources[0].getAzimuth();
+        for (int i = 0; i < m_numOfSources; i++) {
+            float newPos = 360.0 / m_numOfSources * i + currentPos;
+            int ioff = (i + posOfFirstSource) % m_numOfSources;
+            sources[tosort[ioff].index].setAzimuth(newPos);
         }
     }
 
