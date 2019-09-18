@@ -133,6 +133,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     //--------------------------------
     parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
     parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
+    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 
     // Set global settings values.
     //----------------------------
@@ -146,8 +147,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     // Set state for trajectory box persistent values.
     //------------------------------------------------
-    trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
+    trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
+    trajectoryBox.setTrajectoryTypeAlt(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
+    trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
     // Update the interface.
     //----------------------
@@ -339,6 +342,10 @@ void ControlGrisAudioProcessorEditor::parametersBoxLinkChanged(int parameterId, 
     valueTreeState.state.setProperty(parameterNames[parameterId], value, nullptr);
 }
 
+void ControlGrisAudioProcessorEditor::parametersBoxSpanLinkChanged(bool value) {
+    valueTreeState.state.setProperty("spanLinkState", value, nullptr);
+}
+
 void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value) {
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
@@ -387,18 +394,29 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
+    valueTreeState.state.setProperty("trajectoryType", value, nullptr);
     automationManager.setDrawingType(value);
     mainField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(int value) {
+    valueTreeState.state.setProperty("trajectoryTypeAlt", value, nullptr);
     automationManagerAlt.setDrawingTypeAlt(value);
     elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDurationChanged(double duration, int mode) {
-    processor.parameters.state.setProperty("cycleDuration", duration, nullptr);
-    processor.parameters.state.setProperty("durationUnit", mode, nullptr);
+void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode) {
+    valueTreeState.state.setProperty("cycleDuration", duration, nullptr);
+    double dur = duration;
+    if (mode == 2) {
+        dur = duration * 60.0 / processor.getBPM();
+    }
+    automationManager.setPlaybackDuration(dur);
+    automationManagerAlt.setPlaybackDuration(dur);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode) {
+    valueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
         dur = duration * 60.0 / processor.getBPM();

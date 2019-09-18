@@ -107,7 +107,11 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("firstSourceId", 1, nullptr);
     parameters.state.setProperty("azimuthSpanLink", false, nullptr);
     parameters.state.setProperty("elevationSpanLink", false, nullptr);
+    parameters.state.setProperty("spanLinkState", false, nullptr);
+
     // Trajectory box persitent settings.
+    parameters.state.setProperty("trajectoryType", 1, nullptr);
+    parameters.state.setProperty("trajectoryTypeAlt", 1, nullptr);
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
 
@@ -1019,6 +1023,13 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+        String id(i);
+        parameters.state.setProperty(String("p_azimuth_") + id, sources[i].getNormalizedAzimuth(), nullptr);
+        parameters.state.setProperty(String("p_elevation_") + id, sources[i].getNormalizedElevation(), nullptr);
+        parameters.state.setProperty(String("p_distance_") + id, sources[i].getDistance(), nullptr);
+    }
+
     auto state = parameters.copyState();
 
     std::unique_ptr<XmlElement> xmlState (state.createXml());
