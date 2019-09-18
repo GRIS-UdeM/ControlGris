@@ -107,7 +107,11 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("firstSourceId", 1, nullptr);
     parameters.state.setProperty("azimuthSpanLink", false, nullptr);
     parameters.state.setProperty("elevationSpanLink", false, nullptr);
+    parameters.state.setProperty("spanLinkState", false, nullptr);
+
     // Trajectory box persitent settings.
+    parameters.state.setProperty("trajectoryType", 1, nullptr);
+    parameters.state.setProperty("trajectoryTypeAlt", 1, nullptr);
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
 
@@ -208,6 +212,17 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     m_somethingChanged = true;
 }
 
+//== Tools for sorting sources based on azimuth values. ==
+struct Sorter {
+    int index;
+    float value;
+};
+
+bool compareLessThan(const Sorter &a, const Sorter &b) {
+    return a.value <= b.value;
+}
+//========================================================
+
 void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
     // Fixed radius.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
@@ -224,13 +239,29 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
 
     // Fixed angle.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
-        float angleOffset = sources[0].getDeltaAzimuth();
+        Sorter tosort[m_numOfSources];
         for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setAzimuth(sources[i].getAzimuth() + angleOffset);
+            tosort[i].index = i;
+            tosort[i].value = sources[i].getAzimuth();
+        }
+        std::sort(tosort, tosort + m_numOfSources, compareLessThan);
+
+        int posOfFirstSource;
+        for (int i = 0; i < m_numOfSources; i++) {
+            if (tosort[i].index == 0) {
+                posOfFirstSource = i;
+            }
+        }
+
+        float currentPos = sources[0].getAzimuth();
+        for (int i = 0; i < m_numOfSources; i++) {
+            float newPos = 360.0 / m_numOfSources * i + currentPos;
+            int ioff = (i + posOfFirstSource) % m_numOfSources;
+            sources[tosort[ioff].index].setAzimuth(newPos);
         }
     }
 
-    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDANT;
+    bool shouldBeFixed = value != SOURCE_LINK_INDEPENDENT;
     for (int i = 0; i < m_numOfSources; i++) {
         sources[i].fixSourcePosition(shouldBeFixed);
     }
@@ -259,7 +290,7 @@ void ControlGrisAudioProcessor::onSourceLinkAltChanged(int value) {
             }
         }
 
-        bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDANT;
+        bool shouldBeFixed = value != SOURCE_LINK_ALT_INDEPENDENT;
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
@@ -607,7 +638,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
     float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
 
     switch (automationManager.getSourceLink()) {
-        case SOURCE_LINK_INDEPENDANT:
+        case SOURCE_LINK_INDEPENDENT:
             sources[0].setPos(automationManager.getSourcePosition());
             break;
         case SOURCE_LINK_CIRCULAR:
@@ -633,7 +664,7 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
     float deltaY = 0.0f;
 
     switch (automationManagerAlt.getSourceLink()) {
-        case SOURCE_LINK_ALT_INDEPENDANT:
+        case SOURCE_LINK_ALT_INDEPENDENT:
             sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
             break;
         case SOURCE_LINK_ALT_FIXED_ELEVATION:
@@ -944,7 +975,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
 
                     if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
                         // Ugly hack to make the DELTA_LOCK link working.
-                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDANT);
+                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDENT);
                         automationManager.fixSourcePosition();
                         automationManager.setSourceLink(SOURCE_LINK_DELTA_LOCK);
                         automationManager.fixSourcePosition();
@@ -955,7 +986,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
                         z = currentFixPosition->getDoubleAttribute("T1_Z");
                         automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
                         if (automationManagerAlt.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
-                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDANT);
+                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDENT);
                             automationManagerAlt.fixSourcePosition();
                             automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_DELTA_LOCK);
                             automationManagerAlt.fixSourcePosition();
@@ -992,6 +1023,13 @@ AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 {
+    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+        String id(i);
+        parameters.state.setProperty(String("p_azimuth_") + id, sources[i].getNormalizedAzimuth(), nullptr);
+        parameters.state.setProperty(String("p_elevation_") + id, sources[i].getNormalizedElevation(), nullptr);
+        parameters.state.setProperty(String("p_distance_") + id, sources[i].getDistance(), nullptr);
+    }
+
     auto state = parameters.copyState();
 
     std::unique_ptr<XmlElement> xmlState (state.createXml());

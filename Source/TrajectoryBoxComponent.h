@@ -33,6 +33,8 @@ public:
     void resized() override;
 
     void setSpatMode(SPAT_MODE_ENUM spatMode);
+    void setTrajectoryType(int type);
+    void setTrajectoryTypeAlt(int type);
     void setSourceLink(int value);
     void setSourceLinkAlt(int value);
     void setCycleDuration(double value);
@@ -46,7 +48,8 @@ public:
         virtual void trajectoryBoxSourceLinkAltChanged(int value) = 0;
         virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
         virtual void trajectoryBoxTrajectoryTypeAltChanged(int value) = 0;
-        virtual void trajectoryBoxDurationChanged(double duration, int mode) = 0;
+        virtual void trajectoryBoxCycleDurationChanged(double duration, int mode) = 0;
+        virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
         virtual void trajectoryBoxActivateAltChanged(bool value) = 0;
         virtual void trajectoryBoxEditFixedSourceButtonClicked() = 0;

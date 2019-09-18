@@ -32,7 +32,8 @@ SourceBoxComponent::SourceBoxComponent() {
     sourcePlacementCombo.setTextWhenNothingSelected("Choose a source placement...");
     sourcePlacementCombo.addItemList(SOURCE_PLACEMENT_SKETCH, 1);
     sourcePlacementCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.sourceBoxPlacementChanged(sourcePlacementCombo.getSelectedId()); });
+            listeners.call([&] (Listener& l) { l.sourceBoxPlacementChanged(sourcePlacementCombo.getSelectedId()); 
+                                                sourcePlacementCombo.setSelectedId(0, NotificationType::dontSendNotification); });
         };
 
     sourceNumberLabel.setText("Source Number:", NotificationType::dontSendNotification);

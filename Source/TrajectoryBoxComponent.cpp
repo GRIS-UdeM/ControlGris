@@ -64,7 +64,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             durationUnitCombo.grabKeyboardFocus();
         };
     durationEditor.onFocusLost = [this] {
-            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
+            listeners.call([&] (Listener& l) { l.trajectoryBoxCycleDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
     addAndMakeVisible(&durationUnitCombo);
@@ -72,7 +72,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     durationUnitCombo.addItem("Beat(s)", 2);
     durationUnitCombo.setSelectedId(1);
     durationUnitCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDurationUnitChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); }); };
 
     cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
     addAndMakeVisible(&cycleSpeedLabel);
@@ -118,6 +118,14 @@ void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     resized();
 }
 
+void TrajectoryBoxComponent::setTrajectoryType(int type) {
+    trajectoryTypeCombo.setSelectedId(type);
+}
+
+void TrajectoryBoxComponent::setTrajectoryTypeAlt(int type) {
+    trajectoryTypeAltCombo.setSelectedId(type);
+}
+
 void TrajectoryBoxComponent::setSourceLink(int value) {
     sourceLinkCombo.setSelectedId(value);
 }
@@ -128,12 +136,12 @@ void TrajectoryBoxComponent::setSourceLinkAlt(int value) {
 
 void TrajectoryBoxComponent::setCycleDuration(double value) {
     durationEditor.setText(String(value));
-    listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
+    listeners.call([&] (Listener& l) { l.trajectoryBoxCycleDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
 }
 
 void TrajectoryBoxComponent::setDurationUnit(int value) {
     durationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
-    listeners.call([&] (Listener& l) { l.trajectoryBoxDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
+    listeners.call([&] (Listener& l) { l.trajectoryBoxDurationUnitChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });
 }
 
 void TrajectoryBoxComponent::paint(Graphics& g) {

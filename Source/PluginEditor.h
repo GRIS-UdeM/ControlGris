@@ -60,6 +60,7 @@ public:
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() override;
     void parametersBoxLinkChanged(int parameterId, bool value) override;
+    void parametersBoxSpanLinkChanged(bool value) override;
     void parametersBoxParameterChanged(int parameterId, double value) override;
 
     // SettingsBoxComponent::Listeners
@@ -79,7 +80,8 @@ public:
     void trajectoryBoxSourceLinkAltChanged(int value) override;
     void trajectoryBoxTrajectoryTypeChanged(int value) override;
     void trajectoryBoxTrajectoryTypeAltChanged(int value) override;
-    void trajectoryBoxDurationChanged(double duration, int mode) override;
+    void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
+    void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
     void trajectoryBoxActivateChanged(bool value) override;
     void trajectoryBoxActivateAltChanged(bool value) override;
     void trajectoryBoxEditFixedSourceButtonClicked() override;

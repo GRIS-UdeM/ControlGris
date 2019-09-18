@@ -49,24 +49,24 @@ const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Rig
 
 // Trajectories -> Source Link popup choices.
 //-------------------------------------------
-enum SOURCE_LINK_ENUM { SOURCE_LINK_INDEPENDANT = 1,
+enum SOURCE_LINK_ENUM { SOURCE_LINK_INDEPENDENT = 1,
                         SOURCE_LINK_CIRCULAR,
                         SOURCE_LINK_CIRCULAR_FIXED_RADIUS,
                         SOURCE_LINK_CIRCULAR_FIXED_ANGLE,
                         SOURCE_LINK_CIRCULAR_FULLY_FIXED,
                         SOURCE_LINK_DELTA_LOCK
                       };
-const StringArray SOURCE_LINK_TYPES       {String("Independant"), String("Circular"),
+const StringArray SOURCE_LINK_TYPES       {String("Independent"), String("Circular"),
                                            String("Circular Fixed Radius"), String("Circular Fixed Angle"),
                                            String("Circular Fully Fixed"), String("Delta Lock")};
 
-enum SOURCE_LINK_ALT_ENUM { SOURCE_LINK_ALT_INDEPENDANT = 1,
+enum SOURCE_LINK_ALT_ENUM { SOURCE_LINK_ALT_INDEPENDENT = 1,
                             SOURCE_LINK_ALT_FIXED_ELEVATION,
                             SOURCE_LINK_ALT_LINEAR_MIN,
                             SOURCE_LINK_ALT_LINEAR_MAX,
                             SOURCE_LINK_ALT_DELTA_LOCK
                       };
-const StringArray SOURCE_LINK_ALT_TYPES   {String("Independant"), String("Fixed Elevation"),
+const StringArray SOURCE_LINK_ALT_TYPES   {String("Independent"), String("Fixed Elevation"),
                                            String("Linear Min"), String("Linear Max"), String("Delta Lock")};
 
 // Trajectories -> Trajectory Type popup choices.

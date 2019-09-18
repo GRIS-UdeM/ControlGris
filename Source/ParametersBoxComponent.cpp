@@ -117,6 +117,15 @@ void ParametersBoxComponent::setLinkState(int parameterId, bool state) {
     }
 }
 
+bool ParametersBoxComponent::getSpanLinkState() {
+    return m_spanLinked;
+}
+
+void ParametersBoxComponent::setSpanLinkState(bool state) {
+    m_spanLinked = state;
+    repaint();
+}
+
 void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     float x = getWidth() - 35;
     float y = 15;
@@ -125,6 +134,7 @@ void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     Rectangle<float> area = Rectangle<float>(245.f, 25.f, 45.f, 25.f);
     if (area.contains(event.getMouseDownPosition().toFloat())) {
         m_spanLinked = ! m_spanLinked;
+        listeners.call([&] (Listener& l) { l.parametersBoxSpanLinkChanged(m_spanLinked); });
         repaint();
     }
 
