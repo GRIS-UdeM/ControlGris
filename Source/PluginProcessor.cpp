@@ -94,6 +94,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = m_lastTimerTime = 10000000.0;
 
+    m_bpm = 120;
+
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
 
@@ -463,29 +465,33 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     String address = message.getAddressPattern().toString().toStdString();
     if (address == "/controlgris/traj/1/x" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         automationManager.setSourcePositionX(message[0].getFloat32());
+        automationManager.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/y" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         automationManager.setSourcePositionY(message[0].getFloat32());
+        automationManager.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/z" && automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
         automationManagerAlt.setSourcePositionY(message[0].getFloat32());
+        automationManagerAlt.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/xy" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         automationManager.setSourcePositionX(message[0].getFloat32());
         automationManager.setSourcePositionY(message[1].getFloat32());
+        automationManager.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/xyz") {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
             automationManager.setSourcePositionX(message[0].getFloat32());
             automationManager.setSourcePositionY(message[1].getFloat32());
+            automationManager.sendTrajectoryPositionChangedEvent();
         }
         if (automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
             automationManagerAlt.setSourcePositionY(message[2].getFloat32());
+            automationManagerAlt.sendTrajectoryPositionChangedEvent();
         }
     }
 }
 
 void ControlGrisAudioProcessor::timerCallback() {
-    bool needRepaint = false;
     if (m_somethingChanged) {
         m_somethingChanged = false;
-        needRepaint = true;
     }
 
     // MainField automation.
@@ -494,11 +500,9 @@ void ControlGrisAudioProcessor::timerCallback() {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
-            needRepaint = true;
         }
     } else if (m_isPlaying && automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-        needRepaint = true;
     }
 
     // ElevationField automation.
@@ -507,11 +511,9 @@ void ControlGrisAudioProcessor::timerCallback() {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
-            needRepaint = true;
         }
-    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
+    } else if (m_isPlaying && automationManagerAlt.hasValidPlaybackPosition()) {
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
-        needRepaint = true;
     }
 
     m_lastTimerTime = getCurrentTime();
@@ -618,6 +620,7 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
+    std::cout << "trajectoryPositionChanged\n";
     if (manager == &automationManager) {
         parameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
         parameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(position.x);

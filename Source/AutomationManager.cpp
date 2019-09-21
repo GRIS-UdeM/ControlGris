@@ -36,6 +36,9 @@ AutomationManager::~AutomationManager() {}
 
 void AutomationManager::setActivateState(bool state) {
     activateState = state;
+    if (! state) {
+        playbackPosition = Point<float> (-1.0f, -1.0f);
+    }
 }
 
 bool AutomationManager::getActivateState() {
@@ -139,6 +142,7 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
 
     if (activateState) {
         setSourcePosition(Point<float> (currentTrajectoryPoint.x / FIELD_WIDTH, 1.0 - currentTrajectoryPoint.y / FIELD_WIDTH));
+        sendTrajectoryPositionChangedEvent();
     }
 }
 
@@ -152,21 +156,18 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() {
 
 void AutomationManager::setSourcePosition(Point<float> pos) {
     source.setPos(pos);
-    if (activateState) {
-        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, pos); });
-    }
 }
 
 void AutomationManager::setSourcePositionX(float x) {
     source.setX(x);
-    if (activateState) {
-        listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
-    }
 }
 
 void AutomationManager::setSourcePositionY(float y) {
     source.setY(y);
-    if (activateState) {
+}
+
+void AutomationManager::sendTrajectoryPositionChangedEvent() {
+    if (activateState || drawingType == TRAJECTORY_TYPE_REALTIME || drawingType == TRAJECTORY_TYPE_ALT_REALTIME) {
         listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
     }
 }

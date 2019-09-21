@@ -381,6 +381,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
             automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
         } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
             automationManager.setSourcePosition(automationManager.getSourcePosition());
+            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
@@ -526,6 +527,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
         y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
         automationManager.resetRecordingTrajectory(Point<float> (currentRecordingPositionX, y));
         automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), width));
+        automationManager.sendTrajectoryPositionChangedEvent();
         repaint();
     }
 }
@@ -545,6 +547,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
             automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
         } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
             automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
+            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;

@@ -62,6 +62,8 @@ public:
     Point<float> getSourcePosition();
     void fixSourcePosition();
 
+    void sendTrajectoryPositionChangedEvent();
+
     struct Listener
     {
         virtual ~Listener() {}
