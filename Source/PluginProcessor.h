@@ -156,6 +156,7 @@ private:
 
     bool m_lock;
     bool m_isPlaying;
+    bool m_canStopActivate;
     double m_bpm;
 
     Source sources[MAX_NUMBER_OF_SOURCES];

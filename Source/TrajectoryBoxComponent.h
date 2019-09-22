@@ -40,6 +40,11 @@ public:
     void setCycleDuration(double value);
     void setDurationUnit(int value);
 
+    bool getActivateState();
+    bool getActivateAltState();
+    void setActivateState(bool state);
+    void setActivateAltState(bool state);
+
     struct Listener
     {
         virtual ~Listener() {}

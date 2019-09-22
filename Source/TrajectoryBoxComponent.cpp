@@ -134,6 +134,22 @@ void TrajectoryBoxComponent::setSourceLinkAlt(int value) {
     sourceLinkAltCombo.setSelectedId(value);
 }
 
+bool TrajectoryBoxComponent::getActivateState() {
+    return activateButton.getToggleState();
+}
+
+void TrajectoryBoxComponent::setActivateState(bool state) {
+    activateButton.setToggleState(state, NotificationType::dontSendNotification);
+}
+
+bool TrajectoryBoxComponent::getActivateAltState() {
+    return activateAltButton.getToggleState();
+}
+
+void TrajectoryBoxComponent::setActivateAltState(bool state) {
+    activateAltButton.setToggleState(state, NotificationType::dontSendNotification);
+}
+
 void TrajectoryBoxComponent::setCycleDuration(double value) {
     durationEditor.setText(String(value));
     listeners.call([&] (Listener& l) { l.trajectoryBoxCycleDurationChanged(durationEditor.getText().getDoubleValue(), durationUnitCombo.getSelectedId()); });

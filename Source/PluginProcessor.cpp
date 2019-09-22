@@ -96,6 +96,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     m_bpm = 120;
 
+    m_canStopActivate = false;
+
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
 
@@ -518,6 +520,16 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     m_lastTimerTime = getCurrentTime();
 
+    if (m_canStopActivate && automationManager.getActivateState() && !m_isPlaying) {
+        automationManager.setActivateState(false);
+    }
+    if (m_canStopActivate && automationManagerAlt.getActivateState() && !m_isPlaying) {
+        automationManagerAlt.setActivateState(false);
+    }
+    if (m_canStopActivate && !m_isPlaying) {
+        m_canStopActivate = false;
+    }
+
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
     if (editor != nullptr) {
         editor->refresh();
@@ -620,7 +632,6 @@ void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parame
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
-    std::cout << "trajectoryPositionChanged\n";
     if (manager == &automationManager) {
         parameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
         parameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(position.x);
@@ -882,6 +893,7 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
 {
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
+    m_canStopActivate = true;
 
     // FIXME: We can't assume m_currentTime will hold the correct time on every OSes. Just strip this out for now.
     /*

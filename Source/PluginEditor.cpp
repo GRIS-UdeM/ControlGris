@@ -469,6 +469,13 @@ void ControlGrisAudioProcessorEditor::refresh() {
         if (processor.getOscFormat() == SPAT_MODE_LBAP)
             elevationField.repaint();
     }
+
+    if (trajectoryBox.getActivateState() != automationManager.getActivateState()) {
+        trajectoryBox.setActivateState(automationManager.getActivateState());
+    }
+    if (trajectoryBox.getActivateAltState() != automationManagerAlt.getActivateState()) {
+        trajectoryBox.setActivateAltState(automationManagerAlt.getActivateState());
+    }
 }
 
 // FieldComponent::Listener callback.
