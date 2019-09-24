@@ -32,6 +32,7 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    void setNumberOfSources(int numOfSources);
     void setSpatMode(SPAT_MODE_ENUM spatMode);
     void setTrajectoryType(int type);
     void setTrajectoryTypeAlt(int type);

@@ -203,6 +203,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
     processor.setNumberOfSources(numOfSources);
     processor.setSelectedSourceId(m_selectedSource);
     settingsBox.setNumberOfSources(numOfSources);
+    trajectoryBox.setNumberOfSources(numOfSources);
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSources(processor.getSources(), numOfSources);
     elevationField.setSources(processor.getSources(), numOfSources);

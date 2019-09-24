@@ -118,6 +118,18 @@ void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     resized();
 }
 
+void TrajectoryBoxComponent::setNumberOfSources(int numOfSources) {
+    if (numOfSources == 1) {
+        sourceLinkCombo.setSelectedId(1);
+        sourceLinkCombo.setEnabled(false);
+        sourceLinkAltCombo.setSelectedId(1);
+        sourceLinkAltCombo.setEnabled(false);
+    } else {
+        sourceLinkCombo.setEnabled(true);
+        sourceLinkAltCombo.setEnabled(true);
+    }
+}
+
 void TrajectoryBoxComponent::setTrajectoryType(int type) {
     trajectoryTypeCombo.setSelectedId(type);
 }

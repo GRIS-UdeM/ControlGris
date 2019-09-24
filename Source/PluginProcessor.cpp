@@ -659,9 +659,19 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
         case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
         case SOURCE_LINK_CIRCULAR_FIXED_ANGLE:
         case SOURCE_LINK_CIRCULAR_FULLY_FIXED:
-            deltaAzimuth = automationManager.getSource().getAzimuth();
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0f, 0.0f);
+            sources[0].setPos(automationManager.getSourcePosition());
+            if (getOscFormat() == SPAT_MODE_LBAP) {
+                float deltaAzimuth = sources[0].getDeltaAzimuth();
+                float deltaDistance = sources[0].getDeltaDistance();
+                for (int i = 1; i < m_numOfSources; i++) {
+                    sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0, deltaDistance);
+                }
+            } else {
+                float deltaAzimuth = sources[0].getDeltaAzimuth();
+                float deltaElevation = sources[0].getDeltaElevation();
+                for (int i = 1; i < m_numOfSources; i++) {
+                    sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
+                }
             }
             break;
         case SOURCE_LINK_DELTA_LOCK:

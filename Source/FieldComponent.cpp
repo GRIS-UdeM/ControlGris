@@ -240,8 +240,19 @@ void MainFieldComponent::paint(Graphics& g) {
 
     drawFieldBackground(g, true, m_spatMode);
 
+    bool shouldDrawTrajectoryHandle = false;
+    if (m_numberOfSources == 1) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
+            shouldDrawTrajectoryHandle = true;
+        }
+    } else {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) { // Should handle DELTA_LOCK.
+            shouldDrawTrajectoryHandle = true;
+        }
+    }
+
     // Draw recording trajectory handle.
-    if (!m_isPlaying || automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if (shouldDrawTrajectoryHandle) {
         Point<float> rpos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
@@ -301,10 +312,12 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
 
     Point<int> mouseLocation(event.x, height - event.y);
 
+    m_selectedSourceId = -2; // No selection (should be something more meaningful than -2!
+
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && i > 0) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && i > 0) { // TO FIX: User should be able to move anyone of the sources.
             break;
         }
 
@@ -328,35 +341,34 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         return;
     }
 
-    // Realtime movements.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
-        m_oldSelectedSourceId = m_selectedSourceId;
-        m_selectedSourceId = -1;
-        Source *selectedSource = &automationManager.getSource();
-        if (m_spatMode == SPAT_MODE_VBAP) {
-        Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
-            selectedSource->setAzimuth(pos.x);
-            selectedSource->setElevation(pos.y);
-        } else {
-        Point<float> pos = xyToPos(mouseLocation.toFloat(), width);
-            selectedSource->setX(pos.x);
-            selectedSource->setY(pos.y);
-        }
-        repaint();
-        return;
-    }
     // Check if we record a trajectory.
-    else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
-        m_oldSelectedSourceId = m_selectedSourceId;
-        m_selectedSourceId = -1;
-        automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-        repaint();
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) { // Could also be used in DELTA_LOCK mode && REALTIME.
+        Point<float> pos;
+        if (m_spatMode == SPAT_MODE_VBAP) {
+            pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
+        } else {
+            pos = posToXy(automationManager.getSource().getPos(), width);
+        }
+        Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        if (area.contains(event.getMouseDownPosition().toFloat())) {
+            m_oldSelectedSourceId = m_selectedSourceId;
+            m_selectedSourceId = -1;
+            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+                automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            }
+            repaint();
+        }
     }
 }
 
 void MainFieldComponent::mouseDrag(const MouseEvent &event) {    
     int width = getWidth();
     int height = getHeight();
+
+    // No selection.
+    if (m_selectedSourceId == -2) {
+        return;
+    }
 
     Point<int> mouseLocation(event.x, height - event.y);
 
@@ -376,16 +388,26 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         selectedSource->setX(pos.x);
         selectedSource->setY(pos.y);
     }
+
     if (m_selectedSourceId == -1) {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
             automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
-            automationManager.setSourcePosition(automationManager.getSourcePosition());
-            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
+
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        if (m_spatMode == SPAT_MODE_VBAP) {
+            automationManager.getSource().setAzimuth(m_sources[0].getAzimuth());
+            automationManager.getSource().setElevation(m_sources[0].getElevation());
+        } else {
+            automationManager.getSource().setX(m_sources[0].getX());
+            automationManager.getSource().setY(m_sources[0].getY());
+        }
+        automationManager.sendTrajectoryPositionChangedEvent();
+    }
+
     repaint();
 }
 
@@ -423,8 +445,19 @@ void ElevationFieldComponent::paint(Graphics& g) {
 
     drawFieldBackground(g, false);
 
+    bool shouldDrawTrajectoryHandle = false;
+    if (m_numberOfSources == 1) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
+            shouldDrawTrajectoryHandle = true;
+        }
+    } else {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) { // Should handle DELTA_LOCK.
+            shouldDrawTrajectoryHandle = true;
+        }
+    }
+
     // Draw recording trajectory handle.
-    if (!m_isPlaying || automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (shouldDrawTrajectoryHandle) {
         pos = posToXy(automationManager.getSourcePosition(), width);
         lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
         Rectangle<float> rarea (10, pos.y, kSourceDiameter, kSourceDiameter);
@@ -482,10 +515,12 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     int width = getWidth();
     int height = getHeight();
 
+    m_selectedSourceId = -2; // No selection (should be something more meaningful than -2!
+
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDENT && i > 0) {
+        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDENT && i > 0) { // TO FIX: User should be able to move anyone of the sources.
             break;
         }
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
@@ -505,61 +540,60 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
         return;
     }
 
-    // Realtime movements.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
-        m_oldSelectedSourceId = m_selectedSourceId;
-        m_selectedSourceId = -1;
-        Source *selectedSource = &automationManager.getSource();
-        float y = event.getPosition().toFloat().y;
-        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-        Point<float> rpos = xyToPos(Point<float> (10.0 + kSourceRadius, height - y), height);
-        selectedSource->setX(rpos.x);
-        selectedSource->setY(rpos.y);
-        repaint();
-        return;
-    }
-    // Check if we click on a recording trajectory.
-    else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
-        m_oldSelectedSourceId = m_selectedSourceId;
-        m_selectedSourceId = -1;
-        currentRecordingPositionX = 10.0 + kSourceRadius;
-        float y = event.getPosition().toFloat().y;
-        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-        automationManager.resetRecordingTrajectory(Point<float> (currentRecordingPositionX, y));
-        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), width));
-        automationManager.sendTrajectoryPositionChangedEvent();
-        repaint();
+    // Check if we record a trajectory.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) { // Could also be used in DELTA_LOCK && REALTIME.
+        float x = 10.0f;
+        float y = (90.0 - automationManager.getSource().getElevation()) / 90.0 * (height - 35) + 5;
+        Point<float> pos = Point<float> {x, y};
+        Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        if (area.contains(event.getMouseDownPosition().toFloat())) {
+            m_oldSelectedSourceId = m_selectedSourceId;
+            m_selectedSourceId = -1;
+            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+                automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            }
+            repaint();
+        }
     }
 }
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
     float height = getHeight();
 
+    // No selection.
+    if (m_selectedSourceId == -2) {
+        return;
+    }
+
     if (m_selectedSourceId == -1) {
-        currentRecordingPositionX += 1;
-        if (currentRecordingPositionX >= height) {
-            currentRecordingPositionX = height;
-            automationManager.compressTrajectoryXValues(height);
-        }
-        float y = event.getPosition().toFloat().y;
-        y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+            currentRecordingPositionX += 1;
+            if (currentRecordingPositionX >= height) {
+                currentRecordingPositionX = height;
+                automationManager.compressTrajectoryXValues(height);
+            }
+            float y = event.getPosition().toFloat().y;
+            y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
-            automationManager.setSourcePosition(xyToPos(Point<float> (10.0, height - event.getPosition().toFloat().y), height));
-            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
+
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        float y = m_sources[0].getElevation() / 90.0 * (height - 15) + 5;
+        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, y), height));
+        automationManager.sendTrajectoryPositionChangedEvent();
+    }
+
     repaint();
 }
 
 void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }
