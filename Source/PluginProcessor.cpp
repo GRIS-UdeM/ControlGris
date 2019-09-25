@@ -99,7 +99,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_canStopActivate = false;
 
     // Size of the plugin window.
-    parameters.state.addChild ({ "uiState", { { "width",  600 }, { "height", 680 } }, {} }, -1, nullptr);
+    parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 680 } }, {} }, -1, nullptr);
 
     // Global setting parameters.
     parameters.state.setProperty("oscFormat", 0, nullptr);

@@ -31,6 +31,7 @@
 #include "InterfaceBoxComponent.h"
 #include "Source.h"
 #include "AutomationManager.h"
+#include "PositionPresetComponent.h"
 #include "FixedPositionEditor.h"
 
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
@@ -117,6 +118,7 @@ private:
     BannerComponent elevationBanner;
     BannerComponent trajectoryBanner;
     BannerComponent settingsBanner;
+    BannerComponent positionPresetBanner;
 
     MainFieldComponent  mainField;
     ElevationFieldComponent  elevationField;
@@ -130,6 +132,8 @@ private:
     SettingsBoxComponent    settingsBox;
     SourceBoxComponent      sourceBox;
     InterfaceBoxComponent   interfaceBox;
+
+    PositionPresetComponent positionPresetBox;
 
     bool m_fixedSourcesWindowVisible;
     int m_selectedSource;

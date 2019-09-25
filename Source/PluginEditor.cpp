@@ -56,6 +56,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
     addAndMakeVisible(&settingsBanner);
 
+    positionPresetBanner.setLookAndFeel(&grisLookAndFeel);
+    positionPresetBanner.setText("Preset", NotificationType::dontSendNotification);
+    addAndMakeVisible(&positionPresetBanner);
+
     mainField.setLookAndFeel(&grisLookAndFeel);
     mainField.addListener(this);
     addAndMakeVisible(&mainField);
@@ -91,6 +95,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     configurationComponent.addTab ("Source", bg, &sourceBox, false);
     configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
     addAndMakeVisible(configurationComponent);
+
+    positionPresetBox.setLookAndFeel(&grisLookAndFeel);
+    addAndMakeVisible(&positionPresetBox);
 
     fixedPositionEditor.setLookAndFeel(&grisLookAndFeel);
     fixedPositionEditor.loadData(processor.getFixedPositionData());
@@ -544,7 +551,7 @@ void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
 }
 
 void ControlGrisAudioProcessorEditor::resized() {
-    double width = getWidth();
+    double width = getWidth() - 50; // Remove position preset space. 
     double height = getHeight();
 
     double fieldSize = width / 2;
@@ -575,6 +582,9 @@ void ControlGrisAudioProcessorEditor::resized() {
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();
+
+    positionPresetBanner.setBounds(600, 0, 50, 20);
+    positionPresetBox.setBounds(600, 20, 50, height - 20);
 
     if (m_fixedSourcesWindowVisible) {
         fixedPositionEditor.setVisible(true);

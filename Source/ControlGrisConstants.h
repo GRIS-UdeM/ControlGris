@@ -23,6 +23,7 @@
 //------------------
 const int FIELD_WIDTH = 300;
 const int MAX_NUMBER_OF_SOURCES = 8;
+const int NUMBER_OF_POSITION_PRESETS = 50;
 
 // Spatialisation modes.
 //----------------------
