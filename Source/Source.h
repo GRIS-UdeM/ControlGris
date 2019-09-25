@@ -29,7 +29,7 @@
 #define SOURCE_ID_AZIMUTH_SPAN 5
 #define SOURCE_ID_ELEVATION_SPAN 6
 
-static const float kSourceRadius = 10;
+static const float kSourceRadius = 12;
 static const float kSourceDiameter = kSourceRadius * 2;
 
 class Source

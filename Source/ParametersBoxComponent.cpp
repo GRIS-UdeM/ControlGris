@@ -177,9 +177,13 @@ void ParametersBoxComponent::paint(Graphics& g) {
     g.drawArrow(Line<float>(285, 34, 245, 34), 4, 10, 10);
     g.drawArrow(Line<float>(250, 34, 290, 34), 4, 10, 10);
 
-    g.setColour(selectedSource->getColour());
+//    g.setColour(selectedSource->getColour());
     Rectangle<float> area(x, y, 20, 20);
     area.expand(3, 3);
+    g.setColour(Colour(.2f, .2f, .2f, 1.f));
+    g.drawEllipse(area.translated(.5f, .5f), 1.f);
+    g.setGradientFill(ColourGradient(selectedSource->getColour().withSaturation(1.0f).darker(1.f), x + kSourceRadius, y + kSourceRadius,
+                                     selectedSource->getColour().withSaturation(1.0f), x, y, true));
     g.fillEllipse(area);
 
     g.setColour(Colours::white);

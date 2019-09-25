@@ -49,7 +49,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
         if (hue > 1) {
             hue -= 1;
         }
-        m_sources[i].setColour(Colour::fromHSV(hue, 1.0, 1, 0.5));
+        m_sources[i].setColour(Colour::fromHSV(hue, 1.0, 1.0, 0.85));
     }
     repaint();
 }
@@ -283,16 +283,19 @@ void MainFieldComponent::paint(Graphics& g) {
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
         int lineThickness = (i == m_selectedSourceId) ? 3 : 1;
-        float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
+        float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
-        g.setColour(m_sources[i].getColour().withSaturation(saturation));
         Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         area.expand(lineThickness, lineThickness);
+        g.setColour(Colour(.2f, .2f, .2f, 1.f));
+        g.drawEllipse(area.translated(.5f, .5f), 1.f);
+        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f), pos.x + kSourceRadius, pos.y + kSourceRadius,
+                                         m_sources[i].getColour().withSaturation(saturation), pos.x, pos.y, true));
         g.fillEllipse(area);
         g.setColour(Colours::white);
         g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
@@ -487,13 +490,16 @@ void ElevationFieldComponent::paint(Graphics& g) {
     // Draw sources.
     for (int i = 0; i < m_numberOfSources; i++) {
         lineThickness = (i == m_selectedSourceId) ? 3 : 1;
-        float saturation = (i == m_selectedSourceId) ? 1.0 : 0.5;
+        float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         pos = Point<float> {x, y};
-        g.setColour(m_sources[i].getColour().withSaturation(saturation));
         Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         area.expand(lineThickness, lineThickness);
+        g.setColour(Colour(.2f, .2f, .2f, 1.f));
+        g.drawEllipse(area.translated(.5f, .5f), 1.f);
+        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f), pos.x + kSourceRadius, pos.y + kSourceRadius,
+                                         m_sources[i].getColour().withSaturation(saturation), pos.x, pos.y, true));
         g.fillEllipse(area);
         g.drawLine(pos.x + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
                    pos.x + kSourceRadius, height - 5, lineThickness);
