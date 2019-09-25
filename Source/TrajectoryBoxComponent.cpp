@@ -94,6 +94,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxFixSourceButtonClicked(); });
             durationUnitCombo.grabKeyboardFocus(); };
 
+    activateButton.addShortcut(KeyPress('a', 0, 0));
     addAndMakeVisible(&activateButton);
     activateButton.setButtonText("Activate");
     activateButton.setClickingTogglesState(true);
@@ -101,6 +102,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
+    activateAltButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
     addChildComponent(&activateAltButton);
     activateAltButton.setButtonText("Activate");
     activateAltButton.setClickingTogglesState(true);
