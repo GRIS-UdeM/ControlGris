@@ -49,6 +49,10 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
+    parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
+                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 0.f, nullptr, nullptr,
+                                                     false, true, true));
+
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
         String id1(i + 1);
@@ -145,6 +149,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.addParameterListener(String("recordingTrajectory_z"), this);
     parameters.addParameterListener(String("sourceLink"), this);
     parameters.addParameterListener(String("sourceLinkAlt"), this);
+    parameters.addParameterListener(String("positionPreset"), this);
 
     automationManager.addListener(this);
     automationManagerAlt.addListener(this);
@@ -203,6 +208,15 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
             if (ed != nullptr) {
                 ed->updateSourceLinkAltCombo(val);
             }
+        }
+    }
+
+    if (parameterID.compare("positionPreset") == 0) {
+        int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1);
+        recallFixedPosition(newPreset);
+        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+        if (ed != nullptr) {
+            ed->updatePositionPreset(newPreset);
         }
     }
 
@@ -718,11 +732,20 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::addNewFixedPosition() {
+void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
+    recallFixedPosition(presetNumber);
+    float value = (presetNumber - 1) / (float)NUMBER_OF_POSITION_PRESETS;
+    parameters.getParameter("positionPreset")->beginChangeGesture();
+    parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
+    parameters.getParameter("positionPreset")->endChangeGesture();
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
     while (m_lock) {}
     // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
-    newData->setAttribute("Time", m_currentTime);
+    newData->setAttribute("ID", id);
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
@@ -730,15 +753,16 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
             newData->setAttribute(getFixedPosSourceName(i, 2), sources[i].getNormalizedElevation());
         }
     }
+    // Does trajectory really need to be in fixed position ?
     newData->setAttribute("T1_X", automationManager.getSourcePosition().x);
     newData->setAttribute("T1_Y", automationManager.getSourcePosition().y);
     newData->setAttribute("T1_Z", automationManagerAlt.getSourcePosition().y);
 
-    // Replace an element if the new one has the same time as one already saved.
+    // Replace an element if the new one has the same ID as one already saved.
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
-        if (approximatelyEqual(fpos->getDoubleAttribute("Time"), m_currentTime)) {
+        if (fpos->getIntAttribute("ID") == id) {
             found = true;
             break;
         }
@@ -751,23 +775,41 @@ void ControlGrisAudioProcessor::addNewFixedPosition() {
         fixPositionData.addChildElement(newData);
     }
 
-    XmlElementDataSorter sorter("Time", true);
+    XmlElementDataSorter sorter("ID", true);
     fixPositionData.sortChildElements(sorter);
-    currentFixPosition = fixPositionData.getFirstChildElement();
+
+    recallFixedPosition(id);
+    //currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
-void ControlGrisAudioProcessor::recallFixedPosition() {
-    if (currentFixPosition == nullptr)
+void ControlGrisAudioProcessor::recallFixedPosition(int id) {
+    // called twice on new preset selection...
+    bool found = false;
+    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    while (fpos) {
+        if (fpos->getIntAttribute("ID") == id) {
+            found = true;
+            break;
+        }
+        fpos = fpos->getNextElement();
+    }
+
+    if (! found) {
         return;
+    }
+
+    currentFixPosition = fpos;
 
     float x, y, z = 0.0;
     for (int i = 0; i < m_numOfSources; i++) {
         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
         y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
+        sources[i].setPos(Point<float> (x, y));
         sources[i].setFixedPosition(x, y);
         if (m_selectedOscFormat == SPAT_MODE_LBAP) {
             z = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 2));
             sources[i].setFixedElevation(z);
+            sources[i].setNormalizedElevation(z);
         }
     }
 
@@ -786,7 +828,7 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
 
     forEachXmlChildElement (*src, element) {
         XmlElement *newData = new XmlElement("ITEM");
-        newData->setAttribute("Time", element->getDoubleAttribute("Time"));
+        newData->setAttribute("ID", element->getIntAttribute("ID"));
         for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
             newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
             newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
@@ -805,18 +847,24 @@ XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
     return &fixPositionData;
 }
 
-void ControlGrisAudioProcessor::changeFixedPosition(int row, int column, double value) {
-    fixPositionData.getChildElement(row-1)->setAttribute(FIXED_POSITION_DATA_HEADERS[column-1], value);
-    XmlElementDataSorter sorter("Time", true);
-    fixPositionData.sortChildElements(sorter);
-}
-
-void ControlGrisAudioProcessor::deleteFixedPosition(int row, int column) {
+void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
     while (m_lock) {}
-    fixPositionData.removeChildElement(fixPositionData.getChildElement(row), true);
-    XmlElementDataSorter sorter("Time", true);
-    fixPositionData.sortChildElements(sorter);
-    currentFixPosition = fixPositionData.getFirstChildElement();
+    bool found = false;
+    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    while (fpos) {
+        if (fpos->getIntAttribute("ID") == id) {
+            found = true;
+            break;
+        }
+        fpos = fpos->getNextElement();
+    }
+
+    if (found) {
+        fixPositionData.removeChildElement(fpos, true);
+        XmlElementDataSorter sorter("ID", true);
+        fixPositionData.sortChildElements(sorter);
+        //currentFixPosition = fixPositionData.getFirstChildElement();
+    }
 }
 
 //==============================================================================
@@ -904,25 +952,6 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
     m_canStopActivate = true;
-
-    // FIXME: We can't assume m_currentTime will hold the correct time on every OSes. Just strip this out for now.
-    /*
-    // If Activate is on and there is not a fixed position for the current timestamp, add one.
-    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
-        bool found = false;
-        XmlElement *fpos = fixPositionData.getFirstChildElement();
-        while (fpos) {
-            if (approximatelyEqual(fpos->getDoubleAttribute("Time"), m_currentTime)) {
-                found = true;
-                break;
-            }
-            fpos = fpos->getNextElement();
-        }
-        if (! found) {
-            addNewFixedPosition();
-        }
-    }
-    */
 }
 
 void ControlGrisAudioProcessor::releaseResources()
@@ -970,66 +999,6 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             m_currentTime = playposinfo.timeInSeconds;
         }
     }
-
-    // Check if we need to update the fix positions.
-    int numFixPositions = fixPositionData.getNumChildElements();
-    if (numFixPositions > 0) {
-        if (! currentFixPosition) {
-            currentFixPosition = fixPositionData.getFirstChildElement();
-        }
-        if (m_currentTime < m_lastTime) {
-            currentFixPosition = fixPositionData.getFirstChildElement();
-            while (currentFixPosition && currentFixPosition->getDoubleAttribute("Time") < m_currentTime) {
-                currentFixPosition = currentFixPosition->getNextElement();
-            }
-            recallFixedPosition();
-
-            // Force source positions on time 0.
-            if (currentFixPosition != nullptr) {
-                if (m_currentTime == 0.0f && currentFixPosition->getDoubleAttribute("Time") == 0.0) {
-                    float x, y, z = 0.0;
-                    for (int i = 0; i < m_numOfSources; i++) {
-                        x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
-                        y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
-                        sources[i].setPos(Point<float> (x, y));
-                    }
-
-                    x = currentFixPosition->getDoubleAttribute("T1_X");
-                    y = currentFixPosition->getDoubleAttribute("T1_Y");
-                    automationManager.setSourcePosition(Point<float> (x, y));
-
-                    if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
-                        // Ugly hack to make the DELTA_LOCK link working.
-                        automationManager.setSourceLink(SOURCE_LINK_INDEPENDENT);
-                        automationManager.fixSourcePosition();
-                        automationManager.setSourceLink(SOURCE_LINK_DELTA_LOCK);
-                        automationManager.fixSourcePosition();
-                    } else {
-                        linkSourcePositions();
-                    }
-                    if (getOscFormat() == SPAT_MODE_LBAP) {
-                        z = currentFixPosition->getDoubleAttribute("T1_Z");
-                        automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
-                        if (automationManagerAlt.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
-                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_INDEPENDENT);
-                            automationManagerAlt.fixSourcePosition();
-                            automationManagerAlt.setSourceLink(SOURCE_LINK_ALT_DELTA_LOCK);
-                            automationManagerAlt.fixSourcePosition();
-                        } else {
-                            linkSourcePositionsAlt();
-                        }
-                    }
-                }
-            }
-        } else if (m_currentTime >= m_lastTime) {
-            XmlElement *nextElement = currentFixPosition->getNextElement();
-            if (nextElement && m_currentTime > nextElement->getDoubleAttribute("Time")) {
-                currentFixPosition = nextElement;
-                recallFixedPosition();
-            }
-        }
-    }
-
     m_lastTime = m_currentTime;
     m_lock = false;
 }

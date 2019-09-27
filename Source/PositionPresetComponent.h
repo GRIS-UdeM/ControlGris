@@ -29,6 +29,7 @@ public:
     PresetButton() { saved = loaded = false; };
     ~PresetButton() {};
 
+    void setSavedState(bool isSaved);
     void refresh();
 
     void clicked (const ModifierKeys &mods) override;
@@ -70,9 +71,15 @@ public:
     void savingPresetClicked(PresetButton *button) override;
     void deletingPresetClicked(PresetButton *button) override;
 
+    void setPreset(int value);
+    void presetSaved(int presetNumber, bool isSaved);
+
     struct Listener
     {
         virtual ~Listener() {}
+        virtual void positionPresetChanged(int presetNumber) = 0;
+        virtual void positionPresetSaved(int presetNumber) = 0;
+        virtual void positionPresetDeleted(int presetNumber) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

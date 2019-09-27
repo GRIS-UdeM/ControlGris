@@ -83,17 +83,6 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     cycleSpeedSlider.setColour(Slider:: textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&cycleSpeedSlider);
 
-    addAndMakeVisible(&editFixedSourceButton);
-    editFixedSourceButton.setButtonText("Edit Fixed Sources");
-    editFixedSourceButton.onClick = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxEditFixedSourceButtonClicked(); }); };
-
-    addAndMakeVisible(&fixSourceButton);
-    fixSourceButton.setButtonText("Fix Sources");
-    fixSourceButton.onClick = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxFixSourceButtonClicked(); });
-            durationUnitCombo.grabKeyboardFocus(); };
-
     activateButton.addShortcut(KeyPress('a', 0, 0));
     addAndMakeVisible(&activateButton);
     activateButton.setButtonText("Activate");
@@ -210,7 +199,4 @@ void TrajectoryBoxComponent::resized() {
     cycleSpeedLabel.setVisible(false);
     cycleSpeedSlider.setVisible(false);
     //------------------------------------------------------------------
-
-    editFixedSourceButton.setBounds(getWidth() - 120, 10, 100, 20);
-    fixSourceButton.setBounds(getWidth() - 120, 40, 100, 20);
 }

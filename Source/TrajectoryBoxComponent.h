@@ -58,8 +58,6 @@ public:
         virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
         virtual void trajectoryBoxActivateAltChanged(bool value) = 0;
-        virtual void trajectoryBoxEditFixedSourceButtonClicked() = 0;
-        virtual void trajectoryBoxFixSourceButtonClicked() = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

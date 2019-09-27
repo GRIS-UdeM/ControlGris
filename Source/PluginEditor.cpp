@@ -97,12 +97,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     addAndMakeVisible(configurationComponent);
 
     positionPresetBox.setLookAndFeel(&grisLookAndFeel);
+    positionPresetBox.addListener(this);
     addAndMakeVisible(&positionPresetBox);
-
-    fixedPositionEditor.setLookAndFeel(&grisLookAndFeel);
-    fixedPositionEditor.loadData(processor.getFixedPositionData());
-    fixedPositionEditor.addListener(this);
-    addChildComponent(&fixedPositionEditor);
 
     // Add sources to the fields.
     //---------------------------
@@ -159,6 +155,19 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
+    
+    // Update the position preset box.
+    //--------------------------------
+    for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
+        positionPresetBox.presetSaved(i+1, false);
+    }
+    XmlElement *positionData = processor.getFixedPositionData();
+    XmlElement *fpos = positionData->getFirstChildElement();
+    while (fpos) {
+        positionPresetBox.presetSaved(fpos->getIntAttribute("ID"), true);
+        fpos = fpos->getNextElement();
+    }
+
     // Update the interface.
     //----------------------
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
@@ -174,6 +183,14 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
     trajectoryBox.sourceLinkAltCombo.setSelectedId(value, NotificationType::dontSendNotification);
+}
+
+void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
+    positionPresetBox.setPreset(presetNumber);
+}
+
+void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber, bool isSaved) {
+    positionPresetBox.presetSaved(presetNumber, isSaved);
 }
 
 // Value::Listener callback. Called when the stored window size changes.
@@ -320,10 +337,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
         processor.getSources()[i].fixSourcePosition(true);
     }
 
-    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
-        processor.addNewFixedPosition();
-    }
-
     repaint();
 }
 
@@ -336,10 +349,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
     }
 
     processor.getSources()[sourceNum].fixSourcePosition(true);
-
-    if (automationManager.getActivateState() || automationManagerAlt.getActivateState()) {
-        processor.addNewFixedPosition();
-    }
 
     repaint();
 }
@@ -379,9 +388,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
     automationManager.fixSourcePosition();
 
     processor.onSourceLinkChanged(value);
-    if (automationManager.getActivateState()) {
-        processor.addNewFixedPosition();
-    }
 
     valueTreeState.getParameterAsValue("sourceLink").setValue((value - 1) / 5.f);
 
@@ -393,9 +399,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
     automationManagerAlt.fixSourcePosition();
 
     processor.onSourceLinkAltChanged(value);
-    if (automationManagerAlt.getActivateState()) {
-        processor.addNewFixedPosition();
-    }
 
     valueTreeState.getParameterAsValue("sourceLinkAlt").setValue((value - 1) / 4.f);
 
@@ -440,27 +443,6 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value) {
     automationManagerAlt.setActivateState(value);
-}
-
-void ControlGrisAudioProcessorEditor::trajectoryBoxEditFixedSourceButtonClicked() {
-    fixedPositionEditor.loadData(processor.getFixedPositionData());
-    m_fixedSourcesWindowVisible = ! m_fixedSourcesWindowVisible;
-    resized();
-}
-
-void ControlGrisAudioProcessorEditor::trajectoryBoxFixSourceButtonClicked() {
-    int numOfSources = processor.getNumberOfSources();
-    int link = automationManager.getSourceLink();
-    int linkAlt = automationManagerAlt.getSourceLink();
-
-    automationManager.fixSourcePosition();
-    automationManagerAlt.fixSourcePosition();
-
-    bool shouldBeFixed = link != SOURCE_LINK_INDEPENDENT || linkAlt != SOURCE_LINK_ALT_INDEPENDENT;
-    for (int i = 0; i < numOfSources; i++) {
-        processor.getSources()[i].fixSourcePosition(shouldBeFixed);
-    }
-    processor.addNewFixedPosition();
 }
 
 // Update the interface if anything has changed (mostly automations).
@@ -516,21 +498,18 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
     }
 }
 
-// FixedPositionEditor::Listener callback.
-//----------------------------------------
-void ControlGrisAudioProcessorEditor::fixedPositionEditorCellChanged(int row, int column, double value) {
-    processor.changeFixedPosition(row, column, value);
-    fixedPositionEditor.loadData(processor.getFixedPositionData());
+// PositionPresetComponent::Listener callback.
+//--------------------------------------------
+void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber) {
+    processor.setPositionPreset(presetNumber);
 }
 
-void ControlGrisAudioProcessorEditor::fixedPositionEditorCellDeleted(int row, int column) {
-    processor.deleteFixedPosition(row, column);
-    fixedPositionEditor.loadData(processor.getFixedPositionData());
+void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber) {
+    processor.addNewFixedPosition(presetNumber);
 }
 
-void ControlGrisAudioProcessorEditor::fixedPositionEditorClosed() {
-    m_fixedSourcesWindowVisible = false;
-    resized();
+void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber) {
+    processor.deleteFixedPosition(presetNumber);
 }
 
 // InterfaceBoxComponent::Listener callback.
@@ -585,13 +564,6 @@ void ControlGrisAudioProcessorEditor::resized() {
 
     positionPresetBanner.setBounds(600, 0, 50, 20);
     positionPresetBox.setBounds(600, 20, 50, height - 20);
-
-    if (m_fixedSourcesWindowVisible) {
-        fixedPositionEditor.setVisible(true);
-        fixedPositionEditor.setBounds(0, 0, width, height);
-    } else {
-        fixedPositionEditor.setVisible(false);
-    }
 }
 
 //==============================================================================

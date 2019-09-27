@@ -15,10 +15,6 @@
             file="Source/ControlGrisUtilities.cpp"/>
       <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
             file="Source/ControlGrisUtilities.h"/>
-      <FILE id="Xdm3oq" name="FixedPositionEditor.cpp" compile="1" resource="0"
-            file="Source/FixedPositionEditor.cpp"/>
-      <FILE id="sie28P" name="FixedPositionEditor.h" compile="0" resource="0"
-            file="Source/FixedPositionEditor.h"/>
       <FILE id="JknLOg" name="AutomationManager.cpp" compile="1" resource="0"
             file="Source/AutomationManager.cpp"/>
       <FILE id="TpHVRw" name="AutomationManager.h" compile="0" resource="0"

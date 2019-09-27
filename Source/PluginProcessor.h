@@ -123,12 +123,13 @@ public:
     void linkSourcePositions();
     void linkSourcePositionsAlt();
 
-    void addNewFixedPosition();
-    void recallFixedPosition();
+    void setPositionPreset(int presetNumber);
+
+    void addNewFixedPosition(int id);
+    void recallFixedPosition(int id);
     void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
-    XmlElement * getFixedPositionData();
-    void changeFixedPosition(int row, int column, double value);
-    void deleteFixedPosition(int row, int column);
+    XmlElement * getFixedPositionData(); // retrieve all data.
+    void deleteFixedPosition(int id);
 
     //==============================================================================
     AudioProcessorValueTreeState parameters;
@@ -154,7 +155,7 @@ private:
     double m_lastTime;
     double m_lastTimerTime;
 
-    bool m_lock;
+    bool m_lock; // I don't think we need this anymore...
     bool m_isPlaying;
     bool m_canStopActivate;
     double m_bpm;

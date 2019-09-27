@@ -102,7 +102,7 @@ const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Draw
 
 // Fix position data headers.
 //---------------------------
-const StringArray FIXED_POSITION_DATA_HEADERS { String("Del"), String("Time"),
+const StringArray FIXED_POSITION_DATA_HEADERS { String("ID"),
                                                 String("S1_X"), String("S1_Y"), String("S1_Z"),
                                                 String("S2_X"), String("S2_Y"), String("S2_Z"),
                                                 String("S3_X"), String("S3_Y"), String("S3_Z"),

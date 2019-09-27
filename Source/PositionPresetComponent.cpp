@@ -20,6 +20,12 @@
 
 #include "PositionPresetComponent.h"
 
+void PresetButton::setSavedState(bool isSaved) {
+    saved = isSaved;
+    setToggleState(isSaved, NotificationType::dontSendNotification);
+    refresh();
+}
+
 void PresetButton::refresh() {
     if (loaded) {
         setColour(TextButton::buttonColourId, Colour::fromRGB(255, 165, 25));
@@ -78,18 +84,31 @@ PositionPresetComponent::~PositionPresetComponent() {
     setLookAndFeel(nullptr);
 }
 
+void PositionPresetComponent::setPreset(int value) {
+    presets[value - 1]->setToggleState(true, NotificationType::sendNotificationAsync);
+    actionLog.setText(String("Load ") + String(value), NotificationType::dontSendNotification);
+}
+
+void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved) {
+    presets[presetNumber - 1]->setSavedState(isSaved);
+}
+
 void PositionPresetComponent::buttonClicked(PresetButton *button) {
     if (button->getToggleState()) {
         actionLog.setText(String("Load ") + button->getButtonText(), NotificationType::dontSendNotification);
+        listeners.call([&] (Listener& l) { l.positionPresetChanged(button->getButtonText().getIntValue()); });
     }
 }
 
 void PositionPresetComponent::savingPresetClicked(PresetButton *button) {
     actionLog.setText(String("Save ") + button->getButtonText(), NotificationType::dontSendNotification);
+    listeners.call([&] (Listener& l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
+    setPreset(button->getButtonText().getIntValue());
 }
 
 void PositionPresetComponent:: deletingPresetClicked(PresetButton *button) {
     actionLog.setText(String("Del ") + button->getButtonText(), NotificationType::dontSendNotification);
+    listeners.call([&] (Listener& l) { l.positionPresetDeleted(button->getButtonText().getIntValue()); });
 }
 
 void PositionPresetComponent::paint(Graphics& g) {

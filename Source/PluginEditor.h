@@ -32,7 +32,6 @@
 #include "Source.h"
 #include "AutomationManager.h"
 #include "PositionPresetComponent.h"
-#include "FixedPositionEditor.h"
 
 class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         private Value::Listener,
@@ -41,8 +40,8 @@ class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
                                         public SettingsBoxComponent::Listener,
                                         public SourceBoxComponent::Listener,
                                         public TrajectoryBoxComponent::Listener,
-                                        public FixedPositionEditor::Listener,
-                                        public InterfaceBoxComponent::Listener
+                                        public InterfaceBoxComponent::Listener,
+                                        public PositionPresetComponent::Listener
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
@@ -85,13 +84,11 @@ public:
     void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
     void trajectoryBoxActivateChanged(bool value) override;
     void trajectoryBoxActivateAltChanged(bool value) override;
-    void trajectoryBoxEditFixedSourceButtonClicked() override;
-    void trajectoryBoxFixSourceButtonClicked() override;
 
-    // FixedPositionEditor::Listeners
-    void fixedPositionEditorCellChanged(int row, int column, double value) override;
-    void fixedPositionEditorCellDeleted(int row, int column) override;
-    void fixedPositionEditorClosed() override;
+    // PositionPresetComponent::Listeners
+    void positionPresetChanged(int presetNumber) override;
+    void positionPresetSaved(int presetNumber) override;
+    void positionPresetDeleted(int presetNumber) override;
 
     // InterfaceBoxComponent::Listeners
     void oscInputConnectionChanged(bool state, int oscPort) override;
@@ -99,6 +96,8 @@ public:
     void setPluginState();
     void updateSourceLinkCombo(int value);
     void updateSourceLinkAltCombo(int value);
+    void updatePositionPreset(int presetNumber);
+    void positionPresetSaved(int presetNumber, bool isSaved);
 
     void refresh();
 
@@ -111,8 +110,6 @@ private:
 
     AutomationManager& automationManager;
     AutomationManager& automationManagerAlt;
-
-    FixedPositionEditor fixedPositionEditor;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
