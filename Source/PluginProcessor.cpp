@@ -50,7 +50,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 0.f, nullptr, nullptr,
+                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 1.f, nullptr, nullptr,
                                                      false, true, true));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -542,6 +542,10 @@ void ControlGrisAudioProcessor::timerCallback() {
     }
     if (m_canStopActivate && !m_isPlaying) {
         m_canStopActivate = false;
+        // Reset source positions on stop.
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setPos(sourceInitPositions[i]);
+        }
     }
 
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -665,6 +669,13 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
 void ControlGrisAudioProcessor::linkSourcePositions() {
     float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
 
+    float delta = kSourceDiameter / (float)FIELD_WIDTH;
+    Point<float> autopos = automationManager.getSourcePosition() - Point<float> (0.5, 0.5);
+    float mag = sqrtf(autopos.x*autopos.x + autopos.y*autopos.y);
+    float ang = atan2f(autopos.y, autopos.x);
+    float x = (mag + (mag * delta)) * cosf(ang) + 0.5;
+    float y = (mag + (mag * delta)) * sinf(ang) + 0.5;
+
     switch (automationManager.getSourceLink()) {
         case SOURCE_LINK_INDEPENDENT:
             sources[0].setPos(automationManager.getSourcePosition());
@@ -673,7 +684,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
         case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
         case SOURCE_LINK_CIRCULAR_FIXED_ANGLE:
         case SOURCE_LINK_CIRCULAR_FULLY_FIXED:
-            sources[0].setPos(automationManager.getSourcePosition());
+            sources[0].setPos(Point<float> (x, y));
             if (getOscFormat() == SPAT_MODE_LBAP) {
                 float deltaAzimuth = sources[0].getDeltaAzimuth();
                 float deltaDistance = sources[0].getDeltaDistance();
@@ -952,6 +963,10 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
     m_canStopActivate = true;
+    // Keep in memory source positions at the time we hit play.
+    for (int i = 0; i < m_numOfSources; i++) {
+        sourceInitPositions[i] = sources[i].getPos();
+    }
 }
 
 void ControlGrisAudioProcessor::releaseResources()

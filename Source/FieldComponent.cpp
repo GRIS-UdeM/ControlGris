@@ -248,7 +248,10 @@ void MainFieldComponent::paint(Graphics& g) {
     } else {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) { // Should handle DELTA_LOCK.
             shouldDrawTrajectoryHandle = true;
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
+            shouldDrawTrajectoryHandle = true;
         }
+
     }
 
     // Draw recording trajectory handle.
@@ -260,16 +263,16 @@ void MainFieldComponent::paint(Graphics& g) {
             rpos = posToXy(automationManager.getSourcePosition(), width);
         }
         Rectangle<float> rarea (rpos.x, rpos.y, kSourceDiameter, kSourceDiameter);
-        g.setColour(Colours::grey);
+        g.setColour(Colour::fromRGB(176, 176, 228));
         g.fillEllipse(rarea);
-        g.setColour(Colour::fromRGB(64, 64, 84));
+        g.setColour(Colour::fromRGB(64, 64, 128));
         g.drawEllipse(rarea, 1);
         g.setColour(Colours::white);
         g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
     }
 
     // Draw recording trajectory path and current position dot.
-    g.setColour(Colour::fromRGB(176, 176, 176));
+    g.setColour(Colour::fromRGB(176, 176, 228));
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
@@ -344,8 +347,8 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         return;
     }
 
-    // Check if we record a trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) { // Could also be used in DELTA_LOCK mode && REALTIME.
+    // Check if we click on the trajectory handle.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING || automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
@@ -395,12 +398,14 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
             automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
 
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         if (m_spatMode == SPAT_MODE_VBAP) {
             automationManager.getSource().setAzimuth(m_sources[0].getAzimuth());
             automationManager.getSource().setElevation(m_sources[0].getElevation());

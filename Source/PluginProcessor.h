@@ -161,6 +161,7 @@ private:
     double m_bpm;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
+    Point<float> sourceInitPositions[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
     OSCReceiver oscReceiver;

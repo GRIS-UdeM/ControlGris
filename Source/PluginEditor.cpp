@@ -265,62 +265,64 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     const float azims6[6] = {-30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f};
     const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
 
+    bool isLBAP = processor.getOscFormat() == SPAT_MODE_LBAP;
+
     float offset = 360.0f / numOfSources / 2.0f;
-    float distance = processor.getOscFormat() == SPAT_MODE_LBAP ? 0.7f : 1.0f;
+    float distance = isLBAP ? 0.7f : 1.0f;
 
     switch(value) {
         case SOURCE_PLACEMENT_LEFT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(-azims2[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(-azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(-azims4[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(-azims4[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(-azims6[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(-azims6[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else
-                    processor.getSources()[i].setCoordinates(-azims8[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(-azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_ALTERNATE:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(azims2[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(azims4[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(azims4[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(azims6[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(azims6[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
                 else
-                    processor.getSources()[i].setCoordinates(azims8[i], 0.0f, distance);
+                    processor.getSources()[i].setCoordinates(azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_LEFT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_LEFT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_RIGHT_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_TOP_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
         case SOURCE_PLACEMENT_TOP_COUNTER_CLOCKWISE:
             for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, 0.0f, distance);
+                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
     }
@@ -337,6 +339,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
         processor.getSources()[i].fixSourcePosition(true);
     }
 
+    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+
     repaint();
 }
 
@@ -349,6 +353,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
     }
 
     processor.getSources()[sourceNum].fixSourcePosition(true);
+
+    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
 
     repaint();
 }
@@ -384,6 +390,10 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
+    if (value == SOURCE_LINK_DELTA_LOCK) {
+        automationManager.setSourcePosition(Point<float> (0.5, 0.5));
+    }
+
     automationManager.setSourceLink(value);
     automationManager.fixSourcePosition();
 
@@ -407,7 +417,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
     valueTreeState.state.setProperty("trajectoryType", value, nullptr);
-    automationManager.setDrawingType(value);
+    automationManager.setDrawingType(value, processor.getSources()[0].getPos());
     mainField.repaint();
 }
 
@@ -492,6 +502,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
 
     if (whichField == 0) {
         validateSourcePositions();
+        automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
     }
     if (whichField == 1 && processor.getOscFormat() == SPAT_MODE_LBAP) {
         validateSourcePositionsAlt();

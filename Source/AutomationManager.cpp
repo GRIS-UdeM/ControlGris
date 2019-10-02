@@ -185,13 +185,20 @@ void AutomationManager::fixSourcePosition() {
     source.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setDrawingType(int type) {
+void AutomationManager::setDrawingType(int type, Point<float> startpos) {
     drawingType = type;
 
     trajectoryPoints.clear();
 
     int offset = FIELD_WIDTH / 2;
-    int radius = offset - 10;
+    int minlim = 8;
+    int maxlim = FIELD_WIDTH - 8;
+
+    Point<float> translated = startpos.translated(-0.5f, -0.5f) * 2.0f;
+    float magnitude = sqrtf(translated.x * translated.x + translated.y * translated.y) * ((FIELD_WIDTH - kSourceDiameter) / 2);
+    float angle = atan2f(translated.y, translated.x) - M_PI / 2.0f;
+
+    float x, y;
     switch (drawingType) {
         case TRAJECTORY_TYPE_REALTIME:
             playbackPosition = Point<float> (-1.0f, -1.0f);
@@ -201,57 +208,97 @@ void AutomationManager::setDrawingType(int type) {
             break;
         case TRAJECTORY_TYPE_CIRCLE_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = sinf(2.0 * M_PI * i / 199) * radius + offset;
-                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                x = sinf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = -cosf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = -sinf(2.0 * M_PI * i / 199) * radius + offset;
-                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                x = -sinf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = -cosf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_ELLIPSE_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = sinf(2.0 * M_PI * i / 199) * radius * 0.5 + offset;
-                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                x = sinf(2.0 * M_PI * i / 199) * magnitude * 0.5;
+                y = -cosf(2.0 * M_PI * i / 199) * magnitude;
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_ELLIPSE_COUNTER_CLOCKWISE:
             for (int i = 0; i < 200; i++) {
-                float x = -sinf(2.0 * M_PI * i / 199) * radius * 0.5 + offset;
-                float y = -cosf(2.0 * M_PI * i / 199) * radius + offset;
+                x = -sinf(2.0 * M_PI * i / 199) * magnitude * 0.5;
+                y = -cosf(2.0 * M_PI * i / 199) * magnitude;
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_OUT_IN:
             for (int i = 0; i < 300; i++) {
-                float x = sinf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
-                float y = -cosf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                x = sinf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
+                y = -cosf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_OUT_IN:
             for (int i = 0; i < 300; i++) {
-                float x = -sinf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
-                float y = -cosf(2.0 * M_PI * i / 99) * radius * (1.0 - i / 300.0) + offset;
+                x = -sinf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
+                y = -cosf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT:
             for (int i = 0; i < 300; i++) {
-                float x = sinf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
-                float y = -cosf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
+                x = sinf(2.0 * M_PI * i / 99 ) * magnitude * (i / 300.0);
+                y = -cosf(2.0 * M_PI * i / 99 ) * magnitude * (i / 300.0);
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
         case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT:
             for (int i = 0; i < 300; i++) {
-                float x = -sinf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
-                float y = -cosf(2.0 * M_PI * i / 99) * radius * (i / 300.0) + offset;
+                x = -sinf(2.0 * M_PI * i / 99) * magnitude * (i / 300.0);
+                y = -cosf(2.0 * M_PI * i / 99) * magnitude * (i / 300.0);
+                float mag = sqrtf(x*x + y*y);
+                float ang = atan2f(y, x);
+                x = mag * cosf(ang - angle) + offset;
+                y = mag * sinf(ang - angle) + offset;
+                x = x < minlim ? minlim : x > maxlim ? maxlim : x;
+                y = y < minlim ? minlim : y > maxlim ? maxlim : y;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
