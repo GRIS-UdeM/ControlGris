@@ -246,7 +246,7 @@ void MainFieldComponent::paint(Graphics& g) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) { // Should handle DELTA_LOCK.
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
             shouldDrawTrajectoryHandle = true;
@@ -455,11 +455,13 @@ void ElevationFieldComponent::paint(Graphics& g) {
 
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) { // Should handle DELTA_LOCK.
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && !m_isPlaying) {
+            shouldDrawTrajectoryHandle = true;
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME && automationManager.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -552,15 +554,14 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     }
 
     // Check if we record a trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) { // Could also be used in DELTA_LOCK && REALTIME.
-        float x = 10.0f;
-        float y = (90.0 - automationManager.getSource().getElevation()) / 90.0 * (height - 35) + 5;
-        Point<float> pos = Point<float> {x, y};
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING || automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        Point<float> pos = posToXy(automationManager.getSourcePosition(), width).withX(10.0f);
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_oldSelectedSourceId = m_selectedSourceId;
             m_selectedSourceId = -1;
-            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+                currentRecordingPositionX = 10 + kSourceRadius;
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
             }
             repaint();
@@ -586,6 +587,14 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
             float y = event.getPosition().toFloat().y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
+            y = height - event.getPosition().toFloat().y;
+            y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+            automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
+        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+            float y = height - event.y;
+            y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
+            automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
+            automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
@@ -593,7 +602,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
 
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (automationManager.getSourceLink() != SOURCE_LINK_ALT_DELTA_LOCK && automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
         float y = m_sources[0].getElevation() / 90.0 * (height - 15) + 5;
         automationManager.setSourcePosition(xyToPos(Point<float> (10.0, y), height));
         automationManager.sendTrajectoryPositionChangedEvent();
