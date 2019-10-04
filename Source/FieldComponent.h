@@ -59,6 +59,7 @@ public:
         virtual ~Listener() {}
 
         virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
+        virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }

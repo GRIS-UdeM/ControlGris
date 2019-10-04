@@ -357,6 +357,8 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
             m_selectedSourceId = -1;
             if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            } else {
+                listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(0); });
             }
             repaint();
         }
@@ -532,9 +534,6 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_ALT_INDEPENDENT && i > 0) { // TO FIX: User should be able to move anyone of the sources.
-            break;
-        }
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         Point<float> pos = Point<float> {x, y};
@@ -562,6 +561,8 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
             if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
                 currentRecordingPositionX = 10 + kSourceRadius;
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+            } else {
+                listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(1); });
             }
             repaint();
         }

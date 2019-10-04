@@ -405,6 +405,10 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
+    if (value == SOURCE_LINK_ALT_DELTA_LOCK) {
+        automationManagerAlt.setSourcePosition(Point<float> (0., 0.5));
+    }
+
     automationManagerAlt.setSourceLink(value);
     automationManagerAlt.fixSourcePosition();
 
@@ -516,7 +520,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
                 float deltaElevation = processor.getSources()[sourceId].getDeltaElevation();
                 processor.getSources()[0].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
             }
-        } 
+        }
         else if (sourceId != 0 && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) 
         { // Delta Lock mode.
             float deltaX = processor.getSources()[sourceId].getDeltaX();
@@ -524,10 +528,43 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
             processor.getSources()[0].setXYCoordinatesFromFixedSource(deltaX, deltaY);
         }
         validateSourcePositions();
-        automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+        if (automationManager.getDrawingType() >= TRAJECTORY_TYPE_CIRCLE_CLOCKWISE) {
+            automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+        }
     }
     if (whichField == 1 && processor.getOscFormat() == SPAT_MODE_LBAP) {
+        if (sourceId != 0) { 
+            int numOfSources = processor.getNumberOfSources();
+            float sourceElevation = processor.getSources()[sourceId].getElevation();
+            float offset = 60.0 / numOfSources * sourceId;
+            switch (automationManagerAlt.getSourceLink()) {
+                case SOURCE_LINK_ALT_FIXED_ELEVATION:
+                    processor.getSources()[0].setNormalizedElevation(processor.getSources()[sourceId].getNormalizedElevation());
+                    break;
+                case SOURCE_LINK_ALT_LINEAR_MIN:
+                    processor.getSources()[0].setElevation(sourceElevation - offset);
+                    break;
+                case SOURCE_LINK_ALT_LINEAR_MAX:
+                    processor.getSources()[0].setElevation(sourceElevation + offset);
+                    break;
+                case SOURCE_LINK_ALT_DELTA_LOCK:
+                    float deltaElevation = processor.getSources()[sourceId].getDeltaElevation();
+                    std::cout << deltaElevation << std::endl;
+                    processor.getSources()[0].setElevationFromFixedSource(deltaElevation);
+                    break;
+            }
+        }
         validateSourcePositionsAlt();
+    }
+}
+
+void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField) {
+    if (whichField == 0) {
+        automationManager.fixSourcePosition();
+        processor.onSourceLinkChanged(automationManager.getSourceLink());
+    } else {
+        automationManagerAlt.fixSourcePosition();
+        processor.onSourceLinkAltChanged(automationManagerAlt.getSourceLink());
     }
 }
 
