@@ -29,7 +29,7 @@ class ControlGrisAudioProcessor  : public AudioProcessor,
                                    public AudioProcessorValueTreeState::Listener,
                                    public AutomationManager::Listener,
                                    public Timer,
-                                   private OSCReceiver::ListenerWithOSCAddress<OSCReceiver::RealtimeCallback>
+                                   private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
 public:
     //==============================================================================
@@ -100,6 +100,7 @@ public:
     bool disconnectOSCInput();
     bool getOscInputConnected();
     void oscMessageReceived (const OSCMessage& message) override;
+    void oscBundleReceived(const OSCBundle& bundle) override;
 
     void timerCallback() override;
 

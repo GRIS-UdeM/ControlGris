@@ -447,11 +447,7 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
     if (!m_oscInputConnected) {
         std::cout << "Error: could not connect to UDP input port " << oscPort << "." << std::endl;
     } else {
-        oscReceiver.addListener (this, "/controlgris/traj/1/x");
-        oscReceiver.addListener (this, "/controlgris/traj/1/y");
-        oscReceiver.addListener (this, "/controlgris/traj/1/z");
-        oscReceiver.addListener (this, "/controlgris/traj/1/xy");
-        oscReceiver.addListener (this, "/controlgris/traj/1/xyz");
+        oscReceiver.addListener(this);
         m_currentOSCInputPort = oscPort;
         parameters.state.setProperty("oscInputPortNumber", oscPort, nullptr);
     }
@@ -475,6 +471,15 @@ bool ControlGrisAudioProcessor::disconnectOSCInput() {
 
 bool ControlGrisAudioProcessor::getOscInputConnected() {
     return m_oscInputConnected;
+}
+
+void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
+    for (auto& element : bundle) {
+        if (element.isMessage())
+            oscMessageReceived(element.getMessage());
+        else if (element.isBundle())
+            oscBundleReceived(element.getBundle());
+    }
 }
 
 void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
