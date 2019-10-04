@@ -1,0 +1,57 @@
+Meeting GRIS - 26 juillet 2019
+==============================
+
+- Enregistrement dans DP et Logic. **à suivre**
+
+- 2 trajectoires (en mode independant, automatiquement linké sur les sources 1 et 2, avec une couleur qui l'indique).
+
+******* done ******
+- le boutons Activate devrait se désactiver automatiquement après que le séquenceur se soit positionné à Stop. **done**
+- Le mode Realtime toujours actif, sans avoir besoin d<allumer "Activate". **done**
+- Reception de l'OSC pour controller les trajectoires. **done**
+- Retirer les bouton Clear. **done**
+- La FixedPosition au temps 0 ne passe pas correctement à l'ouverture. Correcte après avoir fait play une fois. **done**
+- Enregisterment en mode direct. La position de l'automation est ecrite dans le DAW (pas de dessin). **done**
+- Ecriture de la trajectoire en Z devrait se repartir en X sur le field (juste pour voir le mouvement). **done**
+- changer la couleur du mouse over sur les boutons (confondant avec le ON). **done**
+- Supprimer le nombres de cycles. **done**
+- Circular angle, ciirculkar fully fixed, etc. doit commencer le cercle à la position de la source 1. **done**
+- Corriger SPAT_MODE_ENUM valeurs... **done**
+
+
+ServerGris
+----------
+
+- À l'ouverture, le zoom de la camera est toujours au maximum. Présentement, la distance
+de la caméra est sauvegardé dans le preset ET dans les preférences globales de l'app, cette
+dernière étant appelée en dernier et mal enregistrée en quittant l'app. Est-ce qu'on veut
+vraiment une pref globale si chaque preset possède déjà ses valeurs propres?
+
+- Un mode LBAP/VBAP dans lequel on peut sélectionner d'être en VBAP par source dans un LBAP global.
+
+
+
+Meeting GRIS - 19 septembre 2019
+================================
+
+ControlGris
+-----------
+
+******* done ******
+- On veut manipuler la trajectoire en bougeant n'importe quelle source. **done**
+- "Fixed Positions" remplacer par un système de snapshots avec rappel automatisable. **done**
+- Activate se remet à off après enregistrement. **done**
+	- Est-ce que latch reste en record mode sur les autres DAW que Reaper?
+- Pas besoin du activate en mode realtime. **done**
+- En mode circulaire, la trajectoire est cachée derrière la source 1 et la relation avec
+les autres sources devrait être calquée sur la relation entre les sources elles-mêmes. **done**
+- Button.addShortcut() pour les Activate. **done**
+
+ServerGris
+----------
+
+- lumière rouge pour visualiser les clips.
+- Stats de recording (clipping, when, ...).
+- Master gain en dB.
+- Dome et cube à la place de VBAP et LBAP.
+
