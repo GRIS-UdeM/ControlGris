@@ -78,6 +78,9 @@ PositionPresetComponent::PositionPresetComponent() {
     actionLog.setColour(Label::outlineColourId, Colour::fromRGB(0, 0, 0));
     actionLog.setColour(Label::textColourId, Colour::fromRGB(0, 0, 0));
     addAndMakeVisible(&actionLog);
+
+    appVersionLabel.setText(String("v. ") + JucePlugin_VersionString, NotificationType::dontSendNotification);
+    addAndMakeVisible(&appVersionLabel);
 }
 
 PositionPresetComponent::~PositionPresetComponent() {
@@ -127,4 +130,5 @@ void PositionPresetComponent::resized() {
     }
 
     actionLog.setBounds(1, 25 * 24 + 2, width - 3, 20);
+    appVersionLabel.setBounds(3, 25 * 24 + 25, width - 3, 20);
 }

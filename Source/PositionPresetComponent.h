@@ -91,6 +91,7 @@ private:
     OwnedArray<PresetButton> presets;
 
     Label actionLog;
+    Label appVersionLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionPresetComponent)
 };
