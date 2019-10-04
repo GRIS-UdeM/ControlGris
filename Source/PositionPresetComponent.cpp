@@ -85,12 +85,14 @@ PositionPresetComponent::~PositionPresetComponent() {
 }
 
 void PositionPresetComponent::setPreset(int value) {
-    presets[value - 1]->setToggleState(true, NotificationType::sendNotificationAsync);
+    presets[value - 1]->setToggleState(true, NotificationType::sendNotificationSync);
     actionLog.setText(String("Load ") + String(value), NotificationType::dontSendNotification);
 }
 
 void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved) {
-    presets[presetNumber - 1]->setSavedState(isSaved);
+    if (presets[presetNumber - 1] != nullptr) {
+        presets[presetNumber - 1]->setSavedState(isSaved);
+    }
 }
 
 void PositionPresetComponent::buttonClicked(PresetButton *button) {
@@ -112,8 +114,6 @@ void PositionPresetComponent:: deletingPresetClicked(PresetButton *button) {
 }
 
 void PositionPresetComponent::paint(Graphics& g) {
-    //GrisLookAndFeel *lookAndFeel;
-    //lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
     g.fillAll (Colour::fromRGB(64, 64, 64));
 }
 

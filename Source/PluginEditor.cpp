@@ -186,6 +186,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
+    const MessageManagerLock mmLock;
     positionPresetBox.setPreset(presetNumber);
 }
 

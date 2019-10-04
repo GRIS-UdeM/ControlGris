@@ -213,10 +213,11 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     if (parameterID.compare("positionPreset") == 0) {
         int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1);
-        recallFixedPosition(newPreset);
-        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-        if (ed != nullptr) {
-            ed->updatePositionPreset(newPreset);
+        if (recallFixedPosition(newPreset)) {
+            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            if (ed != nullptr) {
+                ed->updatePositionPreset(newPreset);
+            }
         }
     }
 
@@ -672,8 +673,6 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
 }
 
 void ControlGrisAudioProcessor::linkSourcePositions() {
-    float deltaAzimuth = 0.0f, deltaX = 0.0f, deltaY = 0.0f;
-
     float delta = kSourceDiameter / (float)FIELD_WIDTH;
     Point<float> autopos = automationManager.getSourcePosition() - Point<float> (0.5, 0.5);
     float mag = sqrtf(autopos.x*autopos.x + autopos.y*autopos.y);
@@ -705,8 +704,8 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
             }
             break;
         case SOURCE_LINK_DELTA_LOCK:
-            deltaX = automationManager.getSource().getDeltaX();
-            deltaY = automationManager.getSource().getDeltaY();
+            float deltaX = automationManager.getSource().getDeltaX();
+            float deltaY = automationManager.getSource().getDeltaY();
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
             }
@@ -749,11 +748,12 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
-    recallFixedPosition(presetNumber);
-    float value = (presetNumber - 1) / (float)NUMBER_OF_POSITION_PRESETS;
-    parameters.getParameter("positionPreset")->beginChangeGesture();
-    parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
-    parameters.getParameter("positionPreset")->endChangeGesture();
+    if (recallFixedPosition(presetNumber)) {
+        float value = (presetNumber - 1) / (float)NUMBER_OF_POSITION_PRESETS;
+        parameters.getParameter("positionPreset")->beginChangeGesture();
+        parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
+        parameters.getParameter("positionPreset")->endChangeGesture();
+    }
 }
 
 //==============================================================================
@@ -793,7 +793,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
     recallFixedPosition(id);
 }
 
-void ControlGrisAudioProcessor::recallFixedPosition(int id) {
+bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
     // called twice on new preset selection...
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
@@ -806,7 +806,7 @@ void ControlGrisAudioProcessor::recallFixedPosition(int id) {
     }
 
     if (! found) {
-        return;
+        return false;
     }
 
     currentFixPosition = fpos;
@@ -823,6 +823,7 @@ void ControlGrisAudioProcessor::recallFixedPosition(int id) {
             sources[i].setNormalizedElevation(z);
         }
     }
+    return true;
 }
 
 void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {

@@ -127,7 +127,7 @@ public:
     void setPositionPreset(int presetNumber);
 
     void addNewFixedPosition(int id);
-    void recallFixedPosition(int id);
+    bool recallFixedPosition(int id);
     void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
     XmlElement * getFixedPositionData(); // retrieve all data.
     void deleteFixedPosition(int id);
