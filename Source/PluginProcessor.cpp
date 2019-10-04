@@ -753,6 +753,8 @@ void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
         parameters.getParameter("positionPreset")->beginChangeGesture();
         parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
         parameters.getParameter("positionPreset")->endChangeGesture();
+
+        automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
     }
 }
 
