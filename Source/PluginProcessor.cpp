@@ -678,7 +678,7 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
 
     switch (automationManager.getSourceLink()) {
         case SOURCE_LINK_INDEPENDENT:
-            sources[0].setPos(automationManager.getSourcePosition());
+            sources[0].setPos(Point<float> (x, y));
             break;
         case SOURCE_LINK_CIRCULAR:
         case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
