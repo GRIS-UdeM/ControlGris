@@ -50,7 +50,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 1.f, nullptr, nullptr,
+                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 0.f, nullptr, nullptr,
                                                      false, true, true));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -764,10 +764,6 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
             newData->setAttribute(getFixedPosSourceName(i, 2), sources[i].getNormalizedElevation());
         }
     }
-    // Does trajectory really need to be in fixed position ?
-    newData->setAttribute("T1_X", automationManager.getSourcePosition().x);
-    newData->setAttribute("T1_Y", automationManager.getSourcePosition().y);
-    newData->setAttribute("T1_Z", automationManagerAlt.getSourcePosition().y);
 
     // Replace an element if the new one has the same ID as one already saved.
     bool found = false;
@@ -790,7 +786,6 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
     fixPositionData.sortChildElements(sorter);
 
     recallFixedPosition(id);
-    //currentFixPosition = fixPositionData.getFirstChildElement();
 }
 
 void ControlGrisAudioProcessor::recallFixedPosition(int id) {
@@ -823,14 +818,6 @@ void ControlGrisAudioProcessor::recallFixedPosition(int id) {
             sources[i].setNormalizedElevation(z);
         }
     }
-
-    x = currentFixPosition->getDoubleAttribute("T1_X");
-    y = currentFixPosition->getDoubleAttribute("T1_Y");
-    automationManager.setSourcePosition(Point<float> (x, y));
-    if (getOscFormat() == SPAT_MODE_LBAP) {
-        z = currentFixPosition->getDoubleAttribute("T1_Z");
-        automationManagerAlt.setSourcePosition(Point<float> (0.0, z));
-    }
 }
 
 void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
@@ -845,10 +832,6 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
             newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
             newData->setAttribute(getFixedPosSourceName(i, 2), element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
         }
-
-        newData->setAttribute("T1_X", element->getDoubleAttribute("T1_X"));
-        newData->setAttribute("T1_Y", element->getDoubleAttribute("T1_Y"));
-        newData->setAttribute("T1_Z", element->getDoubleAttribute("T1_Z"));
 
         dest->addChildElement(newData);
     }
@@ -874,7 +857,6 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
         fixPositionData.removeChildElement(fpos, true);
         XmlElementDataSorter sorter("ID", true);
         fixPositionData.sortChildElements(sorter);
-        //currentFixPosition = fixPositionData.getFirstChildElement();
     }
 }
 

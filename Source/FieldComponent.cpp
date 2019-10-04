@@ -602,7 +602,9 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
 
-    if (automationManager.getSourceLink() != SOURCE_LINK_ALT_DELTA_LOCK && automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (automationManager.getSourceLink() != SOURCE_LINK_ALT_DELTA_LOCK &&
+        automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME &&
+        m_selectedSourceId == 0) {
         float y = m_sources[0].getElevation() / 90.0 * (height - 15) + 5;
         automationManager.setSourcePosition(xyToPos(Point<float> (10.0, y), height));
         automationManager.sendTrajectoryPositionChangedEvent();
