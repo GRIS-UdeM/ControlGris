@@ -550,7 +550,6 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
                     break;
                 case SOURCE_LINK_ALT_DELTA_LOCK:
                     float deltaElevation = processor.getSources()[sourceId].getDeltaElevation();
-                    std::cout << deltaElevation << std::endl;
                     processor.getSources()[0].setElevationFromFixedSource(deltaElevation);
                     break;
             }
