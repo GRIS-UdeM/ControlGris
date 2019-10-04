@@ -323,10 +323,6 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     // Check if we click on a new source.
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
-        if (automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && i > 0) { // TO FIX: User should be able to move anyone of the sources.
-            break;
-        }
-
         Point<float> pos;
         if (m_spatMode == SPAT_MODE_VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
@@ -405,7 +401,10 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
 
-    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if (automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
+        automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK &&
+        automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) 
+    {
         if (m_spatMode == SPAT_MODE_VBAP) {
             automationManager.getSource().setAzimuth(m_sources[0].getAzimuth());
             automationManager.getSource().setElevation(m_sources[0].getElevation());
