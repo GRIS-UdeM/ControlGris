@@ -35,6 +35,8 @@ public:
     void clicked (const ModifierKeys &mods) override;
     void internalClickCallback (const ModifierKeys &mods) override;
 
+    bool isSaved();
+
     struct Listener
     {
         virtual ~Listener() {}
@@ -71,7 +73,7 @@ public:
     void savingPresetClicked(PresetButton *button) override;
     void deletingPresetClicked(PresetButton *button) override;
 
-    void setPreset(int value);
+    void setPreset(int value, bool notify=false);
     void presetSaved(int presetNumber, bool isSaved);
 
     struct Listener

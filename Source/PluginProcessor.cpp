@@ -85,7 +85,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 {
     m_lock = false;
     m_somethingChanged = false;
-    m_numOfSources = 1;
+    m_numOfSources = 2;
     m_firstSourceId = 1;
     m_selectedSourceId = 1;
     m_selectedOscFormat = (SPAT_MODE_ENUM)0;
@@ -100,7 +100,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     m_bpm = 120;
 
+    m_currentPositionPreset = -1;
+
     m_canStopActivate = false;
+    m_hasEverBeenStarted = false;
 
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 680 } }, {} }, -1, nullptr);
@@ -129,9 +132,9 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
         // Non-automatable, per source, parameters.
-        parameters.state.setProperty(String("p_azimuth_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_azimuth_") + id, i % 2 == 0 ? -90.0 : 90.0, nullptr);
         parameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
-        parameters.state.setProperty(String("p_distance_") + id, 0.0, nullptr);
+        parameters.state.setProperty(String("p_distance_") + id, 1.0, nullptr);
         parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
 
@@ -139,8 +142,12 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         parameters.addParameterListener(String("azimuthSpan_") + id, this);
         parameters.addParameterListener(String("elevationSpan_") + id, this);
 
-        // Gives the source an initial id.
+        // Gives the source an initial id...
         sources[i].setId(i + m_firstSourceId - 1);
+        // .. and coordinates.
+        sources[i].setAzimuth(i % 2 == 0 ? -90.0 : 90.0);
+        sources[i].setElevation(0.0);
+        sources[i].setDistance(1.0);
     }
 
     // Automation values for the recording trajectory.
@@ -213,6 +220,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
 
     if (parameterID.compare("positionPreset") == 0) {
         int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1);
+        m_currentPositionPreset = newPreset;
         if (recallFixedPosition(newPreset)) {
             ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
@@ -546,12 +554,16 @@ void ControlGrisAudioProcessor::timerCallback() {
     if (m_canStopActivate && automationManagerAlt.getActivateState() && !m_isPlaying) {
         automationManagerAlt.setActivateState(false);
     }
-    if (m_canStopActivate && !m_isPlaying) {
+    if (m_canStopActivate && !m_isPlaying && m_hasEverBeenStarted) {
         m_canStopActivate = false;
         // Reset source positions on stop.
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].setPos(sourceInitPositions[i]);
         }
+    }
+
+    if (m_isPlaying) {
+        m_hasEverBeenStarted = true;
     }
 
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -564,25 +576,21 @@ void ControlGrisAudioProcessor::timerCallback() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::setPluginState() {
-    // Set global settings values.
-    //----------------------------
-    setOscFormat((SPAT_MODE_ENUM)(int)parameters.state.getProperty("oscFormat", 0));
-    setOscPortNumber(parameters.state.getProperty("oscPortNumber", 18032));
-    handleOscConnection(parameters.state.getProperty("oscConnected", true));
-    setNumberOfSources(parameters.state.getProperty("numberOfSources", 1), false);
-    setFirstSourceId(parameters.state.getProperty("firstSourceId", 1));
+    // ASK: Do we really need these calls? Conflict with preset automation? Need to validate with a newly created plugin...
 
-    if (parameters.state.getProperty("oscInputConnected", false)) {
-        createOscInputConnection(parameters.state.getProperty("oscInputPortNumber", 8000));
-    }
-
-    // Set parameter values for sources.
-    //----------------------------------
-    for (int i = 0; i < m_numOfSources; i++) {
-        String id(i);
-        sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
-        sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
-        sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
+    // If no preset has been saved and recalled, try the first fixed position (if it exists),
+    // and finally, try to restore the last saved positions.
+    if (m_currentPositionPreset == -1) {
+        if (fixPositionData.getNumChildElements() > 0) {
+            currentFixPosition = fixPositionData.getFirstChildElement();
+        } else {
+            for (int i = 0; i < m_numOfSources; i++) {
+                String id(i);
+                sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
+                sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
+                sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
+            }
+        }
     }
 
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -749,11 +757,11 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 //==============================================================================
 void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
     if (recallFixedPosition(presetNumber)) {
+        m_currentPositionPreset = presetNumber;
         float value = (presetNumber - 1) / (float)NUMBER_OF_POSITION_PRESETS;
         parameters.getParameter("positionPreset")->beginChangeGesture();
         parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
         parameters.getParameter("positionPreset")->endChangeGesture();
-
         automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
     }
 }
@@ -812,7 +820,6 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
     }
 
     currentFixPosition = fpos;
-
     float x, y, z = 0.0;
     for (int i = 0; i < m_numOfSources; i++) {
         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
@@ -1051,16 +1058,30 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
     std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
 
     if (xmlState.get() != nullptr) {
+
+        // Set global settings values.
+        //----------------------------
+        ValueTree valueTree = ValueTree::fromXml (*xmlState);
+        setOscFormat((SPAT_MODE_ENUM)(int)valueTree.getProperty("oscFormat", 0));
+        setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
+        handleOscConnection(valueTree.getProperty("oscConnected", true));
+        setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
+        setFirstSourceId(valueTree.getProperty("firstSourceId", 1));
+
+        if (valueTree.getProperty("oscInputConnected", false)) {
+            createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 8000));
+        }
+
+        // Load saved fixed positions.
+        //----------------------------
         XmlElement *positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
         if (positionData) {
             fixPositionData.deleteAllChildElements();
             copyFixedPositionXmlElement(positionData, &fixPositionData);
         }
+        // Replace the state and call automated parameter current values.
+        //---------------------------------------------------------------
         parameters.replaceState (ValueTree::fromXml (*xmlState));
-    }
-
-    if (fixPositionData.getNumChildElements() > 0) {
-        currentFixPosition = fixPositionData.getFirstChildElement();
     }
 
     setPluginState();

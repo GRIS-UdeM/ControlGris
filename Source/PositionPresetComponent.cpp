@@ -26,6 +26,10 @@ void PresetButton::setSavedState(bool isSaved) {
     refresh();
 }
 
+bool PresetButton::isSaved() {
+    return saved;
+}
+
 void PresetButton::refresh() {
     if (loaded) {
         setColour(TextButton::buttonColourId, Colour::fromRGB(255, 165, 25));
@@ -87,9 +91,14 @@ PositionPresetComponent::~PositionPresetComponent() {
     setLookAndFeel(nullptr);
 }
 
-void PositionPresetComponent::setPreset(int value) {
-    presets[value - 1]->setToggleState(true, NotificationType::sendNotificationSync);
-    actionLog.setText(String("Load ") + String(value), NotificationType::dontSendNotification);
+void PositionPresetComponent::setPreset(int value, bool notify) {
+    if (presets[value - 1]->isSaved()) {
+        presets[value - 1]->setToggleState(true, NotificationType::sendNotificationSync);
+        actionLog.setText(String("Load ") + String(value), NotificationType::dontSendNotification);
+        if (notify) {
+            buttonClicked(presets[value - 1]);
+        }
+    }
 }
 
 void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved) {

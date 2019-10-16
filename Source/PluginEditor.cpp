@@ -155,7 +155,6 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
-    
     // Update the position preset box.
     //--------------------------------
     for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
@@ -175,6 +174,9 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+
+    int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue() * NUMBER_OF_POSITION_PRESETS + 1);
+    positionPresetBox.setPreset(preset, true);
 }
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
