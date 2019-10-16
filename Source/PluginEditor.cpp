@@ -224,16 +224,18 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
 }
 
 void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
-    m_selectedSource = 0;
-    processor.setNumberOfSources(numOfSources);
-    processor.setSelectedSourceId(m_selectedSource);
-    settingsBox.setNumberOfSources(numOfSources);
-    trajectoryBox.setNumberOfSources(numOfSources);
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSources(processor.getSources(), numOfSources);
-    elevationField.setSources(processor.getSources(), numOfSources);
-    sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
-    sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
+    if (processor.getNumberOfSources() != numOfSources) {
+        m_selectedSource = 0;
+        processor.setNumberOfSources(numOfSources);
+        processor.setSelectedSourceId(m_selectedSource);
+        settingsBox.setNumberOfSources(numOfSources);
+        trajectoryBox.setNumberOfSources(numOfSources);
+        parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
+        mainField.setSources(processor.getSources(), numOfSources);
+        elevationField.setSources(processor.getSources(), numOfSources);
+        sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
+        sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
+    }
 }
 
 void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId) {

@@ -22,6 +22,8 @@ Meeting GRIS - 26 juillet 2019
 ServerGris
 ----------
 
+- Pouvoir choisir la carte de son de les preferences du ServerGris. *important*
+
 - À l'ouverture, le zoom de la camera est toujours au maximum. Présentement, la distance
 de la caméra est sauvegardé dans le preset ET dans les preférences globales de l'app, cette
 dernière étant appelée en dernier et mal enregistrée en quittant l'app. Est-ce qu'on veut
