@@ -34,6 +34,7 @@ public:
     void resized() override;
 
     void setOscReceiveToggleState(bool state);
+    void setOscReceiveInputPort(int port);
 
     struct Listener
     {
@@ -59,6 +60,8 @@ private:
     TextEditor      oscReceivePortEditor;
     TextEditor      oscSendIpEditor;
     TextEditor      oscSendPortEditor;
+
+    int lastOscReceivePort;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterfaceBoxComponent)
 };

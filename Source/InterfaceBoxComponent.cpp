@@ -39,9 +39,22 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscSendToggle.setButtonText("Send on port : IP");
     addAndMakeVisible(&oscSendToggle);
 
+    lastOscReceivePort = 8000;
     oscReceivePortEditor.setText("8000");
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
     oscReceivePortEditor.addListener(this);
+    oscReceivePortEditor.onReturnKey = [this] {
+            oscSourceCombo.grabKeyboardFocus();
+        };
+    oscReceivePortEditor.onFocusLost = [this] {
+            if (! oscReceivePortEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue());
+                                                   oscReceivePortEditor.setText(String(lastOscReceivePort)); });
+            }
+        };
+
     addAndMakeVisible(&oscReceivePortEditor);
 
     oscSendIpEditor.setText("192.168.1.100");
@@ -65,6 +78,11 @@ void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
 
 void InterfaceBoxComponent::setOscReceiveToggleState(bool state) {
     oscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
+}
+
+void InterfaceBoxComponent::setOscReceiveInputPort(int port) {
+    lastOscReceivePort = port;
+    oscReceivePortEditor.setText(String(port));
 }
 
 void InterfaceBoxComponent::paint(Graphics& g) {

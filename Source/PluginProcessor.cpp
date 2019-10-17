@@ -554,11 +554,13 @@ void ControlGrisAudioProcessor::timerCallback() {
     if (m_canStopActivate && automationManagerAlt.getActivateState() && !m_isPlaying) {
         automationManagerAlt.setActivateState(false);
     }
-    if (m_canStopActivate && !m_isPlaying && m_hasEverBeenStarted) {
+    if (m_canStopActivate && !m_isPlaying) {
         m_canStopActivate = false;
-        // Reset source positions on stop.
-        for (int i = 0; i < m_numOfSources; i++) {
-            sources[i].setPos(sourceInitPositions[i]);
+        if (m_hasEverBeenStarted) {
+            // Reset source positions on stop.
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setPos(sourceInitPositions[i]);
+            }
         }
     }
 
