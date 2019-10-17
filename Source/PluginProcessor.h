@@ -110,6 +110,8 @@ public:
     void setSourceParameterValue(int sourceId, int parameterId, double value);
     void setLinkedParameterValue(int sourceId, int parameterId);
 
+    void initialize();
+
     double getInitTimeOnPlay();
     double getCurrentTime();
 

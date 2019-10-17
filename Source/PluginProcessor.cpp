@@ -957,8 +957,7 @@ void ControlGrisAudioProcessor::changeProgramName (int index, const String& newN
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
+void ControlGrisAudioProcessor::initialize() {
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
     m_canStopActivate = true;
@@ -966,6 +965,11 @@ void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPer
     for (int i = 0; i < m_numOfSources; i++) {
         sourceInitPositions[i] = sources[i].getPos();
     }
+}
+
+void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
+{
+    initialize();
 }
 
 void ControlGrisAudioProcessor::releaseResources()
@@ -1000,6 +1004,7 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 
 void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
     m_lock = true;
+    int started = m_isPlaying;
     AudioPlayHead* phead = getPlayHead();
     if (phead != nullptr) {
         AudioPlayHead::CurrentPositionInfo playposinfo;
@@ -1011,6 +1016,13 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
             m_needInitialization = false;
         } else {
             m_currentTime = playposinfo.timeInSeconds;
+        }
+    }
+
+    if (! started && m_isPlaying) { // Initialization here only for Logic, which is not
+        PluginHostType hostType;    // calling prepareToPlay every time the sequence starts.
+        if (hostType.isLogic()) {
+            initialize();
         }
     }
     m_lastTime = m_currentTime;
