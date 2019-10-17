@@ -636,8 +636,8 @@ void ControlGrisAudioProcessorEditor::resized() {
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();
 
-    positionPresetBanner.setBounds(600, 0, 50, 20);
-    positionPresetBox.setBounds(600, 20, 50, height - 20);
+    positionPresetBanner.setBounds(width, 0, 50, 20);
+    positionPresetBox.setBounds(width, 20, 50, height - 20);
 }
 
 //==============================================================================
