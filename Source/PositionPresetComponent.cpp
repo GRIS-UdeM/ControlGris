@@ -44,7 +44,9 @@ void PresetButton::refresh() {
 
 void PresetButton::clicked(const ModifierKeys &mods) {
     listeners.call([&] (Listener& l) { l.buttonClicked(this); });
-    loaded = getToggleState();
+    if (! mods.isShiftDown()) {
+        loaded = getToggleState();
+    }
     refresh();
 };
 
@@ -94,7 +96,6 @@ PositionPresetComponent::~PositionPresetComponent() {
 void PositionPresetComponent::setPreset(int value, bool notify) {
     if (presets[value - 1]->isSaved()) {
         presets[value - 1]->setToggleState(true, NotificationType::sendNotificationSync);
-        actionLog.setText(String("Load ") + String(value), NotificationType::dontSendNotification);
         if (notify) {
             buttonClicked(presets[value - 1]);
         }
@@ -117,7 +118,6 @@ void PositionPresetComponent::buttonClicked(PresetButton *button) {
 void PositionPresetComponent::savingPresetClicked(PresetButton *button) {
     actionLog.setText(String("Save ") + button->getButtonText(), NotificationType::dontSendNotification);
     listeners.call([&] (Listener& l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
-    setPreset(button->getButtonText().getIntValue());
 }
 
 void PositionPresetComponent:: deletingPresetClicked(PresetButton *button) {
