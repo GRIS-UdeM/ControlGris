@@ -403,8 +403,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
 
-    if (automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
-        automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK &&
+    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK &&
         automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) 
     {
         if (m_spatMode == SPAT_MODE_VBAP) {
