@@ -219,7 +219,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     }
 
     if (parameterID.compare("positionPreset") == 0) {
-        int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1);
+        int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1.01);
         m_currentPositionPreset = newPreset;
         if (recallFixedPosition(newPreset)) {
             ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
