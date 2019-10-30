@@ -50,7 +50,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(0.f, 1.f, 1.f/50.f), 0.f, nullptr, nullptr,
+                                                     NormalisableRange<float>(1.f, 50.f, 1.f), 1.f, nullptr, nullptr,
                                                      false, true, true));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -100,7 +100,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     m_bpm = 120;
 
-    m_currentPositionPreset = -1;
+    m_newPositionPreset = m_currentPositionPreset = -1;
 
     m_canStopActivate = false;
     m_hasEverBeenStarted = false;
@@ -175,7 +175,6 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
-
     bool needToLinkSourcePositions = false;
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         automationManager.setPlaybackPositionX(newValue);
@@ -219,14 +218,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     }
 
     if (parameterID.compare("positionPreset") == 0) {
-        int newPreset = (int)(newValue * NUMBER_OF_POSITION_PRESETS + 1.01);
-        m_currentPositionPreset = newPreset;
-        if (recallFixedPosition(newPreset)) {
-            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-            if (ed != nullptr) {
-                ed->updatePositionPreset(newPreset);
-            }
-        }
+        m_newPositionPreset = (int)newValue;
     }
 
     int sourceId = parameterID.getTrailingIntValue();
@@ -522,6 +514,16 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
 void ControlGrisAudioProcessor::timerCallback() {
     if (m_somethingChanged) {
         m_somethingChanged = false;
+    }
+
+    if (m_newPositionPreset != m_currentPositionPreset) {
+        if (recallFixedPosition(m_newPositionPreset)) {
+            m_currentPositionPreset = m_newPositionPreset;
+            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            if (ed != nullptr) {
+                ed->updatePositionPreset(m_currentPositionPreset);
+            }
+        }
     }
 
     // MainField automation.

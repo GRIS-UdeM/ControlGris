@@ -26,6 +26,12 @@ void PresetButton::setSavedState(bool isSaved) {
     refresh();
 }
 
+void PresetButton::setLoadedState(bool isLoaded) {
+    loaded = isLoaded;
+    setToggleState(isLoaded, NotificationType::dontSendNotification);
+    refresh();
+}
+
 bool PresetButton::isSaved() {
     return saved;
 }
@@ -68,6 +74,8 @@ void PresetButton::internalClickCallback (const ModifierKeys &mods) {
 PositionPresetComponent::PositionPresetComponent() {
     int groupId = 1;
 
+    currentSelection = -1;
+
     for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
         auto* button = new PresetButton();
         presets.add (button);
@@ -94,8 +102,12 @@ PositionPresetComponent::~PositionPresetComponent() {
 }
 
 void PositionPresetComponent::setPreset(int value, bool notify) {
+    if (currentSelection >= 0) {
+        presets[currentSelection]->setLoadedState(false);
+    }
     if (presets[value - 1]->isSaved()) {
-        presets[value - 1]->setToggleState(true, NotificationType::sendNotificationSync);
+        presets[value - 1]->setToggleState(true, NotificationType::dontSendNotification);
+        currentSelection = value - 1;
         if (notify) {
             buttonClicked(presets[value - 1]);
         }
@@ -110,6 +122,7 @@ void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved) {
 
 void PositionPresetComponent::buttonClicked(PresetButton *button) {
     if (button->getToggleState()) {
+        currentSelection = button->getButtonText().getIntValue() - 1;
         actionLog.setText(String("Load ") + button->getButtonText(), NotificationType::dontSendNotification);
         listeners.call([&] (Listener& l) { l.positionPresetChanged(button->getButtonText().getIntValue()); });
     }

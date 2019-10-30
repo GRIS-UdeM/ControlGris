@@ -165,6 +165,7 @@ private:
     double m_bpm;
 
     int m_currentPositionPreset;
+    int m_newPositionPreset;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
     Point<float> sourceInitPositions[MAX_NUMBER_OF_SOURCES];

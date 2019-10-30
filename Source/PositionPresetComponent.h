@@ -30,6 +30,7 @@ public:
     ~PresetButton() {};
 
     void setSavedState(bool isSaved);
+    void setLoadedState(bool isLoaded);
     void refresh();
 
     void clicked (const ModifierKeys &mods) override;
@@ -91,6 +92,8 @@ private:
     ListenerList<Listener> listeners;
 
     OwnedArray<PresetButton> presets;
+
+    int currentSelection;
 
     Label actionLog;
     Label appVersionLabel;

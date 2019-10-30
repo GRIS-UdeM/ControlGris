@@ -176,7 +176,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
-    int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue() * NUMBER_OF_POSITION_PRESETS + 1);
+    int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue());
     positionPresetBox.setPreset(preset, true);
 }
 
@@ -189,7 +189,6 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
-    const MessageManagerLock mmLock;
     positionPresetBox.setPreset(presetNumber);
 }
 
