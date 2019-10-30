@@ -403,9 +403,17 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
 
-    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK &&
-        automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) 
-    {
+    bool needToAdjustAutomationManager = false;
+    if (automationManager.getSourceLink() == SOURCE_LINK_INDEPENDENT && m_selectedSourceId == 0 &&
+        automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        needToAdjustAutomationManager = true;
+    } else if (automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
+               automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK &&
+               automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        needToAdjustAutomationManager = true;
+    }
+
+    if (needToAdjustAutomationManager) {
         if (m_spatMode == SPAT_MODE_VBAP) {
             automationManager.getSource().setAzimuth(m_sources[0].getAzimuth());
             automationManager.getSource().setElevation(m_sources[0].getElevation());
@@ -601,9 +609,17 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
         listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
 
-    if (automationManager.getSourceLink() != SOURCE_LINK_ALT_DELTA_LOCK &&
-        automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME &&
-        m_selectedSourceId == 0) {
+    bool needToAdjustAutomationManager = false;
+    if (automationManager.getSourceLink() == SOURCE_LINK_ALT_INDEPENDENT && m_selectedSourceId == 0 &&
+        automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        needToAdjustAutomationManager = true;
+    } else if (automationManager.getSourceLink() >= SOURCE_LINK_ALT_FIXED_ELEVATION &&
+               automationManager.getSourceLink() < SOURCE_LINK_ALT_DELTA_LOCK &&
+               automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        needToAdjustAutomationManager = true;
+    }
+
+    if (needToAdjustAutomationManager) {
         float y = m_sources[0].getElevation() / 90.0 * (height - 15) + 5;
         automationManager.setSourcePosition(xyToPos(Point<float> (10.0, y), height));
         automationManager.sendTrajectoryPositionChangedEvent();
