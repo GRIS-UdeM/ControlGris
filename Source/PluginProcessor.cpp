@@ -550,15 +550,18 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     m_lastTimerTime = getCurrentTime();
 
+    bool reinitSources = false;
     if (m_canStopActivate && automationManager.getActivateState() && !m_isPlaying) {
         automationManager.setActivateState(false);
+        reinitSources = true;
     }
     if (m_canStopActivate && automationManagerAlt.getActivateState() && !m_isPlaying) {
         automationManagerAlt.setActivateState(false);
+        reinitSources = true;
     }
     if (m_canStopActivate && !m_isPlaying) {
         m_canStopActivate = false;
-        if (m_hasEverBeenStarted) {
+        if (m_hasEverBeenStarted && reinitSources) {
             // Reset source positions on stop.
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setPos(sourceInitPositions[i]);
@@ -1021,9 +1024,9 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         }
     }
 
-    if (! started && m_isPlaying) { // Initialization here only for Logic, which is not
+    if (! started && m_isPlaying) { // Initialization here only for Logic (also Reaper and Live), which is not
         PluginHostType hostType;    // calling prepareToPlay every time the sequence starts.
-        if (hostType.isLogic()) {
+        if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
         }
     }
