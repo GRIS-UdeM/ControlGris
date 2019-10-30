@@ -47,7 +47,7 @@ public:
         virtual void settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) = 0;
         virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
         virtual void settingsBoxOscActivated(bool state) = 0;
-        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
+        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources, bool force=false) = 0;
         virtual void settingsBoxFirstSourceIdChanged(int firstSourceId) = 0;
     };
 
