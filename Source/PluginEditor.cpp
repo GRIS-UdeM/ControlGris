@@ -143,8 +143,8 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     settingsBoxOscFormatChanged(processor.getOscFormat());
     settingsBoxOscPortNumberChanged(processor.getOscPortNumber());
     settingsBoxOscActivated(processor.getOscConnected());
-    settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources(), true);
     settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
+    settingsBox.setNumberOfSources(processor.getNumberOfSources());
 
     interfaceBox.setOscReceiveToggleState(valueTreeState.state.getProperty("oscInputConnected", false));
     interfaceBox.setOscReceiveInputPort(valueTreeState.state.getProperty("oscInputPortNumber", 8000));
@@ -226,8 +226,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
     settingsBox.setActivateButtonState(processor.getOscConnected());
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources, bool force) {
-    if (processor.getNumberOfSources() != numOfSources || force) {
+void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
+    if (processor.getNumberOfSources() != numOfSources) {
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
         processor.setSelectedSourceId(m_selectedSource);

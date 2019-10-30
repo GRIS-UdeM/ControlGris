@@ -68,7 +68,7 @@ public:
     void settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) override;
     void settingsBoxOscPortNumberChanged(int oscPort) override;
     void settingsBoxOscActivated(bool state) override;
-    void settingsBoxNumberOfSourcesChanged(int numOfSources, bool force=false) override;
+    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
     void settingsBoxFirstSourceIdChanged(int firstSourceId) override;
 
     // SourceBoxComponent::Listeners
