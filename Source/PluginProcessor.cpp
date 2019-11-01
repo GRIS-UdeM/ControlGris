@@ -442,7 +442,7 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 }
 
 bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
-    disconnectOSCInput();
+    disconnectOSCInput(oscPort);
 
     m_oscInputConnected = oscReceiver.connect(oscPort);
     if (!m_oscInputConnected) {
@@ -458,13 +458,14 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
     return m_oscInputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCInput() {
+bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
     if (m_oscInputConnected) {
         if (oscReceiver.disconnect()) {
             m_oscInputConnected = false;
         }
     }
 
+    parameters.state.setProperty("oscInputPortNumber", oscPort, nullptr);
     parameters.state.setProperty("oscInputConnected", getOscInputConnected(), nullptr);
 
     return !m_oscInputConnected;

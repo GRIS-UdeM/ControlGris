@@ -97,7 +97,7 @@ public:
     void sendOscMessage();
 
     bool createOscInputConnection(int oscPort);
-    bool disconnectOSCInput();
+    bool disconnectOSCInput(int oscPort);
     bool getOscInputConnected();
     void oscMessageReceived (const OSCMessage& message) override;
     void oscBundleReceived(const OSCBundle& bundle) override;

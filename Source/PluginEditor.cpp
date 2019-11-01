@@ -592,7 +592,7 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
     if (state) {
         processor.createOscInputConnection(oscPort);
     } else {
-        processor.disconnectOSCInput();
+        processor.disconnectOSCInput(oscPort);
     }
 }
 
