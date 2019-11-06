@@ -386,7 +386,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     if (m_spatMode == SPAT_MODE_VBAP) {
         Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
         selectedSource->setAzimuth(pos.x);
-        selectedSource->setElevation(pos.y);
+        selectedSource->setElevationNoClip(pos.y);
     } else {
         Point<float> pos = xyToPos(mouseLocation.toFloat(), width);
         selectedSource->setX(pos.x);
