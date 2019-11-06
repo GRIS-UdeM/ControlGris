@@ -53,6 +53,7 @@ public:
     float getElevation();
     float getNormalizedElevation();
     void setDistance(float distance);
+    void setDistanceNoClip(float distance);
     float getDistance();
     void setAzimuthSpan(float azimuthSpan);
     float getAzimuthSpan();
@@ -97,6 +98,7 @@ private:
     float m_elevation;
     float m_elevationNoClip;
     float m_distance;
+    float m_distanceNoClip;
     float m_aziSpan;
     float m_eleSpan;
     float m_x;

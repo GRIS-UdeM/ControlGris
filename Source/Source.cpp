@@ -26,6 +26,7 @@ Source::Source() {
     m_elevation = 0.0;
     m_elevationNoClip = 0.0;
     m_distance = 1.0;
+    m_distanceNoClip = 1.0;
     m_aziSpan = 0.0;
     m_eleSpan = 0.0;
     m_x = 0.0;
@@ -103,8 +104,17 @@ float Source::getNormalizedElevation() {
     return m_elevation / 90.0;
 }
 
+void Source::setDistanceNoClip(float distance) {
+    m_distanceNoClip = distance;
+    setDistance(m_distanceNoClip);
+}
+
 void Source::setDistance(float distance) {
-    m_distance = distance;
+    if (distance < 0.0) {
+        m_distance = 0.0;
+    } else {
+        m_distanceNoClip = m_distance = distance;
+    }
     computeXY();
 }
 
@@ -195,6 +205,7 @@ void Source::computeAzimuthElevation() {
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
         m_elevation = 90.0 - rad * 90.0;
     } else {                    // azimuth - distance
+        rad = rad < 0.0 ? 0.0 : rad;
         m_distance = rad;
     }
     m_changed = true;
@@ -204,7 +215,7 @@ void Source::fixSourcePosition(bool shouldBeFixed) {
     if (shouldBeFixed) {
         fixedAzimuth = m_azimuth;
         fixedElevation = m_elevationNoClip;
-        fixedDistance = m_distance;
+        fixedDistance = m_distanceNoClip;
         fixedX = m_x;
         fixedY = m_y;
     } else {
@@ -239,6 +250,7 @@ void Source::setFixedPosition(float x, float y) {
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
         fixedElevation = 90.0 - rad * 90.0;
     } else {                    // azimuth - distance
+        rad = rad < 0.0 ? 0.0 : rad;
         fixedDistance = rad;
     }
 }
@@ -253,7 +265,7 @@ void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevat
         setElevationNoClip(fixedElevation + deltaElevation * 90.0f);
     } else {                    // azimuth - distance
         setAzimuth(fixedAzimuth + deltaAzimuth);
-        setDistance(fixedDistance + deltaDistance);
+        setDistanceNoClip(fixedDistance + deltaDistance);
     }
     computeXY();
 }
