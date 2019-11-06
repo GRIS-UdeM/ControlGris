@@ -145,7 +145,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id...
         sources[i].setId(i + m_firstSourceId - 1);
         // .. and coordinates.
-        sources[i].setAzimuth(i % 2 == 0 ? -90.0 : 90.0);
+        sources[i].setAzimuth(i % 2 == 0 ? 90.0 : -90.0);
         sources[i].setElevation(0.0);
         sources[i].setDistance(1.0);
     }
