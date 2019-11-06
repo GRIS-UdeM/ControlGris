@@ -24,13 +24,13 @@ ServerGris
 
 - Pouvoir choisir la carte de son de les preferences du ServerGris. *important*
 
+- Un mode LBAP/VBAP dans lequel on peut sélectionner d'être en VBAP par source dans un LBAP global.
+
+******* done ******
 - À l'ouverture, le zoom de la camera est toujours au maximum. Présentement, la distance
 de la caméra est sauvegardé dans le preset ET dans les preférences globales de l'app, cette
 dernière étant appelée en dernier et mal enregistrée en quittant l'app. Est-ce qu'on veut
-vraiment une pref globale si chaque preset possède déjà ses valeurs propres?
-
-- Un mode LBAP/VBAP dans lequel on peut sélectionner d'être en VBAP par source dans un LBAP global.
-
+vraiment une pref globale si chaque preset possède déjà ses valeurs propres? **done**
 
 
 Meeting GRIS - 19 septembre 2019
@@ -54,6 +54,8 @@ ServerGris
 
 - lumière rouge pour visualiser les clips.
 - Stats de recording (clipping, when, ...).
-- Master gain en dB.
-- Dome et cube à la place de VBAP et LBAP.
+
+******* done ******
+- Master gain en dB. **done**
+- Dome et cube à la place de VBAP et LBAP. **done**
 
