@@ -230,7 +230,11 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
 }
 
 void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
+    bool initSourcePlacement = false;
     if (processor.getNumberOfSources() != numOfSources || m_isInsideSetPluginState) {
+        if (processor.getNumberOfSources() != numOfSources) {
+            initSourcePlacement = true;
+        }
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
         processor.setSelectedSourceId(m_selectedSource);
@@ -240,7 +244,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         mainField.setSources(processor.getSources(), numOfSources);
         elevationField.setSources(processor.getSources(), numOfSources);
         sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
-        if (processor.getNumberOfSources() != numOfSources) {
+        if (initSourcePlacement) {
             sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
         }
     }
