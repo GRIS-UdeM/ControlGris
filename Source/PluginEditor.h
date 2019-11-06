@@ -133,7 +133,6 @@ private:
 
     PositionPresetComponent positionPresetBox;
 
-    bool m_fixedSourcesWindowVisible;
     int m_selectedSource;
 
     Value lastUIWidth, lastUIHeight;

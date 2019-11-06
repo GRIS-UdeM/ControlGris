@@ -35,7 +35,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 { 
     setLookAndFeel(&grisLookAndFeel);
 
-    m_fixedSourcesWindowVisible = false;
     m_selectedSource = 0;
 
     // Set up the interface.
@@ -473,11 +472,9 @@ void ControlGrisAudioProcessorEditor::refresh() {
     mainField.setIsPlaying(processor.getIsPlaying());
     elevationField.setIsPlaying(processor.getIsPlaying());
 
-    if (! m_fixedSourcesWindowVisible) {
-        mainField.repaint();
-        if (processor.getOscFormat() == SPAT_MODE_LBAP)
-            elevationField.repaint();
-    }
+    mainField.repaint();
+    if (processor.getOscFormat() == SPAT_MODE_LBAP)
+        elevationField.repaint();
 
     if (trajectoryBox.getActivateState() != automationManager.getActivateState()) {
         trajectoryBox.setActivateState(automationManager.getActivateState());
