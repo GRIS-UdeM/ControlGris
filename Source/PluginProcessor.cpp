@@ -50,7 +50,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(1.f, 50.f, 1.f), 1.f, nullptr, nullptr,
+                                                     NormalisableRange<float>(1.f, 50.f, 1.f), 50.f, nullptr, nullptr,
                                                      false, true, true));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
