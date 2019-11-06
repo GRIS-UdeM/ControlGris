@@ -133,6 +133,7 @@ private:
 
     PositionPresetComponent positionPresetBox;
 
+    bool m_isInsideSetPluginState;
     int m_selectedSource;
 
     Value lastUIWidth, lastUIHeight;

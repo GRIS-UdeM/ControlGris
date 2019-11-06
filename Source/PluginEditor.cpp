@@ -35,6 +35,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 { 
     setLookAndFeel(&grisLookAndFeel);
 
+    m_isInsideSetPluginState = false;
     m_selectedSource = 0;
 
     // Set up the interface.
@@ -131,6 +132,8 @@ ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
 }
 
 void ControlGrisAudioProcessorEditor::setPluginState() {
+    m_isInsideSetPluginState = true;
+
     // Set state for the link buttons.
     //--------------------------------
     parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
@@ -143,7 +146,7 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     settingsBoxOscPortNumberChanged(processor.getOscPortNumber());
     settingsBoxOscActivated(processor.getOscConnected());
     settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
-    settingsBox.setNumberOfSources(processor.getNumberOfSources());
+    settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources());
 
     interfaceBox.setOscReceiveToggleState(valueTreeState.state.getProperty("oscInputConnected", false));
     interfaceBox.setOscReceiveInputPort(valueTreeState.state.getProperty("oscInputPortNumber", 8000));
@@ -177,6 +180,8 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue());
     positionPresetBox.setPreset(preset, true);
+
+    m_isInsideSetPluginState = false;
 }
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
@@ -225,7 +230,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
 }
 
 void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
-    if (processor.getNumberOfSources() != numOfSources) {
+    if (processor.getNumberOfSources() != numOfSources || m_isInsideSetPluginState) {
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
         processor.setSelectedSourceId(m_selectedSource);
@@ -235,7 +240,9 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         mainField.setSources(processor.getSources(), numOfSources);
         elevationField.setSources(processor.getSources(), numOfSources);
         sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
-        sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
+        if (processor.getNumberOfSources() != numOfSources) {
+            sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
+        }
     }
 }
 
