@@ -568,6 +568,9 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
         }
         validateSourcePositionsAlt();
     }
+
+    processor.setPositionPreset(0);
+    positionPresetBox.setPreset(0);
 }
 
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField) {

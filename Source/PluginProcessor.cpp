@@ -50,7 +50,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(1.f, 50.f, 1.f), 50.f, nullptr, nullptr,
+                                                     NormalisableRange<float>(0.f, 50.f, 1.f), 0.f, nullptr, nullptr,
                                                      false, true, true));
 
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -100,7 +100,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     m_bpm = 120;
 
-    m_newPositionPreset = m_currentPositionPreset = -1;
+    m_newPositionPreset = m_currentPositionPreset = 0;
 
     m_canStopActivate = false;
     m_hasEverBeenStarted = false;
@@ -517,7 +517,7 @@ void ControlGrisAudioProcessor::timerCallback() {
         m_somethingChanged = false;
     }
 
-    if (m_newPositionPreset != m_currentPositionPreset) {
+    if (m_newPositionPreset != 0 && m_newPositionPreset != m_currentPositionPreset) {
         if (recallFixedPosition(m_newPositionPreset)) {
             m_currentPositionPreset = m_newPositionPreset;
             ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -584,19 +584,15 @@ void ControlGrisAudioProcessor::timerCallback() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::setPluginState() {
-    // ASK: Do we really need these calls? Conflict with preset automation? Need to validate with a newly created plugin...
-
-    // If no preset has been saved and recalled, try the first fixed position (if it exists),
-    // and finally, try to restore the last saved positions.
-    if (m_currentPositionPreset == -1) {
-        if (fixPositionData.getNumChildElements() > 0) {
-            currentFixPosition = fixPositionData.getFirstChildElement();
-        } else {
-            for (int i = 0; i < m_numOfSources; i++) {
-                String id(i);
-                sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
-                sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
-                sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
+    // If no preset is loaded, try to restore the last saved positions.
+    if (m_currentPositionPreset == 0) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            String id(i);
+            sources[i].setNormalizedAzimuth(parameters.state.getProperty(String("p_azimuth_") + id));
+            sources[i].setNormalizedElevation(parameters.state.getProperty(String("p_elevation_") + id));
+            sources[i].setDistance(parameters.state.getProperty(String("p_distance_") + id));
+            if (i == 0) {
+                automationManager.setSourcePosition(sources[0].getPos());
             }
         }
     }
@@ -763,10 +759,17 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 }
 
 //==============================================================================
+// TODO : Add a preset at position 0 (not seen in the interface) to handle the case where
+// no preset are selected or when we want to unselect a preset. Fix issue #66, #67 and #68.
 void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
-    if (recallFixedPosition(presetNumber)) {
+    if (presetNumber == 0) {
+        m_newPositionPreset = m_currentPositionPreset = 0;
+        parameters.getParameter("positionPreset")->beginChangeGesture();
+        parameters.getParameter("positionPreset")->setValueNotifyingHost(0.0f);
+        parameters.getParameter("positionPreset")->endChangeGesture();
+    } else if (recallFixedPosition(presetNumber)) {
         m_currentPositionPreset = presetNumber;
-        float value = (presetNumber - 1) / (float)NUMBER_OF_POSITION_PRESETS;
+        float value = presetNumber / (float)(NUMBER_OF_POSITION_PRESETS + 1);
         parameters.getParameter("positionPreset")->beginChangeGesture();
         parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
         parameters.getParameter("positionPreset")->endChangeGesture();

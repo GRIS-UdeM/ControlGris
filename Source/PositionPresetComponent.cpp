@@ -22,7 +22,6 @@
 
 void PresetButton::setSavedState(bool isSaved) {
     saved = isSaved;
-    setToggleState(isSaved, NotificationType::dontSendNotification);
     refresh();
 }
 
@@ -105,6 +104,11 @@ void PositionPresetComponent::setPreset(int value, bool notify) {
     if (currentSelection >= 0) {
         presets[currentSelection]->setLoadedState(false);
     }
+
+    if (value == 0) {
+        return;
+    }
+
     if (presets[value - 1]->isSaved()) {
         presets[value - 1]->setToggleState(true, NotificationType::dontSendNotification);
         currentSelection = value - 1;
