@@ -45,9 +45,11 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
-                                                     NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+                                                     NormalisableRange<float>(0.f, 5.f, 1.f), 0.f, nullptr, nullptr,
+                                                     false, true, true));
     parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
-                                                     NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+                                                     NormalisableRange<float>(0.f, 4.f, 1.f), 0.f, nullptr, nullptr,
+                                                     false, true, true));
 
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
                                                      NormalisableRange<float>(0.f, 50.f, 1.f), 0.f, nullptr, nullptr,
@@ -192,7 +194,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     }
 
     if (parameterID.compare("sourceLink") == 0) {
-        int val = (int)(newValue * 5) + 1;
+        int val = (int)(newValue) + 1;
         if (val != automationManager.getSourceLink()) {
             automationManager.setSourceLink(val);
             automationManager.fixSourcePosition();
@@ -205,7 +207,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     }
 
     if (parameterID.compare("sourceLinkAlt") == 0) {
-        int val = (int)(newValue * 4) + 1;
+        int val = (int)(newValue) + 1;
         if (val != automationManagerAlt.getSourceLink()) {
             automationManagerAlt.setSourceLink(val);
             automationManagerAlt.fixSourcePosition();

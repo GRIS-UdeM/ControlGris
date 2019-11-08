@@ -414,7 +414,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 
     processor.onSourceLinkChanged(value);
 
-    valueTreeState.getParameterAsValue("sourceLink").setValue((value - 1) / 5.f);
+    valueTreeState.getParameter("sourceLink")->beginChangeGesture();
+    valueTreeState.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / 5.f);
+    valueTreeState.getParameter("sourceLink")->endChangeGesture();
 
     mainField.repaint();
 }
@@ -429,7 +431,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int valu
 
     processor.onSourceLinkAltChanged(value);
 
-    valueTreeState.getParameterAsValue("sourceLinkAlt").setValue((value - 1) / 4.f);
+    valueTreeState.getParameter("sourceLinkAlt")->beginChangeGesture();
+    valueTreeState.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)value - 1.f) / 4.f);
+    valueTreeState.getParameter("sourceLinkAlt")->endChangeGesture();
 
     elevationField.repaint();
 }
