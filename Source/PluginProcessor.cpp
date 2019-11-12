@@ -55,16 +55,10 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      NormalisableRange<float>(0.f, 50.f, 1.f), 0.f, nullptr, nullptr,
                                                      false, true, true));
 
-    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-        String id(i);
-        String id1(i + 1);
-        parameters.push_back(std::make_unique<Parameter>(
-                                 String("azimuthSpan_") + id, String("Source ") + id1 + String(" Azimuth Span"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
-        parameters.push_back(std::make_unique<Parameter>(
-                                 String("elevationSpan_") + id, String("Source ") + id1 + String(" Elevation Span"),
-                                 String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
-    }
+    parameters.push_back(std::make_unique<Parameter>(String("azimuthSpan"), String("Azimuth Span"),
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("elevationSpan"), String("Elevation Span"),
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
 
     return { parameters.begin(), parameters.end() };
 }
@@ -118,8 +112,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("oscInputConnected", false, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
-    parameters.state.setProperty("azimuthSpanLink", false, nullptr);
-    parameters.state.setProperty("elevationSpanLink", false, nullptr);
     parameters.state.setProperty("spanLinkState", false, nullptr);
 
     // Trajectory box persitent settings.
@@ -140,10 +132,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         parameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
         parameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
 
-        // Automatable, per source, parameters.
-        parameters.addParameterListener(String("azimuthSpan_") + id, this);
-        parameters.addParameterListener(String("elevationSpan_") + id, this);
-
         // Gives the source an initial id...
         sources[i].setId(i + m_firstSourceId - 1);
         // .. and coordinates.
@@ -159,6 +147,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.addParameterListener(String("sourceLink"), this);
     parameters.addParameterListener(String("sourceLinkAlt"), this);
     parameters.addParameterListener(String("positionPreset"), this);
+    parameters.addParameterListener(String("azimuthSpan"), this);
+    parameters.addParameterListener(String("elevationSpan"), this);
 
     automationManager.addListener(this);
     automationManagerAlt.addListener(this);
@@ -177,6 +167,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
+
     bool needToLinkSourcePositions = false;
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         automationManager.setPlaybackPositionX(newValue);
@@ -223,11 +214,14 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
         m_newPositionPreset = (int)newValue;
     }
 
-    int sourceId = parameterID.getTrailingIntValue();
-    if (parameterID.startsWith("azimuthSpan_")) {
-        sources[sourceId].setAzimuthSpan(newValue);
-    } else if (parameterID.startsWith("elevationSpan_")) {
-        sources[sourceId].setElevationSpan(newValue);
+    if (parameterID.startsWith("azimuthSpan")) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setAzimuthSpan(newValue);
+        }
+    } else if (parameterID.startsWith("elevationSpan")) {
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setElevationSpan(newValue);
+        }
     }
 
     m_somethingChanged = true;
@@ -631,41 +625,21 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
             sources[sourceId].setY(value);
             break;
         case SOURCE_ID_AZIMUTH_SPAN:
-            sources[sourceId].setAzimuthSpan(value);
-            parameters.getParameter("azimuthSpan_" + id)->beginChangeGesture();
-            parameters.getParameter("azimuthSpan_" + id)->setValueNotifyingHost(value);
-            parameters.getParameter("azimuthSpan_" + id)->endChangeGesture();
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setAzimuthSpan(value);
+            }
+            parameters.getParameter("azimuthSpan")->beginChangeGesture();
+            parameters.getParameter("azimuthSpan")->setValueNotifyingHost(value);
+            parameters.getParameter("azimuthSpan")->endChangeGesture();
             break;
         case SOURCE_ID_ELEVATION_SPAN:
-            sources[sourceId].setElevationSpan(value);
-            parameters.getParameter("elevationSpan_" + id)->beginChangeGesture();
-            parameters.getParameter("elevationSpan_" + id)->setValueNotifyingHost(value);
-            parameters.getParameter("elevationSpan_" + id)->endChangeGesture();
+            for (int i = 0; i < m_numOfSources; i++) {
+                sources[i].setElevationSpan(value);
+            }
+            parameters.getParameter("elevationSpan")->beginChangeGesture();
+            parameters.getParameter("elevationSpan")->setValueNotifyingHost(value);
+            parameters.getParameter("elevationSpan")->endChangeGesture();
             break;
-    }
-
-    setLinkedParameterValue(sourceId, parameterId);
-}
-
-// Checks if link buttons are on and update sources consequently.
-//---------------------------------------------------------------
-void ControlGrisAudioProcessor::setLinkedParameterValue(int sourceId, int parameterId) {
-    bool linkAzimuthSpan = (parameterId == SOURCE_ID_AZIMUTH_SPAN && parameters.state.getProperty("azimuthSpanLink", false));
-    bool linkElevationSpan = (parameterId == SOURCE_ID_ELEVATION_SPAN && parameters.state.getProperty("elevationSpanLink", false));
-    for (int i = 0; i < m_numOfSources; i++) {
-        String id(i);
-        if (linkAzimuthSpan) {
-            sources[i].setAzimuthSpan(sources[sourceId].getAzimuthSpan());
-            parameters.getParameter("azimuthSpan_" + id)->beginChangeGesture();
-            parameters.getParameter("azimuthSpan_" + id)->setValueNotifyingHost(sources[i].getAzimuthSpan());
-            parameters.getParameter("azimuthSpan_" + id)->endChangeGesture();
-        }
-        if (linkElevationSpan) {
-            sources[i].setElevationSpan(sources[sourceId].getElevationSpan());
-            parameters.getParameter("elevationSpan_" + id)->beginChangeGesture();
-            parameters.getParameter("elevationSpan_" + id)->setValueNotifyingHost(sources[i].getElevationSpan());
-            parameters.getParameter("elevationSpan_" + id)->endChangeGesture();
-        }
     }
 }
 
@@ -761,8 +735,6 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 }
 
 //==============================================================================
-// TODO : Add a preset at position 0 (not seen in the interface) to handle the case where
-// no preset are selected or when we want to unselect a preset. Fix issue #66, #67 and #68.
 void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
     if (presetNumber == 0) {
         m_newPositionPreset = m_currentPositionPreset = 0;
@@ -817,7 +789,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
 }
 
 bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
-    // called twice on new preset selection...
+    // FIXME: called twice on new preset selection...
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
     while (fpos) {

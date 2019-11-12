@@ -136,8 +136,6 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
 
     // Set state for the link buttons.
     //--------------------------------
-    parametersBox.setLinkState(SOURCE_ID_AZIMUTH_SPAN, valueTreeState.state.getProperty("azimuthSpanLink", false));
-    parametersBox.setLinkState(SOURCE_ID_ELEVATION_SPAN, valueTreeState.state.getProperty("elevationSpanLink", false));
     parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 
     // Set global settings values.
@@ -376,11 +374,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::parametersBoxLinkChanged(int parameterId, bool value) {
-    StringArray parameterNames({"", "", "", "", "", "azimuthSpanLink", "elevationSpanLink"});
-    valueTreeState.state.setProperty(parameterNames[parameterId], value, nullptr);
-}
-
 void ControlGrisAudioProcessorEditor::parametersBoxSpanLinkChanged(bool value) {
     valueTreeState.state.setProperty("spanLinkState", value, nullptr);
 }

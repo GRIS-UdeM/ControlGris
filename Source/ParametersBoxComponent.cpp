@@ -19,102 +19,40 @@
  *************************************************************************/
 #include "ParametersBoxComponent.h"
 
-//-------------------------------------------------------------------
-ParameterComponent::ParameterComponent(int parameterId, String label, Component *parent) {
-    m_parameterId = parameterId;
-
-    parameterLabel.setText(label, NotificationType::dontSendNotification);
-    addAndMakeVisible(&parameterLabel);
-
-    linkButton.setButtonText("Link");
-    linkButton.addListener(this);
-    addAndMakeVisible(&linkButton);
-
-    slider.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    slider.setRange(0.0, 1.0);
-    slider.addListener(this);
-    addAndMakeVisible(&slider);
-
-    addListener(dynamic_cast<ParameterComponent::Listener *>(parent));
-    parent->addAndMakeVisible(this);
-}
-
-ParameterComponent::~ParameterComponent() {
-    setLookAndFeel(nullptr);
-}
-
-void ParameterComponent::paint(Graphics& g) {
-    GrisLookAndFeel *lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
-    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
-}
-
-void ParameterComponent::resized() {
-    parameterLabel.setBounds(0, 0, 150, 20);
-    linkButton.setBounds(0, 20, 45, 20);
-    slider.setBounds(50, 20, 175, 20);
-}
-
-void ParameterComponent::buttonClicked(Button *button) {
-    listeners.call([&] (Listener& l) { l.parameterLinkChanged(m_parameterId, button->getToggleState()); });
-}
-
-void ParameterComponent::sliderValueChanged(Slider *slider) {
-    listeners.call([&] (Listener& l) { l.parameterChanged(m_parameterId, slider->getValue()); });
-}
-
-void ParameterComponent::setValue(double value) {
-    slider.setValue(value, NotificationType::sendNotificationAsync);
-}
-
-bool ParameterComponent::getLinkState() {
-    return linkButton.getToggleState();
-}
-
-void ParameterComponent::setLinkState(bool state) {
-    linkButton.setToggleState(state, NotificationType::dontSendNotification);
-    listeners.call([&] (Listener& l) { l.parameterLinkChanged(m_parameterId, state); });
-}
-
-//-------------------------------------------------------------------
-ParametersBoxComponent::ParametersBoxComponent() :
-    p_azimuthSpan(SOURCE_ID_AZIMUTH_SPAN, "Azimuth Span", this),
-    p_elevationSpan(SOURCE_ID_ELEVATION_SPAN, "Elevation Span", this)
+ParametersBoxComponent::ParametersBoxComponent()
 {
     m_distanceEnabled = false;
     m_spanLinked = false;
+
+    azimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
+    addAndMakeVisible(&azimuthLabel);
+
+    elevationLabel.setText("Elevation Span", NotificationType::dontSendNotification);
+    addAndMakeVisible(&elevationLabel);
+
+    azimuthSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    azimuthSpan.setRange(0.0, 1.0);
+    azimuthSpan.addListener(this);
+    addAndMakeVisible(&azimuthSpan);
+
+    elevationSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    elevationSpan.setRange(0.0, 1.0);
+    elevationSpan.addListener(this);
+    addAndMakeVisible(&elevationSpan);
 }
 
 ParametersBoxComponent::~ParametersBoxComponent() {}
 
 void ParametersBoxComponent::setSelectedSource(Source *source) {
     selectedSource = source;
-    p_azimuthSpan.setValue(selectedSource->getAzimuthSpan());
-    p_elevationSpan.setValue(selectedSource->getElevationSpan());
+    azimuthSpan.setValue(selectedSource->getAzimuthSpan(), NotificationType::dontSendNotification);
+    elevationSpan.setValue(selectedSource->getElevationSpan(), NotificationType::dontSendNotification);
     repaint();
 }
 
 void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
     m_distanceEnabled = shouldBeEnabled;
     resized();
-}
-
-bool ParametersBoxComponent::getLinkState(int parameterId) {
-    if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
-        return p_azimuthSpan.getLinkState();
-    } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
-        return p_elevationSpan.getLinkState();
-    } else {
-        return false;
-    }
-}
-
-void ParametersBoxComponent::setLinkState(int parameterId, bool state) {
-    if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
-        p_azimuthSpan.setLinkState(state);
-    } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
-        p_elevationSpan.setLinkState(state);
-    }
 }
 
 bool ParametersBoxComponent::getSpanLinkState() {
@@ -145,21 +83,21 @@ void ParametersBoxComponent::mouseDown(const MouseEvent &event) {
     }
 }
 
-void ParametersBoxComponent::parameterChanged(int parameterId, double value) {
+void ParametersBoxComponent::sliderValueChanged(Slider *slider) {
+    float value = slider->getValue();
+    int parameterId = (slider == &azimuthSpan) ? SOURCE_ID_AZIMUTH_SPAN : SOURCE_ID_ELEVATION_SPAN;
+
     listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(parameterId, value); });
+
     if (m_spanLinked) {
         if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
-            p_elevationSpan.setValue(value);
+            elevationSpan.setValue(value, NotificationType::sendNotificationAsync);
             listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(SOURCE_ID_ELEVATION_SPAN, value); });
         } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
-            p_azimuthSpan.setValue(value);
+            azimuthSpan.setValue(value, NotificationType::sendNotificationAsync);
             listeners.call([&] (Listener& l) { l.parametersBoxParameterChanged(SOURCE_ID_AZIMUTH_SPAN, value); });
         }
     }
-}
-
-void ParametersBoxComponent::parameterLinkChanged(int parameterId, bool value) {
-    listeners.call([&] (Listener& l) { l.parametersBoxLinkChanged(parameterId, value); });
 }
 
 void ParametersBoxComponent::paint(Graphics& g) {
@@ -177,7 +115,6 @@ void ParametersBoxComponent::paint(Graphics& g) {
     g.drawArrow(Line<float>(285, 34, 245, 34), 4, 10, 10);
     g.drawArrow(Line<float>(250, 34, 290, 34), 4, 10, 10);
 
-//    g.setColour(selectedSource->getColour());
     Rectangle<float> area(x, y, 20, 20);
     area.expand(3, 3);
     g.setColour(Colour(.2f, .2f, .2f, 1.f));
@@ -191,7 +128,8 @@ void ParametersBoxComponent::paint(Graphics& g) {
 }
 
 void ParametersBoxComponent::resized() {
-    p_azimuthSpan.setBounds(5, 3, 225, 40);
-    p_elevationSpan.setBounds(305, 3, 225, 40);
+    azimuthLabel.setBounds(5, 3, 225, 20);
+    elevationLabel.setBounds(305, 3, 225, 20);
+    azimuthSpan.setBounds(5, 23, 225, 20);
+    elevationSpan.setBounds(305, 23, 225, 20);
 }
-
