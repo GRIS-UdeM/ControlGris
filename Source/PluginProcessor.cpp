@@ -38,11 +38,11 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
     std::vector<std::unique_ptr<Parameter>> parameters;
 
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_x"), String("Recording Trajectory X"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"), String("Recording Trajectory Y"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"), String("Recording Trajectory Z"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.5f, nullptr, nullptr));
+                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
                                                      NormalisableRange<float>(0.f, 5.f, 1.f), 0.f, nullptr, nullptr,
@@ -139,6 +139,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         sources[i].setElevation(0.0);
         sources[i].setDistance(1.0);
     }
+
+    automationManager.setSourcePosition(sources[0].getPos());
+    parameters.getParameter("recordingTrajectory_x")->setValue(sources[0].getPos().x);
+    parameters.getParameter("recordingTrajectory_y")->setValue(sources[0].getPos().y);
 
     // Automation values for the recording trajectory.
     parameters.addParameterListener(String("recordingTrajectory_x"), this);

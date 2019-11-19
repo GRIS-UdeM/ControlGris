@@ -24,8 +24,8 @@ AutomationManager::AutomationManager() {
     sourceLink = SOURCE_LINK_INDEPENDENT;
     drawingType = TRAJECTORY_TYPE_DRAWING;
     activateState = false;
-    source.setX(0.5f);
-    source.setY(0.5f);
+    source.setX(0.0f);
+    source.setY(0.0f);
     playbackDuration = 5.0;
     currentTrajectoryPoint = Point<float> (FIELD_WIDTH / 2, FIELD_WIDTH / 2);
     playbackPosition = Point<float> (-1.0f, -1.0f);
