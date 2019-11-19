@@ -203,7 +203,7 @@ void Source::computeAzimuthElevation() {
     float rad = sqrtf(x*x + y*y);
     if (m_radiusIsElevation) {  // azimuth - elevation
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
-        m_elevation = 90.0 - rad * 90.0;
+        m_elevationNoClip = m_elevation = 90.0 - rad * 90.0;
     } else {                    // azimuth - distance
         rad = rad < 0.0 ? 0.0 : rad;
         m_distance = rad;

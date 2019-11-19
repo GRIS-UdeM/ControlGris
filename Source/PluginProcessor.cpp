@@ -944,6 +944,18 @@ void ControlGrisAudioProcessor::initialize() {
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
     m_canStopActivate = true;
+
+    // If a preset is actually selected, we always recall it on initialize because
+    // the automation won't trigger parameterChanged if it stays on the same value.
+    if (m_currentPositionPreset != 0) {
+        if (recallFixedPosition(m_currentPositionPreset)) {
+            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            if (ed != nullptr) {
+                ed->updatePositionPreset(m_currentPositionPreset);
+            }
+        }
+    }
+
     // Keep in memory source positions at the time we hit play.
     for (int i = 0; i < m_numOfSources; i++) {
         sourceInitPositions[i] = sources[i].getPos();
