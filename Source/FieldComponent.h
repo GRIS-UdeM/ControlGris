@@ -89,8 +89,10 @@ public:
     
     void createSpanPathVBAP(Graphics& g, int i);
     void createSpanPathLBAP(Graphics& g, int i);
+    void drawTrajectoryHandle (Graphics&);
     void paint (Graphics&);
-	
+
+    bool isTrajectoryHandleClicked(const MouseEvent &event);
 	void mouseDown (const MouseEvent &event);
  	void mouseDrag (const MouseEvent &event);
  	void mouseUp (const MouseEvent &event);
