@@ -174,7 +174,7 @@ void TrajectoryBoxComponent::resized() {
     sourceLinkCombo.setBounds(120, 10, 160, 20);
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(120, 40, 160, 20);
-    activateButton.setBounds(10, 70, 100, 20);
+    activateButton.setBounds(120, 70, 100, 20);
 
     if (m_spatMode == SPAT_MODE_LBAP) {
         sourceLinkAltCombo.setVisible(true);

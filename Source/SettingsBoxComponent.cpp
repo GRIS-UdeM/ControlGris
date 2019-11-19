@@ -23,7 +23,6 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscFormatLabel);
 
-    numOfSourcesEditor.setExplicitFocusOrder(1);
     oscFormatCombo.addItem("VBAP - ServerGris", 1);
     oscFormatCombo.addItem("LBAP - ServerGris", 2);
     oscFormatCombo.onChange = [this] {
@@ -87,7 +86,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
         };
     addAndMakeVisible(&firstSourceIdEditor);
 
-    activateButton.setExplicitFocusOrder(5);
+    activateButton.setExplicitFocusOrder(1);
     activateButton.setButtonText("Activate OSC");
     activateButton.onClick = [this] {
             listeners.call([&] (Listener& l) { l.settingsBoxOscActivated(activateButton.getToggleState()); });
