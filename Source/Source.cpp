@@ -195,11 +195,13 @@ void Source::computeXY() {
 void Source::computeAzimuthElevation() {
     float x = m_x * 2.0 - 1.0;
     float y = m_y * 2.0 - 1.0;
-    float ang = atan2f(x, y) / M_PI * 180.0;
-    if (ang <= -180) {
-        ang += 360.0;
+    if (x != 0.0 || y != 0.0) {
+        float ang = atan2f(x, y) / M_PI * 180.0;
+        if (ang <= -180) {
+            ang += 360.0;
+        }
+        m_azimuth = -ang;
     }
-    m_azimuth = -ang;
     float rad = sqrtf(x*x + y*y);
     if (m_radiusIsElevation) {  // azimuth - elevation
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
