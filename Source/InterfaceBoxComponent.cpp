@@ -39,6 +39,10 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscSendToggle.setButtonText("Send on port : IP");
     addAndMakeVisible(&oscSendToggle);
 
+    oscReceiveIpEditor.setText(IPAddress::getLocalAddress().toString());
+    oscReceiveIpEditor.setReadOnly(true);
+    addAndMakeVisible(&oscReceiveIpEditor);
+
     lastOscReceivePort = 8000;
     oscReceivePortEditor.setText("8000");
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
@@ -100,6 +104,7 @@ void InterfaceBoxComponent::resized() {
 
     oscReceiveToggle.setBounds(255, 10, 200, 20);
     oscReceivePortEditor.setBounds(400, 10, 60, 20);
+    oscReceiveIpEditor.setBounds(470, 10, 120, 20);
 
     oscSendToggle.setBounds(255, 35, 200, 20);
     oscSendPortEditor.setBounds(400, 35, 60, 20);

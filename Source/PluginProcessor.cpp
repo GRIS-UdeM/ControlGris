@@ -486,13 +486,16 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
 
 void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     String address = message.getAddressPattern().toString().toStdString();
-    if (address == "/controlgris/traj/1/x" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if ((address == "/controlgris/traj/1/x" || address == "/controlgris/traj/1/xyz/1") &&
+         automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         automationManager.setSourcePositionX(message[0].getFloat32());
         automationManager.sendTrajectoryPositionChangedEvent();
-    } else if (address == "/controlgris/traj/1/y" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    } else if ((address == "/controlgris/traj/1/y" || address == "/controlgris/traj/1/xyz/2") &&
+                automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         automationManager.setSourcePositionY(message[0].getFloat32());
         automationManager.sendTrajectoryPositionChangedEvent();
-    } else if (address == "/controlgris/traj/1/z" && automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    } else if ((address == "/controlgris/traj/1/z" || address == "/controlgris/traj/1/xyz/3") &&
+                automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
         automationManagerAlt.setSourcePositionY(message[0].getFloat32());
         automationManagerAlt.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/xy" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
