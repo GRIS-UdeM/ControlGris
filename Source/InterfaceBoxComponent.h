@@ -57,6 +57,7 @@ private:
     ToggleButton    oscReceiveToggle;
     ToggleButton    oscSendToggle;
 
+    TextEditor      oscReceiveIpEditor;
     TextEditor      oscReceivePortEditor;
     TextEditor      oscSendIpEditor;
     TextEditor      oscSendPortEditor;
