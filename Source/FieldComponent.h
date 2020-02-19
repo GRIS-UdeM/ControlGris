@@ -109,6 +109,8 @@ private:
 
     SPAT_MODE_ENUM m_spatMode;
 
+    bool showCircularSourceSelectionWarning = false;
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };
 

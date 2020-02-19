@@ -322,6 +322,10 @@ void MainFieldComponent::paint(Graphics& g) {
         drawTrajectoryHandle(g);
     }
 
+    if (showCircularSourceSelectionWarning) {
+        g.setColour(Colours::white);
+        g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION, juce::Rectangle<int>(0, 0, width, 50), Justification(Justification::centred), 1);
+    }
 }
 
 bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
@@ -377,9 +381,13 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
-            m_selectedSourceId = i;
-            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
-            clickOnSource = true;
+            if (i > 0 && automationManager.getSourceLink() > SOURCE_LINK_INDEPENDENT && automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK) {
+                showCircularSourceSelectionWarning = true;
+            } else {
+                m_selectedSourceId = i;
+                listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
+                clickOnSource = true;
+            }
             break;
         }
     }
@@ -465,6 +473,7 @@ void MainFieldComponent::mouseUp(const MouseEvent &event) {
         }
         repaint();
     }
+    showCircularSourceSelectionWarning = false;
 }
 
 Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {

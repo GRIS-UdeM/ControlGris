@@ -32,6 +32,8 @@ enum SPAT_MODE_ENUM {
     SPAT_MODE_LBAP
 };
 
+const String WARNING_CIRCULAR_SOURCE_SELECTION ("Only source 1 can be \nselected in circular links!");
+
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
 enum SOURCE_PLACEMENT_ENUM {    SOURCE_PLACEMENT_LEFT_ALTERNATE = 1,
