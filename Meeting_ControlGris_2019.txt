@@ -22,16 +22,12 @@ Meeting GRIS - 26 juillet 2019
 ServerGris
 ----------
 
-- Pouvoir choisir la carte de son de les preferences du ServerGris. *important*
-
-- Un mode LBAP/VBAP dans lequel on peut sélectionner d'être en VBAP par source dans un LBAP global.
-
 ******* done ******
 - À l'ouverture, le zoom de la camera est toujours au maximum. Présentement, la distance
 de la caméra est sauvegardé dans le preset ET dans les preférences globales de l'app, cette
 dernière étant appelée en dernier et mal enregistrée en quittant l'app. Est-ce qu'on veut
 vraiment une pref globale si chaque preset possède déjà ses valeurs propres? **done**
-
+- Pouvoir choisir la carte de son de les preferences du ServerGris. *important*
 
 Meeting GRIS - 19 septembre 2019
 ================================
@@ -52,10 +48,21 @@ les autres sources devrait être calquée sur la relation entre les sources elle
 ServerGris
 ----------
 
-- lumière rouge pour visualiser les clips.
-- Stats de recording (clipping, when, ...).
-
 ******* done ******
 - Master gain en dB. **done**
 - Dome et cube à la place de VBAP et LBAP. **done**
+- lumière rouge pour visualiser les clips.
+
+Meeting GRIS - 16 décembre 2019
+===============================
+
+ServerGris:
+
+******* done ******
+- De VBAP à LBAP -> on veut prendre le X-Y-Z pour la conversion (garder exactement le même dôme plutôt que l'éclater)
+- Speaker setup window - indiquer dans le titre le mode (DOME ou CUBE).
+- LBAP -> Créer trois zones de gain et filtre (centre, périphérie et lointain). Dans speaker setup.
+- ServerGRIS devient SpatGris.
+- Speaker setup - sorties directes doivent toujours utiliser les coordonnées X-Y-Z, même en VBAP (disable() azimuth - elevation - distance).
+- Afficher un warning si les sorties directes sélectionnées n'existe pas en tant que sorties directes dans le speaker setup qui vient d'être chargé.
 
