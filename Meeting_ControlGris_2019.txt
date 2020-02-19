@@ -1,8 +1,6 @@
 Meeting GRIS - 26 juillet 2019
 ==============================
 
-- Enregistrement dans DP et Logic. **à suivre**
-
 - 2 trajectoires (en mode independant, automatiquement linké sur les sources 1 et 2, avec une couleur qui l'indique).
 
 ******* done ******
