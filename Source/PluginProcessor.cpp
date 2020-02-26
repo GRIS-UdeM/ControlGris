@@ -668,22 +668,15 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
 }
 
 void ControlGrisAudioProcessor::linkSourcePositions() {
-    float delta = kSourceDiameter / (float)FIELD_WIDTH;
-    Point<float> autopos = automationManager.getSourcePosition() - Point<float> (0.5, 0.5);
-    float mag = sqrtf(autopos.x*autopos.x + autopos.y*autopos.y);
-    float ang = atan2f(autopos.y, autopos.x);
-    float x = (mag + (mag * delta)) * cosf(ang) + 0.5;
-    float y = (mag + (mag * delta)) * sinf(ang) + 0.5;
-
     switch (automationManager.getSourceLink()) {
         case SOURCE_LINK_INDEPENDENT:
-            sources[0].setPos(Point<float> (x, y));
+            sources[0].setPos(automationManager.getSourcePosition());
             break;
         case SOURCE_LINK_CIRCULAR:
         case SOURCE_LINK_CIRCULAR_FIXED_RADIUS:
         case SOURCE_LINK_CIRCULAR_FIXED_ANGLE:
         case SOURCE_LINK_CIRCULAR_FULLY_FIXED:
-            sources[0].setPos(Point<float> (x, y));
+            sources[0].setPos(automationManager.getSourcePosition());
             if (getOscFormat() == SPAT_MODE_LBAP) {
                 float deltaAzimuth = sources[0].getDeltaAzimuth();
                 float deltaDistance = sources[0].getDeltaDistance();
