@@ -400,6 +400,8 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
     if (value == SOURCE_LINK_DELTA_LOCK) {
         automationManager.setSourcePosition(Point<float> (0.5, 0.5));
+    } else {
+        automationManager.setSourcePosition(processor.getSources()[0].getPos());
     }
 
     automationManager.setSourceLink(value);
@@ -515,24 +517,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     if (whichField == 0) {
-        // If a source other than the first one is moved in the field, we need to adjust the position of the first source
-        // to get the recording trajectory and the source links correctly.
-        if (sourceId != 0 &&
-            automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
-            automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK)
-        { // All circular modes.
-            if (processor.getOscFormat() == SPAT_MODE_LBAP) {
-                float deltaAzimuth = processor.getSources()[sourceId].getDeltaAzimuth();
-                float deltaDistance = processor.getSources()[sourceId].getDeltaDistance();
-                processor.getSources()[0].setCoordinatesFromFixedSource(deltaAzimuth, 0.0, deltaDistance);
-            } else {
-                float deltaAzimuth = processor.getSources()[sourceId].getDeltaAzimuth();
-                float deltaElevation = processor.getSources()[sourceId].getDeltaElevation();
-                processor.getSources()[0].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
-            }
-        }
-        else if (sourceId != 0 && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) 
-        { // Delta Lock mode.
+        if (sourceId != 0 && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
             float deltaX = processor.getSources()[sourceId].getDeltaX();
             float deltaY = processor.getSources()[sourceId].getDeltaY();
             processor.getSources()[0].setXYCoordinatesFromFixedSource(deltaX, deltaY);
