@@ -36,11 +36,16 @@ public:
     void setOscReceiveToggleState(bool state);
     void setOscReceiveInputPort(int port);
 
+    void setOscSendToggleState(bool state);
+    void setOscSendOutputAddress(String address);
+    void setOscSendOutputPort(int port);
+
     struct Listener
     {
         virtual ~Listener() {}
 
         virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
+        virtual void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) = 0;
     };
 
     void addListener(Listener* l) { listeners.add (l); }
@@ -63,6 +68,8 @@ private:
     TextEditor      oscSendPortEditor;
 
     int lastOscReceivePort;
+    int lastOscSendPort;
+    String lastOscSendAddress;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterfaceBoxComponent)
 };

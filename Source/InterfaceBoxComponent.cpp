@@ -38,13 +38,17 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
 
     oscSendToggle.setButtonText("Send on port : IP");
     addAndMakeVisible(&oscSendToggle);
+    oscSendToggle.onClick = [this] {
+            listeners.call([&] (Listener& l) { l.oscOutputConnectionChanged(oscSendToggle.getToggleState(), oscSendIpEditor.getText(),
+                                                                            oscSendPortEditor.getText().getIntValue()); });
+        };
 
     oscReceiveIpEditor.setText(IPAddress::getLocalAddress().toString());
     oscReceiveIpEditor.setReadOnly(true);
     addAndMakeVisible(&oscReceiveIpEditor);
 
     lastOscReceivePort = 8000;
-    oscReceivePortEditor.setText("8000");
+    oscReceivePortEditor.setText(String(lastOscReceivePort));
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
     oscReceivePortEditor.addListener(this);
     oscReceivePortEditor.onReturnKey = [this] {
@@ -54,21 +58,50 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
             if (! oscReceivePortEditor.isEmpty()) {
                 listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue()); });
             } else {
-                listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue());
+                listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), lastOscReceivePort);
                                                    oscReceivePortEditor.setText(String(lastOscReceivePort)); });
             }
         };
 
     addAndMakeVisible(&oscReceivePortEditor);
 
-    oscSendIpEditor.setText("192.168.1.100");
+    lastOscSendAddress = String("192.168.1.100");
+    oscSendIpEditor.setText(lastOscSendAddress);
     oscSendIpEditor.setInputRestrictions(16, ".0123456789");
     oscSendIpEditor.addListener(this);
+    oscSendIpEditor.onReturnKey = [this] {
+            oscSourceCombo.grabKeyboardFocus();
+        };
+    oscSendIpEditor.onFocusLost = [this] {
+            if (! oscSendIpEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.oscOutputConnectionChanged(oscSendToggle.getToggleState(), oscSendIpEditor.getText(),
+                                                                                oscSendPortEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.oscOutputConnectionChanged(oscSendToggle.getToggleState(), lastOscSendAddress,
+                                                                                oscSendPortEditor.getText().getIntValue());
+                                                   oscSendIpEditor.setText(String(lastOscSendAddress)); });
+            }
+        };
+
     addAndMakeVisible(&oscSendIpEditor);
 
-    oscSendPortEditor.setText("9000");
+    lastOscSendPort = 9000;
+    oscSendPortEditor.setText(String(lastOscSendPort));
     oscSendPortEditor.setInputRestrictions(5, "0123456789");
     oscSendPortEditor.addListener(this);
+    oscSendPortEditor.onReturnKey = [this] {
+            oscSourceCombo.grabKeyboardFocus();
+        };
+    oscSendPortEditor.onFocusLost = [this] {
+            if (! oscSendPortEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.oscOutputConnectionChanged(oscSendToggle.getToggleState(), oscSendIpEditor.getText(),
+                                                                                oscSendPortEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.oscOutputConnectionChanged(oscSendToggle.getToggleState(), oscSendIpEditor.getText(), lastOscSendPort);
+                                                   oscSendPortEditor.setText(String(lastOscSendPort)); });
+            }
+        };
+
     addAndMakeVisible(&oscSendPortEditor);
 }
 
@@ -80,6 +113,7 @@ void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
     unfocusAllComponents();
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscReceiveToggleState(bool state) {
     oscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
 }
@@ -89,6 +123,22 @@ void InterfaceBoxComponent::setOscReceiveInputPort(int port) {
     oscReceivePortEditor.setText(String(port));
 }
 
+//==============================================================================
+void InterfaceBoxComponent::setOscSendToggleState(bool state) {
+    oscSendToggle.setToggleState(state, NotificationType::dontSendNotification);
+}
+
+void InterfaceBoxComponent::setOscSendOutputPort(int port) {
+    lastOscSendPort = port;
+    oscSendPortEditor.setText(String(port));
+}
+
+void InterfaceBoxComponent::setOscSendOutputAddress(String address) {
+    lastOscSendAddress = address;
+    oscSendIpEditor.setText(address);
+}
+
+//==============================================================================
 void InterfaceBoxComponent::paint(Graphics& g) {
     GrisLookAndFeel *lookAndFeel;
     lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());

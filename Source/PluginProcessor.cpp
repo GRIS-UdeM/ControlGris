@@ -90,6 +90,9 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_oscConnected = true;
     m_oscInputConnected = false;
     m_currentOSCInputPort = 8000;
+    m_oscOutputConnected = false;
+    m_currentOSCOutputPort = 9000;
+    m_currentOSCOutputAddress = String("192.168.1.100");
 
     m_initTimeOnPlay = m_currentTime = 0.0;
     m_lastTime = m_lastTimerTime = 10000000.0;
@@ -107,9 +110,12 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Global setting parameters.
     parameters.state.setProperty("oscFormat", 0, nullptr);
     parameters.state.setProperty("oscPortNumber", 18032, nullptr);
-    parameters.state.setProperty("oscInputPortNumber", 8000, nullptr);
     parameters.state.setProperty("oscConnected", true, nullptr);
+    parameters.state.setProperty("oscInputPortNumber", 8000, nullptr);
     parameters.state.setProperty("oscInputConnected", false, nullptr);
+    parameters.state.setProperty("oscOutputAddress", "192.168.1.100", nullptr);
+    parameters.state.setProperty("oscOutputPortNumber", 9000, nullptr);
+    parameters.state.setProperty("oscOutputConnected", false, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
     parameters.state.setProperty("spanLinkState", false, nullptr);
@@ -441,14 +447,15 @@ void ControlGrisAudioProcessor::sendOscMessage() {
     }
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
     disconnectOSCInput(oscPort);
 
-    m_oscInputConnected = oscReceiver.connect(oscPort);
+    m_oscInputConnected = oscInputReceiver.connect(oscPort);
     if (!m_oscInputConnected) {
         std::cout << "Error: could not connect to UDP input port " << oscPort << "." << std::endl;
     } else {
-        oscReceiver.addListener(this);
+        oscInputReceiver.addListener(this);
         m_currentOSCInputPort = oscPort;
         parameters.state.setProperty("oscInputPortNumber", oscPort, nullptr);
     }
@@ -460,7 +467,7 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
 
 bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
     if (m_oscInputConnected) {
-        if (oscReceiver.disconnect()) {
+        if (oscInputReceiver.disconnect()) {
             m_oscInputConnected = false;
         }
     }
@@ -515,6 +522,95 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     }
 }
 
+//==============================================================================
+bool ControlGrisAudioProcessor::createOscOutputConnection(String oscAddress, int oscPort) {
+    disconnectOSCOutput(oscAddress, oscPort);
+
+    m_oscOutputConnected = oscOutputSender.connect(oscAddress, oscPort);
+    if (!m_oscOutputConnected)
+        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << "." << std::endl;
+    else {
+        m_currentOSCOutputPort = oscPort;
+        m_currentOSCOutputAddress = oscAddress;
+        parameters.state.setProperty("oscOutputPortNumber", oscPort, nullptr);
+        parameters.state.setProperty("oscOutputAddress", oscAddress, nullptr);
+    }
+
+    parameters.state.setProperty("oscOutputConnected", getOscOutputConnected(), nullptr);
+
+    return m_oscOutputConnected;
+}
+
+bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPort) {
+    if (m_oscOutputConnected) {
+        if (oscOutputSender.disconnect()) {
+            m_oscOutputConnected = false;
+        }
+    }
+
+    parameters.state.setProperty("oscOutputPortNumber", oscPort, nullptr);
+    parameters.state.setProperty("oscOutputAddress", oscAddress, nullptr);
+    parameters.state.setProperty("oscOutputConnected", getOscOutputConnected(), nullptr);
+
+    return !m_oscOutputConnected;
+}
+
+bool ControlGrisAudioProcessor::getOscOutputConnected() {
+    return m_oscOutputConnected;
+}
+
+void ControlGrisAudioProcessor::sendOscOutputMessage() {
+    if (! m_oscOutputConnected)
+        return;
+
+    float trajectory1x = automationManager.getSourcePosition().x;
+    float trajectory1y = automationManager.getSourcePosition().y;
+    float trajectory1z = automationManagerAlt.getSourcePosition().y;
+
+    OSCMessage message(OSCAddressPattern ("/controlgris/traj/1/x"));
+    message.addFloat32(trajectory1x);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/1"));
+    message.addFloat32(trajectory1x);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/y"));
+    message.addFloat32(trajectory1y);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/2"));
+    message.addFloat32(trajectory1y);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/z"));
+    message.addFloat32(trajectory1z);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/3"));
+    message.addFloat32(trajectory1z);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xy"));
+    message.addFloat32(trajectory1x);
+    message.addFloat32(trajectory1y);
+    oscOutputSender.send(message);
+    message.clear();
+
+    message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz"));
+    message.addFloat32(trajectory1x);
+    message.addFloat32(trajectory1y);
+    message.addFloat32(trajectory1z);
+    oscOutputSender.send(message);
+}
+
+//==============================================================================
 void ControlGrisAudioProcessor::timerCallback() {
     if (m_somethingChanged) {
         m_somethingChanged = false;
@@ -583,6 +679,7 @@ void ControlGrisAudioProcessor::timerCallback() {
     }
 
     sendOscMessage();
+    sendOscOutputMessage();
 }
 
 //==============================================================================
@@ -1079,6 +1176,11 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
 
         if (valueTree.getProperty("oscInputConnected", false)) {
             createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 8000));
+        }
+
+        if (valueTree.getProperty("oscOutputConnected", false)) {
+            createOscOutputConnection(valueTree.getProperty("oscOutputAddress", "192.168.1.100"),
+                                      valueTree.getProperty("oscOutputPortNumber", 9000));
         }
 
         // Load saved fixed positions.

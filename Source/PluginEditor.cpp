@@ -149,6 +149,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     interfaceBox.setOscReceiveToggleState(valueTreeState.state.getProperty("oscInputConnected", false));
     interfaceBox.setOscReceiveInputPort(valueTreeState.state.getProperty("oscInputPortNumber", 8000));
 
+    interfaceBox.setOscSendToggleState(valueTreeState.state.getProperty("oscOutputConnected", false));
+    interfaceBox.setOscSendOutputAddress(valueTreeState.state.getProperty("oscOutputAddress", "192.168.1.100"));
+    interfaceBox.setOscSendOutputPort(valueTreeState.state.getProperty("oscOutputPortNumber", 9000));
+
     // Set state for trajectory box persistent values.
     //------------------------------------------------
     trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
@@ -586,6 +590,14 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
         processor.createOscInputConnection(oscPort);
     } else {
         processor.disconnectOSCInput(oscPort);
+    }
+}
+
+void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) {
+    if (state) {
+        processor.createOscOutputConnection(oscAddress, oscPort);
+    } else {
+        processor.disconnectOSCOutput(oscAddress, oscPort);
     }
 }
 

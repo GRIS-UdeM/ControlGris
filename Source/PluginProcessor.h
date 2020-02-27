@@ -102,6 +102,11 @@ public:
     void oscMessageReceived (const OSCMessage& message) override;
     void oscBundleReceived(const OSCBundle& bundle) override;
 
+    bool createOscOutputConnection(String oscAddress, int oscPort);
+    bool disconnectOSCOutput(String oscAddress, int oscPort);
+    bool getOscOutputConnected();
+    void sendOscOutputMessage();
+
     void timerCallback() override;
 
     //==============================================================================
@@ -143,12 +148,15 @@ private:
     SPAT_MODE_ENUM m_selectedOscFormat;
     bool m_oscConnected;
     bool m_oscInputConnected;
+    bool m_oscOutputConnected;
     int m_firstSourceId;
     int m_numOfSources;
     int m_selectedSourceId;
     int m_currentOSCPort;
     int m_lastConnectedOSCPort;
     int m_currentOSCInputPort;
+    int m_currentOSCOutputPort;
+    String m_currentOSCOutputAddress;
     bool m_somethingChanged;
     bool m_needInitialization;
 
@@ -170,7 +178,8 @@ private:
     Point<float> sourceInitPositions[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
-    OSCReceiver oscReceiver;
+    OSCSender oscOutputSender;
+    OSCReceiver oscInputReceiver;
 
     XmlElement fixPositionData;
     XmlElement *currentFixPosition = nullptr;
