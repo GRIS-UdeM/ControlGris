@@ -854,6 +854,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
     // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
+    newData->setAttribute("spanLinked", (bool)parameters.state.getProperty("spanLinkState", false));
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
@@ -902,6 +903,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
     }
 
     currentFixPosition = fpos;
+    parameters.state.setProperty("spanLinkState", currentFixPosition->getBoolAttribute("spanLinked"), nullptr);
     float x, y, z = 0.0;
     for (int i = 0; i < m_numOfSources; i++) {
         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
@@ -924,6 +926,7 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
     forEachXmlChildElement (*src, element) {
         XmlElement *newData = new XmlElement("ITEM");
         newData->setAttribute("ID", element->getIntAttribute("ID"));
+        newData->setAttribute("spanLinked", element->getBoolAttribute("spanLinked"));
         for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
             newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
             newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));

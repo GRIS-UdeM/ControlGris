@@ -196,6 +196,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
     positionPresetBox.setPreset(presetNumber);
+    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 }
 
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber, bool isSaved) {
@@ -573,6 +574,7 @@ void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichFiel
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber) {
     processor.setPositionPreset(presetNumber);
+    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 }
 
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber) {
