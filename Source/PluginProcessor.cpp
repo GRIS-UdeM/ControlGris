@@ -107,7 +107,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_lastSourceLink = m_lastSourceLinkAlt = 0;
 
     m_canStopActivate = false;
-    m_hasEverBeenStarted = false;
 
     // Size of the plugin window.
     parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 680 } }, {} }, -1, nullptr);
@@ -790,6 +789,11 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
+    } else if (automationManager.hasValidPlaybackPosition()) {
+        int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
+        recallFixedPosition(preset);
+        automationManager.setSourcePosition(automationManager.getPlaybackPosition());
+        linkSourcePositions();
     }
 
     // ElevationField automation.
@@ -801,31 +805,21 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManagerAlt.hasValidPlaybackPosition()) {
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
+    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
+        int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
+        recallFixedPosition(preset);
+        automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
+        linkSourcePositionsAlt();
     }
 
     m_lastTimerTime = getCurrentTime();
 
-    bool reinitSources = false;
-    if (m_canStopActivate && automationManager.getActivateState() && !m_isPlaying) {
-        automationManager.setActivateState(false);
-        reinitSources = true;
-    }
-    if (m_canStopActivate && automationManagerAlt.getActivateState() && !m_isPlaying) {
-        automationManagerAlt.setActivateState(false);
-        reinitSources = true;
-    }
     if (m_canStopActivate && !m_isPlaying) {
+        if (automationManager.getActivateState())
+            automationManager.setActivateState(false);
+        if (automationManagerAlt.getActivateState())
+            automationManagerAlt.setActivateState(false);
         m_canStopActivate = false;
-        if (m_hasEverBeenStarted && reinitSources) {
-            // Reset source positions on stop.
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setPos(sourceInitPositions[i]);
-            }
-        }
-    }
-
-    if (m_isPlaying) {
-        m_hasEverBeenStarted = true;
     }
 
     ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -988,6 +982,9 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
+    if (presetNumber == m_currentPositionPreset)
+        return;
+
     if (presetNumber == 0) {
         m_newPositionPreset = m_currentPositionPreset = 0;
         parameters.getParameter("positionPreset")->beginChangeGesture();
@@ -1209,11 +1206,6 @@ void ControlGrisAudioProcessor::initialize() {
                 ed->updatePositionPreset(m_currentPositionPreset);
             }
         }
-    }
-
-    // Keep in memory source positions at the time we hit play.
-    for (int i = 0; i < m_numOfSources; i++) {
-        sourceInitPositions[i] = sources[i].getPos();
     }
 }
 

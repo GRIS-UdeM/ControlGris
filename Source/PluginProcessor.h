@@ -167,7 +167,6 @@ private:
 
     bool m_lock; // I don't think we need this anymore...
     bool m_isPlaying;
-    bool m_hasEverBeenStarted;
     bool m_canStopActivate;
     double m_bpm;
 
@@ -185,7 +184,6 @@ private:
     int m_lastSourceLinkAlt;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
-    Point<float> sourceInitPositions[MAX_NUMBER_OF_SOURCES];
 
     OSCSender oscSender;
     OSCSender oscOutputSender;
