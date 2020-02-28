@@ -174,6 +174,16 @@ private:
     int m_currentPositionPreset;
     int m_newPositionPreset;
 
+    // Filtering variables for OSC controller output.
+    int m_lastPositionPreset;
+    float m_lastTrajectory1x;
+    float m_lastTrajectory1y;
+    float m_lastTrajectory1z;
+    float m_lastAzispan;
+    float m_lastElespan;
+    int m_lastSourceLink;
+    int m_lastSourceLinkAlt;
+
     Source sources[MAX_NUMBER_OF_SOURCES];
     Point<float> sourceInitPositions[MAX_NUMBER_OF_SOURCES];
 
