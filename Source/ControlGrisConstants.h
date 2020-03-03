@@ -83,13 +83,16 @@ enum TRAJECTORY_TYPE_ENUM { TRAJECTORY_TYPE_REALTIME = 1,
                             TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_OUT_IN,
                             TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_OUT_IN,
                             TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT,
-                            TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT
+                            TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT,
+                            TRAJECTORY_TYPE_SQUARE_CLOCKWISE,
+                            TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE
                           };
 const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing"), String("Circle Clockwise"),
                                            String("Circle Counter Clockwise"), String("Ellipse Clockwise"),
                                            String("Ellipse Counter Clockwise"), String("Spiral Clockwise Out In"),
                                            String("Spiral Counter Clockwise Out In"), String("Spiral Clockwise In Out"),
-                                           String("Spiral Counter Clockwise In Out")};
+                                           String("Spiral Counter Clockwise In Out"), String("Square Clockwise"),
+                                           String("Square Counter Clockwise")};
 
 enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_REALTIME = 1,
                                 TRAJECTORY_TYPE_ALT_DRAWING,

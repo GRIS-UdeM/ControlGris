@@ -309,6 +309,70 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
+        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE:
+            for (int i = 0; i < 300; i++) {
+                float step = 1.f / 75.f;
+                if (i < 75) {
+                    x = i * step;
+                    y = 0.f;
+                } else if (i < 150) {
+                    x = 1.f;
+                    y = (i - 75) * step;
+                } else if (i < 225) {
+                    x = 1.f - ((i - 150) * step);
+                    y = 1.f;
+                } else {
+                    x = 0.f;
+                    y = 1.f - ((i - 225) * step);
+                }
+                float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
+                float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
+                magnitude = sqrtf(transx * transx + transy * transy);
+                float adjustedMagnitude = magnitude * M_PI / 2.f;
+                x *= adjustedMagnitude;
+                y *= adjustedMagnitude;
+                x = x + 150 - (adjustedMagnitude / 2);
+                y = y + 150 - (adjustedMagnitude / 2);
+                Point<float> p (x, y);
+                AffineTransform t = AffineTransform::rotation(-angle + M_PI / 4.f, 150.f, 150.f);
+                p.applyTransform(t);
+                p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
+                p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
+                trajectoryPoints.add(p);
+            }
+            break;
+        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE:
+            for (int i = 0; i < 300; i++) {
+                float step = 1.f / 75.f;
+                if (i < 75) {
+                    x = 0.f;
+                    y = i * step;
+                } else if (i < 150) {
+                    x = (i - 75) * step;
+                    y = 1.f;
+                } else if (i < 225) {
+                    x = 1.f;
+                    y = 1.f - ((i - 150) * step);
+                } else {
+                    x = 1.f - ((i - 225) * step);
+                    y = 0.f;
+                }
+                float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
+                float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
+                magnitude = sqrtf(transx * transx + transy * transy);
+                float adjustedMagnitude = magnitude * M_PI / 2.f;
+                x *= adjustedMagnitude;
+                y *= adjustedMagnitude;
+                x = x + 150 - (adjustedMagnitude / 2);
+                y = y + 150 - (adjustedMagnitude / 2);
+                Point<float> p (x, y);
+                AffineTransform t = AffineTransform::rotation(-angle + M_PI / 4.f, 150.f, 150.f);
+                p.applyTransform(t);
+                p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
+                p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
+                trajectoryPoints.add(p);
+            }
+            break;
     }
 
     if (drawingType > TRAJECTORY_TYPE_DRAWING) {
