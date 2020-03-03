@@ -62,6 +62,8 @@ public:
     Point<float> getSourcePosition();
     void fixSourcePosition();
 
+    void setSourceAndPlaybackPosition(Point<float> pos);
+
     void sendTrajectoryPositionChangedEvent();
 
     struct Listener

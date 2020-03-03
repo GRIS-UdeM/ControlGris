@@ -898,6 +898,11 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
     if (manager == &automationManager) {
+        if (! getIsPlaying()) {
+            automationManager.setSourceAndPlaybackPosition(Point<float> (position.x, position.y));
+            parameters.getParameter("recordingTrajectory_x")->setValue(position.x);
+            parameters.getParameter("recordingTrajectory_y")->setValue(position.y);
+        }
         parameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
         parameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(position.x);
         parameters.getParameter("recordingTrajectory_x")->endChangeGesture();
@@ -906,6 +911,10 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
         parameters.getParameter("recordingTrajectory_y")->endChangeGesture();
         linkSourcePositions();
     } else if (manager == &automationManagerAlt) {
+        if (! getIsPlaying()) {
+            automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0.f, position.y));
+            parameters.getParameter("recordingTrajectory_z")->setValue(position.y);
+        }
         parameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
         parameters.getParameter("recordingTrajectory_z")->setValueNotifyingHost(position.y);
         parameters.getParameter("recordingTrajectory_z")->endChangeGesture();
@@ -1261,7 +1270,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         }
     }
 
-    if (! started && m_isPlaying) { // Initialization here only for Logic (also Reaper and Live), which is not
+    if (! started && m_isPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
         PluginHostType hostType;    // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();

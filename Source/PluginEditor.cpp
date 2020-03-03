@@ -404,7 +404,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
     if (value == SOURCE_LINK_DELTA_LOCK) {
-        automationManager.setSourcePosition(Point<float> (0.5, 0.5));
+        automationManager.setSourceAndPlaybackPosition(Point<float> (0.5, 0.5));
     } else {
         automationManager.setSourcePosition(processor.getSources()[0].getPos());
     }
@@ -423,7 +423,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
     if (value == SOURCE_LINK_ALT_DELTA_LOCK) {
-        automationManagerAlt.setSourcePosition(Point<float> (0., 0.5));
+        automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0., 0.5));
     }
 
     automationManagerAlt.setSourceLink(value);
@@ -652,6 +652,15 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
 
+    if (! processor.getIsPlaying()) {
+        if (sourceLink != SOURCE_LINK_DELTA_LOCK) {
+            automationManager.setSourceAndPlaybackPosition(processor.getSources()[0].getPos());
+        } else {
+            automationManager.setPlaybackPositionX(-1.0f);
+            automationManager.setPlaybackPositionY(-1.0f);
+        }
+    }
+
     // Nothing to do for independent mode.
 
     // All circular modes.
@@ -692,6 +701,15 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
 void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManagerAlt.getSourceLink();
+
+    if (! processor.getIsPlaying()) {
+        if (sourceLink != SOURCE_LINK_ALT_DELTA_LOCK) {
+            automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0.f, processor.getSources()[0].getNormalizedElevation()));
+        } else {
+            automationManagerAlt.setPlaybackPositionX(-1.0f);
+            automationManagerAlt.setPlaybackPositionY(-1.0f);
+        }
+    }
 
     // Fixed elevation.
     if (sourceLink == SOURCE_LINK_ALT_FIXED_ELEVATION) {

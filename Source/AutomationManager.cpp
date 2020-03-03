@@ -166,6 +166,13 @@ void AutomationManager::setSourcePositionY(float y) {
     source.setY(y);
 }
 
+void AutomationManager::setSourceAndPlaybackPosition(Point<float> pos) {
+    setSourcePositionX(pos.x);
+    setSourcePositionY(pos.y);
+    setPlaybackPositionX(pos.x);
+    setPlaybackPositionY(pos.y);
+}
+
 void AutomationManager::sendTrajectoryPositionChangedEvent() {
     if (activateState || drawingType == TRAJECTORY_TYPE_REALTIME || drawingType == TRAJECTORY_TYPE_ALT_REALTIME) {
         listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
