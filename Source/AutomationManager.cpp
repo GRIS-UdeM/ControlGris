@@ -309,7 +309,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE:
+        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE: // TODO: optimize...
             for (int i = 0; i < 300; i++) {
                 float step = 1.f / 75.f;
                 if (i < 75) {
@@ -341,7 +341,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(p);
             }
             break;
-        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE:
+        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE: // TODO: optimize...
             for (int i = 0; i < 300; i++) {
                 float step = 1.f / 75.f;
                 if (i < 75) {
@@ -368,6 +368,38 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 Point<float> p (x, y);
                 AffineTransform t = AffineTransform::rotation(-angle + M_PI / 4.f, 150.f, 150.f);
                 p.applyTransform(t);
+                p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
+                p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
+                trajectoryPoints.add(p);
+            }
+            break;
+        case TRAJECTORY_TYPE_TRIANGLE_CLOCKWISE:
+        case TRAJECTORY_TYPE_TRIANGLE_COUNTER_CLOCKWISE:
+            Point<float> p1 (0.f, -1.f);
+            Point<float> p2, p3;
+            if (drawingType == TRAJECTORY_TYPE_TRIANGLE_CLOCKWISE) {
+                p2 = Point<float> (1.f, 1.f);
+                p3 = Point<float> (-1.f, 1.f);
+            } else { 
+                p2 = Point<float> (-1.f, 1.f);
+                p3 = Point<float> (1.f, 1.f);
+            }
+            float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
+            float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
+            magnitude = sqrtf(transx * transx + transy * transy);
+            for (int i = 0; i < 300; i++) {
+                if (i < 100) {
+                    x = i * (p2.x - p1.x) * 0.01 + p1.x;
+                    y = i * (p2.y - p1.y) * 0.01 + p1.y;
+                } else if (i < 200) {
+                    x = (i - 100) * (p3.x - p2.x) * 0.01 + p2.x;
+                    y = (i - 100) * (p3.y - p2.y) * 0.01 + p2.y;
+                } else {
+                    x = (i - 200) * (p1.x - p3.x) * 0.01 + p3.x;
+                    y = (i - 200) * (p1.y - p3.y) * 0.01 + p3.y;
+                }
+                Point<float> p (x * magnitude + 150.f, y * magnitude + 150.f);
+                p.applyTransform(AffineTransform::rotation(-angle, 150.f, 150.f));
                 p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
                 p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
                 trajectoryPoints.add(p);
