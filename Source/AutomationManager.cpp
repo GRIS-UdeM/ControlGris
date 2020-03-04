@@ -206,6 +206,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
     float angle = atan2f(translated.y, translated.x) - M_PI / 2.0f;
 
     float x, y;
+    float step = 0, transx = 0, transy = 0, adjustedMagnitude = 0;
     switch (drawingType) {
         case TRAJECTORY_TYPE_REALTIME:
             playbackPosition = Point<float> (-1.0f, -1.0f);
@@ -309,58 +310,35 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE: // TODO: optimize...
+        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE:
+        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE:
+            step = 1.f / 75.f;
+            transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
+            transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
+            magnitude = sqrtf(transx * transx + transy * transy);
+            adjustedMagnitude = magnitude * M_PI / 2.f;
+            float tmp1, tmp2;
             for (int i = 0; i < 300; i++) {
-                float step = 1.f / 75.f;
                 if (i < 75) {
-                    x = i * step;
-                    y = 0.f;
+                    tmp1 = i * step;
+                    tmp2 = 0.f;
                 } else if (i < 150) {
-                    x = 1.f;
-                    y = (i - 75) * step;
+                    tmp1 = 1.f;
+                    tmp2 = (i - 75) * step;
                 } else if (i < 225) {
-                    x = 1.f - ((i - 150) * step);
-                    y = 1.f;
+                    tmp1 = 1.f - ((i - 150) * step);
+                    tmp2 = 1.f;
                 } else {
-                    x = 0.f;
-                    y = 1.f - ((i - 225) * step);
+                    tmp1 = 0.f;
+                    tmp2 = 1.f - ((i - 225) * step);
                 }
-                float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
-                float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
-                magnitude = sqrtf(transx * transx + transy * transy);
-                float adjustedMagnitude = magnitude * M_PI / 2.f;
-                x *= adjustedMagnitude;
-                y *= adjustedMagnitude;
-                x = x + 150 - (adjustedMagnitude / 2);
-                y = y + 150 - (adjustedMagnitude / 2);
-                Point<float> p (x, y);
-                AffineTransform t = AffineTransform::rotation(-angle + M_PI / 4.f, 150.f, 150.f);
-                p.applyTransform(t);
-                p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
-                p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
-                trajectoryPoints.add(p);
-            }
-            break;
-        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE: // TODO: optimize...
-            for (int i = 0; i < 300; i++) {
-                float step = 1.f / 75.f;
-                if (i < 75) {
-                    x = 0.f;
-                    y = i * step;
-                } else if (i < 150) {
-                    x = (i - 75) * step;
-                    y = 1.f;
-                } else if (i < 225) {
-                    x = 1.f;
-                    y = 1.f - ((i - 150) * step);
+                if (drawingType == TRAJECTORY_TYPE_SQUARE_CLOCKWISE) {
+                    x = tmp1;
+                    y = tmp2;
                 } else {
-                    x = 1.f - ((i - 225) * step);
-                    y = 0.f;
+                    x = tmp2;
+                    y = tmp1;
                 }
-                float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
-                float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
-                magnitude = sqrtf(transx * transx + transy * transy);
-                float adjustedMagnitude = magnitude * M_PI / 2.f;
                 x *= adjustedMagnitude;
                 y *= adjustedMagnitude;
                 x = x + 150 - (adjustedMagnitude / 2);
@@ -384,8 +362,8 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 p2 = Point<float> (-1.f, 1.f);
                 p3 = Point<float> (1.f, 1.f);
             }
-            float transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
-            float transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
+            transx = translated.x * ((FIELD_WIDTH / 2 - kSourceRadius));
+            transy = translated.y * ((FIELD_WIDTH / 2 - kSourceRadius));
             magnitude = sqrtf(transx * transx + transy * transy);
             for (int i = 0; i < 300; i++) {
                 if (i < 100) {
