@@ -403,10 +403,12 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
-    if (value == SOURCE_LINK_DELTA_LOCK) {
-        automationManager.setSourceAndPlaybackPosition(Point<float> (0.5, 0.5));
-    } else {
-        automationManager.setSourcePosition(processor.getSources()[0].getPos());
+    if (automationManager.getDrawingType() != TRAJECTORY_TYPE_DRAWING) {
+        if (value == SOURCE_LINK_DELTA_LOCK) {
+            automationManager.setSourceAndPlaybackPosition(Point<float> (0.5, 0.5));
+        } else {
+            automationManager.setSourcePosition(processor.getSources()[0].getPos());
+        }
     }
 
     automationManager.setSourceLink(value);
@@ -651,9 +653,10 @@ void ControlGrisAudioProcessorEditor::resized() {
 void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManager.getSourceLink();
+    int drawingType = automationManager.getDrawingType();
 
     if (! processor.getIsPlaying()) {
-        if (sourceLink != SOURCE_LINK_DELTA_LOCK) {
+        if (sourceLink != SOURCE_LINK_DELTA_LOCK && drawingType != TRAJECTORY_TYPE_DRAWING) {
             automationManager.setSourceAndPlaybackPosition(processor.getSources()[0].getPos());
         } else {
             automationManager.setPlaybackPositionX(-1.0f);
