@@ -424,7 +424,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
-    if (value == SOURCE_LINK_ALT_DELTA_LOCK) {
+    if (value == SOURCE_LINK_ALT_DELTA_LOCK && automationManagerAlt.getDrawingType() != TRAJECTORY_TYPE_ALT_DRAWING) {
         automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0., 0.5));
     }
 
@@ -704,9 +704,10 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
 void ControlGrisAudioProcessorEditor::validateSourcePositionsAlt() {
     int numOfSources = processor.getNumberOfSources();
     int sourceLink = automationManagerAlt.getSourceLink();
+    int drawingType = automationManagerAlt.getDrawingType();
 
     if (! processor.getIsPlaying()) {
-        if (sourceLink != SOURCE_LINK_ALT_DELTA_LOCK) {
+        if (sourceLink != SOURCE_LINK_ALT_DELTA_LOCK && drawingType != TRAJECTORY_TYPE_ALT_DRAWING) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0.f, processor.getSources()[0].getNormalizedElevation()));
         } else {
             automationManagerAlt.setPlaybackPositionX(-1.0f);

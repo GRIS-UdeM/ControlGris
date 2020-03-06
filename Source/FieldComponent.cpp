@@ -401,6 +401,14 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
         isTrajectoryHandleClicked(event);
     }
+
+    // If clicked in an empty space while in mode DRAWING, start a new drawing.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+        repaint();
+    }
 }
 
 void MainFieldComponent::mouseDrag(const MouseEvent &event) {    
@@ -518,19 +526,18 @@ void ElevationFieldComponent::paint(Graphics& g) {
         pos = posToXy(automationManager.getSourcePosition(), width);
         lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
         Rectangle<float> rarea (10, pos.y, kSourceDiameter, kSourceDiameter);
-        g.setColour(Colours::grey);
+        g.setColour(Colour::fromRGB(176, 176, 228));
         g.drawLine(10 + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
                    10 + kSourceRadius, height - 5, lineThickness);
-        g.setColour(Colours::grey);
         g.fillEllipse(rarea);
-        g.setColour(Colour::fromRGB(64, 64, 84));
+        g.setColour(Colour::fromRGB(64, 64, 128));
         g.drawEllipse(rarea, 1);
         g.setColour(Colours::white);
         g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
     }
 
     // Draw recording trajectory path and current position dot.
-    g.setColour(Colour::fromRGB(176, 176, 176));
+    g.setColour(Colour::fromRGB(176, 176, 228));
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
@@ -611,7 +618,17 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
                 listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(1); });
             }
             repaint();
+            return;
         }
+    }
+
+    // If clicked in an empty space while in mode DRAWING, start a new drawing.
+    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+        m_oldSelectedSourceId = m_selectedSourceId;
+        m_selectedSourceId = -1;
+        currentRecordingPositionX = 10 + kSourceRadius;
+        automationManager.resetRecordingTrajectory(Point<float> (currentRecordingPositionX, event.getMouseDownPosition().toFloat().y));
+        repaint();
     }
 }
 
