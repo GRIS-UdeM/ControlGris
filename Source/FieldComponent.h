@@ -95,6 +95,7 @@ public:
     bool isTrajectoryHandleClicked(const MouseEvent &event);
 	void mouseDown (const MouseEvent &event);
  	void mouseDrag (const MouseEvent &event);
+ 	void mouseMove (const MouseEvent &event);
  	void mouseUp (const MouseEvent &event);
 
     void setSpatMode(SPAT_MODE_ENUM spatMode);
@@ -107,9 +108,15 @@ private:
 
     Point <int> clipRecordingPosition(Point<int> pos);
 
+    bool hasValidLineDrawingAnchor1();
+    bool hasValidLineDrawingAnchor2();
+
     SPAT_MODE_ENUM m_spatMode;
 
     bool showCircularSourceSelectionWarning = false;
+
+    Point<float> lineDrawingAnchor1;
+    Point<float> lineDrawingAnchor2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
 };

@@ -139,6 +139,8 @@ MainFieldComponent::MainFieldComponent(AutomationManager& automan)
     : automationManager (automan) 
 {
     m_spatMode = SPAT_MODE_VBAP;
+    lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
+    lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
 }
 
 MainFieldComponent::~MainFieldComponent() {}
@@ -169,6 +171,14 @@ Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
 void MainFieldComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
     m_spatMode = spatMode;
     repaint();
+}
+
+bool MainFieldComponent::hasValidLineDrawingAnchor1() {
+    return lineDrawingAnchor1 != Point<float> (-1.0f, -1.0f);
+}
+
+bool MainFieldComponent::hasValidLineDrawingAnchor2() {
+    return lineDrawingAnchor2 != Point<float> (-1.0f, -1.0f);
 }
 
 void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) {
@@ -279,6 +289,13 @@ void MainFieldComponent::paint(Graphics& g) {
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
+    if (hasValidLineDrawingAnchor1() && hasValidLineDrawingAnchor2()) {
+        Path lineDrawingPath;
+        lineDrawingPath.startNewSubPath(lineDrawingAnchor1);
+        lineDrawingPath.lineTo(lineDrawingAnchor2);
+        lineDrawingPath.closeSubPath();
+        g.strokePath(lineDrawingPath, PathStrokeType(.75f));
+    }
     if (automationManager.getRecordingTrajectorySize() > 1) {
         Path trajectoryPath;
         automationManager.createRecordingPath(trajectoryPath);
@@ -343,6 +360,8 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
             m_selectedSourceId = -1;
             if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+                if (event.mods.isShiftDown())
+                    lineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
             } else {
                 listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(0); });
             }
@@ -358,6 +377,31 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
 void MainFieldComponent::mouseDown(const MouseEvent &event) {
     int width = getWidth();
     int height = getHeight();
+
+    if (hasValidLineDrawingAnchor1()) {
+        Point<float> anchor1 = lineDrawingAnchor1;
+        Point<float> anchor2 = clipRecordingPosition(event.getPosition()).toFloat();
+        int numSteps = (int)jmax(abs(anchor2.x - anchor1.x), abs(anchor2.y - anchor1.y));
+        float xinc = (anchor2.x - anchor1.x) / numSteps;
+        float yinc = (anchor2.y - anchor1.y) / numSteps;
+        for (int i = 1; i <= numSteps; i++) {
+            automationManager.addRecordingPoint(Point<float> (anchor1.x + xinc * i, anchor1.y + yinc * i));
+        }
+        if (event.mods.isShiftDown()) {
+            lineDrawingAnchor1 = anchor2;
+            lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+        } else {
+            lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
+            lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+        }
+        repaint();
+        return;
+    }
+
+    if (! event.mods.isShiftDown()) {
+        lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
+        lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+    }
 
     Point<int> mouseLocation(event.x, height - event.y);
 
@@ -407,6 +451,8 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
         automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
+        if (event.mods.isShiftDown())
+            lineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
         repaint();
     }
 }
@@ -441,7 +487,11 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 
     if (m_selectedSourceId == -1) {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
-            automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+            if (hasValidLineDrawingAnchor1()) {
+                lineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
+            } else {
+                automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+            }
         } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
             automationManager.sendTrajectoryPositionChangedEvent();
         }
@@ -473,9 +523,16 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     repaint();
 }
 
+void MainFieldComponent::mouseMove(const MouseEvent &event) {
+    if (m_selectedSourceId == -1 && automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && hasValidLineDrawingAnchor1()) {
+        lineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
+        repaint();
+    }
+}
+
 void MainFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && ! event.mods.isShiftDown()) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }
