@@ -91,7 +91,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     activateButton.onClick = [this] {
             listeners.call([&] (Listener& l) { l.settingsBoxOscActivated(activateButton.getToggleState()); });
         };
-    addAndMakeVisible(activateButton);
+    addAndMakeVisible(&activateButton);
 }
 
 SettingsBoxComponent::~SettingsBoxComponent() {
