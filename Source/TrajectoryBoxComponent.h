@@ -38,6 +38,8 @@ public:
     void setTrajectoryTypeAlt(int type);
     void setBackAndForth(bool state);
     void setBackAndForthAlt(bool state);
+    void setDampeningCycles(int value);
+    void setDampeningCyclesAlt(int value);
     void setSourceLink(int value);
     void setSourceLinkAlt(int value);
     void setCycleDuration(double value);
@@ -58,6 +60,8 @@ public:
         virtual void trajectoryBoxTrajectoryTypeAltChanged(int value) = 0;
         virtual void trajectoryBoxBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxBackAndForthAltChanged(bool value) = 0;
+        virtual void trajectoryBoxDampeningCyclesChanged(int value) = 0;
+        virtual void trajectoryBoxDampeningCyclesAltChanged(int value) = 0;
         virtual void trajectoryBoxCycleDurationChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
@@ -84,6 +88,10 @@ private:
     ToggleButton    backAndForthToggle;
     ToggleButton    backAndForthAltToggle;
 
+    Label           dampeningLabel;
+    TextEditor      dampeningEditor;
+    TextEditor      dampeningAltEditor;
+
     Label           durationLabel;
     TextEditor      durationEditor;
     ComboBox        durationUnitCombo;
@@ -91,8 +99,6 @@ private:
     Label           cycleSpeedLabel;
     Slider          cycleSpeedSlider;
 
-    TextButton      editFixedSourceButton;
-    TextButton      fixSourceButton;
     TextButton      activateButton;
     TextButton      activateAltButton;
 

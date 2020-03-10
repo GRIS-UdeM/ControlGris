@@ -129,6 +129,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("trajectoryTypeAlt", 1, nullptr);
     parameters.state.setProperty("backAndForth", false, nullptr);
     parameters.state.setProperty("backAndForthAlt", false, nullptr);
+    parameters.state.setProperty("dampeningCycles", 20, nullptr);
+    parameters.state.setProperty("dampeningCyclesAlt", 20, nullptr);
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
 

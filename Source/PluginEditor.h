@@ -82,6 +82,8 @@ public:
     void trajectoryBoxTrajectoryTypeAltChanged(int value) override;
     void trajectoryBoxBackAndForthChanged(bool value) override;
     void trajectoryBoxBackAndForthAltChanged(bool value) override;
+    void trajectoryBoxDampeningCyclesChanged(int value) override;
+    void trajectoryBoxDampeningCyclesAltChanged(int value) override;
     void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
     void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
     void trajectoryBoxActivateChanged(bool value) override;
@@ -99,8 +101,6 @@ public:
     void setPluginState();
     void updateSourceLinkCombo(int value);
     void updateSourceLinkAltCombo(int value);
-    void updateBackAndForthToggle(bool value);
-    void updateBackAndForthAltToggle(bool value);
     void updatePositionPreset(int presetNumber);
     void positionPresetSaved(int presetNumber, bool isSaved);
 

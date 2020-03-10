@@ -26,6 +26,9 @@ AutomationManager::AutomationManager() {
     activateState = false;
     isBackAndForth = false;
     backAndForthDirection = 0;
+    dampeningCycles = 20;
+    dampeningCycleCount = 0;
+    dampeningLastFilterOutput = 0.0;
     source.setX(0.0f);
     source.setY(0.0f);
     playbackDuration = 5.0;
@@ -42,6 +45,8 @@ void AutomationManager::setActivateState(bool state) {
         playbackPosition = Point<float> (-1.0f, -1.0f);
     } else {
         backAndForthDirection = 0;
+        dampeningCycleCount = 0;
+        dampeningLastFilterOutput = 0.0;
     }
 }
 
@@ -77,6 +82,10 @@ void AutomationManager::setBackAndForth(bool shouldBeOn) {
     if (shouldBeOn != isBackAndForth) {
         isBackAndForth = shouldBeOn;
     }
+}
+
+void AutomationManager::setDampeningCycles(int value) {
+    dampeningCycles = value;
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
@@ -135,8 +144,12 @@ void AutomationManager::compressTrajectoryXValues(int maxValue) {
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
     if (trajectoryPoints.size() > 0) {
-        if (isBackAndForth && trajectoryDeltaTime < lastTrajectoryDeltaTime)
+        if (isBackAndForth && trajectoryDeltaTime < lastTrajectoryDeltaTime) {
             backAndForthDirection = 1 - backAndForthDirection;
+            dampeningCycleCount++;
+            if (dampeningCycleCount >= dampeningCycles)
+                dampeningCycleCount = dampeningCycles;
+        }
         lastTrajectoryDeltaTime = trajectoryDeltaTime;
         double delta = trajectoryDeltaTime * trajectoryPoints.size();
         if (backAndForthDirection == 1)
@@ -146,6 +159,17 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
         } else if (delta < 0) {
             delta += trajectoryPoints.size();
         }
+
+        if (dampeningCycleCount > 0) {
+            double currentScaleMin = (double)dampeningCycleCount / dampeningCycles * trajectoryPoints.size() * 0.5;
+            double currentScaleMax = trajectoryPoints.size() - currentScaleMin;
+            double currentScale = (currentScaleMax - currentScaleMin) / trajectoryPoints.size();
+            delta = delta * currentScale + currentScaleMin;
+            dampeningLastFilterOutput = delta = delta + (dampeningLastFilterOutput - delta) * 0.75;
+        } else {
+            dampeningLastFilterOutput = delta;
+        }
+
         int index = (int)delta;
         if (index + 1 < trajectoryPoints.size()) {
             double frac = delta - index;

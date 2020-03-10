@@ -56,6 +56,7 @@ public:
     void setDrawingTypeAlt(int type);
 
     void setBackAndForth(bool shouldBeOn);
+    void setDampeningCycles(int value);
 
     Source& getSource();
     void setSourcePosition(Point<float> pos);
@@ -86,6 +87,10 @@ private:
 
     bool            isBackAndForth;
     int             backAndForthDirection;
+
+    int             dampeningCycles;
+    int             dampeningCycleCount;
+    double          dampeningLastFilterOutput;
 
     bool            activateState;
     double          playbackDuration;

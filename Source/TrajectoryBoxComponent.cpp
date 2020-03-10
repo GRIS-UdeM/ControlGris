@@ -94,8 +94,23 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     backAndForthToggle.setButtonText("back & forth");
     backAndForthToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthChanged(backAndForthToggle.getToggleState()); });
+            dampeningEditor.setEnabled(backAndForthToggle.getToggleState());
         };
     addAndMakeVisible(&backAndForthToggle);
+
+    dampeningLabel.setText("Number of cycles \ndampening:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&dampeningLabel);
+
+    addAndMakeVisible(&dampeningEditor);
+    dampeningEditor.setTextToShowWhenEmpty ("20", Colours::white);
+    dampeningEditor.setText("20", false);
+    dampeningEditor.setInputRestrictions (10, "0123456789");
+    dampeningEditor.onReturnKey = [this] {
+            durationUnitCombo.grabKeyboardFocus();
+        };
+    dampeningEditor.onFocusLost = [this] {
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDampeningCyclesChanged(dampeningEditor.getText().getIntValue()); });
+            durationUnitCombo.grabKeyboardFocus(); };
 
     activateAltButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
     addChildComponent(&activateAltButton);
@@ -108,8 +123,20 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     backAndForthAltToggle.setButtonText("back & forth");
     backAndForthAltToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthAltChanged(backAndForthAltToggle.getToggleState()); });
+            dampeningAltEditor.setEnabled(backAndForthAltToggle.getToggleState());
         };
     addAndMakeVisible(&backAndForthAltToggle);
+
+    addAndMakeVisible(&dampeningAltEditor);
+    dampeningAltEditor.setTextToShowWhenEmpty ("20", Colours::white);
+    dampeningAltEditor.setText("20", false);
+    dampeningAltEditor.setInputRestrictions (10, "0123456789");
+    dampeningAltEditor.onReturnKey = [this] {
+            durationUnitCombo.grabKeyboardFocus();
+        };
+    dampeningAltEditor.onFocusLost = [this] {
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDampeningCyclesAltChanged(dampeningAltEditor.getText().getIntValue()); });
+            durationUnitCombo.grabKeyboardFocus(); };
 }
 
 TrajectoryBoxComponent::~TrajectoryBoxComponent() {
@@ -143,10 +170,20 @@ void TrajectoryBoxComponent::setTrajectoryTypeAlt(int type) {
 
 void TrajectoryBoxComponent::setBackAndForth(bool state) {
     backAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+    dampeningEditor.setEnabled(state);
 }
 
 void TrajectoryBoxComponent::setBackAndForthAlt(bool state) {
     backAndForthAltToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+    dampeningAltEditor.setEnabled(state);
+}
+
+void TrajectoryBoxComponent::setDampeningCycles(int value) {
+    dampeningEditor.setText(String(value));
+}
+
+void TrajectoryBoxComponent::setDampeningCyclesAlt(int value) {
+    dampeningAltEditor.setText(String(value));
 }
 
 void TrajectoryBoxComponent::setSourceLink(int value) {
@@ -194,28 +231,33 @@ void TrajectoryBoxComponent::resized() {
     sourceLinkCombo.setBounds(115, 10, 175, 20);
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
     trajectoryTypeCombo.setBounds(115, 40, 175, 20);
-    activateButton.setBounds(114, 70, 80, 20);
     backAndForthToggle.setBounds(196, 70, 94, 20);
+    dampeningLabel.setBounds(5, 70, 150, 20);
+    dampeningEditor.setBounds(115, 70, 75, 20);
+    activateButton.setBounds(114, 100, 176, 20);
 
     if (m_spatMode == SPAT_MODE_LBAP) {
         sourceLinkAltCombo.setVisible(true);
         trajectoryTypeAltCombo.setVisible(true);
         activateAltButton.setVisible(true);
         backAndForthAltToggle.setVisible(true);
+        dampeningAltEditor.setVisible(true);
         sourceLinkAltCombo.setBounds(305, 10, 175, 20);
         trajectoryTypeAltCombo.setBounds(305, 40, 175, 20);
-        activateAltButton.setBounds(304, 70, 80, 20);
         backAndForthAltToggle.setBounds(386, 70, 94, 20);
+        dampeningAltEditor.setBounds(305, 70, 75, 20);
+        activateAltButton.setBounds(304, 100, 176, 20);
     } else {
         sourceLinkAltCombo.setVisible(false);
         trajectoryTypeAltCombo.setVisible(false);
         activateAltButton.setVisible(false);
         backAndForthAltToggle.setVisible(false);
+        dampeningAltEditor.setVisible(false);
     }
 
-    durationLabel.setBounds(5, 100, 150, 20);
-    durationEditor.setBounds(115, 100, 78, 20);
-    durationUnitCombo.setBounds(200, 100, 89, 20);
+    durationLabel.setBounds(490, 15, 90, 20);
+    durationEditor.setBounds(495, 40, 90, 20);
+    durationUnitCombo.setBounds(495, 70, 90, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
     cycleSpeedLabel.setBounds(5, 100, 150, 20);

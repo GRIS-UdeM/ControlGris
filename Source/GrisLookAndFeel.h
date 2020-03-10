@@ -31,7 +31,7 @@ private:
     Font  biggerFont = Font(juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf, (size_t) BinaryData::SinkinSans400Regular_otfSize));
 
     Colour backGroundAndFieldColour, winBackGroundAndFieldColour;
-    Colour lightColour, darkColour, greyColour, editBgcolor, hlBgcolor;
+    Colour lightColour, darkColour, greyColour, editBgcolor, disableBgcolor, hlBgcolor;
     Colour onColor, onColorOver, onColorDown, offColor, greenColor, redColor;
     
 public:
@@ -43,6 +43,7 @@ public:
         this->lightColour               = Colour::fromRGB(235, 245, 250);   //Colours::whitesmoke;
         this->darkColour                = Colour::fromRGB(15,  10,  5);       //Colours::black;
         this->greyColour                = Colour::fromRGB(120, 120, 120);   //Colours::grey;
+        this->disableBgcolor            = Colour::fromRGB(150, 150, 150);
         this->editBgcolor               = Colour::fromRGB(172, 172, 172);
         this->hlBgcolor                 = Colour::fromRGB(190, 125, 18);
         
@@ -326,7 +327,10 @@ public:
     }
     
     void fillTextEditorBackground(Graphics& g, int width, int height, TextEditor& t) override {
-        g.setColour(this->editBgcolor);
+        if (t.isEnabled())
+            g.setColour(this->editBgcolor);
+        else
+            g.setColour(this->disableBgcolor);
         g.fillAll();
     }
     

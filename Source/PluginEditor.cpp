@@ -159,6 +159,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     trajectoryBox.setTrajectoryTypeAlt(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
     trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
     trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
+    trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 20));
+    automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 20));
+    trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 20));
+    automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 20));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
@@ -194,14 +198,6 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
     trajectoryBox.sourceLinkAltCombo.setSelectedId(value, NotificationType::dontSendNotification);
-}
-
-void ControlGrisAudioProcessorEditor::updateBackAndForthToggle(bool value) {
-    trajectoryBox.setBackAndForth(value);
-}
-
-void ControlGrisAudioProcessorEditor::updateBackAndForthAltToggle(bool value) {
-    trajectoryBox.setBackAndForthAlt(value);
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
@@ -470,6 +466,16 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool valu
 void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value) {
     valueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
     automationManagerAlt.setBackAndForth(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesChanged(int value) {
+    valueTreeState.state.setProperty("dampeningCycles", value, nullptr);
+    automationManager.setDampeningCycles(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int value) {
+    valueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
+    automationManagerAlt.setDampeningCycles(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode) {
