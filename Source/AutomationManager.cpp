@@ -24,6 +24,8 @@ AutomationManager::AutomationManager() {
     sourceLink = SOURCE_LINK_INDEPENDENT;
     drawingType = TRAJECTORY_TYPE_DRAWING;
     activateState = false;
+    isBackAndForth = false;
+    backAndForthDirection = 0;
     source.setX(0.0f);
     source.setY(0.0f);
     playbackDuration = 5.0;
@@ -38,6 +40,8 @@ void AutomationManager::setActivateState(bool state) {
     activateState = state;
     if (! state) {
         playbackPosition = Point<float> (-1.0f, -1.0f);
+    } else {
+        backAndForthDirection = 0;
     }
 }
 
@@ -67,6 +71,12 @@ bool AutomationManager::hasValidPlaybackPosition() {
 
 Point<float> AutomationManager::getPlaybackPosition() {
     return playbackPosition;
+}
+
+void AutomationManager::setBackAndForth(bool shouldBeOn) {
+    if (shouldBeOn != isBackAndForth) {
+        isBackAndForth = shouldBeOn;
+    }
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
@@ -125,9 +135,16 @@ void AutomationManager::compressTrajectoryXValues(int maxValue) {
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
     if (trajectoryPoints.size() > 0) {
+        if (isBackAndForth && trajectoryDeltaTime < lastTrajectoryDeltaTime)
+            backAndForthDirection = 1 - backAndForthDirection;
+        lastTrajectoryDeltaTime = trajectoryDeltaTime;
         double delta = trajectoryDeltaTime * trajectoryPoints.size();
+        if (backAndForthDirection == 1)
+            delta = trajectoryPoints.size() - delta;
         if (delta + 1 >= trajectoryPoints.size()) {
             delta = std::fmod(delta, trajectoryPoints.size());
+        } else if (delta < 0) {
+            delta += trajectoryPoints.size();
         }
         int index = (int)delta;
         if (index + 1 < trajectoryPoints.size()) {

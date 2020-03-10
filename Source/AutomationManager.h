@@ -55,6 +55,8 @@ public:
     int getDrawingType();
     void setDrawingTypeAlt(int type);
 
+    void setBackAndForth(bool shouldBeOn);
+
     Source& getSource();
     void setSourcePosition(Point<float> pos);
     void setSourcePositionX(float x);
@@ -82,6 +84,9 @@ private:
     int             sourceLink;
     int             drawingType;
 
+    bool            isBackAndForth;
+    int             backAndForthDirection;
+
     bool            activateState;
     double          playbackDuration;
     Point<float>    playbackPosition;
@@ -89,6 +94,7 @@ private:
     Source source;
 
     double              trajectoryDeltaTime;
+    double              lastTrajectoryDeltaTime;
     Array<Point<float>> trajectoryPoints;
     Point<float>        currentTrajectoryPoint;
     Point<float>        lastRecordingPoint;

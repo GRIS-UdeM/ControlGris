@@ -127,6 +127,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // Trajectory box persitent settings.
     parameters.state.setProperty("trajectoryType", 1, nullptr);
     parameters.state.setProperty("trajectoryTypeAlt", 1, nullptr);
+    parameters.state.setProperty("backAndForth", false, nullptr);
+    parameters.state.setProperty("backAndForthAlt", false, nullptr);
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
 

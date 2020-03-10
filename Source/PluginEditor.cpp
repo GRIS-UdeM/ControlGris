@@ -157,6 +157,8 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     //------------------------------------------------
     trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
     trajectoryBox.setTrajectoryTypeAlt(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
+    trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
+    trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
@@ -192,6 +194,14 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
 
 void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
     trajectoryBox.sourceLinkAltCombo.setSelectedId(value, NotificationType::dontSendNotification);
+}
+
+void ControlGrisAudioProcessorEditor::updateBackAndForthToggle(bool value) {
+    trajectoryBox.setBackAndForth(value);
+}
+
+void ControlGrisAudioProcessorEditor::updateBackAndForthAltToggle(bool value) {
+    trajectoryBox.setBackAndForthAlt(value);
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
@@ -450,6 +460,16 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(int 
     valueTreeState.state.setProperty("trajectoryTypeAlt", value, nullptr);
     automationManagerAlt.setDrawingTypeAlt(value);
     elevationField.repaint();
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool value) {
+    valueTreeState.state.setProperty("backAndForth", value, nullptr);
+    automationManager.setBackAndForth(value);
+}
+
+void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value) {
+    valueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
+    automationManagerAlt.setBackAndForth(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode) {

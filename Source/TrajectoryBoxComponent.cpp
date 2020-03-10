@@ -91,6 +91,12 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
+    backAndForthToggle.setButtonText("back & forth");
+    backAndForthToggle.onClick = [this] {
+            listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthChanged(backAndForthToggle.getToggleState()); });
+        };
+    addAndMakeVisible(&backAndForthToggle);
+
     activateAltButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
     addChildComponent(&activateAltButton);
     activateAltButton.setButtonText("Activate");
@@ -98,6 +104,12 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     activateAltButton.onClick = [this] { 
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateAltChanged(activateAltButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
+
+    backAndForthAltToggle.setButtonText("back & forth");
+    backAndForthAltToggle.onClick = [this] {
+            listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthAltChanged(backAndForthAltToggle.getToggleState()); });
+        };
+    addAndMakeVisible(&backAndForthAltToggle);
 }
 
 TrajectoryBoxComponent::~TrajectoryBoxComponent() {
@@ -127,6 +139,14 @@ void TrajectoryBoxComponent::setTrajectoryType(int type) {
 
 void TrajectoryBoxComponent::setTrajectoryTypeAlt(int type) {
     trajectoryTypeAltCombo.setSelectedId(type);
+}
+
+void TrajectoryBoxComponent::setBackAndForth(bool state) {
+    backAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+}
+
+void TrajectoryBoxComponent::setBackAndForthAlt(bool state) {
+    backAndForthAltToggle.setToggleState(state, NotificationType::sendNotificationAsync);
 }
 
 void TrajectoryBoxComponent::setSourceLink(int value) {
@@ -171,27 +191,31 @@ void TrajectoryBoxComponent::paint(Graphics& g) {
 
 void TrajectoryBoxComponent::resized() {
     sourceLinkLabel.setBounds(5, 10, 150, 20);
-    sourceLinkCombo.setBounds(120, 10, 160, 20);
+    sourceLinkCombo.setBounds(115, 10, 175, 20);
     trajectoryTypeLabel.setBounds(5, 40, 150, 20);
-    trajectoryTypeCombo.setBounds(120, 40, 160, 20);
-    activateButton.setBounds(120, 70, 100, 20);
+    trajectoryTypeCombo.setBounds(115, 40, 175, 20);
+    activateButton.setBounds(114, 70, 80, 20);
+    backAndForthToggle.setBounds(196, 70, 94, 20);
 
     if (m_spatMode == SPAT_MODE_LBAP) {
         sourceLinkAltCombo.setVisible(true);
         trajectoryTypeAltCombo.setVisible(true);
         activateAltButton.setVisible(true);
-        sourceLinkAltCombo.setBounds(300, 10, 160, 20);
-        trajectoryTypeAltCombo.setBounds(300, 40, 160, 20);
-        activateAltButton.setBounds(300, 70, 100, 20);
+        backAndForthAltToggle.setVisible(true);
+        sourceLinkAltCombo.setBounds(305, 10, 175, 20);
+        trajectoryTypeAltCombo.setBounds(305, 40, 175, 20);
+        activateAltButton.setBounds(304, 70, 80, 20);
+        backAndForthAltToggle.setBounds(386, 70, 94, 20);
     } else {
         sourceLinkAltCombo.setVisible(false);
         trajectoryTypeAltCombo.setVisible(false);
         activateAltButton.setVisible(false);
+        backAndForthAltToggle.setVisible(false);
     }
 
     durationLabel.setBounds(5, 100, 150, 20);
-    durationEditor.setBounds(120, 100, 90, 20);
-    durationUnitCombo.setBounds(215, 100, 65, 20);
+    durationEditor.setBounds(115, 100, 78, 20);
+    durationUnitCombo.setBounds(200, 100, 89, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
     cycleSpeedLabel.setBounds(5, 100, 150, 20);
