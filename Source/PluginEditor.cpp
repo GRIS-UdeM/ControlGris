@@ -201,7 +201,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
-    positionPresetBox.setPreset(presetNumber);
+    positionPresetBox.setPreset(presetNumber, true);
     parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 }
 

@@ -500,7 +500,7 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
 }
 
 void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
-    int sourceLinkToProcess = 0, sourceLinkAltToProcess = 0, presetToProcess = 0;
+    int sourceLinkToProcess = 0, sourceLinkAltToProcess = 0;
     String address = message.getAddressPattern().toString().toStdString();
     if ((address == "/controlgris/traj/1/x" || address == "/controlgris/traj/1/xyz/1") &&
          automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
@@ -578,7 +578,12 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     } else if (address == "/controlgris/sourcelinkalt") {
         sourceLinkAltToProcess = (int)message[0].getFloat32(); // 1 -> 5
     } else if (address == "/controlgris/presets") {
-        presetToProcess = (int)message[0].getFloat32(); // 1 -> 50
+        int newPreset = (int)message[0].getFloat32(); // 1 -> 50
+        setPositionPreset(newPreset);
+        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+        if (ed != nullptr) {
+            ed->updatePositionPreset(newPreset);
+        }
     }
 
     if (sourceLinkToProcess) {
@@ -602,10 +607,6 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
                 ed->updateSourceLinkAltCombo(sourceLinkAltToProcess);
             }
         }
-    }
-
-    if (presetToProcess) {
-        m_newPositionPreset = presetToProcess;
     }
 }
 
@@ -793,7 +794,8 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-    } else if (automationManager.hasValidPlaybackPosition()) {
+    } else if (automationManager.hasValidPlaybackPosition() &&
+               automationManager.getSourcePosition() != automationManager.getPlaybackPosition()) {
         int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
         recallFixedPosition(preset);
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
@@ -809,7 +811,8 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManagerAlt.hasValidPlaybackPosition()) {
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
-    } else if (automationManagerAlt.hasValidPlaybackPosition()) {
+    } else if (automationManagerAlt.hasValidPlaybackPosition() &&
+               automationManagerAlt.getSourcePosition() != automationManagerAlt.getPlaybackPosition()) {
         int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
         recallFixedPosition(preset);
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
@@ -1052,7 +1055,6 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
 }
 
 bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
-    // FIXME: called twice on new preset selection...
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
@@ -1081,6 +1083,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
             sources[i].setNormalizedElevation(z);
         }
     }
+
     return true;
 }
 
