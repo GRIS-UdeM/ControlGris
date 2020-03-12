@@ -54,11 +54,13 @@ public:
 private:
     ListenerList<Listener> listeners;
 
+/*
     Label           oscSourceLabel;
     ComboBox        oscSourceCombo;
 
-    ToggleButton    enableLeapToggle;
     ToggleButton    enableJoystickToggle;
+*/
+
     ToggleButton    oscReceiveToggle;
     ToggleButton    oscSendToggle;
 

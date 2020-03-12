@@ -20,16 +20,15 @@
 #include "InterfaceBoxComponent.h"
 
 InterfaceBoxComponent::InterfaceBoxComponent() {
+/*
     oscSourceLabel.setText("OSC Source:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscSourceLabel);
 
     addAndMakeVisible(&oscSourceCombo);
 
-    enableLeapToggle.setButtonText("Enable Leap");
-    addAndMakeVisible(&enableLeapToggle);
-
     enableJoystickToggle.setButtonText("Enable Joystick");
     addAndMakeVisible(&enableJoystickToggle);
+*/
 
     oscReceiveToggle.setButtonText("Receive on port");
     addAndMakeVisible(&oscReceiveToggle);
@@ -52,7 +51,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
     oscReceivePortEditor.addListener(this);
     oscReceivePortEditor.onReturnKey = [this] {
-            oscSourceCombo.grabKeyboardFocus();
+            this->grabKeyboardFocus();
         };
     oscReceivePortEditor.onFocusLost = [this] {
             if (! oscReceivePortEditor.isEmpty()) {
@@ -70,7 +69,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscSendIpEditor.setInputRestrictions(16, ".0123456789");
     oscSendIpEditor.addListener(this);
     oscSendIpEditor.onReturnKey = [this] {
-            oscSourceCombo.grabKeyboardFocus();
+            this->grabKeyboardFocus();
         };
     oscSendIpEditor.onFocusLost = [this] {
             if (! oscSendIpEditor.isEmpty()) {
@@ -90,7 +89,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscSendPortEditor.setInputRestrictions(5, "0123456789");
     oscSendPortEditor.addListener(this);
     oscSendPortEditor.onReturnKey = [this] {
-            oscSourceCombo.grabKeyboardFocus();
+            this->grabKeyboardFocus();
         };
     oscSendPortEditor.onFocusLost = [this] {
             if (! oscSendPortEditor.isEmpty()) {
@@ -146,11 +145,12 @@ void InterfaceBoxComponent::paint(Graphics& g) {
 }
 
 void InterfaceBoxComponent::resized() {
+/*
     oscSourceLabel.setBounds(5, 10, 90, 20);
     oscSourceCombo.setBounds(95, 10, 150, 20);
 
-    enableLeapToggle.setBounds(5, 35, 120, 20);
-    enableJoystickToggle.setBounds(125, 35, 150, 20);
+    enableJoystickToggle.setBounds(5, 35, 120, 20);
+*/
 
     oscReceiveToggle.setBounds(255, 10, 200, 20);
     oscReceivePortEditor.setBounds(400, 10, 60, 20);
