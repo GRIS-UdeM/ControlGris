@@ -94,7 +94,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     backAndForthToggle.setButtonText("back & forth");
     backAndForthToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthChanged(backAndForthToggle.getToggleState()); });
-            dampeningEditor.setEnabled(backAndForthToggle.getToggleState());
+            setDampeningEditorEnabled(backAndForthToggle.getToggleState());
         };
     addAndMakeVisible(&backAndForthToggle);
 
@@ -123,7 +123,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     backAndForthAltToggle.setButtonText("back & forth");
     backAndForthAltToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthAltChanged(backAndForthAltToggle.getToggleState()); });
-            dampeningAltEditor.setEnabled(backAndForthAltToggle.getToggleState());
+            setDampeningAltEditorEnabled(backAndForthAltToggle.getToggleState());
         };
     addAndMakeVisible(&backAndForthAltToggle);
 
@@ -170,12 +170,34 @@ void TrajectoryBoxComponent::setTrajectoryTypeAlt(int type) {
 
 void TrajectoryBoxComponent::setBackAndForth(bool state) {
     backAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
-    dampeningEditor.setEnabled(state);
+    setDampeningEditorEnabled(state);
 }
 
 void TrajectoryBoxComponent::setBackAndForthAlt(bool state) {
     backAndForthAltToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+    setDampeningAltEditorEnabled(state);
+}
+
+void TrajectoryBoxComponent::setDampeningEditorEnabled(bool state) {
+    dampeningEditor.setEnabled(state);
+    String text = dampeningEditor.getText();
+    dampeningEditor.clear();
+    if (state)
+        dampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+    else
+        dampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+    dampeningEditor.setText(text);
+}
+
+void TrajectoryBoxComponent::setDampeningAltEditorEnabled(bool state) {
     dampeningAltEditor.setEnabled(state);
+    String text = dampeningAltEditor.getText();
+    dampeningAltEditor.clear();
+    if (state)
+        dampeningAltEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+    else
+        dampeningAltEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+    dampeningAltEditor.setText(text);
 }
 
 void TrajectoryBoxComponent::setDampeningCycles(int value) {

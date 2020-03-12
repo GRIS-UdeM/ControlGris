@@ -32,7 +32,7 @@ enum SPAT_MODE_ENUM {
     SPAT_MODE_LBAP
 };
 
-const String WARNING_CIRCULAR_SOURCE_SELECTION ("Only source 1 can be \nselected in circular links!");
+const String WARNING_CIRCULAR_SOURCE_SELECTION ("Only source 1 can be selected \nin circular or symmetric links!");
 
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
@@ -57,11 +57,14 @@ enum SOURCE_LINK_ENUM { SOURCE_LINK_INDEPENDENT = 1,
                         SOURCE_LINK_CIRCULAR_FIXED_RADIUS,
                         SOURCE_LINK_CIRCULAR_FIXED_ANGLE,
                         SOURCE_LINK_CIRCULAR_FULLY_FIXED,
-                        SOURCE_LINK_DELTA_LOCK
+                        SOURCE_LINK_DELTA_LOCK,
+                        SOURCE_LINK_SYMMETRIC_X,
+                        SOURCE_LINK_SYMMETRIC_Y
                       };
 const StringArray SOURCE_LINK_TYPES       {String("Independent"), String("Circular"),
                                            String("Circular Fixed Radius"), String("Circular Fixed Angle"),
-                                           String("Circular Fully Fixed"), String("Delta Lock")};
+                                           String("Circular Fully Fixed"), String("Delta Lock"),
+                                           String("Symmetric X"), String("Symmetric Y")};
 
 enum SOURCE_LINK_ALT_ENUM { SOURCE_LINK_ALT_INDEPENDENT = 1,
                             SOURCE_LINK_ALT_FIXED_ELEVATION,

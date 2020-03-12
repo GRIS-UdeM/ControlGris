@@ -38,6 +38,8 @@ public:
     void setTrajectoryTypeAlt(int type);
     void setBackAndForth(bool state);
     void setBackAndForthAlt(bool state);
+    void setDampeningEditorEnabled(bool state);
+    void setDampeningAltEditorEnabled(bool state);
     void setDampeningCycles(int value);
     void setDampeningCyclesAlt(int value);
     void setSourceLink(int value);

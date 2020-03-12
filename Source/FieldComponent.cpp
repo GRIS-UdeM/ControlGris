@@ -282,7 +282,7 @@ void MainFieldComponent::paint(Graphics& g) {
 
     drawFieldBackground(g, true, m_spatMode);
 
-    // Draw recording trajectory handle (if source link *is not* Delta Lock).
+    // Draw recording trajectory handle before sources (if source link *is not* Delta Lock).
     if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
         drawTrajectoryHandle(g);
     }
@@ -334,7 +334,7 @@ void MainFieldComponent::paint(Graphics& g) {
         }
    }
 
-    // Draw recording trajectory handle (if source link *is* Delta Lock).
+    // Draw recording trajectory handle after sources (if source link *is* Delta Lock).
     if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
         drawTrajectoryHandle(g);
     }
@@ -425,7 +425,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
-            if (i > 0 && automationManager.getSourceLink() > SOURCE_LINK_INDEPENDENT && automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK) {
+            if (i > 0 && automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
                 showCircularSourceSelectionWarning = true;
             } else {
                 m_selectedSourceId = i;
@@ -500,8 +500,10 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     }
 
     bool needToAdjustAutomationManager = false;
-    if (automationManager.getSourceLink() == SOURCE_LINK_INDEPENDENT && m_selectedSourceId == 0 &&
-        automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if (m_selectedSourceId == 0 && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME &&
+        (automationManager.getSourceLink() == SOURCE_LINK_INDEPENDENT || automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X ||
+         automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y)
+        ) {
         needToAdjustAutomationManager = true;
     } else if (automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
                automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK &&

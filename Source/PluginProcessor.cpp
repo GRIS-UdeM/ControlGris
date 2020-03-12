@@ -45,8 +45,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
-                                                     NormalisableRange<float>(0.f, 5.f, 1.f), 0.f, nullptr, nullptr,
-                                                     false, true, true));
+                                                     NormalisableRange<float>(0.f, static_cast<float> (SOURCE_LINK_TYPES.size()), 1.f),
+                                                     0.f, nullptr, nullptr, false, true, true));
     parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
                                                      NormalisableRange<float>(0.f, 4.f, 1.f), 0.f, nullptr, nullptr,
                                                      false, true, true));
@@ -257,7 +257,6 @@ bool compareLessThan(const Sorter &a, const Sorter &b) {
 //========================================================
 
 void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
-    // Fixed radius.
     if (value == SOURCE_LINK_CIRCULAR_FIXED_RADIUS || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         if (m_selectedOscFormat == SPAT_MODE_LBAP) {
             for (int i = 1; i < m_numOfSources; i++) {
@@ -268,10 +267,7 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
                 sources[i].setElevation(sources[0].getElevation());
             }
         }
-    }
-
-    // Fixed angle.
-    if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+    } else if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         Sorter tosort[m_numOfSources];
         for (int i = 0; i < m_numOfSources; i++) {
             tosort[i].index = i;
@@ -291,6 +287,16 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
             float newPos = 360.0 / m_numOfSources * i + currentPos;
             int ioff = (i + posOfFirstSource) % m_numOfSources;
             sources[tosort[ioff].index].setAzimuth(newPos);
+        }
+    } else if (value == SOURCE_LINK_SYMMETRIC_X) {
+        for (int i = 1; i < m_numOfSources; i++) {
+            sources[i].setSymmetricYPole(sources[0].getY());
+            sources[i].setSymmetricY(sources[0].getY());
+        }
+    } else if (value == SOURCE_LINK_SYMMETRIC_Y) {
+        for (int i = 1; i < m_numOfSources; i++) {
+            sources[i].setSymmetricXPole(sources[0].getX());
+            sources[i].setSymmetricX(sources[0].getX());
         }
     }
 
@@ -930,6 +936,7 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
 }
 
 void ControlGrisAudioProcessor::linkSourcePositions() {
+    float deltaX = 0.f, deltaY = 0.f;
     switch (automationManager.getSourceLink()) {
         case SOURCE_LINK_INDEPENDENT:
             sources[0].setPos(automationManager.getSourcePosition());
@@ -954,10 +961,24 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
             }
             break;
         case SOURCE_LINK_DELTA_LOCK:
-            float deltaX = automationManager.getSource().getDeltaX();
-            float deltaY = automationManager.getSource().getDeltaY();
+            deltaX = automationManager.getSource().getDeltaX();
+            deltaY = automationManager.getSource().getDeltaY();
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+            }
+            break;
+        case SOURCE_LINK_SYMMETRIC_X:
+            sources[0].setPos(automationManager.getSourcePosition());
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setXYCoordinatesFromFixedSource(sources[0].getDeltaX(), 0.f);
+                sources[i].setSymmetricY(sources[0].getY());
+            }
+            break;
+        case SOURCE_LINK_SYMMETRIC_Y:
+            sources[0].setPos(automationManager.getSourcePosition());
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setXYCoordinatesFromFixedSource(0.f, sources[0].getDeltaY());
+                sources[i].setSymmetricX(sources[0].getX());
             }
             break;
     }

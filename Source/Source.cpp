@@ -36,6 +36,8 @@ Source::Source() {
     fixedAzimuth = -1.0;
     fixedElevation = -1.0;
     fixedDistance = -1.0;
+    symmetricXPole = false;
+    symmetricYPole = false;
     colour = Colours::black;
 }
 
@@ -270,6 +272,28 @@ void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevat
         setDistanceNoClip(fixedDistance + deltaDistance);
     }
     computeXY();
+}
+
+void Source::setSymmetricXPole(float firstSourceX) {
+    symmetricXPole = roundf(firstSourceX) == roundf(getX());
+}
+
+void Source::setSymmetricX(float x) {
+    if (symmetricXPole)
+        setX(x);
+    else
+        setX(1.f - x);
+}
+
+void Source::setSymmetricYPole(float firstSourceY) {
+    symmetricYPole = roundf(firstSourceY) == roundf(getY());
+}
+
+void Source::setSymmetricY(float y) {
+    if (symmetricYPole)
+        setY(y);
+    else
+        setY(1.f - y);
 }
 
 void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {

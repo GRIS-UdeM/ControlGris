@@ -360,6 +360,11 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     for (int i = 0; i < numOfSources; i++) {
+        if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X) {
+            processor.getSources()[i].setSymmetricYPole(processor.getSources()[0].getY());
+        } else if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y) {
+            processor.getSources()[i].setSymmetricXPole(processor.getSources()[0].getX());
+        }
         processor.getSources()[i].fixSourcePosition(true);
     }
 
@@ -422,8 +427,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 
     processor.onSourceLinkChanged(value);
 
+    float howMany = static_cast<float> (SOURCE_LINK_TYPES.size());
     valueTreeState.getParameter("sourceLink")->beginChangeGesture();
-    valueTreeState.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / 5.f);
+    valueTreeState.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / howMany);
     valueTreeState.getParameter("sourceLink")->endChangeGesture();
 
     mainField.repaint();
@@ -714,6 +720,24 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
         float deltaY = processor.getSources()[0].getDeltaY();
         for (int i = 1; i < numOfSources; i++) {
             processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+        }
+    }
+    // Symmetric X.
+    else if (sourceLink == SOURCE_LINK_SYMMETRIC_X) {
+        float deltaX = processor.getSources()[0].getDeltaX();
+        float y = processor.getSources()[0].getY();
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, 0.f);
+            processor.getSources()[i].setSymmetricY(y);
+        }
+    }
+    // Symmetric Y.
+    else if (sourceLink == SOURCE_LINK_SYMMETRIC_Y) {
+        float deltaY = processor.getSources()[0].getDeltaY();
+        float x = processor.getSources()[0].getX();
+        for (int i = 1; i < numOfSources; i++) {
+            processor.getSources()[i].setXYCoordinatesFromFixedSource(0.f, deltaY);
+            processor.getSources()[i].setSymmetricX(x);
         }
     }
 
