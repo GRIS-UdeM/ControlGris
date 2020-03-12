@@ -166,7 +166,9 @@
             "Circular Fixed Radius": 3,
             "Circular Fixed Angle": 4,
             "Circular Fully Fixed": 5,
-            "Delta Lock": 6
+            "Delta Lock": 6,
+            "Symmetric X": 7,
+            "Symmetric Y": 8
           },
           "default": "Independent",
           "value": 1,
