@@ -157,7 +157,6 @@ private:
     int m_currentOSCInputPort;
     int m_currentOSCOutputPort;
     String m_currentOSCOutputAddress;
-    bool m_somethingChanged;
     bool m_needInitialization;
 
     double m_initTimeOnPlay;

@@ -80,7 +80,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     fixPositionData (FIXED_POSITION_DATA_TAG)
 {
     m_lock = false;
-    m_somethingChanged = false;
     m_numOfSources = 2;
     m_firstSourceId = 1;
     m_selectedSourceId = 1;
@@ -241,8 +240,6 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
             sources[i].setElevationSpan(newValue);
         }
     }
-
-    m_somethingChanged = true;
 }
 
 //== Tools for sorting sources based on azimuth values. ==
@@ -777,10 +774,6 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
 
 //==============================================================================
 void ControlGrisAudioProcessor::timerCallback() {
-    if (m_somethingChanged) {
-        m_somethingChanged = false;
-    }
-
     if (m_newPositionPreset != 0 && m_newPositionPreset != m_currentPositionPreset) {
         if (recallFixedPosition(m_newPositionPreset)) {
             m_currentPositionPreset = m_newPositionPreset;
