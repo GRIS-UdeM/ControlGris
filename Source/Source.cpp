@@ -275,7 +275,9 @@ void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevat
 }
 
 void Source::setSymmetricXPole(float firstSourceX) {
-    symmetricXPole = roundf(firstSourceX) == roundf(getX());
+    int x1 = firstSourceX <= 0.5 ? 0 : 1;
+    int x2 = getX() < 0.5 ? 0 : 1;
+    symmetricXPole = x1 == x2;
 }
 
 void Source::setSymmetricX(float x) {
@@ -286,7 +288,9 @@ void Source::setSymmetricX(float x) {
 }
 
 void Source::setSymmetricYPole(float firstSourceY) {
-    symmetricYPole = roundf(firstSourceY) == roundf(getY());
+    int y1 = firstSourceY <= 0.5 ? 0 : 1;
+    int y2 = getY() < 0.5 ? 0 : 1;
+    symmetricYPole = y1 == y2;
 }
 
 void Source::setSymmetricY(float y) {

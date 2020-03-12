@@ -1237,10 +1237,20 @@ void ControlGrisAudioProcessor::initialize() {
             }
         }
     }
+    if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X) {
+        for (int i = 1; i < m_numOfSources; i++) {
+            sources[i].setSymmetricYPole(sources[0].getY());
+            sources[i].setSymmetricY(sources[0].getY());
+        }
+    } else if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y) {
+        for (int i = 1; i < m_numOfSources; i++) {
+            sources[i].setSymmetricXPole(sources[0].getX());
+            sources[i].setSymmetricX(sources[0].getX());
+        }
+    }
 }
 
-void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
-{
+void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
     initialize();
 }
 
