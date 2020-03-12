@@ -159,10 +159,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     trajectoryBox.setTrajectoryTypeAlt(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
     trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
     trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
-    trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 20));
-    automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 20));
-    trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 20));
-    automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 20));
+    trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
+    automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
+    trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 

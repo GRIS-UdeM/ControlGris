@@ -102,8 +102,8 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     addAndMakeVisible(&dampeningLabel);
 
     addAndMakeVisible(&dampeningEditor);
-    dampeningEditor.setTextToShowWhenEmpty ("20", Colours::white);
-    dampeningEditor.setText("20", false);
+    dampeningEditor.setTextToShowWhenEmpty ("0", Colours::white);
+    dampeningEditor.setText("0", false);
     dampeningEditor.setInputRestrictions (10, "0123456789");
     dampeningEditor.onReturnKey = [this] {
             durationUnitCombo.grabKeyboardFocus();
@@ -128,8 +128,8 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     addAndMakeVisible(&backAndForthAltToggle);
 
     addAndMakeVisible(&dampeningAltEditor);
-    dampeningAltEditor.setTextToShowWhenEmpty ("20", Colours::white);
-    dampeningAltEditor.setText("20", false);
+    dampeningAltEditor.setTextToShowWhenEmpty ("0", Colours::white);
+    dampeningAltEditor.setText("0", false);
     dampeningAltEditor.setInputRestrictions (10, "0123456789");
     dampeningAltEditor.onReturnKey = [this] {
             durationUnitCombo.grabKeyboardFocus();
