@@ -79,7 +79,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
     fixPositionData (FIXED_POSITION_DATA_TAG)
 {
-    m_lock = false;
     m_numOfSources = 2;
     m_firstSourceId = 1;
     m_selectedSourceId = 1;
@@ -1032,7 +1031,6 @@ void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
 
 //==============================================================================
 void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
-    while (m_lock) {}
     // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
@@ -1124,7 +1122,6 @@ XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
 }
 
 void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
-    while (m_lock) {}
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
@@ -1285,7 +1282,6 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layou
 #endif
 
 void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
-    m_lock = true;
     int started = m_isPlaying;
     AudioPlayHead* phead = getPlayHead();
     if (phead != nullptr) {
@@ -1308,7 +1304,6 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         }
     }
     m_lastTime = m_currentTime;
-    m_lock = false;
 }
 
 //==============================================================================

@@ -164,7 +164,6 @@ private:
     double m_lastTime;
     double m_lastTimerTime;
 
-    bool m_lock; // I don't think we need this anymore...
     bool m_isPlaying;
     bool m_canStopActivate;
     double m_bpm;
