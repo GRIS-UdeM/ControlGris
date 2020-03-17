@@ -263,7 +263,9 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
                 sources[i].setElevation(sources[0].getElevation());
             }
         }
-    } else if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
+    }
+
+    if (value == SOURCE_LINK_CIRCULAR_FIXED_ANGLE || value == SOURCE_LINK_CIRCULAR_FULLY_FIXED) {
         Sorter tosort[m_numOfSources];
         for (int i = 0; i < m_numOfSources; i++) {
             tosort[i].index = i;
@@ -284,12 +286,16 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
             int ioff = (i + posOfFirstSource) % m_numOfSources;
             sources[tosort[ioff].index].setAzimuth(newPos);
         }
-    } else if (value == SOURCE_LINK_SYMMETRIC_X) {
+    }
+
+    if (value == SOURCE_LINK_SYMMETRIC_X) {
         for (int i = 1; i < m_numOfSources; i++) {
             sources[i].setSymmetricYPole(sources[0].getY());
             sources[i].setSymmetricY(sources[0].getY());
         }
-    } else if (value == SOURCE_LINK_SYMMETRIC_Y) {
+    }
+
+    if (value == SOURCE_LINK_SYMMETRIC_Y) {
         for (int i = 1; i < m_numOfSources; i++) {
             sources[i].setSymmetricXPole(sources[0].getX());
             sources[i].setSymmetricX(sources[0].getX());
