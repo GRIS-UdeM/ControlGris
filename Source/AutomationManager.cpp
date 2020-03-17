@@ -34,7 +34,7 @@ AutomationManager::AutomationManager() {
     playbackDuration = 5.0;
     currentTrajectoryPoint = Point<float> (FIELD_WIDTH / 2, FIELD_WIDTH / 2);
     playbackPosition = Point<float> (-1.0f, -1.0f);
-    trajectoryDeltaTime = 0.0;
+    trajectoryDeltaTime = lastTrajectoryDeltaTime = 0.0;
 }
 
 AutomationManager::~AutomationManager() {}
@@ -44,6 +44,7 @@ void AutomationManager::setActivateState(bool state) {
     if (! state) {
         playbackPosition = Point<float> (-1.0f, -1.0f);
     } else {
+        trajectoryDeltaTime = lastTrajectoryDeltaTime = 0.0;
         backAndForthDirection = 0;
         dampeningCycleCount = 0;
         dampeningLastFilterOutput = 0.0;
