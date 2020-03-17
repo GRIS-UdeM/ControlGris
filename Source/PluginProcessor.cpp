@@ -45,7 +45,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
                                                      String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
-                                                     NormalisableRange<float>(0.f, static_cast<float> (SOURCE_LINK_TYPES.size()), 1.f),
+                                                     NormalisableRange<float>(0.f, static_cast<float> (SOURCE_LINK_TYPES.size() - 1), 1.f),
                                                      0.f, nullptr, nullptr, false, true, true));
     parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
                                                      NormalisableRange<float>(0.f, 4.f, 1.f), 0.f, nullptr, nullptr,

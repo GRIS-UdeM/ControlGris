@@ -427,7 +427,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) 
 
     processor.onSourceLinkChanged(value);
 
-    float howMany = static_cast<float> (SOURCE_LINK_TYPES.size());
+    float howMany = static_cast<float> (SOURCE_LINK_TYPES.size() - 1);
     valueTreeState.getParameter("sourceLink")->beginChangeGesture();
     valueTreeState.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / howMany);
     valueTreeState.getParameter("sourceLink")->endChangeGesture();
