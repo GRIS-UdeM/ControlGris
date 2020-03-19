@@ -110,7 +110,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
-    setResizeLimits(FIELD_WIDTH, FIELD_WIDTH + 20, 1800, 1300);
+    setResizeLimits(FIELD_WIDTH + 50, FIELD_WIDTH + 20, 1800, 1300);
 
     lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
     lastUIHeight.referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
