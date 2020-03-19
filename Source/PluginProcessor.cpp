@@ -1296,7 +1296,7 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         m_isPlaying = playposinfo.isPlaying;
         m_bpm = playposinfo.bpm;
         if (m_needInitialization) {
-            m_initTimeOnPlay = m_currentTime = playposinfo.timeInSeconds;
+            m_initTimeOnPlay = m_currentTime = playposinfo.timeInSeconds < 0.0 ? 0.0 : playposinfo.timeInSeconds;
             m_needInitialization = false;
         } else {
             m_currentTime = playposinfo.timeInSeconds;
