@@ -28,6 +28,8 @@ public:
     AutomationManager();
     ~AutomationManager();
 
+    void setFieldWidth(double newFieldWidth);
+
     void setActivateState(bool state);
     bool getActivateState();
 
@@ -81,6 +83,8 @@ public:
 
 private:
     ListenerList<Listener> listeners;
+
+    double          fieldWidth;
 
     int             sourceLink;
     int             drawingType;

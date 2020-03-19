@@ -110,7 +110,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
-    setResizeLimits(FIELD_WIDTH + 50, FIELD_WIDTH + 20, 1800, 1300);
+    setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
     lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
     lastUIHeight.referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
@@ -649,7 +649,10 @@ void ControlGrisAudioProcessorEditor::resized() {
     double height = getHeight();
 
     double fieldSize = width / 2;
-    if (fieldSize < FIELD_WIDTH) { fieldSize = FIELD_WIDTH; }
+    if (fieldSize < MIN_FIELD_WIDTH) { fieldSize = MIN_FIELD_WIDTH; }
+
+    automationManager.setFieldWidth(fieldSize);
+    automationManagerAlt.setFieldWidth(fieldSize);
 
     mainBanner.setBounds(0, 0, fieldSize, 20);
     mainField.setBounds(0, 20, fieldSize, fieldSize);
