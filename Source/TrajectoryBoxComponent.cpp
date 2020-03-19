@@ -158,6 +158,14 @@ void TrajectoryBoxComponent::setNumberOfSources(int numOfSources) {
         sourceLinkCombo.setEnabled(true);
         sourceLinkAltCombo.setEnabled(true);
     }
+
+    if (numOfSources == 2) {
+        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_X, true);
+        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_Y, true);
+    } else {
+        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_X, false);
+        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_Y, false);
+    }
 }
 
 void TrajectoryBoxComponent::setTrajectoryType(int type) {

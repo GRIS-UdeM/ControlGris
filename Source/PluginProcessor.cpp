@@ -203,6 +203,8 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
     if (parameterID.compare("sourceLink") == 0) {
         int val = (int)(newValue) + 1;
         if (val != automationManager.getSourceLink()) {
+            if (m_numOfSources != 2 && (val == SOURCE_LINK_SYMMETRIC_X || val == SOURCE_LINK_SYMMETRIC_Y))
+                return;
             automationManager.setSourceLink(val);
             automationManager.fixSourcePosition();
             onSourceLinkChanged(val);
@@ -288,18 +290,12 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(int value) {
         }
     }
 
-    if (value == SOURCE_LINK_SYMMETRIC_X) {
-        for (int i = 1; i < m_numOfSources; i++) {
-            sources[i].setSymmetricYPole(sources[0].getY());
-            sources[i].setSymmetricY(sources[0].getY());
-        }
+    if (value == SOURCE_LINK_SYMMETRIC_X && m_numOfSources == 2) {
+        sources[1].setSymmetricX(sources[0].getX(), sources[0].getY());
     }
 
-    if (value == SOURCE_LINK_SYMMETRIC_Y) {
-        for (int i = 1; i < m_numOfSources; i++) {
-            sources[i].setSymmetricXPole(sources[0].getX());
-            sources[i].setSymmetricX(sources[0].getX());
-        }
+    if (value == SOURCE_LINK_SYMMETRIC_Y && m_numOfSources == 2) {
+        sources[1].setSymmetricY(sources[0].getX(), sources[0].getY());
     }
 
     bool shouldBeFixed = value != SOURCE_LINK_INDEPENDENT;
@@ -967,17 +963,13 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
             break;
         case SOURCE_LINK_SYMMETRIC_X:
             sources[0].setPos(automationManager.getSourcePosition());
-            for (int i = 1; i < m_numOfSources; i++) {
-                sources[i].setXYCoordinatesFromFixedSource(sources[0].getDeltaX(), 0.f);
-                sources[i].setSymmetricY(sources[0].getY());
-            }
+            if (m_numOfSources == 2)
+                sources[1].setSymmetricX(sources[0].getX(), sources[0].getY());
             break;
         case SOURCE_LINK_SYMMETRIC_Y:
             sources[0].setPos(automationManager.getSourcePosition());
-            for (int i = 1; i < m_numOfSources; i++) {
-                sources[i].setXYCoordinatesFromFixedSource(0.f, sources[0].getDeltaY());
-                sources[i].setSymmetricX(sources[0].getX());
-            }
+            if (m_numOfSources == 2)
+                sources[1].setSymmetricY(sources[0].getX(), sources[0].getY());
             break;
     }
 }
@@ -1238,17 +1230,6 @@ void ControlGrisAudioProcessor::initialize() {
             if (ed != nullptr) {
                 ed->updatePositionPreset(m_currentPositionPreset);
             }
-        }
-    }
-    if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X) {
-        for (int i = 1; i < m_numOfSources; i++) {
-            sources[i].setSymmetricYPole(sources[0].getY());
-            sources[i].setSymmetricY(sources[0].getY());
-        }
-    } else if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y) {
-        for (int i = 1; i < m_numOfSources; i++) {
-            sources[i].setSymmetricXPole(sources[0].getX());
-            sources[i].setSymmetricX(sources[0].getX());
         }
     }
 }

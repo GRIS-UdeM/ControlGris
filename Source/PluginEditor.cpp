@@ -244,6 +244,11 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         if (processor.getNumberOfSources() != numOfSources) {
             initSourcePlacement = true;
         }
+        if (numOfSources != 2 && (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X ||
+                                  automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y)) {
+            automationManager.setSourceLink(SOURCE_LINK_INDEPENDENT);
+            updateSourceLinkCombo(SOURCE_LINK_INDEPENDENT);
+        }
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
         processor.setSelectedSourceId(m_selectedSource);
@@ -360,11 +365,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 
     for (int i = 0; i < numOfSources; i++) {
-        if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X) {
-            processor.getSources()[i].setSymmetricYPole(processor.getSources()[0].getY());
-        } else if (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y) {
-            processor.getSources()[i].setSymmetricXPole(processor.getSources()[0].getX());
-        }
         processor.getSources()[i].fixSourcePosition(true);
     }
 
@@ -727,20 +727,18 @@ void ControlGrisAudioProcessorEditor::validateSourcePositions() {
     }
     // Symmetric X.
     else if (sourceLink == SOURCE_LINK_SYMMETRIC_X) {
-        float deltaX = processor.getSources()[0].getDeltaX();
-        float y = processor.getSources()[0].getY();
-        for (int i = 1; i < numOfSources; i++) {
-            processor.getSources()[i].setXYCoordinatesFromFixedSource(deltaX, 0.f);
-            processor.getSources()[i].setSymmetricY(y);
+        if (processor.getNumberOfSources() == 2) {
+            float x = processor.getSources()[0].getX();
+            float y = processor.getSources()[0].getY();
+            processor.getSources()[1].setSymmetricX(x, y);
         }
     }
     // Symmetric Y.
     else if (sourceLink == SOURCE_LINK_SYMMETRIC_Y) {
-        float deltaY = processor.getSources()[0].getDeltaY();
-        float x = processor.getSources()[0].getX();
-        for (int i = 1; i < numOfSources; i++) {
-            processor.getSources()[i].setXYCoordinatesFromFixedSource(0.f, deltaY);
-            processor.getSources()[i].setSymmetricX(x);
+        if (processor.getNumberOfSources() == 2) {
+            float x = processor.getSources()[0].getX();
+            float y = processor.getSources()[0].getY();
+            processor.getSources()[1].setSymmetricY(x, y);
         }
     }
 

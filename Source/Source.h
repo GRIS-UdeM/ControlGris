@@ -75,10 +75,8 @@ public:
     void setFixedPosition(float x, float y);
     void setFixedElevation(float z);
 
-    void setSymmetricXPole(float firstSourceX);
-    void setSymmetricX(float x);
-    void setSymmetricYPole(float firstSourceY);
-    void setSymmetricY(float y);
+    void setSymmetricX(float x, float y);
+    void setSymmetricY(float x, float y);
 
     void fixSourcePosition(bool shouldBeFixed);
     void fixSourcePositionElevation(bool shouldBeFixed);
@@ -118,9 +116,6 @@ private:
     float fixedDistance;
     float fixedX;
     float fixedY;
-
-    bool symmetricXPole;
-    bool symmetricYPole;
 
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
 

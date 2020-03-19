@@ -36,8 +36,6 @@ Source::Source() {
     fixedAzimuth = -1.0;
     fixedElevation = -1.0;
     fixedDistance = -1.0;
-    symmetricXPole = false;
-    symmetricYPole = false;
     colour = Colours::black;
 }
 
@@ -274,30 +272,14 @@ void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevat
     computeXY();
 }
 
-void Source::setSymmetricXPole(float firstSourceX) {
-    int x1 = firstSourceX <= 0.5 ? 0 : 1;
-    int x2 = getX() < 0.5 ? 0 : 1;
-    symmetricXPole = x1 == x2;
-}
-
-void Source::setSymmetricX(float x) {
-    if (symmetricXPole)
+void Source::setSymmetricX(float x, float y) {
         setX(x);
-    else
-        setX(1.f - x);
-}
-
-void Source::setSymmetricYPole(float firstSourceY) {
-    int y1 = firstSourceY <= 0.5 ? 0 : 1;
-    int y2 = getY() < 0.5 ? 0 : 1;
-    symmetricYPole = y1 == y2;
-}
-
-void Source::setSymmetricY(float y) {
-    if (symmetricYPole)
-        setY(y);
-    else
         setY(1.f - y);
+}
+
+void Source::setSymmetricY(float x, float y) {
+        setX(1.f - x);
+        setY(y);
 }
 
 void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {
