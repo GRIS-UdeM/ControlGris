@@ -301,7 +301,8 @@ void MainFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_REALTIME) {
+    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_REALTIME &&
+        automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -602,7 +603,8 @@ void ElevationFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_ALT_REALTIME &&
+        automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
