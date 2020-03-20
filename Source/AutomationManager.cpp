@@ -32,7 +32,7 @@ AutomationManager::AutomationManager() {
     dampeningLastDelta = 0.0;
     source.setX(0.0f);
     source.setY(0.0f);
-    playbackDuration = 5.0;
+    playbackDuration = currentPlaybackDuration = 5.0;
     currentTrajectoryPoint = Point<float> (fieldWidth / 2, fieldWidth / 2);
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryDeltaTime = lastTrajectoryDeltaTime = 0.0;
@@ -59,6 +59,7 @@ void AutomationManager::setActivateState(bool state) {
         backAndForthDirection = 0;
         dampeningCycleCount = 0;
         dampeningLastDelta = 0.0;
+        currentPlaybackDuration = playbackDuration;
     }
 }
 
@@ -139,7 +140,7 @@ void AutomationManager::createRecordingPath(Path& path) {
 }
 
 void AutomationManager::setTrajectoryDeltaTime(double relativeTimeFromPlay) {
-    trajectoryDeltaTime = relativeTimeFromPlay / playbackDuration;
+    trajectoryDeltaTime = relativeTimeFromPlay / currentPlaybackDuration;
     trajectoryDeltaTime = std::fmod(trajectoryDeltaTime, 1.0f);
     computeCurrentTrajectoryPoint();
 }
@@ -166,11 +167,15 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
         }
         lastTrajectoryDeltaTime = trajectoryDeltaTime;
 
-        float trajectoryPhase;
-        if (trajectoryDeltaTime <= 0.5f) {
-            trajectoryPhase = powf(trajectoryDeltaTime * 2.f, 2.f) * 0.5f;
+        double trajectoryPhase;
+        if (isBackAndForth && dampeningCycles > 0) {
+            if (trajectoryDeltaTime <= 0.5) {
+                trajectoryPhase = pow(trajectoryDeltaTime * 2.0, 2.0) * 0.5;
+            } else {
+                trajectoryPhase = 1.0 - pow(1.0 - ((trajectoryDeltaTime - 0.5) * 2.0), 2.0) * 0.5;
+            }
         } else {
-            trajectoryPhase = 1.f - powf(1.f - ((trajectoryDeltaTime - 0.5f) * 2.f), 2.f) * 0.5f;
+            trajectoryPhase = trajectoryDeltaTime;
         }
 
         double delta = trajectoryPhase * trajectoryPoints.size();
@@ -186,7 +191,9 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
 
         if (isBackAndForth && dampeningCycles > 0) {
             if (dampeningCycleCount < dampeningCyclesTimes2) {
-                double currentScaleMin = (double)(dampeningCycleCount + trajectoryDeltaTime) / dampeningCyclesTimes2 * trajectoryPoints.size() * 0.5;
+                double relativeDeltaTime = (dampeningCycleCount + trajectoryDeltaTime) / dampeningCyclesTimes2;
+                currentPlaybackDuration = playbackDuration - (pow(relativeDeltaTime, 2.0) * playbackDuration * 0.25);
+                double currentScaleMin = relativeDeltaTime * trajectoryPoints.size() * 0.5;
                 double currentScaleMax = trajectoryPoints.size() - currentScaleMin;
                 double currentScale = (currentScaleMax - currentScaleMin) / trajectoryPoints.size();
                 dampeningLastDelta = delta = delta * currentScale + currentScaleMin;

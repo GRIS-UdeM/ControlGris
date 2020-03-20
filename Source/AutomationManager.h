@@ -98,6 +98,7 @@ private:
 
     bool            activateState;
     double          playbackDuration;
+    double          currentPlaybackDuration;
     Point<float>    playbackPosition;
 
     Source source;
