@@ -27,9 +27,9 @@ AutomationManager::AutomationManager() {
     activateState = false;
     isBackAndForth = false;
     backAndForthDirection = 0;
-    dampeningCycles = 20;
+    dampeningCycles = 0;
     dampeningCycleCount = 0;
-    dampeningLastFilterOutput = 0.0;
+    dampeningLastDelta = 0.0;
     source.setX(0.0f);
     source.setY(0.0f);
     playbackDuration = 5.0;
@@ -58,7 +58,7 @@ void AutomationManager::setActivateState(bool state) {
         trajectoryDeltaTime = lastTrajectoryDeltaTime = 0.0;
         backAndForthDirection = 0;
         dampeningCycleCount = 0;
-        dampeningLastFilterOutput = 0.0;
+        dampeningLastDelta = 0.0;
     }
 }
 
@@ -155,33 +155,50 @@ void AutomationManager::compressTrajectoryXValues(int maxValue) {
 }
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
+    int dampeningCyclesTimes2 = dampeningCycles * 2;
+
     if (trajectoryPoints.size() > 0) {
         if (isBackAndForth && trajectoryDeltaTime < lastTrajectoryDeltaTime) {
             backAndForthDirection = 1 - backAndForthDirection;
             dampeningCycleCount++;
-            if (dampeningCycleCount >= dampeningCycles)
-                dampeningCycleCount = dampeningCycles;
+            if (dampeningCycleCount >= dampeningCyclesTimes2)
+                dampeningCycleCount = dampeningCyclesTimes2;
         }
         lastTrajectoryDeltaTime = trajectoryDeltaTime;
-        double delta = trajectoryDeltaTime * trajectoryPoints.size();
+
+        float trajectoryPhase;
+        if (trajectoryDeltaTime <= 0.5f) {
+            trajectoryPhase = powf(trajectoryDeltaTime * 2.f, 2.f) * 0.5f;
+        } else {
+            trajectoryPhase = 1.f - powf(1.f - ((trajectoryDeltaTime - 0.5f) * 2.f), 2.f) * 0.5f;
+        }
+
+        double delta = trajectoryPhase * trajectoryPoints.size();
+
         if (backAndForthDirection == 1)
             delta = trajectoryPoints.size() - delta;
+
         if (delta + 1 >= trajectoryPoints.size()) {
-            delta = std::fmod(delta, trajectoryPoints.size());
+            delta = trajectoryPoints.size();
         } else if (delta < 0) {
-            delta += trajectoryPoints.size();
+            delta = 0;
         }
 
-        if (dampeningCycleCount > 0) {
-            double currentScaleMin = (double)dampeningCycleCount / dampeningCycles * trajectoryPoints.size() * 0.5;
-            double currentScaleMax = trajectoryPoints.size() - currentScaleMin;
-            double currentScale = (currentScaleMax - currentScaleMin) / trajectoryPoints.size();
-            delta = delta * currentScale + currentScaleMin;
-            dampeningLastFilterOutput = delta = delta + (dampeningLastFilterOutput - delta) * 0.75;
+        if (isBackAndForth && dampeningCycles > 0) {
+            if (dampeningCycleCount < dampeningCyclesTimes2) {
+                double currentScaleMin = (double)(dampeningCycleCount + trajectoryDeltaTime) / dampeningCyclesTimes2 * trajectoryPoints.size() * 0.5;
+                double currentScaleMax = trajectoryPoints.size() - currentScaleMin;
+                double currentScale = (currentScaleMax - currentScaleMin) / trajectoryPoints.size();
+                dampeningLastDelta = delta = delta * currentScale + currentScaleMin;
+            } else {
+                delta = dampeningLastDelta;
+            }
         } else {
-            dampeningLastFilterOutput = delta;
+            dampeningLastDelta = delta;
         }
 
+        double deltaRatio = static_cast<double> (trajectoryPoints.size() - 1) / trajectoryPoints.size();
+        delta *= deltaRatio;
         int index = (int)delta;
         if (index + 1 < trajectoryPoints.size()) {
             double frac = delta - index;

@@ -94,7 +94,7 @@ private:
 
     int             dampeningCycles;
     int             dampeningCycleCount;
-    double          dampeningLastFilterOutput;
+    double          dampeningLastDelta;
 
     bool            activateState;
     double          playbackDuration;

@@ -91,7 +91,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
-    backAndForthToggle.setButtonText("back & forth");
+    backAndForthToggle.setButtonText("Back & Forth");
     backAndForthToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthChanged(backAndForthToggle.getToggleState()); });
             setDampeningEditorEnabled(backAndForthToggle.getToggleState());
@@ -120,7 +120,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxActivateAltChanged(activateAltButton.getToggleState()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
-    backAndForthAltToggle.setButtonText("back & forth");
+    backAndForthAltToggle.setButtonText("Back & Forth");
     backAndForthAltToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.trajectoryBoxBackAndForthAltChanged(backAndForthAltToggle.getToggleState()); });
             setDampeningAltEditorEnabled(backAndForthAltToggle.getToggleState());
