@@ -23,8 +23,8 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&oscFormatLabel);
 
-    oscFormatCombo.addItem("DOME - ServerGris", 1);
-    oscFormatCombo.addItem("CUBE - ServerGris", 2);
+    oscFormatCombo.addItem("DOME - SpatGris", 1);
+    oscFormatCombo.addItem("CUBE - SpatGris", 2);
     oscFormatCombo.onChange = [this] {
             listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged((SPAT_MODE_ENUM)(oscFormatCombo.getSelectedId()-1)); });
         };
