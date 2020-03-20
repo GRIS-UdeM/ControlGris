@@ -203,7 +203,7 @@ public:
                             const bool isHighlighted, const bool isTicked,
                             const bool hasSubMenu, const String& text,
                             const String& shortcutKeyText,
-                            const Drawable* icon, const Colour* const textColourToUse)
+                            const Drawable* icon, const Colour* const textColourToUse) override
     {
         if (isSeparator)
         {
