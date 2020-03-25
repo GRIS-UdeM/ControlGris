@@ -592,6 +592,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
 
     if (sourceLinkToProcess) {
         if (sourceLinkToProcess != automationManager.getSourceLink()) {
+            if (m_numOfSources != 2 && (sourceLinkToProcess == SOURCE_LINK_SYMMETRIC_X || sourceLinkToProcess == SOURCE_LINK_SYMMETRIC_Y))
+                return;
             automationManager.setSourceLink(sourceLinkToProcess);
             automationManager.fixSourcePosition();
             onSourceLinkChanged(sourceLinkToProcess);
