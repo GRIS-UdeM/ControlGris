@@ -519,6 +519,9 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
         automationManagerAlt.setSourcePositionY(message[0].getFloat32());
         automationManagerAlt.sendTrajectoryPositionChangedEvent();
     } else if (address == "/controlgris/traj/1/xy" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        // TODO: this is not enough to fully set the interface (there is an offset between source 1 and the others in circular radius modes).
+        // ControlGrisAudioProcessorEditor::fieldSourcePositionChanged should be refactored to be called from the processor instead of living
+        // in the editor. This way, OSC message handler will be able to call the same code as the interface.
         automationManager.setSourcePositionX(message[0].getFloat32());
         automationManager.setSourcePositionY(message[1].getFloat32());
         automationManager.sendTrajectoryPositionChangedEvent();
@@ -597,6 +600,10 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
             automationManager.setSourceLink(sourceLinkToProcess);
             automationManager.fixSourcePosition();
             onSourceLinkChanged(sourceLinkToProcess);
+            float howMany = static_cast<float> (SOURCE_LINK_TYPES.size() - 1);
+            parameters.getParameter("sourceLink")->beginChangeGesture();
+            parameters.getParameter("sourceLink")->setValueNotifyingHost(((float)sourceLinkToProcess - 1.f) / howMany);
+            parameters.getParameter("sourceLink")->endChangeGesture();
             ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updateSourceLinkCombo(sourceLinkToProcess);
@@ -608,6 +615,9 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
             automationManagerAlt.setSourceLink(sourceLinkAltToProcess);
             automationManagerAlt.fixSourcePosition();
             onSourceLinkAltChanged(sourceLinkAltToProcess);
+            parameters.getParameter("sourceLinkAlt")->beginChangeGesture();
+            parameters.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)sourceLinkAltToProcess - 1.f) / 4.f);
+            parameters.getParameter("sourceLinkAlt")->endChangeGesture();
             ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updateSourceLinkAltCombo(sourceLinkAltToProcess);
