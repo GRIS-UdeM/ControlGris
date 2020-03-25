@@ -1141,11 +1141,11 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
 
 //==============================================================================
 double ControlGrisAudioProcessor::getInitTimeOnPlay() {
-    return m_initTimeOnPlay;
+    return m_initTimeOnPlay >= 0.0 ? m_initTimeOnPlay : 0.0;
 }
 
 double ControlGrisAudioProcessor::getCurrentTime() {
-    return m_currentTime;
+    return m_currentTime >= 0.0 ? m_currentTime : 0.0;
 }
 
 bool ControlGrisAudioProcessor::getIsPlaying() {
