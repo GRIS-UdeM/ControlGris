@@ -1247,7 +1247,8 @@ void ControlGrisAudioProcessor::initialize() {
 }
 
 void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
-    initialize();
+    if (m_isPlaying == 0)
+        initialize();
 }
 
 void ControlGrisAudioProcessor::releaseResources()
