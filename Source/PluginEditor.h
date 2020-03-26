@@ -99,6 +99,7 @@ public:
     void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
 
     void setPluginState();
+    void updateSpanLinkButton(bool state);
     void updateSourceLinkCombo(int value);
     void updateSourceLinkAltCombo(int value);
     void updatePositionPreset(int presetNumber);

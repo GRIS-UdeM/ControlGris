@@ -189,6 +189,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     m_isInsideSetPluginState = false;
 }
 
+void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state) {
+    parametersBox.setSpanLinkState(state);
+}
+
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
     trajectoryBox.sourceLinkCombo.setSelectedId(value, NotificationType::dontSendNotification);
 }

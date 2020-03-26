@@ -896,15 +896,19 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     m_lastTimerTime = getCurrentTime();
 
+    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+
     if (m_canStopActivate && !m_isPlaying) {
         if (automationManager.getActivateState())
             automationManager.setActivateState(false);
         if (automationManagerAlt.getActivateState())
             automationManagerAlt.setActivateState(false);
         m_canStopActivate = false;
+        if (editor != nullptr) {
+            editor->updateSpanLinkButton(false);
+        }
     }
 
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
     if (editor != nullptr) {
         editor->refresh();
     }
