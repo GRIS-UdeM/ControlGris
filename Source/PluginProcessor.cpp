@@ -120,6 +120,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("oscOutputConnected", false, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
+    parameters.state.setProperty("oscOutputPluginId", 1, nullptr);
 
     // Trajectory box persitent settings.
     parameters.state.setProperty("trajectoryType", 1, nullptr);
@@ -555,19 +556,20 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     int sourceLinkToProcess = 0, sourceLinkAltToProcess = 0;
     float x = -1.f, y = -1.f, z = -1.f;
     String address = message.getAddressPattern().toString().toStdString();
-    if ((address == "/controlgris/traj/1/x" || address == "/controlgris/traj/1/xyz/1") &&
+    String pluginInstance = String("/controlgris/") + String(getOscOutputPluginId());
+    if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1")) &&
          automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         x = message[0].getFloat32();
-    } else if ((address == "/controlgris/traj/1/y" || address == "/controlgris/traj/1/xyz/2") &&
+    } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2")) &&
                 automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         y = message[0].getFloat32();
-    } else if ((address == "/controlgris/traj/1/z" || address == "/controlgris/traj/1/xyz/3") &&
+    } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3")) &&
                 automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
         z = message[0].getFloat32();
-    } else if (address == "/controlgris/traj/1/xy" && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    } else if (address == String(pluginInstance + "/traj/1/xy") && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
         x = message[0].getFloat32();
         y = message[1].getFloat32();
-    } else if (address == "/controlgris/traj/1/xyz") {
+    } else if (address == String(pluginInstance + "/traj/1/xyz")) {
         if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
             x = message[0].getFloat32();
             y = message[1].getFloat32();
@@ -575,56 +577,56 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
         if (automationManagerAlt.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
             z = message[2].getFloat32();
         }
-    } else if (address == "/controlgris/azispan") {
+    } else if (address == String(pluginInstance + "/azispan")) {
         for (int i = 0; i < m_numOfSources; i++)
             sources[i].setAzimuthSpan(message[0].getFloat32());
         parameters.getParameter("azimuthSpan")->beginChangeGesture();
         parameters.getParameter("azimuthSpan")->setValueNotifyingHost(message[0].getFloat32());
         parameters.getParameter("azimuthSpan")->endChangeGesture();
-    } else if (address == "/controlgris/elespan") {
+    } else if (address == String(pluginInstance + "/elespan")) {
             for (int i = 0; i < m_numOfSources; i++)
                 sources[i].setElevationSpan(message[0].getFloat32());
             parameters.getParameter("elevationSpan")->beginChangeGesture();
             parameters.getParameter("elevationSpan")->setValueNotifyingHost(message[0].getFloat32());
             parameters.getParameter("elevationSpan")->endChangeGesture();
-    } else if (address == "/controlgris/sourcelink/1/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/1/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 1;
-    } else if (address == "/controlgris/sourcelink/2/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/2/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 2;
-    } else if (address == "/controlgris/sourcelink/3/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/3/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 3;
-    } else if (address == "/controlgris/sourcelink/4/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/4/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 4;
-    } else if (address == "/controlgris/sourcelink/5/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/5/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 5;
-    } else if (address == "/controlgris/sourcelink/6/1") {
+    } else if (address == String(pluginInstance + "/sourcelink/6/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = 6;
-    } else if (address == "/controlgris/sourcelink") {
+    } else if (address == String(pluginInstance + "/sourcelink")) {
         sourceLinkToProcess = (int)message[0].getFloat32(); // 1 -> 6
-    } else if (address == "/controlgris/sourcelinkalt/1/1") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt/1/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkAltToProcess = 1;
-    } else if (address == "/controlgris/sourcelinkalt/2/1") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt/2/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkAltToProcess = 2;
-    } else if (address == "/controlgris/sourcelinkalt/3/1") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt/3/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkAltToProcess = 3;
-    } else if (address == "/controlgris/sourcelinkalt/4/1") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt/4/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkAltToProcess = 4;
-    } else if (address == "/controlgris/sourcelinkalt/5/1") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt/5/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkAltToProcess = 5;
-    } else if (address == "/controlgris/sourcelinkalt") {
+    } else if (address == String(pluginInstance + "/sourcelinkalt")) {
         sourceLinkAltToProcess = (int)message[0].getFloat32(); // 1 -> 5
-    } else if (address == "/controlgris/presets") {
+    } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
         setPositionPreset(newPreset);
         ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -633,7 +635,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
         }
     }
 
-    if (x != -1.f && y != -1.f && z != -1.f) {
+    if (x != -1.f && y != -1.f) {
         if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
             automationManager.setSourcePositionX(x);
             automationManager.setSourcePositionY(y);
@@ -643,23 +645,6 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
             sources[0].setY(y);
             sourcePositionChanged(0, 0);
         }
-        automationManagerAlt.setSourcePositionY(message[2].getFloat32());
-        automationManagerAlt.sendTrajectoryPositionChangedEvent();
-        setPositionPreset(0);
-    } else if (x != -1.f && y != -1.f) {
-        if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
-            automationManager.setSourcePositionX(x);
-            automationManager.setSourcePositionY(y);
-            automationManager.sendTrajectoryPositionChangedEvent();
-        } else {
-            sources[0].setX(x);
-            sources[0].setY(y);
-            sourcePositionChanged(0, 0);
-        }
-        setPositionPreset(0);
-    } else if (z != -1.f) {
-        automationManagerAlt.setSourcePositionY(message[2].getFloat32());
-        automationManagerAlt.sendTrajectoryPositionChangedEvent();
         setPositionPreset(0);
     } else if (y != -1.f) {
         if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
@@ -678,6 +663,12 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
             sources[0].setX(x);
             sourcePositionChanged(0, 0);
         }
+        setPositionPreset(0);
+    }
+
+    if (z != -1.f) {
+        automationManagerAlt.setSourcePositionY(z);
+        automationManagerAlt.sendTrajectoryPositionChangedEvent();
         setPositionPreset(0);
     }
 
@@ -725,60 +716,70 @@ bool ControlGrisAudioProcessor::getOscOutputConnected() {
     return m_oscOutputConnected;
 }
 
+void ControlGrisAudioProcessor::setOscOutputPluginId(int pluginId) {
+    parameters.state.setProperty("oscOutputPluginId", pluginId, nullptr);
+}
+
+int ControlGrisAudioProcessor::getOscOutputPluginId() {
+    return parameters.state.getProperty("oscOutputPluginId", 1);
+}
+
 void ControlGrisAudioProcessor::sendOscOutputMessage() {
     if (! m_oscOutputConnected)
         return;
 
     OSCMessage message(OSCAddressPattern ("/tmp"));
 
+    String pluginInstance = String("/controlgris/") + String(getOscOutputPluginId());
+
     float trajectory1x = automationManager.getSourcePosition().x;
     float trajectory1y = automationManager.getSourcePosition().y;
     float trajectory1z = automationManagerAlt.getSourcePosition().y;
 
     if (m_lastTrajectory1x != trajectory1x) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/x"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/x"));
         message.addFloat32(trajectory1x);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/1"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/1"));
         message.addFloat32(trajectory1x);
         oscOutputSender.send(message);
         message.clear();
     }
 
     if (m_lastTrajectory1y != trajectory1y) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/y"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/y"));
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/2"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/2"));
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
     }
 
     if (m_lastTrajectory1z != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/z"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/z"));
         message.addFloat32(trajectory1z);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz/3"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/3"));
         message.addFloat32(trajectory1z);
         oscOutputSender.send(message);
         message.clear();
     }
 
     if (m_lastTrajectory1x != trajectory1x || m_lastTrajectory1y != trajectory1y || m_lastTrajectory1z != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xy"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xy"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/traj/1/xyz"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         message.addFloat32(trajectory1z);
@@ -791,7 +792,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     m_lastTrajectory1z = trajectory1z;
 
     if (m_lastAzispan != sources[0].getAzimuthSpan()) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/azispan"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/azispan"));
         message.addFloat32(sources[0].getAzimuthSpan());
         oscOutputSender.send(message);
         message.clear();
@@ -799,7 +800,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (m_lastElespan != sources[0].getElevationSpan()) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/elespan"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/elespan"));
         message.addFloat32(sources[0].getElevationSpan());
         oscOutputSender.send(message);
         message.clear();
@@ -807,12 +808,12 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (automationManager.getSourceLink() != m_lastSourceLink) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/sourcelink"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/sourcelink"));
         message.addInt32(automationManager.getSourceLink());
         oscOutputSender.send(message);
         message.clear();
 
-        String pattern = String("/controlgris/sourcelink/") + String(automationManager.getSourceLink()) + String("/1");
+        String pattern = pluginInstance + String("/sourcelink/") + String(automationManager.getSourceLink()) + String("/1");
         message.setAddressPattern(OSCAddressPattern (pattern));
         message.addInt32(1);
         oscOutputSender.send(message);
@@ -823,12 +824,12 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
 
     if (automationManagerAlt.getSourceLink() != m_lastSourceLinkAlt) {
 
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/sourcelinkalt"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/sourcelinkalt"));
         message.addInt32(automationManagerAlt.getSourceLink());
         oscOutputSender.send(message);
         message.clear();
 
-        String patternAlt = String("/controlgris/sourcelinkalt/") + String(automationManagerAlt.getSourceLink()) + String("/1");
+        String patternAlt = pluginInstance + String("/sourcelinkalt/") + String(automationManagerAlt.getSourceLink()) + String("/1");
         message.setAddressPattern(OSCAddressPattern (patternAlt));
         message.addInt32(1);
         oscOutputSender.send(message);
@@ -838,7 +839,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (m_currentPositionPreset != m_lastPositionPreset) {
-        message.setAddressPattern(OSCAddressPattern ("/controlgris/presets"));
+        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/presets"));
         message.addInt32(m_currentPositionPreset);
         oscOutputSender.send(message);
         message.clear();
@@ -1584,6 +1585,7 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
         setFirstSourceId(valueTree.getProperty("firstSourceId", 1));
+        setOscOutputPluginId(valueTree.getProperty("oscOutputPluginId", 1));
 
         if (valueTree.getProperty("oscInputConnected", false)) {
             createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 8000));

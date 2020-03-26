@@ -94,6 +94,7 @@ public:
     void positionPresetDeleted(int presetNumber) override;
 
     // InterfaceBoxComponent::Listeners
+    void oscOutputPluginIdChanged(int value) override;
     void oscInputConnectionChanged(bool state, int oscPort) override;
     void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
 

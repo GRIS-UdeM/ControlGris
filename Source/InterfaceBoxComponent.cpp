@@ -30,7 +30,28 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     addAndMakeVisible(&enableJoystickToggle);
 */
 
+    oscOutputPluginIdLabel.setText("OSC output plugin ID:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&oscOutputPluginIdLabel);
+
+    oscOutputPluginIdEditor.setText(String(1));
+    oscOutputPluginIdEditor.setInputRestrictions(3, "0123456789");
+    oscOutputPluginIdEditor.addListener(this);
+    oscOutputPluginIdEditor.onReturnKey = [this] {
+            this->grabKeyboardFocus();
+        };
+    oscOutputPluginIdEditor.onFocusLost = [this] {
+            if (! oscOutputPluginIdEditor.isEmpty()) {
+                listeners.call([&] (Listener& l) { l.oscOutputPluginIdChanged(oscOutputPluginIdEditor.getText().getIntValue()); });
+            } else {
+                listeners.call([&] (Listener& l) { l.oscOutputPluginIdChanged(1);
+                                                   oscOutputPluginIdEditor.setText(String(1)); });
+            }
+        };
+
+    addAndMakeVisible(&oscOutputPluginIdEditor);
+
     oscReceiveToggle.setButtonText("Receive on port");
+    oscReceiveToggle.setExplicitFocusOrder(1);
     addAndMakeVisible(&oscReceiveToggle);
     oscReceiveToggle.onClick = [this] {
             listeners.call([&] (Listener& l) { l.oscInputConnectionChanged(oscReceiveToggle.getToggleState(), oscReceivePortEditor.getText().getIntValue()); }); };
@@ -113,6 +134,11 @@ void InterfaceBoxComponent::textEditorReturnKeyPressed(TextEditor &editor) {
 }
 
 //==============================================================================
+void InterfaceBoxComponent::setOscOutputPluginId(int id) {
+    oscOutputPluginIdEditor.setText(String(id));
+}
+
+//==============================================================================
 void InterfaceBoxComponent::setOscReceiveToggleState(bool state) {
     oscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
 }
@@ -151,6 +177,9 @@ void InterfaceBoxComponent::resized() {
 
     enableJoystickToggle.setBounds(5, 35, 120, 20);
 */
+
+    oscOutputPluginIdLabel.setBounds(5, 10, 135, 20);
+    oscOutputPluginIdEditor.setBounds(140, 10, 70, 20);
 
     oscReceiveToggle.setBounds(255, 10, 200, 20);
     oscReceivePortEditor.setBounds(400, 10, 60, 20);

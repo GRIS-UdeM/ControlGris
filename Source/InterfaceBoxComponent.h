@@ -33,6 +33,8 @@ public:
     void paint(Graphics&) override;
     void resized() override;
 
+    void setOscOutputPluginId(int id);
+
     void setOscReceiveToggleState(bool state);
     void setOscReceiveInputPort(int port);
 
@@ -44,6 +46,7 @@ public:
     {
         virtual ~Listener() {}
 
+        virtual void oscOutputPluginIdChanged(int value) = 0;
         virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
         virtual void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) = 0;
     };
@@ -63,6 +66,9 @@ private:
 
     ToggleButton    oscReceiveToggle;
     ToggleButton    oscSendToggle;
+
+    Label           oscOutputPluginIdLabel;
+    TextEditor      oscOutputPluginIdEditor;
 
     TextEditor      oscReceiveIpEditor;
     TextEditor      oscReceivePortEditor;

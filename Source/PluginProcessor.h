@@ -106,6 +106,8 @@ public:
     bool disconnectOSCOutput(String oscAddress, int oscPort);
     bool getOscOutputConnected();
     void sendOscOutputMessage();
+    void setOscOutputPluginId(int pluginId);
+    int getOscOutputPluginId();
 
     void timerCallback() override;
 
