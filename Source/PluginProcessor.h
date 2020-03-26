@@ -112,6 +112,7 @@ public:
     //==============================================================================
     void setPluginState();
 
+    void sourcePositionChanged(int sourceId, int whichField);
     void setSourceParameterValue(int sourceId, int parameterId, double value);
 
     void initialize();
@@ -124,11 +125,17 @@ public:
 
     void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) override;
 
+    void setSourceLink(int value);
+    void setSourceLinkAlt(int value);
     void onSourceLinkChanged(int value);
     void onSourceLinkAltChanged(int value);
 
     void linkSourcePositions();
     void linkSourcePositionsAlt();
+
+    // These are called after a source has changed from mouse movement in a field (or from an OSC message).
+    void validateSourcePositions();
+    void validateSourcePositionsAlt();
 
     void setPositionPreset(int presetNumber);
 

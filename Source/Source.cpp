@@ -208,7 +208,7 @@ void Source::computeAzimuthElevation() {
         m_elevationNoClip = m_elevation = 90.0 - rad * 90.0;
     } else {                    // azimuth - distance
         rad = rad < 0.0 ? 0.0 : rad;
-        m_distance = rad;
+        m_distanceNoClip = m_distance = rad;
     }
     m_changed = true;
 }

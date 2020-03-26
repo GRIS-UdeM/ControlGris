@@ -142,10 +142,5 @@ private:
 
     Value lastUIWidth, lastUIHeight;
 
-    // These are called after a source has changed from mouse movement in a field.
-    //----------------------------------------------------------------------------
-    void validateSourcePositions();
-    void validateSourcePositionsAlt();
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)
 };
