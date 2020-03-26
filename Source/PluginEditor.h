@@ -60,7 +60,6 @@ public:
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() override;
-    void parametersBoxSpanLinkChanged(bool value) override;
     void parametersBoxParameterChanged(int parameterId, double value) override;
 
     // SettingsBoxComponent::Listeners

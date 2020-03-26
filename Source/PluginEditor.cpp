@@ -134,10 +134,6 @@ ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
 void ControlGrisAudioProcessorEditor::setPluginState() {
     m_isInsideSetPluginState = true;
 
-    // Set state for the link buttons.
-    //--------------------------------
-    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
-
     // Set global settings values.
     //----------------------------
     settingsBoxOscFormatChanged(processor.getOscFormat());
@@ -202,7 +198,6 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
     positionPresetBox.setPreset(presetNumber, true);
-    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 }
 
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber, bool isSaved) {
@@ -390,10 +385,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::parametersBoxSpanLinkChanged(bool value) {
-    valueTreeState.state.setProperty("spanLinkState", value, nullptr);
-}
-
 void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value) {
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
@@ -533,7 +524,6 @@ void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichFiel
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber) {
     processor.setPositionPreset(presetNumber);
-    parametersBox.setSpanLinkState(valueTreeState.state.getProperty("spanLinkState", false));
 }
 
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber) {
