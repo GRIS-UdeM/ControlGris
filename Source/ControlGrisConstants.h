@@ -103,13 +103,10 @@ const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing")
 enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_REALTIME = 1,
                                 TRAJECTORY_TYPE_ALT_DRAWING,
                                 TRAJECTORY_TYPE_ALT_DOWN_UP,
-                                TRAJECTORY_TYPE_ALT_UP_DOWN,
-                                TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_UP,
-                                TRAJECTORY_TYPE_ALT_BACK_AND_FORTH_DOWN
+                                TRAJECTORY_TYPE_ALT_UP_DOWN
                               };
 const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Drawing"), String("Up Down"),
-                                                String("Down Up"), String("Back and Forth Up"),
-                                                String("Back and Forth Down")};
+                                                String("Down Up")};
 
 // Fix position data headers.
 //---------------------------
