@@ -112,6 +112,21 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
             listeners.call([&] (Listener& l) { l.trajectoryBoxDampeningCyclesChanged(dampeningEditor.getText().getIntValue()); });
             durationUnitCombo.grabKeyboardFocus(); };
 
+    deviationLabel.setText("Deviation degrees\nper cycle:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&deviationLabel);
+
+    addAndMakeVisible(&deviationEditor);
+    deviationEditor.setTextToShowWhenEmpty ("0", Colours::white);
+    deviationEditor.setText("0", false);
+    deviationEditor.setInputRestrictions (10, "-0123456789.");
+    deviationEditor.onReturnKey = [this] {
+            durationUnitCombo.grabKeyboardFocus();
+        };
+    deviationEditor.onFocusLost = [this] {
+            listeners.call([&] (Listener& l) { l.trajectoryBoxDeviationPerCycleChanged(std::fmod(deviationEditor.getText().getFloatValue(), 360.0)); });
+            deviationEditor.setText(String(std::fmod(deviationEditor.getText().getFloatValue(), 360.0)));
+            durationUnitCombo.grabKeyboardFocus(); };
+
     activateAltButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
     addChildComponent(&activateAltButton);
     activateAltButton.setButtonText("Activate");
@@ -216,6 +231,10 @@ void TrajectoryBoxComponent::setDampeningCyclesAlt(int value) {
     dampeningAltEditor.setText(String(value));
 }
 
+void TrajectoryBoxComponent::setDeviationPerCycle(float value) {
+    deviationEditor.setText(String(value));
+}
+
 void TrajectoryBoxComponent::setSourceLink(int value) {
     sourceLinkCombo.setSelectedId(value);
 }
@@ -264,7 +283,9 @@ void TrajectoryBoxComponent::resized() {
     backAndForthToggle.setBounds(196, 70, 94, 20);
     dampeningLabel.setBounds(5, 70, 150, 20);
     dampeningEditor.setBounds(115, 70, 75, 20);
-    activateButton.setBounds(114, 100, 176, 20);
+    deviationLabel.setBounds(5, 100, 150, 20);
+    deviationEditor.setBounds(115, 100, 75, 20);
+    activateButton.setBounds(114, 130, 176, 20);
 
     if (m_spatMode == SPAT_MODE_LBAP) {
         sourceLinkAltCombo.setVisible(true);
@@ -276,7 +297,7 @@ void TrajectoryBoxComponent::resized() {
         trajectoryTypeAltCombo.setBounds(305, 40, 175, 20);
         backAndForthAltToggle.setBounds(386, 70, 94, 20);
         dampeningAltEditor.setBounds(305, 70, 75, 20);
-        activateAltButton.setBounds(304, 100, 176, 20);
+        activateAltButton.setBounds(304, 130, 176, 20);
     } else {
         sourceLinkAltCombo.setVisible(false);
         trajectoryTypeAltCombo.setVisible(false);

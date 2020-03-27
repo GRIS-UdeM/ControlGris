@@ -46,6 +46,7 @@ public:
     void setSourceLinkAlt(int value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
+    void setDeviationPerCycle(float value);
 
     bool getActivateState();
     bool getActivateAltState();
@@ -64,6 +65,7 @@ public:
         virtual void trajectoryBoxBackAndForthAltChanged(bool value) = 0;
         virtual void trajectoryBoxDampeningCyclesChanged(int value) = 0;
         virtual void trajectoryBoxDampeningCyclesAltChanged(int value) = 0;
+        virtual void trajectoryBoxDeviationPerCycleChanged(float value) = 0;
         virtual void trajectoryBoxCycleDurationChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
         virtual void trajectoryBoxActivateChanged(bool value) = 0;
@@ -93,6 +95,9 @@ private:
     Label           dampeningLabel;
     TextEditor      dampeningEditor;
     TextEditor      dampeningAltEditor;
+
+    Label           deviationLabel;
+    TextEditor      deviationEditor;
 
     Label           durationLabel;
     TextEditor      durationEditor;

@@ -107,7 +107,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_canStopActivate = false;
 
     // Size of the plugin window.
-    parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 680 } }, {} }, -1, nullptr);
+    parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 700 } }, {} }, -1, nullptr);
 
     // Global setting parameters.
     parameters.state.setProperty("oscFormat", 0, nullptr);
@@ -129,6 +129,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("backAndForthAlt", false, nullptr);
     parameters.state.setProperty("dampeningCycles", 0, nullptr);
     parameters.state.setProperty("dampeningCyclesAlt", 0, nullptr);
+    parameters.state.setProperty("deviationPerCycle", 0, nullptr);
     parameters.state.setProperty("cycleDuration", 5, nullptr);
     parameters.state.setProperty("durationUnit", 1, nullptr);
 

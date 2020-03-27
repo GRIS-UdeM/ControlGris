@@ -83,6 +83,7 @@ public:
     void trajectoryBoxBackAndForthAltChanged(bool value) override;
     void trajectoryBoxDampeningCyclesChanged(int value) override;
     void trajectoryBoxDampeningCyclesAltChanged(int value) override;
+    void trajectoryBoxDeviationPerCycleChanged(float value) override;
     void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
     void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
     void trajectoryBoxActivateChanged(bool value) override;

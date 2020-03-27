@@ -36,6 +36,7 @@ AutomationManager::AutomationManager() {
     currentTrajectoryPoint = Point<float> (fieldWidth / 2, fieldWidth / 2);
     playbackPosition = Point<float> (-1.0f, -1.0f);
     trajectoryDeltaTime = lastTrajectoryDeltaTime = 0.0;
+    degreeOfDeviationPerCycle = 0.0;
 }
 
 AutomationManager::~AutomationManager() {}
@@ -60,6 +61,8 @@ void AutomationManager::setActivateState(bool state) {
         dampeningCycleCount = 0;
         dampeningLastDelta = 0.0;
         currentPlaybackDuration = playbackDuration;
+        currentDegreeOfDeviation = 0.0;
+        deviationCycleCount = 0;
     }
 }
 
@@ -99,6 +102,10 @@ void AutomationManager::setBackAndForth(bool shouldBeOn) {
 
 void AutomationManager::setDampeningCycles(int value) {
     dampeningCycles = value;
+}
+
+void AutomationManager::setDeviationPerCycle(float value) {
+    degreeOfDeviationPerCycle = value;
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
@@ -157,13 +164,17 @@ void AutomationManager::compressTrajectoryXValues(int maxValue) {
 
 void AutomationManager::computeCurrentTrajectoryPoint() {
     int dampeningCyclesTimes2 = dampeningCycles * 2;
+    double currentScaleMin = 0.0, currentScaleMax = 0.0;
 
     if (trajectoryPoints.size() > 0) {
-        if (isBackAndForth && trajectoryDeltaTime < lastTrajectoryDeltaTime) {
-            backAndForthDirection = 1 - backAndForthDirection;
-            dampeningCycleCount++;
-            if (dampeningCycleCount >= dampeningCyclesTimes2)
-                dampeningCycleCount = dampeningCyclesTimes2;
+        if (trajectoryDeltaTime < lastTrajectoryDeltaTime) {
+            if (isBackAndForth) {
+                backAndForthDirection = 1 - backAndForthDirection;
+                dampeningCycleCount++;
+                if (dampeningCycleCount >= dampeningCyclesTimes2)
+                    dampeningCycleCount = dampeningCyclesTimes2;
+            }
+            deviationCycleCount++;
         }
         lastTrajectoryDeltaTime = trajectoryDeltaTime;
 
@@ -193,8 +204,8 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
             if (dampeningCycleCount < dampeningCyclesTimes2) {
                 double relativeDeltaTime = (dampeningCycleCount + trajectoryDeltaTime) / dampeningCyclesTimes2;
                 currentPlaybackDuration = playbackDuration - (pow(relativeDeltaTime, 2.0) * playbackDuration * 0.25);
-                double currentScaleMin = relativeDeltaTime * trajectoryPoints.size() * 0.5;
-                double currentScaleMax = trajectoryPoints.size() - currentScaleMin;
+                currentScaleMin = relativeDeltaTime * trajectoryPoints.size() * 0.5;
+                currentScaleMax = trajectoryPoints.size() - currentScaleMin;
                 double currentScale = (currentScaleMax - currentScaleMin) / trajectoryPoints.size();
                 dampeningLastDelta = delta = delta * currentScale + currentScaleMin;
             } else {
@@ -215,6 +226,23 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
         } else {
             currentTrajectoryPoint = Point<float> (trajectoryPoints.getLast().x, trajectoryPoints.getLast().y);
         }
+    }
+
+    if (degreeOfDeviationPerCycle != 0) {
+        bool deviationFlag = true;
+        if (isBackAndForth && dampeningCycles > 0) {
+            if (approximatelyEqual(currentScaleMin, currentScaleMax)) {
+                deviationFlag = false;
+            }
+        }
+        if (deviationFlag) {
+            currentDegreeOfDeviation = (deviationCycleCount + trajectoryDeltaTime) * degreeOfDeviationPerCycle;
+            if (currentDegreeOfDeviation >= 360.0f) {
+                currentDegreeOfDeviation -= 360.0f;
+            }
+        }
+        AffineTransform t = AffineTransform::rotation(currentDegreeOfDeviation / 360.0f * 2.f * M_PI, (fieldWidth / 2.f), (fieldWidth / 2.f));
+        currentTrajectoryPoint.applyTransform(t);
     }
 
     if (activateState) {

@@ -60,6 +60,8 @@ public:
     void setBackAndForth(bool shouldBeOn);
     void setDampeningCycles(int value);
 
+    void setDeviationPerCycle(float value);
+
     Source& getSource();
     void setSourcePosition(Point<float> pos);
     void setSourcePositionX(float x);
@@ -108,6 +110,10 @@ private:
     Array<Point<float>> trajectoryPoints;
     Point<float>        currentTrajectoryPoint;
     Point<float>        lastRecordingPoint;
+
+    float          degreeOfDeviationPerCycle;
+    float          currentDegreeOfDeviation;
+    int            deviationCycleCount;
 
     void computeCurrentTrajectoryPoint();
     Point <float> smoothRecordingPosition(Point<float> pos);

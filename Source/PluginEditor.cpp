@@ -160,6 +160,8 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
     trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
     automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    trajectoryBox.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
+    automationManager.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
@@ -451,6 +453,11 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int
     automationManagerAlt.setDampeningCycles(value);
 }
 
+void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value) {
+    valueTreeState.state.setProperty("deviationPerCycle", value, nullptr);
+    automationManager.setDeviationPerCycle(value);
+}
+
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode) {
     valueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
@@ -596,10 +603,10 @@ void ControlGrisAudioProcessorEditor::resized() {
     parametersBox.setBounds(0, fieldSize + 20, width, 50);
 
     trajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
-    trajectoryBox.setBounds(0, fieldSize + 90, width, 140);
+    trajectoryBox.setBounds(0, fieldSize + 90, width, 160);
 
-    settingsBanner.setBounds(0, fieldSize + 230, width, 20);
-    configurationComponent.setBounds(0, fieldSize + 250, width, 130);
+    settingsBanner.setBounds(0, fieldSize + 250, width, 20);
+    configurationComponent.setBounds(0, fieldSize + 270, width, 130);
 
     lastUIWidth  = getWidth();
     lastUIHeight = getHeight();

@@ -156,5 +156,5 @@ void PositionPresetComponent::resized() {
     }
 
     actionLog.setBounds(1, 25 * 24 + 2, width - 3, 20);
-    appVersionLabel.setBounds(3, 25 * 24 + 25, width - 3, 20);
+    appVersionLabel.setBounds(3, 25 * 24 + 35, width - 3, 20);
 }
