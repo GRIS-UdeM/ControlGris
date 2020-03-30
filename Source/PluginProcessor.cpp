@@ -113,10 +113,10 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     parameters.state.setProperty("oscFormat", 0, nullptr);
     parameters.state.setProperty("oscPortNumber", 18032, nullptr);
     parameters.state.setProperty("oscConnected", true, nullptr);
-    parameters.state.setProperty("oscInputPortNumber", 8000, nullptr);
+    parameters.state.setProperty("oscInputPortNumber", 9000, nullptr);
     parameters.state.setProperty("oscInputConnected", false, nullptr);
     parameters.state.setProperty("oscOutputAddress", "192.168.1.100", nullptr);
-    parameters.state.setProperty("oscOutputPortNumber", 9000, nullptr);
+    parameters.state.setProperty("oscOutputPortNumber", 8000, nullptr);
     parameters.state.setProperty("oscOutputConnected", false, nullptr);
     parameters.state.setProperty("numberOfSources", 2, nullptr);
     parameters.state.setProperty("firstSourceId", 1, nullptr);
@@ -1593,12 +1593,12 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
         setOscOutputPluginId(valueTree.getProperty("oscOutputPluginId", 1));
 
         if (valueTree.getProperty("oscInputConnected", false)) {
-            createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 8000));
+            createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 9000));
         }
 
         if (valueTree.getProperty("oscOutputConnected", false)) {
             createOscOutputConnection(valueTree.getProperty("oscOutputAddress", "192.168.1.100"),
-                                      valueTree.getProperty("oscOutputPortNumber", 9000));
+                                      valueTree.getProperty("oscOutputPortNumber", 8000));
         }
 
         // Load saved fixed positions.

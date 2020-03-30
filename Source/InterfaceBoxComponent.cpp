@@ -67,7 +67,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
     oscReceiveIpEditor.setReadOnly(true);
     addAndMakeVisible(&oscReceiveIpEditor);
 
-    lastOscReceivePort = 8000;
+    lastOscReceivePort = 9000;
     oscReceivePortEditor.setText(String(lastOscReceivePort));
     oscReceivePortEditor.setInputRestrictions(5, "0123456789");
     oscReceivePortEditor.addListener(this);
@@ -105,7 +105,7 @@ InterfaceBoxComponent::InterfaceBoxComponent() {
 
     addAndMakeVisible(&oscSendIpEditor);
 
-    lastOscSendPort = 9000;
+    lastOscSendPort = 8000;
     oscSendPortEditor.setText(String(lastOscSendPort));
     oscSendPortEditor.setInputRestrictions(5, "0123456789");
     oscSendPortEditor.addListener(this);
