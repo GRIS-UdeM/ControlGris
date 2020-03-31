@@ -104,7 +104,6 @@ public:
     void updateSourceLinkCombo(int value);
     void updateSourceLinkAltCombo(int value);
     void updatePositionPreset(int presetNumber);
-    void positionPresetSaved(int presetNumber, bool isSaved);
 
     void refresh();
 

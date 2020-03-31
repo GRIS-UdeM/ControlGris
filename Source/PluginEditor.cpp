@@ -207,10 +207,6 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
     positionPresetBox.setPreset(presetNumber, true);
 }
 
-void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber, bool isSaved) {
-    positionPresetBox.presetSaved(presetNumber, isSaved);
-}
-
 // Value::Listener callback. Called when the stored window size changes.
 //----------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
