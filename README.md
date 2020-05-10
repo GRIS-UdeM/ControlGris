@@ -13,6 +13,10 @@ sudo apt-get install clang git ladspa-sdk freeglut3-dev g++ libasound2-dev libcu
 
 To build the ControlGris VST plugin, you'll need Juce 5, download it from https://shop.juce.com/get-juce/download page.
 
+### Download the Steinberg VST SDK
+
+You will need a "legacy" SDK (VST2 - compatible). Extract it somewhere and add it the Projucer global paths.
+
 ### Clone ControlGris sources
 
 ```

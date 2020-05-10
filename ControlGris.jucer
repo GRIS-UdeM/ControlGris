@@ -116,8 +116,8 @@
     </VS2017>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" headerPath="/home/olivier/SDKs/VST_SDK/VST2_SDK"/>
-        <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris" headerPath="/home/olivier/SDKs/VST_SDK/VST2_SDK"/>
+        <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris"/>
+        <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../JUCE/modules"/>
