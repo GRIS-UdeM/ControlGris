@@ -22,16 +22,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
 
-class InterfaceBoxComponent : public Component,
-                              public TextEditor::Listener
+class InterfaceBoxComponent final : public Component,
+                                    public TextEditor::Listener
 {
 public:
     InterfaceBoxComponent();
-    ~InterfaceBoxComponent();
+    ~InterfaceBoxComponent() final;
 
-    void textEditorReturnKeyPressed(TextEditor &editor) override;
-    void paint(Graphics&) override;
-    void resized() override;
+    void textEditorReturnKeyPressed(TextEditor &editor) final;
+    void paint(Graphics&) final;
+    void resized() final;
 
     void setOscOutputPluginId(int id);
 

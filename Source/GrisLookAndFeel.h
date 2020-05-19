@@ -21,7 +21,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class GrisLookAndFeel    : public LookAndFeel_V3 {
+class GrisLookAndFeel final : public LookAndFeel_V4 {
 private:
     
     float fontSize;
@@ -93,73 +93,73 @@ public:
        
     }
     
-    Font getFont(){
+    Font getFont() const {
         return this->font;
     }
-    Font getLabelFont (Label & label) override {
+    Font getLabelFont(Label & label) final {
         return this->font;
     }
-    Font getComboBoxFont (ComboBox & comboBox) override{
+    Font getComboBoxFont (ComboBox & comboBox) final{
         return this->font;
     }
-    Font getTextButtonFont (TextButton &, int buttonHeight) override{
+    Font getTextButtonFont (TextButton &, int buttonHeight) final{
         return this->font;
     }
-    Font getMenuBarFont	(MenuBarComponent &, int itemIndex, const String & itemText) override{
+    Font getMenuBarFont	(MenuBarComponent &, int itemIndex, const String & itemText) final{
         return this->font;
     }
     
-    Colour getWinBackgroundColour(){
+    Colour getWinBackgroundColour() const {
         return this->winBackGroundAndFieldColour;
     }
 
-    Colour getBackgroundColour(){
+    Colour getBackgroundColour() const {
         return this->backGroundAndFieldColour;
     }
     
-    Colour getFieldColour(){
+    Colour getFieldColour() const {
         return this->backGroundAndFieldColour;
     }
     
-    Colour getFontColour(){
+    Colour getFontColour() const {
         return this->lightColour;
     }
     
-    Colour getScrollBarColour(){
+    Colour getScrollBarColour() const {
         return this->greyColour;
     }
     
-    Colour getDarkColour(){
+    Colour getDarkColour() const {
         return this->darkColour;
     }
     
-    Colour getLightColour(){
+    Colour getLightColour() const {
         return this->lightColour;
     }
 
-    Colour getEditBackgroundColour(){
+    Colour getEditBackgroundColour() const {
         return this->editBgcolor;
     }
     
-    Colour getHighlightColour(){
+    Colour getHighlightColour() const {
         return this->hlBgcolor;
     }
-    Colour getOnColour(){
+    Colour getOnColour() const {
         return this->onColor;
     }
-    Colour getOffColour(){
+    Colour getOffColour() const {
         return this->offColor;
     }
-    Colour getGreenColour(){
+    Colour getGreenColour() const {
         return this->greenColor;
     }
-    Colour getRedColour(){
+    Colour getRedColour() const {
         return this->redColor;
     }
     
     //https://github.com/audioplastic/Juce-look-and-feel-examples/blob/master/JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp
     
-    void drawComboBox(Graphics& g,int width, int height,bool isButtonDown,int buttonX,int buttonY,int buttonW,int buttonH,ComboBox & box) override
+    void drawComboBox(Graphics& g,int width, int height,bool isButtonDown,int buttonX,int buttonY,int buttonW,int buttonH,ComboBox & box) final
     {
         box.setColour(ColourSelector::backgroundColourId, this->onColor);
     
@@ -181,7 +181,7 @@ public:
         g.fillPath (p);
     }
     
-    void drawRoundThumb (Graphics& g, const float x, const float y, const float diameter, const Colour& colour, float outlineThickness) {
+    void drawRoundThumb (Graphics& g, const float x, const float y, const float diameter, const Colour& colour, float outlineThickness) const {
         const juce::Rectangle<float> a (x, y, diameter, diameter);
         const float halfThickness = outlineThickness * 0.5f;
         
@@ -203,7 +203,7 @@ public:
                             const bool isHighlighted, const bool isTicked,
                             const bool hasSubMenu, const String& text,
                             const String& shortcutKeyText,
-                            const Drawable* icon, const Colour* const textColourToUse) override
+                            const Drawable* icon, const Colour* const textColourToUse) final
     {
         if (isSeparator)
         {
@@ -292,7 +292,7 @@ public:
         }
     }
 
-    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) override {
+    void drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour, bool isMouseOverButton, bool isButtonDown) final {
         
         const float width  = button.getWidth() - 1.0f;
         const float height = button.getHeight() - 1.0f;
@@ -320,7 +320,7 @@ public:
     }
     
     
-    void drawTickBox (Graphics& g, Component& component, float x, float y, float w, float h, bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) override {
+    void drawTickBox (Graphics& g, Component& component, float x, float y, float w, float h, bool ticked, bool isEnabled, bool isMouseOverButton, bool isButtonDown) final {
         const float boxSize = w * 0.8f;
         const Rectangle<float> r (x, y + (h - boxSize) * 0.5f, boxSize, boxSize);
 
@@ -353,7 +353,7 @@ public:
     }
     
     
-    void drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider& slider) override {
+    void drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider& slider) final {
         const float sliderRadius = (float) (getSliderThumbRadius (slider) - 1);
         float kx, ky;
         
@@ -384,12 +384,12 @@ public:
         
     }
     
-    void drawLinearSlider (Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider& slider) override {
+    void drawLinearSlider (Graphics& g, int x, int y, int width, int height, float sliderPos, float minSliderPos, float maxSliderPos, const Slider::SliderStyle style, Slider& slider) final {
         drawLinearSliderBackground (g, x, y, width, height+2, sliderPos, minSliderPos, maxSliderPos, style, slider);
         drawLinearSliderThumb (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
     }
     
-    void drawLinearSliderBackground (Graphics& g, int x, int y, int width, int height, float /*sliderPos*/, float /*minSliderPos*/, float /*maxSliderPos*/, const Slider::SliderStyle /*style*/, Slider& slider) override {
+    void drawLinearSliderBackground (Graphics& g, int x, int y, int width, int height, float /*sliderPos*/, float /*minSliderPos*/, float /*maxSliderPos*/, const Slider::SliderStyle /*style*/, Slider& slider) final {
         const float sliderRadius = getSliderThumbRadius (slider) - 5.0f;
         Path on, off;
 
@@ -420,7 +420,7 @@ public:
        
     }
     
-    void fillTextEditorBackground(Graphics& g, int width, int height, TextEditor& t) override {
+    void fillTextEditorBackground(Graphics& g, int width, int height, TextEditor& t) final {
         if (t.isEnabled())
             g.setColour(this->editBgcolor);
         else
@@ -428,7 +428,7 @@ public:
         g.fillAll();
     }
     
-    void drawTextEditorOutline(Graphics& g, int width, int height, TextEditor& t) override {
+    void drawTextEditorOutline(Graphics& g, int width, int height, TextEditor& t) final {
         if(t.hasKeyboardFocus(true))
         {
             g.setColour(this->onColor);
@@ -438,7 +438,7 @@ public:
        
     }
     
-    void drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown) override {
+    void drawToggleButton (Graphics& g, ToggleButton& button, bool isMouseOverButton, bool isButtonDown) final {
         if (button.hasKeyboardFocus (true))
         {
             g.setColour (button.findColour (TextEditor::focusedOutlineColourId));
@@ -485,7 +485,7 @@ public:
         }
     }
     
-    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) override{
+    void drawTabButton (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) final{
         const Rectangle<int> activeArea (button.getActiveArea());
         activeArea.withHeight(18);
         const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
@@ -561,7 +561,7 @@ public:
         textLayout.draw (g, Rectangle<float> (length, depth));*/
     }
     
-    void createTabTextLayout (const TabBarButton& button, float length, float depth, Colour colour, TextLayout& textLayout)
+    void createTabTextLayout (const TabBarButton& button, float length, float depth, Colour colour, TextLayout& textLayout) const
     {
         Font font (this->font);
 #if WIN32
@@ -581,7 +581,7 @@ public:
     
 
     
-//    void drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) override
+//    void drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) final
 //    {
 //        const Rectangle<float> area (button.getTextArea().toFloat());
 //        
@@ -633,7 +633,7 @@ public:
         
         //    //we don't use those, so far
     void drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
-                           float rotaryStartAngle, float rotaryEndAngle, Slider& slider) override
+                           float rotaryStartAngle, float rotaryEndAngle, Slider& slider) final
     {
         const float radius = jmin (width / 2, height / 2) - 2.0f;
         const float centreX = x + width * 0.5f;

@@ -243,16 +243,8 @@ void TrajectoryBoxComponent::setSourceLinkAlt(SourceLinkAlt value) {
     sourceLinkAltCombo.setSelectedId(static_cast<int>(value));
 }
 
-bool TrajectoryBoxComponent::getActivateState() {
-    return activateButton.getToggleState();
-}
-
 void TrajectoryBoxComponent::setActivateState(bool state) {
     activateButton.setToggleState(state, NotificationType::dontSendNotification);
-}
-
-bool TrajectoryBoxComponent::getActivateAltState() {
-    return activateAltButton.getToggleState();
 }
 
 void TrajectoryBoxComponent::setActivateAltState(bool state) {

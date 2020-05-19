@@ -42,12 +42,12 @@ class FieldComponent : public Component
 {
 public:
     FieldComponent();
-    ~FieldComponent();
+    ~FieldComponent() override;
 
-    void drawFieldBackground(Graphics&, bool isMainField, SpatMode spatMode = SpatMode::VBAP);
+    void drawFieldBackground(Graphics&, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
 
-    Point <float> posToXy(Point <float> p, int p_iFieldWidth);
-    Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
+    Point<float> posToXy(Point<float> p, int p_iFieldWidth) const;
+    Point<float> xyToPos(Point<float> p, int p_iFieldWidth) const;
 
     void setSources(Source *sources, int numberOfSources);
     void setSelectedSource(int selectedId);
@@ -56,7 +56,7 @@ public:
 
     struct Listener
     {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
@@ -81,35 +81,35 @@ private:
 };
 
 //==============================================================================
-class MainFieldComponent : public FieldComponent
+class MainFieldComponent final : public FieldComponent
 {
 public:
     MainFieldComponent(AutomationManager& automan);
-    ~MainFieldComponent();
+    ~MainFieldComponent() final;
     
-    void createSpanPathVBAP(Graphics& g, int i);
-    void createSpanPathLBAP(Graphics& g, int i);
-    void drawTrajectoryHandle (Graphics&);
-    void paint (Graphics&);
+    void createSpanPathVBAP(Graphics& g, int i) const;
+    void createSpanPathLBAP(Graphics& g, int i) const;
+    void drawTrajectoryHandle(Graphics&) const;
+    void paint(Graphics&) final;
 
-    bool isTrajectoryHandleClicked(const MouseEvent &event);
-	void mouseDown (const MouseEvent &event);
- 	void mouseDrag (const MouseEvent &event);
- 	void mouseMove (const MouseEvent &event);
- 	void mouseUp (const MouseEvent &event);
+    bool isTrajectoryHandleClicked(const MouseEvent &event); // TODO: this should be const
+	void mouseDown(const MouseEvent &event) final;
+ 	void mouseDrag(const MouseEvent &event) final;
+ 	void mouseMove(const MouseEvent &event) final;
+ 	void mouseUp(const MouseEvent &event) final;
 
     void setSpatMode(SpatMode spatMode);
 
 private:
     AutomationManager& automationManager;
-    inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
-    Point <float> degreeToXy(Point <float> p, int p_iFieldWidth);
-    Point <float> xyToDegree(Point <float> p, int p_iFieldWidth);
+    [[gnu::const]] static double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
+    Point<float> degreeToXy(Point<float> p, int p_iFieldWidth) const;
+    Point<float> xyToDegree(Point<float> p, int p_iFieldWidth) const;
 
-    Point <int> clipRecordingPosition(Point<int> pos);
+    Point<int> clipRecordingPosition(Point<int>pos);
 
-    bool hasValidLineDrawingAnchor1();
-    bool hasValidLineDrawingAnchor2();
+    bool hasValidLineDrawingAnchor1() const { return lineDrawingAnchor1 != Point<float> (-1.0f, -1.0f); }
+    bool hasValidLineDrawingAnchor2() const { return lineDrawingAnchor2 != Point<float> (-1.0f, -1.0f); }
 
     SpatMode m_spatMode;
 
@@ -122,17 +122,17 @@ private:
 };
 
 //==============================================================================
-class ElevationFieldComponent : public FieldComponent
+class ElevationFieldComponent final : public FieldComponent
 {
 public:
     ElevationFieldComponent(AutomationManager& automan);
-    ~ElevationFieldComponent();
+    ~ElevationFieldComponent() final;
     
-    void paint (Graphics&);
+    void paint(Graphics&) final;
 	
-	void mouseDown (const MouseEvent &event);
- 	void mouseDrag (const MouseEvent &event);
- 	void mouseUp (const MouseEvent &event);
+	void mouseDown(const MouseEvent &event) final;
+ 	void mouseDrag(const MouseEvent &event) final;
+ 	void mouseUp(const MouseEvent &event) final;
 
 private:
     AutomationManager& automationManager;

@@ -34,42 +34,43 @@ public:
     void setFieldWidth(double newFieldWidth);
 
     void setActivateState(bool state);
-    bool getActivateState();
+    bool getActivateState() const { return activateState; }
 
     void setPlaybackDuration(double value);
-    double getPlaybackDuration();
+    double getPlaybackDuration() const { return playbackDuration; }
 
     void setPlaybackPositionX(float value);
     void setPlaybackPositionY(float value);
-    bool hasValidPlaybackPosition();
-    Point<float> getPlaybackPosition();
+    bool hasValidPlaybackPosition() const { return playbackPosition != Point<float> (-1.0f, -1.0f); }
+    Point<float> getPlaybackPosition() const { return playbackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
     void addRecordingPoint(Point<float> pos);
-    int getRecordingTrajectorySize();
-    Point<float> getFirstRecordingPoint();
-    Point<float> getLastRecordingPoint();
-    Point<float> getCurrentTrajectoryPoint();
+    int getRecordingTrajectorySize() const { return trajectoryPoints.size(); }
+    Point<float> getFirstRecordingPoint() const { return trajectoryPoints.getFirst(); }
+    Point<float> getLastRecordingPoint() const { return trajectoryPoints.getLast(); }
+    Point<float> getCurrentTrajectoryPoint() const;
     void createRecordingPath(Path& path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
-    void setSourceLink(SourceLink value);
-    SourceLink getSourceLink();
+    void setSourceLink(SourceLink value) { this->sourceLink = value; }
+    SourceLink getSourceLink() const { return sourceLink; }
     void setDrawingType(TrajectoryType type, Point<float> startpos);
-    TrajectoryType getDrawingType();
+    TrajectoryType getDrawingType() const { return drawingType; }
     void setDrawingTypeAlt(TrajectoryTypeAlt type);
 
     void setBackAndForth(bool shouldBeOn);
-    void setDampeningCycles(int value);
+    void setDampeningCycles(int value) { this->dampeningCycles = value; }
 
-    void setDeviationPerCycle(float value);
+    void setDeviationPerCycle(float value) { this->degreeOfDeviationPerCycle = value; }
 
-    Source& getSource();
+    Source& getSource() { return source; }
+    Source const& getSource() const { return source; }
     void setSourcePosition(Point<float> pos);
     void setSourcePositionX(float x);
     void setSourcePositionY(float y);
-    Point<float> getSourcePosition();
+    Point<float> getSourcePosition() const { return source.getPos(); }
     void fixSourcePosition();
 
     void setSourceAndPlaybackPosition(Point<float> pos);
@@ -91,8 +92,8 @@ private:
 
     double          fieldWidth;
 
-    SourceLink             sourceLink;
-    TrajectoryType             drawingType;
+    SourceLink      sourceLink;
+    TrajectoryType  drawingType;
 
     bool            isBackAndForth;
     int             backAndForthDirection;
@@ -119,7 +120,7 @@ private:
     int            deviationCycleCount;
 
     void computeCurrentTrajectoryPoint();
-    Point <float> smoothRecordingPosition(Point<float> pos);
+    Point<float> smoothRecordingPosition(Point<float> pos);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationManager)
 };

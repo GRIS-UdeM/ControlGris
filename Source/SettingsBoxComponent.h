@@ -23,11 +23,11 @@
 #include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
 
-class SettingsBoxComponent : public Component
+class SettingsBoxComponent final : public Component
 {
 public:
     SettingsBoxComponent();
-    ~SettingsBoxComponent();
+    ~SettingsBoxComponent() final;
 
     void paint(Graphics&) override;
     void resized() override;

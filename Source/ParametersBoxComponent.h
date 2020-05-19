@@ -23,22 +23,22 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
-class ParametersBoxComponent : public Component,
-                               public Slider::Listener
+class ParametersBoxComponent final : public Component,
+                                     public Slider::Listener
 {
 public:
     ParametersBoxComponent();
-    ~ParametersBoxComponent();
+    ~ParametersBoxComponent() final;
 
- 	void mouseDown(const MouseEvent &event) override;
-    void sliderValueChanged(Slider *slider) override;
-    void paint(Graphics&) override;
-    void resized() override;
+ 	void mouseDown(const MouseEvent &event) final;
+    void sliderValueChanged(Slider *slider) final;
+    void paint(Graphics&) final;
+    void resized() final;
 
     void setSelectedSource(Source *source);
     void setDistanceEnabled(bool shouldBeEnabled);
     void setSpanLinkState(bool state);
-    bool getSpanLinkState();
+    bool getSpanLinkState() const { return m_spanLinked; }
 
     struct Listener
     {

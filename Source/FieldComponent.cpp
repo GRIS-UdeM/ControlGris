@@ -54,7 +54,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode spatMode) {
+void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode spatMode) const {
     const int width = getWidth();
     const int height = getHeight();
     float fieldCenter = width / 2;
@@ -113,14 +113,14 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode
     }
 }
 
-Point <float> FieldComponent::posToXy(Point <float> p, int p_iwidth) {
+Point<float> FieldComponent::posToXy(Point <float> p, int p_iwidth) const {
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float x = p.getX() * effectiveWidth;
     float y = p.getY() * effectiveWidth;
     return Point <float> (x, effectiveWidth - y);
 }
 
-Point <float> FieldComponent::xyToPos(Point <float> p, int p_iwidth) {
+Point <float> FieldComponent::xyToPos(Point <float> p, int p_iwidth) const {
     float k2 = kSourceDiameter / 2.0;
     float half = (p_iwidth - kSourceDiameter) / 2;
 
@@ -145,7 +145,7 @@ MainFieldComponent::MainFieldComponent(AutomationManager& automan)
 
 MainFieldComponent::~MainFieldComponent() {}
 
-Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) {
+Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) const {
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float radius = effectiveWidth / 2.0;
     float distance = (90.0 - p.getY()) / 90.0;
@@ -154,7 +154,7 @@ Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) {
     return Point <float> (effectiveWidth - x, effectiveWidth - y);
 }
 
-Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
+Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) const {
     float k2 = kSourceDiameter / 2.0;
     float half = (p_iwidth - kSourceDiameter) / 2;
     float x = (p.getX() - k2 - half) / half;
@@ -173,15 +173,7 @@ void MainFieldComponent::setSpatMode(SpatMode spatMode) {
     repaint();
 }
 
-bool MainFieldComponent::hasValidLineDrawingAnchor1() {
-    return lineDrawingAnchor1 != Point<float> (-1.0f, -1.0f);
-}
-
-bool MainFieldComponent::hasValidLineDrawingAnchor2() {
-    return lineDrawingAnchor2 != Point<float> (-1.0f, -1.0f);
-}
-
-void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) {
+void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) const {
     const int width = getWidth();
     float fieldCenter = width / 2;
     float azimuth = m_sources[i].getAzimuth();
@@ -232,7 +224,7 @@ void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) {
 }
 
 
-void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) {
+void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) const {
     const int width = getWidth();
     float azimuthSpan = width * m_sources[i].getAzimuthSpan();
     float halfAzimuthSpan = azimuthSpan / 2.0f - kSourceRadius;
@@ -245,7 +237,7 @@ void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) {
     g.fillEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
 }
 
-void MainFieldComponent::drawTrajectoryHandle(Graphics& g) {
+void MainFieldComponent::drawTrajectoryHandle(Graphics& g) const {
     const int width = getWidth();
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
@@ -382,7 +374,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     if (hasValidLineDrawingAnchor1()) {
         Point<float> anchor1 = lineDrawingAnchor1;
         Point<float> anchor2 = clipRecordingPosition(event.getPosition()).toFloat();
-        int numSteps = (int)jmax(abs(anchor2.x - anchor1.x), abs(anchor2.y - anchor1.y));
+        int numSteps = (int)jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y));
         float xinc = (anchor2.x - anchor1.x) / numSteps;
         float yinc = (anchor2.y - anchor1.y) / numSteps;
         for (int i = 1; i <= numSteps; i++) {

@@ -65,16 +65,8 @@ void AutomationManager::setActivateState(bool state) {
     }
 }
 
-bool AutomationManager::getActivateState() {
-    return activateState;
-}
-
 void AutomationManager::setPlaybackDuration(double value) {
     playbackDuration = value;
-}
-
-double AutomationManager::getPlaybackDuration() {
-    return playbackDuration;
 }
 
 void AutomationManager::setPlaybackPositionX(float value) {
@@ -85,26 +77,10 @@ void AutomationManager::setPlaybackPositionY(float value) {
     playbackPosition.y = value;
 }
 
-bool AutomationManager::hasValidPlaybackPosition() {
-    return playbackPosition != Point<float> (-1.0f, -1.0f);
-}
-
-Point<float> AutomationManager::getPlaybackPosition() {
-    return playbackPosition;
-}
-
 void AutomationManager::setBackAndForth(bool shouldBeOn) {
     if (shouldBeOn != isBackAndForth) {
         isBackAndForth = shouldBeOn;
     }
-}
-
-void AutomationManager::setDampeningCycles(int value) {
-    dampeningCycles = value;
-}
-
-void AutomationManager::setDeviationPerCycle(float value) {
-    degreeOfDeviationPerCycle = value;
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> currentPosition) {
@@ -124,18 +100,6 @@ Point<float> AutomationManager::smoothRecordingPosition(Point<float> pos) {
 
 void AutomationManager::addRecordingPoint(Point<float> pos) {
     trajectoryPoints.add(smoothRecordingPosition(pos));
-}
-
-int AutomationManager::getRecordingTrajectorySize() {
-    return trajectoryPoints.size();
-}
-
-Point<float> AutomationManager::getFirstRecordingPoint() {
-    return trajectoryPoints.getFirst();
-}
-
-Point<float> AutomationManager::getLastRecordingPoint() {
-    return trajectoryPoints.getLast();
 }
 
 void AutomationManager::createRecordingPath(Path& path) {
@@ -250,7 +214,7 @@ void AutomationManager::computeCurrentTrajectoryPoint() {
     }
 }
 
-Point<float> AutomationManager::getCurrentTrajectoryPoint() {
+Point<float> AutomationManager::getCurrentTrajectoryPoint() const {
     if (activateState) {
         return currentTrajectoryPoint;
     } else {
@@ -281,14 +245,6 @@ void AutomationManager::sendTrajectoryPositionChangedEvent() {
     if (activateState || drawingType == TrajectoryType::realtime || static_cast<TrajectoryTypeAlt>(drawingType) == TrajectoryTypeAlt::realtime) {
         listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
     }
-}
-
-Source& AutomationManager::getSource() {
-    return source;
-}
-
-Point<float> AutomationManager::getSourcePosition() {
-    return source.getPos();
 }
 
 void AutomationManager::fixSourcePosition() {
@@ -537,16 +493,4 @@ void AutomationManager::setDrawingTypeAlt(TrajectoryTypeAlt type) {
     } else {
         setSourcePosition(Point<float> (0.5f, 0.5f));
     }
-}
-
-TrajectoryType AutomationManager::getDrawingType() {
-    return drawingType;
-}
-
-void AutomationManager::setSourceLink(SourceLink value) {
-    sourceLink = value;
-}
-
-SourceLink AutomationManager::getSourceLink() {
-    return sourceLink;
 }

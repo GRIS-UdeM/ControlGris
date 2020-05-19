@@ -24,14 +24,14 @@
 #include "ControlGrisConstants.h"
 #include "Source.h"
 
-class SourceBoxComponent : public Component
+class SourceBoxComponent final : public Component
 {
 public:
     SourceBoxComponent();
-    ~SourceBoxComponent();
+    ~SourceBoxComponent() final;
 
-    void paint(Graphics&) override;
-    void resized() override;
+    void paint(Graphics&) final;
+    void resized() final;
 
     void setNumberOfSources(int numOfSources, int firstSourceId);
     void updateSelectedSource(Source *source, int sourceIndex, SpatMode spatMode);

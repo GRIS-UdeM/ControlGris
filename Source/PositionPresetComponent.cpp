@@ -31,10 +31,6 @@ void PresetButton::setLoadedState(bool isLoaded) {
     refresh();
 }
 
-bool PresetButton::isSaved() {
-    return saved;
-}
-
 void PresetButton::refresh() {
     if (loaded) {
         setColour(TextButton::buttonColourId, Colour::fromRGB(255, 165, 25));

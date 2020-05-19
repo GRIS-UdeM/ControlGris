@@ -394,17 +394,9 @@ void ControlGrisAudioProcessor::setOscFormat(SpatMode oscFormat) {
     }
 }
 
-SpatMode ControlGrisAudioProcessor::getOscFormat() {
-    return m_selectedOscFormat;
-}
-
 void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber) {
     m_currentOSCPort = oscPortNumber;
     parameters.state.setProperty("oscPortNumber", m_currentOSCPort, nullptr);
-}
-
-int ControlGrisAudioProcessor::getOscPortNumber() {
-    return m_currentOSCPort;
 }
 
 void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate) {
@@ -418,10 +410,6 @@ void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propaga
         sendOscMessage();
 }
 
-int ControlGrisAudioProcessor::getFirstSourceId() {
-    return m_firstSourceId;
-}
-
 void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propagate) {
     m_numOfSources = numOfSources;
     parameters.state.setProperty("numberOfSources", m_numOfSources, nullptr);
@@ -432,14 +420,6 @@ void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propag
 
 void ControlGrisAudioProcessor::setSelectedSourceId(int id) {
     m_selectedSourceId = id;
-}
-
-int ControlGrisAudioProcessor::getNumberOfSources() {
-    return m_numOfSources;
-}
-
-Source * ControlGrisAudioProcessor::getSources() {
-    return sources;
 }
 
 //==============================================================================
@@ -463,10 +443,6 @@ bool ControlGrisAudioProcessor::disconnectOSC() {
         }
     }
     return !m_oscConnected;
-}
-
-bool ControlGrisAudioProcessor::getOscConnected() {
-    return m_oscConnected;
 }
 
 void ControlGrisAudioProcessor::handleOscConnection(bool state) {
@@ -539,10 +515,6 @@ bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
     parameters.state.setProperty("oscInputConnected", getOscInputConnected(), nullptr);
 
     return !m_oscInputConnected;
-}
-
-bool ControlGrisAudioProcessor::getOscInputConnected() {
-    return m_oscInputConnected;
 }
 
 void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
@@ -715,15 +687,11 @@ bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPo
     return !m_oscOutputConnected;
 }
 
-bool ControlGrisAudioProcessor::getOscOutputConnected() {
-    return m_oscOutputConnected;
-}
-
 void ControlGrisAudioProcessor::setOscOutputPluginId(int pluginId) {
     parameters.state.setProperty("oscOutputPluginId", pluginId, nullptr);
 }
 
-int ControlGrisAudioProcessor::getOscOutputPluginId() {
+int ControlGrisAudioProcessor::getOscOutputPluginId() const {
     return parameters.state.getProperty("oscOutputPluginId", 1);
 }
 
@@ -1369,10 +1337,6 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, Xml
     }
 }
 
-XmlElement * ControlGrisAudioProcessor::getFixedPositionData() {
-    return &fixPositionData;
-}
-
 void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
     bool found = false;
     XmlElement *fpos = fixPositionData.getFirstChildElement();
@@ -1389,23 +1353,6 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
         XmlElementDataSorter sorter("ID", true);
         fixPositionData.sortChildElements(sorter);
     }
-}
-
-//==============================================================================
-double ControlGrisAudioProcessor::getInitTimeOnPlay() {
-    return m_initTimeOnPlay >= 0.0 ? m_initTimeOnPlay : 0.0;
-}
-
-double ControlGrisAudioProcessor::getCurrentTime() {
-    return m_currentTime >= 0.0 ? m_currentTime : 0.0;
-}
-
-bool ControlGrisAudioProcessor::getIsPlaying() {
-    return m_isPlaying;
-}
-
-double ControlGrisAudioProcessor::getBPM() {
-    return m_bpm;
 }
 
 //==============================================================================

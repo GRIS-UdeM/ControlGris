@@ -25,91 +25,92 @@
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
 
-class ControlGrisAudioProcessor  : public AudioProcessor,
-                                   public AudioProcessorValueTreeState::Listener,
-                                   public AutomationManager::Listener,
-                                   public Timer,
-                                   private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
+class ControlGrisAudioProcessor final : public AudioProcessor,
+                                        public AudioProcessorValueTreeState::Listener,
+                                        public AutomationManager::Listener,
+                                        public Timer,
+                                        private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
 public:
     //==============================================================================
     ControlGrisAudioProcessor();
-    ~ControlGrisAudioProcessor();
+    ~ControlGrisAudioProcessor() final;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) override;
-    void releaseResources() override;
+    void prepareToPlay (double sampleRate, int samplesPerBlock) final;
+    void releaseResources() final;
 
    #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const override;
+    bool isBusesLayoutSupported (const BusesLayout& layouts) const final;
    #endif
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) override;
+    void processBlock (AudioBuffer<float>&, MidiBuffer&) final;
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() override;
-    bool hasEditor() const override;
+    AudioProcessorEditor* createEditor() final;
+    bool hasEditor() const final;
 
     //==============================================================================
-    const String getName() const override;
+    const String getName() const final;
 
-    bool acceptsMidi() const override;
-    bool producesMidi() const override;
-    bool isMidiEffect() const override;
-    double getTailLengthSeconds() const override;
-
-    //==============================================================================
-    int getNumPrograms() override;
-    int getCurrentProgram() override;
-    void setCurrentProgram (int index) override;
-    const String getProgramName (int index) override;
-    void changeProgramName (int index, const String& newName) override;
+    bool acceptsMidi() const final;
+    bool producesMidi() const final;
+    bool isMidiEffect() const final;
+    double getTailLengthSeconds() const final;
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) override;
-    void setStateInformation (const void* data, int sizeInBytes) override;
+    int getNumPrograms() final;
+    int getCurrentProgram() final;
+    void setCurrentProgram (int index) final;
+    const String getProgramName (int index) final;
+    void changeProgramName (int index, const String& newName) final;
 
     //==============================================================================
-    void parameterChanged(const String &parameterID, float newValue) override;
+    void getStateInformation (MemoryBlock& destData) final;
+    void setStateInformation (const void* data, int sizeInBytes) final;
+
+    //==============================================================================
+    void parameterChanged(const String &parameterID, float newValue) final;
 
     //==============================================================================
     void setOscFormat(SpatMode oscFormat);
-    SpatMode getOscFormat();
+    SpatMode getOscFormat() const { return m_selectedOscFormat; }
 
     void setOscPortNumber(int oscPortNumber);
-    int getOscPortNumber();
+    int getOscPortNumber() const { return m_currentOSCPort; }
 
     void setFirstSourceId(int firstSourceId, bool propagate=true);
-    int getFirstSourceId();
+    int getFirstSourceId() const { return m_firstSourceId; }
 
     void setSelectedSourceId(int id);
 
     void setNumberOfSources(int numOfSources, bool propagate=true);
-    int getNumberOfSources();
+    int getNumberOfSources() const { return m_numOfSources; }
 
-    Source * getSources();
+    Source * getSources() { return sources; }
+    Source const * getSources() const { return sources; }
 
     //==============================================================================
     bool createOscConnection(int oscPort);
     bool disconnectOSC();
-    bool getOscConnected();
+    bool getOscConnected() const { return m_oscConnected; }
     void handleOscConnection(bool state);
     void sendOscMessage();
 
     bool createOscInputConnection(int oscPort);
     bool disconnectOSCInput(int oscPort);
-    bool getOscInputConnected();
-    void oscMessageReceived (const OSCMessage& message) override;
-    void oscBundleReceived(const OSCBundle& bundle) override;
+    bool getOscInputConnected() const { return m_oscInputConnected; }
+    void oscMessageReceived (const OSCMessage& message) final;
+    void oscBundleReceived(const OSCBundle& bundle) final;
 
     bool createOscOutputConnection(String oscAddress, int oscPort);
     bool disconnectOSCOutput(String oscAddress, int oscPort);
-    bool getOscOutputConnected();
+    bool getOscOutputConnected() const { return m_oscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);
-    int getOscOutputPluginId();
+    int getOscOutputPluginId() const;
 
-    void timerCallback() override;
+    void timerCallback() final;
 
     //==============================================================================
     void setPluginState();
@@ -119,13 +120,13 @@ public:
 
     void initialize();
 
-    double getInitTimeOnPlay();
-    double getCurrentTime();
+    double getInitTimeOnPlay() const { return m_initTimeOnPlay >= 0.0 ? m_initTimeOnPlay : 0.0; }
+    double getCurrentTime() const { return m_currentTime >= 0.0 ? m_currentTime : 0.0; }
 
-    bool getIsPlaying();
-    double getBPM();
+    bool getIsPlaying() const { return m_isPlaying; }
+    double getBPM() const { return m_bpm; }
 
-    void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) override;
+    void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) final;
 
     void setSourceLink(SourceLink value);
     void setSourceLinkAlt(SourceLinkAlt value);
@@ -144,7 +145,8 @@ public:
     void addNewFixedPosition(int id);
     bool recallFixedPosition(int id);
     void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
-    XmlElement * getFixedPositionData(); // retrieve all data.
+    XmlElement * getFixedPositionData() { return &fixPositionData; } // retrieve all data.
+    XmlElement const * getFixedPositionData() const { return &fixPositionData; }
     void deleteFixedPosition(int id);
 
     //==============================================================================

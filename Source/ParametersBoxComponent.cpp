@@ -55,10 +55,6 @@ void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled) {
     resized();
 }
 
-bool ParametersBoxComponent::getSpanLinkState() {
-    return m_spanLinked;
-}
-
 void ParametersBoxComponent::setSpanLinkState(bool state) {
     m_spanLinked = state;
     repaint();

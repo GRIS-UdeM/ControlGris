@@ -24,11 +24,11 @@
 // BannerComponent is a Label-derived class used to identify the different
 // UI sections of the plugin.
 
-class BannerComponent : public Label
+class BannerComponent final : public Label
 {
 public:
     BannerComponent();
-    ~BannerComponent();
+    ~BannerComponent() final;
 
 private:
 

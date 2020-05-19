@@ -33,71 +33,71 @@
 #include "AutomationManager.h"
 #include "PositionPresetComponent.h"
 
-class ControlGrisAudioProcessorEditor : public AudioProcessorEditor,
-                                        private Value::Listener,
-                                        public FieldComponent::Listener,
-                                        public ParametersBoxComponent::Listener,
-                                        public SettingsBoxComponent::Listener,
-                                        public SourceBoxComponent::Listener,
-                                        public TrajectoryBoxComponent::Listener,
-                                        public InterfaceBoxComponent::Listener,
-                                        public PositionPresetComponent::Listener
+class ControlGrisAudioProcessorEditor final : public AudioProcessorEditor,
+                                              private Value::Listener,
+                                              public FieldComponent::Listener,
+                                              public ParametersBoxComponent::Listener,
+                                              public SettingsBoxComponent::Listener,
+                                              public SourceBoxComponent::Listener,
+                                              public TrajectoryBoxComponent::Listener,
+                                              public InterfaceBoxComponent::Listener,
+                                              public PositionPresetComponent::Listener
 {
 public:
     ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
                                      AudioProcessorValueTreeState& vts,
                                      AutomationManager& automan,
                                      AutomationManager& automanAlt);
-    ~ControlGrisAudioProcessorEditor();
+    ~ControlGrisAudioProcessorEditor() final;
 
-    void paint (Graphics&) override;
-    void resized() override;
-    void valueChanged (Value&) override;
+    void paint (Graphics&) final;
+    void resized() final;
+    void valueChanged (Value&) final;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(int sourceId, int whichField) override;
-    void fieldTrajectoryHandleClicked(int whichField) override;
+    void fieldSourcePositionChanged(int sourceId, int whichField) final;
+    void fieldTrajectoryHandleClicked(int whichField) final;
 
     // ParametersBoxComponent::Listeners
-    void parametersBoxSelectedSourceClicked() override;
-    void parametersBoxParameterChanged(int parameterId, double value) override;
+    void parametersBoxSelectedSourceClicked() final;
+    void parametersBoxParameterChanged(int parameterId, double value) final;
 
     // SettingsBoxComponent::Listeners
-    void settingsBoxOscFormatChanged(SpatMode mode) override;
-    void settingsBoxOscPortNumberChanged(int oscPort) override;
-    void settingsBoxOscActivated(bool state) override;
-    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
-    void settingsBoxFirstSourceIdChanged(int firstSourceId) override;
+    void settingsBoxOscFormatChanged(SpatMode mode) final;
+    void settingsBoxOscPortNumberChanged(int oscPort) final;
+    void settingsBoxOscActivated(bool state) final;
+    void settingsBoxNumberOfSourcesChanged(int numOfSources) final;
+    void settingsBoxFirstSourceIdChanged(int firstSourceId) final;
 
     // SourceBoxComponent::Listeners
-    void sourceBoxSelectionChanged(int sourceNum) override;
-    void sourceBoxPlacementChanged(SourcePlacement value) override;
-    void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) override;
+    void sourceBoxSelectionChanged(int sourceNum) final;
+    void sourceBoxPlacementChanged(SourcePlacement value) final;
+    void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxSourceLinkChanged(SourceLink value) override;
-    void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) override;
-    void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) override;
-    void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) override;
-    void trajectoryBoxBackAndForthChanged(bool value) override;
-    void trajectoryBoxBackAndForthAltChanged(bool value) override;
-    void trajectoryBoxDampeningCyclesChanged(int value) override;
-    void trajectoryBoxDampeningCyclesAltChanged(int value) override;
-    void trajectoryBoxDeviationPerCycleChanged(float value) override;
-    void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
-    void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
-    void trajectoryBoxActivateChanged(bool value) override;
-    void trajectoryBoxActivateAltChanged(bool value) override;
+    void trajectoryBoxSourceLinkChanged(SourceLink value) final;
+    void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) final;
+    void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) final;
+    void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) final;
+    void trajectoryBoxBackAndForthChanged(bool value) final;
+    void trajectoryBoxBackAndForthAltChanged(bool value) final;
+    void trajectoryBoxDampeningCyclesChanged(int value) final;
+    void trajectoryBoxDampeningCyclesAltChanged(int value) final;
+    void trajectoryBoxDeviationPerCycleChanged(float value) final;
+    void trajectoryBoxCycleDurationChanged(double duration, int mode) final;
+    void trajectoryBoxDurationUnitChanged(double duration, int mode) final;
+    void trajectoryBoxActivateChanged(bool value) final;
+    void trajectoryBoxActivateAltChanged(bool value) final;
 
     // PositionPresetComponent::Listeners
-    void positionPresetChanged(int presetNumber) override;
-    void positionPresetSaved(int presetNumber) override;
-    void positionPresetDeleted(int presetNumber) override;
+    void positionPresetChanged(int presetNumber) final;
+    void positionPresetSaved(int presetNumber) final;
+    void positionPresetDeleted(int presetNumber) final;
 
     // InterfaceBoxComponent::Listeners
-    void oscOutputPluginIdChanged(int value) override;
-    void oscInputConnectionChanged(bool state, int oscPort) override;
-    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
+    void oscOutputPluginIdChanged(int value) final;
+    void oscInputConnectionChanged(bool state, int oscPort) final;
+    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) final;
 
     void setPluginState();
     void updateSpanLinkButton(bool state);

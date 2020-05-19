@@ -45,10 +45,6 @@ void Source::setId(int id) {
     m_id = id;
 }
 
-int Source::getId() {
-    return m_id;
-}
-
 void Source::setRadiusIsElevation(bool shouldBeElevation) {
     m_radiusIsElevation = shouldBeElevation;
 }
@@ -67,12 +63,8 @@ void Source::setNormalizedAzimuth(float value) {
     computeXY();
 }
 
-float Source::getAzimuth() {
-    return m_azimuth;
-}
-
-float Source::getNormalizedAzimuth() {
-    float azimuth = m_azimuth  / 360.0;
+float Source::getNormalizedAzimuth() const {
+    float const azimuth = m_azimuth  / 360.0;
     return azimuth >= 0 ? azimuth : azimuth + 1.0;
 }
 
@@ -96,14 +88,6 @@ void Source::setNormalizedElevation(float value) {
     setElevation(value * 90.0);
 }
 
-float Source::getElevation() {
-    return m_elevation;
-}
-
-float Source::getNormalizedElevation() {
-    return m_elevation / 90.0;
-}
-
 void Source::setDistanceNoClip(float distance) {
     m_distanceNoClip = distance;
     setDistance(m_distanceNoClip);
@@ -116,10 +100,6 @@ void Source::setDistance(float distance) {
         m_distanceNoClip = m_distance = distance;
     }
     computeXY();
-}
-
-float Source::getDistance() {
-    return m_distance;
 }
 
 void Source::setCoordinates(float azimuth, float elevation, float distance) {
@@ -135,17 +115,9 @@ void Source::setAzimuthSpan(float azimuthSpan) {
     m_changed = true;
 }
 
-float Source::getAzimuthSpan() {
-    return m_aziSpan;
-}
-
 void Source::setElevationSpan(float elevationSpan) {
     m_eleSpan = elevationSpan;
     m_changed = true;
-}
-
-float Source::getElevationSpan() {
-    return m_eleSpan;
 }
 
 void Source::setX(float x) {
@@ -153,21 +125,9 @@ void Source::setX(float x) {
     computeAzimuthElevation();
 }
 
-float Source::getX() {
-    return m_x;
-}
-
 void Source::setY(float y) {
     m_y = y;
     computeAzimuthElevation();
-}
-
-float Source::getY() {
-    return m_y;
-}
-
-Point<float> Source::getPos() {
-    return Point<float> {m_x, m_y};
 }
 
 void Source::setPos(Point<float> pos) {
@@ -296,30 +256,6 @@ void Source::setElevationFromFixedSource(float deltaY) {
     setElevation(fixedElevation + deltaY * 90.0f);
 }
 
-float Source::getDeltaX() {
-    return m_x - fixedX;
-}
-
-float Source::getDeltaY() {
-    return m_y - fixedY;
-}
-
-float Source::getDeltaAzimuth() {
-    return (m_azimuth - fixedAzimuth);
-}
-
-float Source::getDeltaElevation() {
-    return (m_elevationNoClip - fixedElevation) / 90.0;
-}
-
-float Source::getDeltaDistance() {
-    return (m_distance - fixedDistance);
-}
-
 void Source::setColour(Colour col) {
     colour = col;
-}
-
-Colour Source::getColour() {
-    return colour;
 }

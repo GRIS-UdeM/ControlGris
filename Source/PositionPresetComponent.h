@@ -23,20 +23,20 @@
 #include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
 
-class PresetButton : public TextButton
+class PresetButton final : public TextButton
 {
 public:
     PresetButton() { saved = loaded = false; };
-    ~PresetButton() {};
+    ~PresetButton() final = default;
 
     void setSavedState(bool isSaved);
     void setLoadedState(bool isLoaded);
     void refresh();
 
-    void clicked (const ModifierKeys &mods) override;
-    void internalClickCallback (const ModifierKeys &mods) override;
+    void clicked (const ModifierKeys &mods) final;
+    void internalClickCallback (const ModifierKeys &mods) final;
 
-    bool isSaved();
+    bool isSaved() const { return saved; }
 
     struct Listener
     {
@@ -60,19 +60,19 @@ private:
 };
 
 //================================================================================
-class PositionPresetComponent : public Component,
-                                PresetButton::Listener
+class PositionPresetComponent final : public  Component,
+                                      private PresetButton::Listener
 {
 public:
     PositionPresetComponent();
-    ~PositionPresetComponent();
+    ~PositionPresetComponent() final;
 
-    void paint(Graphics&) override;
-    void resized() override;
+    void paint(Graphics&) final;
+    void resized() final;
 
-    void buttonClicked(PresetButton *button) override;
-    void savingPresetClicked(PresetButton *button) override;
-    void deletingPresetClicked(PresetButton *button) override;
+    void buttonClicked(PresetButton *button) final;
+    void savingPresetClicked(PresetButton *button) final;
+    void deletingPresetClicked(PresetButton *button) final;
 
     void setPreset(int value, bool notify=false);
     void presetSaved(int presetNumber, bool isSaved);

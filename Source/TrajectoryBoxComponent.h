@@ -23,14 +23,14 @@
 #include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
 
-class TrajectoryBoxComponent : public Component
+class TrajectoryBoxComponent final : public Component
 {
 public:
     TrajectoryBoxComponent();
-    ~TrajectoryBoxComponent();
+    ~TrajectoryBoxComponent() final;
 
-    void paint(Graphics&) override;
-    void resized() override;
+    void paint(Graphics&) final;
+    void resized() final;
 
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
@@ -48,8 +48,8 @@ public:
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
 
-    bool getActivateState();
-    bool getActivateAltState();
+    bool getActivateState() const { return activateButton.getToggleState(); }
+    bool getActivateAltState() const { return activateAltButton.getToggleState(); }
     void setActivateState(bool state);
     void setActivateAltState(bool state);
 

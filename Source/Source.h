@@ -39,34 +39,34 @@ public:
     ~Source();
 
     void setId(int id);
-    int getId();
+    int getId() const { return m_id; }
 
     void setRadiusIsElevation(bool shouldBeElevation);
 
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);
-    float getAzimuth();
-    float getNormalizedAzimuth();
+    float getAzimuth() const { return m_azimuth; }
+    float getNormalizedAzimuth() const;
     void setElevationNoClip(float elevation);
     void setElevation(float elevation);
     void setNormalizedElevation(float value);
-    float getElevation();
-    float getNormalizedElevation();
+    float getElevation() const { return m_elevation; }
+    float getNormalizedElevation() const { return m_elevation / 90.0; }
     void setDistance(float distance);
     void setDistanceNoClip(float distance);
-    float getDistance();
+    float getDistance() const { return m_distance; }
     void setAzimuthSpan(float azimuthSpan);
-    float getAzimuthSpan();
+    float getAzimuthSpan() const { return m_aziSpan; }
     void setElevationSpan(float elevationSpan);
-    float getElevationSpan();
+    float getElevationSpan() const { return m_eleSpan; }
 
     void setCoordinates(float azimuth, float elevation, float distance);
 
     void setX(float x);
-    float getX();
+    float getX() const { return m_x; }
     void setY(float y);
-    float getY();
-    Point<float> getPos();
+    float getY() const { return m_y; }
+    Point<float> getPos() const { return Point<float> {m_x, m_y}; }
     void setPos(Point<float> pos);
 
     void computeXY();
@@ -81,18 +81,18 @@ public:
     void fixSourcePosition(bool shouldBeFixed);
     void fixSourcePositionElevation(bool shouldBeFixed);
 
-    float getDeltaX();
-    float getDeltaY();
-    float getDeltaAzimuth();
-    float getDeltaElevation();
-    float getDeltaDistance();
+    float getDeltaX() const { return m_x - fixedX; }
+    float getDeltaY() const { return m_y - fixedY; }
+    float getDeltaAzimuth() const { return (m_azimuth - fixedAzimuth); }
+    float getDeltaElevation() const { return (m_elevationNoClip - fixedElevation) / 90.0; }
+    float getDeltaDistance() const { return (m_distance - fixedDistance); }
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
     void setElevationFromFixedSource(float deltaY);
 
     void setColour(Colour col);
-    Colour getColour();
+    Colour getColour() const { return colour; }
 
 private:
     int m_id;
