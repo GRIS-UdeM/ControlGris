@@ -54,7 +54,7 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SPAT_MODE_ENUM spatMode) {
+void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode spatMode) {
     const int width = getWidth();
     const int height = getHeight();
     float fieldCenter = width / 2;
@@ -82,7 +82,7 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SPAT_MOD
 
     if (isMainField) {
         g.setColour(lookAndFeel->getLightColour());
-        if (spatMode == SPAT_MODE_VBAP) {
+        if (spatMode == SpatMode::VBAP) {
             // Draw big background circles.
             for (int i = 1; i < 3; i++) {
                 float w = i / 2.0 * (width - kSourceDiameter);
@@ -138,7 +138,7 @@ Point <float> FieldComponent::xyToPos(Point <float> p, int p_iwidth) {
 MainFieldComponent::MainFieldComponent(AutomationManager& automan)
     : automationManager (automan) 
 {
-    m_spatMode = SPAT_MODE_VBAP;
+    m_spatMode = SpatMode::VBAP;
     lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
     lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
 }
@@ -168,7 +168,7 @@ Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) {
     return Point <float> (-ang, rad);
 }
 
-void MainFieldComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
+void MainFieldComponent::setSpatMode(SpatMode spatMode) {
     m_spatMode = spatMode;
     repaint();
 }
@@ -249,20 +249,20 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics& g) {
     const int width = getWidth();
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
+        if (automationManager.getDrawingType() == TrajectoryType::drawing && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && !m_isPlaying) {
+        if (automationManager.getDrawingType() == TrajectoryType::drawing && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME && automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
+        } else if (automationManager.getDrawingType() == TrajectoryType::realtime && automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
 
     if (shouldDrawTrajectoryHandle) {
         Point<float> rpos;
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
         } else {
             rpos = posToXy(automationManager.getSourcePosition(), width);
@@ -283,7 +283,7 @@ void MainFieldComponent::paint(Graphics& g) {
     drawFieldBackground(g, true, m_spatMode);
 
     // Draw recording trajectory handle before sources (if source link *is not* Delta Lock).
-    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
+    if (automationManager.getSourceLink() != SourceLink::circularDeltaLock) {
         drawTrajectoryHandle(g);
     }
 
@@ -301,7 +301,7 @@ void MainFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_REALTIME &&
+    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TrajectoryType::realtime &&
         automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
@@ -312,7 +312,7 @@ void MainFieldComponent::paint(Graphics& g) {
         int lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         Point<float> pos;
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
@@ -328,7 +328,7 @@ void MainFieldComponent::paint(Graphics& g) {
         g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
 
         // Draw spanning.
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             createSpanPathVBAP(g, i);
         } else {
             createSpanPathLBAP(g, i);
@@ -336,7 +336,7 @@ void MainFieldComponent::paint(Graphics& g) {
    }
 
     // Draw recording trajectory handle after sources (if source link *is* Delta Lock).
-    if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
+    if (automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
         drawTrajectoryHandle(g);
     }
 
@@ -348,9 +348,9 @@ void MainFieldComponent::paint(Graphics& g) {
 
 bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
     int width = getWidth();
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING || automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    if (automationManager.getDrawingType() == TrajectoryType::drawing || automationManager.getDrawingType() == TrajectoryType::realtime) {
         Point<float> pos;
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
         } else {
             pos = posToXy(automationManager.getSource().getPos(), width);
@@ -359,7 +359,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_oldSelectedSourceId = m_selectedSourceId;
             m_selectedSourceId = -1;
-            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+            if (automationManager.getDrawingType() == TrajectoryType::drawing) {
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
                 if (event.mods.isShiftDown())
                     lineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
@@ -409,7 +409,7 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     m_selectedSourceId = -2; // No selection (should be something more meaningful than -2!
 
     // Check if we click on the trajectory handle.
-    if (automationManager.getSourceLink() == SOURCE_LINK_DELTA_LOCK) {
+    if (automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
         if (isTrajectoryHandleClicked(event)) {
             return;
         }
@@ -419,14 +419,14 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     bool clickOnSource = false;
     for (int i = 0; i < m_numberOfSources; i++) {
         Point<float> pos;
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
-            if (i > 0 && automationManager.getSourceLink() != SOURCE_LINK_INDEPENDENT && automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
+            if (i > 0 && automationManager.getSourceLink() != SourceLink::independent && automationManager.getSourceLink() != SourceLink::circularDeltaLock) {
                 showCircularSourceSelectionWarning = true;
             } else {
                 m_selectedSourceId = i;
@@ -443,12 +443,12 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     }
 
     // Check if we click on the trajectory handle.
-    if (automationManager.getSourceLink() != SOURCE_LINK_DELTA_LOCK) {
+    if (automationManager.getSourceLink() != SourceLink::circularDeltaLock) {
         isTrajectoryHandleClicked(event);
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+    if (automationManager.getDrawingType() == TrajectoryType::drawing) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
         automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
@@ -476,7 +476,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
         selectedSource = &m_sources[m_selectedSourceId];
     }
 
-    if (m_spatMode == SPAT_MODE_VBAP) {
+    if (m_spatMode == SpatMode::VBAP) {
         Point<float> pos = xyToDegree(mouseLocation.toFloat(), width);
         selectedSource->setAzimuth(pos.x);
         selectedSource->setElevationNoClip(pos.y);
@@ -487,13 +487,13 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     }
 
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING) {
+        if (automationManager.getDrawingType() == TrajectoryType::drawing) {
             if (hasValidLineDrawingAnchor1()) {
                 lineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
             } else {
                 automationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
             }
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+        } else if (automationManager.getDrawingType() == TrajectoryType::realtime) {
             automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
@@ -501,19 +501,19 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     }
 
     bool needToAdjustAutomationManager = false;
-    if (m_selectedSourceId == 0 && automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME &&
-        (automationManager.getSourceLink() == SOURCE_LINK_INDEPENDENT || automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X ||
-         automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y)
+    if (m_selectedSourceId == 0 && automationManager.getDrawingType() == TrajectoryType::realtime &&
+        (automationManager.getSourceLink() == SourceLink::independent || automationManager.getSourceLink() == SourceLink::linkSymmetricX ||
+         automationManager.getSourceLink() == SourceLink::linkSymmetricY)
         ) {
         needToAdjustAutomationManager = true;
-    } else if (automationManager.getSourceLink() >= SOURCE_LINK_CIRCULAR &&
-               automationManager.getSourceLink() < SOURCE_LINK_DELTA_LOCK &&
-               automationManager.getDrawingType() == TRAJECTORY_TYPE_REALTIME) {
+    } else if (automationManager.getSourceLink() >= SourceLink::circular &&
+               automationManager.getSourceLink() < SourceLink::circularDeltaLock &&
+               automationManager.getDrawingType() == TrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
 
     if (needToAdjustAutomationManager) {
-        if (m_spatMode == SPAT_MODE_VBAP) {
+        if (m_spatMode == SpatMode::VBAP) {
             automationManager.getSource().setAzimuth(m_sources[0].getAzimuth());
             automationManager.getSource().setElevation(m_sources[0].getElevation());
         } else {
@@ -527,7 +527,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 }
 
 void MainFieldComponent::mouseMove(const MouseEvent &event) {
-    if (m_selectedSourceId == -1 && automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && hasValidLineDrawingAnchor1()) {
+    if (m_selectedSourceId == -1 && automationManager.getDrawingType() == TrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
         lineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
         repaint();
     }
@@ -535,7 +535,7 @@ void MainFieldComponent::mouseMove(const MouseEvent &event) {
 
 void MainFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_DRAWING && ! event.mods.isShiftDown()) {
+        if (automationManager.getDrawingType() == TrajectoryType::drawing && ! event.mods.isShiftDown()) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }
@@ -570,13 +570,13 @@ void ElevationFieldComponent::paint(Graphics& g) {
 
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && !m_isPlaying) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING && !m_isPlaying) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME && automationManager.getSourceLink() == SOURCE_LINK_ALT_DELTA_LOCK) {
+        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::deltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -603,7 +603,7 @@ void ElevationFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TRAJECTORY_TYPE_ALT_REALTIME &&
+    if (m_isPlaying && !isMouseButtonDown() && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) != TrajectoryTypeAlt::realtime &&
         automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
@@ -666,13 +666,13 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     }
 
     // Check if we record a trajectory.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING || automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing || static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         Point<float> pos = posToXy(automationManager.getSourcePosition(), width).withX(10.0f);
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_oldSelectedSourceId = m_selectedSourceId;
             m_selectedSourceId = -1;
-            if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+            if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
                 currentRecordingPositionX = 10 + kSourceRadius;
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
             } else {
@@ -684,7 +684,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
         currentRecordingPositionX = 10 + kSourceRadius;
@@ -702,7 +702,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
     }
 
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
             currentRecordingPositionX += 1;
             if (currentRecordingPositionX >= height) {
                 currentRecordingPositionX = height;
@@ -714,7 +714,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
             y = height - event.getPosition().toFloat().y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
-        } else if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
             float y = height - event.y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
@@ -727,12 +727,12 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
     }
 
     bool needToAdjustAutomationManager = false;
-    if (automationManager.getSourceLink() == SOURCE_LINK_ALT_INDEPENDENT && m_selectedSourceId == 0 &&
-        automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::independent && m_selectedSourceId == 0 &&
+            static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         needToAdjustAutomationManager = true;
-    } else if (automationManager.getSourceLink() >= SOURCE_LINK_ALT_FIXED_ELEVATION &&
-               automationManager.getSourceLink() < SOURCE_LINK_ALT_DELTA_LOCK &&
-               automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_REALTIME) {
+    } else if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) >= SourceLinkAlt::fixedElevation &&
+            static_cast<SourceLinkAlt>(automationManager.getSourceLink()) < SourceLinkAlt::deltaLock &&
+                    static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         needToAdjustAutomationManager = true;
     }
 
@@ -747,7 +747,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
 
 void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TRAJECTORY_TYPE_ALT_DRAWING) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }

@@ -32,7 +32,7 @@ SourceBoxComponent::SourceBoxComponent() {
     sourcePlacementCombo.setTextWhenNothingSelected("Choose a source placement...");
     sourcePlacementCombo.addItemList(SOURCE_PLACEMENT_SKETCH, 1);
     sourcePlacementCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.sourceBoxPlacementChanged(sourcePlacementCombo.getSelectedId()); 
+            listeners.call([&] (Listener& l) { l.sourceBoxPlacementChanged(static_cast<SourcePlacement>(sourcePlacementCombo.getSelectedId()));
                                                 sourcePlacementCombo.setSelectedId(0, NotificationType::dontSendNotification); });
         };
 
@@ -110,10 +110,10 @@ void SourceBoxComponent::setNumberOfSources(int numOfSources, int firstSourceId)
     sourceNumberCombo.setSelectedItemIndex(selectedSourceNumber);
 }
 
-void SourceBoxComponent::updateSelectedSource(Source *source, int sourceIndex, SPAT_MODE_ENUM spatMode) {
+void SourceBoxComponent::updateSelectedSource(Source *source, int sourceIndex, SpatMode spatMode) {
     selectedSourceNumber = sourceIndex;
     sourceNumberCombo.setSelectedItemIndex(selectedSourceNumber);
-    if (spatMode == SPAT_MODE_LBAP) {
+    if (spatMode == SpatMode::LBAP) {
         currentAngle = source->getAzimuth();
         currentRayLength = source->getDistance();
     } else {

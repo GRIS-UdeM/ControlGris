@@ -21,7 +21,7 @@
 #include "ControlGrisConstants.h"
 
 TrajectoryBoxComponent::TrajectoryBoxComponent() {
-    m_spatMode = SPAT_MODE_VBAP;
+    m_spatMode = SpatMode::VBAP;
 
     sourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
     addAndMakeVisible(&sourceLinkLabel);
@@ -30,13 +30,13 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     sourceLinkCombo.setSelectedId(1);
     addAndMakeVisible(&sourceLinkCombo);
     sourceLinkCombo.onChange = [this] {
-            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkChanged(sourceLinkCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkChanged(static_cast<SourceLink>(sourceLinkCombo.getSelectedId())); }); };
 
     sourceLinkAltCombo.addItemList(SOURCE_LINK_ALT_TYPES, 1);
     sourceLinkAltCombo.setSelectedId(1);
     addChildComponent(&sourceLinkAltCombo);
     sourceLinkAltCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkAltChanged(sourceLinkAltCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxSourceLinkAltChanged(static_cast<SourceLinkAlt>(sourceLinkAltCombo.getSelectedId())); }); };
 
     trajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
     addAndMakeVisible(&trajectoryTypeLabel);
@@ -45,13 +45,13 @@ TrajectoryBoxComponent::TrajectoryBoxComponent() {
     trajectoryTypeCombo.setSelectedId(1);
     addAndMakeVisible(&trajectoryTypeCombo);
     trajectoryTypeCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeChanged(trajectoryTypeCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeChanged(static_cast<TrajectoryType>(trajectoryTypeCombo.getSelectedId())); }); };
 
     trajectoryTypeAltCombo.addItemList(TRAJECTORY_TYPE_ALT_TYPES, 1);
     trajectoryTypeAltCombo.setSelectedId(1);
     addChildComponent(&trajectoryTypeAltCombo);
     trajectoryTypeAltCombo.onChange = [this] { 
-            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeAltChanged(trajectoryTypeAltCombo.getSelectedId()); }); };
+            listeners.call([&] (Listener& l) { l.trajectoryBoxTrajectoryTypeAltChanged(static_cast<TrajectoryTypeAlt>(trajectoryTypeAltCombo.getSelectedId())); }); };
 
     durationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
     addAndMakeVisible(&durationLabel);
@@ -158,7 +158,7 @@ TrajectoryBoxComponent::~TrajectoryBoxComponent() {
     setLookAndFeel(nullptr);
 }
 
-void TrajectoryBoxComponent::setSpatMode(SPAT_MODE_ENUM spatMode) {
+void TrajectoryBoxComponent::setSpatMode(SpatMode spatMode) {
     m_spatMode = spatMode;
     resized();
 }
@@ -175,11 +175,11 @@ void TrajectoryBoxComponent::setNumberOfSources(int numOfSources) {
     }
 
     if (numOfSources == 2) {
-        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_X, true);
-        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_Y, true);
+        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricX), true);
+        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricY), true);
     } else {
-        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_X, false);
-        sourceLinkCombo.setItemEnabled(SOURCE_LINK_SYMMETRIC_Y, false);
+        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricX), false);
+        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricY), false);
     }
 }
 
@@ -235,12 +235,12 @@ void TrajectoryBoxComponent::setDeviationPerCycle(float value) {
     deviationEditor.setText(String(value));
 }
 
-void TrajectoryBoxComponent::setSourceLink(int value) {
-    sourceLinkCombo.setSelectedId(value);
+void TrajectoryBoxComponent::setSourceLink(SourceLink value) {
+    sourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
-void TrajectoryBoxComponent::setSourceLinkAlt(int value) {
-    sourceLinkAltCombo.setSelectedId(value);
+void TrajectoryBoxComponent::setSourceLinkAlt(SourceLinkAlt value) {
+    sourceLinkAltCombo.setSelectedId(static_cast<int>(value));
 }
 
 bool TrajectoryBoxComponent::getActivateState() {
@@ -287,7 +287,7 @@ void TrajectoryBoxComponent::resized() {
     deviationEditor.setBounds(115, 100, 75, 20);
     activateButton.setBounds(114, 130, 176, 20);
 
-    if (m_spatMode == SPAT_MODE_LBAP) {
+    if (m_spatMode == SpatMode::LBAP) {
         sourceLinkAltCombo.setVisible(true);
         trajectoryTypeAltCombo.setVisible(true);
         activateAltButton.setVisible(true);

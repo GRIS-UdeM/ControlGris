@@ -33,7 +33,7 @@ public:
     void resized() override;
 
     void setNumberOfSources(int numOfSources);
-    void setSpatMode(SPAT_MODE_ENUM spatMode);
+    void setSpatMode(SpatMode spatMode);
     void setTrajectoryType(int type);
     void setTrajectoryTypeAlt(int type);
     void setBackAndForth(bool state);
@@ -42,8 +42,8 @@ public:
     void setDampeningAltEditorEnabled(bool state);
     void setDampeningCycles(int value);
     void setDampeningCyclesAlt(int value);
-    void setSourceLink(int value);
-    void setSourceLinkAlt(int value);
+    void setSourceLink(SourceLink value);
+    void setSourceLinkAlt(SourceLinkAlt value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
@@ -57,10 +57,10 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void trajectoryBoxSourceLinkChanged(int value) = 0;
-        virtual void trajectoryBoxSourceLinkAltChanged(int value) = 0;
-        virtual void trajectoryBoxTrajectoryTypeChanged(int value) = 0;
-        virtual void trajectoryBoxTrajectoryTypeAltChanged(int value) = 0;
+        virtual void trajectoryBoxSourceLinkChanged(SourceLink value) = 0;
+        virtual void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) = 0;
+        virtual void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) = 0;
+        virtual void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) = 0;
         virtual void trajectoryBoxBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxBackAndForthAltChanged(bool value) = 0;
         virtual void trajectoryBoxDampeningCyclesChanged(int value) = 0;
@@ -81,7 +81,7 @@ public:
 private:
     ListenerList<Listener> listeners;
 
-    SPAT_MODE_ENUM  m_spatMode;
+    SpatMode  m_spatMode;
 
     Label           sourceLinkLabel;
 

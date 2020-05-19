@@ -63,7 +63,7 @@ public:
     void parametersBoxParameterChanged(int parameterId, double value) override;
 
     // SettingsBoxComponent::Listeners
-    void settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) override;
+    void settingsBoxOscFormatChanged(SpatMode mode) override;
     void settingsBoxOscPortNumberChanged(int oscPort) override;
     void settingsBoxOscActivated(bool state) override;
     void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
@@ -71,14 +71,14 @@ public:
 
     // SourceBoxComponent::Listeners
     void sourceBoxSelectionChanged(int sourceNum) override;
-    void sourceBoxPlacementChanged(int value) override;
+    void sourceBoxPlacementChanged(SourcePlacement value) override;
     void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) override;
 
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxSourceLinkChanged(int value) override;
-    void trajectoryBoxSourceLinkAltChanged(int value) override;
-    void trajectoryBoxTrajectoryTypeChanged(int value) override;
-    void trajectoryBoxTrajectoryTypeAltChanged(int value) override;
+    void trajectoryBoxSourceLinkChanged(SourceLink value) override;
+    void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) override;
+    void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) override;
+    void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) override;
     void trajectoryBoxBackAndForthChanged(bool value) override;
     void trajectoryBoxBackAndForthAltChanged(bool value) override;
     void trajectoryBoxDampeningCyclesChanged(int value) override;
@@ -101,8 +101,8 @@ public:
 
     void setPluginState();
     void updateSpanLinkButton(bool state);
-    void updateSourceLinkCombo(int value);
-    void updateSourceLinkAltCombo(int value);
+    void updateSourceLinkCombo(SourceLink value);
+    void updateSourceLinkAltCombo(SourceLinkAlt value);
     void updatePositionPreset(int presetNumber);
 
     void refresh();

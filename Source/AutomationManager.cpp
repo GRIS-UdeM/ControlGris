@@ -18,11 +18,10 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "AutomationManager.h"
-#include "ControlGrisConstants.h"
 
 AutomationManager::AutomationManager() {
-    sourceLink = SOURCE_LINK_INDEPENDENT;
-    drawingType = TRAJECTORY_TYPE_DRAWING;
+    sourceLink = SourceLink::independent;
+    drawingType = TrajectoryType::drawing;
     fieldWidth = MIN_FIELD_WIDTH;
     activateState = false;
     isBackAndForth = false;
@@ -279,7 +278,7 @@ void AutomationManager::setSourceAndPlaybackPosition(Point<float> pos) {
 }
 
 void AutomationManager::sendTrajectoryPositionChangedEvent() {
-    if (activateState || drawingType == TRAJECTORY_TYPE_REALTIME || drawingType == TRAJECTORY_TYPE_ALT_REALTIME) {
+    if (activateState || drawingType == TrajectoryType::realtime || static_cast<TrajectoryTypeAlt>(drawingType) == TrajectoryTypeAlt::realtime) {
         listeners.call([&] (Listener& l) { l.trajectoryPositionChanged(this, source.getPos()); });
     }
 }
@@ -293,11 +292,11 @@ Point<float> AutomationManager::getSourcePosition() {
 }
 
 void AutomationManager::fixSourcePosition() {
-    bool shouldBeFixed = sourceLink != SOURCE_LINK_INDEPENDENT;
+    bool shouldBeFixed = sourceLink != SourceLink::independent;
     source.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setDrawingType(int type, Point<float> startpos) {
+void AutomationManager::setDrawingType(TrajectoryType type, Point<float> startpos) {
     drawingType = type;
 
     trajectoryPoints.clear();
@@ -316,13 +315,13 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
     float x, y;
     float step = 0, transx = 0, transy = 0, adjustedMagnitude = 0;
     switch (drawingType) {
-        case TRAJECTORY_TYPE_REALTIME:
+        case TrajectoryType::realtime:
             playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
-        case TRAJECTORY_TYPE_DRAWING:
+        case TrajectoryType::drawing:
             playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
-        case TRAJECTORY_TYPE_CIRCLE_CLOCKWISE:
+        case TrajectoryType::circleClockwise:
             for (int i = 0; i < 200; i++) {
                 x = sinf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
                 x = x < minlim ? minlim : x > maxlim ? maxlim : x;
@@ -331,7 +330,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE:
+        case TrajectoryType::circleCounterClockwise:
             for (int i = 0; i < 200; i++) {
                 x = -sinf(2.0 * M_PI * i / 199 - angle) * magnitude + offset;
                 x = x < minlim ? minlim : x > maxlim ? maxlim : x;
@@ -340,7 +339,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_ELLIPSE_CLOCKWISE:
+        case TrajectoryType::ellipseClockwise:
             for (int i = 0; i < 200; i++) {
                 x = sinf(2.0 * M_PI * i / 199) * magnitude * 0.5;
                 y = -cosf(2.0 * M_PI * i / 199) * magnitude;
@@ -353,7 +352,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_ELLIPSE_COUNTER_CLOCKWISE:
+        case TrajectoryType::ellipseCounterClockwise:
             for (int i = 0; i < 200; i++) {
                 x = -sinf(2.0 * M_PI * i / 199) * magnitude * 0.5;
                 y = -cosf(2.0 * M_PI * i / 199) * magnitude;
@@ -366,7 +365,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_OUT_IN:
+        case TrajectoryType::spiralClockwiseOutIn:
             for (int i = 0; i < 300; i++) {
                 x = sinf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
                 y = -cosf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
@@ -379,7 +378,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_OUT_IN:
+        case TrajectoryType::spiralCounterClockwiseOutIn:
             for (int i = 0; i < 300; i++) {
                 x = -sinf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
                 y = -cosf(2.0 * M_PI * i / 99) * magnitude * (1.0 - i / 300.0);
@@ -392,7 +391,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT:
+        case TrajectoryType::spiralClockwiseInOut:
             for (int i = 0; i < 300; i++) {
                 x = sinf(2.0 * M_PI * i / 99 ) * magnitude * (i / 300.0);
                 y = -cosf(2.0 * M_PI * i / 99 ) * magnitude * (i / 300.0);
@@ -405,7 +404,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT:
+        case TrajectoryType::spiralCounterClockwiseInOut:
             for (int i = 0; i < 300; i++) {
                 x = -sinf(2.0 * M_PI * i / 99) * magnitude * (i / 300.0);
                 y = -cosf(2.0 * M_PI * i / 99) * magnitude * (i / 300.0);
@@ -418,8 +417,8 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_SQUARE_CLOCKWISE:
-        case TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE:
+        case TrajectoryType::squareClockwise:
+        case TrajectoryType::squareCounterClockwise:
             step = 1.f / (fieldWidth / 4);
             transx = translated.x * ((fieldWidth / 2 - kSourceRadius));
             transy = translated.y * ((fieldWidth / 2 - kSourceRadius));
@@ -440,7 +439,7 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                     tmp1 = 0.f;
                     tmp2 = 1.f - ((i - fsizeOver4 * 3) * step);
                 }
-                if (drawingType == TRAJECTORY_TYPE_SQUARE_CLOCKWISE) {
+                if (drawingType == TrajectoryType::squareClockwise) {
                     x = tmp1;
                     y = tmp2;
                 } else {
@@ -459,11 +458,11 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
                 trajectoryPoints.add(p);
             }
             break;
-        case TRAJECTORY_TYPE_TRIANGLE_CLOCKWISE:
-        case TRAJECTORY_TYPE_TRIANGLE_COUNTER_CLOCKWISE:
+        case TrajectoryType::triangleClockwise:
+        case TrajectoryType::triangleCounterClockwise:
             Point<float> p1 (0.f, -1.f);
             Point<float> p2, p3;
-            if (drawingType == TRAJECTORY_TYPE_TRIANGLE_CLOCKWISE) {
+            if (drawingType == TrajectoryType::triangleClockwise) {
                 p2 = Point<float> (1.f, 1.f);
                 p3 = Point<float> (-1.f, 1.f);
             } else { 
@@ -494,15 +493,15 @@ void AutomationManager::setDrawingType(int type, Point<float> startpos) {
             break;
     }
 
-    if (drawingType > TRAJECTORY_TYPE_DRAWING) {
+    if (drawingType > TrajectoryType::drawing) {
         setSourcePosition(Point<float> (trajectoryPoints[0].x / fieldWidth, 1.0 - trajectoryPoints[0].y / fieldWidth));
     } else {
         setSourcePosition(Point<float> (0.5f, 0.5f));
     }
 }
 
-void AutomationManager::setDrawingTypeAlt(int type) {
-    drawingType = type;
+void AutomationManager::setDrawingTypeAlt(TrajectoryTypeAlt type) {
+    drawingType = static_cast<TrajectoryType>(type);
 
     trajectoryPoints.clear();
 
@@ -510,21 +509,21 @@ void AutomationManager::setDrawingTypeAlt(int type) {
     float width = fieldWidth - offset;
     float minPos = 15.0, maxPos = fieldWidth - 20.0;
 
-    switch (drawingType) {
-        case TRAJECTORY_TYPE_ALT_REALTIME:
+    switch (type) {
+        case TrajectoryTypeAlt::realtime:
             playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
-        case TRAJECTORY_TYPE_ALT_DRAWING:
+        case TrajectoryTypeAlt::drawing:
             playbackPosition = Point<float> (-1.0f, -1.0f);
             break;
-        case TRAJECTORY_TYPE_ALT_DOWN_UP:
+        case TrajectoryTypeAlt::downUp:
             for (int i = 0; i < 200; i++) {
                 float x = (i / 199.0) * width + offset;
                 float y = (i / 199.0) * (maxPos - minPos) + minPos;
                 trajectoryPoints.add(Point<float> (x, y));
             }
             break;
-        case TRAJECTORY_TYPE_ALT_UP_DOWN:
+        case TrajectoryTypeAlt::upDown:
             for (int i = 0; i < 200; i++) {
                 float x = (i / 199.0) * width + offset;
                 float y = (1.0 - i / 199.0) * (maxPos - minPos) + minPos;
@@ -533,21 +532,21 @@ void AutomationManager::setDrawingTypeAlt(int type) {
             break;
     }
 
-    if (drawingType > TRAJECTORY_TYPE_ALT_DRAWING) {
+    if (type > TrajectoryTypeAlt::drawing) {
         setSourcePosition(Point<float> (trajectoryPoints[0].x / fieldWidth, 1.0 - trajectoryPoints[0].y / fieldWidth));
     } else {
         setSourcePosition(Point<float> (0.5f, 0.5f));
     }
 }
 
-int AutomationManager::getDrawingType() {
+TrajectoryType AutomationManager::getDrawingType() {
     return drawingType;
 }
 
-void AutomationManager::setSourceLink(int value) {
+void AutomationManager::setSourceLink(SourceLink value) {
     sourceLink = value;
 }
 
-int AutomationManager::getSourceLink() {
+SourceLink AutomationManager::getSourceLink() {
     return sourceLink;
 }

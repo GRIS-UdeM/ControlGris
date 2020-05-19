@@ -73,8 +73,8 @@ public:
     void parameterChanged(const String &parameterID, float newValue) override;
 
     //==============================================================================
-    void setOscFormat(SPAT_MODE_ENUM oscFormat);
-    SPAT_MODE_ENUM getOscFormat();
+    void setOscFormat(SpatMode oscFormat);
+    SpatMode getOscFormat();
 
     void setOscPortNumber(int oscPortNumber);
     int getOscPortNumber();
@@ -127,10 +127,10 @@ public:
 
     void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) override;
 
-    void setSourceLink(int value);
-    void setSourceLinkAlt(int value);
-    void onSourceLinkChanged(int value);
-    void onSourceLinkAltChanged(int value);
+    void setSourceLink(SourceLink value);
+    void setSourceLinkAlt(SourceLinkAlt value);
+    void onSourceLinkChanged(SourceLink value);
+    void onSourceLinkAltChanged(SourceLinkAlt value);
 
     void linkSourcePositions();
     void linkSourcePositionsAlt();
@@ -154,7 +154,7 @@ public:
     AutomationManager automationManagerAlt;
 
 private:
-    SPAT_MODE_ENUM m_selectedOscFormat;
+    SpatMode m_selectedOscFormat;
     bool m_oscConnected;
     bool m_oscInputConnected;
     bool m_oscOutputConnected;
@@ -187,8 +187,8 @@ private:
     float m_lastTrajectory1z;
     float m_lastAzispan;
     float m_lastElespan;
-    int m_lastSourceLink;
-    int m_lastSourceLinkAlt;
+    SourceLink m_lastSourceLink;
+    SourceLinkAlt m_lastSourceLinkAlt;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
 

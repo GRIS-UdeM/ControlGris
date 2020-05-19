@@ -20,6 +20,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
+#include "ControlGrisConstants.h"
 #include "Source.h"
 
 class AutomationManager
@@ -52,11 +54,11 @@ public:
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
-    void setSourceLink(int value);
-    int getSourceLink();
-    void setDrawingType(int type, Point<float> startpos);
-    int getDrawingType();
-    void setDrawingTypeAlt(int type);
+    void setSourceLink(SourceLink value);
+    SourceLink getSourceLink();
+    void setDrawingType(TrajectoryType type, Point<float> startpos);
+    TrajectoryType getDrawingType();
+    void setDrawingTypeAlt(TrajectoryTypeAlt type);
 
     void setBackAndForth(bool shouldBeOn);
     void setDampeningCycles(int value);
@@ -89,8 +91,8 @@ private:
 
     double          fieldWidth;
 
-    int             sourceLink;
-    int             drawingType;
+    SourceLink             sourceLink;
+    TrajectoryType             drawingType;
 
     bool            isBackAndForth;
     int             backAndForthDirection;

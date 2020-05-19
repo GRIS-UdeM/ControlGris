@@ -36,7 +36,7 @@ public:
     //-----------------------------------------------------
     void setNumberOfSources(int numOfSources);
     void setFirstSourceId(int firstSourceId);
-    void setOscFormat(SPAT_MODE_ENUM mode);
+    void setOscFormat(SpatMode mode);
     void setOscPortNumber(int oscPortNumber);
     void setActivateButtonState(bool shouldBeOn);
 
@@ -44,7 +44,7 @@ public:
     {
         virtual ~Listener() {}
 
-        virtual void settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) = 0;
+        virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
         virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
         virtual void settingsBoxOscActivated(bool state) = 0;
         virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;

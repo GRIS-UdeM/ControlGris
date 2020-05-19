@@ -44,7 +44,7 @@ public:
     FieldComponent();
     ~FieldComponent();
 
-    void drawFieldBackground(Graphics&, bool isMainField, SPAT_MODE_ENUM spatMode = SPAT_MODE_VBAP);
+    void drawFieldBackground(Graphics&, bool isMainField, SpatMode spatMode = SpatMode::VBAP);
 
     Point <float> posToXy(Point <float> p, int p_iFieldWidth);
     Point <float> xyToPos(Point <float> p, int p_iFieldWidth);
@@ -98,7 +98,7 @@ public:
  	void mouseMove (const MouseEvent &event);
  	void mouseUp (const MouseEvent &event);
 
-    void setSpatMode(SPAT_MODE_ENUM spatMode);
+    void setSpatMode(SpatMode spatMode);
 
 private:
     AutomationManager& automationManager;
@@ -111,7 +111,7 @@ private:
     bool hasValidLineDrawingAnchor1();
     bool hasValidLineDrawingAnchor2();
 
-    SPAT_MODE_ENUM m_spatMode;
+    SpatMode m_spatMode;
 
     bool showCircularSourceSelectionWarning = false;
 

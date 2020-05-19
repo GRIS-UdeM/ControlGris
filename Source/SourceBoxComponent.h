@@ -34,13 +34,13 @@ public:
     void resized() override;
 
     void setNumberOfSources(int numOfSources, int firstSourceId);
-    void updateSelectedSource(Source *source, int sourceIndex, SPAT_MODE_ENUM spatMode);
+    void updateSelectedSource(Source *source, int sourceIndex, SpatMode spatMode);
 
     struct Listener
     {
         virtual ~Listener() {}
 
-        virtual void sourceBoxPlacementChanged(int value) = 0;
+        virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
         virtual void sourceBoxSelectionChanged(int sourceNum) = 0;
         virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
     };

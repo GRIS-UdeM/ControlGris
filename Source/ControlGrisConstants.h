@@ -21,29 +21,29 @@
 
 // Global variables.
 //------------------
-const int MIN_FIELD_WIDTH = 300;
-const int MAX_NUMBER_OF_SOURCES = 8;
-const int NUMBER_OF_POSITION_PRESETS = 50;
+constexpr int MIN_FIELD_WIDTH = 300;
+constexpr int MAX_NUMBER_OF_SOURCES = 8;
+constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 
 // Spatialisation modes.
 //----------------------
-enum SPAT_MODE_ENUM {
-    SPAT_MODE_VBAP = 0,
-    SPAT_MODE_LBAP
+enum class SpatMode {
+    VBAP = 0,
+    LBAP
 };
 
 const String WARNING_CIRCULAR_SOURCE_SELECTION ("Only source 1 can be selected \nin circular or symmetric links!");
 
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
-enum SOURCE_PLACEMENT_ENUM {    SOURCE_PLACEMENT_LEFT_ALTERNATE = 1,
-                                SOURCE_PLACEMENT_RIGHT_ALTERNATE,
-                                SOURCE_PLACEMENT_LEFT_CLOCKWISE,
-                                SOURCE_PLACEMENT_LEFT_COUNTER_CLOCKWISE,
-                                SOURCE_PLACEMENT_RIGHT_CLOCKWISE,
-                                SOURCE_PLACEMENT_RIGHT_COUNTER_CLOCKWISE,
-                                SOURCE_PLACEMENT_TOP_CLOCKWISE,
-                                SOURCE_PLACEMENT_TOP_COUNTER_CLOCKWISE
+enum class SourcePlacement {    leftAlternate = 1,
+                          rightAlternate,
+                          leftClockwise,
+                          leftCounterClockwise,
+                          rightClockwise,
+                          rightCounterClockwise,
+                          topClockwise,
+                          topCounterClockwise
                            };
 const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Right Alternate"),
                                            String("Left Clockwise"), String("Left Counter Clockwise"),
@@ -52,45 +52,45 @@ const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Rig
 
 // Trajectories -> Source Link popup choices.
 //-------------------------------------------
-enum SOURCE_LINK_ENUM { SOURCE_LINK_INDEPENDENT = 1,
-                        SOURCE_LINK_CIRCULAR,
-                        SOURCE_LINK_CIRCULAR_FIXED_RADIUS,
-                        SOURCE_LINK_CIRCULAR_FIXED_ANGLE,
-                        SOURCE_LINK_CIRCULAR_FULLY_FIXED,
-                        SOURCE_LINK_DELTA_LOCK,
-                        SOURCE_LINK_SYMMETRIC_X,
-                        SOURCE_LINK_SYMMETRIC_Y
+enum class SourceLink { independent = 1,
+                  circular,
+                  circularFixedRadius,
+                  circularFixedAngle,
+                  circularFullyFixed,
+                  circularDeltaLock,
+                  linkSymmetricX,
+                  linkSymmetricY
                       };
 const StringArray SOURCE_LINK_TYPES       {String("Independent"), String("Circular"),
                                            String("Circular Fixed Radius"), String("Circular Fixed Angle"),
                                            String("Circular Fully Fixed"), String("Delta Lock"),
                                            String("Symmetric X"), String("Symmetric Y")};
 
-enum SOURCE_LINK_ALT_ENUM { SOURCE_LINK_ALT_INDEPENDENT = 1,
-                            SOURCE_LINK_ALT_FIXED_ELEVATION,
-                            SOURCE_LINK_ALT_LINEAR_MIN,
-                            SOURCE_LINK_ALT_LINEAR_MAX,
-                            SOURCE_LINK_ALT_DELTA_LOCK
+enum class SourceLinkAlt { independent = 1,
+                     fixedElevation,
+                     linearMin,
+                     linearMax,
+                     deltaLock
                       };
 const StringArray SOURCE_LINK_ALT_TYPES   {String("Independent"), String("Fixed Elevation"),
                                            String("Linear Min"), String("Linear Max"), String("Delta Lock")};
 
 // Trajectories -> Trajectory Type popup choices.
 //-----------------------------------------------
-enum TRAJECTORY_TYPE_ENUM { TRAJECTORY_TYPE_REALTIME = 1,
-                            TRAJECTORY_TYPE_DRAWING,
-                            TRAJECTORY_TYPE_CIRCLE_CLOCKWISE,
-                            TRAJECTORY_TYPE_CIRCLE_COUNTER_CLOCKWISE,
-                            TRAJECTORY_TYPE_ELLIPSE_CLOCKWISE,
-                            TRAJECTORY_TYPE_ELLIPSE_COUNTER_CLOCKWISE,
-                            TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_OUT_IN,
-                            TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_OUT_IN,
-                            TRAJECTORY_TYPE_SPIRAL_CLOCKWISE_IN_OUT,
-                            TRAJECTORY_TYPE_SPIRAL_COUNTER_CLOCKWISE_IN_OUT,
-                            TRAJECTORY_TYPE_SQUARE_CLOCKWISE,
-                            TRAJECTORY_TYPE_SQUARE_COUNTER_CLOCKWISE,
-                            TRAJECTORY_TYPE_TRIANGLE_CLOCKWISE,
-                            TRAJECTORY_TYPE_TRIANGLE_COUNTER_CLOCKWISE
+enum class TrajectoryType { realtime = 1,
+                      drawing,
+                      circleClockwise,
+                      circleCounterClockwise,
+                      ellipseClockwise,
+                      ellipseCounterClockwise,
+                      spiralClockwiseOutIn,
+                      spiralCounterClockwiseOutIn,
+                      spiralClockwiseInOut,
+                      spiralCounterClockwiseInOut,
+                      squareClockwise,
+                      squareCounterClockwise,
+                      triangleClockwise,
+                      triangleCounterClockwise
                           };
 const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing"), String("Circle Clockwise"),
                                            String("Circle Counter Clockwise"), String("Ellipse Clockwise"),
@@ -100,10 +100,10 @@ const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing")
                                            String("Square Counter Clockwise"), String("Triangle Clockwise"),
                                            String("Triangle Counter Clockwise")};
 
-enum TRAJECTORY_TYPE_ALT_ENUM { TRAJECTORY_TYPE_ALT_REALTIME = 1,
-                                TRAJECTORY_TYPE_ALT_DRAWING,
-                                TRAJECTORY_TYPE_ALT_DOWN_UP,
-                                TRAJECTORY_TYPE_ALT_UP_DOWN
+enum class TrajectoryTypeAlt { realtime = 1,
+                               drawing,
+                               downUp,
+                               upDown
                               };
 const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Drawing"), String("Up Down"),
                                                 String("Down Up")};

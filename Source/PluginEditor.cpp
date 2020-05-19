@@ -76,7 +76,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     trajectoryBox.addListener(this);
     addAndMakeVisible(trajectoryBox);
     trajectoryBox.setSourceLink(automationManager.getSourceLink());
-    trajectoryBox.setSourceLinkAlt(automationManagerAlt.getSourceLink());
+    trajectoryBox.setSourceLinkAlt(static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()));
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
@@ -195,12 +195,12 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state) {
     parametersBox.setSpanLinkState(state);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(int value) {
-    trajectoryBox.sourceLinkCombo.setSelectedId(value, NotificationType::dontSendNotification);
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value) {
+    trajectoryBox.sourceLinkCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(int value) {
-    trajectoryBox.sourceLinkAltCombo.setSelectedId(value, NotificationType::dontSendNotification);
+void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(SourceLinkAlt value) {
+    trajectoryBox.sourceLinkAltCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
@@ -215,10 +215,10 @@ void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
 
 // SettingsBoxComponent::Listener callbacks.
 //------------------------------------------
-void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SPAT_MODE_ENUM mode) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode) {
     settingsBox.setOscFormat(mode);
     processor.setOscFormat(mode);
-    bool selectionIsLBAP = mode == SPAT_MODE_LBAP;
+    bool selectionIsLBAP = mode == SpatMode::LBAP;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
     mainField.setSpatMode(mode);
     trajectoryBox.setSpatMode(mode);
@@ -242,10 +242,10 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         if (processor.getNumberOfSources() != numOfSources) {
             initSourcePlacement = true;
         }
-        if (numOfSources != 2 && (automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_X ||
-                                  automationManager.getSourceLink() == SOURCE_LINK_SYMMETRIC_Y)) {
-            automationManager.setSourceLink(SOURCE_LINK_INDEPENDENT);
-            updateSourceLinkCombo(SOURCE_LINK_INDEPENDENT);
+        if (numOfSources != 2 && (automationManager.getSourceLink() == SourceLink::linkSymmetricX ||
+                                  automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
+            automationManager.setSourceLink(SourceLink::independent);
+            updateSourceLinkCombo(SourceLink::independent);
         }
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
@@ -257,7 +257,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         elevationField.setSources(processor.getSources(), numOfSources);
         sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
         if (initSourcePlacement) {
-            sourceBoxPlacementChanged(SOURCE_PLACEMENT_LEFT_ALTERNATE);
+            sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
         }
     }
 }
@@ -269,7 +269,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
     sourceBox.setNumberOfSources(processor.getNumberOfSources(), firstSourceId);
 
     mainField.repaint();
-    if (processor.getOscFormat() == SPAT_MODE_LBAP)
+    if (processor.getOscFormat() == SpatMode::LBAP)
         elevationField.repaint();
 }
 
@@ -285,20 +285,20 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum) {
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
+void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value) {
     int numOfSources = processor.getNumberOfSources();
     const float azims2[2] = {-90.0f, 90.0f};
     const float azims4[4] = {-45.0f, 45.0f, -135.0f, 135.0f};
     const float azims6[6] = {-30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f};
     const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
 
-    bool isLBAP = processor.getOscFormat() == SPAT_MODE_LBAP;
+    bool isLBAP = processor.getOscFormat() == SpatMode::LBAP;
 
     float offset = 360.0f / numOfSources / 2.0f;
     float distance = isLBAP ? 0.7f : 1.0f;
 
     switch(value) {
-        case SOURCE_PLACEMENT_LEFT_ALTERNATE:
+        case SourcePlacement::leftAlternate:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
                     processor.getSources()[i].setCoordinates(-azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
@@ -310,7 +310,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
                     processor.getSources()[i].setCoordinates(-azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_RIGHT_ALTERNATE:
+        case SourcePlacement::rightAlternate:
             for (int i = 0; i < numOfSources; i++) {
                 if (numOfSources <= 2)
                     processor.getSources()[i].setCoordinates(azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
@@ -322,32 +322,32 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
                     processor.getSources()[i].setCoordinates(azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_LEFT_CLOCKWISE:
+        case SourcePlacement::leftClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_LEFT_COUNTER_CLOCKWISE:
+        case SourcePlacement::leftCounterClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_RIGHT_CLOCKWISE:
+        case SourcePlacement::rightClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_RIGHT_COUNTER_CLOCKWISE:
+        case SourcePlacement::rightCounterClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_TOP_CLOCKWISE:
+        case SourcePlacement::topClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
             break;
-        case SOURCE_PLACEMENT_TOP_COUNTER_CLOCKWISE:
+        case SourcePlacement::topCounterClockwise:
             for (int i = 0; i < numOfSources; i++) {
                 processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
             }
@@ -372,7 +372,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(int value) {
 }
 
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) {
-    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
+    if (processor.getOscFormat() == SpatMode::LBAP) {
         float currentElevation = processor.getSources()[sourceNum].getElevation();
         processor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
     } else {
@@ -392,7 +392,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int paramete
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
     mainField.repaint();
-    if (processor.getOscFormat() == SPAT_MODE_LBAP)
+    if (processor.getOscFormat() == SpatMode::LBAP)
         elevationField.repaint();
 }
 
@@ -407,24 +407,24 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
 
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(int value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink value) {
     processor.setSourceLink(value);
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(int value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) {
     processor.setSourceLinkAlt(value);
     elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(int value) {
-    valueTreeState.state.setProperty("trajectoryType", value, nullptr);
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) {
+    valueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
     automationManager.setDrawingType(value, processor.getSources()[0].getPos());
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(int value) {
-    valueTreeState.state.setProperty("trajectoryTypeAlt", value, nullptr);
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) {
+    valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
     automationManagerAlt.setDrawingTypeAlt(value);
     elevationField.repaint();
 }
@@ -492,7 +492,7 @@ void ControlGrisAudioProcessorEditor::refresh() {
     elevationField.setIsPlaying(processor.getIsPlaying());
 
     mainField.repaint();
-    if (processor.getOscFormat() == SPAT_MODE_LBAP)
+    if (processor.getOscFormat() == SpatMode::LBAP)
         elevationField.repaint();
 
     if (trajectoryBox.getActivateState() != automationManager.getActivateState()) {
@@ -524,7 +524,7 @@ void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichFiel
         processor.onSourceLinkChanged(automationManager.getSourceLink());
     } else {
         automationManagerAlt.fixSourcePosition();
-        processor.onSourceLinkAltChanged(automationManagerAlt.getSourceLink());
+        processor.onSourceLinkAltChanged(static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()));
     }
 }
 
@@ -584,7 +584,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     mainBanner.setBounds(0, 0, fieldSize, 20);
     mainField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (processor.getOscFormat() == SPAT_MODE_LBAP) {
+    if (processor.getOscFormat() == SpatMode::LBAP) {
         mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         elevationBanner.setVisible(true);
         elevationField.setVisible(true);

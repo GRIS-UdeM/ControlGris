@@ -26,7 +26,7 @@ SettingsBoxComponent::SettingsBoxComponent() {
     oscFormatCombo.addItem("DOME - SpatGris", 1);
     oscFormatCombo.addItem("CUBE - SpatGris", 2);
     oscFormatCombo.onChange = [this] {
-            listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged((SPAT_MODE_ENUM)(oscFormatCombo.getSelectedId()-1)); });
+            listeners.call([&] (Listener& l) { l.settingsBoxOscFormatChanged((SpatMode)(oscFormatCombo.getSelectedId()-1)); });
         };
     oscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&oscFormatCombo);
@@ -98,8 +98,8 @@ SettingsBoxComponent::~SettingsBoxComponent() {
     setLookAndFeel(nullptr);
 }
 
-void SettingsBoxComponent::setOscFormat(SPAT_MODE_ENUM mode) {
-    oscFormatCombo.setSelectedId((int)(mode+1), NotificationType::dontSendNotification);
+void SettingsBoxComponent::setOscFormat(SpatMode mode) {
+    oscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
 }
 
 void SettingsBoxComponent::setOscPortNumber(int oscPortNumber) {
