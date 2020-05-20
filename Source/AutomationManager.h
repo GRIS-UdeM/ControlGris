@@ -28,6 +28,7 @@ public:
     AutomationManager();
     ~AutomationManager();
 
+    double getFieldWidth() const { return fieldWidth; }
     void setFieldWidth(double newFieldWidth);
 
     void setActivateState(bool state);
