@@ -472,8 +472,8 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 
     for (int i = 0; i < m_numOfSources; i++) {
         message.clear();
-        float const azim{-sources[i].getAzimuth() / 180.0 * M_PI};
-        float const elev{(M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0)};
+        float const azim{-sources[i].getAzimuth() / 180.f * MathConstants<float>::pi };
+        float const elev{MathConstants<float>::halfPi - sources[i].getElevation() / 360.f * MathConstants<float>::twoPi };
         message.addInt32(sources[i].getId());
         message.addFloat32(azim);
         message.addFloat32(elev);
@@ -963,6 +963,8 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
                     float deltaElevation = sources[sourceId].getDeltaElevation();
                     sources[0].setElevationFromFixedSource(deltaElevation);
                     break;
+                case SourceLinkAlt::undefined:
+                    jassertfalse;
             }
         }
         validateSourcePositionsAlt();
@@ -1087,6 +1089,8 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
             if (m_numOfSources == 2)
                 sources[1].setSymmetricY(sources[0].getX(), sources[0].getY());
             break;
+        default:
+            jassertfalse;
     }
 }
 
@@ -1120,6 +1124,8 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
                 sources[i].setElevationFromFixedSource(deltaY);
             }
             break;
+        default:
+            jassertfalse;
     }
 }
 
@@ -1234,7 +1240,7 @@ void ControlGrisAudioProcessor::validateSourcePositionsAlt() {
     // Fix source positions.
     automationManagerAlt.fixSourcePosition(); // not sure...
     bool const shouldBeFixed{ sourceLink != SourceLinkAlt::independent };
-    if (sourceLink >= SourceLink::circular && sourceLink < SourceLink::circularFullyFixed) {
+    if (static_cast<int>(sourceLink) >= 2 && static_cast<int>(sourceLink) < 5) { // TODO: what is going on here?
         for (int i{}; i < m_numOfSources; ++i) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
