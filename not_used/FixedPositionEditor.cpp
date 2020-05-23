@@ -51,16 +51,15 @@ int FixedPositionEditor::getNumRows() {
 }
 
 void FixedPositionEditor::paintRowBackground(Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected) {
-    GrisLookAndFeel *lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    auto const &lookAndFeel{ static_cast<GrisLookAndFeel*>(&getLookAndFeel()) };
 
     if (rowIsSelected) {
-        g.fillAll(lookAndFeel->getHighlightColour());
+        g.fillAll(lookAndFeel.getHighlightColour());
     } else {
         if (rowNumber % 2)
-            g.fillAll(lookAndFeel->getBackgroundColour().withBrightness(0.6));
+            g.fillAll(lookAndFeel.getBackgroundColour().withBrightness(0.6));
         else
-            g.fillAll(lookAndFeel->getBackgroundColour().withBrightness(0.7));
+            g.fillAll(lookAndFeel.getBackgroundColour().withBrightness(0.7));
     }
 }
 

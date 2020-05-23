@@ -48,7 +48,7 @@ public:
 
     //==============================================================================
     AudioProcessorEditor* createEditor() final;
-    bool hasEditor() const final;
+    bool hasEditor() const final { return true; } // (change this to false if you choose to not supply an editor)
 
     //==============================================================================
     const String getName() const final;
@@ -56,14 +56,15 @@ public:
     bool acceptsMidi() const final;
     bool producesMidi() const final;
     bool isMidiEffect() const final;
-    double getTailLengthSeconds() const final;
+    double getTailLengthSeconds() const final { return 0.0; }
 
     //==============================================================================
-    int getNumPrograms() final;
-    int getCurrentProgram() final;
-    void setCurrentProgram (int index) final;
-    const String getProgramName (int index) final;
-    void changeProgramName (int index, const String& newName) final;
+    int getNumPrograms() final { return 1; }  // NB: some hosts don't cope very well if you tell them there are 0 programs,
+                                              // so this should be at least 1, even if you're not really implementing programs.
+    int getCurrentProgram() final { return 0; }
+    void setCurrentProgram (int index) final {}
+    const String getProgramName (int index) final { return {}; }
+    void changeProgramName (int index, const String& newName) final {}
 
     //==============================================================================
     void getStateInformation (MemoryBlock& destData) final;

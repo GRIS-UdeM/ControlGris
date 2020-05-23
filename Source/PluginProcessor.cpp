@@ -21,14 +21,21 @@
 #include "PluginEditor.h"
 
 String getFixedPosSourceName(int index, int dimension) {
-    if (dimension == 0)
-        return String("S") + String(index + 1) + String("_X");
-    else if (dimension == 1)
-        return String("S") + String(index + 1) + String("_Y");
-    else if (dimension == 2)
-        return String("S") + String(index + 1) + String("_Z");
-    else
-        return String();
+    String result{};
+    switch (dimension) {
+        case 0:
+            result = String("S") + String(index + 1) + String("_X");
+            break;
+        case 1:
+            result = String("S") + String(index + 1) + String("_Y");
+            break;
+        case 2:
+            result = String("S") + String(index + 1) + String("_Z");
+            break;
+        default:
+            jassertfalse; // how did you get there?
+    }
+    return result;
 }
 
 // The parameter Layout creates the automatable parameters.
@@ -71,18 +78,18 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                      #if ! JucePlugin_IsMidiEffect
                       #if ! JucePlugin_IsSynth
                        .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif
+                      #endif // JucePlugin_IsSynth
                        .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif
+                     #endif // JucePlugin_IsMidiEffect
                        ),
-#endif
+#endif // JucePlugin_PreferredChannelConfigurations
     parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
     fixPositionData (FIXED_POSITION_DATA_TAG)
 {
     m_numOfSources = 2;
     m_firstSourceId = 1;
     m_selectedSourceId = 1;
-    m_selectedOscFormat = (SpatMode)0;
+    m_selectedOscFormat = SpatMode::VBAP;
     m_currentOSCPort = 18032;
     m_lastConnectedOSCPort = -1;
     m_oscConnected = true;
@@ -102,8 +109,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_lastTrajectory1x = m_lastTrajectory1y = m_lastTrajectory1z = -1;
     m_lastAzispan = m_lastElespan = -1;
 
-    m_lastSourceLinkAlt = static_cast<SourceLinkAlt>(0);
-    m_lastSourceLink = static_cast<SourceLink>(0);
+    m_lastSourceLink = SourceLink::undefined;
+    m_lastSourceLinkAlt = SourceLinkAlt::undefined;
 
     m_canStopActivate = false;
 
@@ -465,8 +472,8 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 
     for (int i = 0; i < m_numOfSources; i++) {
         message.clear();
-        float azim = -sources[i].getAzimuth() / 180.0 * M_PI;
-        float elev = (M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0);
+        float const azim{-sources[i].getAzimuth() / 180.0 * M_PI};
+        float const elev{(M_PI / 2.0) - (sources[i].getElevation() / 360.0 * M_PI * 2.0)};
         message.addInt32(sources[i].getId());
         message.addFloat32(azim);
         message.addFloat32(elev);
@@ -518,7 +525,7 @@ bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
 }
 
 void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
-    for (auto& element : bundle) {
+    for (auto const& element : bundle) {
         if (element.isMessage())
             oscMessageReceived(element.getMessage());
         else if (element.isBundle())
@@ -527,11 +534,13 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
 }
 
 void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
-    SourceLink sourceLinkToProcess = static_cast<SourceLink>(0);
-    SourceLinkAlt sourceLinkAltToProcess = static_cast<SourceLinkAlt>(0);
-    float x = -1.f, y = -1.f, z = -1.f;
-    String address = message.getAddressPattern().toString().toStdString();
-    String pluginInstance = String("/controlgris/") + String(getOscOutputPluginId());
+    SourceLink sourceLinkToProcess{ SourceLink::undefined };
+    SourceLinkAlt sourceLinkAltToProcess{ SourceLinkAlt::undefined };
+    float x{ -1.f };
+    float y{ -1.f };
+    float z{ -1.f };
+    String const address{ message.getAddressPattern().toString() };
+    String const pluginInstance{ String("/controlgris/") + String(getOscOutputPluginId()) };
     if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1")) &&
          automationManager.getDrawingType() == TrajectoryType::realtime) {
         x = message[0].getFloat32();
@@ -1224,40 +1233,40 @@ void ControlGrisAudioProcessor::validateSourcePositionsAlt() {
 
     // Fix source positions.
     automationManagerAlt.fixSourcePosition(); // not sure...
-    bool shouldBeFixed = sourceLink != SourceLinkAlt::independent;
-    if (static_cast<int>(sourceLink) >= 2 && static_cast<int>(sourceLink) < 5) {
-        for (int i = 0; i < m_numOfSources; i++) {
+    bool const shouldBeFixed{ sourceLink != SourceLinkAlt::independent };
+    if (sourceLink >= SourceLink::circular && sourceLink < SourceLink::circularFullyFixed) {
+        for (int i{}; i < m_numOfSources; ++i) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
     }
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setPositionPreset(int presetNumber) {
-    if (presetNumber == m_currentPositionPreset)
-        return;
-
-    if (presetNumber == 0) {
-        m_newPositionPreset = m_currentPositionPreset = 0;
-        parameters.getParameter("positionPreset")->beginChangeGesture();
-        parameters.getParameter("positionPreset")->setValueNotifyingHost(0.0f);
-        parameters.getParameter("positionPreset")->endChangeGesture();
-    } else if (recallFixedPosition(presetNumber)) {
-        m_currentPositionPreset = presetNumber;
-        float value = presetNumber / (float)(NUMBER_OF_POSITION_PRESETS + 1);
-        parameters.getParameter("positionPreset")->beginChangeGesture();
-        parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
-        parameters.getParameter("positionPreset")->endChangeGesture();
-        automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
+void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber) {
+    if (presetNumber != m_currentPositionPreset) {
+        if (presetNumber == 0) {
+            m_newPositionPreset = m_currentPositionPreset = 0;
+            parameters.getParameter("positionPreset")->beginChangeGesture();
+            parameters.getParameter("positionPreset")->setValueNotifyingHost(0.0f);
+            parameters.getParameter("positionPreset")->endChangeGesture();
+        } else if (recallFixedPosition(presetNumber)) {
+            m_currentPositionPreset = presetNumber;
+            auto const value{ presetNumber / static_cast<float>(NUMBER_OF_POSITION_PRESETS + 1) };
+            parameters.getParameter("positionPreset")->beginChangeGesture();
+            parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
+            parameters.getParameter("positionPreset")->endChangeGesture();
+            automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
+        }
     }
+
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
+void ControlGrisAudioProcessor::addNewFixedPosition(int const id) {
     // Build a new fixed position element.
     XmlElement *newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
-    for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
+    for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), sources[i].getY());
         if (m_selectedOscFormat == SpatMode::LBAP) {
@@ -1266,7 +1275,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int id) {
     }
 
     // Replace an element if the new one has the same ID as one already saved.
-    bool found = false;
+    bool found{ false };
     XmlElement *fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
         if (fpos->getIntAttribute("ID") == id) {
@@ -1388,35 +1397,6 @@ bool ControlGrisAudioProcessor::isMidiEffect() const
    #endif
 }
 
-double ControlGrisAudioProcessor::getTailLengthSeconds() const
-{
-    return 0.0;
-}
-
-int ControlGrisAudioProcessor::getNumPrograms()
-{
-    return 1;   // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                // so this should be at least 1, even if you're not really implementing programs.
-}
-
-int ControlGrisAudioProcessor::getCurrentProgram()
-{
-    return 0;
-}
-
-void ControlGrisAudioProcessor::setCurrentProgram (int index)
-{
-}
-
-const String ControlGrisAudioProcessor::getProgramName (int index)
-{
-    return {};
-}
-
-void ControlGrisAudioProcessor::changeProgramName (int index, const String& newName)
-{
-}
-
 //==============================================================================
 void ControlGrisAudioProcessor::initialize() {
     m_needInitialization = true;
@@ -1496,11 +1476,6 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::hasEditor() const
-{
-    return true; // (change this to false if you choose to not supply an editor)
-}
-
 AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
 {
     return new ControlGrisAudioProcessorEditor (*this, parameters, automationManager, automationManagerAlt);
