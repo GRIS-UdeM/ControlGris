@@ -19,7 +19,8 @@
  *************************************************************************/
 #include "Source.h"
 
-Source::Source() {
+Source::Source()
+{
     m_changed = false;
     m_radiusIsElevation = true;
     m_azimuth = 0.0;
@@ -39,22 +40,28 @@ Source::Source() {
     colour = Colours::black;
 }
 
-Source::~Source() {}
+Source::~Source()
+{
+}
 
-void Source::setId(int id) {
+void Source::setId(int id)
+{
     m_id = id;
 }
 
-void Source::setRadiusIsElevation(bool shouldBeElevation) {
+void Source::setRadiusIsElevation(bool shouldBeElevation)
+{
     m_radiusIsElevation = shouldBeElevation;
 }
 
-void Source::setAzimuth(float azimuth) {
+void Source::setAzimuth(float azimuth)
+{
     m_azimuth = azimuth;
     computeXY();
 }
 
-void Source::setNormalizedAzimuth(float value) {
+void Source::setNormalizedAzimuth(float value)
+{
     if (value <= 0.5) {
         m_azimuth = value * 360;
     } else {
@@ -63,17 +70,20 @@ void Source::setNormalizedAzimuth(float value) {
     computeXY();
 }
 
-float Source::getNormalizedAzimuth() const {
-    float const azimuth = m_azimuth  / 360.0;
+float Source::getNormalizedAzimuth() const
+{
+    float const azimuth = m_azimuth / 360.0;
     return azimuth >= 0 ? azimuth : azimuth + 1.0;
 }
 
-void Source::setElevationNoClip(float elevation) {
+void Source::setElevationNoClip(float elevation)
+{
     m_elevationNoClip = elevation;
     setElevation(m_elevationNoClip);
 }
 
-void Source::setElevation(float elevation) {
+void Source::setElevation(float elevation)
+{
     if (elevation < 0.0) {
         m_elevation = 0.0;
     } else if (elevation > 90.0) {
@@ -84,16 +94,19 @@ void Source::setElevation(float elevation) {
     computeXY();
 }
 
-void Source::setNormalizedElevation(float value) {
+void Source::setNormalizedElevation(float value)
+{
     setElevation(value * 90.0);
 }
 
-void Source::setDistanceNoClip(float distance) {
+void Source::setDistanceNoClip(float distance)
+{
     m_distanceNoClip = distance;
     setDistance(m_distanceNoClip);
 }
 
-void Source::setDistance(float distance) {
+void Source::setDistance(float distance)
+{
     if (distance < 0.0) {
         m_distance = 0.0;
     } else {
@@ -102,7 +115,8 @@ void Source::setDistance(float distance) {
     computeXY();
 }
 
-void Source::setCoordinates(float azimuth, float elevation, float distance) {
+void Source::setCoordinates(float azimuth, float elevation, float distance)
+{
     m_azimuth = azimuth;
     m_elevation = elevation;
     m_distance = distance;
@@ -110,37 +124,43 @@ void Source::setCoordinates(float azimuth, float elevation, float distance) {
     computeAzimuthElevation();
 }
 
-void Source::setAzimuthSpan(float azimuthSpan) {
+void Source::setAzimuthSpan(float azimuthSpan)
+{
     m_aziSpan = azimuthSpan;
     m_changed = true;
 }
 
-void Source::setElevationSpan(float elevationSpan) {
+void Source::setElevationSpan(float elevationSpan)
+{
     m_eleSpan = elevationSpan;
     m_changed = true;
 }
 
-void Source::setX(float x) {
+void Source::setX(float x)
+{
     m_x = x;
     computeAzimuthElevation();
 }
 
-void Source::setY(float y) {
+void Source::setY(float y)
+{
     m_y = y;
     computeAzimuthElevation();
 }
 
-void Source::setPos(Point<float> pos) {
+void Source::setPos(Point<float> pos)
+{
     m_x = pos.x;
     m_y = pos.y;
     computeAzimuthElevation();
 }
 
-void Source::computeXY() {
+void Source::computeXY()
+{
     float radius;
-    if (m_radiusIsElevation) {  // azimuth - elevation
+    if (m_radiusIsElevation) { // azimuth - elevation
         radius = (90.0 - m_elevation) / 90.0;
-    } else {                    // azimuth - distance
+    } else { // azimuth - distance
         radius = m_distance;
     }
     m_x = radius * sinf(degreeToRadian(m_azimuth));
@@ -152,7 +172,8 @@ void Source::computeXY() {
     m_changed = true;
 }
 
-void Source::computeAzimuthElevation() {
+void Source::computeAzimuthElevation()
+{
     float x = m_x * 2.0 - 1.0;
     float y = m_y * 2.0 - 1.0;
     if (x != 0.0 || y != 0.0) {
@@ -162,18 +183,19 @@ void Source::computeAzimuthElevation() {
         }
         m_azimuth = -ang;
     }
-    float rad = sqrtf(x*x + y*y);
-    if (m_radiusIsElevation) {  // azimuth - elevation
+    float rad = sqrtf(x * x + y * y);
+    if (m_radiusIsElevation) { // azimuth - elevation
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
         m_elevationNoClip = m_elevation = 90.0 - rad * 90.0;
-    } else {                    // azimuth - distance
+    } else { // azimuth - distance
         rad = rad < 0.0 ? 0.0 : rad;
         m_distanceNoClip = m_distance = rad;
     }
     m_changed = true;
 }
 
-void Source::fixSourcePosition(bool shouldBeFixed) {
+void Source::fixSourcePosition(bool shouldBeFixed)
+{
     if (shouldBeFixed) {
         fixedAzimuth = m_azimuth;
         fixedElevation = m_elevationNoClip;
@@ -189,7 +211,8 @@ void Source::fixSourcePosition(bool shouldBeFixed) {
     }
 }
 
-void Source::fixSourcePositionElevation(bool shouldBeFixed) {
+void Source::fixSourcePositionElevation(bool shouldBeFixed)
+{
     if (shouldBeFixed) {
         fixedElevation = m_elevation;
     } else {
@@ -197,7 +220,8 @@ void Source::fixSourcePositionElevation(bool shouldBeFixed) {
     }
 }
 
-void Source::setFixedPosition(float x, float y) {
+void Source::setFixedPosition(float x, float y)
+{
     fixedX = x;
     fixedY = y;
     float fx = fixedX * 2.0 - 1.0;
@@ -207,42 +231,47 @@ void Source::setFixedPosition(float x, float y) {
         ang += 360.0;
     }
     fixedAzimuth = -ang;
-    float rad = sqrtf(fx*fx + fy*fy);
-    if (m_radiusIsElevation) {  // azimuth - elevation
+    float rad = sqrtf(fx * fx + fy * fy);
+    if (m_radiusIsElevation) { // azimuth - elevation
         rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
         fixedElevation = 90.0 - rad * 90.0;
-    } else {                    // azimuth - distance
+    } else { // azimuth - distance
         rad = rad < 0.0 ? 0.0 : rad;
         fixedDistance = rad;
     }
 }
 
-void Source::setFixedElevation(float z) {
+void Source::setFixedElevation(float z)
+{
     fixedElevation = 90.0 - z * 90.0;
 }
 
-void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance) {
-    if (m_radiusIsElevation) {  // azimuth - elevation
+void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance)
+{
+    if (m_radiusIsElevation) { // azimuth - elevation
         setAzimuth(fixedAzimuth + deltaAzimuth);
         setElevationNoClip(fixedElevation + deltaElevation * 90.0f);
-    } else {                    // azimuth - distance
+    } else { // azimuth - distance
         setAzimuth(fixedAzimuth + deltaAzimuth);
         setDistanceNoClip(fixedDistance + deltaDistance);
     }
     computeXY();
 }
 
-void Source::setSymmetricX(float x, float y) {
-        setX(x);
-        setY(1.f - y);
+void Source::setSymmetricX(float x, float y)
+{
+    setX(x);
+    setY(1.f - y);
 }
 
-void Source::setSymmetricY(float x, float y) {
-        setX(1.f - x);
-        setY(y);
+void Source::setSymmetricY(float x, float y)
+{
+    setX(1.f - x);
+    setY(y);
 }
 
-void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {
+void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY)
+{
     float x = fixedX + deltaX;
     float y = fixedY + deltaY;
     x = x < 0.0f ? 0.0f : x > 1.0f ? 1.0f : x;
@@ -252,10 +281,12 @@ void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY) {
     computeAzimuthElevation();
 }
 
-void Source::setElevationFromFixedSource(float deltaY) {
+void Source::setElevationFromFixedSource(float deltaY)
+{
     setElevation(fixedElevation + deltaY * 90.0f);
 }
 
-void Source::setColour(Colour col) {
+void Source::setColour(Colour col)
+{
     colour = col;
 }

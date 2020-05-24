@@ -17,8 +17,8 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "FieldComponent.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "ControlGrisConstants.h"
 
 //==============================================================================
@@ -27,20 +27,24 @@ FieldComponent::FieldComponent()
     m_isPlaying = false;
 }
 
-FieldComponent::~FieldComponent() {
+FieldComponent::~FieldComponent()
+{
     setLookAndFeel(nullptr);
 }
 
-void FieldComponent::setIsPlaying(bool state) {
+void FieldComponent::setIsPlaying(bool state)
+{
     m_isPlaying = state;
 }
 
-void FieldComponent::setSelectedSource(int selectedId) {
+void FieldComponent::setSelectedSource(int selectedId)
+{
     m_oldSelectedSourceId = m_selectedSourceId = selectedId;
     repaint();
 }
 
-void FieldComponent::setSources(Source *sources, int numberOfSources) {
+void FieldComponent::setSources(Source * sources, int numberOfSources)
+{
     m_sources = sources;
     m_numberOfSources = numberOfSources;
     m_oldSelectedSourceId = m_selectedSourceId = 0;
@@ -54,20 +58,21 @@ void FieldComponent::setSources(Source *sources, int numberOfSources) {
     repaint();
 }
 
-void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode spatMode) const {
+void FieldComponent::drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode) const
+{
     const int width = getWidth();
     const int height = getHeight();
     float fieldCenter = width / 2;
 
-    GrisLookAndFeel *lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
+    GrisLookAndFeel * lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
 
     // Draw the background.
     g.setColour(lookAndFeel->getFieldColour());
     g.fillRect(0, 0, width, height);
     g.setColour(Colours::black);
     g.drawRect(0, 0, width, height);
-        
+
     // Draw the grid.
     if (true) {
         g.setColour(Colour::fromRGB(55, 56, 57));
@@ -103,8 +108,8 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode
         }
 
         // Draw cross.
-        g.drawLine(fieldCenter, kSourceRadius, fieldCenter, height-kSourceRadius);
-        g.drawLine(kSourceRadius, height/2, width-kSourceRadius, height/2);
+        g.drawLine(fieldCenter, kSourceRadius, fieldCenter, height - kSourceRadius);
+        g.drawLine(kSourceRadius, height / 2, width - kSourceRadius, height / 2);
     } else {
         // Draw guide lines
         g.setColour(lookAndFeel->getLightColour());
@@ -113,48 +118,55 @@ void FieldComponent::drawFieldBackground(Graphics& g, bool isMainField, SpatMode
     }
 }
 
-Point<float> FieldComponent::posToXy(Point <float> p, int p_iwidth) const {
+Point<float> FieldComponent::posToXy(Point<float> p, int p_iwidth) const
+{
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float x = p.getX() * effectiveWidth;
     float y = p.getY() * effectiveWidth;
-    return Point <float> (x, effectiveWidth - y);
+    return Point<float>(x, effectiveWidth - y);
 }
 
-Point <float> FieldComponent::xyToPos(Point <float> p, int p_iwidth) const {
+Point<float> FieldComponent::xyToPos(Point<float> p, int p_iwidth) const
+{
     float k2 = kSourceDiameter / 2.0;
     float half = (p_iwidth - kSourceDiameter) / 2;
 
     // Limits for the LBAP algorithm
-    float px = p.getX() < kSourceRadius ? kSourceRadius : p.getX() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getX();
-    float py = p.getY() < kSourceRadius ? kSourceRadius : p.getY() > p_iwidth-kSourceRadius ? p_iwidth-kSourceRadius : p.getY();
+    float px = p.getX() < kSourceRadius ? kSourceRadius
+                                        : p.getX() > p_iwidth - kSourceRadius ? p_iwidth - kSourceRadius : p.getX();
+    float py = p.getY() < kSourceRadius ? kSourceRadius
+                                        : p.getY() > p_iwidth - kSourceRadius ? p_iwidth - kSourceRadius : p.getY();
 
     float x = (px - k2 - half) / half * 0.5 + 0.5;
     float y = (py - k2 - half) / half * 0.5 + 0.5;
 
-    return Point <float> (x, y);
+    return Point<float>(x, y);
 }
 
 //==============================================================================
-MainFieldComponent::MainFieldComponent(AutomationManager& automan)
-    : automationManager (automan) 
+MainFieldComponent::MainFieldComponent(AutomationManager & automan) : automationManager(automan)
 {
     m_spatMode = SpatMode::VBAP;
-    lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
-    lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+    lineDrawingAnchor1 = Point<float>(-1.0f, -1.0f);
+    lineDrawingAnchor2 = Point<float>(-1.0f, -1.0f);
 }
 
-MainFieldComponent::~MainFieldComponent() {}
+MainFieldComponent::~MainFieldComponent()
+{
+}
 
-Point <float> MainFieldComponent::degreeToXy(Point <float> p, int p_iwidth) const {
+Point<float> MainFieldComponent::degreeToXy(Point<float> p, int p_iwidth) const
+{
     float effectiveWidth = p_iwidth - kSourceDiameter;
     float radius = effectiveWidth / 2.0;
     float distance = (90.0 - p.getY()) / 90.0;
     float x = radius * distance * sinf(degreeToRadian(p.getX())) + radius;
     float y = radius * distance * cosf(degreeToRadian(p.getX())) + radius;
-    return Point <float> (effectiveWidth - x, effectiveWidth - y);
+    return Point<float>(effectiveWidth - x, effectiveWidth - y);
 }
 
-Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) const {
+Point<float> MainFieldComponent::xyToDegree(Point<float> p, int p_iwidth) const
+{
     float k2 = kSourceDiameter / 2.0;
     float half = (p_iwidth - kSourceDiameter) / 2;
     float x = (p.getX() - k2 - half) / half;
@@ -163,17 +175,19 @@ Point <float> MainFieldComponent::xyToDegree(Point <float> p, int p_iwidth) cons
     if (ang <= -180) {
         ang += 360.0;
     }
-    float rad = sqrtf(x*x + y*y);
+    float rad = sqrtf(x * x + y * y);
     rad = 90.0 - rad * 90.0;
-    return Point <float> (-ang, rad);
+    return Point<float>(-ang, rad);
 }
 
-void MainFieldComponent::setSpatMode(SpatMode spatMode) {
+void MainFieldComponent::setSpatMode(SpatMode spatMode)
+{
     m_spatMode = spatMode;
     repaint();
 }
 
-void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) const {
+void MainFieldComponent::createSpanPathVBAP(Graphics & g, int i) const
+{
     const int width = getWidth();
     float fieldCenter = width / 2;
     float azimuth = m_sources[i].getAzimuth();
@@ -182,8 +196,8 @@ void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) const {
     float elevationSpan = 45.0f * m_sources[i].getElevationSpan();
 
     // Calculate min and max elevation in degrees.
-    Point<float> minElev = {azimuth, elevation - elevationSpan};
-    Point<float> maxElev = {azimuth, elevation + elevationSpan};
+    Point<float> minElev = { azimuth, elevation - elevationSpan };
+    Point<float> maxElev = { azimuth, elevation + elevationSpan };
 
     if (minElev.getY() < 0) {
         maxElev.setY(maxElev.getY() - minElev.getY());
@@ -196,24 +210,39 @@ void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) const {
 
     // Convert min and max elevation to xy position.
     float halfWidth = (width - kSourceDiameter) / 2.0f;
-    Point<float> minElevPos = {-halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
-                                -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f};
-    Point<float> maxElevPos = {-halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
-                                -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f};
+    Point<float> minElevPos = { -halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
+                                -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f };
+    Point<float> maxElevPos = { -halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
+                                -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f };
 
     // Calculate min and max radius.
-    float minRadius = sqrtf(minElevPos.getX()*minElevPos.getX() + minElevPos.getY()*minElevPos.getY());
-    float maxRadius = sqrtf(maxElevPos.getX()*maxElevPos.getX() + maxElevPos.getY()*maxElevPos.getY());
+    float minRadius = sqrtf(minElevPos.getX() * minElevPos.getX() + minElevPos.getY() * minElevPos.getY());
+    float maxRadius = sqrtf(maxElevPos.getX() * maxElevPos.getX() + maxElevPos.getY() * maxElevPos.getY());
 
     // Draw the path for spanning.
     Path myPath;
     myPath.startNewSubPath(fieldCenter + minElevPos.getX(), fieldCenter + minElevPos.getY());
-    myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0,
-                         degreeToRadian(-azimuth), degreeToRadian(-azimuth + azimuthSpan));
-    myPath.addCentredArc(fieldCenter, fieldCenter, maxRadius, maxRadius, 0.0,
-                         degreeToRadian(-azimuth+azimuthSpan), degreeToRadian(-azimuth-azimuthSpan));
-    myPath.addCentredArc(fieldCenter, fieldCenter, minRadius, minRadius, 0.0,
-                         degreeToRadian(-azimuth-azimuthSpan), degreeToRadian(-azimuth));
+    myPath.addCentredArc(fieldCenter,
+                         fieldCenter,
+                         minRadius,
+                         minRadius,
+                         0.0,
+                         degreeToRadian(-azimuth),
+                         degreeToRadian(-azimuth + azimuthSpan));
+    myPath.addCentredArc(fieldCenter,
+                         fieldCenter,
+                         maxRadius,
+                         maxRadius,
+                         0.0,
+                         degreeToRadian(-azimuth + azimuthSpan),
+                         degreeToRadian(-azimuth - azimuthSpan));
+    myPath.addCentredArc(fieldCenter,
+                         fieldCenter,
+                         minRadius,
+                         minRadius,
+                         0.0,
+                         degreeToRadian(-azimuth - azimuthSpan),
+                         degreeToRadian(-azimuth));
     myPath.closeSubPath();
 
     g.setColour(m_sources[i].getColour().withAlpha(0.1f));
@@ -223,8 +252,8 @@ void MainFieldComponent::createSpanPathVBAP(Graphics& g, int i) const {
     g.strokePath(myPath, strokeType);
 }
 
-
-void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) const {
+void MainFieldComponent::createSpanPathLBAP(Graphics & g, int i) const
+{
     const int width = getWidth();
     float azimuthSpan = width * m_sources[i].getAzimuthSpan();
     float halfAzimuthSpan = azimuthSpan / 2.0f - kSourceRadius;
@@ -237,7 +266,8 @@ void MainFieldComponent::createSpanPathLBAP(Graphics& g, int i) const {
     g.fillEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
 }
 
-void MainFieldComponent::drawTrajectoryHandle(Graphics& g) const {
+void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
+{
     const int width = getWidth();
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
@@ -247,7 +277,8 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics& g) const {
     } else {
         if (automationManager.getDrawingType() == TrajectoryType::drawing && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (automationManager.getDrawingType() == TrajectoryType::realtime && automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
+        } else if (automationManager.getDrawingType() == TrajectoryType::realtime
+                   && automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -255,11 +286,13 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics& g) const {
     if (shouldDrawTrajectoryHandle) {
         Point<float> rpos;
         if (m_spatMode == SpatMode::VBAP) {
-            rpos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
+            rpos = degreeToXy(Point<float>{ automationManager.getSource().getAzimuth(),
+                                            automationManager.getSource().getElevation() },
+                              width);
         } else {
             rpos = posToXy(automationManager.getSourcePosition(), width);
         }
-        Rectangle<float> rarea (rpos.x, rpos.y, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> rarea(rpos.x, rpos.y, kSourceDiameter, kSourceDiameter);
         g.setColour(Colour::fromRGB(176, 176, 228));
         g.fillEllipse(rarea);
         g.setColour(Colour::fromRGB(64, 64, 128));
@@ -269,7 +302,8 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics& g) const {
     }
 }
 
-void MainFieldComponent::paint(Graphics& g) {
+void MainFieldComponent::paint(Graphics & g)
+{
     const int width = getWidth();
 
     drawFieldBackground(g, true, m_spatMode);
@@ -293,8 +327,8 @@ void MainFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TrajectoryType::realtime &&
-        automationManager.getActivateState()) {
+    if (m_isPlaying && !isMouseButtonDown() && automationManager.getDrawingType() != TrajectoryType::realtime
+        && automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -305,19 +339,27 @@ void MainFieldComponent::paint(Graphics& g) {
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         Point<float> pos;
         if (m_spatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
+            pos = degreeToXy(Point<float>{ m_sources[i].getAzimuth(), m_sources[i].getElevation() }, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
-        Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> area(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         area.expand(lineThickness, lineThickness);
         g.setColour(Colour(.2f, .2f, .2f, 1.f));
         g.drawEllipse(area.translated(.5f, .5f), 1.f);
-        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f), pos.x + kSourceRadius, pos.y + kSourceRadius,
-                                         m_sources[i].getColour().withSaturation(saturation), pos.x, pos.y, true));
+        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f),
+                                         pos.x + kSourceRadius,
+                                         pos.y + kSourceRadius,
+                                         m_sources[i].getColour().withSaturation(saturation),
+                                         pos.x,
+                                         pos.y,
+                                         true));
         g.fillEllipse(area);
         g.setColour(Colours::white);
-        g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
+        g.drawFittedText(String(m_sources[i].getId() + 1),
+                         area.getSmallestIntegerContainer(),
+                         Justification(Justification::centred),
+                         1);
 
         // Draw spanning.
         if (m_spatMode == SpatMode::VBAP) {
@@ -325,7 +367,7 @@ void MainFieldComponent::paint(Graphics& g) {
         } else {
             createSpanPathLBAP(g, i);
         }
-   }
+    }
 
     // Draw recording trajectory handle after sources (if source link *is* Delta Lock).
     if (automationManager.getSourceLink() == SourceLink::circularDeltaLock) {
@@ -334,16 +376,23 @@ void MainFieldComponent::paint(Graphics& g) {
 
     if (showCircularSourceSelectionWarning) {
         g.setColour(Colours::white);
-        g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION, juce::Rectangle<int>(0, 0, width, 50), Justification(Justification::centred), 1);
+        g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION,
+                         juce::Rectangle<int>(0, 0, width, 50),
+                         Justification(Justification::centred),
+                         1);
     }
 }
 
-bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
+bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent & event)
+{
     int width = getWidth();
-    if (automationManager.getDrawingType() == TrajectoryType::drawing || automationManager.getDrawingType() == TrajectoryType::realtime) {
+    if (automationManager.getDrawingType() == TrajectoryType::drawing
+        || automationManager.getDrawingType() == TrajectoryType::realtime) {
         Point<float> pos;
         if (m_spatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float> {automationManager.getSource().getAzimuth(), automationManager.getSource().getElevation()}, width);
+            pos = degreeToXy(Point<float>{ automationManager.getSource().getAzimuth(),
+                                           automationManager.getSource().getElevation() },
+                             width);
         } else {
             pos = posToXy(automationManager.getSource().getPos(), width);
         }
@@ -356,7 +405,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
                 if (event.mods.isShiftDown())
                     lineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
             } else {
-                listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(0); });
+                listeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(0); });
             }
             repaint();
             return true;
@@ -367,7 +416,8 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent &event) {
     return false;
 }
 
-void MainFieldComponent::mouseDown(const MouseEvent &event) {
+void MainFieldComponent::mouseDown(const MouseEvent & event)
+{
     int width = getWidth();
     int height = getHeight();
 
@@ -378,22 +428,22 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
         float xinc = (anchor2.x - anchor1.x) / numSteps;
         float yinc = (anchor2.y - anchor1.y) / numSteps;
         for (int i = 1; i <= numSteps; i++) {
-            automationManager.addRecordingPoint(Point<float> (anchor1.x + xinc * i, anchor1.y + yinc * i));
+            automationManager.addRecordingPoint(Point<float>(anchor1.x + xinc * i, anchor1.y + yinc * i));
         }
         if (event.mods.isShiftDown()) {
             lineDrawingAnchor1 = anchor2;
-            lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+            lineDrawingAnchor2 = Point<float>(-1.0f, -1.0f);
         } else {
-            lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
-            lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+            lineDrawingAnchor1 = Point<float>(-1.0f, -1.0f);
+            lineDrawingAnchor2 = Point<float>(-1.0f, -1.0f);
         }
         repaint();
         return;
     }
 
-    if (! event.mods.isShiftDown()) {
-        lineDrawingAnchor1 = Point<float> (-1.0f, -1.0f);
-        lineDrawingAnchor2 = Point<float> (-1.0f, -1.0f);
+    if (!event.mods.isShiftDown()) {
+        lineDrawingAnchor1 = Point<float>(-1.0f, -1.0f);
+        lineDrawingAnchor2 = Point<float>(-1.0f, -1.0f);
     }
 
     Point<int> mouseLocation(event.x, height - event.y);
@@ -412,17 +462,18 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     for (int i = 0; i < m_numberOfSources; i++) {
         Point<float> pos;
         if (m_spatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float> {m_sources[i].getAzimuth(), m_sources[i].getElevation()}, width);
+            pos = degreeToXy(Point<float>{ m_sources[i].getAzimuth(), m_sources[i].getElevation() }, width);
         } else {
             pos = posToXy(m_sources[i].getPos(), width);
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
-            if (i > 0 && automationManager.getSourceLink() != SourceLink::independent && automationManager.getSourceLink() != SourceLink::circularDeltaLock) {
+            if (i > 0 && automationManager.getSourceLink() != SourceLink::independent
+                && automationManager.getSourceLink() != SourceLink::circularDeltaLock) {
                 showCircularSourceSelectionWarning = true;
             } else {
                 m_selectedSourceId = i;
-                listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
+                listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
                 clickOnSource = true;
             }
             break;
@@ -450,7 +501,8 @@ void MainFieldComponent::mouseDown(const MouseEvent &event) {
     }
 }
 
-void MainFieldComponent::mouseDrag(const MouseEvent &event) {    
+void MainFieldComponent::mouseDrag(const MouseEvent & event)
+{
     int width = getWidth();
     int height = getHeight();
 
@@ -461,7 +513,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
 
     Point<int> mouseLocation(event.x, height - event.y);
 
-    Source *selectedSource;
+    Source * selectedSource;
     if (m_selectedSourceId == -1) {
         selectedSource = &automationManager.getSource();
     } else {
@@ -489,18 +541,18 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
             automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
-        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
+        listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(m_selectedSourceId, 0); });
     }
 
     bool needToAdjustAutomationManager = false;
-    if (m_selectedSourceId == 0 && automationManager.getDrawingType() == TrajectoryType::realtime &&
-        (automationManager.getSourceLink() == SourceLink::independent || automationManager.getSourceLink() == SourceLink::linkSymmetricX ||
-         automationManager.getSourceLink() == SourceLink::linkSymmetricY)
-        ) {
+    if (m_selectedSourceId == 0 && automationManager.getDrawingType() == TrajectoryType::realtime
+        && (automationManager.getSourceLink() == SourceLink::independent
+            || automationManager.getSourceLink() == SourceLink::linkSymmetricX
+            || automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
         needToAdjustAutomationManager = true;
-    } else if (automationManager.getSourceLink() >= SourceLink::circular &&
-               automationManager.getSourceLink() < SourceLink::circularDeltaLock &&
-               automationManager.getDrawingType() == TrajectoryType::realtime) {
+    } else if (automationManager.getSourceLink() >= SourceLink::circular
+               && automationManager.getSourceLink() < SourceLink::circularDeltaLock
+               && automationManager.getDrawingType() == TrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
 
@@ -518,16 +570,19 @@ void MainFieldComponent::mouseDrag(const MouseEvent &event) {
     repaint();
 }
 
-void MainFieldComponent::mouseMove(const MouseEvent &event) {
-    if (m_selectedSourceId == -1 && automationManager.getDrawingType() == TrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
+void MainFieldComponent::mouseMove(const MouseEvent & event)
+{
+    if (m_selectedSourceId == -1 && automationManager.getDrawingType() == TrajectoryType::drawing
+        && hasValidLineDrawingAnchor1()) {
         lineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
         repaint();
     }
 }
 
-void MainFieldComponent::mouseUp(const MouseEvent &event) {
+void MainFieldComponent::mouseUp(const MouseEvent & event)
+{
     if (m_selectedSourceId == -1) {
-        if (automationManager.getDrawingType() == TrajectoryType::drawing && ! event.mods.isShiftDown()) {
+        if (automationManager.getDrawingType() == TrajectoryType::drawing && !event.mods.isShiftDown()) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }
@@ -536,7 +591,8 @@ void MainFieldComponent::mouseUp(const MouseEvent &event) {
     showCircularSourceSelectionWarning = false;
 }
 
-Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {
+Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos)
+{
     Point<int> clipped;
     int max = getWidth() - 10;
 
@@ -547,12 +603,16 @@ Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos) {
 }
 
 //==============================================================================
-ElevationFieldComponent::ElevationFieldComponent(AutomationManager& automan) 
-    : automationManager (automan) {}
+ElevationFieldComponent::ElevationFieldComponent(AutomationManager & automan) : automationManager(automan)
+{
+}
 
-ElevationFieldComponent::~ElevationFieldComponent() {}
+ElevationFieldComponent::~ElevationFieldComponent()
+{
+}
 
-void ElevationFieldComponent::paint(Graphics& g) {
+void ElevationFieldComponent::paint(Graphics & g)
+{
     const int width = getWidth();
     const int height = getHeight();
     Point<float> pos;
@@ -562,13 +622,16 @@ void ElevationFieldComponent::paint(Graphics& g) {
 
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing && !m_isPlaying) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
+            && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing && !m_isPlaying) {
+        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
+            && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::deltaLock) {
+        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime
+                   && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::deltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -577,10 +640,13 @@ void ElevationFieldComponent::paint(Graphics& g) {
     if (shouldDrawTrajectoryHandle) {
         pos = posToXy(automationManager.getSourcePosition(), width);
         lineThickness = (m_selectedSourceId == -1) ? 3 : 1;
-        Rectangle<float> rarea (10, pos.y, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> rarea(10, pos.y, kSourceDiameter, kSourceDiameter);
         g.setColour(Colour::fromRGB(176, 176, 228));
-        g.drawLine(10 + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
-                   10 + kSourceRadius, height - 5, lineThickness);
+        g.drawLine(10 + kSourceRadius,
+                   pos.y + kSourceDiameter + lineThickness / 2,
+                   10 + kSourceRadius,
+                   height - 5,
+                   lineThickness);
         g.fillEllipse(rarea);
         g.setColour(Colour::fromRGB(64, 64, 128));
         g.drawEllipse(rarea, 1);
@@ -595,8 +661,9 @@ void ElevationFieldComponent::paint(Graphics& g) {
         automationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (m_isPlaying && !isMouseButtonDown() && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) != TrajectoryTypeAlt::realtime &&
-        automationManager.getActivateState()) {
+    if (m_isPlaying && !isMouseButtonDown()
+        && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) != TrajectoryTypeAlt::realtime
+        && automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -607,31 +674,48 @@ void ElevationFieldComponent::paint(Graphics& g) {
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
-        pos = Point<float> {x, y};
-        Rectangle<float> area (pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        pos = Point<float>{ x, y };
+        Rectangle<float> area(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         area.expand(lineThickness, lineThickness);
         g.setColour(Colour(.2f, .2f, .2f, 1.f));
         g.drawEllipse(area.translated(.5f, .5f), 1.f);
-        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f), pos.x + kSourceRadius, pos.y + kSourceRadius,
-                                         m_sources[i].getColour().withSaturation(saturation), pos.x, pos.y, true));
+        g.setGradientFill(ColourGradient(m_sources[i].getColour().withSaturation(saturation).darker(1.f),
+                                         pos.x + kSourceRadius,
+                                         pos.y + kSourceRadius,
+                                         m_sources[i].getColour().withSaturation(saturation),
+                                         pos.x,
+                                         pos.y,
+                                         true));
         g.fillEllipse(area);
-        g.drawLine(pos.x + kSourceRadius, pos.y + kSourceDiameter + lineThickness / 2,
-                   pos.x + kSourceRadius, height - 5, lineThickness);
+        g.drawLine(pos.x + kSourceRadius,
+                   pos.y + kSourceDiameter + lineThickness / 2,
+                   pos.x + kSourceRadius,
+                   height - 5,
+                   lineThickness);
         g.setColour(Colours::white);
-        g.drawFittedText(String(m_sources[i].getId()+1), area.getSmallestIntegerContainer(), Justification(Justification::centred), 1);
+        g.drawFittedText(String(m_sources[i].getId() + 1),
+                         area.getSmallestIntegerContainer(),
+                         Justification(Justification::centred),
+                         1);
 
         // Draw spanning.
         float elevationSpan = 50.0f * m_sources[i].getElevationSpan();
         g.setColour(m_sources[i].getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawRect(pos.x + kSourceRadius - elevationSpan / 2, pos.y + kSourceDiameter + lineThickness / 2,
-                   elevationSpan, height - 5.0f, 1.5);
+        g.drawRect(pos.x + kSourceRadius - elevationSpan / 2,
+                   pos.y + kSourceDiameter + lineThickness / 2,
+                   elevationSpan,
+                   height - 5.0f,
+                   1.5);
         g.setColour(m_sources[i].getColour().withSaturation(saturation).withAlpha(0.1f));
-        g.fillRect(pos.x + kSourceRadius - elevationSpan / 2, pos.y + kSourceDiameter + lineThickness / 2,
-                   elevationSpan, height - 5.0f);
+        g.fillRect(pos.x + kSourceRadius - elevationSpan / 2,
+                   pos.y + kSourceDiameter + lineThickness / 2,
+                   elevationSpan,
+                   height - 5.0f);
     }
 }
 
-void ElevationFieldComponent::mouseDown(const MouseEvent &event) {    
+void ElevationFieldComponent::mouseDown(const MouseEvent & event)
+{
     int width = getWidth();
     int height = getHeight();
 
@@ -642,11 +726,11 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     for (int i = 0; i < m_numberOfSources; i++) {
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
-        Point<float> pos = Point<float> {x, y};
+        Point<float> pos = Point<float>{ x, y };
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_selectedSourceId = i;
-            listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
+            listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
             clickOnSource = true;
             break;
         }
@@ -658,7 +742,8 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
     }
 
     // Check if we record a trajectory.
-    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing || static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
+        || static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         Point<float> pos = posToXy(automationManager.getSourcePosition(), width).withX(10.0f);
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
@@ -668,7 +753,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
                 currentRecordingPositionX = 10 + kSourceRadius;
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
             } else {
-                listeners.call([&] (Listener& l) { l.fieldTrajectoryHandleClicked(1); });
+                listeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(1); });
             }
             repaint();
             return;
@@ -680,12 +765,14 @@ void ElevationFieldComponent::mouseDown(const MouseEvent &event) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
         currentRecordingPositionX = 10 + kSourceRadius;
-        automationManager.resetRecordingTrajectory(Point<float> (currentRecordingPositionX, event.getMouseDownPosition().toFloat().y));
+        automationManager.resetRecordingTrajectory(
+            Point<float>(currentRecordingPositionX, event.getMouseDownPosition().toFloat().y));
         repaint();
     }
 }
 
-void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {    
+void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
+{
     float height = getHeight();
 
     // No selection.
@@ -702,42 +789,44 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent &event) {
             }
             float y = event.getPosition().toFloat().y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-            automationManager.addRecordingPoint(Point<float> (currentRecordingPositionX, y));
+            automationManager.addRecordingPoint(Point<float>(currentRecordingPositionX, y));
             y = height - event.getPosition().toFloat().y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-            automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
+            automationManager.setSourcePosition(xyToPos(Point<float>(10.0f, y), height));
         } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
             float y = height - event.y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
-            automationManager.setSourcePosition(xyToPos(Point<float> (10.0f, y), height));
+            automationManager.setSourcePosition(xyToPos(Point<float>(10.0f, y), height));
             automationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
         float elevation = (height - event.y - kSourceDiameter) / (height - 35) * 90.0;
         m_sources[m_selectedSourceId].setElevation(elevation);
-        listeners.call([&] (Listener& l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
+        listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(m_selectedSourceId, 1); });
     }
 
     bool needToAdjustAutomationManager = false;
-    if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::independent && m_selectedSourceId == 0 &&
-            static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::independent
+        && m_selectedSourceId == 0
+        && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         needToAdjustAutomationManager = true;
-    } else if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) >= SourceLinkAlt::fixedElevation &&
-            static_cast<SourceLinkAlt>(automationManager.getSourceLink()) < SourceLinkAlt::deltaLock &&
-                    static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    } else if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) >= SourceLinkAlt::fixedElevation
+               && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) < SourceLinkAlt::deltaLock
+               && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
         needToAdjustAutomationManager = true;
     }
 
     if (needToAdjustAutomationManager) {
         float y = m_sources[0].getElevation() / 90.0 * (height - 15) + 5;
-        automationManager.setSourcePosition(xyToPos(Point<float> (10.0, y), height));
+        automationManager.setSourcePosition(xyToPos(Point<float>(10.0, y), height));
         automationManager.sendTrajectoryPositionChangedEvent();
     }
 
     repaint();
 }
 
-void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
+void ElevationFieldComponent::mouseUp(const MouseEvent & event)
+{
     if (m_selectedSourceId == -1) {
         if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
@@ -746,4 +835,3 @@ void ElevationFieldComponent::mouseUp(const MouseEvent &event) {
         repaint();
     }
 }
-

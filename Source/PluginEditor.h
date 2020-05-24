@@ -20,39 +20,40 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
-#include "GrisLookAndFeel.h"
-#include "FieldComponent.h"
-#include "BannerComponent.h"
-#include "ParametersBoxComponent.h"
-#include "TrajectoryBoxComponent.h"
-#include "SettingsBoxComponent.h"
-#include "SourceBoxComponent.h"
-#include "InterfaceBoxComponent.h"
-#include "Source.h"
 #include "AutomationManager.h"
+#include "BannerComponent.h"
+#include "FieldComponent.h"
+#include "GrisLookAndFeel.h"
+#include "InterfaceBoxComponent.h"
+#include "ParametersBoxComponent.h"
+#include "PluginProcessor.h"
 #include "PositionPresetComponent.h"
+#include "SettingsBoxComponent.h"
+#include "Source.h"
+#include "SourceBoxComponent.h"
+#include "TrajectoryBoxComponent.h"
 
-class ControlGrisAudioProcessorEditor final : public AudioProcessorEditor,
-                                              private Value::Listener,
-                                              public FieldComponent::Listener,
-                                              public ParametersBoxComponent::Listener,
-                                              public SettingsBoxComponent::Listener,
-                                              public SourceBoxComponent::Listener,
-                                              public TrajectoryBoxComponent::Listener,
-                                              public InterfaceBoxComponent::Listener,
-                                              public PositionPresetComponent::Listener
+class ControlGrisAudioProcessorEditor final
+    : public AudioProcessorEditor
+    , private Value::Listener
+    , public FieldComponent::Listener
+    , public ParametersBoxComponent::Listener
+    , public SettingsBoxComponent::Listener
+    , public SourceBoxComponent::Listener
+    , public TrajectoryBoxComponent::Listener
+    , public InterfaceBoxComponent::Listener
+    , public PositionPresetComponent::Listener
 {
 public:
-    ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor&,
-                                     AudioProcessorValueTreeState& vts,
-                                     AutomationManager& automan,
-                                     AutomationManager& automanAlt);
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor &,
+                                    AudioProcessorValueTreeState & vts,
+                                    AutomationManager & automan,
+                                    AutomationManager & automanAlt);
     ~ControlGrisAudioProcessorEditor() final;
 
-    void paint (Graphics&) final;
+    void paint(Graphics &) final;
     void resized() final;
-    void valueChanged (Value&) final;
+    void valueChanged(Value &) final;
 
     // FieldComponent::Listeners
     void fieldSourcePositionChanged(int sourceId, int whichField) final;
@@ -108,14 +109,14 @@ public:
     void refresh();
 
 private:
-    ControlGrisAudioProcessor& processor;
+    ControlGrisAudioProcessor & processor;
 
     GrisLookAndFeel grisLookAndFeel;
 
-    AudioProcessorValueTreeState& valueTreeState;
+    AudioProcessorValueTreeState & valueTreeState;
 
-    AutomationManager& automationManager;
-    AutomationManager& automationManagerAlt;
+    AutomationManager & automationManager;
+    AutomationManager & automationManagerAlt;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
@@ -123,18 +124,18 @@ private:
     BannerComponent settingsBanner;
     BannerComponent positionPresetBanner;
 
-    MainFieldComponent  mainField;
-    ElevationFieldComponent  elevationField;
+    MainFieldComponent mainField;
+    ElevationFieldComponent elevationField;
 
-    ParametersBoxComponent  parametersBox;
+    ParametersBoxComponent parametersBox;
 
-    TrajectoryBoxComponent  trajectoryBox;
+    TrajectoryBoxComponent trajectoryBox;
 
-    TabbedComponent configurationComponent { TabbedButtonBar::Orientation::TabsAtTop };
+    TabbedComponent configurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
 
-    SettingsBoxComponent    settingsBox;
-    SourceBoxComponent      sourceBox;
-    InterfaceBoxComponent   interfaceBox;
+    SettingsBoxComponent settingsBox;
+    SourceBoxComponent sourceBox;
+    InterfaceBoxComponent interfaceBox;
 
     PositionPresetComponent positionPresetBox;
 
@@ -143,5 +144,5 @@ private:
 
     Value lastUIWidth, lastUIHeight;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessorEditor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
 };

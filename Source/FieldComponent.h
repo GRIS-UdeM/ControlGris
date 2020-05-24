@@ -19,16 +19,16 @@
  *************************************************************************/
 #pragma once
 
+#include "AutomationManager.h"
 #include "GrisLookAndFeel.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"
-#include "AutomationManager.h"
 
 // This file defines the classes that implement the 2D view (azimuth-elevation
 // or azimuth-distance) and the elevation view.
 //
 // Classes:
-//   FieldComponent : The base class. Implements the common attributes and 
+//   FieldComponent : The base class. Implements the common attributes and
 //                    methods of the two views.
 //   MainFieldComponent : The 2D view as a cartesian plane. It is used to show
 //                        and control two parameters, azimuth-elevation for the
@@ -44,31 +44,30 @@ public:
     FieldComponent();
     ~FieldComponent() override;
 
-    void drawFieldBackground(Graphics&, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
+    void drawFieldBackground(Graphics &, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
 
     Point<float> posToXy(Point<float> p, int p_iFieldWidth) const;
     Point<float> xyToPos(Point<float> p, int p_iFieldWidth) const;
 
-    void setSources(Source *sources, int numberOfSources);
+    void setSources(Source * sources, int numberOfSources);
     void setSelectedSource(int selectedId);
 
     void setIsPlaying(bool state);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() = default;
 
         virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
     ListenerList<Listener> listeners;
 
 protected:
-    Source *m_sources;
+    Source * m_sources;
 
     bool m_isPlaying;
     int m_numberOfSources;
@@ -76,40 +75,39 @@ protected:
     int m_oldSelectedSourceId;
 
 private:
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (FieldComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponent)
 };
 
 //==============================================================================
 class MainFieldComponent final : public FieldComponent
 {
 public:
-    MainFieldComponent(AutomationManager& automan);
+    MainFieldComponent(AutomationManager & automan);
     ~MainFieldComponent() final;
-    
-    void createSpanPathVBAP(Graphics& g, int i) const;
-    void createSpanPathLBAP(Graphics& g, int i) const;
-    void drawTrajectoryHandle(Graphics&) const;
-    void paint(Graphics&) final;
 
-    bool isTrajectoryHandleClicked(const MouseEvent &event); // TODO: this should be const
-	void mouseDown(const MouseEvent &event) final;
- 	void mouseDrag(const MouseEvent &event) final;
- 	void mouseMove(const MouseEvent &event) final;
- 	void mouseUp(const MouseEvent &event) final;
+    void createSpanPathVBAP(Graphics & g, int i) const;
+    void createSpanPathLBAP(Graphics & g, int i) const;
+    void drawTrajectoryHandle(Graphics &) const;
+    void paint(Graphics &) final;
+
+    bool isTrajectoryHandleClicked(const MouseEvent & event); // TODO: this should be const
+    void mouseDown(const MouseEvent & event) final;
+    void mouseDrag(const MouseEvent & event) final;
+    void mouseMove(const MouseEvent & event) final;
+    void mouseUp(const MouseEvent & event) final;
 
     void setSpatMode(SpatMode spatMode);
 
 private:
-    AutomationManager& automationManager;
+    AutomationManager & automationManager;
     [[gnu::const]] static double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
     Point<float> degreeToXy(Point<float> p, int p_iFieldWidth) const;
     Point<float> xyToDegree(Point<float> p, int p_iFieldWidth) const;
 
-    Point<int> clipRecordingPosition(Point<int>pos);
+    Point<int> clipRecordingPosition(Point<int> pos);
 
-    bool hasValidLineDrawingAnchor1() const { return lineDrawingAnchor1 != Point<float> (-1.0f, -1.0f); }
-    bool hasValidLineDrawingAnchor2() const { return lineDrawingAnchor2 != Point<float> (-1.0f, -1.0f); }
+    bool hasValidLineDrawingAnchor1() const { return lineDrawingAnchor1 != Point<float>(-1.0f, -1.0f); }
+    bool hasValidLineDrawingAnchor2() const { return lineDrawingAnchor2 != Point<float>(-1.0f, -1.0f); }
 
     SpatMode m_spatMode;
 
@@ -118,25 +116,25 @@ private:
     Point<float> lineDrawingAnchor1;
     Point<float> lineDrawingAnchor2;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainFieldComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainFieldComponent)
 };
 
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
 {
 public:
-    ElevationFieldComponent(AutomationManager& automan);
+    ElevationFieldComponent(AutomationManager & automan);
     ~ElevationFieldComponent() final;
-    
-    void paint(Graphics&) final;
-	
-	void mouseDown(const MouseEvent &event) final;
- 	void mouseDrag(const MouseEvent &event) final;
- 	void mouseUp(const MouseEvent &event) final;
+
+    void paint(Graphics &) final;
+
+    void mouseDown(const MouseEvent & event) final;
+    void mouseDrag(const MouseEvent & event) final;
+    void mouseUp(const MouseEvent & event) final;
 
 private:
-    AutomationManager& automationManager;
+    AutomationManager & automationManager;
     int currentRecordingPositionX;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ElevationFieldComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
 };

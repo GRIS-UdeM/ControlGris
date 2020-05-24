@@ -20,8 +20,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
+#include "GrisLookAndFeel.h"
 #include "Source.h"
 
 class SourceBoxComponent final : public Component
@@ -30,14 +30,13 @@ public:
     SourceBoxComponent();
     ~SourceBoxComponent() final;
 
-    void paint(Graphics&) final;
+    void paint(Graphics &) final;
     void resized() final;
 
     void setNumberOfSources(int numOfSources, int firstSourceId);
-    void updateSelectedSource(Source *source, int sourceIndex, SpatMode spatMode);
+    void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
@@ -45,27 +44,27 @@ public:
         virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
 
-    int             selectedSourceNumber;
-    float           currentAngle;
-    float           currentRayLength;
+    int selectedSourceNumber;
+    float currentAngle;
+    float currentRayLength;
 
-    Label           sourcePlacementLabel;
-    ComboBox        sourcePlacementCombo;
+    Label sourcePlacementLabel;
+    ComboBox sourcePlacementCombo;
 
-    Label           sourceNumberLabel;
-    ComboBox        sourceNumberCombo;
+    Label sourceNumberLabel;
+    ComboBox sourceNumberCombo;
 
-    Label           rayLengthLabel;
-    Slider          rayLengthSlider;
+    Label rayLengthLabel;
+    Slider rayLengthSlider;
 
-    Label           angleLabel;
-    Slider          angleSlider;
+    Label angleLabel;
+    Slider angleSlider;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SourceBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent)
 };

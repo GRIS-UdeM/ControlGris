@@ -20,16 +20,17 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "Source.h"
 #include "AutomationManager.h"
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
+#include "Source.h"
 
-class ControlGrisAudioProcessor final : public AudioProcessor,
-                                        public AudioProcessorValueTreeState::Listener,
-                                        public AutomationManager::Listener,
-                                        public Timer,
-                                        private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
+class ControlGrisAudioProcessor final
+    : public AudioProcessor
+    , public AudioProcessorValueTreeState::Listener
+    , public AutomationManager::Listener
+    , public Timer
+    , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
 public:
     //==============================================================================
@@ -37,17 +38,17 @@ public:
     ~ControlGrisAudioProcessor() final;
 
     //==============================================================================
-    void prepareToPlay (double sampleRate, int samplesPerBlock) final;
+    void prepareToPlay(double sampleRate, int samplesPerBlock) final;
     void releaseResources() final;
 
-   #ifndef JucePlugin_PreferredChannelConfigurations
-    bool isBusesLayoutSupported (const BusesLayout& layouts) const final;
-   #endif
+#ifndef JucePlugin_PreferredChannelConfigurations
+    bool isBusesLayoutSupported(const BusesLayout & layouts) const final;
+#endif
 
-    void processBlock (AudioBuffer<float>&, MidiBuffer&) final;
+    void processBlock(AudioBuffer<float> &, MidiBuffer &) final;
 
     //==============================================================================
-    AudioProcessorEditor* createEditor() final;
+    AudioProcessorEditor * createEditor() final;
     bool hasEditor() const final { return true; } // (change this to false if you choose to not supply an editor)
 
     //==============================================================================
@@ -59,19 +60,22 @@ public:
     double getTailLengthSeconds() const final { return 0.0; }
 
     //==============================================================================
-    int getNumPrograms() final { return 1; }  // NB: some hosts don't cope very well if you tell them there are 0 programs,
-                                              // so this should be at least 1, even if you're not really implementing programs.
+    int getNumPrograms() final
+    {
+        return 1;
+    } // NB: some hosts don't cope very well if you tell them there are 0 programs,
+      // so this should be at least 1, even if you're not really implementing programs.
     int getCurrentProgram() final { return 0; }
-    void setCurrentProgram (int index) final {}
-    const String getProgramName (int index) final { return {}; }
-    void changeProgramName (int index, const String& newName) final {}
+    void setCurrentProgram(int index) final {}
+    const String getProgramName(int index) final { return {}; }
+    void changeProgramName(int index, const String & newName) final {}
 
     //==============================================================================
-    void getStateInformation (MemoryBlock& destData) final;
-    void setStateInformation (const void* data, int sizeInBytes) final;
+    void getStateInformation(MemoryBlock & destData) final;
+    void setStateInformation(const void * data, int sizeInBytes) final;
 
     //==============================================================================
-    void parameterChanged(const String &parameterID, float newValue) final;
+    void parameterChanged(const String & parameterID, float newValue) final;
 
     //==============================================================================
     void setOscFormat(SpatMode oscFormat);
@@ -80,12 +84,12 @@ public:
     void setOscPortNumber(int oscPortNumber);
     int getOscPortNumber() const { return m_currentOSCPort; }
 
-    void setFirstSourceId(int firstSourceId, bool propagate=true);
+    void setFirstSourceId(int firstSourceId, bool propagate = true);
     int getFirstSourceId() const { return m_firstSourceId; }
 
     void setSelectedSourceId(int id);
 
-    void setNumberOfSources(int numOfSources, bool propagate=true);
+    void setNumberOfSources(int numOfSources, bool propagate = true);
     int getNumberOfSources() const { return m_numOfSources; }
 
     Source * getSources() { return sources; }
@@ -101,8 +105,8 @@ public:
     bool createOscInputConnection(int oscPort);
     bool disconnectOSCInput(int oscPort);
     bool getOscInputConnected() const { return m_oscInputConnected; }
-    void oscMessageReceived (const OSCMessage& message) final;
-    void oscBundleReceived(const OSCBundle& bundle) final;
+    void oscMessageReceived(const OSCMessage & message) final;
+    void oscBundleReceived(const OSCBundle & bundle) final;
 
     bool createOscOutputConnection(String oscAddress, int oscPort);
     bool disconnectOSCOutput(String oscAddress, int oscPort);
@@ -127,7 +131,7 @@ public:
     bool getIsPlaying() const { return m_isPlaying; }
     double getBPM() const { return m_bpm; }
 
-    void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) final;
+    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
     void setSourceLink(SourceLink value);
     void setSourceLinkAlt(SourceLinkAlt value);
@@ -145,7 +149,7 @@ public:
 
     void addNewFixedPosition(int id);
     bool recallFixedPosition(int id);
-    void copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest);
+    void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
     XmlElement * getFixedPositionData() { return &fixPositionData; } // retrieve all data.
     XmlElement const * getFixedPositionData() const { return &fixPositionData; }
     void deleteFixedPosition(int id);
@@ -200,7 +204,7 @@ private:
     OSCReceiver oscInputReceiver;
 
     XmlElement fixPositionData;
-    XmlElement *currentFixPosition = nullptr;
+    XmlElement * currentFixPosition = nullptr;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ControlGrisAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessor)
 };

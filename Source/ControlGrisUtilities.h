@@ -24,11 +24,14 @@ double getFloatPrecision(double value, double precision);
 class XmlElementDataSorter
 {
 public:
-    XmlElementDataSorter (const String& attributeToSortBy, bool forwards)
-        : attributeToSort (attributeToSortBy), direction (forwards ? 1 : -1)
-    {}
+    XmlElementDataSorter(const String & attributeToSortBy, bool forwards)
+        : attributeToSort(attributeToSortBy)
+        , direction(forwards ? 1 : -1)
+    {
+    }
 
-    int compareElements (XmlElement* first, XmlElement* second) const {
+    int compareElements(XmlElement * first, XmlElement * second) const
+    {
         int result;
         if (first->getDoubleAttribute(attributeToSort) < second->getDoubleAttribute(attributeToSort))
             result = -1;

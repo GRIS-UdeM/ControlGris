@@ -23,33 +23,33 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
-class ParametersBoxComponent final : public Component,
-                                     public Slider::Listener
+class ParametersBoxComponent final
+    : public Component
+    , public Slider::Listener
 {
 public:
     ParametersBoxComponent();
     ~ParametersBoxComponent() final;
 
- 	void mouseDown(const MouseEvent &event) final;
-    void sliderValueChanged(Slider *slider) final;
-    void paint(Graphics&) final;
+    void mouseDown(const MouseEvent & event) final;
+    void sliderValueChanged(Slider * slider) final;
+    void paint(Graphics &) final;
     void resized() final;
 
-    void setSelectedSource(Source *source);
+    void setSelectedSource(Source * source);
     void setDistanceEnabled(bool shouldBeEnabled);
     void setSpanLinkState(bool state);
     bool getSpanLinkState() const { return m_spanLinked; }
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
         virtual void parametersBoxSelectedSourceClicked() = 0;
         virtual void parametersBoxParameterChanged(int parameterId, double value) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
@@ -57,12 +57,12 @@ private:
     bool m_distanceEnabled;
     bool m_spanLinked;
 
-    Source *selectedSource;
+    Source * selectedSource;
 
     Label azimuthLabel;
     Label elevationLabel;
     Slider azimuthSpan;
     Slider elevationSpan;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ParametersBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
 };

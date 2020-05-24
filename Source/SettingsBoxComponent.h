@@ -20,8 +20,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
+#include "GrisLookAndFeel.h"
 
 class SettingsBoxComponent final : public Component
 {
@@ -29,7 +29,7 @@ public:
     SettingsBoxComponent();
     ~SettingsBoxComponent() final;
 
-    void paint(Graphics&) override;
+    void paint(Graphics &) override;
     void resized() override;
 
     // These are only setters, they dont send notification.
@@ -40,8 +40,7 @@ public:
     void setOscPortNumber(int oscPortNumber);
     void setActivateButtonState(bool shouldBeOn);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
         virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
@@ -51,25 +50,25 @@ public:
         virtual void settingsBoxFirstSourceIdChanged(int firstSourceId) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
 
-    Label           oscFormatLabel;
-    ComboBox        oscFormatCombo;
+    Label oscFormatLabel;
+    ComboBox oscFormatCombo;
 
-    Label           oscPortLabel;
-    TextEditor      oscPortEditor;
+    Label oscPortLabel;
+    TextEditor oscPortEditor;
 
-    Label           numOfSourcesLabel;
-    TextEditor      numOfSourcesEditor;
+    Label numOfSourcesLabel;
+    TextEditor numOfSourcesEditor;
 
-    Label           firstSourceIdLabel;
-    TextEditor      firstSourceIdEditor;
+    Label firstSourceIdLabel;
+    TextEditor firstSourceIdEditor;
 
-    ToggleButton    activateButton;
+    ToggleButton activateButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SettingsBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsBoxComponent)
 };

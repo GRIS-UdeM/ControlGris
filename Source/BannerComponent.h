@@ -31,6 +31,5 @@ public:
     ~BannerComponent() final;
 
 private:
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BannerComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BannerComponent)
 };

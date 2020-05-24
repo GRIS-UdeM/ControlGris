@@ -66,7 +66,7 @@ public:
     float getX() const { return m_x; }
     void setY(float y);
     float getY() const { return m_y; }
-    Point<float> getPos() const { return Point<float> {m_x, m_y}; }
+    Point<float> getPos() const { return Point<float>{ m_x, m_y }; }
     void setPos(Point<float> pos);
 
     void computeXY();
@@ -118,5 +118,4 @@ private:
     float fixedY;
 
     inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
-
 };

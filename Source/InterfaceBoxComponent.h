@@ -22,15 +22,16 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "GrisLookAndFeel.h"
 
-class InterfaceBoxComponent final : public Component,
-                                    public TextEditor::Listener
+class InterfaceBoxComponent final
+    : public Component
+    , public TextEditor::Listener
 {
 public:
     InterfaceBoxComponent();
     ~InterfaceBoxComponent() final;
 
-    void textEditorReturnKeyPressed(TextEditor &editor) final;
-    void paint(Graphics&) final;
+    void textEditorReturnKeyPressed(TextEditor & editor) final;
+    void paint(Graphics &) final;
     void resized() final;
 
     void setOscOutputPluginId(int id);
@@ -42,8 +43,7 @@ public:
     void setOscSendOutputAddress(String address);
     void setOscSendOutputPort(int port);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
         virtual void oscOutputPluginIdChanged(int value) = 0;
@@ -51,33 +51,33 @@ public:
         virtual void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
 
-/*
-    Label           oscSourceLabel;
-    ComboBox        oscSourceCombo;
+    /*
+        Label           oscSourceLabel;
+        ComboBox        oscSourceCombo;
 
-    ToggleButton    enableJoystickToggle;
-*/
+        ToggleButton    enableJoystickToggle;
+    */
 
-    ToggleButton    oscReceiveToggle;
-    ToggleButton    oscSendToggle;
+    ToggleButton oscReceiveToggle;
+    ToggleButton oscSendToggle;
 
-    Label           oscOutputPluginIdLabel;
-    TextEditor      oscOutputPluginIdEditor;
+    Label oscOutputPluginIdLabel;
+    TextEditor oscOutputPluginIdEditor;
 
-    TextEditor      oscReceiveIpEditor;
-    TextEditor      oscReceivePortEditor;
-    TextEditor      oscSendIpEditor;
-    TextEditor      oscSendPortEditor;
+    TextEditor oscReceiveIpEditor;
+    TextEditor oscReceivePortEditor;
+    TextEditor oscSendIpEditor;
+    TextEditor oscSendPortEditor;
 
     int lastOscReceivePort;
     int lastOscSendPort;
     String lastOscSendAddress;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (InterfaceBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InterfaceBoxComponent)
 };

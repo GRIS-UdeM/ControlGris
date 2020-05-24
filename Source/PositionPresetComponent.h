@@ -20,8 +20,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
+#include "GrisLookAndFeel.h"
 
 class PresetButton final : public TextButton
 {
@@ -33,22 +33,21 @@ public:
     void setLoadedState(bool isLoaded);
     void refresh();
 
-    void clicked (const ModifierKeys &mods) final;
-    void internalClickCallback (const ModifierKeys &mods) final;
+    void clicked(const ModifierKeys & mods) final;
+    void internalClickCallback(const ModifierKeys & mods) final;
 
     bool isSaved() const { return saved; }
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
-        virtual void buttonClicked(PresetButton *button) = 0;
-        virtual void savingPresetClicked(PresetButton *button) = 0;
-        virtual void deletingPresetClicked(PresetButton *button) = 0;
+        virtual void buttonClicked(PresetButton * button) = 0;
+        virtual void savingPresetClicked(PresetButton * button) = 0;
+        virtual void deletingPresetClicked(PresetButton * button) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
@@ -56,37 +55,37 @@ private:
     bool saved;
     bool loaded;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PresetButton)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetButton)
 };
 
 //================================================================================
-class PositionPresetComponent final : public  Component,
-                                      private PresetButton::Listener
+class PositionPresetComponent final
+    : public Component
+    , private PresetButton::Listener
 {
 public:
     PositionPresetComponent();
     ~PositionPresetComponent() final;
 
-    void paint(Graphics&) final;
+    void paint(Graphics &) final;
     void resized() final;
 
-    void buttonClicked(PresetButton *button) final;
-    void savingPresetClicked(PresetButton *button) final;
-    void deletingPresetClicked(PresetButton *button) final;
+    void buttonClicked(PresetButton * button) final;
+    void savingPresetClicked(PresetButton * button) final;
+    void deletingPresetClicked(PresetButton * button) final;
 
-    void setPreset(int value, bool notify=false);
+    void setPreset(int value, bool notify = false);
     void presetSaved(int presetNumber, bool isSaved);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
         virtual void positionPresetChanged(int presetNumber) = 0;
         virtual void positionPresetSaved(int presetNumber) = 0;
         virtual void positionPresetDeleted(int presetNumber) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
@@ -98,5 +97,5 @@ private:
     Label actionLog;
     Label appVersionLabel;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (PositionPresetComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionPresetComponent)
 };

@@ -41,7 +41,7 @@ public:
 
     void setPlaybackPositionX(float value);
     void setPlaybackPositionY(float value);
-    bool hasValidPlaybackPosition() const { return playbackPosition != Point<float> (-1.0f, -1.0f); }
+    bool hasValidPlaybackPosition() const { return playbackPosition != Point<float>(-1.0f, -1.0f); }
     Point<float> getPlaybackPosition() const { return playbackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
@@ -50,7 +50,7 @@ public:
     Point<float> getFirstRecordingPoint() const { return trajectoryPoints.getFirst(); }
     Point<float> getLastRecordingPoint() const { return trajectoryPoints.getLast(); }
     Point<float> getCurrentTrajectoryPoint() const;
-    void createRecordingPath(Path& path);
+    void createRecordingPath(Path & path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
@@ -65,8 +65,8 @@ public:
 
     void setDeviationPerCycle(float value) { this->degreeOfDeviationPerCycle = value; }
 
-    Source& getSource() { return source; }
-    Source const& getSource() const { return source; }
+    Source & getSource() { return source; }
+    Source const & getSource() const { return source; }
     void setSourcePosition(Point<float> pos);
     void setSourcePositionX(float x);
     void setSourcePositionY(float y);
@@ -77,50 +77,49 @@ public:
 
     void sendTrajectoryPositionChangedEvent();
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
-        virtual void trajectoryPositionChanged(AutomationManager *manager, Point<float> position) = 0;
+        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
 private:
     ListenerList<Listener> listeners;
 
-    double          fieldWidth;
+    double fieldWidth;
 
-    SourceLink      sourceLink;
-    TrajectoryType  drawingType;
+    SourceLink sourceLink;
+    TrajectoryType drawingType;
 
-    bool            isBackAndForth;
-    int             backAndForthDirection;
+    bool isBackAndForth;
+    int backAndForthDirection;
 
-    int             dampeningCycles;
-    int             dampeningCycleCount;
-    double          dampeningLastDelta;
+    int dampeningCycles;
+    int dampeningCycleCount;
+    double dampeningLastDelta;
 
-    bool            activateState;
-    double          playbackDuration;
-    double          currentPlaybackDuration;
-    Point<float>    playbackPosition;
+    bool activateState;
+    double playbackDuration;
+    double currentPlaybackDuration;
+    Point<float> playbackPosition;
 
     Source source;
 
-    double              trajectoryDeltaTime;
-    double              lastTrajectoryDeltaTime;
+    double trajectoryDeltaTime;
+    double lastTrajectoryDeltaTime;
     Array<Point<float>> trajectoryPoints;
-    Point<float>        currentTrajectoryPoint;
-    Point<float>        lastRecordingPoint;
+    Point<float> currentTrajectoryPoint;
+    Point<float> lastRecordingPoint;
 
-    float          degreeOfDeviationPerCycle;
-    float          currentDegreeOfDeviation;
-    int            deviationCycleCount;
+    float degreeOfDeviationPerCycle;
+    float currentDegreeOfDeviation;
+    int deviationCycleCount;
 
     void computeCurrentTrajectoryPoint();
     Point<float> smoothRecordingPosition(Point<float> pos);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AutomationManager)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager)
 };

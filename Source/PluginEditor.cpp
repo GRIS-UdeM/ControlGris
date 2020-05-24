@@ -17,22 +17,22 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
-#include "PluginProcessor.h"
 #include "PluginEditor.h"
 #include "ControlGrisConstants.h"
+#include "PluginProcessor.h"
 
-ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAudioProcessor& p,
-                                                                  AudioProcessorValueTreeState& vts,
-                                                                  AutomationManager& automan,
-                                                                  AutomationManager& automanAlt)
-    : AudioProcessorEditor (&p),
-      processor (p),
-      valueTreeState (vts), 
-      automationManager (automan), 
-      automationManagerAlt (automanAlt), 
-      mainField (automan),
-      elevationField (automanAlt)
-{ 
+ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & p,
+                                                                 AudioProcessorValueTreeState & vts,
+                                                                 AutomationManager & automan,
+                                                                 AutomationManager & automanAlt)
+    : AudioProcessorEditor(&p)
+    , processor(p)
+    , valueTreeState(vts)
+    , automationManager(automan)
+    , automationManagerAlt(automanAlt)
+    , mainField(automan)
+    , elevationField(automanAlt)
+{
     setLookAndFeel(&grisLookAndFeel);
 
     m_isInsideSetPluginState = false;
@@ -87,13 +87,13 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     interfaceBox.setLookAndFeel(&grisLookAndFeel);
     interfaceBox.addListener(this);
 
-    Colour bg = grisLookAndFeel.findColour (ResizableWindow::backgroundColourId);
+    Colour bg = grisLookAndFeel.findColour(ResizableWindow::backgroundColourId);
 
     configurationComponent.setLookAndFeel(&grisLookAndFeel);
     configurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
-    configurationComponent.addTab ("Settings", bg, &settingsBox, false);
-    configurationComponent.addTab ("Source", bg, &sourceBox, false);
-    configurationComponent.addTab ("Controllers", bg, &interfaceBox, false);
+    configurationComponent.addTab("Settings", bg, &settingsBox, false);
+    configurationComponent.addTab("Source", bg, &sourceBox, false);
+    configurationComponent.addTab("Controllers", bg, &interfaceBox, false);
     addAndMakeVisible(configurationComponent);
 
     positionPresetBox.setLookAndFeel(&grisLookAndFeel);
@@ -112,8 +112,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     //------------------------------------------
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
-    lastUIWidth .referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("width",  nullptr));
-    lastUIHeight.referTo (processor.parameters.state.getChildWithName ("uiState").getPropertyAsValue ("height", nullptr));
+    lastUIWidth.referTo(processor.parameters.state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
+    lastUIHeight.referTo(processor.parameters.state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize(lastUIWidth.getValue(), lastUIHeight.getValue());
@@ -126,12 +126,14 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor (ControlGrisAud
     setPluginState();
 }
 
-ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor() {
+ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor()
+{
     configurationComponent.setLookAndFeel(nullptr);
     setLookAndFeel(nullptr);
 }
 
-void ControlGrisAudioProcessorEditor::setPluginState() {
+void ControlGrisAudioProcessorEditor::setPluginState()
+{
     m_isInsideSetPluginState = true;
 
     // Set global settings values.
@@ -168,10 +170,10 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     // Update the position preset box.
     //--------------------------------
     for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
-        positionPresetBox.presetSaved(i+1, false);
+        positionPresetBox.presetSaved(i + 1, false);
     }
-    XmlElement *positionData = processor.getFixedPositionData();
-    XmlElement *fpos = positionData->getFirstChildElement();
+    XmlElement * positionData = processor.getFixedPositionData();
+    XmlElement * fpos = positionData->getFirstChildElement();
     while (fpos) {
         positionPresetBox.presetSaved(fpos->getIntAttribute("ID"), true);
         fpos = fpos->getNextElement();
@@ -183,7 +185,9 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 
     int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue());
     positionPresetBox.setPreset(preset, true);
@@ -191,31 +195,37 @@ void ControlGrisAudioProcessorEditor::setPluginState() {
     m_isInsideSetPluginState = false;
 }
 
-void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state) {
+void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
+{
     parametersBox.setSpanLinkState(state);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value) {
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value)
+{
     trajectoryBox.sourceLinkCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(SourceLinkAlt value) {
+void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(SourceLinkAlt value)
+{
     trajectoryBox.sourceLinkAltCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
 
-void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber) {
+void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber)
+{
     positionPresetBox.setPreset(presetNumber, true);
 }
 
 // Value::Listener callback. Called when the stored window size changes.
 //----------------------------------------------------------------------
-void ControlGrisAudioProcessorEditor::valueChanged (Value&) {
-    setSize (lastUIWidth.getValue(), lastUIHeight.getValue());
+void ControlGrisAudioProcessorEditor::valueChanged(Value &)
+{
+    setSize(lastUIWidth.getValue(), lastUIHeight.getValue());
 }
 
 // SettingsBoxComponent::Listener callbacks.
 //------------------------------------------
-void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
+{
     settingsBox.setOscFormat(mode);
     processor.setOscFormat(mode);
     bool selectionIsLBAP = mode == SpatMode::LBAP;
@@ -226,24 +236,28 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
     resized();
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxOscPortNumberChanged(int oscPort) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscPortNumberChanged(int oscPort)
+{
     processor.setOscPortNumber(oscPort);
     settingsBox.setOscPortNumber(oscPort);
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state) {
+void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state)
+{
     processor.handleOscConnection(state);
     settingsBox.setActivateButtonState(processor.getOscConnected());
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources) {
+void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources)
+{
     bool initSourcePlacement = false;
     if (processor.getNumberOfSources() != numOfSources || m_isInsideSetPluginState) {
         if (processor.getNumberOfSources() != numOfSources) {
             initSourcePlacement = true;
         }
-        if (numOfSources != 2 && (automationManager.getSourceLink() == SourceLink::linkSymmetricX ||
-                                  automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
+        if (numOfSources != 2
+            && (automationManager.getSourceLink() == SourceLink::linkSymmetricX
+                || automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
             automationManager.setSourceLink(SourceLink::independent);
             updateSourceLinkCombo(SourceLink::independent);
         }
@@ -262,7 +276,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
     }
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId) {
+void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId)
+{
     processor.setFirstSourceId(firstSourceId);
     settingsBox.setFirstSourceId(firstSourceId);
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
@@ -275,83 +290,115 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
 
 // SourceBoxComponent::Listener callbacks.
 //----------------------------------------
-void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum) {
+void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum)
+{
     m_selectedSource = sourceNum;
 
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value) {
+void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value)
+{
     int numOfSources = processor.getNumberOfSources();
-    const float azims2[2] = {-90.0f, 90.0f};
-    const float azims4[4] = {-45.0f, 45.0f, -135.0f, 135.0f};
-    const float azims6[6] = {-30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f};
-    const float azims8[8] = {-22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f};
+    const float azims2[2] = { -90.0f, 90.0f };
+    const float azims4[4] = { -45.0f, 45.0f, -135.0f, 135.0f };
+    const float azims6[6] = { -30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f };
+    const float azims8[8] = { -22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f };
 
     bool isLBAP = processor.getOscFormat() == SpatMode::LBAP;
 
     float offset = 360.0f / numOfSources / 2.0f;
     float distance = isLBAP ? 0.7f : 1.0f;
 
-    switch(value) {
-        case SourcePlacement::leftAlternate:
-            for (int i = 0; i < numOfSources; i++) {
-                if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(-azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(-azims4[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(-azims6[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else
-                    processor.getSources()[i].setCoordinates(-azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::rightAlternate:
-            for (int i = 0; i < numOfSources; i++) {
-                if (numOfSources <= 2)
-                    processor.getSources()[i].setCoordinates(azims2[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else if (numOfSources <= 4)
-                    processor.getSources()[i].setCoordinates(azims4[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else if (numOfSources <= 6)
-                    processor.getSources()[i].setCoordinates(azims6[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-                else
-                    processor.getSources()[i].setCoordinates(azims8[i], isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::leftClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::leftCounterClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::rightClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::rightCounterClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::topClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
-        case SourcePlacement::topCounterClockwise:
-            for (int i = 0; i < numOfSources; i++) {
-                processor.getSources()[i].setCoordinates(360.0f / numOfSources * i, isLBAP ? processor.getSources()[i].getElevation() : 0.0f, distance);
-            }
-            break;
+    switch (value) {
+    case SourcePlacement::leftAlternate:
+        for (int i = 0; i < numOfSources; i++) {
+            if (numOfSources <= 2)
+                processor.getSources()[i].setCoordinates(-azims2[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else if (numOfSources <= 4)
+                processor.getSources()[i].setCoordinates(-azims4[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else if (numOfSources <= 6)
+                processor.getSources()[i].setCoordinates(-azims6[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else
+                processor.getSources()[i].setCoordinates(-azims8[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+        }
+        break;
+    case SourcePlacement::rightAlternate:
+        for (int i = 0; i < numOfSources; i++) {
+            if (numOfSources <= 2)
+                processor.getSources()[i].setCoordinates(azims2[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else if (numOfSources <= 4)
+                processor.getSources()[i].setCoordinates(azims4[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else if (numOfSources <= 6)
+                processor.getSources()[i].setCoordinates(azims6[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+            else
+                processor.getSources()[i].setCoordinates(azims8[i],
+                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                         distance);
+        }
+        break;
+    case SourcePlacement::leftClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
+    case SourcePlacement::leftCounterClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
+    case SourcePlacement::rightClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
+    case SourcePlacement::rightCounterClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
+    case SourcePlacement::topClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
+    case SourcePlacement::topCounterClockwise:
+        for (int i = 0; i < numOfSources; i++) {
+            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i,
+                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
+                                                     distance);
+        }
+        break;
     }
 
     for (int i = 0; i < numOfSources; i++) {
@@ -360,7 +407,9 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
     }
 
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 
     for (int i = 0; i < numOfSources; i++) {
         processor.getSources()[i].fixSourcePosition(true);
@@ -371,7 +420,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     repaint();
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) {
+void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen)
+{
     if (processor.getOscFormat() == SpatMode::LBAP) {
         float currentElevation = processor.getSources()[sourceNum].getElevation();
         processor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
@@ -388,7 +438,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value) {
+void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value)
+{
     processor.setSourceParameterValue(m_selectedSource, parameterId, value);
 
     mainField.repaint();
@@ -396,65 +447,78 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int paramete
         elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked() {
+void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
+{
     m_selectedSource = (m_selectedSource + 1) % processor.getNumberOfSources();
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 }
 
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink value)
+{
     processor.setSourceLink(value);
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value)
+{
     processor.setSourceLinkAlt(value);
     elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value)
+{
     valueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
     automationManager.setDrawingType(value, processor.getSources()[0].getPos());
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value)
+{
     valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
     automationManagerAlt.setDrawingTypeAlt(value);
     elevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool value)
+{
     valueTreeState.state.setProperty("backAndForth", value, nullptr);
     automationManager.setBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value)
+{
     valueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
     automationManagerAlt.setBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesChanged(int value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesChanged(int value)
+{
     valueTreeState.state.setProperty("dampeningCycles", value, nullptr);
     automationManager.setDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int value)
+{
     valueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
     automationManagerAlt.setDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value)
+{
     valueTreeState.state.setProperty("deviationPerCycle", value, nullptr);
     automationManager.setDeviationPerCycle(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode)
+{
     valueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
     if (mode == 2) {
@@ -464,7 +528,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double d
     automationManagerAlt.setPlaybackDuration(dur);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode)
+{
     valueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
@@ -474,19 +539,24 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double du
     automationManagerAlt.setPlaybackDuration(dur);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value)
+{
     automationManager.setActivateState(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value) {
+void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value)
+{
     automationManagerAlt.setActivateState(value);
 }
 
 // Update the interface if anything has changed (mostly automations).
 //-------------------------------------------------------------------
-void ControlGrisAudioProcessorEditor::refresh() {
+void ControlGrisAudioProcessorEditor::refresh()
+{
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 
     mainField.setIsPlaying(processor.getIsPlaying());
     elevationField.setIsPlaying(processor.getIsPlaying());
@@ -505,20 +575,24 @@ void ControlGrisAudioProcessorEditor::refresh() {
 
 // FieldComponent::Listener callback.
 //-----------------------------------
-void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, int whichField) {
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, int whichField)
+{
     processor.sourcePositionChanged(sourceId, whichField);
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
     mainField.setSelectedSource(m_selectedSource);
     elevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource], m_selectedSource, processor.getOscFormat());
+    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
+                                   m_selectedSource,
+                                   processor.getOscFormat());
 
     processor.setPositionPreset(0);
     positionPresetBox.setPreset(0);
 }
 
-void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField) {
+void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
+{
     if (whichField == 0) {
         automationManager.fixSourcePosition();
         processor.onSourceLinkChanged(automationManager.getSourceLink());
@@ -530,25 +604,30 @@ void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichFiel
 
 // PositionPresetComponent::Listener callback.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber) {
+void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber)
+{
     processor.setPositionPreset(presetNumber);
 }
 
-void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber) {
+void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber)
+{
     processor.addNewFixedPosition(presetNumber);
 }
 
-void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber) {
+void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
+{
     processor.deleteFixedPosition(presetNumber);
 }
 
 // InterfaceBoxComponent::Listener callback.
 //------------------------------------------
-void ControlGrisAudioProcessorEditor::oscOutputPluginIdChanged(int value) {
+void ControlGrisAudioProcessorEditor::oscOutputPluginIdChanged(int value)
+{
     processor.setOscOutputPluginId(value);
 }
 
-void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int oscPort) {
+void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int oscPort)
+{
     if (state) {
         processor.createOscInputConnection(oscPort);
     } else {
@@ -556,7 +635,8 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
     }
 }
 
-void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) {
+void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, String oscAddress, int oscPort)
+{
     if (state) {
         processor.createOscOutputConnection(oscAddress, oscPort);
     } else {
@@ -565,18 +645,22 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, Str
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::paint (Graphics& g) {
-    GrisLookAndFeel *lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *> (&getLookAndFeel());
-    g.fillAll (lookAndFeel->findColour (ResizableWindow::backgroundColourId));
+void ControlGrisAudioProcessorEditor::paint(Graphics & g)
+{
+    GrisLookAndFeel * lookAndFeel;
+    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
+    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 }
 
-void ControlGrisAudioProcessorEditor::resized() {
-    double width = getWidth() - 50; // Remove position preset space. 
+void ControlGrisAudioProcessorEditor::resized()
+{
+    double width = getWidth() - 50; // Remove position preset space.
     double height = getHeight();
 
     double fieldSize = width / 2;
-    if (fieldSize < MIN_FIELD_WIDTH) { fieldSize = MIN_FIELD_WIDTH; }
+    if (fieldSize < MIN_FIELD_WIDTH) {
+        fieldSize = MIN_FIELD_WIDTH;
+    }
 
     automationManager.setFieldWidth(fieldSize);
     automationManagerAlt.setFieldWidth(fieldSize);
@@ -604,7 +688,7 @@ void ControlGrisAudioProcessorEditor::resized() {
     settingsBanner.setBounds(0, fieldSize + 250, width, 20);
     configurationComponent.setBounds(0, fieldSize + 270, width, 130);
 
-    lastUIWidth  = getWidth();
+    lastUIWidth = getWidth();
     lastUIHeight = getHeight();
 
     positionPresetBanner.setBounds(width, 0, 50, 20);

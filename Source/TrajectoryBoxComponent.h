@@ -20,8 +20,8 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "GrisLookAndFeel.h"
 #include "ControlGrisConstants.h"
+#include "GrisLookAndFeel.h"
 
 class TrajectoryBoxComponent final : public Component
 {
@@ -29,7 +29,7 @@ public:
     TrajectoryBoxComponent();
     ~TrajectoryBoxComponent() final;
 
-    void paint(Graphics&) final;
+    void paint(Graphics &) final;
     void resized() final;
 
     void setNumberOfSources(int numOfSources);
@@ -53,8 +53,7 @@ public:
     void setActivateState(bool state);
     void setActivateAltState(bool state);
 
-    struct Listener
-    {
+    struct Listener {
         virtual ~Listener() {}
 
         virtual void trajectoryBoxSourceLinkChanged(SourceLink value) = 0;
@@ -72,42 +71,42 @@ public:
         virtual void trajectoryBoxActivateAltChanged(bool value) = 0;
     };
 
-    void addListener(Listener* l) { listeners.add (l); }
-    void removeListener(Listener* l) { listeners.remove (l); }
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
 
-    ComboBox        sourceLinkCombo;
-    ComboBox        sourceLinkAltCombo;
+    ComboBox sourceLinkCombo;
+    ComboBox sourceLinkAltCombo;
 
 private:
     ListenerList<Listener> listeners;
 
-    SpatMode  m_spatMode;
+    SpatMode m_spatMode;
 
-    Label           sourceLinkLabel;
+    Label sourceLinkLabel;
 
-    Label           trajectoryTypeLabel;
-    ComboBox        trajectoryTypeCombo;
-    ComboBox        trajectoryTypeAltCombo;
+    Label trajectoryTypeLabel;
+    ComboBox trajectoryTypeCombo;
+    ComboBox trajectoryTypeAltCombo;
 
-    ToggleButton    backAndForthToggle;
-    ToggleButton    backAndForthAltToggle;
+    ToggleButton backAndForthToggle;
+    ToggleButton backAndForthAltToggle;
 
-    Label           dampeningLabel;
-    TextEditor      dampeningEditor;
-    TextEditor      dampeningAltEditor;
+    Label dampeningLabel;
+    TextEditor dampeningEditor;
+    TextEditor dampeningAltEditor;
 
-    Label           deviationLabel;
-    TextEditor      deviationEditor;
+    Label deviationLabel;
+    TextEditor deviationEditor;
 
-    Label           durationLabel;
-    TextEditor      durationEditor;
-    ComboBox        durationUnitCombo;
+    Label durationLabel;
+    TextEditor durationEditor;
+    ComboBox durationUnitCombo;
 
-    Label           cycleSpeedLabel;
-    Slider          cycleSpeedSlider;
+    Label cycleSpeedLabel;
+    Slider cycleSpeedSlider;
 
-    TextButton      activateButton;
-    TextButton      activateAltButton;
+    TextButton activateButton;
+    TextButton activateAltButton;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (TrajectoryBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrajectoryBoxComponent)
 };

@@ -20,18 +20,21 @@
 
 #include "PositionPresetComponent.h"
 
-void PresetButton::setSavedState(bool isSaved) {
+void PresetButton::setSavedState(bool isSaved)
+{
     saved = isSaved;
     refresh();
 }
 
-void PresetButton::setLoadedState(bool isLoaded) {
+void PresetButton::setLoadedState(bool isLoaded)
+{
     loaded = isLoaded;
     setToggleState(isLoaded, NotificationType::dontSendNotification);
     refresh();
 }
 
-void PresetButton::refresh() {
+void PresetButton::refresh()
+{
     if (loaded) {
         setColour(TextButton::buttonColourId, Colour::fromRGB(255, 165, 25));
     } else {
@@ -43,20 +46,22 @@ void PresetButton::refresh() {
     }
 }
 
-void PresetButton::clicked(const ModifierKeys &mods) {
-    listeners.call([&] (Listener& l) { l.buttonClicked(this); });
-    if (! mods.isShiftDown()) {
+void PresetButton::clicked(const ModifierKeys & mods)
+{
+    listeners.call([&](Listener & l) { l.buttonClicked(this); });
+    if (!mods.isShiftDown()) {
         loaded = getToggleState();
     }
     refresh();
 };
 
-void PresetButton::internalClickCallback (const ModifierKeys &mods) {
+void PresetButton::internalClickCallback(const ModifierKeys & mods)
+{
     if (mods.isShiftDown()) {
-        listeners.call([&] (Listener& l) { l.savingPresetClicked(this); });
+        listeners.call([&](Listener & l) { l.savingPresetClicked(this); });
         saved = true;
     } else if (saved && mods.isAltDown()) {
-        listeners.call([&] (Listener& l) { l.deletingPresetClicked(this); });
+        listeners.call([&](Listener & l) { l.deletingPresetClicked(this); });
         setToggleState(false, NotificationType::dontSendNotification);
         loaded = saved = false;
     } else if (saved) {
@@ -66,21 +71,22 @@ void PresetButton::internalClickCallback (const ModifierKeys &mods) {
 };
 
 //===============================================================================
-PositionPresetComponent::PositionPresetComponent() {
+PositionPresetComponent::PositionPresetComponent()
+{
     int groupId = 1;
 
     currentSelection = -1;
 
     for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
-        auto* button = new PresetButton();
-        presets.add (button);
+        auto * button = new PresetButton();
+        presets.add(button);
 
         button->setRadioGroupId(groupId);
         button->setClickingTogglesState(true);
-        button->setButtonText(String(i+1));
+        button->setButtonText(String(i + 1));
         button->addListener(this);
 
-        addAndMakeVisible (button);
+        addAndMakeVisible(button);
     }
 
     actionLog.setColour(Label::backgroundColourId, Colour::fromRGB(120, 120, 120));
@@ -92,11 +98,13 @@ PositionPresetComponent::PositionPresetComponent() {
     addAndMakeVisible(&appVersionLabel);
 }
 
-PositionPresetComponent::~PositionPresetComponent() {
+PositionPresetComponent::~PositionPresetComponent()
+{
     setLookAndFeel(nullptr);
 }
 
-void PositionPresetComponent::setPreset(int value, bool notify) {
+void PositionPresetComponent::setPreset(int value, bool notify)
+{
     if (currentSelection >= 0) {
         presets[currentSelection]->setLoadedState(false);
     }
@@ -114,35 +122,41 @@ void PositionPresetComponent::setPreset(int value, bool notify) {
     }
 }
 
-void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved) {
+void PositionPresetComponent::presetSaved(int presetNumber, bool isSaved)
+{
     if (presets[presetNumber - 1] != nullptr) {
         presets[presetNumber - 1]->setSavedState(isSaved);
     }
 }
 
-void PositionPresetComponent::buttonClicked(PresetButton *button) {
+void PositionPresetComponent::buttonClicked(PresetButton * button)
+{
     if (button->getToggleState()) {
         currentSelection = button->getButtonText().getIntValue() - 1;
         actionLog.setText(String("Load ") + button->getButtonText(), NotificationType::dontSendNotification);
-        listeners.call([&] (Listener& l) { l.positionPresetChanged(button->getButtonText().getIntValue()); });
+        listeners.call([&](Listener & l) { l.positionPresetChanged(button->getButtonText().getIntValue()); });
     }
 }
 
-void PositionPresetComponent::savingPresetClicked(PresetButton *button) {
+void PositionPresetComponent::savingPresetClicked(PresetButton * button)
+{
     actionLog.setText(String("Save ") + button->getButtonText(), NotificationType::dontSendNotification);
-    listeners.call([&] (Listener& l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
+    listeners.call([&](Listener & l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
 }
 
-void PositionPresetComponent:: deletingPresetClicked(PresetButton *button) {
+void PositionPresetComponent::deletingPresetClicked(PresetButton * button)
+{
     actionLog.setText(String("Del ") + button->getButtonText(), NotificationType::dontSendNotification);
-    listeners.call([&] (Listener& l) { l.positionPresetDeleted(button->getButtonText().getIntValue()); });
+    listeners.call([&](Listener & l) { l.positionPresetDeleted(button->getButtonText().getIntValue()); });
 }
 
-void PositionPresetComponent::paint(Graphics& g) {
-    g.fillAll (Colour::fromRGB(64, 64, 64));
+void PositionPresetComponent::paint(Graphics & g)
+{
+    g.fillAll(Colour::fromRGB(64, 64, 64));
 }
 
-void PositionPresetComponent::resized() {
+void PositionPresetComponent::resized()
+{
     int width = getWidth();
 
     for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {

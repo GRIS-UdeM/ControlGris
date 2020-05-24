@@ -20,71 +20,121 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-String getFixedPosSourceName(int index, int dimension) {
+String getFixedPosSourceName(int index, int dimension)
+{
     String result{};
     switch (dimension) {
-        case 0:
-            result = String("S") + String(index + 1) + String("_X");
-            break;
-        case 1:
-            result = String("S") + String(index + 1) + String("_Y");
-            break;
-        case 2:
-            result = String("S") + String(index + 1) + String("_Z");
-            break;
-        default:
-            jassertfalse; // how did you get there?
+    case 0:
+        result = String("S") + String(index + 1) + String("_X");
+        break;
+    case 1:
+        result = String("S") + String(index + 1) + String("_Y");
+        break;
+    case 2:
+        result = String("S") + String(index + 1) + String("_Z");
+        break;
+    default:
+        jassertfalse; // how did you get there?
     }
     return result;
 }
 
 // The parameter Layout creates the automatable parameters.
-AudioProcessorValueTreeState::ParameterLayout createParameterLayout() {
+AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+{
     using Parameter = AudioProcessorValueTreeState::Parameter;
 
     std::vector<std::unique_ptr<Parameter>> parameters;
 
-    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_x"), String("Recording Trajectory X"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
-    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"), String("Recording Trajectory Y"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
-    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"), String("Recording Trajectory Z"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.0f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_x"),
+                                                     String("Recording Trajectory X"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"),
+                                                     String("Recording Trajectory Y"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"),
+                                                     String("Recording Trajectory Z"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
 
-    parameters.push_back(std::make_unique<Parameter>(String("sourceLink"), String("Source Link"), String(),
-                                                     NormalisableRange<float>(0.f, static_cast<float> (SOURCE_LINK_TYPES.size() - 1), 1.f),
-                                                     0.f, nullptr, nullptr, false, true, true));
-    parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"), String("Source Link Alt"), String(),
-                                                     NormalisableRange<float>(0.f, 4.f, 1.f), 0.f, nullptr, nullptr,
-                                                     false, true, true));
+    parameters.push_back(std::make_unique<Parameter>(
+        String("sourceLink"),
+        String("Source Link"),
+        String(),
+        NormalisableRange<float>(0.f, static_cast<float>(SOURCE_LINK_TYPES.size() - 1), 1.f),
+        0.f,
+        nullptr,
+        nullptr,
+        false,
+        true,
+        true));
+    parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"),
+                                                     String("Source Link Alt"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 4.f, 1.f),
+                                                     0.f,
+                                                     nullptr,
+                                                     nullptr,
+                                                     false,
+                                                     true,
+                                                     true));
 
-    parameters.push_back(std::make_unique<Parameter>(String("positionPreset"), String("Position Preset"), String(),
-                                                     NormalisableRange<float>(0.f, 50.f, 1.f), 0.f, nullptr, nullptr,
-                                                     false, true, true));
+    parameters.push_back(std::make_unique<Parameter>(String("positionPreset"),
+                                                     String("Position Preset"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 50.f, 1.f),
+                                                     0.f,
+                                                     nullptr,
+                                                     nullptr,
+                                                     false,
+                                                     true,
+                                                     true));
 
-    parameters.push_back(std::make_unique<Parameter>(String("azimuthSpan"), String("Azimuth Span"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
-    parameters.push_back(std::make_unique<Parameter>(String("elevationSpan"), String("Elevation Span"),
-                                                     String(), NormalisableRange<float>(0.f, 1.f), 0.f, nullptr, nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("azimuthSpan"),
+                                                     String("Azimuth Span"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     0.f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(String("elevationSpan"),
+                                                     String("Elevation Span"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     0.f,
+                                                     nullptr,
+                                                     nullptr));
 
     return { parameters.begin(), parameters.end() };
 }
 
 //==============================================================================
 ControlGrisAudioProcessor::ControlGrisAudioProcessor()
-     :
+    :
 #ifndef JucePlugin_PreferredChannelConfigurations
-     AudioProcessor (BusesProperties()
-                     #if ! JucePlugin_IsMidiEffect
-                      #if ! JucePlugin_IsSynth
-                       .withInput  ("Input",  AudioChannelSet::stereo(), true)
-                      #endif // JucePlugin_IsSynth
-                       .withOutput ("Output", AudioChannelSet::stereo(), true)
-                     #endif // JucePlugin_IsMidiEffect
-                       ),
+    AudioProcessor(BusesProperties()
+    #if !JucePlugin_IsMidiEffect
+        #if !JucePlugin_IsSynth
+                       .withInput("Input", AudioChannelSet::stereo(), true)
+        #endif // JucePlugin_IsSynth
+                       .withOutput("Output", AudioChannelSet::stereo(), true)
+    #endif // JucePlugin_IsMidiEffect
+                       )
+    ,
 #endif // JucePlugin_PreferredChannelConfigurations
-    parameters (*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout()),
-    fixPositionData (FIXED_POSITION_DATA_TAG)
+    parameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
+    , fixPositionData(FIXED_POSITION_DATA_TAG)
 {
     m_numOfSources = 2;
     m_firstSourceId = 1;
@@ -115,7 +165,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_canStopActivate = false;
 
     // Size of the plugin window.
-    parameters.state.addChild ({ "uiState", { { "width",  650 }, { "height", 700 } }, {} }, -1, nullptr);
+    parameters.state.addChild({ "uiState", { { "width", 650 }, { "height", 700 } }, {} }, -1, nullptr);
 
     // Global setting parameters.
     parameters.state.setProperty("oscFormat", 0, nullptr);
@@ -183,12 +233,14 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     startTimerHz(50);
 }
 
-ControlGrisAudioProcessor::~ControlGrisAudioProcessor() {
+ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
+{
     disconnectOSC();
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, float newValue) {
+void ControlGrisAudioProcessor::parameterChanged(const String & parameterID, float newValue)
+{
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
@@ -217,7 +269,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
             automationManager.setSourceLink(val);
             automationManager.fixSourcePosition();
             onSourceLinkChanged(val);
-            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updateSourceLinkCombo(val);
             }
@@ -230,7 +282,7 @@ void ControlGrisAudioProcessor::parameterChanged(const String &parameterID, floa
             automationManagerAlt.setSourceLink(val);
             automationManagerAlt.fixSourcePosition();
             onSourceLinkAltChanged(static_cast<SourceLinkAlt>(val));
-            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updateSourceLinkAltCombo(static_cast<SourceLinkAlt>(val));
             }
@@ -258,18 +310,20 @@ struct Sorter {
     float value;
 };
 
-bool compareLessThan(const Sorter &a, const Sorter &b) {
+bool compareLessThan(const Sorter & a, const Sorter & b)
+{
     return a.value <= b.value;
 }
 //========================================================
-void ControlGrisAudioProcessor::setSourceLink(SourceLink value) {
+void ControlGrisAudioProcessor::setSourceLink(SourceLink value)
+{
     if (value != automationManager.getSourceLink()) {
         if (m_numOfSources != 2 && (value == SourceLink::linkSymmetricX || value == SourceLink::linkSymmetricY))
             return;
 
         if (automationManager.getDrawingType() != TrajectoryType::drawing) {
             if (value == SourceLink::circularDeltaLock) {
-                automationManager.setSourceAndPlaybackPosition(Point<float> (0.5, 0.5));
+                automationManager.setSourceAndPlaybackPosition(Point<float>(0.5, 0.5));
             } else {
                 automationManager.setSourceAndPlaybackPosition(sources[0].getPos());
             }
@@ -280,21 +334,23 @@ void ControlGrisAudioProcessor::setSourceLink(SourceLink value) {
 
         onSourceLinkChanged(value);
 
-        float howMany = static_cast<float> (SOURCE_LINK_TYPES.size() - 1);
+        float howMany = static_cast<float>(SOURCE_LINK_TYPES.size() - 1);
         parameters.getParameter("sourceLink")->beginChangeGesture();
         parameters.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / howMany);
         parameters.getParameter("sourceLink")->endChangeGesture();
-        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+        ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
             ed->updateSourceLinkCombo(value);
         }
     }
 }
 
-void ControlGrisAudioProcessor::setSourceLinkAlt(SourceLinkAlt value) {
+void ControlGrisAudioProcessor::setSourceLinkAlt(SourceLinkAlt value)
+{
     if (value != static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-        if (value == SourceLinkAlt::deltaLock && static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) != TrajectoryTypeAlt::drawing) {
-            automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0., 0.5));
+        if (value == SourceLinkAlt::deltaLock
+            && static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) != TrajectoryTypeAlt::drawing) {
+            automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0., 0.5));
         }
 
         automationManagerAlt.setSourceLink(static_cast<SourceLink>(value));
@@ -305,14 +361,15 @@ void ControlGrisAudioProcessor::setSourceLinkAlt(SourceLinkAlt value) {
         parameters.getParameter("sourceLinkAlt")->beginChangeGesture();
         parameters.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)value - 1.f) / 4.f);
         parameters.getParameter("sourceLinkAlt")->endChangeGesture();
-        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+        ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
             ed->updateSourceLinkAltCombo(value);
         }
     }
 }
 
-void ControlGrisAudioProcessor::onSourceLinkChanged(SourceLink value) {
+void ControlGrisAudioProcessor::onSourceLinkChanged(SourceLink value)
+{
     if (value == SourceLink::circularFixedRadius || value == SourceLink::circularFullyFixed) {
         if (m_selectedOscFormat == SpatMode::LBAP) {
             for (int i = 1; i < m_numOfSources; i++) {
@@ -362,7 +419,8 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(SourceLink value) {
     }
 }
 
-void ControlGrisAudioProcessor::onSourceLinkAltChanged(SourceLinkAlt value) {
+void ControlGrisAudioProcessor::onSourceLinkAltChanged(SourceLinkAlt value)
+{
     if (getOscFormat() == SpatMode::LBAP) {
         // Fixed elevation.
         if (value == SourceLinkAlt::fixedElevation) {
@@ -393,7 +451,8 @@ void ControlGrisAudioProcessor::onSourceLinkAltChanged(SourceLinkAlt value) {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setOscFormat(SpatMode oscFormat) {
+void ControlGrisAudioProcessor::setOscFormat(SpatMode oscFormat)
+{
     m_selectedOscFormat = oscFormat;
     parameters.state.setProperty("oscFormat", static_cast<int>(m_selectedOscFormat), nullptr);
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -401,12 +460,14 @@ void ControlGrisAudioProcessor::setOscFormat(SpatMode oscFormat) {
     }
 }
 
-void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber) {
+void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber)
+{
     m_currentOSCPort = oscPortNumber;
     parameters.state.setProperty("oscPortNumber", m_currentOSCPort, nullptr);
 }
 
-void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate) {
+void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate)
+{
     m_firstSourceId = firstSourceId;
     parameters.state.setProperty("firstSourceId", m_firstSourceId, nullptr);
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
@@ -417,7 +478,8 @@ void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propaga
         sendOscMessage();
 }
 
-void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propagate) {
+void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propagate)
+{
     m_numOfSources = numOfSources;
     parameters.state.setProperty("numberOfSources", m_numOfSources, nullptr);
 
@@ -425,12 +487,14 @@ void ControlGrisAudioProcessor::setNumberOfSources(int numOfSources, bool propag
         sendOscMessage();
 }
 
-void ControlGrisAudioProcessor::setSelectedSourceId(int id) {
+void ControlGrisAudioProcessor::setSelectedSourceId(int id)
+{
     m_selectedSourceId = id;
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscConnection(int oscPort) {
+bool ControlGrisAudioProcessor::createOscConnection(int oscPort)
+{
     disconnectOSC();
 
     m_oscConnected = oscSender.connect("127.0.0.1", oscPort);
@@ -442,7 +506,8 @@ bool ControlGrisAudioProcessor::createOscConnection(int oscPort) {
     return m_oscConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSC() {
+bool ControlGrisAudioProcessor::disconnectOSC()
+{
     if (m_oscConnected) {
         if (oscSender.disconnect()) {
             m_oscConnected = false;
@@ -452,7 +517,8 @@ bool ControlGrisAudioProcessor::disconnectOSC() {
     return !m_oscConnected;
 }
 
-void ControlGrisAudioProcessor::handleOscConnection(bool state) {
+void ControlGrisAudioProcessor::handleOscConnection(bool state)
+{
     if (state) {
         if (m_lastConnectedOSCPort != m_currentOSCPort) {
             createOscConnection(m_currentOSCPort);
@@ -463,8 +529,9 @@ void ControlGrisAudioProcessor::handleOscConnection(bool state) {
     parameters.state.setProperty("oscConnected", getOscConnected(), nullptr);
 }
 
-void ControlGrisAudioProcessor::sendOscMessage() {
-    if (! m_oscConnected)
+void ControlGrisAudioProcessor::sendOscMessage()
+{
+    if (!m_oscConnected)
         return;
 
     OSCAddressPattern oscPattern("/spat/serv");
@@ -472,8 +539,9 @@ void ControlGrisAudioProcessor::sendOscMessage() {
 
     for (int i = 0; i < m_numOfSources; i++) {
         message.clear();
-        float const azim{-sources[i].getAzimuth() / 180.f * MathConstants<float>::pi };
-        float const elev{MathConstants<float>::halfPi - sources[i].getElevation() / 360.f * MathConstants<float>::twoPi };
+        float const azim{ -sources[i].getAzimuth() / 180.f * MathConstants<float>::pi };
+        float const elev{ MathConstants<float>::halfPi
+                          - sources[i].getElevation() / 360.f * MathConstants<float>::twoPi };
         message.addInt32(sources[i].getId());
         message.addFloat32(azim);
         message.addFloat32(elev);
@@ -487,14 +555,15 @@ void ControlGrisAudioProcessor::sendOscMessage() {
         message.addFloat32(0.0);
 
         if (!oscSender.send(message)) {
-            //std::cout << "Error: could not send OSC message." << std::endl;
+            // std::cout << "Error: could not send OSC message." << std::endl;
             return;
         }
     }
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
+bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort)
+{
     disconnectOSCInput(oscPort);
 
     m_oscInputConnected = oscInputReceiver.connect(oscPort);
@@ -511,7 +580,8 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort) {
     return m_oscInputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
+bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort)
+{
     if (m_oscInputConnected) {
         if (oscInputReceiver.disconnect()) {
             m_oscInputConnected = false;
@@ -524,8 +594,9 @@ bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort) {
     return !m_oscInputConnected;
 }
 
-void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
-    for (auto const& element : bundle) {
+void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle & bundle)
+{
+    for (auto const & element : bundle) {
         if (element.isMessage())
             oscMessageReceived(element.getMessage());
         else if (element.isBundle())
@@ -533,7 +604,8 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle& bundle) {
     }
 }
 
-void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
+void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
+{
     SourceLink sourceLinkToProcess{ SourceLink::undefined };
     SourceLinkAlt sourceLinkAltToProcess{ SourceLinkAlt::undefined };
     float x{ -1.f };
@@ -541,16 +613,18 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     float z{ -1.f };
     String const address{ message.getAddressPattern().toString() };
     String const pluginInstance{ String("/controlgris/") + String(getOscOutputPluginId()) };
-    if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1")) &&
-         automationManager.getDrawingType() == TrajectoryType::realtime) {
+    if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
+        && automationManager.getDrawingType() == TrajectoryType::realtime) {
         x = message[0].getFloat32();
-    } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2")) &&
-                automationManager.getDrawingType() == TrajectoryType::realtime) {
+    } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2"))
+               && automationManager.getDrawingType() == TrajectoryType::realtime) {
         y = message[0].getFloat32();
-    } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3")) &&
-                static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3"))
+               && static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType())
+                      == TrajectoryTypeAlt::realtime) {
         z = message[0].getFloat32();
-    } else if (address == String(pluginInstance + "/traj/1/xy") && automationManager.getDrawingType() == TrajectoryType::realtime) {
+    } else if (address == String(pluginInstance + "/traj/1/xy")
+               && automationManager.getDrawingType() == TrajectoryType::realtime) {
         x = message[0].getFloat32();
         y = message[1].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xyz")) {
@@ -568,11 +642,11 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
         parameters.getParameter("azimuthSpan")->setValueNotifyingHost(message[0].getFloat32());
         parameters.getParameter("azimuthSpan")->endChangeGesture();
     } else if (address == String(pluginInstance + "/elespan")) {
-            for (int i = 0; i < m_numOfSources; i++)
-                sources[i].setElevationSpan(message[0].getFloat32());
-            parameters.getParameter("elevationSpan")->beginChangeGesture();
-            parameters.getParameter("elevationSpan")->setValueNotifyingHost(message[0].getFloat32());
-            parameters.getParameter("elevationSpan")->endChangeGesture();
+        for (int i = 0; i < m_numOfSources; i++)
+            sources[i].setElevationSpan(message[0].getFloat32());
+        parameters.getParameter("elevationSpan")->beginChangeGesture();
+        parameters.getParameter("elevationSpan")->setValueNotifyingHost(message[0].getFloat32());
+        parameters.getParameter("elevationSpan")->endChangeGesture();
     } else if (address == String(pluginInstance + "/sourcelink/1/1")) {
         if (message[0].getFloat32() == 1)
             sourceLinkToProcess = static_cast<SourceLink>(1);
@@ -613,7 +687,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
         setPositionPreset(newPreset);
-        ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+        ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
             ed->updatePositionPreset(newPreset);
         }
@@ -664,12 +738,14 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage& message) {
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscOutputConnection(String oscAddress, int oscPort) {
+bool ControlGrisAudioProcessor::createOscOutputConnection(String oscAddress, int oscPort)
+{
     disconnectOSCOutput(oscAddress, oscPort);
 
     m_oscOutputConnected = oscOutputSender.connect(oscAddress, oscPort);
     if (!m_oscOutputConnected)
-        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << "." << std::endl;
+        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << "."
+                  << std::endl;
     else {
         m_currentOSCOutputPort = oscPort;
         m_currentOSCOutputAddress = oscAddress;
@@ -682,7 +758,8 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(String oscAddress, int
     return m_oscOutputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPort) {
+bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPort)
+{
     if (m_oscOutputConnected) {
         if (oscOutputSender.disconnect()) {
             m_oscOutputConnected = false;
@@ -696,19 +773,22 @@ bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPo
     return !m_oscOutputConnected;
 }
 
-void ControlGrisAudioProcessor::setOscOutputPluginId(int pluginId) {
+void ControlGrisAudioProcessor::setOscOutputPluginId(int pluginId)
+{
     parameters.state.setProperty("oscOutputPluginId", pluginId, nullptr);
 }
 
-int ControlGrisAudioProcessor::getOscOutputPluginId() const {
+int ControlGrisAudioProcessor::getOscOutputPluginId() const
+{
     return parameters.state.getProperty("oscOutputPluginId", 1);
 }
 
-void ControlGrisAudioProcessor::sendOscOutputMessage() {
-    if (! m_oscOutputConnected)
+void ControlGrisAudioProcessor::sendOscOutputMessage()
+{
+    if (!m_oscOutputConnected)
         return;
 
-    OSCMessage message(OSCAddressPattern ("/tmp"));
+    OSCMessage message(OSCAddressPattern("/tmp"));
 
     String pluginInstance = String("/controlgris/") + String(getOscOutputPluginId());
 
@@ -717,49 +797,50 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     float trajectory1z = automationManagerAlt.getSourcePosition().y;
 
     if (m_lastTrajectory1x != trajectory1x) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/x"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/x"));
         message.addFloat32(trajectory1x);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/1"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/1"));
         message.addFloat32(trajectory1x);
         oscOutputSender.send(message);
         message.clear();
     }
 
     if (m_lastTrajectory1y != trajectory1y) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/y"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/y"));
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/2"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/2"));
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
     }
 
     if (m_lastTrajectory1z != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/z"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/z"));
         message.addFloat32(trajectory1z);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz/3"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/3"));
         message.addFloat32(trajectory1z);
         oscOutputSender.send(message);
         message.clear();
     }
 
-    if (m_lastTrajectory1x != trajectory1x || m_lastTrajectory1y != trajectory1y || m_lastTrajectory1z != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xy"));
+    if (m_lastTrajectory1x != trajectory1x || m_lastTrajectory1y != trajectory1y
+        || m_lastTrajectory1z != trajectory1z) {
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xy"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         oscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/traj/1/xyz"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         message.addFloat32(trajectory1z);
@@ -772,7 +853,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     m_lastTrajectory1z = trajectory1z;
 
     if (m_lastAzispan != sources[0].getAzimuthSpan()) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/azispan"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/azispan"));
         message.addFloat32(sources[0].getAzimuthSpan());
         oscOutputSender.send(message);
         message.clear();
@@ -780,7 +861,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (m_lastElespan != sources[0].getElevationSpan()) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/elespan"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/elespan"));
         message.addFloat32(sources[0].getElevationSpan());
         oscOutputSender.send(message);
         message.clear();
@@ -788,13 +869,14 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (automationManager.getSourceLink() != m_lastSourceLink) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/sourcelink"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelink"));
         message.addInt32(static_cast<int32>(automationManager.getSourceLink()));
         oscOutputSender.send(message);
         message.clear();
 
-        String pattern = pluginInstance + String("/sourcelink/") + String(static_cast<int>(automationManager.getSourceLink())) + String("/1");
-        message.setAddressPattern(OSCAddressPattern (pattern));
+        String pattern = pluginInstance + String("/sourcelink/")
+                         + String(static_cast<int>(automationManager.getSourceLink())) + String("/1");
+        message.setAddressPattern(OSCAddressPattern(pattern));
         message.addInt32(1);
         oscOutputSender.send(message);
         message.clear();
@@ -803,14 +885,14 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()) != m_lastSourceLinkAlt) {
-
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/sourcelinkalt"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
         message.addInt32(static_cast<int32>(automationManagerAlt.getSourceLink()));
         oscOutputSender.send(message);
         message.clear();
 
-        String patternAlt = pluginInstance + String("/sourcelinkalt/") + String(static_cast<int>(automationManagerAlt.getSourceLink())) + String("/1");
-        message.setAddressPattern(OSCAddressPattern (patternAlt));
+        String patternAlt = pluginInstance + String("/sourcelinkalt/")
+                            + String(static_cast<int>(automationManagerAlt.getSourceLink())) + String("/1");
+        message.setAddressPattern(OSCAddressPattern(patternAlt));
         message.addInt32(1);
         oscOutputSender.send(message);
         message.clear();
@@ -819,7 +901,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
     }
 
     if (m_currentPositionPreset != m_lastPositionPreset) {
-        message.setAddressPattern(OSCAddressPattern (pluginInstance + "/presets"));
+        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/presets"));
         message.addInt32(m_currentPositionPreset);
         oscOutputSender.send(message);
         message.clear();
@@ -829,11 +911,12 @@ void ControlGrisAudioProcessor::sendOscOutputMessage() {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::timerCallback() {
+void ControlGrisAudioProcessor::timerCallback()
+{
     if (m_newPositionPreset != 0 && m_newPositionPreset != m_currentPositionPreset) {
         if (recallFixedPosition(m_newPositionPreset)) {
             m_currentPositionPreset = m_newPositionPreset;
-            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updatePositionPreset(m_currentPositionPreset);
             }
@@ -849,8 +932,8 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManager.hasValidPlaybackPosition()) {
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
-    } else if (automationManager.hasValidPlaybackPosition() &&
-               automationManager.getSourcePosition() != automationManager.getPlaybackPosition()) {
+    } else if (automationManager.hasValidPlaybackPosition()
+               && automationManager.getSourcePosition() != automationManager.getPlaybackPosition()) {
         int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
         recallFixedPosition(preset);
         automationManager.setSourcePosition(automationManager.getPlaybackPosition());
@@ -866,8 +949,8 @@ void ControlGrisAudioProcessor::timerCallback() {
         }
     } else if (m_isPlaying && automationManagerAlt.hasValidPlaybackPosition()) {
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
-    } else if (automationManagerAlt.hasValidPlaybackPosition() &&
-               automationManagerAlt.getSourcePosition() != automationManagerAlt.getPlaybackPosition()) {
+    } else if (automationManagerAlt.hasValidPlaybackPosition()
+               && automationManagerAlt.getSourcePosition() != automationManagerAlt.getPlaybackPosition()) {
         int preset = (int)parameters.getParameterAsValue("positionPreset").getValue();
         recallFixedPosition(preset);
         automationManagerAlt.setSourcePosition(automationManagerAlt.getPlaybackPosition());
@@ -876,7 +959,7 @@ void ControlGrisAudioProcessor::timerCallback() {
 
     m_lastTimerTime = getCurrentTime();
 
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    ControlGrisAudioProcessorEditor * editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
 
     if (m_canStopActivate && !m_isPlaying) {
         if (automationManager.getActivateState())
@@ -898,7 +981,8 @@ void ControlGrisAudioProcessor::timerCallback() {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setPluginState() {
+void ControlGrisAudioProcessor::setPluginState()
+{
     // If no preset is loaded, try to restore the last saved positions.
     if (m_currentPositionPreset == 0) {
         for (int i = 0; i < m_numOfSources; i++) {
@@ -912,7 +996,7 @@ void ControlGrisAudioProcessor::setPluginState() {
         }
     }
 
-    ControlGrisAudioProcessorEditor *editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    ControlGrisAudioProcessorEditor * editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
     if (editor != nullptr) {
         editor->setPluginState();
     }
@@ -921,7 +1005,8 @@ void ControlGrisAudioProcessor::setPluginState() {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichField) {
+void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichField)
+{
     if (whichField == 0) {
         if (getOscFormat() == SpatMode::LBAP) {
             setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, sources[sourceId].getNormalizedAzimuth());
@@ -946,25 +1031,25 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
         }
     }
     if (whichField == 1 && getOscFormat() == SpatMode::LBAP) {
-        if (sourceId != 0) { 
+        if (sourceId != 0) {
             float sourceElevation = sources[sourceId].getElevation();
             float offset = 60.0 / m_numOfSources * sourceId;
             switch (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-                case SourceLinkAlt::fixedElevation:
-                    sources[0].setNormalizedElevation(sources[sourceId].getNormalizedElevation());
-                    break;
-                case SourceLinkAlt::linearMin:
-                    sources[0].setElevation(sourceElevation - offset);
-                    break;
-                case SourceLinkAlt::linearMax:
-                    sources[0].setElevation(sourceElevation + offset);
-                    break;
-                case SourceLinkAlt::deltaLock:
-                    float deltaElevation = sources[sourceId].getDeltaElevation();
-                    sources[0].setElevationFromFixedSource(deltaElevation);
-                    break;
-                case SourceLinkAlt::undefined:
-                    jassertfalse;
+            case SourceLinkAlt::fixedElevation:
+                sources[0].setNormalizedElevation(sources[sourceId].getNormalizedElevation());
+                break;
+            case SourceLinkAlt::linearMin:
+                sources[0].setElevation(sourceElevation - offset);
+                break;
+            case SourceLinkAlt::linearMax:
+                sources[0].setElevation(sourceElevation + offset);
+                break;
+            case SourceLinkAlt::deltaLock:
+                float deltaElevation = sources[sourceId].getDeltaElevation();
+                sources[0].setElevationFromFixedSource(deltaElevation);
+                break;
+            case SourceLinkAlt::undefined:
+                jassertfalse;
             }
         }
         validateSourcePositionsAlt();
@@ -973,50 +1058,52 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
 
 // Called whenever a source has changed.
 //--------------------------------------
-void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parameterId, double value) {
+void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parameterId, double value)
+{
     String id(sourceId);
     switch (parameterId) {
-        case SOURCE_ID_AZIMUTH:
-            sources[sourceId].setNormalizedAzimuth(value);
-            parameters.state.setProperty("p_azimuth_" + id, value, nullptr);
-            break;
-        case SOURCE_ID_ELEVATION:
-            sources[sourceId].setNormalizedElevation(value);
-            parameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
-            break;
-        case SOURCE_ID_DISTANCE:
-            sources[sourceId].setDistance(value);
-            parameters.state.setProperty(String("p_distance_") + id, value, nullptr);
-            break;
-        case SOURCE_ID_X:
-            sources[sourceId].setX(value);
-            break;
-        case SOURCE_ID_Y:
-            sources[sourceId].setY(value);
-            break;
-        case SOURCE_ID_AZIMUTH_SPAN:
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setAzimuthSpan(value);
-            }
-            parameters.getParameter("azimuthSpan")->beginChangeGesture();
-            parameters.getParameter("azimuthSpan")->setValueNotifyingHost(value);
-            parameters.getParameter("azimuthSpan")->endChangeGesture();
-            break;
-        case SOURCE_ID_ELEVATION_SPAN:
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setElevationSpan(value);
-            }
-            parameters.getParameter("elevationSpan")->beginChangeGesture();
-            parameters.getParameter("elevationSpan")->setValueNotifyingHost(value);
-            parameters.getParameter("elevationSpan")->endChangeGesture();
-            break;
+    case SOURCE_ID_AZIMUTH:
+        sources[sourceId].setNormalizedAzimuth(value);
+        parameters.state.setProperty("p_azimuth_" + id, value, nullptr);
+        break;
+    case SOURCE_ID_ELEVATION:
+        sources[sourceId].setNormalizedElevation(value);
+        parameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
+        break;
+    case SOURCE_ID_DISTANCE:
+        sources[sourceId].setDistance(value);
+        parameters.state.setProperty(String("p_distance_") + id, value, nullptr);
+        break;
+    case SOURCE_ID_X:
+        sources[sourceId].setX(value);
+        break;
+    case SOURCE_ID_Y:
+        sources[sourceId].setY(value);
+        break;
+    case SOURCE_ID_AZIMUTH_SPAN:
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setAzimuthSpan(value);
+        }
+        parameters.getParameter("azimuthSpan")->beginChangeGesture();
+        parameters.getParameter("azimuthSpan")->setValueNotifyingHost(value);
+        parameters.getParameter("azimuthSpan")->endChangeGesture();
+        break;
+    case SOURCE_ID_ELEVATION_SPAN:
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setElevationSpan(value);
+        }
+        parameters.getParameter("elevationSpan")->beginChangeGesture();
+        parameters.getParameter("elevationSpan")->setValueNotifyingHost(value);
+        parameters.getParameter("elevationSpan")->endChangeGesture();
+        break;
     }
 }
 
-void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *manager, Point<float> position) {
+void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager, Point<float> position)
+{
     if (manager == &automationManager) {
-        if (! getIsPlaying()) {
-            automationManager.setSourceAndPlaybackPosition(Point<float> (position.x, position.y));
+        if (!getIsPlaying()) {
+            automationManager.setSourceAndPlaybackPosition(Point<float>(position.x, position.y));
             parameters.getParameter("recordingTrajectory_x")->setValue(position.x);
             parameters.getParameter("recordingTrajectory_y")->setValue(position.y);
         }
@@ -1028,8 +1115,8 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
         parameters.getParameter("recordingTrajectory_y")->endChangeGesture();
         linkSourcePositions();
     } else if (manager == &automationManagerAlt) {
-        if (! getIsPlaying()) {
-            automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0.f, position.y));
+        if (!getIsPlaying()) {
+            automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0.f, position.y));
             parameters.getParameter("recordingTrajectory_z")->setValue(position.y);
         }
         parameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
@@ -1039,10 +1126,11 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager *man
     }
 }
 
-void ControlGrisAudioProcessor::linkSourcePositions() {
+void ControlGrisAudioProcessor::linkSourcePositions()
+{
     float delta = kSourceDiameter / automationManager.getFieldWidth();
-    Point<float> autopos = automationManager.getSourcePosition() - Point<float> (0.5, 0.5);
-    float mag = sqrtf(autopos.x*autopos.x + autopos.y*autopos.y);
+    Point<float> autopos = automationManager.getSourcePosition() - Point<float>(0.5, 0.5);
+    float mag = sqrtf(autopos.x * autopos.x + autopos.y * autopos.y);
     float ang = atan2f(autopos.y, autopos.x);
     float const x = (mag + (mag * delta)) * cosf(ang) + 0.5;
     float const y = (mag + (mag * delta)) * sinf(ang) + 0.5;
@@ -1050,91 +1138,93 @@ void ControlGrisAudioProcessor::linkSourcePositions() {
 
     float deltaX = 0.f, deltaY = 0.f;
     switch (automationManager.getSourceLink()) {
-        case SourceLink::independent:
-            sources[0].setPos(automationManager.getSourcePosition());
-            break;
-        case SourceLink::circular:
-        case SourceLink::circularFixedRadius:
-        case SourceLink::circularFixedAngle:
-        case SourceLink::circularFullyFixed:
-            sources[0].setPos(correctedPosition);
-            if (getOscFormat() == SpatMode::LBAP) {
-                float deltaAzimuth = sources[0].getDeltaAzimuth();
-                float deltaDistance = sources[0].getDeltaDistance();
-                for (int i = 1; i < m_numOfSources; i++) {
-                    sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0, deltaDistance);
-                }
-            } else {
-                float deltaAzimuth = sources[0].getDeltaAzimuth();
-                float deltaElevation = sources[0].getDeltaElevation();
-                for (int i = 1; i < m_numOfSources; i++) {
-                    sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
-                }
+    case SourceLink::independent:
+        sources[0].setPos(automationManager.getSourcePosition());
+        break;
+    case SourceLink::circular:
+    case SourceLink::circularFixedRadius:
+    case SourceLink::circularFixedAngle:
+    case SourceLink::circularFullyFixed:
+        sources[0].setPos(correctedPosition);
+        if (getOscFormat() == SpatMode::LBAP) {
+            float deltaAzimuth = sources[0].getDeltaAzimuth();
+            float deltaDistance = sources[0].getDeltaDistance();
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, 0.0, deltaDistance);
             }
-            break;
-        case SourceLink::circularDeltaLock:
-            deltaX = automationManager.getSource().getDeltaX();
-            deltaY = automationManager.getSource().getDeltaY();
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+        } else {
+            float deltaAzimuth = sources[0].getDeltaAzimuth();
+            float deltaElevation = sources[0].getDeltaElevation();
+            for (int i = 1; i < m_numOfSources; i++) {
+                sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
             }
-            break;
-        case SourceLink::linkSymmetricX:
-            sources[0].setPos(automationManager.getSourcePosition());
-            if (m_numOfSources == 2)
-                sources[1].setSymmetricX(sources[0].getX(), sources[0].getY());
-            break;
-        case SourceLink::linkSymmetricY:
-            sources[0].setPos(automationManager.getSourcePosition());
-            if (m_numOfSources == 2)
-                sources[1].setSymmetricY(sources[0].getX(), sources[0].getY());
-            break;
-        default:
-            jassertfalse;
+        }
+        break;
+    case SourceLink::circularDeltaLock:
+        deltaX = automationManager.getSource().getDeltaX();
+        deltaY = automationManager.getSource().getDeltaY();
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setXYCoordinatesFromFixedSource(deltaX, deltaY);
+        }
+        break;
+    case SourceLink::linkSymmetricX:
+        sources[0].setPos(automationManager.getSourcePosition());
+        if (m_numOfSources == 2)
+            sources[1].setSymmetricX(sources[0].getX(), sources[0].getY());
+        break;
+    case SourceLink::linkSymmetricY:
+        sources[0].setPos(automationManager.getSourcePosition());
+        if (m_numOfSources == 2)
+            sources[1].setSymmetricY(sources[0].getX(), sources[0].getY());
+        break;
+    default:
+        jassertfalse;
     }
 }
 
-void ControlGrisAudioProcessor::linkSourcePositionsAlt() {
+void ControlGrisAudioProcessor::linkSourcePositionsAlt()
+{
     float deltaY = 0.0f;
 
     switch (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-        case SourceLinkAlt::independent:
-            sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
-            break;
-        case SourceLinkAlt::fixedElevation:
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
-            }
-            break;
-        case SourceLinkAlt::linearMin:
-            for (int i = 0; i < m_numOfSources; i++) {
-                float offset = automationManagerAlt.getSourcePosition().y * 90.0;
-                sources[i].setElevation(60.0 / m_numOfSources * i + offset);
-            }
-            break;
-        case SourceLinkAlt::linearMax:
-            for (int i = 0; i < m_numOfSources; i++) {
-                float offset = 90.0 - automationManagerAlt.getSourcePosition().y * 90.0;
-                sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i) - offset);
-            }
-            break;
-        case SourceLinkAlt::deltaLock:
-            deltaY = automationManagerAlt.getSource().getDeltaY();
-            for (int i = 0; i < m_numOfSources; i++) {
-                sources[i].setElevationFromFixedSource(deltaY);
-            }
-            break;
-        default:
-            jassertfalse;
+    case SourceLinkAlt::independent:
+        sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
+        break;
+    case SourceLinkAlt::fixedElevation:
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
+        }
+        break;
+    case SourceLinkAlt::linearMin:
+        for (int i = 0; i < m_numOfSources; i++) {
+            float offset = automationManagerAlt.getSourcePosition().y * 90.0;
+            sources[i].setElevation(60.0 / m_numOfSources * i + offset);
+        }
+        break;
+    case SourceLinkAlt::linearMax:
+        for (int i = 0; i < m_numOfSources; i++) {
+            float offset = 90.0 - automationManagerAlt.getSourcePosition().y * 90.0;
+            sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i) - offset);
+        }
+        break;
+    case SourceLinkAlt::deltaLock:
+        deltaY = automationManagerAlt.getSource().getDeltaY();
+        for (int i = 0; i < m_numOfSources; i++) {
+            sources[i].setElevationFromFixedSource(deltaY);
+        }
+        break;
+    default:
+        jassertfalse;
     }
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::validateSourcePositions() {
+void ControlGrisAudioProcessor::validateSourcePositions()
+{
     auto sourceLink = automationManager.getSourceLink();
     auto drawingType = automationManager.getDrawingType();
 
-    if (! getIsPlaying()) {
+    if (!getIsPlaying()) {
         if (sourceLink != SourceLink::circularDeltaLock && drawingType != TrajectoryType::drawing) {
             automationManager.setSourceAndPlaybackPosition(sources[0].getPos());
         } else {
@@ -1160,7 +1250,7 @@ void ControlGrisAudioProcessor::validateSourcePositions() {
                 sources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
             }
         }
-    } 
+    }
     // Delta Lock mode.
     else if (sourceLink == SourceLink::circularDeltaLock) {
         float deltaX = sources[0].getDeltaX();
@@ -1196,13 +1286,15 @@ void ControlGrisAudioProcessor::validateSourcePositions() {
     }
 }
 
-void ControlGrisAudioProcessor::validateSourcePositionsAlt() {
+void ControlGrisAudioProcessor::validateSourcePositionsAlt()
+{
     auto const sourceLink = static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink());
     auto const drawingType = automationManagerAlt.getDrawingType();
 
-    if (! getIsPlaying()) {
-        if (sourceLink != SourceLinkAlt::deltaLock && static_cast<TrajectoryTypeAlt>(drawingType) != TrajectoryTypeAlt::drawing) {
-            automationManagerAlt.setSourceAndPlaybackPosition(Point<float> (0.f, sources[0].getNormalizedElevation()));
+    if (!getIsPlaying()) {
+        if (sourceLink != SourceLinkAlt::deltaLock
+            && static_cast<TrajectoryTypeAlt>(drawingType) != TrajectoryTypeAlt::drawing) {
+            automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0.f, sources[0].getNormalizedElevation()));
         } else {
             automationManagerAlt.setPlaybackPositionX(-1.0f);
             automationManagerAlt.setPlaybackPositionY(-1.0f);
@@ -1248,7 +1340,8 @@ void ControlGrisAudioProcessor::validateSourcePositionsAlt() {
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber) {
+void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
+{
     if (presetNumber != m_currentPositionPreset) {
         if (presetNumber == 0) {
             m_newPositionPreset = m_currentPositionPreset = 0;
@@ -1264,13 +1357,13 @@ void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber) {
             automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
         }
     }
-
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::addNewFixedPosition(int const id) {
+void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
+{
     // Build a new fixed position element.
-    XmlElement *newData = new XmlElement("ITEM");
+    XmlElement * newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         newData->setAttribute(getFixedPosSourceName(i, 0), sources[i].getX());
@@ -1282,7 +1375,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id) {
 
     // Replace an element if the new one has the same ID as one already saved.
     bool found{ false };
-    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    XmlElement * fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
         if (fpos->getIntAttribute("ID") == id) {
             found = true;
@@ -1303,9 +1396,10 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id) {
     recallFixedPosition(id);
 }
 
-bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
+bool ControlGrisAudioProcessor::recallFixedPosition(int id)
+{
     bool found = false;
-    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    XmlElement * fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
         if (fpos->getIntAttribute("ID") == id) {
             found = true;
@@ -1314,7 +1408,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
         fpos = fpos->getNextElement();
     }
 
-    if (! found) {
+    if (!found) {
         return false;
     }
 
@@ -1323,7 +1417,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
     for (int i = 0; i < m_numOfSources; i++) {
         x = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0));
         y = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
-        sources[i].setPos(Point<float> (x, y));
+        sources[i].setPos(Point<float>(x, y));
         sources[i].setFixedPosition(x, y);
         if (m_selectedOscFormat == SpatMode::LBAP) {
             z = currentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 2));
@@ -1335,26 +1429,32 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id) {
     return true;
 }
 
-void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement *src, XmlElement *dest) {
+void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest)
+{
     if (dest == nullptr)
         dest = new XmlElement(FIXED_POSITION_DATA_TAG);
 
-    forEachXmlChildElement (*src, element) {
-        XmlElement *newData = new XmlElement("ITEM");
+    forEachXmlChildElement(*src, element)
+    {
+        XmlElement * newData = new XmlElement("ITEM");
         newData->setAttribute("ID", element->getIntAttribute("ID"));
         for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
-            newData->setAttribute(getFixedPosSourceName(i, 0), element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
-            newData->setAttribute(getFixedPosSourceName(i, 1), element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
-            newData->setAttribute(getFixedPosSourceName(i, 2), element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
+            newData->setAttribute(getFixedPosSourceName(i, 0),
+                                  element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
+            newData->setAttribute(getFixedPosSourceName(i, 1),
+                                  element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
+            newData->setAttribute(getFixedPosSourceName(i, 2),
+                                  element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
         }
 
         dest->addChildElement(newData);
     }
 }
 
-void ControlGrisAudioProcessor::deleteFixedPosition(int id) {
+void ControlGrisAudioProcessor::deleteFixedPosition(int id)
+{
     bool found = false;
-    XmlElement *fpos = fixPositionData.getFirstChildElement();
+    XmlElement * fpos = fixPositionData.getFirstChildElement();
     while (fpos) {
         if (fpos->getIntAttribute("ID") == id) {
             found = true;
@@ -1378,33 +1478,34 @@ const String ControlGrisAudioProcessor::getName() const
 
 bool ControlGrisAudioProcessor::acceptsMidi() const
 {
-   #if JucePlugin_WantsMidiInput
+#if JucePlugin_WantsMidiInput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool ControlGrisAudioProcessor::producesMidi() const
 {
-   #if JucePlugin_ProducesMidiOutput
+#if JucePlugin_ProducesMidiOutput
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 bool ControlGrisAudioProcessor::isMidiEffect() const
 {
-   #if JucePlugin_IsMidiEffect
+#if JucePlugin_IsMidiEffect
     return true;
-   #else
+#else
     return false;
-   #endif
+#endif
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::initialize() {
+void ControlGrisAudioProcessor::initialize()
+{
     m_needInitialization = true;
     m_lastTime = m_lastTimerTime = 10000000.0;
     m_canStopActivate = true;
@@ -1413,7 +1514,7 @@ void ControlGrisAudioProcessor::initialize() {
     // the automation won't trigger parameterChanged if it stays on the same value.
     if (m_currentPositionPreset != 0) {
         if (recallFixedPosition(m_currentPositionPreset)) {
-            ControlGrisAudioProcessorEditor *ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+            ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updatePositionPreset(m_currentPositionPreset);
             }
@@ -1421,7 +1522,8 @@ void ControlGrisAudioProcessor::initialize() {
     }
 }
 
-void ControlGrisAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock) {
+void ControlGrisAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+{
     if (m_isPlaying == 0)
         initialize();
 }
@@ -1433,32 +1535,33 @@ void ControlGrisAudioProcessor::releaseResources()
 }
 
 #ifndef JucePlugin_PreferredChannelConfigurations
-bool ControlGrisAudioProcessor::isBusesLayoutSupported (const BusesLayout& layouts) const
+bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layouts) const
 {
-  #if JucePlugin_IsMidiEffect
-    ignoreUnused (layouts);
+    #if JucePlugin_IsMidiEffect
+    ignoreUnused(layouts);
     return true;
-  #else
+    #else
     // This is the place where you check if the layout is supported.
     // In this template code we only support mono or stereo.
     if (layouts.getMainOutputChannelSet() != AudioChannelSet::mono()
-     && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
+        && layouts.getMainOutputChannelSet() != AudioChannelSet::stereo())
         return false;
 
-    // This checks if the input layout matches the output layout
-   #if ! JucePlugin_IsSynth
+            // This checks if the input layout matches the output layout
+        #if !JucePlugin_IsSynth
     if (layouts.getMainOutputChannelSet() != layouts.getMainInputChannelSet())
         return false;
-   #endif
+        #endif
 
     return true;
-  #endif
+    #endif
 }
 #endif
 
-void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBuffer& midiMessages) {
+void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBuffer & midiMessages)
+{
     int started = m_isPlaying;
-    AudioPlayHead* phead = getPlayHead();
+    AudioPlayHead * phead = getPlayHead();
     if (phead != nullptr) {
         AudioPlayHead::CurrentPositionInfo playposinfo;
         phead->getCurrentPosition(playposinfo);
@@ -1472,8 +1575,8 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
         }
     }
 
-    if (! started && m_isPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
-        PluginHostType hostType;    // calling prepareToPlay every time the sequence starts.
+    if (!started && m_isPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
+        PluginHostType hostType;   // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
         }
@@ -1482,13 +1585,13 @@ void ControlGrisAudioProcessor::processBlock (AudioBuffer<float>& buffer, MidiBu
 }
 
 //==============================================================================
-AudioProcessorEditor* ControlGrisAudioProcessor::createEditor()
+AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
 {
-    return new ControlGrisAudioProcessorEditor (*this, parameters, automationManager, automationManagerAlt);
+    return new ControlGrisAudioProcessorEditor(*this, parameters, automationManager, automationManagerAlt);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
+void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
 {
     for (int i = 0; i < MAX_NUMBER_OF_SOURCES; i++) {
         String id(i);
@@ -1499,30 +1602,29 @@ void ControlGrisAudioProcessor::getStateInformation (MemoryBlock& destData)
 
     auto state = parameters.copyState();
 
-    std::unique_ptr<XmlElement> xmlState (state.createXml());
+    std::unique_ptr<XmlElement> xmlState(state.createXml());
 
     if (xmlState.get() != nullptr) {
-        XmlElement *childExist = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
+        XmlElement * childExist = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
         if (childExist) {
             xmlState->removeChildElement(childExist, true);
         }
         if (fixPositionData.getNumChildElements() > 0) {
-            XmlElement *positionData = xmlState->createNewChildElement(FIXED_POSITION_DATA_TAG);
+            XmlElement * positionData = xmlState->createNewChildElement(FIXED_POSITION_DATA_TAG);
             copyFixedPositionXmlElement(&fixPositionData, positionData);
         }
-        copyXmlToBinary (*xmlState, destData);
+        copyXmlToBinary(*xmlState, destData);
     }
 }
 
-void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
+void ControlGrisAudioProcessor::setStateInformation(const void * data, int sizeInBytes)
 {
-    std::unique_ptr<XmlElement> xmlState (getXmlFromBinary (data, sizeInBytes));
+    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
     if (xmlState.get() != nullptr) {
-
         // Set global settings values.
         //----------------------------
-        ValueTree valueTree = ValueTree::fromXml (*xmlState);
+        ValueTree valueTree = ValueTree::fromXml(*xmlState);
         setOscFormat((SpatMode)(int)valueTree.getProperty("oscFormat", 0));
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
@@ -1541,14 +1643,14 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
 
         // Load saved fixed positions.
         //----------------------------
-        XmlElement *positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
+        XmlElement * positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
         if (positionData) {
             fixPositionData.deleteAllChildElements();
             copyFixedPositionXmlElement(positionData, &fixPositionData);
         }
         // Replace the state and call automated parameter current values.
         //---------------------------------------------------------------
-        parameters.replaceState (ValueTree::fromXml (*xmlState));
+        parameters.replaceState(ValueTree::fromXml(*xmlState));
     }
 
     setPluginState();
@@ -1556,7 +1658,7 @@ void ControlGrisAudioProcessor::setStateInformation (const void* data, int sizeI
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+AudioProcessor * JUCE_CALLTYPE createPluginFilter()
 {
     return new ControlGrisAudioProcessor();
 }

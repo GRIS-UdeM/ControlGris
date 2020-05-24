@@ -17,10 +17,11 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
-#include <cmath>
-#include "../JuceLibraryCode/JuceHeader.h"
 #include "ControlGrisUtilities.h"
+#include "../JuceLibraryCode/JuceHeader.h"
+#include <cmath>
 
-double getFloatPrecision(double value, double precision) {
+double getFloatPrecision(double value, double precision)
+{
     return (floor((value * pow(10, precision) + 0.5)) / pow(10, precision));
 }

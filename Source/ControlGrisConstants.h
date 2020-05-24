@@ -27,16 +27,13 @@ constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 
 // Spatialisation modes.
 //----------------------
-enum class SpatMode {
-    VBAP = 0,
-    LBAP
-};
+enum class SpatMode { VBAP = 0, LBAP };
 
-const String WARNING_CIRCULAR_SOURCE_SELECTION ("Only source 1 can be selected \nin circular or symmetric links!");
+const String WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
 
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
-enum class SourcePlacement { 
+enum class SourcePlacement {
     undefined,
     leftAlternate = 1,
     rightAlternate,
@@ -47,14 +44,14 @@ enum class SourcePlacement {
     topClockwise,
     topCounterClockwise
 };
-const StringArray SOURCE_PLACEMENT_SKETCH {String("Left Alternate"), String("Right Alternate"),
-                                           String("Left Clockwise"), String("Left Counter Clockwise"),
+const StringArray SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Right Alternate"),
+                                           String("Left Clockwise"),  String("Left Counter Clockwise"),
                                            String("Right Clockwise"), String("Right Counter Clockwise"),
-                                           String("Top Clockwise"), String("Top Counter Clockwise")};
+                                           String("Top Clockwise"),   String("Top Counter Clockwise") };
 
 // Trajectories -> Source Link popup choices.
 //-------------------------------------------
-enum class SourceLink { 
+enum class SourceLink {
     undefined,
     independent = 1,
     circular,
@@ -65,25 +62,21 @@ enum class SourceLink {
     linkSymmetricX,
     linkSymmetricY
 };
-const StringArray SOURCE_LINK_TYPES       {String("Independent"), String("Circular"),
-                                           String("Circular Fixed Radius"), String("Circular Fixed Angle"),
-                                           String("Circular Fully Fixed"), String("Delta Lock"),
-                                           String("Symmetric X"), String("Symmetric Y")};
+const StringArray SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
+                                     String("Circular Fixed Radius"), String("Circular Fixed Angle"),
+                                     String("Circular Fully Fixed"),  String("Delta Lock"),
+                                     String("Symmetric X"),           String("Symmetric Y") };
 
-enum class SourceLinkAlt { 
-    undefined,
-    independent = 1,
-    fixedElevation,
-    linearMin,
-    linearMax,
-    deltaLock
-};
-const StringArray SOURCE_LINK_ALT_TYPES   {String("Independent"), String("Fixed Elevation"),
-                                           String("Linear Min"), String("Linear Max"), String("Delta Lock")};
+enum class SourceLinkAlt { undefined, independent = 1, fixedElevation, linearMin, linearMax, deltaLock };
+const StringArray SOURCE_LINK_ALT_TYPES{ String("Independent"),
+                                         String("Fixed Elevation"),
+                                         String("Linear Min"),
+                                         String("Linear Max"),
+                                         String("Delta Lock") };
 
 // Trajectories -> Trajectory Type popup choices.
 //-----------------------------------------------
-enum class TrajectoryType { 
+enum class TrajectoryType {
     undefined,
     realtime = 1,
     drawing,
@@ -100,34 +93,35 @@ enum class TrajectoryType {
     triangleClockwise,
     triangleCounterClockwise
 };
-const StringArray TRAJECTORY_TYPE_TYPES   {String("Realtime"), String("Drawing"), String("Circle Clockwise"),
-                                           String("Circle Counter Clockwise"), String("Ellipse Clockwise"),
-                                           String("Ellipse Counter Clockwise"), String("Spiral Clockwise Out In"),
-                                           String("Spiral Counter Clockwise Out In"), String("Spiral Clockwise In Out"),
-                                           String("Spiral Counter Clockwise In Out"), String("Square Clockwise"),
-                                           String("Square Counter Clockwise"), String("Triangle Clockwise"),
-                                           String("Triangle Counter Clockwise")};
+const StringArray TRAJECTORY_TYPE_TYPES{ String("Realtime"),
+                                         String("Drawing"),
+                                         String("Circle Clockwise"),
+                                         String("Circle Counter Clockwise"),
+                                         String("Ellipse Clockwise"),
+                                         String("Ellipse Counter Clockwise"),
+                                         String("Spiral Clockwise Out In"),
+                                         String("Spiral Counter Clockwise Out In"),
+                                         String("Spiral Clockwise In Out"),
+                                         String("Spiral Counter Clockwise In Out"),
+                                         String("Square Clockwise"),
+                                         String("Square Counter Clockwise"),
+                                         String("Triangle Clockwise"),
+                                         String("Triangle Counter Clockwise") };
 
-enum class TrajectoryTypeAlt { undefined, realtime = 1,
-                               drawing,
-                               downUp,
-                               upDown
-                              };
-const StringArray TRAJECTORY_TYPE_ALT_TYPES    {String("Realtime"), String("Drawing"), String("Up Down"),
-                                                String("Down Up")};
+enum class TrajectoryTypeAlt { undefined, realtime = 1, drawing, downUp, upDown };
+const StringArray TRAJECTORY_TYPE_ALT_TYPES{ String("Realtime"),
+                                             String("Drawing"),
+                                             String("Up Down"),
+                                             String("Down Up") };
 
 // Fix position data headers.
 //---------------------------
-const StringArray FIXED_POSITION_DATA_HEADERS { String("ID"),
-                                                String("S1_X"), String("S1_Y"), String("S1_Z"),
-                                                String("S2_X"), String("S2_Y"), String("S2_Z"),
-                                                String("S3_X"), String("S3_Y"), String("S3_Z"),
-                                                String("S4_X"), String("S4_Y"), String("S4_Z"),
-                                                String("S5_X"), String("S5_Y"), String("S5_Z"),
-                                                String("S6_X"), String("S6_Y"), String("S6_Z"),
-                                                String("S7_X"), String("S7_Y"), String("S7_Z"),
-                                                String("S8_X"), String("S8_Y"), String("S8_Z"),
-                                                String("T1_X"), String("T1_Y"), String("T1_Z"),
-                                                String("T2_X"), String("T2_Y"), String("T2_Z")};
+const StringArray FIXED_POSITION_DATA_HEADERS{
+    String("ID"),   String("S1_X"), String("S1_Y"), String("S1_Z"), String("S2_X"), String("S2_Y"), String("S2_Z"),
+    String("S3_X"), String("S3_Y"), String("S3_Z"), String("S4_X"), String("S4_Y"), String("S4_Z"), String("S5_X"),
+    String("S5_Y"), String("S5_Z"), String("S6_X"), String("S6_Y"), String("S6_Z"), String("S7_X"), String("S7_Y"),
+    String("S7_Z"), String("S8_X"), String("S8_Y"), String("S8_Z"), String("T1_X"), String("T1_Y"), String("T1_Z"),
+    String("T2_X"), String("T2_Y"), String("T2_Z")
+};
 
-const String FIXED_POSITION_DATA_TAG ("Fix_Position_Data");
+const String FIXED_POSITION_DATA_TAG("Fix_Position_Data");
