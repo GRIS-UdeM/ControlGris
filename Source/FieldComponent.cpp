@@ -48,7 +48,7 @@ void FieldComponent::setSources(Source * sources, int numberOfSources)
     m_sources = sources;
     m_numberOfSources = numberOfSources;
     m_oldSelectedSourceId = m_selectedSourceId = 0;
-    for (int i = 0; i < m_numberOfSources; i++) {
+    for (int i{}; i < m_numberOfSources; ++i) {
         float hue = (float)i / m_numberOfSources + 0.577251;
         if (hue > 1) {
             hue -= 1;
@@ -77,7 +77,7 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool isMainField, SpatMod
     if (true) {
         g.setColour(Colour::fromRGB(55, 56, 57));
         const int gridCount = 8;
-        for (int i = 1; i < gridCount; i++) {
+        for (int i{ 1 }; i < gridCount; ++i) {
             g.drawLine(width * i / gridCount, 0, height * i / gridCount, height);
             g.drawLine(0, height * i / gridCount, width, height * i / gridCount);
         }
@@ -89,7 +89,7 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool isMainField, SpatMod
         g.setColour(lookAndFeel->getLightColour());
         if (spatMode == SpatMode::VBAP) {
             // Draw big background circles.
-            for (int i = 1; i < 3; i++) {
+            for (int i{ 1 }; i < 3; ++i) {
                 float w = i / 2.0 * (width - kSourceDiameter);
                 float x = (width - w) / 2;
                 g.drawEllipse(x, x, w, w, 1);
@@ -334,7 +334,7 @@ void MainFieldComponent::paint(Graphics & g)
     }
 
     // Draw sources.
-    for (int i = 0; i < m_numberOfSources; i++) {
+    for (int i{}; i < m_numberOfSources; ++i) {
         int lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         Point<float> pos;
@@ -427,7 +427,7 @@ void MainFieldComponent::mouseDown(const MouseEvent & event)
         int numSteps = (int)jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y));
         float xinc = (anchor2.x - anchor1.x) / numSteps;
         float yinc = (anchor2.y - anchor1.y) / numSteps;
-        for (int i = 1; i <= numSteps; i++) {
+        for (int i{ 1 }; i <= numSteps; ++i) {
             automationManager.addRecordingPoint(Point<float>(anchor1.x + xinc * i, anchor1.y + yinc * i));
         }
         if (event.mods.isShiftDown()) {
@@ -459,7 +459,7 @@ void MainFieldComponent::mouseDown(const MouseEvent & event)
 
     // Check if we click on a new source.
     bool clickOnSource = false;
-    for (int i = 0; i < m_numberOfSources; i++) {
+    for (int i{}; i < m_numberOfSources; ++i) {
         Point<float> pos;
         if (m_spatMode == SpatMode::VBAP) {
             pos = degreeToXy(Point<float>{ m_sources[i].getAzimuth(), m_sources[i].getElevation() }, width);
@@ -671,7 +671,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     }
 
     // Draw sources.
-    for (int i = 0; i < m_numberOfSources; i++) {
+    for (int i{}; i < m_numberOfSources; ++i) {
         lineThickness = (i == m_selectedSourceId) ? 3 : 1;
         float saturation = (i == m_selectedSourceId) ? 1.0 : 0.75;
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
@@ -725,7 +725,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
 
     // Check if we click on a new source.
     bool clickOnSource = false;
-    for (int i = 0; i < m_numberOfSources; i++) {
+    for (int i{}; i < m_numberOfSources; ++i) {
         float x = (float)i / m_numberOfSources * (width - 50) + 50;
         float y = (90.0 - m_sources[i].getElevation()) / 90.0 * (height - 35) + 5;
         Point<float> pos = Point<float>{ x, y };

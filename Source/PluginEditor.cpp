@@ -169,7 +169,7 @@ void ControlGrisAudioProcessorEditor::setPluginState()
 
     // Update the position preset box.
     //--------------------------------
-    for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
+    for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
         positionPresetBox.presetSaved(i + 1, false);
     }
     XmlElement * positionData = processor.getFixedPositionData();
@@ -318,7 +318,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 
     switch (value) {
     case SourcePlacement::leftAlternate:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             if (numOfSources <= 2)
                 processor.getSources()[i].setCoordinates(-azims2[i],
                                                          isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
@@ -338,7 +338,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         }
         break;
     case SourcePlacement::rightAlternate:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             if (numOfSources <= 2)
                 processor.getSources()[i].setCoordinates(azims2[i],
                                                          isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
@@ -358,42 +358,42 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         }
         break;
     case SourcePlacement::leftClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
         }
         break;
     case SourcePlacement::leftCounterClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
         }
         break;
     case SourcePlacement::rightClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
         }
         break;
     case SourcePlacement::rightCounterClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
         }
         break;
     case SourcePlacement::topClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
         }
         break;
     case SourcePlacement::topCounterClockwise:
-        for (int i = 0; i < numOfSources; i++) {
+        for (int i{}; i < numOfSources; ++i) {
             processor.getSources()[i].setCoordinates(360.0f / numOfSources * i,
                                                      isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
                                                      distance);
@@ -401,7 +401,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         break;
     }
 
-    for (int i = 0; i < numOfSources; i++) {
+    for (int i{}; i < numOfSources; ++i) {
         processor.setSourceParameterValue(i, SOURCE_ID_AZIMUTH, processor.getSources()[i].getNormalizedAzimuth());
         processor.setSourceParameterValue(i, SOURCE_ID_ELEVATION, processor.getSources()[i].getNormalizedElevation());
         processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
@@ -411,7 +411,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
                                    m_selectedSource,
                                    processor.getOscFormat());
 
-    for (int i = 0; i < numOfSources; i++) {
+    for (int i{}; i < numOfSources; ++i) {
         processor.getSources()[i].fixSourcePosition(true);
     }
 

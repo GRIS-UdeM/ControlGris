@@ -77,7 +77,7 @@ PositionPresetComponent::PositionPresetComponent()
 
     currentSelection = -1;
 
-    for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
+    for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
         auto * button = new PresetButton();
         presets.add(button);
 
@@ -159,7 +159,7 @@ void PositionPresetComponent::resized()
 {
     int width = getWidth();
 
-    for (int i = 0; i < NUMBER_OF_POSITION_PRESETS; i++) {
+    for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
         int x = i % 2 == 0 ? 1 : 25;
         int y = (i / 2) * 24 + 1;
         presets[i]->setBounds(x, y, 23, 23);

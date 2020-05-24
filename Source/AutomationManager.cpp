@@ -24,7 +24,7 @@ constexpr auto MAGIC_2 = 300.f;
 constexpr auto MAGIC_3 = 99;
 constexpr auto MAGIC_4 = 200;
 constexpr auto MAGIC_5 = 199;
-constexpr auto MAGIC_6 = 199.0;
+constexpr auto MAGIC_6 = 199.f;
 
 AutomationManager::AutomationManager()
 {
@@ -105,9 +105,9 @@ void AutomationManager::compressTrajectoryXValues(int maxValue)
     auto const offset{ static_cast<int>(10.0 + kSourceRadius) };
     maxValue -= offset;
     int const size{ getRecordingTrajectorySize() };
-    float const delta{ maxValue / (size + 1.f) };
+    auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.f) };
     for (int i{}; i < size; ++i) {
-        mTrajectoryPoints.data()[i].setX(i * delta + offset);
+        mTrajectoryPoints.data()[i].setX(static_cast<float>(i) * delta + offset);
     }
 }
 
@@ -172,7 +172,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         delta *= deltaRatio;
         int index = (int)delta;
         if (index + 1 < mTrajectoryPoints.size()) {
-            auto const frac{ static_cast<float>(delta) - index };
+            auto const frac{ static_cast<float>(delta) - static_cast<float>(index) };
             Point<float> const p1{ mTrajectoryPoints[index] };
             Point<float> const p2{ mTrajectoryPoints[index + 1] };
             mCurrentTrajectoryPoint = Point<float>{ p1.x + (p2.x - p1.x) * frac, p1.y + (p2.y - p1.y) * frac };
@@ -189,7 +189,8 @@ void AutomationManager::computeCurrentTrajectoryPoint()
             }
         }
         if (deviationFlag) {
-            mCurrentDegreeOfDeviation = (mDeviationCycleCount + mTrajectoryDeltaTime) * mDegreeOfDeviationPerCycle;
+            mCurrentDegreeOfDeviation
+                = static_cast<float>(mDeviationCycleCount + mTrajectoryDeltaTime) * mDegreeOfDeviationPerCycle;
             if (mCurrentDegreeOfDeviation >= 360.0f) {
                 mCurrentDegreeOfDeviation -= 360.0f;
             }
@@ -239,155 +240,161 @@ void AutomationManager::fixSourcePosition()
     mSource.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> const startpos)
+void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> const startPos)
 {
     mDrawingType = type;
 
     mTrajectoryPoints.clear();
 
     auto const offset{ static_cast<int>(mFieldWidth / 2) };
-    auto const minlim{ 8 };
-    auto const maxlim{ static_cast<int>(mFieldWidth - 8) };
+    auto const minLim{ 8 };
+    auto const maxLim{ static_cast<int>(mFieldWidth - 8) };
 
-    Point<float> const translated{ startpos.translated(-0.5f, -0.5f) * 2.0f };
+    Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
     float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
                      * ((mFieldWidth - kSourceDiameter) / 2) };
     float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
 
-    int const fsize{ static_cast<int>(mFieldWidth) };
-    int const fsizeOver3{ fsize / 3 };
-    int const fsizeOver4{ fsize / 4 };
+    int const fSize{ static_cast<int>(mFieldWidth) };
+    int const fSizeOver3{ fSize / 3 };
+    int const fSizeOver4{ fSize / 4 };
     float x;
     float y;
     float step{};
-    float transx{};
-    float transy{};
+    float transX{};
+    float transY{};
     float adjustedMagnitude{};
     switch (mDrawingType) {
     case TrajectoryType::realtime:
-        mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
-        break;
     case TrajectoryType::drawing:
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
         break;
     case TrajectoryType::circleClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
-            x = sinf(MathConstants<float>::twoPi * i / MAGIC_5 - angle) * magnitude + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_5 - angle) * magnitude + offset;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::circleCounterClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
-            x = -sinf(MathConstants<float>::twoPi * i / MAGIC_5 - angle) * magnitude + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_5 - angle) * magnitude + offset;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::ellipseClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
-            x = sinf(MathConstants<float>::twoPi * i / MAGIC_5) * magnitude * 0.5f;
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_5) * magnitude;
+            x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude * 0.5f;
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude;
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::ellipseCounterClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
-            x = -sinf(MathConstants<float>::twoPi * i / MAGIC_5) * magnitude * 0.5f;
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_5) * magnitude;
+            x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude * 0.5f;
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude;
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::spiralClockwiseOutIn:
         for (int i{}; i < MAGIC_1; ++i) {
-            x = sinf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (1.f - i / MAGIC_2);
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (1.f - i / MAGIC_2);
+            x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (1.f - static_cast<float>(i) / MAGIC_2);
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (1.f - static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::spiralCounterClockwiseOutIn:
         for (int i{}; i < MAGIC_1; ++i) {
-            x = -sinf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (1.f - i / MAGIC_2);
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (1.f - i / MAGIC_2);
+            x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (1.f - static_cast<float>(i) / MAGIC_2);
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (1.f - static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::spiralClockwiseInOut:
         for (int i{}; i < MAGIC_1; ++i) {
-            x = sinf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (i / MAGIC_2);
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (i / MAGIC_2);
+            x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (static_cast<float>(i) / MAGIC_2);
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::spiralCounterClockwiseInOut:
         for (int i{}; i < MAGIC_1; ++i) {
-            x = -sinf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (i / MAGIC_2);
-            y = -cosf(MathConstants<float>::twoPi * i / MAGIC_3) * magnitude * (i / MAGIC_2);
+            x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (static_cast<float>(i) / MAGIC_2);
+            y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
+                * (static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minlim ? minlim : x > maxlim ? maxlim : x;
-            y = y < minlim ? minlim : y > maxlim ? maxlim : y;
+            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
+            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case TrajectoryType::squareClockwise:
     case TrajectoryType::squareCounterClockwise:
         step = 1.f / (mFieldWidth / 4);
-        transx = translated.x * ((mFieldWidth / 2 - kSourceRadius));
-        transy = translated.y * ((mFieldWidth / 2 - kSourceRadius));
-        magnitude = sqrtf(transx * transx + transy * transy);
+        transX = translated.x * ((mFieldWidth / 2 - kSourceRadius));
+        transY = translated.y * ((mFieldWidth / 2 - kSourceRadius));
+        magnitude = sqrtf(transX * transX + transY * transY);
         adjustedMagnitude = magnitude * MathConstants<float>::halfPi;
         float tmp1;
         float tmp2;
-        for (int i{}; i < fsize; ++i) {
-            if (i < fsizeOver4) {
-                tmp1 = i * step;
+        for (int i{}; i < fSize; ++i) {
+            if (i < fSizeOver4) {
+                tmp1 = static_cast<float>(i) * step;
                 tmp2 = 0.f;
-            } else if (i < (fsizeOver4 * 2)) {
+            } else if (i < (fSizeOver4 * 2)) {
                 tmp1 = 1.f;
-                tmp2 = (i - fsizeOver4) * step;
-            } else if (i < (fsizeOver4 * 3)) {
-                tmp1 = 1.f - ((i - fsizeOver4 * 2) * step);
+                tmp2 = static_cast<float>(i - fSizeOver4) * step;
+            } else if (i < (fSizeOver4 * 3)) {
+                tmp1 = 1.f - (static_cast<float>(i - fSizeOver4 * 2) * step);
                 tmp2 = 1.f;
             } else {
                 tmp1 = 0.f;
-                tmp2 = 1.f - ((i - fsizeOver4 * 3) * step);
+                tmp2 = 1.f - (static_cast<float>(i - fSizeOver4 * 3) * step);
             }
             if (mDrawingType == TrajectoryType::squareClockwise) {
                 x = tmp1;
@@ -405,8 +412,8 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
                                                                 (mFieldWidth / 2.f),
                                                                 (mFieldWidth / 2.f));
             p.applyTransform(t);
-            p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
-            p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
+            p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
+            p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
             mTrajectoryPoints.add(p);
         }
         break;
@@ -422,25 +429,25 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
             p2 = Point<float>{ -1.f, 1.f };
             p3 = Point<float>{ 1.f, 1.f };
         }
-        step = 1.f / (mFieldWidth / 3.0);
-        transx = translated.x * ((mFieldWidth / 2.0 - kSourceRadius));
-        transy = translated.y * ((mFieldWidth / 2.0 - kSourceRadius));
-        magnitude = sqrtf(transx * transx + transy * transy);
-        for (int i{}; i < fsize; ++i) {
-            if (i < (fsizeOver3)) {
-                x = (p2.x - p1.x) * i * step + p1.x;
-                y = (p2.y - p1.y) * i * step + p1.y;
-            } else if (i < (fsizeOver3 * 2)) {
-                x = (p3.x - p2.x) * (i - fsizeOver3) * step + p2.x;
-                y = (p3.y - p2.y) * (i - fsizeOver3) * step + p2.y;
+        step = 1.f / (mFieldWidth / 3.f);
+        transX = translated.x * ((mFieldWidth / 2.f - kSourceRadius));
+        transY = translated.y * ((mFieldWidth / 2.f - kSourceRadius));
+        magnitude = sqrtf(transX * transX + transY * transY);
+        for (int i{}; i < fSize; ++i) {
+            if (i < (fSizeOver3)) {
+                x = (p2.x - p1.x) * static_cast<float>(i) * step + p1.x;
+                y = (p2.y - p1.y) * static_cast<float>(i) * step + p1.y;
+            } else if (i < (fSizeOver3 * 2)) {
+                x = (p3.x - p2.x) * static_cast<float>(i - fSizeOver3) * step + p2.x;
+                y = (p3.y - p2.y) * static_cast<float>(i - fSizeOver3) * step + p2.y;
             } else {
-                x = (p1.x - p3.x) * (i - fsizeOver3 * 2) * step + p3.x;
-                y = (p1.y - p3.y) * (i - fsizeOver3 * 2) * step + p3.y;
+                x = (p1.x - p3.x) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.x;
+                y = (p1.y - p3.y) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.y;
             }
             Point<float> p(x * magnitude + (mFieldWidth / 2.f), y * magnitude + (mFieldWidth / 2.f));
             p.applyTransform(AffineTransform::rotation(-angle, (mFieldWidth / 2.f), (mFieldWidth / 2.f)));
-            p.x = p.x < minlim ? minlim : p.x > maxlim ? maxlim : p.x;
-            p.y = p.y < minlim ? minlim : p.y > maxlim ? maxlim : p.y;
+            p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
+            p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
             mTrajectoryPoints.add(p);
         }
     } break;
@@ -469,22 +476,20 @@ void AutomationManager::setDrawingTypeAlt(ElevationTrajectoryType const type)
 
     switch (type) {
     case ElevationTrajectoryType::realtime:
-        mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
-        break;
     case ElevationTrajectoryType::drawing:
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
         break;
     case ElevationTrajectoryType::downUp:
         for (int i{}; i < MAGIC_4; ++i) {
-            float x = (i / MAGIC_6) * width + offset;
-            float y = (i / MAGIC_6) * (maxPos - minPos) + minPos;
+            float const x = (static_cast<float>(i) / MAGIC_6) * width + offset;
+            float const y = (static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case ElevationTrajectoryType::upDown:
         for (int i{}; i < MAGIC_4; ++i) {
-            float x = (i / MAGIC_6) * width + offset;
-            float y = (1.0 - i / MAGIC_6) * (maxPos - minPos) + minPos;
+            float const x = (static_cast<float>(i) / MAGIC_6) * width + offset;
+            float const y = (1.f - static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;

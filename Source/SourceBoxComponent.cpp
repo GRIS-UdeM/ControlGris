@@ -44,7 +44,7 @@ SourceBoxComponent::SourceBoxComponent()
 
     addAndMakeVisible(&sourceNumberCombo);
     sourceNumberCombo.setTextWhenNothingSelected("Choose a source...");
-    for (int i = 1; i <= 8; i++) {
+    for (int i{ 1 }; i <= 8; ++i) {
         sourceNumberCombo.addItem(String(i), i);
     }
     sourceNumberCombo.setSelectedId(selectedSourceNumber);
@@ -112,7 +112,7 @@ void SourceBoxComponent::resized()
 void SourceBoxComponent::setNumberOfSources(int numOfSources, int firstSourceId)
 {
     sourceNumberCombo.clear();
-    for (int i = firstSourceId; i < firstSourceId + numOfSources; i++) {
+    for (int i = firstSourceId; i < firstSourceId + numOfSources; ++i) {
         sourceNumberCombo.addItem(String(i), i);
     }
     if (selectedSourceNumber >= numOfSources)
