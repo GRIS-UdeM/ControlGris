@@ -77,9 +77,9 @@ public:
 
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxSourceLinkChanged(SourceLink value) final;
-    void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) final;
+    void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) final;
     void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) final;
-    void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) final;
+    void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) final;
     void trajectoryBoxBackAndForthChanged(bool value) final;
     void trajectoryBoxBackAndForthAltChanged(bool value) final;
     void trajectoryBoxDampeningCyclesChanged(int value) final;
@@ -103,7 +103,7 @@ public:
     void setPluginState();
     void updateSpanLinkButton(bool state);
     void updateSourceLinkCombo(SourceLink value);
-    void updateSourceLinkAltCombo(SourceLinkAlt value);
+    void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);
 
     void refresh();

@@ -228,7 +228,7 @@ void AutomationManager::setSourceAndPlaybackPosition(Point<float> const pos)
 void AutomationManager::sendTrajectoryPositionChangedEvent()
 {
     if (mActivateState || mDrawingType == TrajectoryType::realtime
-        || static_cast<TrajectoryTypeAlt>(mDrawingType) == TrajectoryTypeAlt::realtime) {
+        || static_cast<ElevationTrajectoryType>(mDrawingType) == ElevationTrajectoryType::realtime) {
         mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
     }
 }
@@ -456,7 +456,7 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
     }
 }
 
-void AutomationManager::setDrawingTypeAlt(TrajectoryTypeAlt const type)
+void AutomationManager::setDrawingTypeAlt(ElevationTrajectoryType const type)
 {
     mDrawingType = static_cast<TrajectoryType>(type);
 
@@ -468,31 +468,31 @@ void AutomationManager::setDrawingTypeAlt(TrajectoryTypeAlt const type)
     float const maxPos{ mFieldWidth - 20.f };
 
     switch (type) {
-    case TrajectoryTypeAlt::realtime:
+    case ElevationTrajectoryType::realtime:
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
         break;
-    case TrajectoryTypeAlt::drawing:
+    case ElevationTrajectoryType::drawing:
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
         break;
-    case TrajectoryTypeAlt::downUp:
+    case ElevationTrajectoryType::downUp:
         for (int i{}; i < MAGIC_4; ++i) {
             float x = (i / MAGIC_6) * width + offset;
             float y = (i / MAGIC_6) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
-    case TrajectoryTypeAlt::upDown:
+    case ElevationTrajectoryType::upDown:
         for (int i{}; i < MAGIC_4; ++i) {
             float x = (i / MAGIC_6) * width + offset;
             float y = (1.0 - i / MAGIC_6) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
-    case TrajectoryTypeAlt::undefined:
+    case ElevationTrajectoryType::undefined:
         jassertfalse;
     }
 
-    if (type > TrajectoryTypeAlt::drawing) {
+    if (type > ElevationTrajectoryType::drawing) {
         setSourcePosition(
             Point<float>(mTrajectoryPoints[0].x / mFieldWidth, 1.0 - mTrajectoryPoints[0].y / mFieldWidth));
     } else {

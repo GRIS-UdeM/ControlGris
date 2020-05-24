@@ -622,16 +622,16 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     bool shouldDrawTrajectoryHandle = false;
     if (m_numberOfSources == 1) {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
+        if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing
             && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
+        if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing
             && !m_isPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime
-                   && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::deltaLock) {
+        } else if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::realtime
+                   && static_cast<ElevationSourceLink>(automationManager.getSourceLink()) == ElevationSourceLink::deltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -662,7 +662,7 @@ void ElevationFieldComponent::paint(Graphics & g)
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (m_isPlaying && !isMouseButtonDown()
-        && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) != TrajectoryTypeAlt::realtime
+        && static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) != ElevationTrajectoryType::realtime
         && automationManager.getActivateState()) {
         Point<float> dpos = automationManager.getCurrentTrajectoryPoint();
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
@@ -742,14 +742,14 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     }
 
     // Check if we record a trajectory.
-    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing
-        || static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing
+        || static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::realtime) {
         Point<float> pos = posToXy(automationManager.getSourcePosition(), width).withX(10.0f);
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             m_oldSelectedSourceId = m_selectedSourceId;
             m_selectedSourceId = -1;
-            if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
+            if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
                 currentRecordingPositionX = 10 + kSourceRadius;
                 automationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
             } else {
@@ -761,7 +761,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
+    if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
         m_oldSelectedSourceId = m_selectedSourceId;
         m_selectedSourceId = -1;
         currentRecordingPositionX = 10 + kSourceRadius;
@@ -781,7 +781,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (m_selectedSourceId == -1) {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
+        if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
             currentRecordingPositionX += 1;
             if (currentRecordingPositionX >= height) {
                 currentRecordingPositionX = height;
@@ -793,7 +793,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             y = height - event.getPosition().toFloat().y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.setSourcePosition(xyToPos(Point<float>(10.0f, y), height));
-        } else if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+        } else if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::realtime) {
             float y = height - event.y;
             y = y < 15.0 ? 15.0 : y > height - 20 ? height - 20 : y;
             automationManager.setSourcePosition(xyToPos(Point<float>(10.0f, y), height));
@@ -806,13 +806,13 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     bool needToAdjustAutomationManager = false;
-    if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) == SourceLinkAlt::independent
+    if (static_cast<ElevationSourceLink>(automationManager.getSourceLink()) == ElevationSourceLink::independent
         && m_selectedSourceId == 0
-        && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+        && static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
-    } else if (static_cast<SourceLinkAlt>(automationManager.getSourceLink()) >= SourceLinkAlt::fixedElevation
-               && static_cast<SourceLinkAlt>(automationManager.getSourceLink()) < SourceLinkAlt::deltaLock
-               && static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+    } else if (static_cast<ElevationSourceLink>(automationManager.getSourceLink()) >= ElevationSourceLink::fixedElevation
+               && static_cast<ElevationSourceLink>(automationManager.getSourceLink()) < ElevationSourceLink::deltaLock
+               && static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
 
@@ -828,7 +828,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
     if (m_selectedSourceId == -1) {
-        if (static_cast<TrajectoryTypeAlt>(automationManager.getDrawingType()) == TrajectoryTypeAlt::drawing) {
+        if (static_cast<ElevationTrajectoryType>(automationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
             automationManager.addRecordingPoint(automationManager.getLastRecordingPoint());
             m_selectedSourceId = m_oldSelectedSourceId;
         }

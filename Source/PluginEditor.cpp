@@ -76,7 +76,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudi
     trajectoryBox.addListener(this);
     addAndMakeVisible(trajectoryBox);
     trajectoryBox.setSourceLink(automationManager.getSourceLink());
-    trajectoryBox.setSourceLinkAlt(static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()));
+    trajectoryBox.setElevationSourceLink(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
@@ -155,7 +155,7 @@ void ControlGrisAudioProcessorEditor::setPluginState()
     // Set state for trajectory box persistent values.
     //------------------------------------------------
     trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
-    trajectoryBox.setTrajectoryTypeAlt(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
+    trajectoryBox.setElevationTrajectoryType(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
     trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
     trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
     trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
@@ -205,7 +205,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value)
     trajectoryBox.sourceLinkCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkAltCombo(SourceLinkAlt value)
+void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
     trajectoryBox.sourceLinkAltCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
 }
@@ -467,9 +467,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink 
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value)
 {
-    processor.setSourceLinkAlt(value);
+    processor.setElevationSourceLink(value);
     elevationField.repaint();
 }
 
@@ -480,7 +480,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(Traject
     mainField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
     automationManagerAlt.setDrawingTypeAlt(value);
@@ -598,7 +598,7 @@ void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichFiel
         processor.onSourceLinkChanged(automationManager.getSourceLink());
     } else {
         automationManagerAlt.fixSourcePosition();
-        processor.onSourceLinkAltChanged(static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()));
+        processor.onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
     }
 }
 

@@ -58,7 +58,7 @@ public:
     SourceLink getSourceLink() const { return mSourceLink; }
     void setDrawingType(TrajectoryType type, Point<float> startpos);
     TrajectoryType getDrawingType() const { return mDrawingType; }
-    void setDrawingTypeAlt(TrajectoryTypeAlt type);
+    void setDrawingTypeAlt(ElevationTrajectoryType type);
 
     void setBackAndForth(bool shouldBeOn);
     void setDampeningCycles(int value) { this->mDampeningCycles = value; }

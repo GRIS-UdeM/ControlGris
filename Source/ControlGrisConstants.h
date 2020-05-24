@@ -67,7 +67,7 @@ const StringArray SOURCE_LINK_TYPES{ String("Independent"),           String("Ci
                                      String("Circular Fully Fixed"),  String("Delta Lock"),
                                      String("Symmetric X"),           String("Symmetric Y") };
 
-enum class SourceLinkAlt { undefined, independent = 1, fixedElevation, linearMin, linearMax, deltaLock };
+enum class ElevationSourceLink { undefined, independent = 1, fixedElevation, linearMin, linearMax, deltaLock };
 const StringArray SOURCE_LINK_ALT_TYPES{ String("Independent"),
                                          String("Fixed Elevation"),
                                          String("Linear Min"),
@@ -108,7 +108,7 @@ const StringArray TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                          String("Triangle Clockwise"),
                                          String("Triangle Counter Clockwise") };
 
-enum class TrajectoryTypeAlt { undefined, realtime = 1, drawing, downUp, upDown };
+enum class ElevationTrajectoryType { undefined, realtime = 1, drawing, downUp, upDown };
 const StringArray TRAJECTORY_TYPE_ALT_TYPES{ String("Realtime"),
                                              String("Drawing"),
                                              String("Up Down"),

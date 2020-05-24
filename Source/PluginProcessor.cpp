@@ -160,7 +160,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     m_lastAzispan = m_lastElespan = -1;
 
     m_lastSourceLink = SourceLink::undefined;
-    m_lastSourceLinkAlt = SourceLinkAlt::undefined;
+    m_lastElevationSourceLink = ElevationSourceLink::undefined;
 
     m_canStopActivate = false;
 
@@ -281,10 +281,10 @@ void ControlGrisAudioProcessor::parameterChanged(const String & parameterID, flo
         if (val != automationManagerAlt.getSourceLink()) {
             automationManagerAlt.setSourceLink(val);
             automationManagerAlt.fixSourcePosition();
-            onSourceLinkAltChanged(static_cast<SourceLinkAlt>(val));
+            onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(val));
             ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
-                ed->updateSourceLinkAltCombo(static_cast<SourceLinkAlt>(val));
+                ed->updateElevationSourceLinkCombo(static_cast<ElevationSourceLink>(val));
             }
         }
     }
@@ -345,25 +345,25 @@ void ControlGrisAudioProcessor::setSourceLink(SourceLink value)
     }
 }
 
-void ControlGrisAudioProcessor::setSourceLinkAlt(SourceLinkAlt value)
+void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value)
 {
-    if (value != static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-        if (value == SourceLinkAlt::deltaLock
-            && static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) != TrajectoryTypeAlt::drawing) {
+    if (value != static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
+        if (value == ElevationSourceLink::deltaLock
+            && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) != ElevationTrajectoryType::drawing) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0., 0.5));
         }
 
         automationManagerAlt.setSourceLink(static_cast<SourceLink>(value));
         automationManagerAlt.fixSourcePosition();
 
-        onSourceLinkAltChanged(value);
+        onElevationSourceLinkChanged(value);
 
         parameters.getParameter("sourceLinkAlt")->beginChangeGesture();
         parameters.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)value - 1.f) / 4.f);
         parameters.getParameter("sourceLinkAlt")->endChangeGesture();
         ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
-            ed->updateSourceLinkAltCombo(value);
+            ed->updateElevationSourceLinkCombo(value);
         }
     }
 }
@@ -419,31 +419,31 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(SourceLink value)
     }
 }
 
-void ControlGrisAudioProcessor::onSourceLinkAltChanged(SourceLinkAlt value)
+void ControlGrisAudioProcessor::onElevationSourceLinkChanged(ElevationSourceLink value)
 {
     if (getOscFormat() == SpatMode::LBAP) {
         // Fixed elevation.
-        if (value == SourceLinkAlt::fixedElevation) {
+        if (value == ElevationSourceLink::fixedElevation) {
             for (int i = 1; i < m_numOfSources; i++) {
                 sources[i].setElevation(sources[0].getElevation());
             }
         }
 
         // Linear min.
-        if (value == SourceLinkAlt::linearMin) {
+        if (value == ElevationSourceLink::linearMin) {
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setElevation(60.0 / m_numOfSources * i);
             }
         }
 
         // Linear max.
-        if (value == SourceLinkAlt::linearMax) {
+        if (value == ElevationSourceLink::linearMax) {
             for (int i = 0; i < m_numOfSources; i++) {
                 sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i));
             }
         }
 
-        bool shouldBeFixed = value != SourceLinkAlt::independent;
+        bool shouldBeFixed = value != ElevationSourceLink::independent;
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);
         }
@@ -607,7 +607,7 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle & bundle)
 void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
 {
     SourceLink sourceLinkToProcess{ SourceLink::undefined };
-    SourceLinkAlt sourceLinkAltToProcess{ SourceLinkAlt::undefined };
+    ElevationSourceLink sourceLinkAltToProcess{ ElevationSourceLink::undefined };
     float x{ -1.f };
     float y{ -1.f };
     float z{ -1.f };
@@ -620,8 +620,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
                && automationManager.getDrawingType() == TrajectoryType::realtime) {
         y = message[0].getFloat32();
     } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3"))
-               && static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType())
-                      == TrajectoryTypeAlt::realtime) {
+               && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+                      == ElevationTrajectoryType::realtime) {
         z = message[0].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xy")
                && automationManager.getDrawingType() == TrajectoryType::realtime) {
@@ -632,7 +632,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             x = message[0].getFloat32();
             y = message[1].getFloat32();
         }
-        if (static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) == ElevationTrajectoryType::realtime) {
             z = message[2].getFloat32();
         }
     } else if (address == String(pluginInstance + "/azispan")) {
@@ -669,21 +669,21 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         sourceLinkToProcess = static_cast<SourceLink>(message[0].getFloat32()); // 1 -> 6
     } else if (address == String(pluginInstance + "/sourcelinkalt/1/1")) {
         if (message[0].getFloat32() == 1)
-            sourceLinkAltToProcess = static_cast<SourceLinkAlt>(1);
+            sourceLinkAltToProcess = static_cast<ElevationSourceLink>(1);
     } else if (address == String(pluginInstance + "/sourcelinkalt/2/1")) {
         if (message[0].getFloat32() == 1)
-            sourceLinkAltToProcess = static_cast<SourceLinkAlt>(2);
+            sourceLinkAltToProcess = static_cast<ElevationSourceLink>(2);
     } else if (address == String(pluginInstance + "/sourcelinkalt/3/1")) {
         if (message[0].getFloat32() == 1)
-            sourceLinkAltToProcess = static_cast<SourceLinkAlt>(3);
+            sourceLinkAltToProcess = static_cast<ElevationSourceLink>(3);
     } else if (address == String(pluginInstance + "/sourcelinkalt/4/1")) {
         if (message[0].getFloat32() == 1)
-            sourceLinkAltToProcess = static_cast<SourceLinkAlt>(4);
+            sourceLinkAltToProcess = static_cast<ElevationSourceLink>(4);
     } else if (address == String(pluginInstance + "/sourcelinkalt/5/1")) {
         if (message[0].getFloat32() == 1)
-            sourceLinkAltToProcess = static_cast<SourceLinkAlt>(5);
+            sourceLinkAltToProcess = static_cast<ElevationSourceLink>(5);
     } else if (address == String(pluginInstance + "/sourcelinkalt")) {
-        sourceLinkAltToProcess = static_cast<SourceLinkAlt>(message[0].getFloat32()); // 1 -> 5
+        sourceLinkAltToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
         setPositionPreset(newPreset);
@@ -734,7 +734,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         setSourceLink(sourceLinkToProcess);
 
     if (static_cast<bool>(sourceLinkAltToProcess))
-        setSourceLinkAlt(sourceLinkAltToProcess);
+        setElevationSourceLink(sourceLinkAltToProcess);
 }
 
 //==============================================================================
@@ -884,7 +884,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         m_lastSourceLink = automationManager.getSourceLink();
     }
 
-    if (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink()) != m_lastSourceLinkAlt) {
+    if (static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()) != m_lastElevationSourceLink) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
         message.addInt32(static_cast<int32>(automationManagerAlt.getSourceLink()));
         oscOutputSender.send(message);
@@ -897,7 +897,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         oscOutputSender.send(message);
         message.clear();
 
-        m_lastSourceLinkAlt = static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink());
+        m_lastElevationSourceLink = static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink());
     }
 
     if (m_currentPositionPreset != m_lastPositionPreset) {
@@ -942,7 +942,7 @@ void ControlGrisAudioProcessor::timerCallback()
 
     // ElevationField automation.
     if (getOscFormat() == SpatMode::LBAP && automationManagerAlt.getActivateState()) {
-        if (static_cast<TrajectoryTypeAlt>(automationManagerAlt.getDrawingType()) == TrajectoryTypeAlt::realtime) {
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) == ElevationTrajectoryType::realtime) {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
@@ -1034,22 +1034,22 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
         if (sourceId != 0) {
             float sourceElevation = sources[sourceId].getElevation();
             float offset = 60.0 / m_numOfSources * sourceId;
-            switch (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-            case SourceLinkAlt::fixedElevation:
+            switch (static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
+            case ElevationSourceLink::fixedElevation:
                 sources[0].setNormalizedElevation(sources[sourceId].getNormalizedElevation());
                 break;
-            case SourceLinkAlt::linearMin:
+            case ElevationSourceLink::linearMin:
                 sources[0].setElevation(sourceElevation - offset);
                 break;
-            case SourceLinkAlt::linearMax:
+            case ElevationSourceLink::linearMax:
                 sources[0].setElevation(sourceElevation + offset);
                 break;
-            case SourceLinkAlt::deltaLock: {
+            case ElevationSourceLink::deltaLock: {
                 float const deltaElevation = sources[sourceId].getDeltaElevation();
                 sources[0].setElevationFromFixedSource(deltaElevation);
             } break;
-            case SourceLinkAlt::independent:
-            case SourceLinkAlt::undefined:
+            case ElevationSourceLink::independent:
+            case ElevationSourceLink::undefined:
                 jassertfalse;
             }
         }
@@ -1187,28 +1187,28 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt()
 {
     float deltaY = 0.0f;
 
-    switch (static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink())) {
-    case SourceLinkAlt::independent:
+    switch (static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
+    case ElevationSourceLink::independent:
         sources[0].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
         break;
-    case SourceLinkAlt::fixedElevation:
+    case ElevationSourceLink::fixedElevation:
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].setNormalizedElevation(automationManagerAlt.getSourcePosition().y);
         }
         break;
-    case SourceLinkAlt::linearMin:
+    case ElevationSourceLink::linearMin:
         for (int i = 0; i < m_numOfSources; i++) {
             float offset = automationManagerAlt.getSourcePosition().y * 90.0;
             sources[i].setElevation(60.0 / m_numOfSources * i + offset);
         }
         break;
-    case SourceLinkAlt::linearMax:
+    case ElevationSourceLink::linearMax:
         for (int i = 0; i < m_numOfSources; i++) {
             float offset = 90.0 - automationManagerAlt.getSourcePosition().y * 90.0;
             sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i) - offset);
         }
         break;
-    case SourceLinkAlt::deltaLock:
+    case ElevationSourceLink::deltaLock:
         deltaY = automationManagerAlt.getSource().getDeltaY();
         for (int i = 0; i < m_numOfSources; i++) {
             sources[i].setElevationFromFixedSource(deltaY);
@@ -1289,12 +1289,12 @@ void ControlGrisAudioProcessor::validateSourcePositions()
 
 void ControlGrisAudioProcessor::validateSourcePositionsAlt()
 {
-    auto const sourceLink = static_cast<SourceLinkAlt>(automationManagerAlt.getSourceLink());
+    auto const sourceLink = static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink());
     auto const drawingType = automationManagerAlt.getDrawingType();
 
     if (!getIsPlaying()) {
-        if (sourceLink != SourceLinkAlt::deltaLock
-            && static_cast<TrajectoryTypeAlt>(drawingType) != TrajectoryTypeAlt::drawing) {
+        if (sourceLink != ElevationSourceLink::deltaLock
+            && static_cast<ElevationTrajectoryType>(drawingType) != ElevationTrajectoryType::drawing) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0.f, sources[0].getNormalizedElevation()));
         } else {
             automationManagerAlt.setPlaybackPositionX(-1.0f);
@@ -1303,27 +1303,27 @@ void ControlGrisAudioProcessor::validateSourcePositionsAlt()
     }
 
     // Fixed elevation.
-    if (sourceLink == SourceLinkAlt::fixedElevation) {
+    if (sourceLink == ElevationSourceLink::fixedElevation) {
         for (int i = 1; i < m_numOfSources; i++) {
             sources[i].setElevation(sources[0].getElevation());
         }
     }
     // Linear min.
-    else if (sourceLink == SourceLinkAlt::linearMin) {
+    else if (sourceLink == ElevationSourceLink::linearMin) {
         for (int i = 1; i < m_numOfSources; i++) {
             float offset = sources[0].getElevation();
             sources[i].setElevation(60.0 / m_numOfSources * i + offset);
         }
     }
     // Linear max.
-    else if (sourceLink == SourceLinkAlt::linearMax) {
+    else if (sourceLink == ElevationSourceLink::linearMax) {
         for (int i = 1; i < m_numOfSources; i++) {
             float offset = 90.0 - sources[0].getElevation();
             sources[i].setElevation(90.0 - (60.0 / m_numOfSources * i) - offset);
         }
     }
     // Delta lock.
-    else if (sourceLink == SourceLinkAlt::deltaLock) {
+    else if (sourceLink == ElevationSourceLink::deltaLock) {
         float deltaY = sources[0].getDeltaElevation();
         for (int i = 1; i < m_numOfSources; i++) {
             sources[i].setElevationFromFixedSource(deltaY);
@@ -1332,7 +1332,7 @@ void ControlGrisAudioProcessor::validateSourcePositionsAlt()
 
     // Fix source positions.
     automationManagerAlt.fixSourcePosition(); // not sure...
-    bool const shouldBeFixed{ sourceLink != SourceLinkAlt::independent };
+    bool const shouldBeFixed{ sourceLink != ElevationSourceLink::independent };
     if (static_cast<int>(sourceLink) >= 2 && static_cast<int>(sourceLink) < 5) { // TODO: what is going on here?
         for (int i{}; i < m_numOfSources; ++i) {
             sources[i].fixSourcePositionElevation(shouldBeFixed);

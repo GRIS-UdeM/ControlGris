@@ -134,9 +134,9 @@ public:
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
     void setSourceLink(SourceLink value);
-    void setSourceLinkAlt(SourceLinkAlt value);
+    void setElevationSourceLink(ElevationSourceLink value);
     void onSourceLinkChanged(SourceLink value);
-    void onSourceLinkAltChanged(SourceLinkAlt value);
+    void onElevationSourceLinkChanged(ElevationSourceLink value);
 
     void linkSourcePositions();
     void linkSourcePositionsAlt();
@@ -195,7 +195,7 @@ private:
     float m_lastAzispan;
     float m_lastElespan;
     SourceLink m_lastSourceLink;
-    SourceLinkAlt m_lastSourceLinkAlt;
+    ElevationSourceLink m_lastElevationSourceLink;
 
     Source sources[MAX_NUMBER_OF_SOURCES];
 

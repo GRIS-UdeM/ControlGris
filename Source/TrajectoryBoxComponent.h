@@ -35,7 +35,7 @@ public:
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
     void setTrajectoryType(int type);
-    void setTrajectoryTypeAlt(int type);
+    void setElevationTrajectoryType(int type);
     void setBackAndForth(bool state);
     void setBackAndForthAlt(bool state);
     void setDampeningEditorEnabled(bool state);
@@ -43,7 +43,7 @@ public:
     void setDampeningCycles(int value);
     void setDampeningCyclesAlt(int value);
     void setSourceLink(SourceLink value);
-    void setSourceLinkAlt(SourceLinkAlt value);
+    void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
@@ -57,9 +57,9 @@ public:
         virtual ~Listener() {}
 
         virtual void trajectoryBoxSourceLinkChanged(SourceLink value) = 0;
-        virtual void trajectoryBoxSourceLinkAltChanged(SourceLinkAlt value) = 0;
+        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) = 0;
         virtual void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) = 0;
-        virtual void trajectoryBoxTrajectoryTypeAltChanged(TrajectoryTypeAlt value) = 0;
+        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) = 0;
         virtual void trajectoryBoxBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxBackAndForthAltChanged(bool value) = 0;
         virtual void trajectoryBoxDampeningCyclesChanged(int value) = 0;

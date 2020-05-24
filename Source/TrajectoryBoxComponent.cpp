@@ -41,7 +41,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
     addChildComponent(&sourceLinkAltCombo);
     sourceLinkAltCombo.onChange = [this] {
         listeners.call([&](Listener & l) {
-            l.trajectoryBoxSourceLinkAltChanged(static_cast<SourceLinkAlt>(sourceLinkAltCombo.getSelectedId()));
+            l.trajectoryBoxElevationSourceLinkChanged(static_cast<ElevationSourceLink>(sourceLinkAltCombo.getSelectedId()));
         });
     };
 
@@ -62,8 +62,8 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
     addChildComponent(&trajectoryTypeAltCombo);
     trajectoryTypeAltCombo.onChange = [this] {
         listeners.call([&](Listener & l) {
-            l.trajectoryBoxTrajectoryTypeAltChanged(
-                static_cast<TrajectoryTypeAlt>(trajectoryTypeAltCombo.getSelectedId()));
+            l.trajectoryBoxElevationTrajectoryTypeChanged(
+                static_cast<ElevationTrajectoryType>(trajectoryTypeAltCombo.getSelectedId()));
         });
     };
 
@@ -216,7 +216,7 @@ void TrajectoryBoxComponent::setTrajectoryType(int type)
     trajectoryTypeCombo.setSelectedId(type);
 }
 
-void TrajectoryBoxComponent::setTrajectoryTypeAlt(int type)
+void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
 {
     trajectoryTypeAltCombo.setSelectedId(type);
 }
@@ -277,7 +277,7 @@ void TrajectoryBoxComponent::setSourceLink(SourceLink value)
     sourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
-void TrajectoryBoxComponent::setSourceLinkAlt(SourceLinkAlt value)
+void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink value)
 {
     sourceLinkAltCombo.setSelectedId(static_cast<int>(value));
 }
