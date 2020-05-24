@@ -21,7 +21,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-class GrisLookAndFeel final : public LookAndFeel_V4
+class GrisLookAndFeel final : public LookAndFeel_V3
 {
 private:
     float fontSize;
