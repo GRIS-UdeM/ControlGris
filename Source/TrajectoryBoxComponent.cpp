@@ -41,7 +41,8 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
     addChildComponent(&sourceLinkAltCombo);
     sourceLinkAltCombo.onChange = [this] {
         listeners.call([&](Listener & l) {
-            l.trajectoryBoxElevationSourceLinkChanged(static_cast<ElevationSourceLink>(sourceLinkAltCombo.getSelectedId()));
+            l.trajectoryBoxElevationSourceLinkChanged(
+                static_cast<ElevationSourceLink>(sourceLinkAltCombo.getSelectedId()));
         });
     };
 

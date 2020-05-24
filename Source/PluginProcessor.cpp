@@ -349,7 +349,8 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value
 {
     if (value != static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
         if (value == ElevationSourceLink::deltaLock
-            && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) != ElevationTrajectoryType::drawing) {
+            && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+                   != ElevationTrajectoryType::drawing) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0., 0.5));
         }
 
@@ -632,7 +633,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             x = message[0].getFloat32();
             y = message[1].getFloat32();
         }
-        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) == ElevationTrajectoryType::realtime) {
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+            == ElevationTrajectoryType::realtime) {
             z = message[2].getFloat32();
         }
     } else if (address == String(pluginInstance + "/azispan")) {
@@ -942,7 +944,8 @@ void ControlGrisAudioProcessor::timerCallback()
 
     // ElevationField automation.
     if (getOscFormat() == SpatMode::LBAP && automationManagerAlt.getActivateState()) {
-        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType()) == ElevationTrajectoryType::realtime) {
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+            == ElevationTrajectoryType::realtime) {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManagerAlt.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
