@@ -28,49 +28,49 @@ class AutomationManager
 {
 public:
     AutomationManager();
-    ~AutomationManager();
+    ~AutomationManager() = default;
 
-    double getFieldWidth() const { return fieldWidth; }
-    void setFieldWidth(double newFieldWidth);
+    double getFieldWidth() const { return mFieldWidth; }
+    void setFieldWidth(float newFieldWidth);
 
     void setActivateState(bool state);
-    bool getActivateState() const { return activateState; }
+    bool getActivateState() const { return mActivateState; }
 
-    void setPlaybackDuration(double value);
-    double getPlaybackDuration() const { return playbackDuration; }
+    void setPlaybackDuration(double value) { mPlaybackDuration = value; }
+    double getPlaybackDuration() const { return mPlaybackDuration; }
 
-    void setPlaybackPositionX(float value);
-    void setPlaybackPositionY(float value);
-    bool hasValidPlaybackPosition() const { return playbackPosition != Point<float>(-1.0f, -1.0f); }
-    Point<float> getPlaybackPosition() const { return playbackPosition; }
+    void setPlaybackPositionX(float value) { mPlaybackPosition.x = value; }
+    void setPlaybackPositionY(float value) { mPlaybackPosition.y = value; }
+    bool hasValidPlaybackPosition() const { return mPlaybackPosition != Point<float>(-1.0f, -1.0f); }
+    Point<float> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
-    void addRecordingPoint(Point<float> pos);
-    int getRecordingTrajectorySize() const { return trajectoryPoints.size(); }
-    Point<float> getFirstRecordingPoint() const { return trajectoryPoints.getFirst(); }
-    Point<float> getLastRecordingPoint() const { return trajectoryPoints.getLast(); }
+    void addRecordingPoint(Point<float> pos) { mTrajectoryPoints.add(smoothRecordingPosition(pos)); }
+    int getRecordingTrajectorySize() const { return mTrajectoryPoints.size(); }
+    Point<float> getFirstRecordingPoint() const { return mTrajectoryPoints.getFirst(); }
+    Point<float> getLastRecordingPoint() const { return mTrajectoryPoints.getLast(); }
     Point<float> getCurrentTrajectoryPoint() const;
     void createRecordingPath(Path & path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
-    void setSourceLink(SourceLink value) { this->sourceLink = value; }
-    SourceLink getSourceLink() const { return sourceLink; }
+    void setSourceLink(SourceLink value) { this->mSourceLink = value; }
+    SourceLink getSourceLink() const { return mSourceLink; }
     void setDrawingType(TrajectoryType type, Point<float> startpos);
-    TrajectoryType getDrawingType() const { return drawingType; }
+    TrajectoryType getDrawingType() const { return mDrawingType; }
     void setDrawingTypeAlt(TrajectoryTypeAlt type);
 
     void setBackAndForth(bool shouldBeOn);
-    void setDampeningCycles(int value) { this->dampeningCycles = value; }
+    void setDampeningCycles(int value) { this->mDampeningCycles = value; }
 
-    void setDeviationPerCycle(float value) { this->degreeOfDeviationPerCycle = value; }
+    void setDeviationPerCycle(float value) { this->mDegreeOfDeviationPerCycle = value; }
 
-    Source & getSource() { return source; }
-    Source const & getSource() const { return source; }
-    void setSourcePosition(Point<float> pos);
-    void setSourcePositionX(float x);
-    void setSourcePositionY(float y);
-    Point<float> getSourcePosition() const { return source.getPos(); }
+    Source & getSource() { return mSource; }
+    Source const & getSource() const { return mSource; }
+    void setSourcePosition(Point<float> pos) { mSource.setPos(pos); }
+    void setSourcePositionX(float x) { mSource.setX(x); }
+    void setSourcePositionY(float y) { mSource.setY(y); }
+    Point<float> getSourcePosition() const { return mSource.getPos(); }
     void fixSourcePosition();
 
     void setSourceAndPlaybackPosition(Point<float> pos);
@@ -83,40 +83,40 @@ public:
         virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners;
 
-    double fieldWidth;
+    float mFieldWidth{ MIN_FIELD_WIDTH };
 
-    SourceLink sourceLink;
-    TrajectoryType drawingType;
+    SourceLink mSourceLink{ SourceLink::independent };
+    TrajectoryType mDrawingType{ TrajectoryType::drawing };
 
-    bool isBackAndForth;
-    int backAndForthDirection;
+    bool mIsBackAndForth{ false };
+    int mBackAndForthDirection{};
 
-    int dampeningCycles;
-    int dampeningCycleCount;
-    double dampeningLastDelta;
+    int mDampeningCycles{};
+    int mDampeningCycleCount{};
+    double mDampeningLastDelta{};
 
-    bool activateState;
-    double playbackDuration;
-    double currentPlaybackDuration;
-    Point<float> playbackPosition;
+    bool mActivateState{ false };
+    double mPlaybackDuration{ 5.0 };
+    double mCurrentPlaybackDuration{ 5.0 };
+    Point<float> mPlaybackPosition{ -1.f, -1.f };
 
-    Source source;
+    Source mSource{};
 
-    double trajectoryDeltaTime;
-    double lastTrajectoryDeltaTime;
-    Array<Point<float>> trajectoryPoints;
-    Point<float> currentTrajectoryPoint;
-    Point<float> lastRecordingPoint;
+    double mTrajectoryDeltaTime{};
+    double mLastTrajectoryDeltaTime{};
+    Array<Point<float>> mTrajectoryPoints{};
+    Point<float> mCurrentTrajectoryPoint;
+    Point<float> mLastRecordingPoint{};
 
-    float degreeOfDeviationPerCycle;
-    float currentDegreeOfDeviation;
-    int deviationCycleCount;
+    float mDegreeOfDeviationPerCycle{};
+    float mCurrentDegreeOfDeviation{};
+    int mDeviationCycleCount{};
 
     void computeCurrentTrajectoryPoint();
     Point<float> smoothRecordingPosition(Point<float> pos);

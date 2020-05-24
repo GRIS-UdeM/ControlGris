@@ -18,7 +18,7 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "ControlGrisUtilities.h"
-#include "../JuceLibraryCode/JuceHeader.h"
+
 #include <cmath>
 
 double getFloatPrecision(double value, double precision)

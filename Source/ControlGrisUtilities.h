@@ -19,6 +19,8 @@
  *************************************************************************/
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
+
 double getFloatPrecision(double value, double precision);
 
 class XmlElementDataSorter

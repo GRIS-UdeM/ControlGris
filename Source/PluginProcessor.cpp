@@ -1044,10 +1044,11 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
             case SourceLinkAlt::linearMax:
                 sources[0].setElevation(sourceElevation + offset);
                 break;
-            case SourceLinkAlt::deltaLock:
-                float deltaElevation = sources[sourceId].getDeltaElevation();
+            case SourceLinkAlt::deltaLock: {
+                float const deltaElevation = sources[sourceId].getDeltaElevation();
                 sources[0].setElevationFromFixedSource(deltaElevation);
-                break;
+            } break;
+            case SourceLinkAlt::independent:
             case SourceLinkAlt::undefined:
                 jassertfalse;
             }
