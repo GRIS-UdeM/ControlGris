@@ -19,6 +19,8 @@
  *************************************************************************/
 #include "AutomationManager.h"
 
+#include <algorithm>
+
 constexpr auto MAGIC_1 = 300;
 constexpr auto MAGIC_2 = 300.f;
 constexpr auto MAGIC_3 = 99;
@@ -28,7 +30,7 @@ constexpr auto MAGIC_6 = 199.f;
 
 AutomationManager::AutomationManager()
 {
-    mCurrentTrajectoryPoint = Point<float>{ mFieldWidth / 2, mFieldWidth / 2 };
+    mCurrentTrajectoryPoint = Point<float>{ mFieldWidth / 2.f, mFieldWidth / 2.f };
     mSource.setX(0.0f);
     mSource.setY(0.0f);
 }
@@ -37,35 +39,26 @@ void AutomationManager::setFieldWidth(float const newFieldWidth)
 {
     float const factor{ newFieldWidth / mFieldWidth };
     mFieldWidth = newFieldWidth;
-    if (mTrajectoryPoints.size() > 0) {
-        AffineTransform const t{ AffineTransform::scale(factor) };
-        for (auto & p : mTrajectoryPoints) {
-            p.applyTransform(t);
-        }
+    AffineTransform const t{ AffineTransform::scale(factor) };
+    for (auto & p : mTrajectoryPoints) {
+        p.applyTransform(t);
     }
 }
 
-void AutomationManager::setActivateState(bool const state)
+void AutomationManager::setActivateState(bool const newState)
 {
-    mActivateState = state;
-    if (!state) {
+    mActivateState = newState;
+    if (newState == false) {
         mPlaybackPosition = Point<float>{ -1.f, -1.f };
     } else {
         mTrajectoryDeltaTime = 0.0;
         mLastTrajectoryDeltaTime = 0.0;
-        mBackAndForthDirection = 0;
+        mBackAndForthDirection = Direction::forward;
         mDampeningCycleCount = 0;
         mDampeningLastDelta = 0.0;
         mCurrentPlaybackDuration = mPlaybackDuration;
         mCurrentDegreeOfDeviation = 0.0;
         mDeviationCycleCount = 0;
-    }
-}
-
-void AutomationManager::setBackAndForth(bool const shouldBeOn)
-{
-    if (shouldBeOn != mIsBackAndForth) {
-        mIsBackAndForth = shouldBeOn;
     }
 }
 
@@ -78,10 +71,11 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
     setSourcePosition(Point<float>{ currentPosition.x / mFieldWidth, 1.f - currentPosition.y / mFieldWidth });
 }
 
-Point<float> AutomationManager::smoothRecordingPosition(Point<float> const pos)
+Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
 {
-    mLastRecordingPoint.x = pos.x + (mLastRecordingPoint.x - pos.x) * 0.8f;
-    mLastRecordingPoint.y = pos.y + (mLastRecordingPoint.y - pos.y) * 0.8f;
+    constexpr auto smoothingFactor = 0.8f;
+
+    mLastRecordingPoint = (mLastRecordingPoint - pos) * smoothingFactor + pos;
     return mLastRecordingPoint;
 }
 
@@ -100,7 +94,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
     computeCurrentTrajectoryPoint();
 }
 
-void AutomationManager::compressTrajectoryXValues(int maxValue)
+void AutomationManager::compressTrajectoryXValues(int maxValue) // TODO: make this function useless asap
 {
     auto const offset{ static_cast<int>(10.f + kSourceRadius) };
     maxValue -= offset;
@@ -120,7 +114,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     if (mTrajectoryPoints.size() > 0) {
         if (mTrajectoryDeltaTime < mLastTrajectoryDeltaTime) {
             if (mIsBackAndForth) {
-                mBackAndForthDirection = 1 - mBackAndForthDirection;
+                this->invertBackAndForthDirection();
                 mDampeningCycleCount++;
                 if (mDampeningCycleCount >= dampeningCyclesTimes2) {
                     mDampeningCycleCount = dampeningCyclesTimes2;
@@ -133,9 +127,9 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         double trajectoryPhase;
         if (mIsBackAndForth && mDampeningCycles > 0) {
             if (mTrajectoryDeltaTime <= 0.5) {
-                trajectoryPhase = std::pow(mTrajectoryDeltaTime * 2.0, 2.0) * 0.5f;
+                trajectoryPhase = std::pow(mTrajectoryDeltaTime * 2.0, 2.0) * 0.5;
             } else {
-                trajectoryPhase = 1.0 - pow(1.0 - ((mTrajectoryDeltaTime - 0.5) * 2.0), 2.0) * 0.5f;
+                trajectoryPhase = 1.0 - std::pow(1.0 - ((mTrajectoryDeltaTime - 0.5) * 2.0), 2.0) * 0.5;
             }
         } else {
             trajectoryPhase = mTrajectoryDeltaTime;
@@ -143,24 +137,22 @@ void AutomationManager::computeCurrentTrajectoryPoint()
 
         double delta{ trajectoryPhase * mTrajectoryPoints.size() };
 
-        if (mBackAndForthDirection == 1) {
+        if (mBackAndForthDirection == Direction::backward) {
             delta = mTrajectoryPoints.size() - delta;
         }
 
-        if (delta + 1 >= mTrajectoryPoints.size()) {
-            delta = mTrajectoryPoints.size();
-        } else if (delta < 0) {
-            delta = 0;
-        }
+        delta = std::clamp(delta, 0.0, static_cast<double>(mTrajectoryPoints.size()));
 
         if (mIsBackAndForth && mDampeningCycles > 0) {
             if (mDampeningCycleCount < dampeningCyclesTimes2) {
                 double const relativeDeltaTime{ (mDampeningCycleCount + mTrajectoryDeltaTime) / dampeningCyclesTimes2 };
-                mCurrentPlaybackDuration = mPlaybackDuration - (pow(relativeDeltaTime, 2.0) * mPlaybackDuration * 0.25);
-                currentScaleMin = relativeDeltaTime * mTrajectoryPoints.size() * 0.5f;
+                mCurrentPlaybackDuration
+                    = mPlaybackDuration - (std::pow(relativeDeltaTime, 2.0) * mPlaybackDuration * 0.25);
+                currentScaleMin = relativeDeltaTime * mTrajectoryPoints.size() * 0.5;
                 currentScaleMax = mTrajectoryPoints.size() - currentScaleMin;
                 double const currentScale{ (currentScaleMax - currentScaleMin) / mTrajectoryPoints.size() };
-                mDampeningLastDelta = delta = delta * currentScale + currentScaleMin;
+                delta = delta * currentScale + currentScaleMin;
+                mDampeningLastDelta = delta;
             } else {
                 delta = mDampeningLastDelta;
             }
@@ -170,14 +162,14 @@ void AutomationManager::computeCurrentTrajectoryPoint()
 
         double const deltaRatio{ static_cast<double>(mTrajectoryPoints.size() - 1) / mTrajectoryPoints.size() };
         delta *= deltaRatio;
-        int index = (int)delta;
+        auto index = static_cast<int>(delta);
         if (index + 1 < mTrajectoryPoints.size()) {
             auto const frac{ static_cast<float>(delta) - static_cast<float>(index) };
-            Point<float> const p1{ mTrajectoryPoints[index] };
-            Point<float> const p2{ mTrajectoryPoints[index + 1] };
-            mCurrentTrajectoryPoint = Point<float>{ p1.x + (p2.x - p1.x) * frac, p1.y + (p2.y - p1.y) * frac };
+            auto const & p1{ mTrajectoryPoints.getReference(index) };
+            auto const & p2{ mTrajectoryPoints.getReference(index + 1) };
+            mCurrentTrajectoryPoint = p1 + (p2 - p1) * frac;
         } else {
-            mCurrentTrajectoryPoint = Point<float>{ mTrajectoryPoints.getLast().x, mTrajectoryPoints.getLast().y };
+            mCurrentTrajectoryPoint = mTrajectoryPoints.getLast();
         }
     }
 
@@ -203,6 +195,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 
     if (mActivateState) {
+        ;
         setSourcePosition(
             Point<float>{ mCurrentTrajectoryPoint.x / mFieldWidth, 1.f - mCurrentTrajectoryPoint.y / mFieldWidth });
         sendTrajectoryPositionChangedEvent();
@@ -220,10 +213,8 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 
 void AutomationManager::setSourceAndPlaybackPosition(Point<float> const pos)
 {
-    setSourcePositionX(pos.x);
-    setSourcePositionY(pos.y);
-    setPlaybackPositionX(pos.x);
-    setPlaybackPositionY(pos.y);
+    setSourcePosition(pos);
+    setPlaybackPosition(pos);
 }
 
 void AutomationManager::sendTrajectoryPositionChangedEvent()
@@ -240,22 +231,22 @@ void AutomationManager::fixSourcePosition()
     mSource.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> const startPos)
+void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> const & startPos)
 {
     mDrawingType = type;
 
     mTrajectoryPoints.clear();
 
-    auto const offset{ static_cast<int>(mFieldWidth / 2) };
-    auto const minLim{ 8 };
-    auto const maxLim{ static_cast<int>(mFieldWidth - 8) };
+    auto const offset{ static_cast<int>(mFieldWidth / 2.f) };
+    auto constexpr minLim{ 8 };
+    auto const maxLim{ static_cast<int>(mFieldWidth - minLim) };
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
     float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
-                     * ((mFieldWidth - kSourceDiameter) / 2) };
+                     * ((mFieldWidth - kSourceDiameter) / 2.f) };
     float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
 
-    int const fSize{ static_cast<int>(mFieldWidth) };
+    auto const fSize{ static_cast<int>(mFieldWidth) };
     int const fSizeOver3{ fSize / 3 };
     int const fSizeOver4{ fSize / 4 };
     float x;
@@ -469,10 +460,10 @@ void AutomationManager::setDrawingTypeAlt(ElevationTrajectoryType const type)
 
     mTrajectoryPoints.clear();
 
-    float const offset{ 10.f + kSourceRadius };
-    float const width{ mFieldWidth - offset };
-    float const minPos{ 15.f };
-    float const maxPos{ mFieldWidth - 20.f };
+    auto constexpr offset{ 10.f + kSourceRadius };
+    auto const width{ mFieldWidth - offset };
+    auto constexpr minPos{ 15.f };
+    auto const maxPos{ mFieldWidth - 20.f };
 
     switch (type) {
     case ElevationTrajectoryType::realtime:
@@ -499,8 +490,8 @@ void AutomationManager::setDrawingTypeAlt(ElevationTrajectoryType const type)
 
     if (type > ElevationTrajectoryType::drawing) {
         setSourcePosition(
-            Point<float>(mTrajectoryPoints[0].x / mFieldWidth, 1.0 - mTrajectoryPoints[0].y / mFieldWidth));
+            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.f - mTrajectoryPoints[0].y / mFieldWidth });
     } else {
-        setSourcePosition(Point<float>(0.5f, 0.5f));
+        setSourcePosition(Point<float>{ 0.5f, 0.5f });
     }
 }

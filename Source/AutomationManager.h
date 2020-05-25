@@ -39,13 +39,14 @@ public:
     void setPlaybackDuration(double value) { mPlaybackDuration = value; }
     double getPlaybackDuration() const { return mPlaybackDuration; }
 
-    void setPlaybackPositionX(float value) { mPlaybackPosition.x = value; }
-    void setPlaybackPositionY(float value) { mPlaybackPosition.y = value; }
+    void setPlaybackPosition(Point<float> const & value) { mPlaybackPosition = value; }
+    void setPlaybackPositionX(float const value) { mPlaybackPosition.x = value; }
+    void setPlaybackPositionY(float const value) { mPlaybackPosition.y = value; }
     bool hasValidPlaybackPosition() const { return mPlaybackPosition != Point<float>(-1.0f, -1.0f); }
     Point<float> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
-    void addRecordingPoint(Point<float> pos) { mTrajectoryPoints.add(smoothRecordingPosition(pos)); }
+    void addRecordingPoint(Point<float> const & pos) { mTrajectoryPoints.add(smoothRecordingPosition(pos)); }
     int getRecordingTrajectorySize() const { return mTrajectoryPoints.size(); }
     Point<float> getFirstRecordingPoint() const { return mTrajectoryPoints.getFirst(); }
     Point<float> getLastRecordingPoint() const { return mTrajectoryPoints.getLast(); }
@@ -56,11 +57,11 @@ public:
 
     void setSourceLink(SourceLink value) { this->mSourceLink = value; }
     SourceLink getSourceLink() const { return mSourceLink; }
-    void setDrawingType(TrajectoryType type, Point<float> startpos);
+    void setDrawingType(TrajectoryType type, Point<float> const & startpos);
     TrajectoryType getDrawingType() const { return mDrawingType; }
     void setDrawingTypeAlt(ElevationTrajectoryType type);
 
-    void setBackAndForth(bool shouldBeOn);
+    void setBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setDampeningCycles(int value) { this->mDampeningCycles = value; }
 
     void setDeviationPerCycle(float value) { this->mDegreeOfDeviationPerCycle = value; }
@@ -87,6 +88,8 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
+    enum class Direction { forward, backward };
+
     ListenerList<Listener> mListeners;
 
     float mFieldWidth{ MIN_FIELD_WIDTH };
@@ -95,7 +98,7 @@ private:
     TrajectoryType mDrawingType{ TrajectoryType::drawing };
 
     bool mIsBackAndForth{ false };
-    int mBackAndForthDirection{};
+    Direction mBackAndForthDirection{ Direction::forward };
 
     int mDampeningCycles{};
     int mDampeningCycleCount{};
@@ -118,8 +121,13 @@ private:
     float mCurrentDegreeOfDeviation{};
     int mDeviationCycleCount{};
 
+    void invertBackAndForthDirection()
+    {
+        mBackAndForthDirection
+            = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
+    }
     void computeCurrentTrajectoryPoint();
-    Point<float> smoothRecordingPosition(Point<float> pos);
+    Point<float> smoothRecordingPosition(Point<float> const & pos);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager)
 };
