@@ -27,7 +27,7 @@ constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 
 // Spatialisation modes.
 //----------------------
-enum class SpatMode { VBAP = 0, LBAP };
+enum class SpatMode { VBAP, LBAP };
 
 const String WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
 
@@ -35,7 +35,7 @@ const String WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \n
 //---------------------------------------------------------------
 enum class SourcePlacement {
     undefined,
-    leftAlternate = 1,
+    leftAlternate,
     rightAlternate,
     leftClockwise,
     leftCounterClockwise,
@@ -53,7 +53,7 @@ const StringArray SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Ri
 //-------------------------------------------
 enum class SourceLink {
     undefined,
-    independent = 1,
+    independent,
     circular,
     circularFixedRadius,
     circularFixedAngle,
@@ -78,7 +78,7 @@ const StringArray SOURCE_LINK_ALT_TYPES{ String("Independent"),
 //-----------------------------------------------
 enum class TrajectoryType {
     undefined,
-    realtime = 1,
+    realtime,
     drawing,
     circleClockwise,
     circleCounterClockwise,
@@ -108,7 +108,7 @@ const StringArray TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                          String("Triangle Clockwise"),
                                          String("Triangle Counter Clockwise") };
 
-enum class ElevationTrajectoryType { undefined, realtime = 1, drawing, downUp, upDown };
+enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
 const StringArray TRAJECTORY_TYPE_ALT_TYPES{ String("Realtime"),
                                              String("Drawing"),
                                              String("Up Down"),

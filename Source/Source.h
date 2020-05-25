@@ -21,16 +21,10 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#define SOURCE_ID_AZIMUTH 0
-#define SOURCE_ID_ELEVATION 1
-#define SOURCE_ID_DISTANCE 2
-#define SOURCE_ID_X 3
-#define SOURCE_ID_Y 4
-#define SOURCE_ID_AZIMUTH_SPAN 5
-#define SOURCE_ID_ELEVATION_SPAN 6
+enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
 
-static const float kSourceRadius = 12;
-static const float kSourceDiameter = kSourceRadius * 2;
+constexpr float kSourceRadius = 12.f;
+constexpr float kSourceDiameter = kSourceRadius * 2.f;
 
 class Source
 {
@@ -84,7 +78,7 @@ public:
     float getDeltaX() const { return m_x - fixedX; }
     float getDeltaY() const { return m_y - fixedY; }
     float getDeltaAzimuth() const { return (m_azimuth - fixedAzimuth); }
-    float getDeltaElevation() const { return (m_elevationNoClip - fixedElevation) / 90.0; }
+    float getDeltaElevation() const { return (m_elevationNoClip - fixedElevation) / 90.f; }
     float getDeltaDistance() const { return (m_distance - fixedDistance); }
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);

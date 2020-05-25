@@ -102,7 +102,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 
 void AutomationManager::compressTrajectoryXValues(int maxValue)
 {
-    auto const offset{ static_cast<int>(10.0 + kSourceRadius) };
+    auto const offset{ static_cast<int>(10.f + kSourceRadius) };
     maxValue -= offset;
     int const size{ getRecordingTrajectorySize() };
     auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.f) };

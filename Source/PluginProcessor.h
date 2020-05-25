@@ -121,7 +121,7 @@ public:
     void setPluginState();
 
     void sourcePositionChanged(int sourceId, int whichField);
-    void setSourceParameterValue(int sourceId, int parameterId, double value);
+    void setSourceParameterValue(int sourceId, SourceParameter sourceParameter, double value);
 
     void initialize();
 

@@ -87,17 +87,18 @@ void ParametersBoxComponent::mouseDown(const MouseEvent & event)
 void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 {
     float value = slider->getValue();
-    int parameterId = (slider == &azimuthSpan) ? SOURCE_ID_AZIMUTH_SPAN : SOURCE_ID_ELEVATION_SPAN;
+    auto const parameterId{ (slider == &azimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
 
     listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(parameterId, value); });
 
     if (m_spanLinked) {
-        if (parameterId == SOURCE_ID_AZIMUTH_SPAN) {
+        if (parameterId == SourceParameter::azimuthSpan) {
             elevationSpan.setValue(value, NotificationType::sendNotificationAsync);
-            listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(SOURCE_ID_ELEVATION_SPAN, value); });
-        } else if (parameterId == SOURCE_ID_ELEVATION_SPAN) {
+            listeners.call(
+                [&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::elevationSpan, value); });
+        } else if (parameterId == SourceParameter::elevationSpan) {
             azimuthSpan.setValue(value, NotificationType::sendNotificationAsync);
-            listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(SOURCE_ID_AZIMUTH_SPAN, value); });
+            listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::azimuthSpan, value); });
         }
     }
 }

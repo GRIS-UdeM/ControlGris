@@ -61,7 +61,7 @@ public:
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() final;
-    void parametersBoxParameterChanged(int parameterId, double value) final;
+    void parametersBoxParameterChanged(SourceParameter sourceId, double value) final;
 
     // SettingsBoxComponent::Listeners
     void settingsBoxOscFormatChanged(SpatMode mode) final;

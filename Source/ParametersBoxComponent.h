@@ -45,7 +45,7 @@ public:
         virtual ~Listener() {}
 
         virtual void parametersBoxSelectedSourceClicked() = 0;
-        virtual void parametersBoxParameterChanged(int parameterId, double value) = 0;
+        virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
     };
 
     void addListener(Listener * l) { listeners.add(l); }

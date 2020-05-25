@@ -1012,14 +1012,14 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
 {
     if (whichField == 0) {
         if (getOscFormat() == SpatMode::LBAP) {
-            setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, sources[sourceId].getNormalizedAzimuth());
-            setSourceParameterValue(sourceId, SOURCE_ID_DISTANCE, sources[sourceId].getDistance());
+            setSourceParameterValue(sourceId, SourceParameter::azimuth, sources[sourceId].getNormalizedAzimuth());
+            setSourceParameterValue(sourceId, SourceParameter::distance, sources[sourceId].getDistance());
         } else {
-            setSourceParameterValue(sourceId, SOURCE_ID_AZIMUTH, sources[sourceId].getNormalizedAzimuth());
-            setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, sources[sourceId].getNormalizedElevation());
+            setSourceParameterValue(sourceId, SourceParameter::azimuth, sources[sourceId].getNormalizedAzimuth());
+            setSourceParameterValue(sourceId, SourceParameter::elevation, sources[sourceId].getNormalizedElevation());
         }
     } else {
-        setSourceParameterValue(sourceId, SOURCE_ID_ELEVATION, sources[sourceId].getNormalizedElevation());
+        setSourceParameterValue(sourceId, SourceParameter::elevation, sources[sourceId].getNormalizedElevation());
     }
 
     if (whichField == 0) {
@@ -1036,7 +1036,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
     if (whichField == 1 && getOscFormat() == SpatMode::LBAP) {
         if (sourceId != 0) {
             float sourceElevation = sources[sourceId].getElevation();
-            float offset = 60.0 / m_numOfSources * sourceId;
+            float offset = 60.f / m_numOfSources * sourceId;
             switch (static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
             case ElevationSourceLink::fixedElevation:
                 sources[0].setNormalizedElevation(sources[sourceId].getNormalizedElevation());
@@ -1062,29 +1062,31 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
 
 // Called whenever a source has changed.
 //--------------------------------------
-void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parameterId, double value)
+void ControlGrisAudioProcessor::setSourceParameterValue(int const sourceId,
+                                                        SourceParameter const parameterId,
+                                                        double const value)
 {
     String id(sourceId);
     switch (parameterId) {
-    case SOURCE_ID_AZIMUTH:
+    case SourceParameter::azimuth:
         sources[sourceId].setNormalizedAzimuth(value);
         parameters.state.setProperty("p_azimuth_" + id, value, nullptr);
         break;
-    case SOURCE_ID_ELEVATION:
+    case SourceParameter::elevation:
         sources[sourceId].setNormalizedElevation(value);
         parameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
         break;
-    case SOURCE_ID_DISTANCE:
+    case SourceParameter::distance:
         sources[sourceId].setDistance(value);
         parameters.state.setProperty(String("p_distance_") + id, value, nullptr);
         break;
-    case SOURCE_ID_X:
+    case SourceParameter::x:
         sources[sourceId].setX(value);
         break;
-    case SOURCE_ID_Y:
+    case SourceParameter::y:
         sources[sourceId].setY(value);
         break;
-    case SOURCE_ID_AZIMUTH_SPAN:
+    case SourceParameter::azimuthSpan:
         for (int i{}; i < m_numOfSources; ++i) {
             sources[i].setAzimuthSpan(value);
         }
@@ -1092,7 +1094,7 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int sourceId, int parame
         parameters.getParameter("azimuthSpan")->setValueNotifyingHost(value);
         parameters.getParameter("azimuthSpan")->endChangeGesture();
         break;
-    case SOURCE_ID_ELEVATION_SPAN:
+    case SourceParameter::elevationSpan:
         for (int i{}; i < m_numOfSources; ++i) {
             sources[i].setElevationSpan(value);
         }

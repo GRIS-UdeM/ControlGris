@@ -404,9 +404,13 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     }
 
     for (int i{}; i < numOfSources; ++i) {
-        processor.setSourceParameterValue(i, SOURCE_ID_AZIMUTH, processor.getSources()[i].getNormalizedAzimuth());
-        processor.setSourceParameterValue(i, SOURCE_ID_ELEVATION, processor.getSources()[i].getNormalizedElevation());
-        processor.setSourceParameterValue(i, SOURCE_ID_DISTANCE, processor.getSources()[i].getDistance());
+        processor.setSourceParameterValue(i,
+                                          SourceParameter::azimuth,
+                                          processor.getSources()[i].getNormalizedAzimuth());
+        processor.setSourceParameterValue(i,
+                                          SourceParameter::elevation,
+                                          processor.getSources()[i].getNormalizedElevation());
+        processor.setSourceParameterValue(i, SourceParameter::distance, processor.getSources()[i].getDistance());
     }
 
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
@@ -440,9 +444,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
 // ParametersBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(int parameterId, double value)
+void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParameter const sourceParameter,
+                                                                    double const value)
 {
-    processor.setSourceParameterValue(m_selectedSource, parameterId, value);
+    processor.setSourceParameterValue(m_selectedSource, sourceParameter, value);
 
     mainField.repaint();
     if (processor.getOscFormat() == SpatMode::LBAP)
