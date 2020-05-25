@@ -67,9 +67,9 @@ public:
 
     Source & getSource() { return mSource; }
     Source const & getSource() const { return mSource; }
-    void setSourcePosition(Point<float> pos) { mSource.setPos(pos); }
-    void setSourcePositionX(float x) { mSource.setX(x); }
-    void setSourcePositionY(float y) { mSource.setY(y); }
+    void setSourcePosition(Point<float> const & pos) { mSource.setPos(pos); }
+    void setSourcePositionX(float const x) { mSource.setX(x); }
+    void setSourcePositionY(float const y) { mSource.setY(y); }
     Point<float> getSourcePosition() const { return mSource.getPos(); }
     void fixSourcePosition();
 

@@ -29,45 +29,45 @@ constexpr float kSourceDiameter = kSourceRadius * 2.f;
 class Source
 {
 public:
-    Source();
-    ~Source();
+    Source() = default;
+    ~Source() = default;
 
-    void setId(int id);
-    int getId() const { return m_id; }
+    void setId(int const id) { mId = id; }
+    int getId() const { return mId; }
 
-    void setRadiusIsElevation(bool shouldBeElevation);
+    void setRadiusIsElevation(bool const shouldBeElevation) { mRadiusIsElevation = shouldBeElevation; }
 
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);
-    float getAzimuth() const { return m_azimuth; }
+    float getAzimuth() const { return mAzimuth; }
     float getNormalizedAzimuth() const;
     void setElevationNoClip(float elevation);
     void setElevation(float elevation);
-    void setNormalizedElevation(float value);
-    float getElevation() const { return m_elevation; }
-    float getNormalizedElevation() const { return m_elevation / 90.0; }
+    void setNormalizedElevation(float const value) { setElevation(value * 90.f); }
+    float getElevation() const { return mElevation; }
+    float getNormalizedElevation() const { return mElevation / 90.f; }
     void setDistance(float distance);
     void setDistanceNoClip(float distance);
-    float getDistance() const { return m_distance; }
+    float getDistance() const { return mDistance; }
     void setAzimuthSpan(float azimuthSpan);
-    float getAzimuthSpan() const { return m_aziSpan; }
+    float getAzimuthSpan() const { return mAzimuthSpan; }
     void setElevationSpan(float elevationSpan);
-    float getElevationSpan() const { return m_eleSpan; }
+    float getElevationSpan() const { return mElevationSpan; }
 
     void setCoordinates(float azimuth, float elevation, float distance);
 
     void setX(float x);
-    float getX() const { return m_x; }
+    float getX() const { return mX; }
     void setY(float y);
-    float getY() const { return m_y; }
-    Point<float> getPos() const { return Point<float>{ m_x, m_y }; }
-    void setPos(Point<float> pos);
+    float getY() const { return mY; }
+    Point<float> getPos() const { return Point<float>{ mX, mY }; }
+    void setPos(Point<float> const & pos);
 
     void computeXY();
     void computeAzimuthElevation();
 
     void setFixedPosition(float x, float y);
-    void setFixedElevation(float z);
+    void setFixedElevation(float const z) { mFixedElevation = 90.f - z * 90.f; }
 
     void setSymmetricX(float x, float y);
     void setSymmetricY(float x, float y);
@@ -75,41 +75,41 @@ public:
     void fixSourcePosition(bool shouldBeFixed);
     void fixSourcePositionElevation(bool shouldBeFixed);
 
-    float getDeltaX() const { return m_x - fixedX; }
-    float getDeltaY() const { return m_y - fixedY; }
-    float getDeltaAzimuth() const { return (m_azimuth - fixedAzimuth); }
-    float getDeltaElevation() const { return (m_elevationNoClip - fixedElevation) / 90.f; }
-    float getDeltaDistance() const { return (m_distance - fixedDistance); }
+    float getDeltaX() const { return mX - mFixedX; }
+    float getDeltaY() const { return mY - mFixedY; }
+    float getDeltaAzimuth() const { return (mAzimuth - mFixedAzimuth); }
+    float getDeltaElevation() const { return (mElevationNoClip - mFixedElevation) / 90.f; }
+    float getDeltaDistance() const { return (mDistance - mFixedDistance); }
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
-    void setElevationFromFixedSource(float deltaY);
+    void setElevationFromFixedSource(float const deltaY) { setElevation(mFixedElevation + deltaY * 90.f); }
 
-    void setColour(Colour col);
-    Colour getColour() const { return colour; }
+    void setColour(Colour const & col) { mColour = col; }
+    Colour getColour() const { return mColour; }
 
 private:
-    int m_id;
-    bool m_changed;
-    bool m_radiusIsElevation;
+    int mId{};
+    bool mChanged{ false };
+    bool mRadiusIsElevation{ true };
 
-    float m_azimuth;
-    float m_elevation;
-    float m_elevationNoClip;
-    float m_distance;
-    float m_distanceNoClip;
-    float m_aziSpan;
-    float m_eleSpan;
-    float m_x;
-    float m_y;
+    float mAzimuth{};
+    float mElevation{};
+    float mElevationNoClip{};
+    float mDistance{ 1.f };
+    float mDistanceNoClip{ 1.f };
+    float mAzimuthSpan{};
+    float mElevationSpan{};
+    float mX{};
+    float mY{};
 
-    Colour colour;
+    Colour mColour{ Colours::black };
 
-    float fixedAzimuth;
-    float fixedElevation;
-    float fixedDistance;
-    float fixedX;
-    float fixedY;
+    float mFixedAzimuth{ -1.f };
+    float mFixedElevation{ -1.f };
+    float mFixedDistance{ -1.f };
+    float mFixedX{};
+    float mFixedY{};
 
-    inline double degreeToRadian(float degree) { return (degree / 360.0 * 2.0 * M_PI); }
+    inline double degreeToRadian(float degree) { return (degree / 360.0 * MathConstants<float>::twoPi); }
 };

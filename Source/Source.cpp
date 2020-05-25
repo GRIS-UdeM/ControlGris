@@ -19,274 +19,219 @@
  *************************************************************************/
 #include "Source.h"
 
-Source::Source()
+void Source::setAzimuth(float const azimuth)
 {
-    m_changed = false;
-    m_radiusIsElevation = true;
-    m_azimuth = 0.0;
-    m_elevation = 0.0;
-    m_elevationNoClip = 0.0;
-    m_distance = 1.0;
-    m_distanceNoClip = 1.0;
-    m_aziSpan = 0.0;
-    m_eleSpan = 0.0;
-    m_x = 0.0;
-    m_y = 0.0;
-    fixedX = 0.0;
-    fixedY = 0.0;
-    fixedAzimuth = -1.0;
-    fixedElevation = -1.0;
-    fixedDistance = -1.0;
-    colour = Colours::black;
-}
-
-Source::~Source()
-{
-}
-
-void Source::setId(int id)
-{
-    m_id = id;
-}
-
-void Source::setRadiusIsElevation(bool shouldBeElevation)
-{
-    m_radiusIsElevation = shouldBeElevation;
-}
-
-void Source::setAzimuth(float azimuth)
-{
-    m_azimuth = azimuth;
+    mAzimuth = azimuth;
     computeXY();
 }
 
-void Source::setNormalizedAzimuth(float value)
+void Source::setNormalizedAzimuth(float const value)
 {
-    if (value <= 0.5) {
-        m_azimuth = value * 360;
+    if (value <= 0.5f) {
+        mAzimuth = value * 360.f;
     } else {
-        m_azimuth = (value - 1.0) * 360;
+        mAzimuth = (value - 1.f) * 360.f;
     }
     computeXY();
 }
 
 float Source::getNormalizedAzimuth() const
 {
-    float const azimuth = m_azimuth / 360.0;
-    return azimuth >= 0 ? azimuth : azimuth + 1.0;
+    auto const azimuth{ mAzimuth / 360.f };
+    return azimuth >= 0.f ? azimuth : azimuth + 1.f;
 }
 
 void Source::setElevationNoClip(float elevation)
 {
-    m_elevationNoClip = elevation;
-    setElevation(m_elevationNoClip);
+    mElevationNoClip = elevation;
+    setElevation(mElevationNoClip);
 }
 
-void Source::setElevation(float elevation)
+void Source::setElevation(float const elevation)
 {
-    if (elevation < 0.0) {
-        m_elevation = 0.0;
-    } else if (elevation > 90.0) {
-        m_elevation = 90.0;
+    if (elevation < 0.f) {
+        mElevation = 0.f;
+    } else if (elevation > 90.f) {
+        mElevation = 90.f;
     } else {
-        m_elevationNoClip = m_elevation = elevation;
+        mElevationNoClip = mElevation = elevation;
     }
     computeXY();
 }
 
-void Source::setNormalizedElevation(float value)
+void Source::setDistanceNoClip(float const distance)
 {
-    setElevation(value * 90.0);
+    mDistanceNoClip = distance;
+    setDistance(mDistanceNoClip);
 }
 
-void Source::setDistanceNoClip(float distance)
+void Source::setDistance(float const distance)
 {
-    m_distanceNoClip = distance;
-    setDistance(m_distanceNoClip);
-}
-
-void Source::setDistance(float distance)
-{
-    if (distance < 0.0) {
-        m_distance = 0.0;
+    if (distance < 0.f) {
+        mDistance = 0.f;
     } else {
-        m_distanceNoClip = m_distance = distance;
+        mDistanceNoClip = mDistance = distance;
     }
     computeXY();
 }
 
-void Source::setCoordinates(float azimuth, float elevation, float distance)
+void Source::setCoordinates(float const azimuth, float const elevation, float const distance)
 {
-    m_azimuth = azimuth;
-    m_elevation = elevation;
-    m_distance = distance;
+    mAzimuth = azimuth;
+    mElevation = elevation;
+    mDistance = distance;
     computeXY();
     computeAzimuthElevation();
 }
 
-void Source::setAzimuthSpan(float azimuthSpan)
+void Source::setAzimuthSpan(float const azimuthSpan)
 {
-    m_aziSpan = azimuthSpan;
-    m_changed = true;
+    mAzimuthSpan = azimuthSpan;
+    mChanged = true;
 }
 
-void Source::setElevationSpan(float elevationSpan)
+void Source::setElevationSpan(float const elevationSpan)
 {
-    m_eleSpan = elevationSpan;
-    m_changed = true;
+    mElevationSpan = elevationSpan;
+    mChanged = true;
 }
 
-void Source::setX(float x)
+void Source::setX(float const x)
 {
-    m_x = x;
+    mX = x;
     computeAzimuthElevation();
 }
 
-void Source::setY(float y)
+void Source::setY(float const y)
 {
-    m_y = y;
+    mY = y;
     computeAzimuthElevation();
 }
 
-void Source::setPos(Point<float> pos)
+void Source::setPos(Point<float> const & pos)
 {
-    m_x = pos.x;
-    m_y = pos.y;
+    mX = pos.x;
+    mY = pos.y;
     computeAzimuthElevation();
 }
 
 void Source::computeXY()
 {
     float radius;
-    if (m_radiusIsElevation) { // azimuth - elevation
-        radius = (90.0 - m_elevation) / 90.0;
+    if (mRadiusIsElevation) { // azimuth - elevation
+        radius = (90.f - mElevation) / 90.f;
     } else { // azimuth - distance
-        radius = m_distance;
+        radius = mDistance;
     }
-    m_x = radius * sinf(degreeToRadian(m_azimuth));
-    m_x = -m_x * 0.5 + 0.5;
-    m_x = m_x < 0.0 ? 0.0 : m_x > 1.0 ? 1.0 : m_x;
-    m_y = radius * cosf(degreeToRadian(m_azimuth));
-    m_y = m_y * 0.5 + 0.5;
-    m_y = m_y < 0.0 ? 0.0 : m_y > 1.0 ? 1.0 : m_y;
-    m_changed = true;
+    mX = radius * sinf(degreeToRadian(mAzimuth));
+    mX = -mX * 0.5f + 0.5f;
+    mX = std::clamp(mX, 0.f, 1.f);
+    mY = radius * cosf(degreeToRadian(mAzimuth));
+    mY = mY * 0.5f + 0.5f;
+    mY = std::clamp(mY, 0.f, 1.f);
+    mChanged = true;
 }
 
 void Source::computeAzimuthElevation()
 {
-    float x = m_x * 2.0 - 1.0;
-    float y = m_y * 2.0 - 1.0;
+    auto const x{ mX * 2.f - 1.f };
+    auto const y{ mY * 2.f - 1.f };
     if (x != 0.0 || y != 0.0) {
-        float ang = atan2f(x, y) / M_PI * 180.0;
-        if (ang <= -180) {
-            ang += 360.0;
+        auto ang{ atan2f(x, y) / MathConstants<float>::pi * 180.f };
+        if (ang <= -180.f) {
+            ang += 360.f;
         }
-        m_azimuth = -ang;
+        mAzimuth = -ang;
     }
-    float rad = sqrtf(x * x + y * y);
-    if (m_radiusIsElevation) { // azimuth - elevation
-        rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
-        m_elevationNoClip = m_elevation = 90.0 - rad * 90.0;
+    float rad{ sqrtf(x * x + y * y) };
+    if (mRadiusIsElevation) { // azimuth - elevation
+        rad = rad < 0.f ? 0.f : rad > 1.f ? 1.f : rad;
+        mElevationNoClip = mElevation = 90.f - rad * 90.f;
     } else { // azimuth - distance
-        rad = rad < 0.0 ? 0.0 : rad;
-        m_distanceNoClip = m_distance = rad;
+        rad = rad < 0.f ? 0.f : rad;
+        mDistanceNoClip = mDistance = rad;
     }
-    m_changed = true;
+    mChanged = true;
 }
 
-void Source::fixSourcePosition(bool shouldBeFixed)
+void Source::fixSourcePosition(bool const shouldBeFixed)
 {
     if (shouldBeFixed) {
-        fixedAzimuth = m_azimuth;
-        fixedElevation = m_elevationNoClip;
-        fixedDistance = m_distanceNoClip;
-        fixedX = m_x;
-        fixedY = m_y;
+        mFixedAzimuth = mAzimuth;
+        mFixedElevation = mElevationNoClip;
+        mFixedDistance = mDistanceNoClip;
+        mFixedX = mX;
+        mFixedY = mY;
     } else {
-        fixedAzimuth = -1.0;
-        fixedElevation = -1.0;
-        fixedDistance = -1.0;
-        fixedX = -1.0;
-        fixedY = -1.0;
+        mFixedAzimuth = -1.f;
+        mFixedElevation = -1.f;
+        mFixedDistance = -1.f;
+        mFixedX = -1.f;
+        mFixedY = -1.f;
     }
 }
 
-void Source::fixSourcePositionElevation(bool shouldBeFixed)
+void Source::fixSourcePositionElevation(bool const shouldBeFixed)
 {
     if (shouldBeFixed) {
-        fixedElevation = m_elevation;
+        mFixedElevation = mElevation;
     } else {
-        fixedElevation = -1.0;
+        mFixedElevation = -1.f;
     }
 }
 
-void Source::setFixedPosition(float x, float y)
+void Source::setFixedPosition(float const x, float const y)
 {
-    fixedX = x;
-    fixedY = y;
-    float fx = fixedX * 2.0 - 1.0;
-    float fy = fixedY * 2.0 - 1.0;
-    float ang = atan2f(fx, fy) / M_PI * 180.0;
-    if (ang <= -180) {
-        ang += 360.0;
+    mFixedX = x;
+    mFixedY = y;
+    auto const fx{ mFixedX * 2.f - 1.f };
+    auto const fy{ mFixedY * 2.f - 1.f };
+    auto ang{ atan2f(fx, fy) / MathConstants<float>::pi * 180.f };
+    if (ang <= -180.f) {
+        ang += 360.f;
     }
-    fixedAzimuth = -ang;
-    float rad = sqrtf(fx * fx + fy * fy);
-    if (m_radiusIsElevation) { // azimuth - elevation
-        rad = rad < 0.0 ? 0.0 : rad > 1.0 ? 1.0 : rad;
-        fixedElevation = 90.0 - rad * 90.0;
+    mFixedAzimuth = -ang;
+    auto rad{ sqrtf(fx * fx + fy * fy) };
+    if (mRadiusIsElevation) { // azimuth - elevation
+        rad = std::clamp(rad, 0.f, 1.f);
+        mFixedElevation = 90.f - rad * 90.f;
     } else { // azimuth - distance
-        rad = rad < 0.0 ? 0.0 : rad;
-        fixedDistance = rad;
+        rad = rad < 0.f ? 0.f : rad;
+        mFixedDistance = rad;
     }
 }
 
-void Source::setFixedElevation(float z)
+void Source::setCoordinatesFromFixedSource(float const deltaAzimuth,
+                                           float const deltaElevation,
+                                           float const deltaDistance)
 {
-    fixedElevation = 90.0 - z * 90.0;
-}
-
-void Source::setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance)
-{
-    if (m_radiusIsElevation) { // azimuth - elevation
-        setAzimuth(fixedAzimuth + deltaAzimuth);
-        setElevationNoClip(fixedElevation + deltaElevation * 90.0f);
+    if (mRadiusIsElevation) { // azimuth - elevation
+        setAzimuth(mFixedAzimuth + deltaAzimuth);
+        setElevationNoClip(mFixedElevation + deltaElevation * 90.f);
     } else { // azimuth - distance
-        setAzimuth(fixedAzimuth + deltaAzimuth);
-        setDistanceNoClip(fixedDistance + deltaDistance);
+        setAzimuth(mFixedAzimuth + deltaAzimuth);
+        setDistanceNoClip(mFixedDistance + deltaDistance);
     }
     computeXY();
 }
 
-void Source::setSymmetricX(float x, float y)
+void Source::setSymmetricX(float const x, float const y)
 {
     setX(x);
     setY(1.f - y);
 }
 
-void Source::setSymmetricY(float x, float y)
+void Source::setSymmetricY(float const x, float const y)
 {
     setX(1.f - x);
     setY(y);
 }
 
-void Source::setXYCoordinatesFromFixedSource(float deltaX, float deltaY)
+void Source::setXYCoordinatesFromFixedSource(float const deltaX, float const deltaY)
 {
-    float x = fixedX + deltaX;
-    float y = fixedY + deltaY;
-    x = x < 0.0f ? 0.0f : x > 1.0f ? 1.0f : x;
-    y = y < 0.0f ? 0.0f : y > 1.0f ? 1.0f : y;
+    auto const x{ std::clamp(mFixedX + deltaX, 0.f, 1.f) };
+    auto const y{ std::clamp(mFixedY + deltaY, 0.f, 1.f) };
     setX(x);
     setY(y);
     computeAzimuthElevation();
-}
-
-void Source::setElevationFromFixedSource(float deltaY)
-{
-    setElevation(fixedElevation + deltaY * 90.0f);
-}
-
-void Source::setColour(Colour col)
-{
-    colour = col;
 }

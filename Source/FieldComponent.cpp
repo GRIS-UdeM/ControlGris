@@ -171,7 +171,7 @@ Point<float> MainFieldComponent::xyToDegree(Point<float> p, int p_iwidth) const
     float half = (p_iwidth - kSourceDiameter) / 2;
     float x = (p.getX() - k2 - half) / half;
     float y = (p.getY() - k2 - half) / half;
-    float ang = atan2f(x, y) / M_PI * 180.0;
+    float ang = atan2f(x, y) / MathConstants<float>::pi * 180.0;
     if (ang <= -180) {
         ang += 360.0;
     }
