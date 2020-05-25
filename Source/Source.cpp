@@ -18,6 +18,9 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "Source.h"
+#include "ControlGrisUtilities.h"
+
+#include <algorithm>
 
 void Source::setAzimuth(float const azimuth)
 {

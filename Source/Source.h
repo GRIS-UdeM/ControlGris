@@ -110,6 +110,4 @@ private:
     float mFixedDistance{ -1.f };
     float mFixedX{};
     float mFixedY{};
-
-    inline double degreeToRadian(float degree) { return (degree / 360.0 * MathConstants<float>::twoPi); }
 };

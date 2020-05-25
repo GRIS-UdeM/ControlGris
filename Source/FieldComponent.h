@@ -100,10 +100,7 @@ public:
 
 private:
     AutomationManager & automationManager;
-    [[gnu::const]] static double degreeToRadian(float degree)
-    {
-        return (degree / 360.0 * 2.0 * MathConstants<float>::pi);
-    }
+
     Point<float> degreeToXy(Point<float> p, int p_iFieldWidth) const;
     Point<float> xyToDegree(Point<float> p, int p_iFieldWidth) const;
 

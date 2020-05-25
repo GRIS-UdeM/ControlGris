@@ -20,6 +20,7 @@
 #include "FieldComponent.h"
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "ControlGrisConstants.h"
+#include "ControlGrisUtilities.h"
 
 //==============================================================================
 FieldComponent::FieldComponent()

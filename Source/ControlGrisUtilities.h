@@ -19,9 +19,24 @@
  *************************************************************************/
 #pragma once
 
+#include <cmath>
+#include <type_traits>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
-double getFloatPrecision(double value, double precision);
+template<typename Float>
+constexpr Float getFloatPrecision(Float const value, size_t const precision)
+{
+    static_assert(std::is_floating_point_v<Float>);
+    return std::floor((value * std::pow(10, precision) + static_cast<Float>(0.5))) / std::pow(10, precision);
+}
+
+template<typename Float>
+constexpr Float degreeToRadian(Float const degree)
+{
+    static_assert(std::is_floating_point_v<Float>);
+    return (degree / static_cast<Float>(360.0) * MathConstants<Float>::twoPi);
+}
 
 class XmlElementDataSorter
 {
