@@ -399,6 +399,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
                                                      distance);
         }
         break;
+    case SourcePlacement::undefined:
+        jassertfalse;
     }
 
     for (int i{}; i < numOfSources; ++i) {
