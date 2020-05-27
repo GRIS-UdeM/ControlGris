@@ -20,6 +20,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
 #include "Source.h"

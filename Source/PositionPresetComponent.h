@@ -20,23 +20,24 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
 
 class PresetButton final : public TextButton
 {
 public:
-    PresetButton() { saved = loaded = false; };
+    PresetButton() = default;
     ~PresetButton() final = default;
 
-    void setSavedState(bool isSaved);
-    void setLoadedState(bool isLoaded);
+    void setSavedState(bool savedState);
+    void setLoadedState(bool loadedState);
     void refresh();
 
-    void clicked(const ModifierKeys & mods) final;
-    void internalClickCallback(const ModifierKeys & mods) final;
+    void clicked(ModifierKeys const & mods) final;
+    void internalClickCallback(ModifierKeys const & mods) final;
 
-    bool isSaved() const { return saved; }
+    bool isSaved() const { return mSaved; }
 
     struct Listener {
         virtual ~Listener() {}
@@ -46,14 +47,14 @@ public:
         virtual void deletingPresetClicked(PresetButton * button) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners{};
 
-    bool saved;
-    bool loaded;
+    bool mSaved{ false };
+    bool mLoaded{ false };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetButton)
 };
@@ -65,9 +66,9 @@ class PositionPresetComponent final
 {
 public:
     PositionPresetComponent();
-    ~PositionPresetComponent() final;
+    ~PositionPresetComponent() final { this->setLookAndFeel(nullptr); }
 
-    void paint(Graphics &) final;
+    void paint(Graphics & g) final { g.fillAll(Colour::fromRGB(64, 64, 64)); }
     void resized() final;
 
     void buttonClicked(PresetButton * button) final;
@@ -84,18 +85,18 @@ public:
         virtual void positionPresetDeleted(int presetNumber) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners{};
 
-    OwnedArray<PresetButton> presets;
+    OwnedArray<PresetButton> mPresets{};
 
-    int currentSelection;
+    int mCurrentSelection{ -1 };
 
-    Label actionLog;
-    Label appVersionLabel;
+    Label mActionLog{};
+    Label mAppVersionLabel{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionPresetComponent)
 };
