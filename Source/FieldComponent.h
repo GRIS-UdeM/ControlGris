@@ -19,6 +19,8 @@
  *************************************************************************/
 #pragma once
 
+#include <type_traits>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
@@ -40,6 +42,17 @@
 //                             parameter for the LBAP algorithm.
 
 //==============================================================================
+
+template<typename Float>
+struct AngleVector {
+    static_assert(std::is_floating_point_v<Float>);
+
+    AngleVector(Float const angle, Float const distance) : angle(angle), distance(distance) {}
+
+    Float angle;
+    Float distance;
+};
+
 class FieldComponent : public Component
 {
 public:
@@ -106,8 +119,8 @@ public:
 private:
     AutomationManager & mAutomationManager;
 
-    Point<float> degreeToXy(Point<float> const & p, int p_iFieldWidth) const;
-    Point<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
+    Point<float> degreeToXy(AngleVector<float> const & p, int p_iFieldWidth) const;
+    AngleVector<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
 
     Point<int> clipRecordingPosition(Point<int> const & pos);
 

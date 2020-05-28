@@ -137,17 +137,17 @@ MainFieldComponent::MainFieldComponent(AutomationManager & automan) : mAutomatio
     mLineDrawingAnchor2 = INVALID_POINT;
 }
 
-Point<float> MainFieldComponent::degreeToXy(Point<float> const & p, int const p_iwidth) const
+Point<float> MainFieldComponent::degreeToXy(AngleVector<float> const & p, int const p_iwidth) const
 {
     float const effectiveWidth{ p_iwidth - kSourceDiameter };
     float const radius{ effectiveWidth / 2.f };
-    float const distance{ (90.f - p.getY()) / 90.f };
-    float const x{ radius * distance * sinf(degreeToRadian(p.getX())) + radius };
-    float const y{ radius * distance * cosf(degreeToRadian(p.getX())) + radius };
+    float const distance{ (90.f - p.distance) / 90.f };
+    float const x{ radius * distance * sinf(degreeToRadian(p.angle)) + radius };
+    float const y{ radius * distance * cosf(degreeToRadian(p.angle)) + radius };
     return Point<float>(effectiveWidth - x, effectiveWidth - y);
 }
 
-Point<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_iwidth) const
+AngleVector<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_iwidth) const
 {
     float const k2{ kSourceDiameter / 2.f };
     float const half{ (p_iwidth - kSourceDiameter) / 2.f };
@@ -159,7 +159,7 @@ Point<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_iwidth
     }
     float rad = sqrtf(x * x + y * y);
     rad = 90.f - rad * 90.f;
-    return Point<float>{ -ang, rad };
+    return AngleVector<float>{ -ang, rad };
 }
 
 void MainFieldComponent::setSpatMode(SpatMode const spatMode)
@@ -270,8 +270,8 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     if (shouldDrawTrajectoryHandle) {
         Point<float> rpos;
         if (mSpatMode == SpatMode::VBAP) {
-            rpos = degreeToXy(Point<float>{ mAutomationManager.getSource().getAzimuth(),
-                                            mAutomationManager.getSource().getElevation() },
+            rpos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
+                                                  mAutomationManager.getSource().getElevation() },
                               width);
         } else {
             rpos = posToXy(mAutomationManager.getSourcePosition(), width);
@@ -323,7 +323,7 @@ void MainFieldComponent::paint(Graphics & g)
         float const saturation{ (i == mSelectedSourceId) ? 1.f : 0.75f };
         Point<float> pos;
         if (mSpatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
+            pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
         } else {
             pos = posToXy(mSources[i].getPos(), width);
         }
@@ -374,8 +374,8 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent & event)
         || mAutomationManager.getDrawingType() == TrajectoryType::realtime) {
         Point<float> pos;
         if (mSpatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float>{ mAutomationManager.getSource().getAzimuth(),
-                                           mAutomationManager.getSource().getElevation() },
+            pos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
+                                                 mAutomationManager.getSource().getElevation() },
                              width);
         } else {
             pos = posToXy(mAutomationManager.getSource().getPos(), width);
@@ -446,7 +446,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     for (int i{}; i < mNumberOfSources; ++i) {
         Point<float> pos;
         if (mSpatMode == SpatMode::VBAP) {
-            pos = degreeToXy(Point<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
+            pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
         } else {
             pos = posToXy(mSources[i].getPos(), width);
         }
@@ -495,14 +495,14 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     auto const width{ getWidth() };
     auto const height{ getHeight() };
 
-    auto const mousePosition{ event.getPosition() };
+    Point<int> const mousePosition{ event.x, height - event.y };
 
     auto * selectedSource{ mSelectedSourceId == -1 ? &mAutomationManager.getSource() : &mSources[mSelectedSourceId] };
 
     if (mSpatMode == SpatMode::VBAP) {
-        Point<float> const pos{ xyToDegree(mousePosition.toFloat(), width) };
-        selectedSource->setAzimuth(pos.x);
-        selectedSource->setElevationNoClip(pos.y);
+        auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
+        selectedSource->setAzimuth(pos.angle);
+        selectedSource->setElevationNoClip(pos.distance);
     } else {
         Point<float> const pos{ xyToPos(mousePosition.toFloat(), width) };
         selectedSource->setX(pos.x);
