@@ -57,7 +57,8 @@ void Source::setElevation(float const elevation)
     } else if (elevation > 90.f) {
         mElevation = 90.f;
     } else {
-        mElevationNoClip = mElevation = elevation;
+        mElevation = elevation;
+        mElevationNoClip = elevation;
     }
     computeXY();
 }

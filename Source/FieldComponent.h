@@ -19,6 +19,8 @@
  *************************************************************************/
 #pragma once
 
+#include "../JuceLibraryCode/JuceHeader.h"
+
 #include "AutomationManager.h"
 #include "GrisLookAndFeel.h"
 #include "SettingsBoxComponent.h"
@@ -41,18 +43,18 @@
 class FieldComponent : public Component
 {
 public:
-    FieldComponent();
-    ~FieldComponent() override;
+    FieldComponent() = default;
+    ~FieldComponent() override { setLookAndFeel(nullptr); }
 
-    void drawFieldBackground(Graphics &, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
+    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
 
-    Point<float> posToXy(Point<float> p, int p_iFieldWidth) const;
-    Point<float> xyToPos(Point<float> p, int p_iFieldWidth) const;
+    Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;
+    Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
 
     void setSources(Source * sources, int numberOfSources);
     void setSelectedSource(int selectedId);
 
-    void setIsPlaying(bool state);
+    void setIsPlaying(bool const state) { mIsPlaying = state; }
 
     struct Listener {
         virtual ~Listener() = default;
@@ -64,15 +66,15 @@ public:
     void addListener(Listener * l) { listeners.add(l); }
     void removeListener(Listener * l) { listeners.remove(l); }
 
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> listeners{};
 
 protected:
-    Source * m_sources;
+    Source * mSources{};
 
-    bool m_isPlaying;
-    int m_numberOfSources;
-    int m_selectedSourceId;
-    int m_oldSelectedSourceId;
+    bool mIsPlaying{ false };
+    int mNumberOfSources{};
+    int mSelectedSourceId{};
+    int mOldSelectedSourceId{};
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponent)
@@ -81,40 +83,43 @@ private:
 //==============================================================================
 class MainFieldComponent final : public FieldComponent
 {
+    static constexpr Point<float> INVALID_POINT{ -1.f, -1.f };
+    static constexpr int NO_SELECTION_SOURCE_ID = -2;
+
 public:
     MainFieldComponent(AutomationManager & automan);
-    ~MainFieldComponent() final;
+    ~MainFieldComponent() final = default;
 
     void createSpanPathVBAP(Graphics & g, int i) const;
     void createSpanPathLBAP(Graphics & g, int i) const;
     void drawTrajectoryHandle(Graphics &) const;
-    void paint(Graphics &) final;
+    void paint(Graphics & g) final;
 
-    bool isTrajectoryHandleClicked(const MouseEvent & event); // TODO: this should be const
-    void mouseDown(const MouseEvent & event) final;
-    void mouseDrag(const MouseEvent & event) final;
-    void mouseMove(const MouseEvent & event) final;
-    void mouseUp(const MouseEvent & event) final;
+    bool isTrajectoryHandleClicked(MouseEvent const & event); // TODO: this should be const
+    void mouseDown(MouseEvent const & event) final;
+    void mouseDrag(MouseEvent const & event) final;
+    void mouseMove(MouseEvent const & event) final;
+    void mouseUp(MouseEvent const & event) final;
 
     void setSpatMode(SpatMode spatMode);
 
 private:
-    AutomationManager & automationManager;
+    AutomationManager & mAutomationManager;
 
-    Point<float> degreeToXy(Point<float> p, int p_iFieldWidth) const;
-    Point<float> xyToDegree(Point<float> p, int p_iFieldWidth) const;
+    Point<float> degreeToXy(Point<float> const & p, int p_iFieldWidth) const;
+    Point<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
 
-    Point<int> clipRecordingPosition(Point<int> pos);
+    Point<int> clipRecordingPosition(Point<int> const & pos);
 
-    bool hasValidLineDrawingAnchor1() const { return lineDrawingAnchor1 != Point<float>(-1.0f, -1.0f); }
-    bool hasValidLineDrawingAnchor2() const { return lineDrawingAnchor2 != Point<float>(-1.0f, -1.0f); }
+    bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1 != INVALID_POINT; }
+    bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2 != INVALID_POINT; }
 
-    SpatMode m_spatMode;
+    SpatMode mSpatMode;
 
-    bool showCircularSourceSelectionWarning = false;
+    bool mShowCircularSourceSelectionWarning{ false };
 
-    Point<float> lineDrawingAnchor1;
-    Point<float> lineDrawingAnchor2;
+    Point<float> mLineDrawingAnchor1;
+    Point<float> mLineDrawingAnchor2;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainFieldComponent)
 };
@@ -123,18 +128,18 @@ private:
 class ElevationFieldComponent final : public FieldComponent
 {
 public:
-    ElevationFieldComponent(AutomationManager & automan);
-    ~ElevationFieldComponent() final;
+    ElevationFieldComponent(AutomationManager & automationManager) : mAutomationManager(automationManager) {}
+    ~ElevationFieldComponent() final = default;
 
-    void paint(Graphics &) final;
+    void paint(Graphics & g) final;
 
-    void mouseDown(const MouseEvent & event) final;
-    void mouseDrag(const MouseEvent & event) final;
-    void mouseUp(const MouseEvent & event) final;
+    void mouseDown(MouseEvent const & event) final;
+    void mouseDrag(MouseEvent const & event) final;
+    void mouseUp(MouseEvent const & event) final;
 
 private:
-    AutomationManager & automationManager;
-    int currentRecordingPositionX;
+    AutomationManager & mAutomationManager;
+    int mCurrentRecordingPositionX{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
 };
