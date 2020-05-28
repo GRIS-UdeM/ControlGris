@@ -69,6 +69,9 @@ public:
     ListenerList<Listener> listeners{};
 
 protected:
+    static constexpr Point<float> INVALID_POINT{ -1.f, -1.f };
+    static constexpr int NO_SELECTION_SOURCE_ID = -2;
+
     Source * mSources{};
 
     bool mIsPlaying{ false };
@@ -83,9 +86,6 @@ private:
 //==============================================================================
 class MainFieldComponent final : public FieldComponent
 {
-    static constexpr Point<float> INVALID_POINT{ -1.f, -1.f };
-    static constexpr int NO_SELECTION_SOURCE_ID = -2;
-
 public:
     MainFieldComponent(AutomationManager & automan);
     ~MainFieldComponent() final = default;

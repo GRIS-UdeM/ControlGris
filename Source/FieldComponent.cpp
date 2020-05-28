@@ -36,11 +36,11 @@ void FieldComponent::setSources(Source * sources, int const numberOfSources)
     mSelectedSourceId = 0;
     mOldSelectedSourceId = 0;
     for (int i{}; i < mNumberOfSources; ++i) {
-        auto const hue{ static_cast<float>(i) / mNumberOfSources + 0.577251 };
-        if (hue > 1) {
-            hue -= 1;
+        auto hue{ static_cast<float>(i) / mNumberOfSources + 0.577251f };
+        if (hue > 1.f) {
+            hue -= 1.f;
         }
-        mSources[i].setColour(Colour::fromHSV(hue, 1.0, 1.0, 0.85));
+        mSources[i].setColour(Colour::fromHSV(hue, 1.f, 1.f, 0.85f));
     }
     repaint();
 }
@@ -49,7 +49,7 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, S
 {
     int const width{ getWidth() };
     int const height{ getHeight() };
-    float const fieldCenter{ width / 2 };
+    float const fieldCenter{ width / 2.f };
 
     auto * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
 
@@ -153,7 +153,7 @@ Point<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_iwidth
     float const half{ (p_iwidth - kSourceDiameter) / 2.f };
     float const x{ (p.getX() - k2 - half) / half };
     float const y{ (p.getY() - k2 - half) / half };
-    float const ang{ atan2f(x, y) / MathConstants<float>::pi * 180.f };
+    float ang{ atan2f(x, y) / MathConstants<float>::pi * 180.f };
     if (ang <= -180.f) {
         ang += 360.f;
     }
@@ -242,7 +242,7 @@ void MainFieldComponent::createSpanPathLBAP(Graphics & g, int const i) const
     float const azimuthSpan{ width * mSources[i].getAzimuthSpan() };
     float const halfAzimuthSpan{ azimuthSpan / 2.f - kSourceRadius };
     float const saturation{ (i == mSelectedSourceId) ? 1.f : 0.5f };
-    Point<float> pos{ nst = posToXy(mSources[i].getPos(), width) };
+    Point<float> const pos{ posToXy(mSources[i].getPos(), width) };
 
     g.setColour(mSources[i].getColour().withSaturation(saturation).withAlpha(0.5f));
     g.drawEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
@@ -327,7 +327,7 @@ void MainFieldComponent::paint(Graphics & g)
         } else {
             pos = posToXy(mSources[i].getPos(), width);
         }
-        Rectangle<float> const area{ pos.x, pos.y, kSourceDiameter, kSourceDiameter };
+        Rectangle<float> area{ pos.x, pos.y, kSourceDiameter, kSourceDiameter };
         area.expand(lineThickness, lineThickness);
         g.setColour(Colour(.2f, .2f, .2f, 1.f));
         g.drawEllipse(area.translated(.5f, .5f), 1.f);
@@ -408,11 +408,11 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     if (hasValidLineDrawingAnchor1()) {
         Point<float> const anchor1{ mLineDrawingAnchor1 };
         Point<float> const anchor2{ clipRecordingPosition(event.getPosition()).toFloat() };
-        int const numSteps{ jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y)) };
-        float const xinc{ (anchor2.x - anchor1.x) / numSteps };
-        float const yinc{ (anchor2.y - anchor1.y) / numSteps };
+        auto const numSteps{ static_cast<int>(jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
+        auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
+        auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
         for (int i{ 1 }; i <= numSteps; ++i) {
-            mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xinc * i, anchor1.y + yinc * i });
+            mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
         }
         if (event.mods.isShiftDown()) {
             mLineDrawingAnchor1 = anchor2;
@@ -570,7 +570,7 @@ void MainFieldComponent::mouseUp(const MouseEvent & event)
     mShowCircularSourceSelectionWarning = false;
 }
 
-Point<int> MainFieldComponent::clipRecordingPosition(Point<int> pos)
+Point<int> MainFieldComponent::clipRecordingPosition(Point<int> const & pos)
 {
     int const max{ getWidth() - 10 };
 
@@ -649,7 +649,7 @@ void ElevationFieldComponent::paint(Graphics & g)
         float const x{ static_cast<float>(i) / mNumberOfSources * (width - 50.f) + 50.f };
         float const y{ (90.f - mSources[i].getElevation()) / 90.f * (height - 35.f) + 5.f };
         Point<float> const pos{ x, y };
-        Rectangle<float> const area(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
+        Rectangle<float> area(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
 
         area.expand(lineThickness, lineThickness);
         g.setColour(Colour(.2f, .2f, .2f, 1.f));
@@ -743,14 +743,14 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
         mSelectedSourceId = -1;
         mCurrentRecordingPositionX = 10 + static_cast<int>(kSourceRadius);
         mAutomationManager.resetRecordingTrajectory(
-            Point<float>{ mCurrentRecordingPositionX, event.getMouseDownPosition().toFloat().y });
+            Point<float>{ static_cast<float>(mCurrentRecordingPositionX), event.getMouseDownPosition().toFloat().y });
         repaint();
     }
 }
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 {
-    float const height{ getHeight() };
+    auto const height{ static_cast<float>(getHeight()) };
 
     // No selection.
     if (mSelectedSourceId == NO_SELECTION_SOURCE_ID) {
@@ -767,7 +767,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             }
             float y{ event.getPosition().toFloat().y };
             y = std::clamp(y, 15.f, height - 20.f);
-            mAutomationManager.addRecordingPoint(Point<float>{ mCurrentRecordingPositionX, y });
+            mAutomationManager.addRecordingPoint(Point<float>{ static_cast<float>(mCurrentRecordingPositionX), y });
             y = height - event.getPosition().toFloat().y;
             y = std::clamp(y, 15.f, height - 20.f);
             mAutomationManager.setSourcePosition(xyToPos(Point<float>{ 10.f, y }, height));
