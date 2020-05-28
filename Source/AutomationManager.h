@@ -42,7 +42,7 @@ public:
     void setPlaybackPosition(Point<float> const & value) { mPlaybackPosition = value; }
     void setPlaybackPositionX(float const value) { mPlaybackPosition.x = value; }
     void setPlaybackPositionY(float const value) { mPlaybackPosition.y = value; }
-    bool hasValidPlaybackPosition() const { return mPlaybackPosition != Point<float>(-1.0f, -1.0f); }
+    bool hasValidPlaybackPosition() const { return mPlaybackPosition != INVALID_POSITION; }
     Point<float> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
@@ -88,6 +88,8 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
+    static constexpr Point<float> INVALID_POSITION{ -1.f, -1.f };
+
     enum class Direction { forward, backward };
 
     ListenerList<Listener> mListeners;
@@ -107,7 +109,7 @@ private:
     bool mActivateState{ false };
     double mPlaybackDuration{ 5.0 };
     double mCurrentPlaybackDuration{ 5.0 };
-    Point<float> mPlaybackPosition{ -1.f, -1.f };
+    Point<float> mPlaybackPosition{ INVALID_POSITION };
 
     Source mSource{};
 

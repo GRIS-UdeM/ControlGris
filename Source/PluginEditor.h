@@ -20,6 +20,7 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "AutomationManager.h"
 #include "BannerComponent.h"
 #include "FieldComponent.h"

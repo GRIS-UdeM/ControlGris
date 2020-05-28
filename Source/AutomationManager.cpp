@@ -49,7 +49,7 @@ void AutomationManager::setActivateState(bool const newState)
 {
     mActivateState = newState;
     if (newState == false) {
-        mPlaybackPosition = Point<float>{ -1.f, -1.f };
+        mPlaybackPosition = Point<float>{ INVALID_POSITION };
     } else {
         mTrajectoryDeltaTime = 0.0;
         mLastTrajectoryDeltaTime = 0.0;
@@ -64,7 +64,7 @@ void AutomationManager::setActivateState(bool const newState)
 
 void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosition)
 {
-    mPlaybackPosition = Point<float>{ -1.f, -1.f };
+    mPlaybackPosition = Point<float>{ INVALID_POSITION };
     mTrajectoryPoints.clear();
     mTrajectoryPoints.add(currentPosition);
     mLastRecordingPoint = currentPosition;
