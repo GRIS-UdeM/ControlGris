@@ -29,17 +29,17 @@ class ParametersBoxComponent final
 {
 public:
     ParametersBoxComponent();
-    ~ParametersBoxComponent() final;
+    ~ParametersBoxComponent() final = default;
 
-    void mouseDown(const MouseEvent & event) final;
+    void mouseDown(MouseEvent const & event) final;
     void sliderValueChanged(Slider * slider) final;
     void paint(Graphics &) final;
     void resized() final;
 
     void setSelectedSource(Source * source);
-    void setDistanceEnabled(bool shouldBeEnabled);
-    void setSpanLinkState(bool state);
-    bool getSpanLinkState() const { return m_spanLinked; }
+    void setDistanceEnabled(bool distanceEnabled);
+    void setSpanLinkState(bool spanLinkState);
+    bool getSpanLinkState() const { return mSpanLinked; }
 
     struct Listener {
         virtual ~Listener() {}
@@ -48,21 +48,21 @@ public:
         virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners;
 
-    bool m_distanceEnabled;
-    bool m_spanLinked;
+    bool mDistanceEnabled{ false };
+    bool mSpanLinked{ false };
 
-    Source * selectedSource;
+    Source * mSelectedSource{};
 
-    Label azimuthLabel;
-    Label elevationLabel;
-    Slider azimuthSpan;
-    Slider elevationSpan;
+    Label mAzimuthLabel{};
+    Label mElevationLabel{};
+    Slider mAzimuthSpan{};
+    Slider mElevationSpan{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
 };

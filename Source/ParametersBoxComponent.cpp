@@ -21,119 +21,112 @@
 
 ParametersBoxComponent::ParametersBoxComponent()
 {
-    m_distanceEnabled = false;
-    m_spanLinked = false;
+    mAzimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mAzimuthLabel);
 
-    azimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
-    addAndMakeVisible(&azimuthLabel);
+    mElevationLabel.setText("Elevation Span", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mElevationLabel);
 
-    elevationLabel.setText("Elevation Span", NotificationType::dontSendNotification);
-    addAndMakeVisible(&elevationLabel);
+    mAzimuthSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    mAzimuthSpan.setRange(0.0, 1.0);
+    mAzimuthSpan.addListener(this);
+    addAndMakeVisible(&mAzimuthSpan);
 
-    azimuthSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    azimuthSpan.setRange(0.0, 1.0);
-    azimuthSpan.addListener(this);
-    addAndMakeVisible(&azimuthSpan);
-
-    elevationSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-    elevationSpan.setRange(0.0, 1.0);
-    elevationSpan.addListener(this);
-    addAndMakeVisible(&elevationSpan);
-}
-
-ParametersBoxComponent::~ParametersBoxComponent()
-{
+    mElevationSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    mElevationSpan.setRange(0.0, 1.0);
+    mElevationSpan.addListener(this);
+    addAndMakeVisible(&mElevationSpan);
 }
 
 void ParametersBoxComponent::setSelectedSource(Source * source)
 {
-    selectedSource = source;
-    azimuthSpan.setValue(selectedSource->getAzimuthSpan(), NotificationType::dontSendNotification);
-    elevationSpan.setValue(selectedSource->getElevationSpan(), NotificationType::dontSendNotification);
+    mSelectedSource = source;
+    mAzimuthSpan.setValue(mSelectedSource->getAzimuthSpan(), NotificationType::dontSendNotification);
+    mElevationSpan.setValue(mSelectedSource->getElevationSpan(), NotificationType::dontSendNotification);
     repaint();
 }
 
-void ParametersBoxComponent::setDistanceEnabled(bool shouldBeEnabled)
+void ParametersBoxComponent::setDistanceEnabled(bool const distanceEnabled)
 {
-    m_distanceEnabled = shouldBeEnabled;
+    mDistanceEnabled = distanceEnabled;
     resized();
 }
 
-void ParametersBoxComponent::setSpanLinkState(bool state)
+void ParametersBoxComponent::setSpanLinkState(bool const spanLinkState)
 {
-    m_spanLinked = state;
+    mSpanLinked = spanLinkState;
     repaint();
 }
 
-void ParametersBoxComponent::mouseDown(const MouseEvent & event)
+void ParametersBoxComponent::mouseDown(MouseEvent const & event)
 {
-    float x = getWidth() - 35;
-    float y = 15;
+    float const x{ getWidth() - 35.f };
+    float constexpr y = 15;
 
     // Area where the spanLinked arrow is shown.
-    Rectangle<float> area = Rectangle<float>(245.f, 25.f, 45.f, 25.f);
-    if (area.contains(event.getMouseDownPosition().toFloat())) {
-        m_spanLinked = !m_spanLinked;
+    Rectangle<float> const spanLinkedArrowArea{ 245.f, 25.f, 45.f, 25.f };
+    if (spanLinkedArrowArea.contains(event.getMouseDownPosition().toFloat())) {
+        mSpanLinked = !mSpanLinked;
         repaint();
     }
 
     // Area where the selected source is shown.
-    area = Rectangle<float>(x - 5, y - 5, 30, 30);
-    if (area.contains(event.getMouseDownPosition().toFloat())) {
-        listeners.call([&](Listener & l) { l.parametersBoxSelectedSourceClicked(); });
+    Rectangle<float> const selectedSourceArea{ x - 5.f, y - 5.f, 30.f, 30.f };
+    if (selectedSourceArea.contains(event.getMouseDownPosition().toFloat())) {
+        mListeners.call([&](Listener & l) { l.parametersBoxSelectedSourceClicked(); });
     }
 }
 
 void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 {
-    float value = slider->getValue();
-    auto const parameterId{ (slider == &azimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
+    auto const value{ slider->getValue() };
+    auto const parameterId{ (slider == &mAzimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
 
-    listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(parameterId, value); });
+    mListeners.call([&](Listener & l) { l.parametersBoxParameterChanged(parameterId, value); });
 
-    if (m_spanLinked) {
+    if (mSpanLinked) {
         if (parameterId == SourceParameter::azimuthSpan) {
-            elevationSpan.setValue(value, NotificationType::sendNotificationAsync);
-            listeners.call(
+            mElevationSpan.setValue(value, NotificationType::sendNotificationAsync);
+            mListeners.call(
                 [&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::elevationSpan, value); });
         } else if (parameterId == SourceParameter::elevationSpan) {
-            azimuthSpan.setValue(value, NotificationType::sendNotificationAsync);
-            listeners.call([&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::azimuthSpan, value); });
+            mAzimuthSpan.setValue(value, NotificationType::sendNotificationAsync);
+            mListeners.call(
+                [&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::azimuthSpan, value); });
         }
     }
 }
 
 void ParametersBoxComponent::paint(Graphics & g)
 {
-    float x = getWidth() - 35;
-    float y = 15;
+    float const x{ getWidth() - 35.f };
+    float constexpr y = 15.f;
 
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
+    auto const * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 
-    if (m_spanLinked)
+    if (mSpanLinked)
         g.setColour(Colours::orange);
     else
         g.setColour(Colours::black);
-    g.drawArrow(Line<float>(285, 34, 245, 34), 4, 10, 10);
-    g.drawArrow(Line<float>(250, 34, 290, 34), 4, 10, 10);
+    g.drawArrow(Line<float>(285.f, 34.f, 245.f, 34.f), 4, 10, 10);
+    g.drawArrow(Line<float>(250.f, 34.f, 290.f, 34.f), 4, 10, 10);
 
-    Rectangle<float> area(x, y, 20, 20);
+    Rectangle<float> area{ x, y, 20, 20 };
     area.expand(3, 3);
     g.setColour(Colour(.2f, .2f, .2f, 1.f));
     g.drawEllipse(area.translated(.5f, .5f), 1.f);
-    g.setGradientFill(ColourGradient(selectedSource->getColour().withSaturation(1.0f).darker(1.f),
+    g.setGradientFill(ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.f),
                                      x + kSourceRadius,
                                      y + kSourceRadius,
-                                     selectedSource->getColour().withSaturation(1.0f),
+                                     mSelectedSource->getColour().withSaturation(1.0f),
                                      x,
                                      y,
                                      true));
     g.fillEllipse(area);
 
     g.setColour(Colours::white);
-    g.drawFittedText(String(selectedSource->getId() + 1),
+    g.drawFittedText(String(mSelectedSource->getId() + 1),
                      area.getSmallestIntegerContainer(),
                      Justification(Justification::centred),
                      1);
@@ -141,8 +134,8 @@ void ParametersBoxComponent::paint(Graphics & g)
 
 void ParametersBoxComponent::resized()
 {
-    azimuthLabel.setBounds(5, 3, 225, 20);
-    elevationLabel.setBounds(305, 3, 225, 20);
-    azimuthSpan.setBounds(5, 23, 225, 20);
-    elevationSpan.setBounds(305, 23, 225, 20);
+    mAzimuthLabel.setBounds(5, 3, 225, 20);
+    mElevationLabel.setBounds(305, 3, 225, 20);
+    mAzimuthSpan.setBounds(5, 23, 225, 20);
+    mElevationSpan.setBounds(305, 23, 225, 20);
 }
