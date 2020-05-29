@@ -67,7 +67,7 @@ const StringArray SOURCE_LINK_TYPES{ String("Independent"),           String("Ci
                                      String("Circular Fully Fixed"),  String("Delta Lock"),
                                      String("Symmetric X"),           String("Symmetric Y") };
 
-enum class ElevationSourceLink { undefined, independent = 1, fixedElevation, linearMin, linearMax, deltaLock };
+enum class ElevationSourceLink { undefined, independent, fixedElevation, linearMin, linearMax, deltaLock };
 const StringArray SOURCE_LINK_ALT_TYPES{ String("Independent"),
                                          String("Fixed Elevation"),
                                          String("Linear Min"),

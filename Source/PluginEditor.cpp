@@ -421,7 +421,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         processor.getSources()[i].fixSourcePosition(true);
     }
 
-    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+    automationManager.setTrajectoryType(automationManager.getTrajectoryType(), processor.getSources()[0].getPos());
 
     repaint();
 }
@@ -437,7 +437,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
     processor.getSources()[sourceNum].fixSourcePosition(true);
 
-    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+    automationManager.setTrajectoryType(automationManager.getTrajectoryType(), processor.getSources()[0].getPos());
 
     repaint();
 }
@@ -483,14 +483,14 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(El
 void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    automationManager.setDrawingType(value, processor.getSources()[0].getPos());
+    automationManager.setTrajectoryType(value, processor.getSources()[0].getPos());
     mainField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    automationManagerAlt.setDrawingTypeAlt(value);
+    automationManagerAlt.setElevationTrajectoryType(value);
     elevationField.repaint();
 }
 

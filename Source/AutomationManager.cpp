@@ -219,8 +219,8 @@ void AutomationManager::setSourceAndPlaybackPosition(Point<float> const pos)
 
 void AutomationManager::sendTrajectoryPositionChangedEvent()
 {
-    if (mActivateState || mDrawingType == TrajectoryType::realtime
-        || static_cast<ElevationTrajectoryType>(mDrawingType) == ElevationTrajectoryType::realtime) {
+    if (mActivateState || mTrajectoryType == TrajectoryType::realtime
+        || static_cast<ElevationTrajectoryType>(mTrajectoryType) == ElevationTrajectoryType::realtime) {
         mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
     }
 }
@@ -231,9 +231,9 @@ void AutomationManager::fixSourcePosition()
     mSource.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> const & startPos)
+void AutomationManager::setTrajectoryType(TrajectoryType const type, Point<float> const & startPos)
 {
-    mDrawingType = type;
+    mTrajectoryType = type;
 
     mTrajectoryPoints.clear();
 
@@ -255,7 +255,7 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
     float transX{};
     float transY{};
     float adjustedMagnitude{};
-    switch (mDrawingType) {
+    switch (mTrajectoryType) {
     case TrajectoryType::realtime:
     case TrajectoryType::drawing:
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
@@ -387,7 +387,7 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
                 tmp1 = 0.f;
                 tmp2 = 1.f - (static_cast<float>(i - fSizeOver4 * 3) * step);
             }
-            if (mDrawingType == TrajectoryType::squareClockwise) {
+            if (mTrajectoryType == TrajectoryType::squareClockwise) {
                 x = tmp1;
                 y = tmp2;
             } else {
@@ -413,7 +413,7 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
         Point<float> const p1{ 0.f, -1.f };
         Point<float> p2{};
         Point<float> p3{};
-        if (mDrawingType == TrajectoryType::triangleClockwise) {
+        if (mTrajectoryType == TrajectoryType::triangleClockwise) {
             p2 = Point<float>{ 1.f, 1.f };
             p3 = Point<float>{ -1.f, 1.f };
         } else {
@@ -446,7 +446,7 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
         jassertfalse;
     }
 
-    if (mDrawingType > TrajectoryType::drawing) {
+    if (mTrajectoryType > TrajectoryType::drawing) {
         setSourcePosition(
             Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.f - mTrajectoryPoints[0].y / mFieldWidth });
     } else {
@@ -454,9 +454,9 @@ void AutomationManager::setDrawingType(TrajectoryType const type, Point<float> c
     }
 }
 
-void AutomationManager::setDrawingTypeAlt(ElevationTrajectoryType const type)
+void AutomationManager::setElevationTrajectoryType(ElevationTrajectoryType const type)
 {
-    mDrawingType = static_cast<TrajectoryType>(type);
+    mTrajectoryType = static_cast<TrajectoryType>(type);
 
     mTrajectoryPoints.clear();
 

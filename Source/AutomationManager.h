@@ -57,9 +57,9 @@ public:
 
     void setSourceLink(SourceLink value) { this->mSourceLink = value; }
     SourceLink getSourceLink() const { return mSourceLink; }
-    void setDrawingType(TrajectoryType type, Point<float> const & startpos);
-    TrajectoryType getDrawingType() const { return mDrawingType; }
-    void setDrawingTypeAlt(ElevationTrajectoryType type);
+    void setTrajectoryType(TrajectoryType type, Point<float> const & startpos);
+    TrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+    void setElevationTrajectoryType(ElevationTrajectoryType type);
 
     void setBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setDampeningCycles(int value) { this->mDampeningCycles = value; }
@@ -68,10 +68,11 @@ public:
 
     Source & getSource() { return mSource; }
     Source const & getSource() const { return mSource; }
+    Point<float> getSourcePosition() const { return mSource.getPos(); }
     void setSourcePosition(Point<float> const & pos) { mSource.setPos(pos); }
     void setSourcePositionX(float const x) { mSource.setX(x); }
     void setSourcePositionY(float const y) { mSource.setY(y); }
-    Point<float> getSourcePosition() const { return mSource.getPos(); }
+
     void fixSourcePosition();
 
     void setSourceAndPlaybackPosition(Point<float> pos);
@@ -97,7 +98,7 @@ private:
     float mFieldWidth{ MIN_FIELD_WIDTH };
 
     SourceLink mSourceLink{ SourceLink::independent };
-    TrajectoryType mDrawingType{ TrajectoryType::drawing };
+    TrajectoryType mTrajectoryType{ TrajectoryType::drawing };
 
     bool mIsBackAndForth{ false };
     Direction mBackAndForthDirection{ Direction::forward };

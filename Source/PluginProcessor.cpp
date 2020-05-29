@@ -321,7 +321,7 @@ void ControlGrisAudioProcessor::setSourceLink(SourceLink value)
         if (m_numOfSources != 2 && (value == SourceLink::linkSymmetricX || value == SourceLink::linkSymmetricY))
             return;
 
-        if (automationManager.getDrawingType() != TrajectoryType::drawing) {
+        if (automationManager.getTrajectoryType() != TrajectoryType::drawing) {
             if (value == SourceLink::circularDeltaLock) {
                 automationManager.setSourceAndPlaybackPosition(Point<float>(0.5, 0.5));
             } else {
@@ -349,7 +349,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value
 {
     if (value != static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink())) {
         if (value == ElevationSourceLink::deltaLock
-            && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+            && static_cast<ElevationTrajectoryType>(automationManagerAlt.getTrajectoryType())
                    != ElevationTrajectoryType::drawing) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0., 0.5));
         }
@@ -615,25 +615,25 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
     String const address{ message.getAddressPattern().toString() };
     String const pluginInstance{ String("/controlgris/") + String(getOscOutputPluginId()) };
     if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
-        && automationManager.getDrawingType() == TrajectoryType::realtime) {
+        && automationManager.getTrajectoryType() == TrajectoryType::realtime) {
         x = message[0].getFloat32();
     } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2"))
-               && automationManager.getDrawingType() == TrajectoryType::realtime) {
+               && automationManager.getTrajectoryType() == TrajectoryType::realtime) {
         y = message[0].getFloat32();
     } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3"))
-               && static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+               && static_cast<ElevationTrajectoryType>(automationManagerAlt.getTrajectoryType())
                       == ElevationTrajectoryType::realtime) {
         z = message[0].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xy")
-               && automationManager.getDrawingType() == TrajectoryType::realtime) {
+               && automationManager.getTrajectoryType() == TrajectoryType::realtime) {
         x = message[0].getFloat32();
         y = message[1].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xyz")) {
-        if (automationManager.getDrawingType() == TrajectoryType::realtime) {
+        if (automationManager.getTrajectoryType() == TrajectoryType::realtime) {
             x = message[0].getFloat32();
             y = message[1].getFloat32();
         }
-        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getTrajectoryType())
             == ElevationTrajectoryType::realtime) {
             z = message[2].getFloat32();
         }
@@ -927,7 +927,7 @@ void ControlGrisAudioProcessor::timerCallback()
 
     // MainField automation.
     if (automationManager.getActivateState()) {
-        if (automationManager.getDrawingType() == TrajectoryType::realtime) {
+        if (automationManager.getTrajectoryType() == TrajectoryType::realtime) {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
             automationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
@@ -944,7 +944,7 @@ void ControlGrisAudioProcessor::timerCallback()
 
     // ElevationField automation.
     if (getOscFormat() == SpatMode::LBAP && automationManagerAlt.getActivateState()) {
-        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(automationManagerAlt.getTrajectoryType())
             == ElevationTrajectoryType::realtime) {
             //...
         } else if (m_lastTimerTime != getCurrentTime()) {
@@ -1029,8 +1029,8 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
             sources[0].setXYCoordinatesFromFixedSource(deltaX, deltaY);
         }
         validateSourcePositions();
-        if (automationManager.getDrawingType() >= TrajectoryType::circleClockwise) {
-            automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
+        if (automationManager.getTrajectoryType() >= TrajectoryType::circleClockwise) {
+            automationManager.setTrajectoryType(automationManager.getTrajectoryType(), sources[0].getPos());
         }
     }
     if (whichField == 1 && getOscFormat() == SpatMode::LBAP) {
@@ -1227,11 +1227,11 @@ void ControlGrisAudioProcessor::linkSourcePositionsAlt()
 //==============================================================================
 void ControlGrisAudioProcessor::validateSourcePositions()
 {
-    auto sourceLink = automationManager.getSourceLink();
-    auto drawingType = automationManager.getDrawingType();
+    auto const sourceLink{ automationManager.getSourceLink() };
+    auto const trajectoryType{ automationManager.getTrajectoryType() };
 
     if (!getIsPlaying()) {
-        if (sourceLink != SourceLink::circularDeltaLock && drawingType != TrajectoryType::drawing) {
+        if (sourceLink != SourceLink::circularDeltaLock && trajectoryType != TrajectoryType::drawing) {
             automationManager.setSourceAndPlaybackPosition(sources[0].getPos());
         } else {
             automationManager.setPlaybackPositionX(-1.0f);
@@ -1294,16 +1294,16 @@ void ControlGrisAudioProcessor::validateSourcePositions()
 
 void ControlGrisAudioProcessor::validateSourcePositionsAlt()
 {
-    auto const sourceLink = static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink());
-    auto const drawingType = automationManagerAlt.getDrawingType();
+    auto const sourceLink{ static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()) };
+    auto const trajectoryType{ automationManagerAlt.getTrajectoryType() };
 
     if (!getIsPlaying()) {
         if (sourceLink != ElevationSourceLink::deltaLock
-            && static_cast<ElevationTrajectoryType>(drawingType) != ElevationTrajectoryType::drawing) {
+            && static_cast<ElevationTrajectoryType>(trajectoryType) != ElevationTrajectoryType::drawing) {
             automationManagerAlt.setSourceAndPlaybackPosition(Point<float>(0.f, sources[0].getNormalizedElevation()));
         } else {
-            automationManagerAlt.setPlaybackPositionX(-1.0f);
-            automationManagerAlt.setPlaybackPositionY(-1.0f);
+            automationManagerAlt.setPlaybackPositionX(-1.f);
+            automationManagerAlt.setPlaybackPositionY(-1.f);
         }
     }
 
@@ -1360,7 +1360,7 @@ void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
             parameters.getParameter("positionPreset")->beginChangeGesture();
             parameters.getParameter("positionPreset")->setValueNotifyingHost(value);
             parameters.getParameter("positionPreset")->endChangeGesture();
-            automationManager.setDrawingType(automationManager.getDrawingType(), sources[0].getPos());
+            automationManager.setTrajectoryType(automationManager.getTrajectoryType(), sources[0].getPos());
         }
     }
 }

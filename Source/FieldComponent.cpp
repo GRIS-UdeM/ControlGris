@@ -255,13 +255,13 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     int const width{ getWidth() };
     bool shouldDrawTrajectoryHandle{ false };
     if (mNumberOfSources == 1) {
-        if (mAutomationManager.getDrawingType() == TrajectoryType::drawing && !mIsPlaying) {
+        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (mAutomationManager.getDrawingType() == TrajectoryType::drawing && !mIsPlaying) {
+        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (mAutomationManager.getDrawingType() == TrajectoryType::realtime
+        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
                    && mAutomationManager.getSourceLink() == SourceLink::circularDeltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
@@ -311,7 +311,7 @@ void MainFieldComponent::paint(Graphics & g)
         mAutomationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getDrawingType() != TrajectoryType::realtime
+    if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != TrajectoryType::realtime
         && mAutomationManager.getActivateState()) {
         Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
@@ -370,8 +370,8 @@ void MainFieldComponent::paint(Graphics & g)
 bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
 {
     int const width{ getWidth() };
-    if (mAutomationManager.getDrawingType() == TrajectoryType::drawing
-        || mAutomationManager.getDrawingType() == TrajectoryType::realtime) {
+    if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing
+        || mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
         Point<float> pos;
         if (mSpatMode == SpatMode::VBAP) {
             pos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
@@ -384,7 +384,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
             mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
-            if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
+            if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
                 mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
                 if (event.mods.isShiftDown())
                     mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
@@ -470,7 +470,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
+    if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
         mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
         mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
@@ -493,7 +493,8 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
 
     Point<int> const mousePosition{ event.x, height - event.y };
 
-    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource() : &mSources[mSelectedSourceId] };
+    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource()
+                                                                            : &mSources[mSelectedSourceId] };
 
     if (mSpatMode == SpatMode::VBAP) {
         auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
@@ -506,13 +507,13 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
+        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
             if (hasValidLineDrawingAnchor1()) {
                 mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
             } else {
                 mAutomationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
             }
-        } else if (mAutomationManager.getDrawingType() == TrajectoryType::realtime) {
+        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
             mAutomationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
@@ -520,14 +521,14 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     bool needToAdjustAutomationManager{ false };
-    if (mSelectedSourceId == 0 && mAutomationManager.getDrawingType() == TrajectoryType::realtime
+    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
         && (mAutomationManager.getSourceLink() == SourceLink::independent
             || mAutomationManager.getSourceLink() == SourceLink::linkSymmetricX
             || mAutomationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
         needToAdjustAutomationManager = true;
     } else if (mAutomationManager.getSourceLink() >= SourceLink::circular
                && mAutomationManager.getSourceLink() < SourceLink::circularDeltaLock
-               && mAutomationManager.getDrawingType() == TrajectoryType::realtime) {
+               && mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
 
@@ -547,8 +548,8 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
 
 void MainFieldComponent::mouseMove(const MouseEvent & event)
 {
-    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID && mAutomationManager.getDrawingType() == TrajectoryType::drawing
-        && hasValidLineDrawingAnchor1()) {
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID
+        && mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
         mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
         repaint();
     }
@@ -557,7 +558,7 @@ void MainFieldComponent::mouseMove(const MouseEvent & event)
 void MainFieldComponent::mouseUp(const MouseEvent & event)
 {
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getDrawingType() == TrajectoryType::drawing && !event.mods.isShiftDown()) {
+        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !event.mods.isShiftDown()) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             mSelectedSourceId = mOldSelectedSourceId;
         }
@@ -586,18 +587,17 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     bool shouldDrawTrajectoryHandle{ false };
     if (mNumberOfSources == 1) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                 == ElevationTrajectoryType::drawing
             && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                 == ElevationTrajectoryType::drawing
             && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
-                       == ElevationTrajectoryType::realtime
+        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
                    && static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink())
                           == ElevationSourceLink::deltaLock) {
             shouldDrawTrajectoryHandle = true;
@@ -631,7 +631,7 @@ void ElevationFieldComponent::paint(Graphics & g)
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown()
-        && static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                != ElevationTrajectoryType::realtime
         && mAutomationManager.getActivateState()) {
         Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
@@ -713,15 +713,15 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     }
 
     // Check if we record a trajectory.
-    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType()) == ElevationTrajectoryType::drawing
-        || static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType()) == ElevationTrajectoryType::drawing
+        || static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                == ElevationTrajectoryType::realtime) {
         Point<float> const pos{ posToXy(mAutomationManager.getSourcePosition(), width).withX(10.0f) };
         Rectangle<float> const area{ pos.x, pos.y, kSourceDiameter, kSourceDiameter };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
             mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
-            if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+            if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                 == ElevationTrajectoryType::drawing) {
                 mCurrentRecordingPositionX = 10 + kSourceRadius;
                 mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
@@ -734,7 +734,8 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
+    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
+        == ElevationTrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
         mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
         mCurrentRecordingPositionX = 10 + static_cast<int>(kSourceRadius);
@@ -754,7 +755,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
             == ElevationTrajectoryType::drawing) {
             mCurrentRecordingPositionX += 1;
             if (mCurrentRecordingPositionX >= height) {
@@ -767,7 +768,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             y = height - event.getPosition().toFloat().y;
             y = std::clamp(y, 15.f, height - 20.f);
             mAutomationManager.setSourcePosition(xyToPos(Point<float>{ 10.f, y }, height));
-        } else if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        } else if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                    == ElevationTrajectoryType::realtime) {
             float y{ height - event.y };
             y = std::clamp(y, 15.f, height - 20.f);
@@ -783,13 +784,13 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     bool needToAdjustAutomationManager{ false };
     if (static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink()) == ElevationSourceLink::independent
         && mSelectedSourceId == 0
-        && static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                == ElevationTrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     } else if (static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink())
                    >= ElevationSourceLink::fixedElevation
                && static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink()) < ElevationSourceLink::deltaLock
-               && static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+               && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                       == ElevationTrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
@@ -806,7 +807,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
+        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
             == ElevationTrajectoryType::drawing) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             mSelectedSourceId = mOldSelectedSourceId;
