@@ -367,7 +367,7 @@ void MainFieldComponent::paint(Graphics & g)
     }
 }
 
-bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent & event)
+bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
 {
     int const width{ getWidth() };
     if (mAutomationManager.getDrawingType() == TrajectoryType::drawing
@@ -383,7 +383,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(const MouseEvent & event)
         Rectangle<float> const area{ pos.x, pos.y, kSourceDiameter, kSourceDiameter };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
-            mSelectedSourceId = -1;
+            mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
             if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
                 mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
                 if (event.mods.isShiftDown())
@@ -472,7 +472,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
     if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
-        mSelectedSourceId = -1;
+        mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
         mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
         if (event.mods.isShiftDown()) {
             mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
@@ -493,7 +493,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
 
     Point<int> const mousePosition{ event.x, height - event.y };
 
-    auto * selectedSource{ mSelectedSourceId == -1 ? &mAutomationManager.getSource() : &mSources[mSelectedSourceId] };
+    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource() : &mSources[mSelectedSourceId] };
 
     if (mSpatMode == SpatMode::VBAP) {
         auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
@@ -505,7 +505,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
         selectedSource->setY(pos.y);
     }
 
-    if (mSelectedSourceId == -1) {
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
         if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
             if (hasValidLineDrawingAnchor1()) {
                 mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
@@ -547,7 +547,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
 
 void MainFieldComponent::mouseMove(const MouseEvent & event)
 {
-    if (mSelectedSourceId == -1 && mAutomationManager.getDrawingType() == TrajectoryType::drawing
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID && mAutomationManager.getDrawingType() == TrajectoryType::drawing
         && hasValidLineDrawingAnchor1()) {
         mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
         repaint();
@@ -556,7 +556,7 @@ void MainFieldComponent::mouseMove(const MouseEvent & event)
 
 void MainFieldComponent::mouseUp(const MouseEvent & event)
 {
-    if (mSelectedSourceId == -1) {
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
         if (mAutomationManager.getDrawingType() == TrajectoryType::drawing && !event.mods.isShiftDown()) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             mSelectedSourceId = mOldSelectedSourceId;
@@ -607,7 +607,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     // Draw recording trajectory handle.
     if (shouldDrawTrajectoryHandle) {
         auto const pos{ posToXy(mAutomationManager.getSourcePosition(), width) };
-        auto const lineThickness{ (mSelectedSourceId == -1) ? 3 : 1 };
+        auto const lineThickness{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
         Rectangle<float> const rarea{ 10.f, pos.y, kSourceDiameter, kSourceDiameter };
 
         g.setColour(Colour::fromRGB(176, 176, 228));
@@ -720,7 +720,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
         Rectangle<float> const area{ pos.x, pos.y, kSourceDiameter, kSourceDiameter };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
-            mSelectedSourceId = -1;
+            mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
             if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
                 == ElevationTrajectoryType::drawing) {
                 mCurrentRecordingPositionX = 10 + kSourceRadius;
@@ -736,7 +736,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
     if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType()) == ElevationTrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
-        mSelectedSourceId = -1;
+        mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
         mCurrentRecordingPositionX = 10 + static_cast<int>(kSourceRadius);
         mAutomationManager.resetRecordingTrajectory(
             Point<float>{ static_cast<float>(mCurrentRecordingPositionX), event.getMouseDownPosition().toFloat().y });
@@ -753,7 +753,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
         return;
     }
 
-    if (mSelectedSourceId == -1) {
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
         if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
             == ElevationTrajectoryType::drawing) {
             mCurrentRecordingPositionX += 1;
@@ -805,7 +805,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
-    if (mSelectedSourceId == -1) {
+    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
         if (static_cast<ElevationTrajectoryType>(mAutomationManager.getDrawingType())
             == ElevationTrajectoryType::drawing) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());

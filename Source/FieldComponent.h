@@ -83,6 +83,7 @@ public:
 
 protected:
     static constexpr Point<float> INVALID_POINT{ -1.f, -1.f };
+    static constexpr int TRAJECTORY_HANDLE_SOURCE_ID = -1;
     static constexpr int NO_SELECTION_SOURCE_ID = -2;
 
     Source * mSources{};
