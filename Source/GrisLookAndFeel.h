@@ -101,7 +101,7 @@ public:
     Font getLabelFont(Label & label) final { return this->font; }
     Font getComboBoxFont(ComboBox & comboBox) final { return this->font; }
     Font getTextButtonFont(TextButton &, int buttonHeight) final { return this->font; }
-    Font getMenuBarFont(MenuBarComponent &, int itemIndex, const String & itemText) final { return this->font; }
+    Font getMenuBarFont(MenuBarComponent &, int itemIndex, String const & itemText) final { return this->font; }
 
     Colour getWinBackgroundColour() const { return this->winBackGroundAndFieldColour; }
 
@@ -141,8 +141,8 @@ public:
 
         g.fillAll(this->editBgcolor); // box.findColour (ComboBox::backgroundColourId))
 
-        const float arrowX = 0.3f;
-        const float arrowH = 0.2f;
+        float const arrowX = 0.3f;
+        float const arrowH = 0.2f;
 
         Path p;
         p.addTriangle(buttonX + buttonW * 0.5f,
@@ -165,14 +165,14 @@ public:
     }
 
     void drawRoundThumb(Graphics & g,
-                        const float x,
-                        const float y,
-                        const float diameter,
+                        float const x,
+                        float const y,
+                        float const diameter,
                         const Colour & colour,
                         float outlineThickness) const
     {
         const juce::Rectangle<float> a(x, y, diameter, diameter);
-        const float halfThickness = outlineThickness * 0.5f;
+        float const halfThickness = outlineThickness * 0.5f;
 
         Path p;
         p.addEllipse(x + halfThickness, y + halfThickness, diameter - outlineThickness, diameter - outlineThickness);
@@ -189,13 +189,13 @@ public:
 
     void drawPopupMenuItem(Graphics & g,
                            const Rectangle<int> & area,
-                           const bool isSeparator,
-                           const bool isActive,
-                           const bool isHighlighted,
-                           const bool isTicked,
-                           const bool hasSubMenu,
-                           const String & text,
-                           const String & shortcutKeyText,
+                           bool const isSeparator,
+                           bool const isActive,
+                           bool const isHighlighted,
+                           bool const isTicked,
+                           bool const hasSubMenu,
+                           String const & text,
+                           String const & shortcutKeyText,
                            const Drawable * icon,
                            const Colour * const textColourToUse) final
     {
@@ -279,11 +279,11 @@ public:
                               bool isMouseOverButton,
                               bool isButtonDown) final
     {
-        const float width = button.getWidth() - 1.0f;
-        const float height = button.getHeight() - 1.0f;
-        const float cornerSize = jmin(15.0f, jmin(width, height) * 0.45f);
-        const float lineThickness = cornerSize * 0.1f;
-        const float halfThickness = lineThickness * 0.5f;
+        float const width = button.getWidth() - 1.0f;
+        float const height = button.getHeight() - 1.0f;
+        float const cornerSize = jmin(15.0f, jmin(width, height) * 0.45f);
+        float const lineThickness = cornerSize * 0.1f;
+        float const halfThickness = lineThickness * 0.5f;
         Path outline;
         Colour colour;
 
@@ -315,7 +315,7 @@ public:
                      bool isMouseOverButton,
                      bool isButtonDown) final
     {
-        const float boxSize = w * 0.8f;
+        float const boxSize = w * 0.8f;
         const Rectangle<float> r(x, y + (h - boxSize) * 0.5f, boxSize, boxSize);
 
         if (ticked) {
@@ -357,7 +357,7 @@ public:
                                const Slider::SliderStyle style,
                                Slider & slider) final
     {
-        const float sliderRadius = (float)(getSliderThumbRadius(slider) - 1);
+        float const sliderRadius = (float)(getSliderThumbRadius(slider) - 1);
         float kx, ky;
 
         if (style == Slider::LinearVertical) {
@@ -412,19 +412,19 @@ public:
                                     const Slider::SliderStyle /*style*/,
                                     Slider & slider) final
     {
-        const float sliderRadius = getSliderThumbRadius(slider) - 5.0f;
+        float const sliderRadius = getSliderThumbRadius(slider) - 5.0f;
         Path on, off;
 
         if (slider.isHorizontal()) {
-            const float iy = y + height * 0.5f - sliderRadius * 0.5f;
+            float const iy = y + height * 0.5f - sliderRadius * 0.5f;
             juce::Rectangle<float> r(x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
-            const float onW = r.getWidth() * ((float)slider.valueToProportionOfLength(slider.getValue()));
+            float const onW = r.getWidth() * ((float)slider.valueToProportionOfLength(slider.getValue()));
             on.addRectangle(r.removeFromLeft(onW));
             off.addRectangle(r);
         } else {
-            const float ix = x + width * 0.5f - sliderRadius * 0.5f;
+            float const ix = x + width * 0.5f - sliderRadius * 0.5f;
             juce::Rectangle<float> r(ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius);
-            const float onH = r.getHeight() * ((float)slider.valueToProportionOfLength(slider.getValue()));
+            float const onH = r.getHeight() * ((float)slider.valueToProportionOfLength(slider.getValue()));
             on.addRectangle(r.removeFromBottom(onH));
             off.addRectangle(r);
         }
@@ -492,7 +492,7 @@ public:
 
         } else {
             float fontSize = jmin(15.0f, button.getHeight() * 0.75f);
-            const float tickWidth = fontSize * 1.1f;
+            float const tickWidth = fontSize * 1.1f;
 
             drawTickBox(g,
                         button,
@@ -511,7 +511,7 @@ public:
             if (!button.isEnabled())
                 g.setOpacity(0.5f);
 
-            const int textX = (int)tickWidth + 5;
+            int const textX = (int)tickWidth + 5;
 
             g.drawFittedText(button.getButtonText(),
                              textX,
@@ -548,7 +548,7 @@ public:
         if (o != TabbedButtonBar::TabsAtLeft)
             g.fillRect(r.removeFromRight(1));
 
-        const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
         Colour col = (bkg.contrasting().withMultipliedAlpha(alpha));
         const Rectangle<float> area(button.getTextArea().toFloat());
 
@@ -580,7 +580,7 @@ public:
         g.setColour (this->winBackGroundAndFieldColour);
 
         Rectangle<int> r (activeArea);
-        const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
         Colour col = (bkg.contrasting().withMultipliedAlpha (alpha));
 
 
@@ -658,7 +658,7 @@ public:
     //        else
     //            col = button.getTabBackgroundColour().contrasting();
     //
-    //        const float alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
+    //        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
     //
     //        g.setColour (col.withMultipliedAlpha (alpha));
     //        g.setFont (font);
@@ -681,14 +681,14 @@ public:
                           float rotaryEndAngle,
                           Slider & slider) final
     {
-        const float radius = jmin(width / 2, height / 2) - 2.0f;
-        const float centreX = x + width * 0.5f;
-        const float centreY = (y + height * 0.5f) + 6.0f;
-        const float rx = centreX - radius;
-        const float ry = centreY - radius;
-        const float rw = radius * 2.0f;
-        const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-        const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+        float const radius = jmin(width / 2, height / 2) - 2.0f;
+        float const centreX = x + width * 0.5f;
+        float const centreY = (y + height * 0.5f) + 6.0f;
+        float const rx = centreX - radius;
+        float const ry = centreY - radius;
+        float const rw = radius * 2.0f;
+        float const angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+        bool const isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
 
         if (slider.isEnabled()) {
             // slider.findColour (Slider::rotarySliderFillColourId).withAlpha (isMouseOver ? 0.7f : 1.0f)
@@ -703,7 +703,7 @@ public:
         Path filledArc;
         filledArc.addPieSegment(rx, ry, rw, rw, rotaryStartAngle, angle, 0.0);
         g.fillPath(filledArc);
-        const float lineThickness = jmin(15.0f, jmin(width, height) * 0.45f) * 0.1f;
+        float const lineThickness = jmin(15.0f, jmin(width, height) * 0.45f) * 0.1f;
         Path outlineArc;
         outlineArc.addPieSegment(rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, 0.0);
         g.strokePath(outlineArc, PathStrokeType(lineThickness));

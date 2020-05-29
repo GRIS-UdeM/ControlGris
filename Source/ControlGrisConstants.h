@@ -29,7 +29,7 @@ constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 //----------------------
 enum class SpatMode { VBAP, LBAP };
 
-const String WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
+String const WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
 
 // Configuration -> Source tab -> Source Placement popup choices.
 //---------------------------------------------------------------
@@ -44,7 +44,7 @@ enum class SourcePlacement {
     topClockwise,
     topCounterClockwise
 };
-const StringArray SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Right Alternate"),
+StringArray const SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Right Alternate"),
                                            String("Left Clockwise"),  String("Left Counter Clockwise"),
                                            String("Right Clockwise"), String("Right Counter Clockwise"),
                                            String("Top Clockwise"),   String("Top Counter Clockwise") };
@@ -62,13 +62,13 @@ enum class PositionSourceLink {
     linkSymmetricX,
     linkSymmetricY
 };
-const StringArray POSITION_SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
+StringArray const POSITION_SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
                                               String("Circular Fixed Radius"), String("Circular Fixed Angle"),
                                               String("Circular Fully Fixed"),  String("Delta Lock"),
                                               String("Symmetric X"),           String("Symmetric Y") };
 
 enum class ElevationSourceLink { undefined, independent, fixedElevation, linearMin, linearMax, deltaLock };
-const StringArray ELEVATION_SOURCE_LINK_TYPES{ String("Independent"),
+StringArray const ELEVATION_SOURCE_LINK_TYPES{ String("Independent"),
                                                String("Fixed Elevation"),
                                                String("Linear Min"),
                                                String("Linear Max"),
@@ -93,7 +93,7 @@ enum class PositionTrajectoryType {
     triangleClockwise,
     triangleCounterClockwise
 };
-const StringArray POSITION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
+StringArray const POSITION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                                   String("Drawing"),
                                                   String("Circle Clockwise"),
                                                   String("Circle Counter Clockwise"),
@@ -109,14 +109,15 @@ const StringArray POSITION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                                   String("Triangle Counter Clockwise") };
 
 enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
-const StringArray ELEVATION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
+StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                                    String("Drawing"),
                                                    String("Up Down"),
                                                    String("Down Up") };
 
 // Fix position data headers.
 //---------------------------
-const StringArray FIXED_POSITION_DATA_HEADERS{
+StringArray const FIXED_POSITION_DATA_HEADERS{
+    // TODO: is this usefull?
     String("ID"),   String("S1_X"), String("S1_Y"), String("S1_Z"), String("S2_X"), String("S2_Y"), String("S2_Z"),
     String("S3_X"), String("S3_Y"), String("S3_Z"), String("S4_X"), String("S4_Y"), String("S4_Z"), String("S5_X"),
     String("S5_Y"), String("S5_Z"), String("S6_X"), String("S6_Y"), String("S6_Z"), String("S7_X"), String("S7_Y"),
@@ -124,4 +125,4 @@ const StringArray FIXED_POSITION_DATA_HEADERS{
     String("T2_X"), String("T2_Y"), String("T2_Z")
 };
 
-const String FIXED_POSITION_DATA_TAG("Fix_Position_Data");
+String const FIXED_POSITION_DATA_TAG("Fix_Position_Data");

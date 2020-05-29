@@ -310,10 +310,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum)
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value)
 {
     int numOfSources = processor.getNumberOfSources();
-    const float azims2[2] = { -90.0f, 90.0f };
-    const float azims4[4] = { -45.0f, 45.0f, -135.0f, 135.0f };
-    const float azims6[6] = { -30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f };
-    const float azims8[8] = { -22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f };
+    float const azims2[2] = { -90.0f, 90.0f };
+    float const azims4[4] = { -45.0f, 45.0f, -135.0f, 135.0f };
+    float const azims6[6] = { -30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f };
+    float const azims8[8] = { -22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f };
 
     bool isLBAP = processor.getOscFormat() == SpatMode::LBAP;
 

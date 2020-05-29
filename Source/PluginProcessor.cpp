@@ -239,7 +239,7 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::parameterChanged(const String & parameterID, float newValue)
+void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
@@ -1483,7 +1483,7 @@ void ControlGrisAudioProcessor::deleteFixedPosition(int id)
 }
 
 //==============================================================================
-const String ControlGrisAudioProcessor::getName() const
+String const ControlGrisAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }

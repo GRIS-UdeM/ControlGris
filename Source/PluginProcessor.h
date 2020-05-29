@@ -52,7 +52,7 @@ public:
     bool hasEditor() const final { return true; } // (change this to false if you choose to not supply an editor)
 
     //==============================================================================
-    const String getName() const final;
+    String const getName() const final;
 
     bool acceptsMidi() const final;
     bool producesMidi() const final;
@@ -67,15 +67,15 @@ public:
       // so this should be at least 1, even if you're not really implementing programs.
     int getCurrentProgram() final { return 0; }
     void setCurrentProgram(int index) final {}
-    const String getProgramName(int index) final { return {}; }
-    void changeProgramName(int index, const String & newName) final {}
+    String const getProgramName(int index) final { return {}; }
+    void changeProgramName(int index, String const & newName) final {}
 
     //==============================================================================
     void getStateInformation(MemoryBlock & destData) final;
     void setStateInformation(const void * data, int sizeInBytes) final;
 
     //==============================================================================
-    void parameterChanged(const String & parameterID, float newValue) final;
+    void parameterChanged(String const & parameterID, float newValue) final;
 
     //==============================================================================
     void setOscFormat(SpatMode oscFormat);

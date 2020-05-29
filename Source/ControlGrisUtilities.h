@@ -41,7 +41,7 @@ constexpr Float degreeToRadian(Float const degree)
 class XmlElementDataSorter
 {
 public:
-    XmlElementDataSorter(const String & attributeToSortBy, bool forwards)
+    XmlElementDataSorter(String const & attributeToSortBy, bool forwards)
         : attributeToSort(attributeToSortBy)
         , direction(forwards ? 1 : -1)
     {
