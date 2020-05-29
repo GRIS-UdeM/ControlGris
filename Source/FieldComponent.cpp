@@ -469,22 +469,18 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
         return;
     }
 
-    // Check if we click on the trajectory handle.
-    if (mAutomationManager.getSourceLink() != SourceLink::circularDeltaLock) {
-        isTrajectoryHandleClicked(event);
-    }
-
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
     if (mAutomationManager.getDrawingType() == TrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
         mSelectedSourceId = -1;
         mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-        if (event.mods.isShiftDown())
+        if (event.mods.isShiftDown()) {
             mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
+        }
         repaint();
     }
 }
-//=----------------------------------------DSADSAVRESADVT$AE TRA TFD FDSA FDSA F
+
 void MainFieldComponent::mouseDrag(const MouseEvent & event)
 {
     // No selection.
