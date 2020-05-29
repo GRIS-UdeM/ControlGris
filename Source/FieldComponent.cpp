@@ -255,14 +255,14 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     int const width{ getWidth() };
     bool shouldDrawTrajectoryHandle{ false };
     if (mNumberOfSources == 1) {
-        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !mIsPlaying) {
+        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
         }
     } else {
-        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !mIsPlaying) {
+        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
-                   && mAutomationManager.getSourceLink() == SourceLink::circularDeltaLock) {
+        } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
+                   && mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
             shouldDrawTrajectoryHandle = true;
         }
     }
@@ -293,7 +293,7 @@ void MainFieldComponent::paint(Graphics & g)
     drawFieldBackground(g, true, mSpatMode);
 
     // Draw recording trajectory handle before sources (if source link *is not* Delta Lock).
-    if (mAutomationManager.getSourceLink() != SourceLink::circularDeltaLock) {
+    if (mAutomationManager.getSourceLink() != PositionSourceLink::circularDeltaLock) {
         drawTrajectoryHandle(g);
     }
 
@@ -311,8 +311,8 @@ void MainFieldComponent::paint(Graphics & g)
         mAutomationManager.createRecordingPath(trajectoryPath);
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
-    if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != TrajectoryType::realtime
-        && mAutomationManager.getActivateState()) {
+    if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != PositionTrajectoryType::realtime
+        && mAutomationManager.getPositionActivateState()) {
         Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
@@ -354,7 +354,7 @@ void MainFieldComponent::paint(Graphics & g)
     }
 
     // Draw recording trajectory handle after sources (if source link *is* Delta Lock).
-    if (mAutomationManager.getSourceLink() == SourceLink::circularDeltaLock) {
+    if (mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
         drawTrajectoryHandle(g);
     }
 
@@ -370,8 +370,8 @@ void MainFieldComponent::paint(Graphics & g)
 bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
 {
     int const width{ getWidth() };
-    if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing
-        || mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
+    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
+        || mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         Point<float> pos;
         if (mSpatMode == SpatMode::VBAP) {
             pos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
@@ -384,7 +384,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
             mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
-            if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
+            if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
                 mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
                 if (event.mods.isShiftDown())
                     mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
@@ -435,7 +435,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     mSelectedSourceId = NO_SELECTION_SOURCE_ID;
 
     // Check if we click on the trajectory handle.
-    if (mAutomationManager.getSourceLink() == SourceLink::circularDeltaLock) {
+    if (mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
         if (isTrajectoryHandleClicked(event)) {
             return;
         }
@@ -452,8 +452,8 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
         }
         Rectangle<float> area = Rectangle<float>(pos.x, pos.y, kSourceDiameter, kSourceDiameter);
         if (area.contains(event.getMouseDownPosition().toFloat())) {
-            if (i > 0 && mAutomationManager.getSourceLink() != SourceLink::independent
-                && mAutomationManager.getSourceLink() != SourceLink::circularDeltaLock) {
+            if (i > 0 && mAutomationManager.getSourceLink() != PositionSourceLink::independent
+                && mAutomationManager.getSourceLink() != PositionSourceLink::circularDeltaLock) {
                 mShowCircularSourceSelectionWarning = true;
             } else {
                 mSelectedSourceId = i;
@@ -470,7 +470,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
+    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         mOldSelectedSourceId = mSelectedSourceId;
         mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
         mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
@@ -507,13 +507,13 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing) {
+        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
             if (hasValidLineDrawingAnchor1()) {
                 mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
             } else {
                 mAutomationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
             }
-        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
+        } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
             mAutomationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
@@ -521,14 +521,14 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     bool needToAdjustAutomationManager{ false };
-    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
-        && (mAutomationManager.getSourceLink() == SourceLink::independent
-            || mAutomationManager.getSourceLink() == SourceLink::linkSymmetricX
-            || mAutomationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
+    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
+        && (mAutomationManager.getSourceLink() == PositionSourceLink::independent
+            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
+            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
         needToAdjustAutomationManager = true;
-    } else if (mAutomationManager.getSourceLink() >= SourceLink::circular
-               && mAutomationManager.getSourceLink() < SourceLink::circularDeltaLock
-               && mAutomationManager.getTrajectoryType() == TrajectoryType::realtime) {
+    } else if (mAutomationManager.getSourceLink() >= PositionSourceLink::circular
+               && mAutomationManager.getSourceLink() < PositionSourceLink::circularDeltaLock
+               && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         needToAdjustAutomationManager = true;
     }
 
@@ -549,7 +549,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
 void MainFieldComponent::mouseMove(const MouseEvent & event)
 {
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID
-        && mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
+        && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
         mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
         repaint();
     }
@@ -558,7 +558,7 @@ void MainFieldComponent::mouseMove(const MouseEvent & event)
 void MainFieldComponent::mouseUp(const MouseEvent & event)
 {
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getTrajectoryType() == TrajectoryType::drawing && !event.mods.isShiftDown()) {
+        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !event.mods.isShiftDown()) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             mSelectedSourceId = mOldSelectedSourceId;
         }
@@ -633,7 +633,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     if (mIsPlaying && !isMouseButtonDown()
         && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                != ElevationTrajectoryType::realtime
-        && mAutomationManager.getActivateState()) {
+        && mAutomationManager.getPositionActivateState()) {
         Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }

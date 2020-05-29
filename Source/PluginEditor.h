@@ -46,10 +46,10 @@ class ControlGrisAudioProcessorEditor final
     , public PositionPresetComponent::Listener
 {
 public:
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor &,
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     AudioProcessorValueTreeState & vts,
-                                    PositionAutomationManager & automan,
-                                    ElevationAutomationManager & automanAlt);
+                                    PositionAutomationManager & positionAutomationManager,
+                                    ElevationAutomationManager & elevationAutomationManager);
     ~ControlGrisAudioProcessorEditor() final;
 
     void paint(Graphics &) final;
@@ -77,19 +77,19 @@ public:
     void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxSourceLinkChanged(SourceLink value) final;
+    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) final;
     void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) final;
-    void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) final;
+    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) final;
     void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) final;
-    void trajectoryBoxBackAndForthChanged(bool value) final;
-    void trajectoryBoxBackAndForthAltChanged(bool value) final;
-    void trajectoryBoxDampeningCyclesChanged(int value) final;
-    void trajectoryBoxDampeningCyclesAltChanged(int value) final;
+    void trajectoryBoxPositionBackAndForthChanged(bool value) final;
+    void trajectoryBoxElevationBackAndForthChanged(bool value) final;
+    void trajectoryBoxPositionDampeningCyclesChanged(int value) final;
+    void trajectoryBoxElevationDampeningCyclesChanged(int value) final;
     void trajectoryBoxDeviationPerCycleChanged(float value) final;
     void trajectoryBoxCycleDurationChanged(double duration, int mode) final;
     void trajectoryBoxDurationUnitChanged(double duration, int mode) final;
-    void trajectoryBoxActivateChanged(bool value) final;
-    void trajectoryBoxActivateAltChanged(bool value) final;
+    void trajectoryBoxPositionActivateChanged(bool value) final;
+    void trajectoryBoxElevationActivateChanged(bool value) final;
 
     // PositionPresetComponent::Listeners
     void positionPresetChanged(int presetNumber) final;
@@ -103,7 +103,7 @@ public:
 
     void setPluginState();
     void updateSpanLinkButton(bool state);
-    void updateSourceLinkCombo(SourceLink value);
+    void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);
 
@@ -116,8 +116,8 @@ private:
 
     AudioProcessorValueTreeState & valueTreeState;
 
-    PositionAutomationManager & automationManager;
-    ElevationAutomationManager & automationManagerAlt;
+    PositionAutomationManager & mPositionAutomationManager;
+    ElevationAutomationManager & mElevationAutomationManager;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;
@@ -125,8 +125,8 @@ private:
     BannerComponent settingsBanner;
     BannerComponent positionPresetBanner;
 
-    MainFieldComponent mainField;
-    ElevationFieldComponent elevationField;
+    MainFieldComponent mPositionField;
+    ElevationFieldComponent mElevationField;
 
     ParametersBoxComponent parametersBox;
 

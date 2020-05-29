@@ -42,7 +42,7 @@ protected:
 
     float mFieldWidth{ MIN_FIELD_WIDTH };
 
-    SourceLink mSourceLink{ SourceLink::independent };
+    PositionSourceLink mSourceLink{ PositionSourceLink::independent };
 
     bool mIsBackAndForth{ false };
     Direction mBackAndForthDirection{ Direction::forward };
@@ -75,8 +75,8 @@ public:
     double getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
 
-    void setActivateState(bool state);
-    bool getActivateState() const { return mActivateState; }
+    void setPositionActivateState(bool state);
+    bool getPositionActivateState() const { return mActivateState; }
 
     void setPlaybackDuration(double value) { mPlaybackDuration = value; }
     double getPlaybackDuration() const { return mPlaybackDuration; }
@@ -97,11 +97,11 @@ public:
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
-    void setSourceLink(SourceLink value) { this->mSourceLink = value; }
-    SourceLink getSourceLink() const { return mSourceLink; }
+    void setPostionSourceLink(PositionSourceLink value) { this->mSourceLink = value; }
+    PositionSourceLink getSourceLink() const { return mSourceLink; }
 
-    void setBackAndForth(bool const newState) { mIsBackAndForth = newState; }
-    void setDampeningCycles(int value) { this->mDampeningCycles = value; }
+    void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
+    void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }
 
     void setDeviationPerCycle(float value) { this->mDegreeOfDeviationPerCycle = value; }
 
@@ -135,13 +135,13 @@ private:
 
 class PositionAutomationManager final : public AutomationManager
 {
-    TrajectoryType mTrajectoryType{ TrajectoryType::drawing };
+    PositionTrajectoryType mTrajectoryType{ PositionTrajectoryType::drawing };
 
 public:
     PositionAutomationManager() = default;
 
-    void setTrajectoryType(TrajectoryType type, Point<float> const & startpos);
-    TrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+    void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
+    PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
     void sendTrajectoryPositionChangedEvent() final;
 

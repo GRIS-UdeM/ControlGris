@@ -94,11 +94,12 @@ SettingsBoxComponent::SettingsBoxComponent()
     };
     addAndMakeVisible(&firstSourceIdEditor);
 
-    activateButton.setExplicitFocusOrder(1);
-    activateButton.setButtonText("Activate OSC");
-    activateButton.onClick
-        = [this] { listeners.call([&](Listener & l) { l.settingsBoxOscActivated(activateButton.getToggleState()); }); };
-    addAndMakeVisible(&activateButton);
+    mPositionActivateButton.setExplicitFocusOrder(1);
+    mPositionActivateButton.setButtonText("Activate OSC");
+    mPositionActivateButton.onClick = [this] {
+        listeners.call([&](Listener & l) { l.settingsBoxOscActivated(mPositionActivateButton.getToggleState()); });
+    };
+    addAndMakeVisible(&mPositionActivateButton);
 }
 
 SettingsBoxComponent::~SettingsBoxComponent()
@@ -128,7 +129,7 @@ void SettingsBoxComponent::setFirstSourceId(int firstSourceId)
 
 void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
 {
-    activateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
+    mPositionActivateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
 }
 
 void SettingsBoxComponent::paint(Graphics & g)
@@ -152,5 +153,5 @@ void SettingsBoxComponent::resized()
     firstSourceIdLabel.setBounds(265, 40, 130, 15);
     firstSourceIdEditor.setBounds(395, 40, 40, 15);
 
-    activateButton.setBounds(5, 70, 150, 20);
+    mPositionActivateButton.setBounds(5, 70, 150, 20);
 }

@@ -51,7 +51,7 @@ const StringArray SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Ri
 
 // Trajectories -> Source Link popup choices.
 //-------------------------------------------
-enum class SourceLink {
+enum class PositionSourceLink {
     undefined,
     independent,
     circular,
@@ -62,21 +62,21 @@ enum class SourceLink {
     linkSymmetricX,
     linkSymmetricY
 };
-const StringArray SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
-                                     String("Circular Fixed Radius"), String("Circular Fixed Angle"),
-                                     String("Circular Fully Fixed"),  String("Delta Lock"),
-                                     String("Symmetric X"),           String("Symmetric Y") };
+const StringArray POSITION_SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
+                                              String("Circular Fixed Radius"), String("Circular Fixed Angle"),
+                                              String("Circular Fully Fixed"),  String("Delta Lock"),
+                                              String("Symmetric X"),           String("Symmetric Y") };
 
 enum class ElevationSourceLink { undefined, independent, fixedElevation, linearMin, linearMax, deltaLock };
-const StringArray SOURCE_LINK_ALT_TYPES{ String("Independent"),
-                                         String("Fixed Elevation"),
-                                         String("Linear Min"),
-                                         String("Linear Max"),
-                                         String("Delta Lock") };
+const StringArray ELEVATION_SOURCE_LINK_TYPES{ String("Independent"),
+                                               String("Fixed Elevation"),
+                                               String("Linear Min"),
+                                               String("Linear Max"),
+                                               String("Delta Lock") };
 
 // Trajectories -> Trajectory Type popup choices.
 //-----------------------------------------------
-enum class TrajectoryType {
+enum class PositionTrajectoryType {
     undefined,
     realtime,
     drawing,
@@ -93,26 +93,26 @@ enum class TrajectoryType {
     triangleClockwise,
     triangleCounterClockwise
 };
-const StringArray TRAJECTORY_TYPE_TYPES{ String("Realtime"),
-                                         String("Drawing"),
-                                         String("Circle Clockwise"),
-                                         String("Circle Counter Clockwise"),
-                                         String("Ellipse Clockwise"),
-                                         String("Ellipse Counter Clockwise"),
-                                         String("Spiral Clockwise Out In"),
-                                         String("Spiral Counter Clockwise Out In"),
-                                         String("Spiral Clockwise In Out"),
-                                         String("Spiral Counter Clockwise In Out"),
-                                         String("Square Clockwise"),
-                                         String("Square Counter Clockwise"),
-                                         String("Triangle Clockwise"),
-                                         String("Triangle Counter Clockwise") };
+const StringArray POSITION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
+                                                  String("Drawing"),
+                                                  String("Circle Clockwise"),
+                                                  String("Circle Counter Clockwise"),
+                                                  String("Ellipse Clockwise"),
+                                                  String("Ellipse Counter Clockwise"),
+                                                  String("Spiral Clockwise Out In"),
+                                                  String("Spiral Counter Clockwise Out In"),
+                                                  String("Spiral Clockwise In Out"),
+                                                  String("Spiral Counter Clockwise In Out"),
+                                                  String("Square Clockwise"),
+                                                  String("Square Counter Clockwise"),
+                                                  String("Triangle Clockwise"),
+                                                  String("Triangle Counter Clockwise") };
 
 enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
-const StringArray TRAJECTORY_TYPE_ALT_TYPES{ String("Realtime"),
-                                             String("Drawing"),
-                                             String("Up Down"),
-                                             String("Down Up") };
+const StringArray ELEVATION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
+                                                   String("Drawing"),
+                                                   String("Up Down"),
+                                                   String("Down Up") };
 
 // Fix position data headers.
 //---------------------------

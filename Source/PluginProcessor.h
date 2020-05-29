@@ -133,17 +133,17 @@ public:
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
-    void setSourceLink(SourceLink value);
+    void setPostionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
-    void onSourceLinkChanged(SourceLink value);
+    void onSourceLinkChanged(PositionSourceLink value);
     void onElevationSourceLinkChanged(ElevationSourceLink value);
 
-    void linkSourcePositions();
-    void linkSourcePositionsAlt();
+    void linkPositionSourcePositions();
+    void linkElevationSourcePositions();
 
     // These are called after a source has changed from mouse movement in a field (or from an OSC message).
-    void validateSourcePositions();
-    void validateSourcePositionsAlt();
+    void validatePositionSourcePositions();
+    void validateElevationSourcePositions();
 
     void setPositionPreset(int presetNumber);
 
@@ -157,8 +157,8 @@ public:
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
-    PositionAutomationManager automationManager;
-    ElevationAutomationManager automationManagerAlt;
+    PositionAutomationManager mPositionAutomationManager;
+    ElevationAutomationManager mElevationAutomationManager;
 
 private:
     SpatMode m_selectedOscFormat;
@@ -194,7 +194,7 @@ private:
     float m_lastTrajectory1z;
     float m_lastAzispan;
     float m_lastElespan;
-    SourceLink m_lastSourceLink;
+    PositionSourceLink m_lastSourceLink;
     ElevationSourceLink m_lastElevationSourceLink;
 
     Source sources[MAX_NUMBER_OF_SOURCES];

@@ -142,7 +142,10 @@ private:
 class ElevationFieldComponent final : public FieldComponent
 {
 public:
-    ElevationFieldComponent(ElevationAutomationManager & automationManager) : mAutomationManager(automationManager) {}
+    ElevationFieldComponent(ElevationAutomationManager & mPositionAutomationManager)
+        : mAutomationManager(mPositionAutomationManager)
+    {
+    }
     ~ElevationFieldComponent() final = default;
 
     void paint(Graphics & g) final;

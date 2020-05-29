@@ -18,20 +18,22 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "PluginEditor.h"
+
 #include "ControlGrisConstants.h"
 #include "PluginProcessor.h"
 
-ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & p,
-                                                                 AudioProcessorValueTreeState & vts,
-                                                                 PositionAutomationManager & automan,
-                                                                 ElevationAutomationManager & automanAlt)
+ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
+    ControlGrisAudioProcessor & p,
+    AudioProcessorValueTreeState & vts,
+    PositionAutomationManager & positionAutomationManager,
+    ElevationAutomationManager & elevationAutomationManager)
     : AudioProcessorEditor(&p)
     , processor(p)
     , valueTreeState(vts)
-    , automationManager(automan)
-    , automationManagerAlt(automanAlt)
-    , mainField(automan)
-    , elevationField(automanAlt)
+    , mPositionAutomationManager(positionAutomationManager)
+    , mElevationAutomationManager(elevationAutomationManager)
+    , mPositionField(positionAutomationManager)
+    , mElevationField(elevationAutomationManager)
 {
     setLookAndFeel(&grisLookAndFeel);
 
@@ -60,13 +62,13 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudi
     positionPresetBanner.setText("Preset", NotificationType::dontSendNotification);
     addAndMakeVisible(&positionPresetBanner);
 
-    mainField.setLookAndFeel(&grisLookAndFeel);
-    mainField.addListener(this);
-    addAndMakeVisible(&mainField);
+    mPositionField.setLookAndFeel(&grisLookAndFeel);
+    mPositionField.addListener(this);
+    addAndMakeVisible(&mPositionField);
 
-    elevationField.setLookAndFeel(&grisLookAndFeel);
-    elevationField.addListener(this);
-    addAndMakeVisible(&elevationField);
+    mElevationField.setLookAndFeel(&grisLookAndFeel);
+    mElevationField.addListener(this);
+    addAndMakeVisible(&mElevationField);
 
     parametersBox.setLookAndFeel(&grisLookAndFeel);
     parametersBox.addListener(this);
@@ -75,8 +77,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudi
     trajectoryBox.setLookAndFeel(&grisLookAndFeel);
     trajectoryBox.addListener(this);
     addAndMakeVisible(trajectoryBox);
-    trajectoryBox.setSourceLink(automationManager.getSourceLink());
-    trajectoryBox.setElevationSourceLink(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
+    trajectoryBox.setPostionSourceLink(mPositionAutomationManager.getSourceLink());
+    trajectoryBox.setElevationSourceLink(static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
 
     settingsBox.setLookAndFeel(&grisLookAndFeel);
     settingsBox.addListener(this);
@@ -102,8 +104,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudi
 
     // Add sources to the fields.
     //---------------------------
-    mainField.setSources(processor.getSources(), processor.getNumberOfSources());
-    elevationField.setSources(processor.getSources(), processor.getNumberOfSources());
+    mPositionField.setSources(processor.getSources(), processor.getNumberOfSources());
+    mElevationField.setSources(processor.getSources(), processor.getNumberOfSources());
 
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     processor.setSelectedSourceId(m_selectedSource);
@@ -156,14 +158,14 @@ void ControlGrisAudioProcessorEditor::setPluginState()
     //------------------------------------------------
     trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
     trajectoryBox.setElevationTrajectoryType(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
-    trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
-    trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
-    trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
-    automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
-    trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
-    automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    trajectoryBox.setPositionBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
+    trajectoryBox.setElevationBackAndForth(valueTreeState.state.getProperty("backAndForthAlt", false));
+    trajectoryBox.setPositionDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
+    mPositionAutomationManager.setPositionDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
+    trajectoryBox.setElevationDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    mElevationAutomationManager.setPositionDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
     trajectoryBox.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
-    automationManager.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
+    mPositionAutomationManager.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
     trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
     trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
 
@@ -182,8 +184,8 @@ void ControlGrisAudioProcessorEditor::setPluginState()
     // Update the interface.
     //----------------------
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
+    mPositionField.setSelectedSource(m_selectedSource);
+    mElevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
                                    m_selectedSource,
@@ -200,14 +202,16 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
     parametersBox.setSpanLinkState(state);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value)
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
-    trajectoryBox.sourceLinkCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
+    trajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
+                                                         NotificationType::dontSendNotification);
 }
 
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    trajectoryBox.sourceLinkAltCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
+    trajectoryBox.mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value),
+                                                          NotificationType::dontSendNotification);
 }
 
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber)
@@ -230,7 +234,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
     processor.setOscFormat(mode);
     bool selectionIsLBAP = mode == SpatMode::LBAP;
     parametersBox.setDistanceEnabled(selectionIsLBAP);
-    mainField.setSpatMode(mode);
+    mPositionField.setSpatMode(mode);
     trajectoryBox.setSpatMode(mode);
     repaint();
     resized();
@@ -256,10 +260,10 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
             initSourcePlacement = true;
         }
         if (numOfSources != 2
-            && (automationManager.getSourceLink() == SourceLink::linkSymmetricX
-                || automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
-            automationManager.setSourceLink(SourceLink::independent);
-            updateSourceLinkCombo(SourceLink::independent);
+            && (mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
+                || mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
+            mPositionAutomationManager.setPostionSourceLink(PositionSourceLink::independent);
+            updateSourceLinkCombo(PositionSourceLink::independent);
         }
         m_selectedSource = 0;
         processor.setNumberOfSources(numOfSources);
@@ -267,8 +271,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         settingsBox.setNumberOfSources(numOfSources);
         trajectoryBox.setNumberOfSources(numOfSources);
         parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-        mainField.setSources(processor.getSources(), numOfSources);
-        elevationField.setSources(processor.getSources(), numOfSources);
+        mPositionField.setSources(processor.getSources(), numOfSources);
+        mElevationField.setSources(processor.getSources(), numOfSources);
         sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
         if (initSourcePlacement) {
             sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
@@ -283,9 +287,9 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
     sourceBox.setNumberOfSources(processor.getNumberOfSources(), firstSourceId);
 
-    mainField.repaint();
+    mPositionField.repaint();
     if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
+        mElevationField.repaint();
 }
 
 // SourceBoxComponent::Listener callbacks.
@@ -295,8 +299,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum)
     m_selectedSource = sourceNum;
 
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
+    mPositionField.setSelectedSource(m_selectedSource);
+    mElevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
                                    m_selectedSource,
@@ -421,7 +425,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         processor.getSources()[i].fixSourcePosition(true);
     }
 
-    automationManager.setTrajectoryType(automationManager.getTrajectoryType(), processor.getSources()[0].getPos());
+    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+                                                 processor.getSources()[0].getPos());
 
     repaint();
 }
@@ -437,7 +442,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, fl
 
     processor.getSources()[sourceNum].fixSourcePosition(true);
 
-    automationManager.setTrajectoryType(automationManager.getTrajectoryType(), processor.getSources()[0].getPos());
+    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+                                                 processor.getSources()[0].getPos());
 
     repaint();
 }
@@ -449,17 +455,17 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParame
 {
     processor.setSourceParameterValue(m_selectedSource, sourceParameter, value);
 
-    mainField.repaint();
+    mPositionField.repaint();
     if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
+        mElevationField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 {
     m_selectedSource = (m_selectedSource + 1) % processor.getNumberOfSources();
     parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
+    mPositionField.setSelectedSource(m_selectedSource);
+    mElevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
                                    m_selectedSource,
@@ -468,60 +474,60 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value)
 {
-    processor.setSourceLink(value);
-    mainField.repaint();
+    processor.setPostionSourceLink(value);
+    mPositionField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value)
 {
     processor.setElevationSourceLink(value);
-    elevationField.repaint();
+    mElevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    automationManager.setTrajectoryType(value, processor.getSources()[0].getPos());
-    mainField.repaint();
+    mPositionAutomationManager.setTrajectoryType(value, processor.getSources()[0].getPos());
+    mPositionField.repaint();
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    automationManagerAlt.setTrajectoryType(value);
-    elevationField.repaint();
+    mElevationAutomationManager.setTrajectoryType(value);
+    mElevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionBackAndForthChanged(bool value)
 {
     valueTreeState.state.setProperty("backAndForth", value, nullptr);
-    automationManager.setBackAndForth(value);
+    mPositionAutomationManager.setPositionBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationBackAndForthChanged(bool value)
 {
     valueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
-    automationManagerAlt.setBackAndForth(value);
+    mElevationAutomationManager.setPositionBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesChanged(int value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionDampeningCyclesChanged(int value)
 {
     valueTreeState.state.setProperty("dampeningCycles", value, nullptr);
-    automationManager.setDampeningCycles(value);
+    mPositionAutomationManager.setPositionDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationDampeningCyclesChanged(int value)
 {
     valueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
-    automationManagerAlt.setDampeningCycles(value);
+    mElevationAutomationManager.setPositionDampeningCycles(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value)
 {
     valueTreeState.state.setProperty("deviationPerCycle", value, nullptr);
-    automationManager.setDeviationPerCycle(value);
+    mPositionAutomationManager.setDeviationPerCycle(value);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode)
@@ -531,8 +537,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double d
     if (mode == 2) {
         dur = duration * 60.0 / processor.getBPM();
     }
-    automationManager.setPlaybackDuration(dur);
-    automationManagerAlt.setPlaybackDuration(dur);
+    mPositionAutomationManager.setPlaybackDuration(dur);
+    mElevationAutomationManager.setPlaybackDuration(dur);
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode)
@@ -542,18 +548,18 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double du
     if (mode == 2) {
         dur = duration * 60.0 / processor.getBPM();
     }
-    automationManager.setPlaybackDuration(dur);
-    automationManagerAlt.setPlaybackDuration(dur);
+    mPositionAutomationManager.setPlaybackDuration(dur);
+    mElevationAutomationManager.setPlaybackDuration(dur);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionActivateChanged(bool value)
 {
-    automationManager.setActivateState(value);
+    mPositionAutomationManager.setPositionActivateState(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationActivateChanged(bool value)
 {
-    automationManagerAlt.setActivateState(value);
+    mElevationAutomationManager.setPositionActivateState(value);
 }
 
 // Update the interface if anything has changed (mostly automations).
@@ -565,18 +571,18 @@ void ControlGrisAudioProcessorEditor::refresh()
                                    m_selectedSource,
                                    processor.getOscFormat());
 
-    mainField.setIsPlaying(processor.getIsPlaying());
-    elevationField.setIsPlaying(processor.getIsPlaying());
+    mPositionField.setIsPlaying(processor.getIsPlaying());
+    mElevationField.setIsPlaying(processor.getIsPlaying());
 
-    mainField.repaint();
+    mPositionField.repaint();
     if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
+        mElevationField.repaint();
 
-    if (trajectoryBox.getActivateState() != automationManager.getActivateState()) {
-        trajectoryBox.setActivateState(automationManager.getActivateState());
+    if (trajectoryBox.getPositionActivateState() != mPositionAutomationManager.getPositionActivateState()) {
+        trajectoryBox.setPositionActivateState(mPositionAutomationManager.getPositionActivateState());
     }
-    if (trajectoryBox.getActivateAltState() != automationManagerAlt.getActivateState()) {
-        trajectoryBox.setActivateAltState(automationManagerAlt.getActivateState());
+    if (trajectoryBox.getElevationActivateState() != mElevationAutomationManager.getPositionActivateState()) {
+        trajectoryBox.setElevationActivateState(mElevationAutomationManager.getPositionActivateState());
     }
 }
 
@@ -587,8 +593,8 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
     processor.sourcePositionChanged(sourceId, whichField);
     m_selectedSource = sourceId;
     parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
+    mPositionField.setSelectedSource(m_selectedSource);
+    mElevationField.setSelectedSource(m_selectedSource);
     processor.setSelectedSourceId(m_selectedSource);
     sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
                                    m_selectedSource,
@@ -601,11 +607,12 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
 {
     if (whichField == 0) {
-        automationManager.fixSourcePosition();
-        processor.onSourceLinkChanged(automationManager.getSourceLink());
+        mPositionAutomationManager.fixSourcePosition();
+        processor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
     } else {
-        automationManagerAlt.fixSourcePosition();
-        processor.onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
+        mElevationAutomationManager.fixSourcePosition();
+        processor.onElevationSourceLinkChanged(
+            static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
     }
 }
 
@@ -669,22 +676,22 @@ void ControlGrisAudioProcessorEditor::resized()
         fieldSize = MIN_FIELD_WIDTH;
     }
 
-    automationManager.setFieldWidth(fieldSize);
-    automationManagerAlt.setFieldWidth(fieldSize);
+    mPositionAutomationManager.setFieldWidth(fieldSize);
+    mElevationAutomationManager.setFieldWidth(fieldSize);
 
     mainBanner.setBounds(0, 0, fieldSize, 20);
-    mainField.setBounds(0, 20, fieldSize, fieldSize);
+    mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
     if (processor.getOscFormat() == SpatMode::LBAP) {
         mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         elevationBanner.setVisible(true);
-        elevationField.setVisible(true);
+        mElevationField.setVisible(true);
         elevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
-        elevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+        mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
     } else {
         mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
         elevationBanner.setVisible(false);
-        elevationField.setVisible(false);
+        mElevationField.setVisible(false);
     }
 
     parametersBox.setBounds(0, fieldSize + 20, width, 50);
