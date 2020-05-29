@@ -36,7 +36,7 @@ public:
     enum class Direction { forward, backward };
 
 protected:
-    static constexpr Point<float> INVALID_POSITION{ -1.f, -1.f };
+    static constexpr Point<float> INVALID_POSITION{ -1.0f, -1.0f };
 
     ListenerList<Listener> mListeners;
 

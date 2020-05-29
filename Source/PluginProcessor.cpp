@@ -49,21 +49,21 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_x"),
                                                      String("Recording Trajectory X"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_y"),
                                                      String("Recording Trajectory Y"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("recordingTrajectory_z"),
                                                      String("Recording Trajectory Z"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 1.f),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
@@ -72,8 +72,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         String("sourceLink"),
         String("Source Link"),
         String(),
-        NormalisableRange<float>(0.f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.f),
-        0.f,
+        NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
+        0.0f,
         nullptr,
         nullptr,
         false,
@@ -82,8 +82,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     parameters.push_back(std::make_unique<Parameter>(String("sourceLinkAlt"),
                                                      String("Source Link Alt"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 4.f, 1.f),
-                                                     0.f,
+                                                     NormalisableRange<float>(0.0f, 4.0f, 1.0f),
+                                                     0.0f,
                                                      nullptr,
                                                      nullptr,
                                                      false,
@@ -93,8 +93,8 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     parameters.push_back(std::make_unique<Parameter>(String("positionPreset"),
                                                      String("Position Preset"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 50.f, 1.f),
-                                                     0.f,
+                                                     NormalisableRange<float>(0.0f, 50.0f, 1.0f),
+                                                     0.0f,
                                                      nullptr,
                                                      nullptr,
                                                      false,
@@ -104,15 +104,15 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     parameters.push_back(std::make_unique<Parameter>(String("azimuthSpan"),
                                                      String("Azimuth Span"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 1.f),
-                                                     0.f,
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(String("elevationSpan"),
                                                      String("Elevation Span"),
                                                      String(),
-                                                     NormalisableRange<float>(0.f, 1.f),
-                                                     0.f,
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
                                                      nullptr,
                                                      nullptr));
 
@@ -338,7 +338,7 @@ void ControlGrisAudioProcessor::setPostionSourceLink(PositionSourceLink value)
 
         float howMany = static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1);
         parameters.getParameter("sourceLink")->beginChangeGesture();
-        parameters.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.f) / howMany);
+        parameters.getParameter("sourceLink")->setValueNotifyingHost(((float)value - 1.0f) / howMany);
         parameters.getParameter("sourceLink")->endChangeGesture();
         ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
@@ -362,7 +362,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value
         onElevationSourceLinkChanged(value);
 
         parameters.getParameter("sourceLinkAlt")->beginChangeGesture();
-        parameters.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)value - 1.f) / 4.f);
+        parameters.getParameter("sourceLinkAlt")->setValueNotifyingHost(((float)value - 1.0f) / 4.0f);
         parameters.getParameter("sourceLinkAlt")->endChangeGesture();
         ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
         if (ed != nullptr) {
@@ -542,9 +542,9 @@ void ControlGrisAudioProcessor::sendOscMessage()
 
     for (int i{}; i < m_numOfSources; ++i) {
         message.clear();
-        float const azim{ -sources[i].getAzimuth() / 180.f * MathConstants<float>::pi };
+        float const azim{ -sources[i].getAzimuth() / 180.0f * MathConstants<float>::pi };
         float const elev{ MathConstants<float>::halfPi
-                          - sources[i].getElevation() / 360.f * MathConstants<float>::twoPi };
+                          - sources[i].getElevation() / 360.0f * MathConstants<float>::twoPi };
         message.addInt32(sources[i].getId());
         message.addFloat32(azim);
         message.addFloat32(elev);
@@ -611,9 +611,9 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
 {
     PositionSourceLink positionSourceLinkToProcess{ PositionSourceLink::undefined };
     ElevationSourceLink elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
-    float x{ -1.f };
-    float y{ -1.f };
-    float z{ -1.f };
+    float x{ -1.0f };
+    float y{ -1.0f };
+    float z{ -1.0f };
     String const address{ message.getAddressPattern().toString() };
     String const pluginInstance{ String("/controlgris/") + String(getOscOutputPluginId()) };
     if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
@@ -697,7 +697,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         }
     }
 
-    if (x != -1.f && y != -1.f) {
+    if (x != -1.0f && y != -1.0f) {
         if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
             mPositionAutomationManager.setSourcePositionX(x);
             mPositionAutomationManager.setSourcePositionY(y);
@@ -708,7 +708,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             sourcePositionChanged(0, 0);
         }
         setPositionPreset(0);
-    } else if (y != -1.f) {
+    } else if (y != -1.0f) {
         if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
             mPositionAutomationManager.setSourcePositionY(y);
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
@@ -717,7 +717,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             sourcePositionChanged(0, 0);
         }
         setPositionPreset(0);
-    } else if (x != -1.f) {
+    } else if (x != -1.0f) {
         if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
             mPositionAutomationManager.setSourcePositionX(x);
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
@@ -728,7 +728,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         setPositionPreset(0);
     }
 
-    if (z != -1.f) {
+    if (z != -1.0f) {
         mElevationAutomationManager.setSourcePositionY(z);
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
         setPositionPreset(0);
@@ -1040,7 +1040,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
     if (whichField == 1 && getOscFormat() == SpatMode::LBAP) {
         if (sourceId != 0) {
             float sourceElevation = sources[sourceId].getElevation();
-            float offset = 60.f / m_numOfSources * sourceId;
+            float offset = 60.0f / m_numOfSources * sourceId;
             switch (static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink())) {
             case ElevationSourceLink::fixedElevation:
                 sources[0].setNormalizedElevation(sources[sourceId].getNormalizedElevation());
@@ -1126,7 +1126,7 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
         linkPositionSourcePositions();
     } else if (manager == &mElevationAutomationManager) {
         if (!getIsPlaying()) {
-            mElevationAutomationManager.setSourceAndPlaybackPosition(Point<float>(0.f, position.y));
+            mElevationAutomationManager.setSourceAndPlaybackPosition(Point<float>(0.0f, position.y));
             parameters.getParameter("recordingTrajectory_z")->setValue(position.y);
         }
         parameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
@@ -1146,7 +1146,7 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
     float const y = (mag + (mag * delta)) * sinf(ang) + 0.5;
     Point<float> const correctedPosition{ x, y };
 
-    float deltaX = 0.f, deltaY = 0.f;
+    float deltaX = 0.0f, deltaY = 0.0f;
     switch (mPositionAutomationManager.getSourceLink()) {
     case PositionSourceLink::independent:
         sources[0].setPos(mPositionAutomationManager.getSourcePosition());
@@ -1305,10 +1305,10 @@ void ControlGrisAudioProcessor::validateElevationSourcePositions()
         if (sourceLink != ElevationSourceLink::deltaLock
             && static_cast<ElevationTrajectoryType>(trajectoryType) != ElevationTrajectoryType::drawing) {
             mElevationAutomationManager.setSourceAndPlaybackPosition(
-                Point<float>(0.f, sources[0].getNormalizedElevation()));
+                Point<float>(0.0f, sources[0].getNormalizedElevation()));
         } else {
-            mElevationAutomationManager.setPlaybackPositionX(-1.f);
-            mElevationAutomationManager.setPlaybackPositionY(-1.f);
+            mElevationAutomationManager.setPlaybackPositionX(-1.0f);
+            mElevationAutomationManager.setPlaybackPositionY(-1.0f);
         }
     }
 

@@ -88,9 +88,9 @@ public:
         setColour(Label::textColourId, this->lightColour);
 
 #if WIN32
-        this->fontSize = 18.f;
+        this->fontSize = 18.0f;
 #else
-        this->fontSize = 10.f;
+        this->fontSize = 10.0f;
 #endif
         this->font.setHeight(this->fontSize);
         this->bigFont.setHeight(this->fontSize + 3);

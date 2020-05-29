@@ -22,15 +22,15 @@
 #include <algorithm>
 
 constexpr auto MAGIC_1 = 300;
-constexpr auto MAGIC_2 = 300.f;
+constexpr auto MAGIC_2 = 300.0f;
 constexpr auto MAGIC_3 = 99;
 constexpr auto MAGIC_4 = 200;
 constexpr auto MAGIC_5 = 199;
-constexpr auto MAGIC_6 = 199.f;
+constexpr auto MAGIC_6 = 199.0f;
 
 AutomationManager::AutomationManager()
 {
-    mCurrentTrajectoryPoint = Point<float>{ mFieldWidth / 2.f, mFieldWidth / 2.f };
+    mCurrentTrajectoryPoint = Point<float>{ mFieldWidth / 2.0f, mFieldWidth / 2.0f };
     mSource.setX(0.0f);
     mSource.setY(0.0f);
 }
@@ -68,7 +68,7 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
     mTrajectoryPoints.clear();
     mTrajectoryPoints.add(currentPosition);
     mLastRecordingPoint = currentPosition;
-    setSourcePosition(Point<float>{ currentPosition.x / mFieldWidth, 1.f - currentPosition.y / mFieldWidth });
+    setSourcePosition(Point<float>{ currentPosition.x / mFieldWidth, 1.0f - currentPosition.y / mFieldWidth });
 }
 
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
@@ -90,16 +90,16 @@ void AutomationManager::createRecordingPath(Path & path)
 void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
-    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.f);
+    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0f);
     computeCurrentTrajectoryPoint();
 }
 
 void AutomationManager::compressTrajectoryXValues(int maxValue) // TODO: make this function useless asap
 {
-    auto const offset{ static_cast<int>(10.f + kSourceRadius) };
+    auto const offset{ static_cast<int>(10.0f + kSourceRadius) };
     maxValue -= offset;
     int const size{ getRecordingTrajectorySize() };
-    auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.f) };
+    auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.0f) };
     for (int i{}; i < size; ++i) {
         mTrajectoryPoints.data()[i].setX(static_cast<float>(i) * delta + offset);
     }
@@ -189,15 +189,15 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         }
         AffineTransform const t{ AffineTransform::rotation(mCurrentDegreeOfDeviation / 360.0f
                                                                * MathConstants<float>::twoPi,
-                                                           (mFieldWidth / 2.f),
-                                                           (mFieldWidth / 2.f)) };
+                                                           (mFieldWidth / 2.0f),
+                                                           (mFieldWidth / 2.0f)) };
         mCurrentTrajectoryPoint.applyTransform(t);
     }
 
     if (mActivateState) {
         ;
         setSourcePosition(
-            Point<float>{ mCurrentTrajectoryPoint.x / mFieldWidth, 1.f - mCurrentTrajectoryPoint.y / mFieldWidth });
+            Point<float>{ mCurrentTrajectoryPoint.x / mFieldWidth, 1.0f - mCurrentTrajectoryPoint.y / mFieldWidth });
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -207,7 +207,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
     } else {
-        return Point<float>{ getSourcePosition().x * mFieldWidth, (1.f - getSourcePosition().y) * mFieldWidth };
+        return Point<float>{ getSourcePosition().x * mFieldWidth, (1.0f - getSourcePosition().y) * mFieldWidth };
     }
 }
 
@@ -243,13 +243,13 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 
     mTrajectoryPoints.clear();
 
-    auto const offset{ static_cast<int>(mFieldWidth / 2.f) };
+    auto const offset{ static_cast<int>(mFieldWidth / 2.0f) };
     auto constexpr minLim{ 8 };
     auto const maxLim{ static_cast<int>(mFieldWidth - minLim) };
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
     float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
-                     * ((mFieldWidth - kSourceDiameter) / 2.f) };
+                     * ((mFieldWidth - kSourceDiameter) / 2.0f) };
     float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
 
     auto const fSize{ static_cast<int>(mFieldWidth) };
@@ -313,9 +313,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::spiralClockwiseOutIn:
         for (int i{}; i < MAGIC_1; ++i) {
             x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
-                * (1.f - static_cast<float>(i) / MAGIC_2);
+                * (1.0f - static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
-                * (1.f - static_cast<float>(i) / MAGIC_2);
+                * (1.0f - static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
@@ -328,9 +328,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::spiralCounterClockwiseOutIn:
         for (int i{}; i < MAGIC_1; ++i) {
             x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
-                * (1.f - static_cast<float>(i) / MAGIC_2);
+                * (1.0f - static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
-                * (1.f - static_cast<float>(i) / MAGIC_2);
+                * (1.0f - static_cast<float>(i) / MAGIC_2);
             float const mag{ sqrtf(x * x + y * y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
@@ -372,7 +372,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         break;
     case PositionTrajectoryType::squareClockwise:
     case PositionTrajectoryType::squareCounterClockwise:
-        step = 1.f / (mFieldWidth / 4);
+        step = 1.0f / (mFieldWidth / 4);
         transX = translated.x * ((mFieldWidth / 2 - kSourceRadius));
         transY = translated.y * ((mFieldWidth / 2 - kSourceRadius));
         magnitude = sqrtf(transX * transX + transY * transY);
@@ -382,16 +382,16 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         for (int i{}; i < fSize; ++i) {
             if (i < fSizeOver4) {
                 tmp1 = static_cast<float>(i) * step;
-                tmp2 = 0.f;
+                tmp2 = 0.0f;
             } else if (i < (fSizeOver4 * 2)) {
-                tmp1 = 1.f;
+                tmp1 = 1.0f;
                 tmp2 = static_cast<float>(i - fSizeOver4) * step;
             } else if (i < (fSizeOver4 * 3)) {
-                tmp1 = 1.f - (static_cast<float>(i - fSizeOver4 * 2) * step);
-                tmp2 = 1.f;
+                tmp1 = 1.0f - (static_cast<float>(i - fSizeOver4 * 2) * step);
+                tmp2 = 1.0f;
             } else {
-                tmp1 = 0.f;
-                tmp2 = 1.f - (static_cast<float>(i - fSizeOver4 * 3) * step);
+                tmp1 = 0.0f;
+                tmp2 = 1.0f - (static_cast<float>(i - fSizeOver4 * 3) * step);
             }
             if (mTrajectoryType == PositionTrajectoryType::squareClockwise) {
                 x = tmp1;
@@ -402,12 +402,12 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             }
             x *= adjustedMagnitude;
             y *= adjustedMagnitude;
-            x = x + (mFieldWidth / 2.f) - (adjustedMagnitude / 2);
-            y = y + (mFieldWidth / 2.f) - (adjustedMagnitude / 2);
+            x = x + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
+            y = y + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
             Point<float> p{ x, y };
-            AffineTransform const t = AffineTransform::rotation(-angle + MathConstants<float>::pi / 4.f,
-                                                                (mFieldWidth / 2.f),
-                                                                (mFieldWidth / 2.f));
+            AffineTransform const t = AffineTransform::rotation(-angle + MathConstants<float>::pi / 4.0f,
+                                                                (mFieldWidth / 2.0f),
+                                                                (mFieldWidth / 2.0f));
             p.applyTransform(t);
             p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
             p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
@@ -416,19 +416,19 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         break;
     case PositionTrajectoryType::triangleClockwise:
     case PositionTrajectoryType::triangleCounterClockwise: {
-        Point<float> const p1{ 0.f, -1.f };
+        Point<float> const p1{ 0.0f, -1.0f };
         Point<float> p2{};
         Point<float> p3{};
         if (mTrajectoryType == PositionTrajectoryType::triangleClockwise) {
-            p2 = Point<float>{ 1.f, 1.f };
-            p3 = Point<float>{ -1.f, 1.f };
+            p2 = Point<float>{ 1.0f, 1.0f };
+            p3 = Point<float>{ -1.0f, 1.0f };
         } else {
-            p2 = Point<float>{ -1.f, 1.f };
-            p3 = Point<float>{ 1.f, 1.f };
+            p2 = Point<float>{ -1.0f, 1.0f };
+            p3 = Point<float>{ 1.0f, 1.0f };
         }
-        step = 1.f / (mFieldWidth / 3.f);
-        transX = translated.x * ((mFieldWidth / 2.f - kSourceRadius));
-        transY = translated.y * ((mFieldWidth / 2.f - kSourceRadius));
+        step = 1.0f / (mFieldWidth / 3.0f);
+        transX = translated.x * ((mFieldWidth / 2.0f - kSourceRadius));
+        transY = translated.y * ((mFieldWidth / 2.0f - kSourceRadius));
         magnitude = sqrtf(transX * transX + transY * transY);
         for (int i{}; i < fSize; ++i) {
             if (i < (fSizeOver3)) {
@@ -441,8 +441,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 x = (p1.x - p3.x) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.x;
                 y = (p1.y - p3.y) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.y;
             }
-            Point<float> p(x * magnitude + (mFieldWidth / 2.f), y * magnitude + (mFieldWidth / 2.f));
-            p.applyTransform(AffineTransform::rotation(-angle, (mFieldWidth / 2.f), (mFieldWidth / 2.f)));
+            Point<float> p(x * magnitude + (mFieldWidth / 2.0f), y * magnitude + (mFieldWidth / 2.0f));
+            p.applyTransform(AffineTransform::rotation(-angle, (mFieldWidth / 2.0f), (mFieldWidth / 2.0f)));
             p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
             p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
             mTrajectoryPoints.add(p);
@@ -454,7 +454,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 
     if (mTrajectoryType > PositionTrajectoryType::drawing) {
         setSourcePosition(
-            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.f - mTrajectoryPoints[0].y / mFieldWidth });
+            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.0f - mTrajectoryPoints[0].y / mFieldWidth });
     } else {
         setSourcePosition(Point<float>{ 0.5f, 0.5f });
     }
@@ -466,10 +466,10 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 
     mTrajectoryPoints.clear();
 
-    auto constexpr offset{ 10.f + kSourceRadius };
+    auto constexpr offset{ 10.0f + kSourceRadius };
     auto const width{ mFieldWidth - offset };
-    auto constexpr minPos{ 15.f };
-    auto const maxPos{ mFieldWidth - 20.f };
+    auto constexpr minPos{ 15.0f };
+    auto const maxPos{ mFieldWidth - 20.0f };
 
     switch (type) {
     case ElevationTrajectoryType::realtime:
@@ -486,7 +486,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
     case ElevationTrajectoryType::upDown:
         for (int i{}; i < MAGIC_4; ++i) {
             float const x = (static_cast<float>(i) / MAGIC_6) * width + offset;
-            float const y = (1.f - static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
+            float const y = (1.0f - static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -496,7 +496,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 
     if (type > ElevationTrajectoryType::drawing) {
         setSourcePosition(
-            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.f - mTrajectoryPoints[0].y / mFieldWidth });
+            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.0f - mTrajectoryPoints[0].y / mFieldWidth });
     } else {
         setSourcePosition(Point<float>{ 0.5f, 0.5f });
     }

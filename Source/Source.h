@@ -23,8 +23,8 @@
 
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
 
-constexpr float kSourceRadius = 12.f;
-constexpr float kSourceDiameter = kSourceRadius * 2.f;
+constexpr float kSourceRadius = 12.0f;
+constexpr float kSourceDiameter = kSourceRadius * 2.0f;
 
 class Source
 {
@@ -43,9 +43,9 @@ public:
     float getNormalizedAzimuth() const;
     void setElevationNoClip(float elevation);
     void setElevation(float elevation);
-    void setNormalizedElevation(float const value) { setElevation(value * 90.f); }
+    void setNormalizedElevation(float const value) { setElevation(value * 90.0f); }
     float getElevation() const { return mElevation; }
-    float getNormalizedElevation() const { return mElevation / 90.f; }
+    float getNormalizedElevation() const { return mElevation / 90.0f; }
     void setDistance(float distance);
     void setDistanceNoClip(float distance);
     float getDistance() const { return mDistance; }
@@ -67,7 +67,7 @@ public:
     void computeAzimuthElevation();
 
     void setFixedPosition(float x, float y);
-    void setFixedElevation(float const z) { mFixedElevation = 90.f - z * 90.f; }
+    void setFixedElevation(float const z) { mFixedElevation = 90.0f - z * 90.0f; }
 
     void setSymmetricX(float x, float y);
     void setSymmetricY(float x, float y);
@@ -78,12 +78,12 @@ public:
     float getDeltaX() const { return mX - mFixedX; }
     float getDeltaY() const { return mY - mFixedY; }
     float getDeltaAzimuth() const { return (mAzimuth - mFixedAzimuth); }
-    float getDeltaElevation() const { return (mElevationNoClip - mFixedElevation) / 90.f; }
+    float getDeltaElevation() const { return (mElevationNoClip - mFixedElevation) / 90.0f; }
     float getDeltaDistance() const { return (mDistance - mFixedDistance); }
 
     void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
-    void setElevationFromFixedSource(float const deltaY) { setElevation(mFixedElevation + deltaY * 90.f); }
+    void setElevationFromFixedSource(float const deltaY) { setElevation(mFixedElevation + deltaY * 90.0f); }
 
     void setColour(Colour const & col) { mColour = col; }
     Colour getColour() const { return mColour; }
@@ -96,8 +96,8 @@ private:
     float mAzimuth{};
     float mElevation{};
     float mElevationNoClip{};
-    float mDistance{ 1.f };
-    float mDistanceNoClip{ 1.f };
+    float mDistance{ 1.0f };
+    float mDistanceNoClip{ 1.0f };
     float mAzimuthSpan{};
     float mElevationSpan{};
     float mX{};
@@ -105,9 +105,9 @@ private:
 
     Colour mColour{ Colours::black };
 
-    float mFixedAzimuth{ -1.f };
-    float mFixedElevation{ -1.f };
-    float mFixedDistance{ -1.f };
+    float mFixedAzimuth{ -1.0f };
+    float mFixedElevation{ -1.0f };
+    float mFixedDistance{ -1.0f };
     float mFixedX{};
     float mFixedY{};
 };

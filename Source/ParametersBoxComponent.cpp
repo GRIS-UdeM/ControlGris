@@ -60,18 +60,18 @@ void ParametersBoxComponent::setSpanLinkState(bool const spanLinkState)
 
 void ParametersBoxComponent::mouseDown(MouseEvent const & event)
 {
-    float const x{ getWidth() - 35.f };
+    float const x{ getWidth() - 35.0f };
     float constexpr y = 15;
 
     // Area where the spanLinked arrow is shown.
-    Rectangle<float> const spanLinkedArrowArea{ 245.f, 25.f, 45.f, 25.f };
+    Rectangle<float> const spanLinkedArrowArea{ 245.0f, 25.0f, 45.0f, 25.0f };
     if (spanLinkedArrowArea.contains(event.getMouseDownPosition().toFloat())) {
         mSpanLinked = !mSpanLinked;
         repaint();
     }
 
     // Area where the selected source is shown.
-    Rectangle<float> const selectedSourceArea{ x - 5.f, y - 5.f, 30.f, 30.f };
+    Rectangle<float> const selectedSourceArea{ x - 5.0f, y - 5.0f, 30.0f, 30.0f };
     if (selectedSourceArea.contains(event.getMouseDownPosition().toFloat())) {
         mListeners.call([&](Listener & l) { l.parametersBoxSelectedSourceClicked(); });
     }
@@ -99,8 +99,8 @@ void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 
 void ParametersBoxComponent::paint(Graphics & g)
 {
-    float const x{ getWidth() - 35.f };
-    float constexpr y = 15.f;
+    float const x{ getWidth() - 35.0f };
+    float constexpr y = 15.0f;
 
     auto const * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
@@ -109,14 +109,14 @@ void ParametersBoxComponent::paint(Graphics & g)
         g.setColour(Colours::orange);
     else
         g.setColour(Colours::black);
-    g.drawArrow(Line<float>(285.f, 34.f, 245.f, 34.f), 4, 10, 10);
-    g.drawArrow(Line<float>(250.f, 34.f, 290.f, 34.f), 4, 10, 10);
+    g.drawArrow(Line<float>(285.0f, 34.0f, 245.0f, 34.0f), 4, 10, 10);
+    g.drawArrow(Line<float>(250.0f, 34.0f, 290.0f, 34.0f), 4, 10, 10);
 
     Rectangle<float> area{ x, y, 20, 20 };
     area.expand(3, 3);
-    g.setColour(Colour(.2f, .2f, .2f, 1.f));
-    g.drawEllipse(area.translated(.5f, .5f), 1.f);
-    g.setGradientFill(ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.f),
+    g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+    g.drawEllipse(area.translated(.5f, .5f), 1.0f);
+    g.setGradientFill(ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.0f),
                                      x + kSourceRadius,
                                      y + kSourceRadius,
                                      mSelectedSource->getColour().withSaturation(1.0f),
