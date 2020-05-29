@@ -36,7 +36,8 @@ void FieldComponent::setSources(Source * sources, int const numberOfSources)
     mSelectedSourceId = 0;
     mOldSelectedSourceId = 0;
     for (int i{}; i < mNumberOfSources; ++i) {
-        auto hue{ static_cast<float>(i) / mNumberOfSources + 0.577251f };
+        auto hue{ static_cast<float>(i) / mNumberOfSources
+                  + 0.577251f }; // TODO: why is the Euler–Mascheroni constant appearing here???
         if (hue > 1.0f) {
             hue -= 1.0f;
         }
@@ -116,12 +117,8 @@ Point<float> FieldComponent::xyToPos(Point<float> const & p, int const p_iwidth)
     float const half{ (p_iwidth - kSourceDiameter) / 2.0f };
 
     // Limits for the LBAP algorithm
-    float const px{ p.getX() < kSourceRadius
-                        ? kSourceRadius
-                        : p.getX() > p_iwidth - kSourceRadius ? p_iwidth - kSourceRadius : p.getX() };
-    float const py{ p.getY() < kSourceRadius
-                        ? kSourceRadius
-                        : p.getY() > p_iwidth - kSourceRadius ? p_iwidth - kSourceRadius : p.getY() };
+    float const px{ std::clamp(p.getX(), kSourceRadius, p_iwidth - kSourceRadius) };
+    float const py{ std::clamp(p.getY(), kSourceRadius, p_iwidth - kSourceRadius) };
 
     float const x{ (px - k2 - half) / half * 0.5f + 0.5f };
     float const y{ (py - k2 - half) / half * 0.5f + 0.5f };
@@ -569,10 +566,10 @@ void MainFieldComponent::mouseUp(const MouseEvent & event)
 
 Point<int> MainFieldComponent::clipRecordingPosition(Point<int> const & pos)
 {
-    int const max{ getWidth() - 10 };
+    constexpr int MAGIC{ 10 }; // TODO
 
-    Point<int> const clipped{ pos.x < 10 ? 10 : pos.x > max ? max : pos.x,
-                              pos.y < 10 ? 10 : pos.y > max ? max : pos.y };
+    int const max{ getWidth() - MAGIC };
+    Point<int> const clipped{ std::clamp(pos.x, MAGIC, max), std::clamp(pos.y, MAGIC, max) };
 
     return clipped;
 }
@@ -612,7 +609,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 
         g.setColour(Colour::fromRGB(176, 176, 228));
         g.drawLine(10 + kSourceRadius,
-                   pos.y + kSourceDiameter + lineThickness / 2,
+                   pos.y + kSourceDiameter + lineThickness / 2.0f,
                    10 + kSourceRadius,
                    height - 5,
                    lineThickness);

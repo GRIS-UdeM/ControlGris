@@ -141,7 +141,7 @@ void Source::computeAzimuthElevation()
     auto const x{ mX * 2.0f - 1.0f };
     auto const y{ mY * 2.0f - 1.0f };
     if (x != 0.0 || y != 0.0) {
-        auto ang{ atan2f(x, y) / MathConstants<float>::pi * 180.0f };
+        auto ang{ atan2f(x, y) / MathConstants<float>::halfPi * 360.0f };
         if (ang <= -180.0f) {
             ang += 360.0f;
         }
@@ -149,10 +149,10 @@ void Source::computeAzimuthElevation()
     }
     float rad{ sqrtf(x * x + y * y) };
     if (mRadiusIsElevation) { // azimuth - elevation
-        rad = rad < 0.0f ? 0.0f : rad > 1.0f ? 1.0f : rad;
+        rad = std::clamp(rad, 0.0f, 1.0f);
         mElevationNoClip = mElevation = 90.0f - rad * 90.0f;
     } else { // azimuth - distance
-        rad = rad < 0.0f ? 0.0f : rad;
+        rad = std::max(rad, 0.0f);
         mDistanceNoClip = mDistance = rad;
     }
     mChanged = true;
@@ -200,7 +200,8 @@ void Source::setFixedPosition(float const x, float const y)
         rad = std::clamp(rad, 0.0f, 1.0f);
         mFixedElevation = 90.0f - rad * 90.0f;
     } else { // azimuth - distance
-        rad = rad < 0.0f ? 0.0f : rad;
+        rad = std::max(rad, 0.0f);
+        ;
         mFixedDistance = rad;
     }
 }

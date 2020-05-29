@@ -125,8 +125,8 @@ public:
 
     void initialize();
 
-    double getInitTimeOnPlay() const { return m_initTimeOnPlay >= 0.0 ? m_initTimeOnPlay : 0.0; }
-    double getCurrentTime() const { return m_currentTime >= 0.0 ? m_currentTime : 0.0; }
+    double getInitTimeOnPlay() const { return std::max(m_initTimeOnPlay, 0.0); }
+    double getCurrentTime() const { return std::max(m_currentTime, 0.0); }
 
     bool getIsPlaying() const { return m_isPlaying; }
     double getBPM() const { return m_bpm; }

@@ -243,9 +243,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 
     mTrajectoryPoints.clear();
 
-    auto const offset{ static_cast<int>(mFieldWidth / 2.0f) };
-    auto constexpr minLim{ 8 };
-    auto const maxLim{ static_cast<int>(mFieldWidth - minLim) };
+    auto const offset{ mFieldWidth / 2.0f };
+    auto constexpr minLim{ 8.0f };
+    auto const maxLim{ mFieldWidth - minLim };
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
     float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
@@ -269,18 +269,18 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::circleClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
             x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case PositionTrajectoryType::circleCounterClockwise:
         for (int i{}; i < MAGIC_4; ++i) {
             x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5 - angle) * magnitude + offset;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -292,8 +292,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -305,8 +305,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -320,8 +320,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -335,8 +335,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -350,8 +350,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -365,8 +365,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
-            x = x < minLim ? minLim : x > maxLim ? maxLim : x;
-            y = y < minLim ? minLim : y > maxLim ? maxLim : y;
+            x = std::clamp(x, minLim, maxLim);
+            y = std::clamp(y, minLim, maxLim);
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
@@ -405,12 +405,12 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             x = x + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
             y = y + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
             Point<float> p{ x, y };
-            AffineTransform const t = AffineTransform::rotation(-angle + MathConstants<float>::pi / 4.0f,
-                                                                (mFieldWidth / 2.0f),
-                                                                (mFieldWidth / 2.0f));
+            AffineTransform const t{ AffineTransform::rotation(-angle + MathConstants<float>::pi / 4.0f,
+                                                               (mFieldWidth / 2.0f),
+                                                               (mFieldWidth / 2.0f)) };
             p.applyTransform(t);
-            p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
-            p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
+            p.x = std::clamp(p.x, minLim, maxLim);
+            p.y = std::clamp(p.y, minLim, maxLim);
             mTrajectoryPoints.add(p);
         }
         break;
@@ -443,8 +443,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             }
             Point<float> p(x * magnitude + (mFieldWidth / 2.0f), y * magnitude + (mFieldWidth / 2.0f));
             p.applyTransform(AffineTransform::rotation(-angle, (mFieldWidth / 2.0f), (mFieldWidth / 2.0f)));
-            p.x = p.x < minLim ? minLim : p.x > maxLim ? maxLim : p.x;
-            p.y = p.y < minLim ? minLim : p.y > maxLim ? maxLim : p.y;
+            p.x = std::clamp(p.x, minLim, maxLim);
+            p.y = std::clamp(p.y, minLim, maxLim);
             mTrajectoryPoints.add(p);
         }
     } break;
