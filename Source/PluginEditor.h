@@ -48,8 +48,8 @@ class ControlGrisAudioProcessorEditor final
 public:
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor &,
                                     AudioProcessorValueTreeState & vts,
-                                    AutomationManager & automan,
-                                    AutomationManager & automanAlt);
+                                    PositionAutomationManager & automan,
+                                    ElevationAutomationManager & automanAlt);
     ~ControlGrisAudioProcessorEditor() final;
 
     void paint(Graphics &) final;
@@ -116,8 +116,8 @@ private:
 
     AudioProcessorValueTreeState & valueTreeState;
 
-    AutomationManager & automationManager;
-    AutomationManager & automationManagerAlt;
+    PositionAutomationManager & automationManager;
+    ElevationAutomationManager & automationManagerAlt;
 
     BannerComponent mainBanner;
     BannerComponent elevationBanner;

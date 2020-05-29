@@ -101,7 +101,7 @@ private:
 class MainFieldComponent final : public FieldComponent
 {
 public:
-    MainFieldComponent(AutomationManager & automan);
+    MainFieldComponent(PositionAutomationManager & automan);
     ~MainFieldComponent() final = default;
 
     void createSpanPathVBAP(Graphics & g, int i) const;
@@ -118,7 +118,7 @@ public:
     void setSpatMode(SpatMode spatMode);
 
 private:
-    AutomationManager & mAutomationManager;
+    PositionAutomationManager & mAutomationManager;
 
     Point<float> degreeToXy(AngleVector<float> const & p, int p_iFieldWidth) const;
     AngleVector<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
@@ -142,7 +142,7 @@ private:
 class ElevationFieldComponent final : public FieldComponent
 {
 public:
-    ElevationFieldComponent(AutomationManager & automationManager) : mAutomationManager(automationManager) {}
+    ElevationFieldComponent(ElevationAutomationManager & automationManager) : mAutomationManager(automationManager) {}
     ~ElevationFieldComponent() final = default;
 
     void paint(Graphics & g) final;
@@ -152,7 +152,7 @@ public:
     void mouseUp(MouseEvent const & event) final;
 
 private:
-    AutomationManager & mAutomationManager;
+    ElevationAutomationManager & mAutomationManager;
     int mCurrentRecordingPositionX{};
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)

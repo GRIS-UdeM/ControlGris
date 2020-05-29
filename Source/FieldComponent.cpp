@@ -130,7 +130,7 @@ Point<float> FieldComponent::xyToPos(Point<float> const & p, int const p_iwidth)
 }
 
 //==============================================================================
-MainFieldComponent::MainFieldComponent(AutomationManager & automan) : mAutomationManager(automan)
+MainFieldComponent::MainFieldComponent(PositionAutomationManager & automan) : mAutomationManager(automan)
 {
     mSpatMode = SpatMode::VBAP;
     mLineDrawingAnchor1 = INVALID_POINT;
@@ -597,7 +597,7 @@ void ElevationFieldComponent::paint(Graphics & g)
                 == ElevationTrajectoryType::drawing
             && !mIsPlaying) {
             shouldDrawTrajectoryHandle = true;
-        } else if (mAutomationManager.getTrajectoryType() == TrajectoryType::realtime
+        } else if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::realtime
                    && static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink())
                           == ElevationSourceLink::deltaLock) {
             shouldDrawTrajectoryHandle = true;

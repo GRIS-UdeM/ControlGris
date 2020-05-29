@@ -27,8 +27,50 @@
 class AutomationManager
 {
 public:
+    struct Listener {
+        virtual ~Listener() {}
+
+        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
+    };
+
+    enum class Direction { forward, backward };
+
+protected:
+    static constexpr Point<float> INVALID_POSITION{ -1.f, -1.f };
+
+    ListenerList<Listener> mListeners;
+
+    float mFieldWidth{ MIN_FIELD_WIDTH };
+
+    SourceLink mSourceLink{ SourceLink::independent };
+
+    bool mIsBackAndForth{ false };
+    Direction mBackAndForthDirection{ Direction::forward };
+
+    int mDampeningCycles{};
+    int mDampeningCycleCount{};
+    double mDampeningLastDelta{};
+
+    bool mActivateState{ false };
+    double mPlaybackDuration{ 5.0 };
+    double mCurrentPlaybackDuration{ 5.0 };
+    Point<float> mPlaybackPosition{ INVALID_POSITION };
+
+    Source mSource{};
+
+    double mTrajectoryDeltaTime{};
+    double mLastTrajectoryDeltaTime{};
+    Array<Point<float>> mTrajectoryPoints{};
+    Point<float> mCurrentTrajectoryPoint;
+    Point<float> mLastRecordingPoint{};
+
+    float mDegreeOfDeviationPerCycle{};
+    float mCurrentDegreeOfDeviation{};
+    int mDeviationCycleCount{};
+
+public:
     AutomationManager();
-    ~AutomationManager() = default;
+    virtual ~AutomationManager() = default;
 
     double getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
@@ -57,9 +99,6 @@ public:
 
     void setSourceLink(SourceLink value) { this->mSourceLink = value; }
     SourceLink getSourceLink() const { return mSourceLink; }
-    void setTrajectoryType(TrajectoryType type, Point<float> const & startpos);
-    TrajectoryType getTrajectoryType() const { return mTrajectoryType; }
-    void setElevationTrajectoryType(ElevationTrajectoryType type);
 
     void setBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setDampeningCycles(int value) { this->mDampeningCycles = value; }
@@ -77,53 +116,12 @@ public:
 
     void setSourceAndPlaybackPosition(Point<float> pos);
 
-    void sendTrajectoryPositionChangedEvent();
-
-    struct Listener {
-        virtual ~Listener() {}
-
-        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
-    };
-
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
+    virtual void sendTrajectoryPositionChangedEvent() = 0;
+
 private:
-    static constexpr Point<float> INVALID_POSITION{ -1.f, -1.f };
-
-    enum class Direction { forward, backward };
-
-    ListenerList<Listener> mListeners;
-
-    float mFieldWidth{ MIN_FIELD_WIDTH };
-
-    SourceLink mSourceLink{ SourceLink::independent };
-    TrajectoryType mTrajectoryType{ TrajectoryType::drawing };
-
-    bool mIsBackAndForth{ false };
-    Direction mBackAndForthDirection{ Direction::forward };
-
-    int mDampeningCycles{};
-    int mDampeningCycleCount{};
-    double mDampeningLastDelta{};
-
-    bool mActivateState{ false };
-    double mPlaybackDuration{ 5.0 };
-    double mCurrentPlaybackDuration{ 5.0 };
-    Point<float> mPlaybackPosition{ INVALID_POSITION };
-
-    Source mSource{};
-
-    double mTrajectoryDeltaTime{};
-    double mLastTrajectoryDeltaTime{};
-    Array<Point<float>> mTrajectoryPoints{};
-    Point<float> mCurrentTrajectoryPoint;
-    Point<float> mLastRecordingPoint{};
-
-    float mDegreeOfDeviationPerCycle{};
-    float mCurrentDegreeOfDeviation{};
-    int mDeviationCycleCount{};
-
     void invertBackAndForthDirection()
     {
         mBackAndForthDirection
@@ -132,5 +130,37 @@ private:
     void computeCurrentTrajectoryPoint();
     Point<float> smoothRecordingPosition(Point<float> const & pos);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager);
+};
+
+class PositionAutomationManager final : public AutomationManager
+{
+    TrajectoryType mTrajectoryType{ TrajectoryType::drawing };
+
+public:
+    PositionAutomationManager() = default;
+
+    void setTrajectoryType(TrajectoryType type, Point<float> const & startpos);
+    TrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+
+    void sendTrajectoryPositionChangedEvent() final;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionAutomationManager);
+};
+
+class ElevationAutomationManager final : public AutomationManager
+{
+    ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
+
+public:
+    ElevationAutomationManager() = default;
+
+    void setTrajectoryType(ElevationTrajectoryType type);
+    ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+
+    void sendTrajectoryPositionChangedEvent() final;
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationAutomationManager);
 };

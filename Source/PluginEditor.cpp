@@ -23,8 +23,8 @@
 
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & p,
                                                                  AudioProcessorValueTreeState & vts,
-                                                                 AutomationManager & automan,
-                                                                 AutomationManager & automanAlt)
+                                                                 PositionAutomationManager & automan,
+                                                                 ElevationAutomationManager & automanAlt)
     : AudioProcessorEditor(&p)
     , processor(p)
     , valueTreeState(vts)
@@ -490,7 +490,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(Traject
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
     valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    automationManagerAlt.setElevationTrajectoryType(value);
+    automationManagerAlt.setTrajectoryType(value);
     elevationField.repaint();
 }
 

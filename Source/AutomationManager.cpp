@@ -217,10 +217,16 @@ void AutomationManager::setSourceAndPlaybackPosition(Point<float> const pos)
     setPlaybackPosition(pos);
 }
 
-void AutomationManager::sendTrajectoryPositionChangedEvent()
+void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
-    if (mActivateState || mTrajectoryType == TrajectoryType::realtime
-        || static_cast<ElevationTrajectoryType>(mTrajectoryType) == ElevationTrajectoryType::realtime) {
+    if (mActivateState || mTrajectoryType == TrajectoryType::realtime) {
+        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
+    }
+}
+
+void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
+{
+    if (mActivateState || mTrajectoryType == ElevationTrajectoryType::realtime) {
         mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
     }
 }
@@ -231,7 +237,7 @@ void AutomationManager::fixSourcePosition()
     mSource.fixSourcePosition(shouldBeFixed);
 }
 
-void AutomationManager::setTrajectoryType(TrajectoryType const type, Point<float> const & startPos)
+void PositionAutomationManager::setTrajectoryType(TrajectoryType const type, Point<float> const & startPos)
 {
     mTrajectoryType = type;
 
@@ -454,9 +460,9 @@ void AutomationManager::setTrajectoryType(TrajectoryType const type, Point<float
     }
 }
 
-void AutomationManager::setElevationTrajectoryType(ElevationTrajectoryType const type)
+void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
 {
-    mTrajectoryType = static_cast<TrajectoryType>(type);
+    mTrajectoryType = type;
 
     mTrajectoryPoints.clear();
 

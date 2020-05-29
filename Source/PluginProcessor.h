@@ -157,8 +157,8 @@ public:
     //==============================================================================
     AudioProcessorValueTreeState parameters;
 
-    AutomationManager automationManager;
-    AutomationManager automationManagerAlt;
+    PositionAutomationManager automationManager;
+    ElevationAutomationManager automationManagerAlt;
 
 private:
     SpatMode m_selectedOscFormat;
