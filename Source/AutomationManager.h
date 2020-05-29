@@ -24,6 +24,7 @@
 #include "ControlGrisConstants.h"
 #include "Source.h"
 
+//==============================================================================
 class AutomationManager
 {
 public:
@@ -32,12 +33,13 @@ public:
 
         virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
     };
-
+    //==============================================================================
     enum class Direction { forward, backward };
 
 protected:
+    //==============================================================================
     static constexpr Point<float> INVALID_POSITION{ -1.0f, -1.0f };
-
+    //==============================================================================
     ListenerList<Listener> mListeners;
 
     float mFieldWidth{ MIN_FIELD_WIDTH };
@@ -69,9 +71,10 @@ protected:
     int mDeviationCycleCount{};
 
 public:
+    //==============================================================================
     AutomationManager();
     virtual ~AutomationManager() = default;
-
+    //==============================================================================
     double getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
 
@@ -122,6 +125,7 @@ public:
     virtual void sendTrajectoryPositionChangedEvent() = 0;
 
 private:
+    //==============================================================================
     void invertBackAndForthDirection()
     {
         mBackAndForthDirection
@@ -129,38 +133,44 @@ private:
     }
     void computeCurrentTrajectoryPoint();
     Point<float> smoothRecordingPosition(Point<float> const & pos);
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager);
 };
 
+//==============================================================================
 class PositionAutomationManager final : public AutomationManager
 {
     PositionTrajectoryType mTrajectoryType{ PositionTrajectoryType::drawing };
 
 public:
+    //==============================================================================
     PositionAutomationManager() = default;
-
+    //==============================================================================
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
     PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
     void sendTrajectoryPositionChangedEvent() final;
 
 private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionAutomationManager);
 };
 
+//==============================================================================
 class ElevationAutomationManager final : public AutomationManager
 {
     ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
 
 public:
+    //==============================================================================
     ElevationAutomationManager() = default;
-
+    //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
     void sendTrajectoryPositionChangedEvent() final;
 
 private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationAutomationManager);
 };

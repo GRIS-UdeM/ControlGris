@@ -38,15 +38,20 @@ constexpr Float degreeToRadian(Float const degree)
     return (degree / static_cast<Float>(360.0) * MathConstants<Float>::twoPi);
 }
 
+//==============================================================================
 class XmlElementDataSorter
 {
+    String attributeToSort;
+    int direction;
+
 public:
+    //==============================================================================
     XmlElementDataSorter(String const & attributeToSortBy, bool forwards)
         : attributeToSort(attributeToSortBy)
         , direction(forwards ? 1 : -1)
     {
     }
-
+    //==============================================================================
     int compareElements(XmlElement * first, XmlElement * second) const
     {
         int result;
@@ -59,8 +64,4 @@ public:
 
         return direction * result;
     }
-
-private:
-    String attributeToSort;
-    int direction;
 };

@@ -19,20 +19,20 @@
  *************************************************************************/
 #pragma once
 
+//==============================================================================
 // Global variables.
-//------------------
 constexpr int MIN_FIELD_WIDTH = 300;
 constexpr int MAX_NUMBER_OF_SOURCES = 8;
 constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 
+//==============================================================================
 // Spatialisation modes.
-//----------------------
 enum class SpatMode { VBAP, LBAP };
 
 String const WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
 
+//==============================================================================
 // Configuration -> Source tab -> Source Placement popup choices.
-//---------------------------------------------------------------
 enum class SourcePlacement {
     undefined,
     leftAlternate,
@@ -49,8 +49,8 @@ StringArray const SOURCE_PLACEMENT_SKETCH{ String("Left Alternate"),  String("Ri
                                            String("Right Clockwise"), String("Right Counter Clockwise"),
                                            String("Top Clockwise"),   String("Top Counter Clockwise") };
 
+//==============================================================================
 // Trajectories -> Source Link popup choices.
-//-------------------------------------------
 enum class PositionSourceLink {
     undefined,
     independent,
@@ -74,8 +74,8 @@ StringArray const ELEVATION_SOURCE_LINK_TYPES{ String("Independent"),
                                                String("Linear Max"),
                                                String("Delta Lock") };
 
+//==============================================================================
 // Trajectories -> Trajectory Type popup choices.
-//-----------------------------------------------
 enum class PositionTrajectoryType {
     undefined,
     realtime,
@@ -114,8 +114,8 @@ StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
                                                    String("Up Down"),
                                                    String("Down Up") };
 
+//==============================================================================
 // Fix position data headers.
-//---------------------------
 StringArray const FIXED_POSITION_DATA_HEADERS{
     // TODO: is this usefull?
     String("ID"),   String("S1_X"), String("S1_Y"), String("S1_Z"), String("S2_X"), String("S2_Y"), String("S2_Z"),

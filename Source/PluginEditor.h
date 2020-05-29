@@ -34,6 +34,7 @@
 #include "SourceBoxComponent.h"
 #include "TrajectoryBoxComponent.h"
 
+//==============================================================================
 class ControlGrisAudioProcessorEditor final
     : public AudioProcessorEditor
     , private Value::Listener
@@ -45,13 +46,51 @@ class ControlGrisAudioProcessorEditor final
     , public InterfaceBoxComponent::Listener
     , public PositionPresetComponent::Listener
 {
+private:
+    //==============================================================================
+    ControlGrisAudioProcessor & processor;
+
+    GrisLookAndFeel grisLookAndFeel;
+
+    AudioProcessorValueTreeState & valueTreeState;
+
+    PositionAutomationManager & mPositionAutomationManager;
+    ElevationAutomationManager & mElevationAutomationManager;
+
+    BannerComponent mainBanner;
+    BannerComponent elevationBanner;
+    BannerComponent trajectoryBanner;
+    BannerComponent settingsBanner;
+    BannerComponent positionPresetBanner;
+
+    MainFieldComponent mPositionField;
+    ElevationFieldComponent mElevationField;
+
+    ParametersBoxComponent parametersBox;
+
+    TrajectoryBoxComponent trajectoryBox;
+
+    TabbedComponent configurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
+
+    SettingsBoxComponent settingsBox;
+    SourceBoxComponent sourceBox;
+    InterfaceBoxComponent interfaceBox;
+
+    PositionPresetComponent positionPresetBox;
+
+    bool m_isInsideSetPluginState;
+    int m_selectedSource;
+
+    Value lastUIWidth, lastUIHeight;
+
 public:
+    //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     AudioProcessorValueTreeState & vts,
                                     PositionAutomationManager & positionAutomationManager,
                                     ElevationAutomationManager & elevationAutomationManager);
     ~ControlGrisAudioProcessorEditor() final;
-
+    //==============================================================================
     void paint(Graphics &) final;
     void resized() final;
     void valueChanged(Value &) final;
@@ -110,40 +149,6 @@ public:
     void refresh();
 
 private:
-    ControlGrisAudioProcessor & processor;
-
-    GrisLookAndFeel grisLookAndFeel;
-
-    AudioProcessorValueTreeState & valueTreeState;
-
-    PositionAutomationManager & mPositionAutomationManager;
-    ElevationAutomationManager & mElevationAutomationManager;
-
-    BannerComponent mainBanner;
-    BannerComponent elevationBanner;
-    BannerComponent trajectoryBanner;
-    BannerComponent settingsBanner;
-    BannerComponent positionPresetBanner;
-
-    MainFieldComponent mPositionField;
-    ElevationFieldComponent mElevationField;
-
-    ParametersBoxComponent parametersBox;
-
-    TrajectoryBoxComponent trajectoryBox;
-
-    TabbedComponent configurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
-
-    SettingsBoxComponent settingsBox;
-    SourceBoxComponent sourceBox;
-    InterfaceBoxComponent interfaceBox;
-
-    PositionPresetComponent positionPresetBox;
-
-    bool m_isInsideSetPluginState;
-    int m_selectedSource;
-
-    Value lastUIWidth, lastUIHeight;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
 };

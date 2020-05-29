@@ -20,27 +20,17 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
+//==============================================================================
 class ParametersBoxComponent final
     : public Component
     , public Slider::Listener
 {
 public:
-    ParametersBoxComponent();
-    ~ParametersBoxComponent() final = default;
-
-    void mouseDown(MouseEvent const & event) final;
-    void sliderValueChanged(Slider * slider) final;
-    void paint(Graphics &) final;
-    void resized() final;
-
-    void setSelectedSource(Source * source);
-    void setDistanceEnabled(bool distanceEnabled);
-    void setSpanLinkState(bool spanLinkState);
-    bool getSpanLinkState() const { return mSpanLinked; }
-
+    //==============================================================================
     struct Listener {
         virtual ~Listener() {}
 
@@ -48,10 +38,8 @@ public:
         virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
     };
 
-    void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
-
 private:
+    //==============================================================================
     ListenerList<Listener> mListeners;
 
     bool mDistanceEnabled{ false };
@@ -64,5 +52,25 @@ private:
     Slider mAzimuthSpan{};
     Slider mElevationSpan{};
 
+public:
+    //==============================================================================
+    ParametersBoxComponent();
+    ~ParametersBoxComponent() final = default;
+    //==============================================================================
+    void mouseDown(MouseEvent const & event) final;
+    void sliderValueChanged(Slider * slider) final;
+    void paint(Graphics &) final;
+    void resized() final;
+
+    void setSelectedSource(Source * source);
+    void setDistanceEnabled(bool distanceEnabled);
+    void setSpanLinkState(bool spanLinkState);
+    bool getSpanLinkState() const { return mSpanLinked; }
+
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
+
+private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
 };

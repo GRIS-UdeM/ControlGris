@@ -24,12 +24,31 @@
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
 
+//==============================================================================
 class PresetButton final : public TextButton
 {
 public:
+    //==============================================================================
+    struct Listener {
+        virtual ~Listener() {}
+
+        virtual void buttonClicked(PresetButton * button) = 0;
+        virtual void savingPresetClicked(PresetButton * button) = 0;
+        virtual void deletingPresetClicked(PresetButton * button) = 0;
+    };
+
+private:
+    //==============================================================================
+    ListenerList<Listener> mListeners{};
+
+    bool mSaved{ false };
+    bool mLoaded{ false };
+
+public:
+    //==============================================================================
     PresetButton() = default;
     ~PresetButton() final = default;
-
+    //==============================================================================
     void setSavedState(bool savedState);
     void setLoadedState(bool loadedState);
     void refresh();
@@ -39,24 +58,12 @@ public:
 
     bool isSaved() const { return mSaved; }
 
-    struct Listener {
-        virtual ~Listener() {}
-
-        virtual void buttonClicked(PresetButton * button) = 0;
-        virtual void savingPresetClicked(PresetButton * button) = 0;
-        virtual void deletingPresetClicked(PresetButton * button) = 0;
-    };
-
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> mListeners{};
-
-    bool mSaved{ false };
-    bool mLoaded{ false };
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetButton)
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetButton);
 };
 
 //================================================================================
@@ -65,9 +72,30 @@ class PositionPresetComponent final
     , private PresetButton::Listener
 {
 public:
+    //==============================================================================
+    struct Listener {
+        virtual ~Listener() {}
+        virtual void positionPresetChanged(int presetNumber) = 0;
+        virtual void positionPresetSaved(int presetNumber) = 0;
+        virtual void positionPresetDeleted(int presetNumber) = 0;
+    };
+
+private:
+    //==============================================================================
+    ListenerList<Listener> mListeners{};
+
+    OwnedArray<PresetButton> mPresets{};
+
+    int mCurrentSelection{ -1 };
+
+    Label mActionLog{};
+    Label mAppVersionLabel{};
+
+public:
+    //==============================================================================
     PositionPresetComponent();
     ~PositionPresetComponent() final { this->setLookAndFeel(nullptr); }
-
+    //==============================================================================
     void paint(Graphics & g) final { g.fillAll(Colour::fromRGB(64, 64, 64)); }
     void resized() final;
 
@@ -78,25 +106,10 @@ public:
     void setPreset(int value, bool notify = false);
     void presetSaved(int presetNumber, bool isSaved);
 
-    struct Listener {
-        virtual ~Listener() {}
-        virtual void positionPresetChanged(int presetNumber) = 0;
-        virtual void positionPresetSaved(int presetNumber) = 0;
-        virtual void positionPresetDeleted(int presetNumber) = 0;
-    };
-
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> mListeners{};
-
-    OwnedArray<PresetButton> mPresets{};
-
-    int mCurrentSelection{ -1 };
-
-    Label mActionLog{};
-    Label mAppVersionLabel{};
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionPresetComponent)
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionPresetComponent);
 };

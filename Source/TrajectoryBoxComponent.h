@@ -24,36 +24,11 @@
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
 
+//==============================================================================
 class TrajectoryBoxComponent final : public Component
 {
 public:
-    TrajectoryBoxComponent();
-    ~TrajectoryBoxComponent() final;
-
-    void paint(Graphics &) final;
-    void resized() final;
-
-    void setNumberOfSources(int numOfSources);
-    void setSpatMode(SpatMode spatMode);
-    void setTrajectoryType(int type);
-    void setElevationTrajectoryType(int type);
-    void setPositionBackAndForth(bool state);
-    void setElevationBackAndForth(bool state);
-    void setPositionDampeningEnabled(bool state);
-    void setElevationDampeningEnabled(bool state);
-    void setPositionDampeningCycles(int value);
-    void setElevationDampeningCycles(int value);
-    void setPostionSourceLink(PositionSourceLink value);
-    void setElevationSourceLink(ElevationSourceLink value);
-    void setCycleDuration(double value);
-    void setDurationUnit(int value);
-    void setDeviationPerCycle(float value);
-
-    bool getPositionActivateState() const { return mPositionActivateButton.getToggleState(); }
-    bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
-    void setPositionActivateState(bool state);
-    void setElevationActivateState(bool state);
-
+    //==============================================================================
     struct Listener {
         virtual ~Listener() {}
 
@@ -72,13 +47,8 @@ public:
         virtual void trajectoryBoxElevationActivateChanged(bool value) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
-
-    ComboBox mPositionSourceLinkCombo;
-    ComboBox mElevationSourceLinkCombo;
-
 private:
+    //==============================================================================
     ListenerList<Listener> listeners;
 
     SpatMode m_spatMode;
@@ -109,5 +79,42 @@ private:
     TextButton mPositionActivateButton;
     TextButton mElevationActivateButton;
 
+public:
+    //==============================================================================
+    TrajectoryBoxComponent();
+    ~TrajectoryBoxComponent() final;
+    //==============================================================================
+    void paint(Graphics &) final;
+    void resized() final;
+
+    void setNumberOfSources(int numOfSources);
+    void setSpatMode(SpatMode spatMode);
+    void setTrajectoryType(int type);
+    void setElevationTrajectoryType(int type);
+    void setPositionBackAndForth(bool state);
+    void setElevationBackAndForth(bool state);
+    void setPositionDampeningEnabled(bool state);
+    void setElevationDampeningEnabled(bool state);
+    void setPositionDampeningCycles(int value);
+    void setElevationDampeningCycles(int value);
+    void setPostionSourceLink(PositionSourceLink value);
+    void setElevationSourceLink(ElevationSourceLink value);
+    void setCycleDuration(double value);
+    void setDurationUnit(int value);
+    void setDeviationPerCycle(float value);
+
+    bool getPositionActivateState() const { return mPositionActivateButton.getToggleState(); }
+    bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
+    void setPositionActivateState(bool state);
+    void setElevationActivateState(bool state);
+
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
+
+    ComboBox mPositionSourceLinkCombo;
+    ComboBox mElevationSourceLinkCombo;
+
+private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrajectoryBoxComponent)
 };

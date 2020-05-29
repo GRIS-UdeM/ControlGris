@@ -21,6 +21,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//==============================================================================
 class GrisLookAndFeel final : public LookAndFeel_V3
 {
 private:
@@ -40,6 +41,7 @@ private:
     Colour onColor, onColorOver, onColorDown, offColor, greenColor, redColor;
 
 public:
+    //==============================================================================
     GrisLookAndFeel()
     {
         this->backGroundAndFieldColour = Colour::fromRGB(75, 75, 75); // Colours::darkgrey;

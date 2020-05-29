@@ -23,27 +23,12 @@
 
 #include "GrisLookAndFeel.h"
 
+//==============================================================================
 class InterfaceBoxComponent final
     : public Component
     , public TextEditor::Listener
 {
 public:
-    InterfaceBoxComponent();
-    ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
-
-    void textEditorReturnKeyPressed([[maybe_unused]] TextEditor & editor) final { unfocusAllComponents(); }
-    void paint(Graphics &) final;
-    void resized() final;
-
-    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(String(id)); }
-
-    void setOscReceiveToggleState(bool const state);
-    void setOscReceiveInputPort(int port);
-
-    void setOscSendToggleState(bool const state);
-    void setOscSendOutputAddress(String const & address);
-    void setOscSendOutputPort(int port);
-
     struct Listener {
         virtual ~Listener() {}
 
@@ -52,10 +37,8 @@ public:
         virtual void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) = 0;
     };
 
-    void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
-
 private:
+    //==============================================================================
     ListenerList<Listener> mListeners{};
 
     ToggleButton mOscReceiveToggle{};
@@ -73,5 +56,28 @@ private:
     int mLastOscSendPort{ 8000 };
     String mLastOscSendAddress{};
 
+public:
+    //==============================================================================
+    InterfaceBoxComponent();
+    ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
+    //==============================================================================
+    void textEditorReturnKeyPressed([[maybe_unused]] TextEditor & editor) final { unfocusAllComponents(); }
+    void paint(Graphics &) final;
+    void resized() final;
+
+    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(String(id)); }
+
+    void setOscReceiveToggleState(bool const state);
+    void setOscReceiveInputPort(int port);
+
+    void setOscSendToggleState(bool const state);
+    void setOscSendOutputAddress(String const & address);
+    void setOscSendOutputPort(int port);
+
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
+
+private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InterfaceBoxComponent)
 };

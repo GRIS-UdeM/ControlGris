@@ -28,6 +28,7 @@
 #include "SettingsBoxComponent.h"
 #include "Source.h"
 
+//==============================================================================
 // This file defines the classes that implement the 2D view (azimuth-elevation
 // or azimuth-distance) and the elevation view.
 //
@@ -40,9 +41,9 @@
 //                        algorithm.
 //   ElevationFieldComponent : The 1D view used to show and control the elevation
 //                             parameter for the LBAP algorithm.
-
 //==============================================================================
 
+//==============================================================================
 template<typename Float>
 struct AngleVector {
     static_assert(std::is_floating_point_v<Float>);
@@ -53,35 +54,22 @@ struct AngleVector {
     Float distance;
 };
 
+//==============================================================================
 class FieldComponent : public Component
 {
 public:
-    FieldComponent() = default;
-    ~FieldComponent() override { setLookAndFeel(nullptr); }
-
-    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
-
-    Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;
-    Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
-
-    void setSources(Source * sources, int numberOfSources);
-    void setSelectedSource(int selectedId);
-
-    void setIsPlaying(bool const state) { mIsPlaying = state; }
-
+    //==============================================================================
     struct Listener {
         virtual ~Listener() = default;
 
         virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
     };
-
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
-
+    //==============================================================================
     ListenerList<Listener> listeners{};
 
 protected:
+    //==============================================================================
     static constexpr Point<float> INVALID_POINT{ -1.0f, -1.0f };
     static constexpr int TRAJECTORY_HANDLE_SOURCE_ID = -1;
     static constexpr int NO_SELECTION_SOURCE_ID = -2;
@@ -93,17 +81,45 @@ protected:
     int mSelectedSourceId{};
     int mOldSelectedSourceId{};
 
+public:
+    //==============================================================================
+    FieldComponent() = default;
+    ~FieldComponent() override { setLookAndFeel(nullptr); }
+    //==============================================================================
+    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
+
+    Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;
+    Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
+
+    void setSources(Source * sources, int numberOfSources);
+    void setSelectedSource(int selectedId);
+
+    void setIsPlaying(bool const state) { mIsPlaying = state; }
+
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
+
 private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponent)
 };
 
 //==============================================================================
 class MainFieldComponent final : public FieldComponent
 {
+    PositionAutomationManager & mAutomationManager;
+
+    SpatMode mSpatMode;
+
+    bool mShowCircularSourceSelectionWarning{ false };
+
+    Point<float> mLineDrawingAnchor1;
+    Point<float> mLineDrawingAnchor2;
+
 public:
     MainFieldComponent(PositionAutomationManager & automan);
     ~MainFieldComponent() final = default;
-
+    //==============================================================================
     void createSpanPathVBAP(Graphics & g, int i) const;
     void createSpanPathLBAP(Graphics & g, int i) const;
     void drawTrajectoryHandle(Graphics &) const;
@@ -118,8 +134,7 @@ public:
     void setSpatMode(SpatMode spatMode);
 
 private:
-    PositionAutomationManager & mAutomationManager;
-
+    //==============================================================================
     Point<float> degreeToXy(AngleVector<float> const & p, int p_iFieldWidth) const;
     AngleVector<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
 
@@ -128,26 +143,24 @@ private:
     bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1 != INVALID_POINT; }
     bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2 != INVALID_POINT; }
 
-    SpatMode mSpatMode;
-
-    bool mShowCircularSourceSelectionWarning{ false };
-
-    Point<float> mLineDrawingAnchor1;
-    Point<float> mLineDrawingAnchor2;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainFieldComponent)
 };
 
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
 {
+    ElevationAutomationManager & mAutomationManager;
+    int mCurrentRecordingPositionX{};
+
 public:
+    //==============================================================================
     ElevationFieldComponent(ElevationAutomationManager & mPositionAutomationManager)
         : mAutomationManager(mPositionAutomationManager)
     {
     }
     ~ElevationFieldComponent() final = default;
-
+    //==============================================================================
     void paint(Graphics & g) final;
 
     void mouseDown(MouseEvent const & event) final;
@@ -155,8 +168,6 @@ public:
     void mouseUp(MouseEvent const & event) final;
 
 private:
-    ElevationAutomationManager & mAutomationManager;
-    int mCurrentRecordingPositionX{};
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
 };

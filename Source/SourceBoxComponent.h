@@ -25,18 +25,11 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
+//==============================================================================
 class SourceBoxComponent final : public Component
 {
 public:
-    SourceBoxComponent();
-    ~SourceBoxComponent() final;
-
-    void paint(Graphics &) final;
-    void resized() final;
-
-    void setNumberOfSources(int numOfSources, int firstSourceId);
-    void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
-
+    //==============================================================================
     struct Listener {
         virtual ~Listener() {}
 
@@ -45,10 +38,8 @@ public:
         virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
-
 private:
+    //==============================================================================
     ListenerList<Listener> listeners;
 
     int selectedSourceNumber;
@@ -67,5 +58,21 @@ private:
     Label angleLabel;
     Slider angleSlider;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent)
+public:
+    //==============================================================================
+    SourceBoxComponent();
+    ~SourceBoxComponent() final;
+    //==============================================================================
+    void paint(Graphics &) final;
+    void resized() final;
+
+    void setNumberOfSources(int numOfSources, int firstSourceId);
+    void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
+
+    void addListener(Listener * l) { listeners.add(l); }
+    void removeListener(Listener * l) { listeners.remove(l); }
+
+private:
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent);
 };

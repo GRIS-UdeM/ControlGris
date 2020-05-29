@@ -20,11 +20,13 @@
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "AutomationManager.h"
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
 #include "Source.h"
 
+//==============================================================================
 class ControlGrisAudioProcessor final
     : public AudioProcessor
     , public AudioProcessorValueTreeState::Listener
@@ -32,11 +34,62 @@ class ControlGrisAudioProcessor final
     , public Timer
     , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
+private:
+    //==============================================================================
+    SpatMode m_selectedOscFormat;
+    bool m_oscConnected;
+    bool m_oscInputConnected;
+    bool m_oscOutputConnected;
+    int m_firstSourceId;
+    int m_numOfSources;
+    int m_selectedSourceId;
+    int m_currentOSCPort;
+    int m_lastConnectedOSCPort;
+    int m_currentOSCInputPort;
+    int m_currentOSCOutputPort;
+    String m_currentOSCOutputAddress;
+    bool m_needInitialization;
+
+    double m_initTimeOnPlay;
+    double m_currentTime;
+    double m_lastTime;
+    double m_lastTimerTime;
+
+    bool m_isPlaying;
+    bool m_canStopActivate;
+    double m_bpm;
+
+    int m_currentPositionPreset;
+    int m_newPositionPreset;
+
+    // Filtering variables for OSC controller output.
+    int m_lastPositionPreset;
+    float m_lastTrajectory1x;
+    float m_lastTrajectory1y;
+    float m_lastTrajectory1z;
+    float m_lastAzispan;
+    float m_lastElespan;
+    PositionSourceLink m_lastSourceLink;
+    ElevationSourceLink m_lastElevationSourceLink;
+
+    Source sources[MAX_NUMBER_OF_SOURCES];
+
+    OSCSender oscSender;
+    OSCSender oscOutputSender;
+    OSCReceiver oscInputReceiver;
+
+    XmlElement fixPositionData;
+    XmlElement * currentFixPosition = nullptr;
+
 public:
+    //==============================================================================
+    AudioProcessorValueTreeState parameters;
+
+    PositionAutomationManager mPositionAutomationManager;
+    ElevationAutomationManager mElevationAutomationManager;
     //==============================================================================
     ControlGrisAudioProcessor();
     ~ControlGrisAudioProcessor() final;
-
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) final;
     void releaseResources() final;
@@ -154,57 +207,7 @@ public:
     XmlElement const * getFixedPositionData() const { return &fixPositionData; }
     void deleteFixedPosition(int id);
 
-    //==============================================================================
-    AudioProcessorValueTreeState parameters;
-
-    PositionAutomationManager mPositionAutomationManager;
-    ElevationAutomationManager mElevationAutomationManager;
-
 private:
-    SpatMode m_selectedOscFormat;
-    bool m_oscConnected;
-    bool m_oscInputConnected;
-    bool m_oscOutputConnected;
-    int m_firstSourceId;
-    int m_numOfSources;
-    int m_selectedSourceId;
-    int m_currentOSCPort;
-    int m_lastConnectedOSCPort;
-    int m_currentOSCInputPort;
-    int m_currentOSCOutputPort;
-    String m_currentOSCOutputAddress;
-    bool m_needInitialization;
-
-    double m_initTimeOnPlay;
-    double m_currentTime;
-    double m_lastTime;
-    double m_lastTimerTime;
-
-    bool m_isPlaying;
-    bool m_canStopActivate;
-    double m_bpm;
-
-    int m_currentPositionPreset;
-    int m_newPositionPreset;
-
-    // Filtering variables for OSC controller output.
-    int m_lastPositionPreset;
-    float m_lastTrajectory1x;
-    float m_lastTrajectory1y;
-    float m_lastTrajectory1z;
-    float m_lastAzispan;
-    float m_lastElespan;
-    PositionSourceLink m_lastSourceLink;
-    ElevationSourceLink m_lastElevationSourceLink;
-
-    Source sources[MAX_NUMBER_OF_SOURCES];
-
-    OSCSender oscSender;
-    OSCSender oscOutputSender;
-    OSCReceiver oscInputReceiver;
-
-    XmlElement fixPositionData;
-    XmlElement * currentFixPosition = nullptr;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessor)
 };

@@ -21,17 +21,44 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
-
+//==============================================================================
 constexpr float kSourceRadius = 12.0f;
 constexpr float kSourceDiameter = kSourceRadius * 2.0f;
 
+//==============================================================================
 class Source
 {
+private:
+    //==============================================================================
+    int mId{};
+    bool mChanged{ false };
+    bool mRadiusIsElevation{ true };
+
+    float mAzimuth{};
+    float mElevation{};
+    float mElevationNoClip{};
+    float mDistance{ 1.0f };
+    float mDistanceNoClip{ 1.0f };
+    float mAzimuthSpan{};
+    float mElevationSpan{};
+    float mX{};
+    float mY{};
+
+    Colour mColour{ Colours::black };
+
+    float mFixedAzimuth{ -1.0f };
+    float mFixedElevation{ -1.0f };
+    float mFixedDistance{ -1.0f };
+    float mFixedX{};
+    float mFixedY{};
+
 public:
+    //==============================================================================
     Source() = default;
     ~Source() = default;
-
+    //==============================================================================
     void setId(int const id) { mId = id; }
     int getId() const { return mId; }
 
@@ -89,25 +116,6 @@ public:
     Colour getColour() const { return mColour; }
 
 private:
-    int mId{};
-    bool mChanged{ false };
-    bool mRadiusIsElevation{ true };
-
-    float mAzimuth{};
-    float mElevation{};
-    float mElevationNoClip{};
-    float mDistance{ 1.0f };
-    float mDistanceNoClip{ 1.0f };
-    float mAzimuthSpan{};
-    float mElevationSpan{};
-    float mX{};
-    float mY{};
-
-    Colour mColour{ Colours::black };
-
-    float mFixedAzimuth{ -1.0f };
-    float mFixedElevation{ -1.0f };
-    float mFixedDistance{ -1.0f };
-    float mFixedX{};
-    float mFixedY{};
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Source);
 };
