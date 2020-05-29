@@ -19,7 +19,6 @@
  *************************************************************************/
 #pragma once
 
-#include <cmath>
 #include <type_traits>
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -41,27 +40,29 @@ constexpr Float degreeToRadian(Float const degree)
 //==============================================================================
 class XmlElementDataSorter
 {
-    String attributeToSort;
-    int direction;
+private:
+    //==============================================================================
+    String mAttributeToSort{};
+    int mDirection{};
 
 public:
     //==============================================================================
     XmlElementDataSorter(String const & attributeToSortBy, bool forwards)
-        : attributeToSort(attributeToSortBy)
-        , direction(forwards ? 1 : -1)
+        : mAttributeToSort(attributeToSortBy)
+        , mDirection(forwards ? 1 : -1)
     {
     }
     //==============================================================================
     int compareElements(XmlElement * first, XmlElement * second) const
     {
         int result;
-        if (first->getDoubleAttribute(attributeToSort) < second->getDoubleAttribute(attributeToSort))
+        if (first->getDoubleAttribute(mAttributeToSort) < second->getDoubleAttribute(mAttributeToSort))
             result = -1;
-        else if (first->getDoubleAttribute(attributeToSort) > second->getDoubleAttribute(attributeToSort))
+        else if (first->getDoubleAttribute(mAttributeToSort) > second->getDoubleAttribute(mAttributeToSort))
             result = 1;
         else
             result = 0;
 
-        return direction * result;
+        return mDirection * result;
     }
 };

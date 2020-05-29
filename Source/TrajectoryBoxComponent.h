@@ -49,37 +49,40 @@ public:
 
 private:
     //==============================================================================
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners;
 
-    SpatMode m_spatMode;
+    SpatMode mSpatMode;
 
-    Label sourceLinkLabel;
+    Label mSourceLinkLabel;
 
-    Label trajectoryTypeLabel;
+    Label mTrajectoryTypeLabel;
     ComboBox mPositionTrajectoryTypeCombo;
     ComboBox mElevationTracjectoryTypeCombo;
 
     ToggleButton mPositionBackAndForthToggle;
     ToggleButton mElevationBackAndForthToggle;
 
-    Label dampeningLabel;
+    Label mDampeningLabel;
     TextEditor mPositionDampeningEditor;
     TextEditor mElevationDampeningEditor;
 
-    Label deviationLabel;
-    TextEditor deviationEditor;
+    Label mDeviationLabel;
+    TextEditor mDeviationEditor;
 
-    Label durationLabel;
-    TextEditor durationEditor;
-    ComboBox durationUnitCombo;
+    Label mDurationLabel;
+    TextEditor mDurationEditor;
+    ComboBox mDurationUnitCombo;
 
-    Label cycleSpeedLabel;
-    Slider cycleSpeedSlider;
+    Label mCycleSpeedLabel;
+    Slider mCycleSpeedSlider;
 
     TextButton mPositionActivateButton;
     TextButton mElevationActivateButton;
 
 public:
+    //==============================================================================
+    ComboBox mPositionSourceLinkCombo;
+    ComboBox mElevationSourceLinkCombo;
     //==============================================================================
     TrajectoryBoxComponent();
     ~TrajectoryBoxComponent() final;
@@ -108,11 +111,8 @@ public:
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
-
-    ComboBox mPositionSourceLinkCombo;
-    ComboBox mElevationSourceLinkCombo;
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

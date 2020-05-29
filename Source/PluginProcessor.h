@@ -36,54 +36,54 @@ class ControlGrisAudioProcessor final
 {
 private:
     //==============================================================================
-    SpatMode m_selectedOscFormat;
-    bool m_oscConnected;
-    bool m_oscInputConnected;
-    bool m_oscOutputConnected;
-    int m_firstSourceId;
-    int m_numOfSources;
-    int m_selectedSourceId;
-    int m_currentOSCPort;
-    int m_lastConnectedOSCPort;
-    int m_currentOSCInputPort;
-    int m_currentOSCOutputPort;
-    String m_currentOSCOutputAddress;
-    bool m_needInitialization;
+    SpatMode mSelectedOscFormat;
+    bool mOscConnected;
+    bool mOscInputConnected;
+    bool mOscOutputConnected;
+    int mFirstSourceId;
+    int mNumOfSources;
+    int mSelectedSourceId;
+    int mCurrentOSCPort;
+    int mLastConnectedOSCPort;
+    int mCurrentOSCInputPort;
+    int mCurrentOSCOutputPort;
+    String mCurrentOSCOutputAddress;
+    bool mNeedsInitialization;
 
-    double m_initTimeOnPlay;
-    double m_currentTime;
-    double m_lastTime;
-    double m_lastTimerTime;
+    double mInitTimeOnPlay;
+    double mCurrentTime;
+    double mLastTime;
+    double mLastTimerTime;
 
-    bool m_isPlaying;
-    bool m_canStopActivate;
-    double m_bpm;
+    bool mIsPlaying;
+    bool mCanStopActivate;
+    double mBpm;
 
-    int m_currentPositionPreset;
-    int m_newPositionPreset;
+    int mCurrentPositionPreset;
+    int mNewPositionPreset;
 
     // Filtering variables for OSC controller output.
-    int m_lastPositionPreset;
-    float m_lastTrajectory1x;
-    float m_lastTrajectory1y;
-    float m_lastTrajectory1z;
-    float m_lastAzispan;
-    float m_lastElespan;
-    PositionSourceLink m_lastSourceLink;
-    ElevationSourceLink m_lastElevationSourceLink;
+    int mLastPositionPreset;
+    float mLastTrajectory1x;
+    float mLastTrajectory1y;
+    float mLastTrajectory1z;
+    float mLastAzispan;
+    float mLastElespan;
+    PositionSourceLink mLastSourceLink;
+    ElevationSourceLink mLastElevationSourceLink;
 
-    Source sources[MAX_NUMBER_OF_SOURCES];
+    Source mSources[MAX_NUMBER_OF_SOURCES];
 
-    OSCSender oscSender;
-    OSCSender oscOutputSender;
-    OSCReceiver oscInputReceiver;
+    OSCSender mOscSender;
+    OSCSender mOscOutputSender;
+    OSCReceiver mOscInputReceiver;
 
-    XmlElement fixPositionData;
-    XmlElement * currentFixPosition = nullptr;
+    XmlElement mFixPositionData;
+    XmlElement * mCurrentFixPosition{ nullptr };
 
 public:
     //==============================================================================
-    AudioProcessorValueTreeState parameters;
+    AudioProcessorValueTreeState mParameters;
 
     PositionAutomationManager mPositionAutomationManager;
     ElevationAutomationManager mElevationAutomationManager;
@@ -132,38 +132,38 @@ public:
 
     //==============================================================================
     void setOscFormat(SpatMode oscFormat);
-    SpatMode getOscFormat() const { return m_selectedOscFormat; }
+    SpatMode getOscFormat() const { return mSelectedOscFormat; }
 
     void setOscPortNumber(int oscPortNumber);
-    int getOscPortNumber() const { return m_currentOSCPort; }
+    int getOscPortNumber() const { return mCurrentOSCPort; }
 
     void setFirstSourceId(int firstSourceId, bool propagate = true);
-    int getFirstSourceId() const { return m_firstSourceId; }
+    int getFirstSourceId() const { return mFirstSourceId; }
 
     void setSelectedSourceId(int id);
 
     void setNumberOfSources(int numOfSources, bool propagate = true);
-    int getNumberOfSources() const { return m_numOfSources; }
+    int getNumberOfSources() const { return mNumOfSources; }
 
-    Source * getSources() { return sources; }
-    Source const * getSources() const { return sources; }
+    Source * getSources() { return mSources; }
+    Source const * getSources() const { return mSources; }
 
     //==============================================================================
     bool createOscConnection(int oscPort);
     bool disconnectOSC();
-    bool getOscConnected() const { return m_oscConnected; }
+    bool getOscConnected() const { return mOscConnected; }
     void handleOscConnection(bool state);
     void sendOscMessage();
 
     bool createOscInputConnection(int oscPort);
     bool disconnectOSCInput(int oscPort);
-    bool getOscInputConnected() const { return m_oscInputConnected; }
+    bool getOscInputConnected() const { return mOscInputConnected; }
     void oscMessageReceived(const OSCMessage & message) final;
     void oscBundleReceived(const OSCBundle & bundle) final;
 
     bool createOscOutputConnection(String oscAddress, int oscPort);
     bool disconnectOSCOutput(String oscAddress, int oscPort);
-    bool getOscOutputConnected() const { return m_oscOutputConnected; }
+    bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);
     int getOscOutputPluginId() const;
@@ -178,11 +178,11 @@ public:
 
     void initialize();
 
-    double getInitTimeOnPlay() const { return std::max(m_initTimeOnPlay, 0.0); }
-    double getCurrentTime() const { return std::max(m_currentTime, 0.0); }
+    double getInitTimeOnPlay() const { return std::max(mInitTimeOnPlay, 0.0); }
+    double getCurrentTime() const { return std::max(mCurrentTime, 0.0); }
 
-    bool getIsPlaying() const { return m_isPlaying; }
-    double getBPM() const { return m_bpm; }
+    bool getIsPlaying() const { return mIsPlaying; }
+    double getBPM() const { return mBpm; }
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
@@ -203,8 +203,8 @@ public:
     void addNewFixedPosition(int id);
     bool recallFixedPosition(int id);
     void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
-    XmlElement * getFixedPositionData() { return &fixPositionData; } // retrieve all data.
-    XmlElement const * getFixedPositionData() const { return &fixPositionData; }
+    XmlElement * getFixedPositionData() { return &mFixPositionData; } // retrieve all data.
+    XmlElement const * getFixedPositionData() const { return &mFixPositionData; }
     void deleteFixedPosition(int id);
 
 private:

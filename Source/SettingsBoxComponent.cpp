@@ -21,83 +21,84 @@
 
 SettingsBoxComponent::SettingsBoxComponent()
 {
-    oscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&oscFormatLabel);
+    mOscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mOscFormatLabel);
 
-    oscFormatCombo.addItem("DOME - SpatGris", 1);
-    oscFormatCombo.addItem("CUBE - SpatGris", 2);
-    oscFormatCombo.onChange = [this] {
-        listeners.call(
-            [&](Listener & l) { l.settingsBoxOscFormatChanged((SpatMode)(oscFormatCombo.getSelectedId() - 1)); });
+    mOscFormatCombo.addItem("DOME - SpatGris", 1);
+    mOscFormatCombo.addItem("CUBE - SpatGris", 2);
+    mOscFormatCombo.onChange = [this] {
+        mListeners.call(
+            [&](Listener & l) { l.settingsBoxOscFormatChanged((SpatMode)(mOscFormatCombo.getSelectedId() - 1)); });
     };
-    oscFormatCombo.setSelectedId(1);
-    addAndMakeVisible(&oscFormatCombo);
+    mOscFormatCombo.setSelectedId(1);
+    addAndMakeVisible(&mOscFormatCombo);
 
-    oscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&oscPortLabel);
+    mOscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mOscPortLabel);
 
     String defaultPort("18032");
-    oscPortEditor.setExplicitFocusOrder(4);
-    oscPortEditor.setText(defaultPort);
-    oscPortEditor.setInputRestrictions(5, "0123456789");
-    oscPortEditor.onReturnKey = [this] { oscFormatCombo.grabKeyboardFocus(); };
-    oscPortEditor.onFocusLost = [this, defaultPort] {
-        if (!oscPortEditor.isEmpty()) {
-            listeners.call(
-                [&](Listener & l) { l.settingsBoxOscPortNumberChanged(oscPortEditor.getText().getIntValue()); });
+    mOscPortEditor.setExplicitFocusOrder(4);
+    mOscPortEditor.setText(defaultPort);
+    mOscPortEditor.setInputRestrictions(5, "0123456789");
+    mOscPortEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
+    mOscPortEditor.onFocusLost = [this, defaultPort] {
+        if (!mOscPortEditor.isEmpty()) {
+            mListeners.call(
+                [&](Listener & l) { l.settingsBoxOscPortNumberChanged(mOscPortEditor.getText().getIntValue()); });
         } else {
-            listeners.call([&](Listener & l) {
+            mListeners.call([&](Listener & l) {
                 l.settingsBoxOscPortNumberChanged(defaultPort.getIntValue());
-                oscPortEditor.setText(defaultPort);
+                mOscPortEditor.setText(defaultPort);
             });
         }
     };
-    addAndMakeVisible(&oscPortEditor);
+    addAndMakeVisible(&mOscPortEditor);
 
-    numOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&numOfSourcesLabel);
+    mNumOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mNumOfSourcesLabel);
 
-    numOfSourcesEditor.setExplicitFocusOrder(2);
-    numOfSourcesEditor.setText("2");
-    numOfSourcesEditor.setInputRestrictions(1, "12345678");
-    numOfSourcesEditor.onReturnKey = [this] { oscFormatCombo.grabKeyboardFocus(); };
-    numOfSourcesEditor.onFocusLost = [this] {
-        if (!numOfSourcesEditor.isEmpty()) {
-            listeners.call(
-                [&](Listener & l) { l.settingsBoxNumberOfSourcesChanged(numOfSourcesEditor.getText().getIntValue()); });
+    mNumOfSourcesEditor.setExplicitFocusOrder(2);
+    mNumOfSourcesEditor.setText("2");
+    mNumOfSourcesEditor.setInputRestrictions(1, "12345678");
+    mNumOfSourcesEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
+    mNumOfSourcesEditor.onFocusLost = [this] {
+        if (!mNumOfSourcesEditor.isEmpty()) {
+            mListeners.call([&](Listener & l) {
+                l.settingsBoxNumberOfSourcesChanged(mNumOfSourcesEditor.getText().getIntValue());
+            });
         } else {
-            listeners.call([&](Listener & l) {
+            mListeners.call([&](Listener & l) {
                 l.settingsBoxNumberOfSourcesChanged(1);
-                numOfSourcesEditor.setText("1");
+                mNumOfSourcesEditor.setText("1");
             });
         }
     };
-    addAndMakeVisible(&numOfSourcesEditor);
+    addAndMakeVisible(&mNumOfSourcesEditor);
 
-    firstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&firstSourceIdLabel);
+    mFirstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mFirstSourceIdLabel);
 
-    firstSourceIdEditor.setExplicitFocusOrder(3);
-    firstSourceIdEditor.setText("1");
-    firstSourceIdEditor.setInputRestrictions(3, "0123456789");
-    firstSourceIdEditor.onReturnKey = [this] { oscFormatCombo.grabKeyboardFocus(); };
-    firstSourceIdEditor.onFocusLost = [this] {
-        if (!firstSourceIdEditor.isEmpty()) {
-            listeners.call(
-                [&](Listener & l) { l.settingsBoxFirstSourceIdChanged(firstSourceIdEditor.getText().getIntValue()); });
+    mFirstSourceIdEditor.setExplicitFocusOrder(3);
+    mFirstSourceIdEditor.setText("1");
+    mFirstSourceIdEditor.setInputRestrictions(3, "0123456789");
+    mFirstSourceIdEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
+    mFirstSourceIdEditor.onFocusLost = [this] {
+        if (!mFirstSourceIdEditor.isEmpty()) {
+            mListeners.call(
+                [&](Listener & l) { l.settingsBoxFirstSourceIdChanged(mFirstSourceIdEditor.getText().getIntValue()); });
         } else {
-            listeners.call([&](Listener & l) {
+            mListeners.call([&](Listener & l) {
                 l.settingsBoxFirstSourceIdChanged(1);
-                firstSourceIdEditor.setText("1");
+                mFirstSourceIdEditor.setText("1");
             });
         }
     };
-    addAndMakeVisible(&firstSourceIdEditor);
+    addAndMakeVisible(&mFirstSourceIdEditor);
 
     mPositionActivateButton.setExplicitFocusOrder(1);
     mPositionActivateButton.setButtonText("Activate OSC");
     mPositionActivateButton.onClick = [this] {
-        listeners.call([&](Listener & l) { l.settingsBoxOscActivated(mPositionActivateButton.getToggleState()); });
+        mListeners.call([&](Listener & l) { l.settingsBoxOscActivated(mPositionActivateButton.getToggleState()); });
     };
     addAndMakeVisible(&mPositionActivateButton);
 }
@@ -109,22 +110,22 @@ SettingsBoxComponent::~SettingsBoxComponent()
 
 void SettingsBoxComponent::setOscFormat(SpatMode mode)
 {
-    oscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
+    mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
 }
 
 void SettingsBoxComponent::setOscPortNumber(int oscPortNumber)
 {
-    oscPortEditor.setText(String(oscPortNumber));
+    mOscPortEditor.setText(String(oscPortNumber));
 }
 
 void SettingsBoxComponent::setNumberOfSources(int numOfSources)
 {
-    numOfSourcesEditor.setText(String(numOfSources));
+    mNumOfSourcesEditor.setText(String(numOfSources));
 }
 
 void SettingsBoxComponent::setFirstSourceId(int firstSourceId)
 {
-    firstSourceIdEditor.setText(String(firstSourceId));
+    mFirstSourceIdEditor.setText(String(firstSourceId));
 }
 
 void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
@@ -141,17 +142,17 @@ void SettingsBoxComponent::paint(Graphics & g)
 
 void SettingsBoxComponent::resized()
 {
-    oscFormatLabel.setBounds(5, 10, 90, 15);
-    oscFormatCombo.setBounds(95, 10, 150, 20);
+    mOscFormatLabel.setBounds(5, 10, 90, 15);
+    mOscFormatCombo.setBounds(95, 10, 150, 20);
 
-    oscPortLabel.setBounds(5, 40, 90, 15);
-    oscPortEditor.setBounds(95, 40, 150, 20);
+    mOscPortLabel.setBounds(5, 40, 90, 15);
+    mOscPortEditor.setBounds(95, 40, 150, 20);
 
-    numOfSourcesLabel.setBounds(265, 10, 130, 15);
-    numOfSourcesEditor.setBounds(395, 10, 40, 15);
+    mNumOfSourcesLabel.setBounds(265, 10, 130, 15);
+    mNumOfSourcesEditor.setBounds(395, 10, 40, 15);
 
-    firstSourceIdLabel.setBounds(265, 40, 130, 15);
-    firstSourceIdEditor.setBounds(395, 40, 40, 15);
+    mFirstSourceIdLabel.setBounds(265, 40, 130, 15);
+    mFirstSourceIdEditor.setBounds(395, 40, 40, 15);
 
     mPositionActivateButton.setBounds(5, 70, 150, 20);
 }

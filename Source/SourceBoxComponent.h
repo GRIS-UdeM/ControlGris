@@ -40,23 +40,23 @@ public:
 
 private:
     //==============================================================================
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners;
 
-    int selectedSourceNumber;
-    float currentAngle;
-    float currentRayLength;
+    int mSelectedSourceNumber;
+    float mCurrentAngle;
+    float mCurrentRayLength;
 
-    Label sourcePlacementLabel;
-    ComboBox sourcePlacementCombo;
+    Label mSourcePlacementLabel;
+    ComboBox mSourcePlacementCombo;
 
-    Label sourceNumberLabel;
-    ComboBox sourceNumberCombo;
+    Label mSourceNumberLabel;
+    ComboBox mSourceNumberCombo;
 
-    Label rayLengthLabel;
-    Slider rayLengthSlider;
+    Label mRayLengthLabel;
+    Slider mRayLengthSlider;
 
-    Label angleLabel;
-    Slider angleSlider;
+    Label mAngleLabel;
+    Slider mAngleSlider;
 
 public:
     //==============================================================================
@@ -69,8 +69,8 @@ public:
     void setNumberOfSources(int numOfSources, int firstSourceId);
     void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

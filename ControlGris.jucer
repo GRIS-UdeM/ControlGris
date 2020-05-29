@@ -12,8 +12,6 @@
             file="Source/PositionPresetComponent.cpp"/>
       <FILE id="fzL7XR" name="PositionPresetComponent.h" compile="0" resource="0"
             file="Source/PositionPresetComponent.h"/>
-      <FILE id="jhFBDG" name="ControlGrisUtilities.cpp" compile="1" resource="0"
-            file="Source/ControlGrisUtilities.cpp"/>
       <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
             file="Source/ControlGrisUtilities.h"/>
       <FILE id="JknLOg" name="AutomationManager.cpp" compile="1" resource="0"

@@ -48,40 +48,41 @@ class ControlGrisAudioProcessorEditor final
 {
 private:
     //==============================================================================
-    ControlGrisAudioProcessor & processor;
+    ControlGrisAudioProcessor & mProcessor;
 
-    GrisLookAndFeel grisLookAndFeel;
+    GrisLookAndFeel mGrisLookAndFeel;
 
-    AudioProcessorValueTreeState & valueTreeState;
+    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
     PositionAutomationManager & mPositionAutomationManager;
     ElevationAutomationManager & mElevationAutomationManager;
 
-    BannerComponent mainBanner;
-    BannerComponent elevationBanner;
-    BannerComponent trajectoryBanner;
-    BannerComponent settingsBanner;
-    BannerComponent positionPresetBanner;
+    BannerComponent mMainBanner;
+    BannerComponent mElevationBanner;
+    BannerComponent mTrajectoryBanner;
+    BannerComponent mSettingsBanner;
+    BannerComponent mPositionPresetBanner;
 
     MainFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
-    ParametersBoxComponent parametersBox;
+    ParametersBoxComponent mParametersBox;
 
-    TrajectoryBoxComponent trajectoryBox;
+    TrajectoryBoxComponent mTrajectoryBox;
 
-    TabbedComponent configurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
+    TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
 
-    SettingsBoxComponent settingsBox;
-    SourceBoxComponent sourceBox;
-    InterfaceBoxComponent interfaceBox;
+    SettingsBoxComponent mSettingsBox;
+    SourceBoxComponent mSourceBox;
+    InterfaceBoxComponent mInterfaceBox;
 
-    PositionPresetComponent positionPresetBox;
+    PositionPresetComponent mPositionPresetBox;
 
-    bool m_isInsideSetPluginState;
-    int m_selectedSource;
+    bool mIsInsideSetPluginState;
+    int mSelectedSource;
 
-    Value lastUIWidth, lastUIHeight;
+    Value mLastUIWidth;
+    Value mLastUIHeight;
 
 public:
     //==============================================================================

@@ -96,7 +96,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 
 void AutomationManager::compressTrajectoryXValues(int maxValue) // TODO: make this function useless asap
 {
-    auto const offset{ static_cast<int>(10.0f + kSourceRadius) };
+    auto const offset{ static_cast<int>(10.0f + SOURCE_FIELD_COMPONENT_RADIUS) };
     maxValue -= offset;
     int const size{ getRecordingTrajectorySize() };
     auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.0f) };
@@ -249,7 +249,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
     float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
-                     * ((mFieldWidth - kSourceDiameter) / 2.0f) };
+                     * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
     float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
 
     auto const fSize{ static_cast<int>(mFieldWidth) };
@@ -373,8 +373,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::squareClockwise:
     case PositionTrajectoryType::squareCounterClockwise:
         step = 1.0f / (mFieldWidth / 4);
-        transX = translated.x * ((mFieldWidth / 2 - kSourceRadius));
-        transY = translated.y * ((mFieldWidth / 2 - kSourceRadius));
+        transX = translated.x * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
+        transY = translated.y * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
         magnitude = sqrtf(transX * transX + transY * transY);
         adjustedMagnitude = magnitude * MathConstants<float>::halfPi;
         float tmp1;
@@ -427,8 +427,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             p3 = Point<float>{ 1.0f, 1.0f };
         }
         step = 1.0f / (mFieldWidth / 3.0f);
-        transX = translated.x * ((mFieldWidth / 2.0f - kSourceRadius));
-        transY = translated.y * ((mFieldWidth / 2.0f - kSourceRadius));
+        transX = translated.x * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
+        transY = translated.y * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
         magnitude = sqrtf(transX * transX + transY * transY);
         for (int i{}; i < fSize; ++i) {
             if (i < (fSizeOver3)) {
@@ -466,7 +466,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 
     mTrajectoryPoints.clear();
 
-    auto constexpr offset{ 10.0f + kSourceRadius };
+    auto constexpr offset{ 10.0f + SOURCE_FIELD_COMPONENT_RADIUS };
     auto const width{ mFieldWidth - offset };
     auto constexpr minPos{ 15.0f };
     auto const maxPos{ mFieldWidth - 20.0f };

@@ -117,8 +117,8 @@ void ParametersBoxComponent::paint(Graphics & g)
     g.setColour(Colour(.2f, .2f, .2f, 1.0f));
     g.drawEllipse(area.translated(.5f, .5f), 1.0f);
     g.setGradientFill(ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.0f),
-                                     x + kSourceRadius,
-                                     y + kSourceRadius,
+                                     x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                     y + SOURCE_FIELD_COMPONENT_RADIUS,
                                      mSelectedSource->getColour().withSaturation(1.0f),
                                      x,
                                      y,

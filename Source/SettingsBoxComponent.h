@@ -41,19 +41,19 @@ public:
 
 private:
     //==============================================================================
-    ListenerList<Listener> listeners;
+    ListenerList<Listener> mListeners;
 
-    Label oscFormatLabel;
-    ComboBox oscFormatCombo;
+    Label mOscFormatLabel;
+    ComboBox mOscFormatCombo;
 
-    Label oscPortLabel;
-    TextEditor oscPortEditor;
+    Label mOscPortLabel;
+    TextEditor mOscPortEditor;
 
-    Label numOfSourcesLabel;
-    TextEditor numOfSourcesEditor;
+    Label mNumOfSourcesLabel;
+    TextEditor mNumOfSourcesEditor;
 
-    Label firstSourceIdLabel;
-    TextEditor firstSourceIdEditor;
+    Label mFirstSourceIdLabel;
+    TextEditor mFirstSourceIdEditor;
 
     ToggleButton mPositionActivateButton;
 
@@ -73,8 +73,8 @@ public:
     void setOscPortNumber(int oscPortNumber);
     void setActivateButtonState(bool shouldBeOn);
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

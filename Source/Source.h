@@ -24,8 +24,8 @@
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
 //==============================================================================
-constexpr float kSourceRadius = 12.0f;
-constexpr float kSourceDiameter = kSourceRadius * 2.0f;
+constexpr float SOURCE_FIELD_COMPONENT_RADIUS = 12.0f;
+constexpr float SOURCE_FIELD_COMPONENT_DIAMETER = SOURCE_FIELD_COMPONENT_RADIUS * 2.0f;
 
 //==============================================================================
 class Source
@@ -62,7 +62,7 @@ public:
     void setId(int const id) { mId = id; }
     int getId() const { return mId; }
 
-    void setRadiusIsElevation(bool const shouldBeElevation) { mRadiusIsElevation = shouldBeElevation; }
+    void setRadiusIsElevation(bool const radiusIsElevation) { mRadiusIsElevation = radiusIsElevation; }
 
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);
