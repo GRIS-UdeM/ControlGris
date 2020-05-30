@@ -87,6 +87,7 @@ public:
     ~FieldComponent() override { setLookAndFeel(nullptr); }
     //==============================================================================
     void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
+    virtual void drawSources(Graphics & g) const = 0;
 
     Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;
     Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
@@ -117,11 +118,13 @@ class MainFieldComponent final : public FieldComponent
     Point<float> mLineDrawingAnchor2;
 
 public:
-    MainFieldComponent(PositionAutomationManager & automan);
+    MainFieldComponent(PositionAutomationManager & positionAutomationManager);
     ~MainFieldComponent() final = default;
     //==============================================================================
-    void createSpanPathVBAP(Graphics & g, int i) const;
-    void createSpanPathLBAP(Graphics & g, int i) const;
+    void drawSources(Graphics & g) const final;
+    void drawSpans(Graphics & g) const;
+    void drawDomeSpans(Graphics & g) const;
+    void drawCubeSpans(Graphics & g) const;
     void drawTrajectoryHandle(Graphics &) const;
     void paint(Graphics & g) final;
 
@@ -162,6 +165,7 @@ public:
     ~ElevationFieldComponent() final = default;
     //==============================================================================
     void paint(Graphics & g) final;
+    void drawSources(Graphics & g) const final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;

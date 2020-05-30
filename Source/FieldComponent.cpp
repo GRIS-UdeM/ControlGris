@@ -126,6 +126,38 @@ Point<float> FieldComponent::xyToPos(Point<float> const & p, int const p_iwidth)
     return Point<float>(x, y);
 }
 
+void MainFieldComponent::drawSources(Graphics & g) const
+{
+    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
+        int const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
+        float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
+        Point<float> pos;
+        if (mSpatMode == SpatMode::VBAP) {
+            pos = degreeToXy(AngleVector<float>{ mSources[sourceId].getAzimuth(), mSources[sourceId].getElevation() },
+                             this->getWidth());
+        } else {
+            pos = posToXy(mSources[sourceId].getPos(), this->getWidth());
+        }
+        Rectangle<float> area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
+        area.expand(lineThickness, lineThickness);
+        g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+        g.drawEllipse(area.translated(.5f, .5f), 1.0f);
+        g.setGradientFill(ColourGradient(mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
+                                         pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                         pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                         mSources[sourceId].getColour().withSaturation(saturation),
+                                         pos.x,
+                                         pos.y,
+                                         true));
+        g.fillEllipse(area);
+        g.setColour(Colours::white);
+        g.drawFittedText(String(mSources[sourceId].getId() + 1),
+                         area.getSmallestIntegerContainer(),
+                         Justification(Justification::centred),
+                         1);
+    }
+}
+
 //==============================================================================
 MainFieldComponent::MainFieldComponent(PositionAutomationManager & automan) : mAutomationManager(automan)
 {
@@ -165,86 +197,94 @@ void MainFieldComponent::setSpatMode(SpatMode const spatMode)
     repaint();
 }
 
-void MainFieldComponent::createSpanPathVBAP(Graphics & g, int i) const
+void MainFieldComponent::drawDomeSpans(Graphics & g) const
 {
     int const width{ getWidth() };
     float const fieldCenter{ width / 2.0f };
-    float const azimuth{ mSources[i].getAzimuth() };
-    float const elevation{ mSources[i].getElevation() };
-    float const azimuthSpan{ 180.0f * mSources[i].getAzimuthSpan() };
-    float const elevationSpan{ 45.0f * mSources[i].getElevationSpan() };
 
-    // Calculate min and max elevation in degrees.
-    Point<float> minElev{ azimuth, elevation - elevationSpan };
-    Point<float> maxElev{ azimuth, elevation + elevationSpan };
+    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
+        float const azimuth{ mSources[sourceId].getAzimuth() };
+        float const elevation{ mSources[sourceId].getElevation() };
+        float const azimuthSpan{ 180.0f * mSources[sourceId].getAzimuthSpan() };
+        float const elevationSpan{ 45.0f * mSources[sourceId].getElevationSpan() };
 
-    if (minElev.getY() < 0.0f) {
-        maxElev.setY(maxElev.getY() - minElev.getY());
-        minElev.setY(0);
+        // Calculate min and max elevation in degrees.
+        Point<float> minElev{ azimuth, elevation - elevationSpan };
+        Point<float> maxElev{ azimuth, elevation + elevationSpan };
+
+        if (minElev.getY() < 0.0f) {
+            maxElev.setY(maxElev.getY() - minElev.getY());
+            minElev.setY(0);
+        }
+        if (maxElev.getY() > 89.99f) {
+            minElev.setY(minElev.getY() + maxElev.getY() - 89.99f);
+            maxElev.setY(89.99f);
+        }
+
+        // Convert min and max elevation to xy position.
+        float const halfWidth{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
+        Point<float> const minElevPos{
+            -halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
+            -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f
+        };
+        Point<float> const maxElevPos{
+            -halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
+            -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f
+        };
+
+        // Calculate min and max radius.
+        float const minRadius{ sqrtf(minElevPos.getX() * minElevPos.getX() + minElevPos.getY() * minElevPos.getY()) };
+        float const maxRadius{ sqrtf(maxElevPos.getX() * maxElevPos.getX() + maxElevPos.getY() * maxElevPos.getY()) };
+
+        // Draw the path for spanning.
+        Path myPath{};
+        myPath.startNewSubPath(fieldCenter + minElevPos.getX(), fieldCenter + minElevPos.getY());
+        myPath.addCentredArc(fieldCenter,
+                             fieldCenter,
+                             minRadius,
+                             minRadius,
+                             0.0,
+                             degreeToRadian(-azimuth),
+                             degreeToRadian(-azimuth + azimuthSpan));
+        myPath.addCentredArc(fieldCenter,
+                             fieldCenter,
+                             maxRadius,
+                             maxRadius,
+                             0.0,
+                             degreeToRadian(-azimuth + azimuthSpan),
+                             degreeToRadian(-azimuth - azimuthSpan));
+        myPath.addCentredArc(fieldCenter,
+                             fieldCenter,
+                             minRadius,
+                             minRadius,
+                             0.0,
+                             degreeToRadian(-azimuth - azimuthSpan),
+                             degreeToRadian(-azimuth));
+        myPath.closeSubPath();
+
+        g.setColour(mSources[sourceId].getColour().withAlpha(0.1f));
+        g.fillPath(myPath);
+        g.setColour(mSources[sourceId].getColour().withAlpha(0.5f));
+        PathStrokeType strokeType = PathStrokeType(1.5);
+        g.strokePath(myPath, strokeType);
     }
-    if (maxElev.getY() > 89.99f) {
-        minElev.setY(minElev.getY() + maxElev.getY() - 89.99f);
-        maxElev.setY(89.99f);
-    }
-
-    // Convert min and max elevation to xy position.
-    float const halfWidth{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
-    Point<float> const minElevPos{ -halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
-                                   -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY())
-                                       / 90.0f };
-    Point<float> const maxElevPos{ -halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
-                                   -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY())
-                                       / 90.0f };
-
-    // Calculate min and max radius.
-    float const minRadius{ sqrtf(minElevPos.getX() * minElevPos.getX() + minElevPos.getY() * minElevPos.getY()) };
-    float const maxRadius{ sqrtf(maxElevPos.getX() * maxElevPos.getX() + maxElevPos.getY() * maxElevPos.getY()) };
-
-    // Draw the path for spanning.
-    Path myPath{};
-    myPath.startNewSubPath(fieldCenter + minElevPos.getX(), fieldCenter + minElevPos.getY());
-    myPath.addCentredArc(fieldCenter,
-                         fieldCenter,
-                         minRadius,
-                         minRadius,
-                         0.0,
-                         degreeToRadian(-azimuth),
-                         degreeToRadian(-azimuth + azimuthSpan));
-    myPath.addCentredArc(fieldCenter,
-                         fieldCenter,
-                         maxRadius,
-                         maxRadius,
-                         0.0,
-                         degreeToRadian(-azimuth + azimuthSpan),
-                         degreeToRadian(-azimuth - azimuthSpan));
-    myPath.addCentredArc(fieldCenter,
-                         fieldCenter,
-                         minRadius,
-                         minRadius,
-                         0.0,
-                         degreeToRadian(-azimuth - azimuthSpan),
-                         degreeToRadian(-azimuth));
-    myPath.closeSubPath();
-
-    g.setColour(mSources[i].getColour().withAlpha(0.1f));
-    g.fillPath(myPath);
-    g.setColour(mSources[i].getColour().withAlpha(0.5f));
-    PathStrokeType strokeType = PathStrokeType(1.5);
-    g.strokePath(myPath, strokeType);
 }
 
-void MainFieldComponent::createSpanPathLBAP(Graphics & g, int const i) const
+void MainFieldComponent::drawCubeSpans(Graphics & g) const
 {
     int const width{ getWidth() };
-    float const azimuthSpan{ width * mSources[i].getAzimuthSpan() };
-    float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
-    float const saturation{ (i == mSelectedSourceId) ? 1.0f : 0.5f };
-    Point<float> const pos{ posToXy(mSources[i].getPos(), width) };
 
-    g.setColour(mSources[i].getColour().withSaturation(saturation).withAlpha(0.5f));
-    g.drawEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
-    g.setColour(mSources[i].getColour().withSaturation(saturation).withAlpha(0.1f));
-    g.fillEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
+    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
+        float const azimuthSpan{ width * mSources[sourceId].getAzimuthSpan() };
+        float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
+        float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.5f };
+        Point<float> const pos{ posToXy(mSources[sourceId].getPos(), width) };
+
+        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.5f));
+        g.drawEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
+        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.1f));
+        g.fillEllipse(pos.x - halfAzimuthSpan, pos.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
+    }
 }
 
 void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
@@ -318,40 +358,10 @@ void MainFieldComponent::paint(Graphics & g)
     }
 
     // Draw sources.
-    for (int i{}; i < mNumberOfSources; ++i) {
-        int const lineThickness{ (i == mSelectedSourceId) ? 3 : 1 };
-        float const saturation{ (i == mSelectedSourceId) ? 1.0f : 0.75f };
-        Point<float> pos;
-        if (mSpatMode == SpatMode::VBAP) {
-            pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
-        } else {
-            pos = posToXy(mSources[i].getPos(), width);
-        }
-        Rectangle<float> area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
-        area.expand(lineThickness, lineThickness);
-        g.setColour(Colour(.2f, .2f, .2f, 1.0f));
-        g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(ColourGradient(mSources[i].getColour().withSaturation(saturation).darker(1.0f),
-                                         pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         mSources[i].getColour().withSaturation(saturation),
-                                         pos.x,
-                                         pos.y,
-                                         true));
-        g.fillEllipse(area);
-        g.setColour(Colours::white);
-        g.drawFittedText(String(mSources[i].getId() + 1),
-                         area.getSmallestIntegerContainer(),
-                         Justification(Justification::centred),
-                         1);
+    this->drawSources(g);
 
-        // Draw spanning.
-        if (mSpatMode == SpatMode::VBAP) {
-            createSpanPathVBAP(g, i);
-        } else {
-            createSpanPathLBAP(g, i);
-        }
-    }
+    // Draw spanning.
+    this->drawSpans(g);
 
     // Draw recording trajectory handle after sources (if source link *is* Delta Lock).
     if (mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
@@ -398,6 +408,15 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
         }
     }
     return false;
+}
+
+void MainFieldComponent::drawSpans(Graphics & g) const
+{
+    if (mSpatMode == SpatMode::VBAP) {
+        drawDomeSpans(g);
+    } else {
+        drawCubeSpans(g);
+    }
 }
 
 void MainFieldComponent::mouseDown(MouseEvent const & event)
@@ -579,6 +598,57 @@ Point<int> MainFieldComponent::clipRecordingPosition(Point<int> const & pos)
 }
 
 //==============================================================================
+void ElevationFieldComponent::drawSources(Graphics & g) const
+{
+    jassert(getWidth() == getHeight());
+    auto const componentSize{ this->getWidth() };
+
+    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
+        auto const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
+        float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
+        float const x{ static_cast<float>(sourceId) / mNumberOfSources * (componentSize - 50.0f) + 50.0f };
+        float const y{ (90.0f - mSources[sourceId].getElevation()) / 90.0f * (componentSize - 35.0f) + 5.0f };
+        Point<float> const pos{ x, y };
+        Rectangle<float> area(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
+
+        area.expand(lineThickness, lineThickness);
+        g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+        g.drawEllipse(area.translated(.5f, .5f), 1.0f);
+        g.setGradientFill(ColourGradient(mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
+                                         pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                         pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                         mSources[sourceId].getColour().withSaturation(saturation),
+                                         pos.x,
+                                         pos.y,
+                                         true));
+        g.fillEllipse(area);
+        g.drawLine(pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
+                   pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                   componentSize - 5,
+                   lineThickness);
+        g.setColour(Colours::white);
+        g.drawFittedText(String(mSources[sourceId].getId() + 1),
+                         area.getSmallestIntegerContainer(),
+                         Justification(Justification::centred),
+                         1);
+
+        // draw Spans
+        float const elevationSpan{ 50.0f * mSources[sourceId].getElevationSpan() };
+        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.5f));
+        g.drawRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
+                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
+                   elevationSpan,
+                   componentSize - 5.0f,
+                   1.5);
+        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.1f));
+        g.fillRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
+                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
+                   elevationSpan,
+                   componentSize - 5.0f);
+    }
+}
+
 void ElevationFieldComponent::paint(Graphics & g)
 {
     int const width{ getWidth() };
@@ -640,50 +710,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     }
 
     // Draw sources.
-    for (int i{}; i < mNumberOfSources; ++i) {
-        auto const lineThickness{ (i == mSelectedSourceId) ? 3 : 1 };
-        float const saturation{ (i == mSelectedSourceId) ? 1.0f : 0.75f };
-        float const x{ static_cast<float>(i) / mNumberOfSources * (width - 50.0f) + 50.0f };
-        float const y{ (90.0f - mSources[i].getElevation()) / 90.0f * (height - 35.0f) + 5.0f };
-        Point<float> const pos{ x, y };
-        Rectangle<float> area(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
-
-        area.expand(lineThickness, lineThickness);
-        g.setColour(Colour(.2f, .2f, .2f, 1.0f));
-        g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(ColourGradient(mSources[i].getColour().withSaturation(saturation).darker(1.0f),
-                                         pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         mSources[i].getColour().withSaturation(saturation),
-                                         pos.x,
-                                         pos.y,
-                                         true));
-        g.fillEllipse(area);
-        g.drawLine(pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
-                   pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                   height - 5,
-                   lineThickness);
-        g.setColour(Colours::white);
-        g.drawFittedText(String(mSources[i].getId() + 1),
-                         area.getSmallestIntegerContainer(),
-                         Justification(Justification::centred),
-                         1);
-
-        // Draw spanning.
-        float const elevationSpan{ 50.0f * mSources[i].getElevationSpan() };
-        g.setColour(mSources[i].getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
-                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
-                   elevationSpan,
-                   height - 5.0f,
-                   1.5);
-        g.setColour(mSources[i].getColour().withSaturation(saturation).withAlpha(0.1f));
-        g.fillRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
-                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
-                   elevationSpan,
-                   height - 5.0f);
-    }
+    this->drawSources(g);
 }
 
 void ElevationFieldComponent::mouseDown(const MouseEvent & event)
