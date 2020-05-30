@@ -141,7 +141,7 @@ void Source::computeAzimuthElevation()
     auto const x{ mX * 2.0f - 1.0f };
     auto const y{ mY * 2.0f - 1.0f };
     if (x != 0.0 || y != 0.0) {
-        auto ang{ atan2f(x, y) / MathConstants<float>::halfPi * 360.0f };
+        auto ang{ atan2f(x, y) / MathConstants<float>::pi * 180.0f };
         if (ang <= -180.0f) {
             ang += 360.0f;
         }
