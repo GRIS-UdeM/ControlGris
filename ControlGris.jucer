@@ -8,59 +8,65 @@
               cppLanguageStandard="17">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
-      <FILE id="IqJ0vG" name="PositionPresetComponent.cpp" compile="1" resource="0"
-            file="Source/PositionPresetComponent.cpp"/>
-      <FILE id="fzL7XR" name="PositionPresetComponent.h" compile="0" resource="0"
-            file="Source/PositionPresetComponent.h"/>
-      <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
-            file="Source/ControlGrisUtilities.h"/>
+      <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
+        <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
+              file="Source/ControlGrisConstants.h"/>
+        <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
+              file="Source/ControlGrisUtilities.h"/>
+      </GROUP>
+      <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">
+        <FILE id="JVPA2I" name="SinkinSans-400Regular.otf" compile="0" resource="1"
+              file="Source/SinkinSans-400Regular.otf"/>
+      </GROUP>
+      <GROUP id="{B6A2D2FE-2A17-10D3-12C3-DF6BC59A017A}" name="UI">
+        <FILE id="S09fDT" name="BannerComponent.cpp" compile="1" resource="0"
+              file="Source/BannerComponent.cpp"/>
+        <FILE id="L94qFU" name="BannerComponent.h" compile="0" resource="0"
+              file="Source/BannerComponent.h"/>
+        <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
+              file="Source/FieldComponent.cpp"/>
+        <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
+              file="Source/FieldComponent.h"/>
+        <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
+              file="Source/GrisLookAndFeel.h"/>
+        <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
+              file="Source/InterfaceBoxComponent.cpp"/>
+        <FILE id="lmO3cO" name="InterfaceBoxComponent.h" compile="0" resource="0"
+              file="Source/InterfaceBoxComponent.h"/>
+        <FILE id="tMh8VU" name="ParametersBoxComponent.cpp" compile="1" resource="0"
+              file="Source/ParametersBoxComponent.cpp"/>
+        <FILE id="qmk3iz" name="ParametersBoxComponent.h" compile="0" resource="0"
+              file="Source/ParametersBoxComponent.h"/>
+        <FILE id="E0Oz8r" name="PluginEditor.cpp" compile="1" resource="0"
+              file="Source/PluginEditor.cpp"/>
+        <FILE id="Qwbp71" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+        <FILE id="IqJ0vG" name="PositionPresetComponent.cpp" compile="1" resource="0"
+              file="Source/PositionPresetComponent.cpp"/>
+        <FILE id="fzL7XR" name="PositionPresetComponent.h" compile="0" resource="0"
+              file="Source/PositionPresetComponent.h"/>
+        <FILE id="HI1dem" name="SettingsBoxComponent.cpp" compile="1" resource="0"
+              file="Source/SettingsBoxComponent.cpp"/>
+        <FILE id="qBqct9" name="SettingsBoxComponent.h" compile="0" resource="0"
+              file="Source/SettingsBoxComponent.h"/>
+        <FILE id="tr9Qib" name="SourceBoxComponent.cpp" compile="1" resource="0"
+              file="Source/SourceBoxComponent.cpp"/>
+        <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
+              file="Source/SourceBoxComponent.h"/>
+        <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
+              file="Source/TrajectoryBoxComponent.cpp"/>
+        <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"
+              file="Source/TrajectoryBoxComponent.h"/>
+      </GROUP>
       <FILE id="JknLOg" name="AutomationManager.cpp" compile="1" resource="0"
             file="Source/AutomationManager.cpp"/>
       <FILE id="TpHVRw" name="AutomationManager.h" compile="0" resource="0"
             file="Source/AutomationManager.h"/>
-      <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
-            file="Source/ControlGrisConstants.h"/>
-      <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
-      <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
-      <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
-            file="Source/InterfaceBoxComponent.cpp"/>
-      <FILE id="lmO3cO" name="InterfaceBoxComponent.h" compile="0" resource="0"
-            file="Source/InterfaceBoxComponent.h"/>
-      <FILE id="HI1dem" name="SettingsBoxComponent.cpp" compile="1" resource="0"
-            file="Source/SettingsBoxComponent.cpp"/>
-      <FILE id="tr9Qib" name="SourceBoxComponent.cpp" compile="1" resource="0"
-            file="Source/SourceBoxComponent.cpp"/>
-      <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
-            file="Source/SourceBoxComponent.h"/>
-      <FILE id="qBqct9" name="SettingsBoxComponent.h" compile="0" resource="0"
-            file="Source/SettingsBoxComponent.h"/>
-      <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
-            file="Source/TrajectoryBoxComponent.cpp"/>
-      <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"
-            file="Source/TrajectoryBoxComponent.h"/>
-      <FILE id="tMh8VU" name="ParametersBoxComponent.cpp" compile="1" resource="0"
-            file="Source/ParametersBoxComponent.cpp"/>
-      <FILE id="qmk3iz" name="ParametersBoxComponent.h" compile="0" resource="0"
-            file="Source/ParametersBoxComponent.h"/>
-      <FILE id="S09fDT" name="BannerComponent.cpp" compile="1" resource="0"
-            file="Source/BannerComponent.cpp"/>
-      <FILE id="L94qFU" name="BannerComponent.h" compile="0" resource="0"
-            file="Source/BannerComponent.h"/>
-      <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
-            file="Source/FieldComponent.cpp"/>
-      <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
-            file="Source/FieldComponent.h"/>
-      <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
-            file="Source/GrisLookAndFeel.h"/>
-      <FILE id="JVPA2I" name="SinkinSans-400Regular.otf" compile="0" resource="1"
-            file="Source/SinkinSans-400Regular.otf"/>
       <FILE id="VBL5zh" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="NLKhOQ" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
-      <FILE id="E0Oz8r" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="Qwbp71" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
+      <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
+      <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
