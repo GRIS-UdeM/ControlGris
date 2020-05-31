@@ -248,7 +248,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     auto const maxLim{ mFieldWidth - minLim };
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
-    float magnitude{ sqrtf(translated.x * translated.x + translated.y * translated.y)
+    float magnitude{ std::hypotf(translated.x, translated.y)
                      * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
     float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
 
@@ -288,7 +288,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         for (int i{}; i < MAGIC_4; ++i) {
             x = sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude * 0.5f;
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude;
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -301,7 +301,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         for (int i{}; i < MAGIC_4; ++i) {
             x = -sinf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude * 0.5f;
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_5) * magnitude;
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -316,7 +316,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 * (1.0f - static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
                 * (1.0f - static_cast<float>(i) / MAGIC_2);
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -331,7 +331,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 * (1.0f - static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
                 * (1.0f - static_cast<float>(i) / MAGIC_2);
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -346,7 +346,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 * (static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
                 * (static_cast<float>(i) / MAGIC_2);
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -361,7 +361,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 * (static_cast<float>(i) / MAGIC_2);
             y = -cosf(MathConstants<float>::twoPi * static_cast<float>(i) / MAGIC_3) * magnitude
                 * (static_cast<float>(i) / MAGIC_2);
-            float const mag{ sqrtf(x * x + y * y) };
+            float const mag{ std::hypotf(x, y) };
             float const ang{ atan2f(y, x) };
             x = mag * cosf(ang - angle) + offset;
             y = mag * sinf(ang - angle) + offset;
@@ -375,7 +375,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         step = 1.0f / (mFieldWidth / 4);
         transX = translated.x * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
         transY = translated.y * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
-        magnitude = sqrtf(transX * transX + transY * transY);
+        magnitude = std::hypotf(transX, transY);
         adjustedMagnitude = magnitude * MathConstants<float>::halfPi;
         float tmp1;
         float tmp2;
@@ -429,7 +429,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         step = 1.0f / (mFieldWidth / 3.0f);
         transX = translated.x * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
         transY = translated.y * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
-        magnitude = sqrtf(transX * transX + transY * transY);
+        magnitude = std::hypotf(transX, transY);
         for (int i{}; i < fSize; ++i) {
             if (i < (fSizeOver3)) {
                 x = (p2.x - p1.x) * static_cast<float>(i) * step + p1.x;

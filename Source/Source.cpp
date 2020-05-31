@@ -144,7 +144,7 @@ void Source::computeAzimuthElevation()
         }
         mAzimuth = -ang;
     }
-    float rad{ sqrtf(x * x + y * y) };
+    float rad{ std::hypotf(x, y) };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         rad = std::clamp(rad, 0.0f, 1.0f);
         mElevationNoClip = mElevation = 90.0f - rad * 90.0f;
@@ -191,7 +191,7 @@ void Source::setFixedPosition(float const x, float const y)
         ang += 360.0f;
     }
     mFixedAzimuth = -ang;
-    auto rad{ sqrtf(fx * fx + fy * fy) };
+    auto rad{ std::hypotf(fx, fy) };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         rad = std::clamp(rad, 0.0f, 1.0f);
         mFixedElevation = 90.0f - rad * 90.0f;

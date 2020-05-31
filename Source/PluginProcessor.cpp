@@ -1142,12 +1142,12 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
 
 void ControlGrisAudioProcessor::linkPositionSourcePositions()
 {
-    float delta = SOURCE_FIELD_COMPONENT_DIAMETER / mPositionAutomationManager.getFieldWidth();
-    Point<float> autopos = mPositionAutomationManager.getSourcePosition() - Point<float>(0.5, 0.5);
-    float mag = sqrtf(autopos.x * autopos.x + autopos.y * autopos.y);
-    float ang = atan2f(autopos.y, autopos.x);
-    float const x = (mag + (mag * delta)) * cosf(ang) + 0.5;
-    float const y = (mag + (mag * delta)) * sinf(ang) + 0.5;
+    auto const delta{ SOURCE_FIELD_COMPONENT_DIAMETER / mPositionAutomationManager.getFieldWidth() };
+    Point<float> automationManagerPosition{ mPositionAutomationManager.getSourcePosition() - Point<float>(0.5, 0.5) };
+    auto mag{ std::hypotf(automationManagerPosition.x, automationManagerPosition.y) };
+    auto ang{ atan2f(automationManagerPosition.y, automationManagerPosition.x) };
+    auto const x{ (mag + (mag * delta)) * cosf(ang) + 0.5f };
+    auto const y{ (mag + (mag * delta)) * sinf(ang) + 0.5f };
     Point<float> const correctedPosition{ x, y };
 
     float deltaX = 0.0f, deltaY = 0.0f;

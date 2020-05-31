@@ -186,7 +186,7 @@ AngleVector<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_
     if (ang <= -180.0f) {
         ang += 360.0f;
     }
-    float rad = sqrtf(x * x + y * y);
+    float rad = std::hypotf(x, y);
     rad = 90.0f - rad * 90.0f;
     return AngleVector<float>{ -ang, rad };
 }
@@ -233,8 +233,8 @@ void MainFieldComponent::drawDomeSpans(Graphics & g) const
         };
 
         // Calculate min and max radius.
-        float const minRadius{ sqrtf(minElevPos.getX() * minElevPos.getX() + minElevPos.getY() * minElevPos.getY()) };
-        float const maxRadius{ sqrtf(maxElevPos.getX() * maxElevPos.getX() + maxElevPos.getY() * maxElevPos.getY()) };
+        float const minRadius{ std::hypotf(minElevPos.getX(), minElevPos.getY()) };
+        float const maxRadius{ std::hypotf(maxElevPos.getX(), maxElevPos.getY()) };
 
         // Draw the path for spanning.
         Path myPath{};

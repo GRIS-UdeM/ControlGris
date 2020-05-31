@@ -75,7 +75,7 @@ public:
     AutomationManager();
     virtual ~AutomationManager() = default;
     //==============================================================================
-    double getFieldWidth() const { return mFieldWidth; }
+    float getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
 
     void setPositionActivateState(bool state);
