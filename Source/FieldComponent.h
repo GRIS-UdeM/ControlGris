@@ -27,6 +27,7 @@
 #include "GrisLookAndFeel.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"
+#include "SourceComponent.h"
 
 //==============================================================================
 // This file defines the classes that implement the 2D view (azimuth-elevation
@@ -66,7 +67,7 @@ public:
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
     };
     //==============================================================================
-    ListenerList<Listener> listeners{};
+    ListenerList<Listener> mListeners{};
 
 protected:
     //==============================================================================
@@ -75,6 +76,7 @@ protected:
     static constexpr int NO_SELECTION_SOURCE_ID = -2;
 
     Source * mSources{};
+    OwnedArray<SourceComponent> mSourceComponents{};
 
     bool mIsPlaying{ false };
     int mNumberOfSources{};
@@ -93,12 +95,19 @@ public:
     Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
 
     void setSources(Source * sources, int numberOfSources);
+
     void setSelectedSource(int selectedId);
+    int getSelectedSourceId() const { return mSelectedSourceId; }
 
     void setIsPlaying(bool const state) { mIsPlaying = state; }
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
+
+    virtual AutomationManager & getAutomationManager() = 0;
+    virtual AutomationManager const & getAutomationManager() const = 0;
+
+    virtual void notifySourcePositionChanged(int sourceId) = 0;
 
 private:
     //==============================================================================
@@ -121,6 +130,9 @@ public:
     MainFieldComponent(PositionAutomationManager & positionAutomationManager);
     ~MainFieldComponent() final = default;
     //==============================================================================
+    AutomationManager const & getAutomationManager() const final { return mAutomationManager; }
+    AutomationManager & getAutomationManager() final { return mAutomationManager; }
+
     void drawSources(Graphics & g) const final;
     void drawSpans(Graphics & g) const;
     void drawDomeSpans(Graphics & g) const;
@@ -134,7 +146,11 @@ public:
     void mouseMove(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
 
+    void showCircularSourceSelectionWarning();
+
     void setSpatMode(SpatMode spatMode);
+
+    void notifySourcePositionChanged(int sourceId) final;
 
 private:
     //==============================================================================
@@ -164,12 +180,17 @@ public:
     }
     ~ElevationFieldComponent() final = default;
     //==============================================================================
+    AutomationManager const & getAutomationManager() const final { return mAutomationManager; }
+    AutomationManager & getAutomationManager() final { return mAutomationManager; }
+
     void paint(Graphics & g) final;
     void drawSources(Graphics & g) const final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
+
+    void notifySourcePositionChanged(int sourceId) final;
 
 private:
     //==============================================================================

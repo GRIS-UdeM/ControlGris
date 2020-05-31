@@ -131,6 +131,8 @@ void Source::computeXY()
     mY = radius * cosf(degreeToRadian(mAzimuth));
     mY = mY * 0.5f + 0.5f;
     mY = std::clamp(mY, 0.0f, 1.0f);
+
+    this->sendChangeMessage();
 }
 
 void Source::computeAzimuthElevation()
@@ -152,6 +154,8 @@ void Source::computeAzimuthElevation()
         rad = std::max(rad, 0.0f);
         mDistanceNoClip = mDistance = rad;
     }
+
+    this->sendChangeMessage();
 }
 
 void Source::fixSourcePosition(bool const shouldBeFixed)

@@ -26,7 +26,7 @@
 #include "Source.h"
 
 //==============================================================================
-class SourceBoxComponent final : public Component
+class SourceBoxComponent final : public juce::Component
 {
 public:
     //==============================================================================

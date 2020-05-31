@@ -52,6 +52,10 @@
               file="Source/SourceBoxComponent.cpp"/>
         <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
               file="Source/SourceBoxComponent.h"/>
+        <FILE id="IAXjb2" name="SourceComponent.cpp" compile="1" resource="0"
+              file="Source/SourceComponent.cpp"/>
+        <FILE id="BtcY2C" name="SourceComponent.h" compile="0" resource="0"
+              file="Source/SourceComponent.h"/>
         <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
               file="Source/TrajectoryBoxComponent.cpp"/>
         <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"

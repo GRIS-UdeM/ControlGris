@@ -30,7 +30,7 @@ constexpr float SOURCE_FIELD_COMPONENT_RADIUS = 12.0f;
 constexpr float SOURCE_FIELD_COMPONENT_DIAMETER = SOURCE_FIELD_COMPONENT_RADIUS * 2.0f;
 
 //==============================================================================
-class Source
+class Source : public juce::ChangeBroadcaster
 {
 private:
     //==============================================================================

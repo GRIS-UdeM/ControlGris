@@ -33,6 +33,13 @@ void FieldComponent::setSources(Source * sources, int const numberOfSources)
 {
     mSources = sources;
     mNumberOfSources = numberOfSources;
+
+    mSourceComponents.clearQuick(true);
+    for (int i{}; i < numberOfSources; ++i) {
+        mSourceComponents.add(new SourceComponent{ *this, sources[i] });
+        addAndMakeVisible(mSourceComponents.getLast());
+    }
+
     mSelectedSourceId = 0;
     mOldSelectedSourceId = 0;
     for (int i{}; i < mNumberOfSources; ++i) {
@@ -48,58 +55,63 @@ void FieldComponent::setSources(Source * sources, int const numberOfSources)
 
 void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, SpatMode const spatMode) const
 {
-    int const width{ getWidth() };
-    int const height{ getHeight() };
-    float const fieldCenter{ width / 2.0f };
+    auto const fieldComponentSize{ getWidth() };
+    auto const fieldCenter{ fieldComponentSize / 2.0f };
 
     auto * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
 
     // Draw the background.
     g.setColour(lookAndFeel->getFieldColour());
-    g.fillRect(0, 0, width, height);
+    g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
     g.setColour(Colours::black);
-    g.drawRect(0, 0, width, height);
+    g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
 
     // Draw the grid.
     g.setColour(Colour::fromRGB(55, 56, 57));
     constexpr int gridCount = 8;
     for (int i{ 1 }; i < gridCount; ++i) {
-        g.drawLine(width * i / gridCount, 0, height * i / gridCount, height);
-        g.drawLine(0, height * i / gridCount, width, height * i / gridCount);
+        g.drawLine(fieldComponentSize * i / gridCount, 0, fieldComponentSize * i / gridCount, fieldComponentSize);
+        g.drawLine(0, fieldComponentSize * i / gridCount, fieldComponentSize, fieldComponentSize * i / gridCount);
     }
-    g.drawLine(0, 0, height, height);
-    g.drawLine(0, height, height, 0);
+    g.drawLine(0, 0, fieldComponentSize, fieldComponentSize);
+    g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
 
     if (isMainField) {
         g.setColour(lookAndFeel->getLightColour());
         if (spatMode == SpatMode::dome) {
             // Draw big background circles.
             for (int i{ 1 }; i < 3; ++i) {
-                float const w{ i / 2.0f * (width - SOURCE_FIELD_COMPONENT_DIAMETER) };
-                float const x{ (width - w) / 2.0f };
+                float const w{ i / 2.0f * (fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER) };
+                float const x{ (fieldComponentSize - w) / 2.0f };
                 g.drawEllipse(x, x, w, w, 1);
             }
 
             // Draw center dot.
-            float const w{ 0.0125f * (width - SOURCE_FIELD_COMPONENT_DIAMETER) };
-            float const x{ (width - w) / 2.0f };
+            float const w{ 0.0125f * (fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER) };
+            float const x{ (fieldComponentSize - w) / 2.0f };
             g.drawEllipse(x, x, w, w, 1);
         } else {
             // Draw big background squares.
-            float const offset{ width * 0.2f };
-            float const size{ width * 0.6f };
+            float const offset{ fieldComponentSize * 0.2f };
+            float const size{ fieldComponentSize * 0.6f };
             g.drawRect(offset, offset, size, size);
-            g.drawRect(10, 10, width - 20, width - 20);
+            g.drawRect(10, 10, fieldComponentSize - 20, fieldComponentSize - 20);
         }
 
         // Draw cross.
-        g.drawLine(fieldCenter, SOURCE_FIELD_COMPONENT_RADIUS, fieldCenter, height - SOURCE_FIELD_COMPONENT_RADIUS);
-        g.drawLine(SOURCE_FIELD_COMPONENT_RADIUS, height / 2, width - SOURCE_FIELD_COMPONENT_RADIUS, height / 2);
+        g.drawLine(fieldCenter,
+                   SOURCE_FIELD_COMPONENT_RADIUS,
+                   fieldCenter,
+                   fieldComponentSize - SOURCE_FIELD_COMPONENT_RADIUS);
+        g.drawLine(SOURCE_FIELD_COMPONENT_RADIUS,
+                   fieldComponentSize / 2,
+                   fieldComponentSize - SOURCE_FIELD_COMPONENT_RADIUS,
+                   fieldComponentSize / 2);
     } else {
         // Draw guide lines
         g.setColour(lookAndFeel->getLightColour());
-        g.drawVerticalLine(5, 5, height - 5);
-        g.drawHorizontalLine(height - 5, 5, width - 5);
+        g.drawVerticalLine(5, 5, fieldComponentSize - 5);
+        g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize - 5);
     }
 }
 
@@ -126,6 +138,11 @@ Point<float> FieldComponent::xyToPos(Point<float> const & p, int const p_iwidth)
     return Point<float>(x, y);
 }
 
+void MainFieldComponent::notifySourcePositionChanged(int sourceId)
+{
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceId, 0); });
+}
+
 void MainFieldComponent::drawSources(Graphics & g) const
 {
     for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
@@ -140,15 +157,15 @@ void MainFieldComponent::drawSources(Graphics & g) const
         }
         Rectangle<float> area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
         area.expand(lineThickness, lineThickness);
-        g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+        g.setColour(Colour{ .2f, .2f, .2f, 1.0f });
         g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(ColourGradient(mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
-                                         pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         mSources[sourceId].getColour().withSaturation(saturation),
-                                         pos.x,
-                                         pos.y,
-                                         true));
+        g.setGradientFill(ColourGradient{ mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
+                                          pos.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                          pos.y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                          mSources[sourceId].getColour().withSaturation(saturation),
+                                          pos.x,
+                                          pos.y,
+                                          true });
         g.fillEllipse(area);
         g.setColour(Colours::white);
         g.drawFittedText(String(mSources[sourceId].getId() + 1),
@@ -159,7 +176,8 @@ void MainFieldComponent::drawSources(Graphics & g) const
 }
 
 //==============================================================================
-MainFieldComponent::MainFieldComponent(PositionAutomationManager & automan) : mAutomationManager(automan)
+MainFieldComponent::MainFieldComponent(PositionAutomationManager & positionAutomationManager)
+    : mAutomationManager(positionAutomationManager)
 {
     mSpatMode = SpatMode::dome;
     mLineDrawingAnchor1 = INVALID_POINT;
@@ -326,6 +344,12 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     }
 }
 
+void MainFieldComponent::showCircularSourceSelectionWarning()
+{
+    mShowCircularSourceSelectionWarning = true;
+    repaint();
+}
+
 void MainFieldComponent::paint(Graphics & g)
 {
     int const width{ getWidth() };
@@ -358,7 +382,7 @@ void MainFieldComponent::paint(Graphics & g)
     }
 
     // Draw sources.
-    this->drawSources(g);
+    //    this->drawSources(g);
 
     // Draw spanning.
     this->drawSpans(g);
@@ -374,6 +398,7 @@ void MainFieldComponent::paint(Graphics & g)
                          juce::Rectangle<int>(0, 0, width, 50),
                          Justification(Justification::centred),
                          1);
+        mShowCircularSourceSelectionWarning = false;
     }
 }
 
@@ -399,7 +424,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
                 if (event.mods.isShiftDown())
                     mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
             } else {
-                listeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(0); });
+                mListeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(0); });
             }
             repaint();
             return true;
@@ -421,8 +446,9 @@ void MainFieldComponent::drawSpans(Graphics & g) const
 
 void MainFieldComponent::mouseDown(MouseEvent const & event)
 {
-    int const width{ getWidth() };
-    int const height{ getHeight() };
+    jassert(getWidth() == getHeight());
+
+    auto const fieldComponentSize{ getWidth() };
 
     if (hasValidLineDrawingAnchor1()) {
         Point<float> const anchor1{ mLineDrawingAnchor1 };
@@ -449,7 +475,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
         mLineDrawingAnchor2 = INVALID_POINT;
     }
 
-    Point<int> const mouseLocation{ event.x, height - event.y };
+    Point<int> const mouseLocation{ event.x, fieldComponentSize - event.y };
 
     mSelectedSourceId = NO_SELECTION_SOURCE_ID;
 
@@ -461,33 +487,34 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     }
 
     // Check if we click on a new source.
-    bool clickOnSource = false;
-    for (int i{}; i < mNumberOfSources; ++i) {
-        Point<float> pos;
-        if (mSpatMode == SpatMode::dome) {
-            pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
-        } else {
-            pos = posToXy(mSources[i].getPos(), width);
-        }
-        Rectangle<float> area
-            = Rectangle<float>(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
-        if (area.contains(event.getMouseDownPosition().toFloat())) {
-            if (i > 0 && mAutomationManager.getSourceLink() != PositionSourceLink::independent
-                && mAutomationManager.getSourceLink() != PositionSourceLink::circularDeltaLock) {
-                mShowCircularSourceSelectionWarning = true;
-            } else {
-                mSelectedSourceId = i;
-                listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
-                clickOnSource = true;
-            }
-            break;
-        }
-    }
-
-    if (clickOnSource) {
-        repaint();
-        return;
-    }
+    //    bool clickOnSource = false;
+    //     for (int i{}; i < mNumberOfSources; ++i) {
+    //         Point<float> pos;
+    //         if (mSpatMode == SpatMode::dome) {
+    //             pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() },
+    //             fieldComponentSize);
+    //         } else {
+    //             pos = posToXy(mSources[i].getPos(), fieldComponentSize);
+    //         }
+    //         Rectangle<float> area
+    //             = Rectangle<float>(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
+    //         if (area.contains(event.getMouseDownPosition().toFloat())) {
+    //             if (i > 0 && mAutomationManager.getSourceLink() != PositionSourceLink::independent
+    //                 && mAutomationManager.getSourceLink() != PositionSourceLink::circularDeltaLock) {
+    //                 mShowCircularSourceSelectionWarning = true;
+    //             } else {
+    //                 mSelectedSourceId = i;
+    //                 mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
+    //                 clickOnSource = true;
+    //             }
+    //             break;
+    //         }
+    //     }
+    //
+    //    if (clickOnSource) {
+    //        repaint();
+    //        return;
+    //    }
 
     // If clicked in an empty space while in mode DRAWING, start a new drawing.
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
@@ -508,83 +535,85 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
         return;
     }
 
-    auto const width{ getWidth() };
-    auto const height{ getHeight() };
-
-    Point<int> const mousePosition{ event.x, height - event.y };
-
-    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource()
-                                                                            : &mSources[mSelectedSourceId] };
-
-    if (mSpatMode == SpatMode::dome) {
-        auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
-        selectedSource->setAzimuth(pos.angle);
-        selectedSource->setElevationNoClip(pos.distance);
-    } else {
-        Point<float> const pos{ xyToPos(mousePosition.toFloat(), width) };
-        selectedSource->setX(pos.x);
-        selectedSource->setY(pos.y);
-    }
-
-    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
-            if (hasValidLineDrawingAnchor1()) {
-                mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
-            } else {
-                mAutomationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
-            }
-        } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-            mAutomationManager.sendTrajectoryPositionChangedEvent();
-        }
-    } else {
-        listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
-    }
-
-    bool needToAdjustAutomationManager{ false };
-    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
-        && (mAutomationManager.getSourceLink() == PositionSourceLink::independent
-            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
-            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
-        needToAdjustAutomationManager = true;
-    } else if (mAutomationManager.getSourceLink() >= PositionSourceLink::circular
-               && mAutomationManager.getSourceLink() < PositionSourceLink::circularDeltaLock
-               && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-        needToAdjustAutomationManager = true;
-    }
-
-    if (needToAdjustAutomationManager) {
-        if (mSpatMode == SpatMode::dome) {
-            mAutomationManager.getSource().setAzimuth(mSources[0].getAzimuth());
-            mAutomationManager.getSource().setElevation(mSources[0].getElevation());
-        } else {
-            mAutomationManager.getSource().setX(mSources[0].getX());
-            mAutomationManager.getSource().setY(mSources[0].getY());
-        }
-        mAutomationManager.sendTrajectoryPositionChangedEvent();
-    }
-
-    repaint();
+    //    auto const width{ getWidth() };
+    //    auto const height{ getHeight() };
+    //
+    //    Point<int> const mousePosition{ event.x, height - event.y };
+    //
+    //    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource()
+    //                                                                            : &mSources[mSelectedSourceId] };
+    //
+    //    if (mSpatMode == SpatMode::dome) {
+    //        auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
+    //        selectedSource->setAzimuth(pos.angle);
+    //        selectedSource->setElevationNoClip(pos.distance);
+    //    } else {
+    //        Point<float> const pos{ xyToPos(mousePosition.toFloat(), width) };
+    //        selectedSource->setX(pos.x);
+    //        selectedSource->setY(pos.y);
+    //    }
+    //
+    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
+    //        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
+    //            if (hasValidLineDrawingAnchor1()) {
+    //                mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
+    //            } else {
+    //                mAutomationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
+    //            }
+    //        } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+    //            mAutomationManager.sendTrajectoryPositionChangedEvent();
+    //        }
+    //    } else {
+    //        mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
+    //    }
+    //
+    //    bool needToAdjustAutomationManager{ false };
+    //    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
+    //        && (mAutomationManager.getSourceLink() == PositionSourceLink::independent
+    //            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
+    //            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
+    //        needToAdjustAutomationManager = true;
+    //    } else if (mAutomationManager.getSourceLink() >= PositionSourceLink::circular
+    //               && mAutomationManager.getSourceLink() < PositionSourceLink::circularDeltaLock
+    //               && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+    //        needToAdjustAutomationManager = true;
+    //    }
+    //
+    //    if (needToAdjustAutomationManager) {
+    //        if (mSpatMode == SpatMode::dome) {
+    //            mAutomationManager.getSource().setAzimuth(mSources[0].getAzimuth());
+    //            mAutomationManager.getSource().setElevation(mSources[0].getElevation());
+    //        } else {
+    //            mAutomationManager.getSource().setX(mSources[0].getX());
+    //            mAutomationManager.getSource().setY(mSources[0].getY());
+    //        }
+    //        mAutomationManager.sendTrajectoryPositionChangedEvent();
+    //    }
+    //
+    //    repaint();
 }
 
 void MainFieldComponent::mouseMove(const MouseEvent & event)
 {
-    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID
-        && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && hasValidLineDrawingAnchor1()) {
-        mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
-        repaint();
-    }
+    // TODO: mouse move shouldnt do anything right?
+    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID
+    //        && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing &&
+    //        hasValidLineDrawingAnchor1()) { mLineDrawingAnchor2 =
+    //        clipRecordingPosition(event.getPosition()).toFloat(); repaint();
+    //    }
 }
 
 void MainFieldComponent::mouseUp(const MouseEvent & event)
 {
-    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !event.mods.isShiftDown()) {
-            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
-            mSelectedSourceId = mOldSelectedSourceId;
-        }
-        repaint();
-    }
-    mShowCircularSourceSelectionWarning = false;
+    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
+    //        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing &&
+    //        !event.mods.isShiftDown()) {
+    //            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
+    //            mSelectedSourceId = mOldSelectedSourceId;
+    //        }
+    //        repaint();
+    //    }
+    //    mShowCircularSourceSelectionWarning = false;
 }
 
 Point<int> MainFieldComponent::clipRecordingPosition(Point<int> const & pos)
@@ -729,7 +758,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
         Rectangle<float> const area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mSelectedSourceId = i;
-            listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 1); });
+            mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 1); });
             clickOnSource = true;
             break;
         }
@@ -754,7 +783,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
                 mCurrentRecordingPositionX = 10 + SOURCE_FIELD_COMPONENT_RADIUS;
                 mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
             } else {
-                listeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(1); });
+                mListeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(1); });
             }
             repaint();
             return;
@@ -771,6 +800,11 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
             Point<float>{ static_cast<float>(mCurrentRecordingPositionX), event.getMouseDownPosition().toFloat().y });
         repaint();
     }
+}
+
+void ElevationFieldComponent::notifySourcePositionChanged(int sourceId)
+{
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceId, 1); });
 }
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
@@ -806,7 +840,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     } else {
         float const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
         mSources[mSelectedSourceId].setElevation(elevation);
-        listeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 1); });
+        mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 1); });
     }
 
     bool needToAdjustAutomationManager{ false };
