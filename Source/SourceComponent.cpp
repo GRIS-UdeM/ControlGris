@@ -59,7 +59,12 @@ void SourceComponent::updatePositionInParent()
     auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
     auto const effectiveFieldComponentSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    auto const newCenter{ (mSource.getPos() * effectiveFieldComponentSize)
+    auto const sourcePosition{ mSource.getPos() };
+    auto const distanceFromOrigin{ sourcePosition.getDistanceFrom(Point<float>{ 0.5f, 0.5f }) };
+    if (distanceFromOrigin > 0.55f) {
+        jassertfalse;
+    }
+    auto const newCenter{ (sourcePosition * effectiveFieldComponentSize)
                               .translated(SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS) };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }

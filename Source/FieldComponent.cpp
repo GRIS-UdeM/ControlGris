@@ -22,6 +22,11 @@
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
 
+FieldComponent::FieldComponent()
+{
+    setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
+}
+
 void FieldComponent::setSelectedSource(int const selectedId)
 {
     mSelectedSourceId = selectedId;

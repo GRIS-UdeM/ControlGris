@@ -85,7 +85,7 @@ protected:
 
 public:
     //==============================================================================
-    FieldComponent() = default;
+    FieldComponent();
     ~FieldComponent() override { setLookAndFeel(nullptr); }
     //==============================================================================
     void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::dome) const;

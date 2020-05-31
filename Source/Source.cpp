@@ -24,18 +24,16 @@
 
 void Source::setAzimuth(float const azimuth)
 {
-    mAzimuth = azimuth;
-    computeXY();
+    if (azimuth != mAzimuth) {
+        mAzimuth = azimuth;
+        computeXY();
+    }
 }
 
-void Source::setNormalizedAzimuth(float const value)
+void Source::setNormalizedAzimuth(float const normalizedAzimuth)
 {
-    if (value <= 0.5f) {
-        mAzimuth = value * 360.0f;
-    } else {
-        mAzimuth = (value - 1.0f) * 360.0f;
-    }
-    computeXY();
+    float const azimuth{ normalizedAzimuth <= 0.5f ? normalizedAzimuth * 360.0f : (normalizedAzimuth - 1.0f) * 360.0f };
+    this->setAzimuth(azimuth);
 }
 
 float Source::getNormalizedAzimuth() const
@@ -52,15 +50,16 @@ void Source::setElevationNoClip(float elevation)
 
 void Source::setElevation(float const elevation)
 {
-    if (elevation < 0.0f) {
-        mElevation = 0.0f;
-    } else if (elevation > 90.0f) {
-        mElevation = 90.0f;
-    } else {
-        mElevation = elevation;
-        mElevationNoClip = elevation;
+    auto const clippedElevation{ std::clamp(elevation, 0.0f, 90.0f) };
+    if (clippedElevation != mElevation) {
+        if (clippedElevation != elevation) {
+            mElevation = clippedElevation;
+        } else {
+            mElevation = clippedElevation;
+            mElevationNoClip = elevation;
+        }
+        computeXY();
     }
-    computeXY();
 }
 
 void Source::setDistanceNoClip(float const distance)
@@ -71,21 +70,28 @@ void Source::setDistanceNoClip(float const distance)
 
 void Source::setDistance(float const distance)
 {
-    if (distance < 0.0f) {
-        mDistance = 0.0f;
-    } else {
-        mDistanceNoClip = mDistance = distance;
+    auto const clippedDistance{ std::max(distance, 0.0f) };
+
+    if (clippedDistance != mDistance) {
+        if (clippedDistance != distance) {
+            mDistance = clippedDistance;
+        } else {
+            mDistance = clippedDistance;
+            mDistanceNoClip = clippedDistance;
+        }
+        computeXY();
     }
-    computeXY();
 }
 
 void Source::setCoordinates(float const azimuth, float const elevation, float const distance)
 {
-    mAzimuth = azimuth;
-    mElevation = elevation;
-    mDistance = distance;
-    computeXY();
-    computeAzimuthElevation();
+    if (azimuth != mAzimuth || elevation != mElevation || distance != mDistance) {
+        mAzimuth = azimuth;
+        mElevation = elevation;
+        mDistance = distance;
+        computeXY();
+        computeAzimuthElevation();
+    }
 }
 
 void Source::setAzimuthSpan(float const azimuthSpan)
@@ -100,21 +106,27 @@ void Source::setElevationSpan(float const elevationSpan)
 
 void Source::setX(float const x)
 {
-    mX = x;
-    computeAzimuthElevation();
+    if (x != mX) {
+        mX = x;
+        computeAzimuthElevation();
+    }
 }
 
 void Source::setY(float const y)
 {
-    mY = y;
-    computeAzimuthElevation();
+    if (y != mY) {
+        mY = y;
+        computeAzimuthElevation();
+    }
 }
 
 void Source::setPos(Point<float> const & pos)
 {
-    mX = pos.x;
-    mY = pos.y;
-    computeAzimuthElevation();
+    if (pos.getX() != mX || pos.getY() != mY) {
+        mX = pos.x;
+        mY = pos.y;
+        computeAzimuthElevation();
+    }
 }
 
 void Source::computeXY()
@@ -122,6 +134,7 @@ void Source::computeXY()
     float radius;
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         radius = (90.0f - mElevation) / 90.0f;
+        jassert(radius >= 0.0f && radius <= 1.0f);
     } else { // azimuth - distance
         radius = mDistance;
     }
@@ -148,7 +161,7 @@ void Source::computeAzimuthElevation()
     }
     auto const radius{ std::hypotf(x, y) };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
-        auto const clippedRadius{ std::clamp(radius, 0.0f, 1.0f) };
+        auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
             mX = -sinf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
             mY = -cosf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
@@ -220,7 +233,6 @@ void Source::setCoordinatesFromFixedSource(float const deltaAzimuth,
         setAzimuth(mFixedAzimuth + deltaAzimuth);
         setDistanceNoClip(mFixedDistance + deltaDistance);
     }
-    computeXY();
 }
 
 void Source::setSymmetricX(float const x, float const y)
@@ -241,5 +253,4 @@ void Source::setXYCoordinatesFromFixedSource(float const deltaX, float const del
     auto const y{ std::clamp(mFixedY + deltaY, 0.0f, 1.0f) };
     setX(x);
     setY(y);
-    computeAzimuthElevation();
 }
