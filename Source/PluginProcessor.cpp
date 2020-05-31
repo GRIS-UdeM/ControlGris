@@ -139,7 +139,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mNumOfSources = 2;
     mFirstSourceId = 1;
     mSelectedSourceId = 1;
-    mSelectedOscFormat = SpatMode::VBAP;
+    mSelectedOscFormat = SpatMode::dome;
     mCurrentOSCPort = 18032;
     mLastConnectedOSCPort = -1;
     mOscConnected = true;
@@ -252,7 +252,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
         needToLinkSourcePositions = true;
-    } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSelectedOscFormat == SpatMode::LBAP) {
+    } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSelectedOscFormat == SpatMode::cube) {
         mElevationAutomationManager.setPlaybackPositionY(newValue);
         linkElevationSourcePositions();
     }
@@ -374,7 +374,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value
 void ControlGrisAudioProcessor::onSourceLinkChanged(PositionSourceLink value)
 {
     if (value == PositionSourceLink::circularFixedRadius || value == PositionSourceLink::circularFullyFixed) {
-        if (mSelectedOscFormat == SpatMode::LBAP) {
+        if (mSelectedOscFormat == SpatMode::cube) {
             for (int i{ 1 }; i < mNumOfSources; ++i) {
                 mSources[i].setDistance(mSources[0].getDistance());
             }
@@ -424,7 +424,7 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(PositionSourceLink value)
 
 void ControlGrisAudioProcessor::onElevationSourceLinkChanged(ElevationSourceLink value)
 {
-    if (getOscFormat() == SpatMode::LBAP) {
+    if (getOscFormat() == SpatMode::cube) {
         // Fixed elevation.
         if (value == ElevationSourceLink::fixedElevation) {
             for (int i{ 1 }; i < mNumOfSources; ++i) {
@@ -454,12 +454,12 @@ void ControlGrisAudioProcessor::onElevationSourceLinkChanged(ElevationSourceLink
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setOscFormat(SpatMode oscFormat)
+void ControlGrisAudioProcessor::setOscFormat(SpatMode const oscFormat)
 {
     mSelectedOscFormat = oscFormat;
     mParameters.state.setProperty("oscFormat", static_cast<int>(mSelectedOscFormat), nullptr);
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        mSources[i].setRadiusIsElevation(mSelectedOscFormat != SpatMode::LBAP);
+        mSources[i].setSpatMode(oscFormat);
     }
 }
 
@@ -546,7 +546,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
                                - mSources[i].getElevation() / 360.0f * MathConstants<float>::twoPi };
         float const azimuthSpan{ mSources[i].getAzimuthSpan() * 2.0f };
         float const elevationSpan{ mSources[i].getElevationSpan() * 0.5f };
-        float const distance{ mSelectedOscFormat == SpatMode::LBAP ? mSources[i].getDistance() / 0.6f
+        float const distance{ mSelectedOscFormat == SpatMode::cube ? mSources[i].getDistance() / 0.6f
                                                                    : mSources[i].getDistance() };
 
         // std::cout << "Sending osc for source #" << i << ":\n\tazimuth: " << azimuth << "\n\televation: " << elevation
@@ -949,7 +949,7 @@ void ControlGrisAudioProcessor::timerCallback()
     }
 
     // ElevationField automation.
-    if (getOscFormat() == SpatMode::LBAP && mElevationAutomationManager.getPositionActivateState()) {
+    if (getOscFormat() == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
         if (static_cast<ElevationTrajectoryType>(mElevationAutomationManager.getTrajectoryType())
             == ElevationTrajectoryType::realtime) {
             //...
@@ -1018,7 +1018,7 @@ void ControlGrisAudioProcessor::setPluginState()
 void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichField)
 {
     if (whichField == 0) {
-        if (getOscFormat() == SpatMode::LBAP) {
+        if (getOscFormat() == SpatMode::cube) {
             setSourceParameterValue(sourceId, SourceParameter::azimuth, mSources[sourceId].getNormalizedAzimuth());
             setSourceParameterValue(sourceId, SourceParameter::distance, mSources[sourceId].getDistance());
         } else {
@@ -1041,7 +1041,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
                                                          mSources[0].getPos());
         }
     }
-    if (whichField == 1 && getOscFormat() == SpatMode::LBAP) {
+    if (whichField == 1 && getOscFormat() == SpatMode::cube) {
         if (sourceId != 0) {
             float sourceElevation = mSources[sourceId].getElevation();
             float offset = 60.0f / mNumOfSources * sourceId;
@@ -1160,7 +1160,7 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
     case PositionSourceLink::circularFixedAngle:
     case PositionSourceLink::circularFullyFixed:
         mSources[0].setPos(correctedPosition);
-        if (getOscFormat() == SpatMode::LBAP) {
+        if (getOscFormat() == SpatMode::cube) {
             float deltaAzimuth = mSources[0].getDeltaAzimuth();
             float deltaDistance = mSources[0].getDeltaDistance();
             for (int i{ 1 }; i < mNumOfSources; ++i) {
@@ -1251,7 +1251,7 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
 
     // All circular modes.
     if (sourceLink >= PositionSourceLink::circular && sourceLink < PositionSourceLink::circularDeltaLock) {
-        if (getOscFormat() == SpatMode::LBAP) {
+        if (getOscFormat() == SpatMode::cube) {
             float deltaAzimuth = mSources[0].getDeltaAzimuth();
             float deltaDistance = mSources[0].getDeltaDistance();
             for (int i{ 1 }; i < mNumOfSources; ++i) {
@@ -1384,7 +1384,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         newData->setAttribute(getFixedPosSourceName(i, 0), mSources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), mSources[i].getY());
-        if (mSelectedOscFormat == SpatMode::LBAP) {
+        if (mSelectedOscFormat == SpatMode::cube) {
             newData->setAttribute(getFixedPosSourceName(i, 2), mSources[i].getNormalizedElevation());
         }
     }
@@ -1435,7 +1435,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
         y = mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1));
         mSources[i].setPos(Point<float>(x, y));
         mSources[i].setFixedPosition(x, y);
-        if (mSelectedOscFormat == SpatMode::LBAP) {
+        if (mSelectedOscFormat == SpatMode::cube) {
             z = mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 2));
             mSources[i].setFixedElevation(z);
             mSources[i].setNormalizedElevation(z);

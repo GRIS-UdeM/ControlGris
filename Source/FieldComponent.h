@@ -86,7 +86,7 @@ public:
     FieldComponent() = default;
     ~FieldComponent() override { setLookAndFeel(nullptr); }
     //==============================================================================
-    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::VBAP) const;
+    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::dome) const;
     virtual void drawSources(Graphics & g) const = 0;
 
     Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;

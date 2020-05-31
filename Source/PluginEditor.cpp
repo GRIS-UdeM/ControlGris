@@ -239,7 +239,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
 {
     mSettingsBox.setOscFormat(mode);
     mProcessor.setOscFormat(mode);
-    bool selectionIsLBAP = mode == SpatMode::LBAP;
+    bool selectionIsLBAP = mode == SpatMode::cube;
     mParametersBox.setDistanceEnabled(selectionIsLBAP);
     mPositionField.setSpatMode(mode);
     mTrajectoryBox.setSpatMode(mode);
@@ -295,7 +295,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstS
     mSourceBox.setNumberOfSources(mProcessor.getNumberOfSources(), firstSourceId);
 
     mPositionField.repaint();
-    if (mProcessor.getOscFormat() == SpatMode::LBAP)
+    if (mProcessor.getOscFormat() == SpatMode::cube)
         mElevationField.repaint();
 }
 
@@ -322,7 +322,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     float const azims6[6] = { -30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f };
     float const azims8[8] = { -22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f };
 
-    bool isLBAP = mProcessor.getOscFormat() == SpatMode::LBAP;
+    bool isLBAP = mProcessor.getOscFormat() == SpatMode::cube;
 
     float offset = 360.0f / numOfSources / 2.0f;
     float distance = isLBAP ? 0.7f : 1.0f;
@@ -440,7 +440,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen)
 {
-    if (mProcessor.getOscFormat() == SpatMode::LBAP) {
+    if (mProcessor.getOscFormat() == SpatMode::cube) {
         float currentElevation = mProcessor.getSources()[sourceNum].getElevation();
         mProcessor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
     } else {
@@ -463,7 +463,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParame
     mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, value);
 
     mPositionField.repaint();
-    if (mProcessor.getOscFormat() == SpatMode::LBAP)
+    if (mProcessor.getOscFormat() == SpatMode::cube)
         mElevationField.repaint();
 }
 
@@ -582,7 +582,7 @@ void ControlGrisAudioProcessorEditor::refresh()
     mElevationField.setIsPlaying(mProcessor.getIsPlaying());
 
     mPositionField.repaint();
-    if (mProcessor.getOscFormat() == SpatMode::LBAP)
+    if (mProcessor.getOscFormat() == SpatMode::cube)
         mElevationField.repaint();
 
     if (mTrajectoryBox.getPositionActivateState() != mPositionAutomationManager.getPositionActivateState()) {
@@ -689,7 +689,7 @@ void ControlGrisAudioProcessorEditor::resized()
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (mProcessor.getOscFormat() == SpatMode::LBAP) {
+    if (mProcessor.getOscFormat() == SpatMode::cube) {
         mMainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);

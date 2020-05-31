@@ -72,7 +72,7 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, S
 
     if (isMainField) {
         g.setColour(lookAndFeel->getLightColour());
-        if (spatMode == SpatMode::VBAP) {
+        if (spatMode == SpatMode::dome) {
             // Draw big background circles.
             for (int i{ 1 }; i < 3; ++i) {
                 float const w{ i / 2.0f * (width - SOURCE_FIELD_COMPONENT_DIAMETER) };
@@ -132,7 +132,7 @@ void MainFieldComponent::drawSources(Graphics & g) const
         int const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
         float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
         Point<float> pos;
-        if (mSpatMode == SpatMode::VBAP) {
+        if (mSpatMode == SpatMode::dome) {
             pos = degreeToXy(AngleVector<float>{ mSources[sourceId].getAzimuth(), mSources[sourceId].getElevation() },
                              this->getWidth());
         } else {
@@ -161,7 +161,7 @@ void MainFieldComponent::drawSources(Graphics & g) const
 //==============================================================================
 MainFieldComponent::MainFieldComponent(PositionAutomationManager & automan) : mAutomationManager(automan)
 {
-    mSpatMode = SpatMode::VBAP;
+    mSpatMode = SpatMode::dome;
     mLineDrawingAnchor1 = INVALID_POINT;
     mLineDrawingAnchor2 = INVALID_POINT;
 }
@@ -306,7 +306,7 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
 
     if (shouldDrawTrajectoryHandle) {
         Point<float> rpos;
-        if (mSpatMode == SpatMode::VBAP) {
+        if (mSpatMode == SpatMode::dome) {
             rpos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
                                                   mAutomationManager.getSource().getElevation() },
                               width);
@@ -383,7 +383,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
         || mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         Point<float> pos;
-        if (mSpatMode == SpatMode::VBAP) {
+        if (mSpatMode == SpatMode::dome) {
             pos = degreeToXy(AngleVector<float>{ mAutomationManager.getSource().getAzimuth(),
                                                  mAutomationManager.getSource().getElevation() },
                              width);
@@ -412,7 +412,7 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
 
 void MainFieldComponent::drawSpans(Graphics & g) const
 {
-    if (mSpatMode == SpatMode::VBAP) {
+    if (mSpatMode == SpatMode::dome) {
         drawDomeSpans(g);
     } else {
         drawCubeSpans(g);
@@ -464,7 +464,7 @@ void MainFieldComponent::mouseDown(MouseEvent const & event)
     bool clickOnSource = false;
     for (int i{}; i < mNumberOfSources; ++i) {
         Point<float> pos;
-        if (mSpatMode == SpatMode::VBAP) {
+        if (mSpatMode == SpatMode::dome) {
             pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() }, width);
         } else {
             pos = posToXy(mSources[i].getPos(), width);
@@ -516,7 +516,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource()
                                                                             : &mSources[mSelectedSourceId] };
 
-    if (mSpatMode == SpatMode::VBAP) {
+    if (mSpatMode == SpatMode::dome) {
         auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
         selectedSource->setAzimuth(pos.angle);
         selectedSource->setElevationNoClip(pos.distance);
@@ -553,7 +553,7 @@ void MainFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (needToAdjustAutomationManager) {
-        if (mSpatMode == SpatMode::VBAP) {
+        if (mSpatMode == SpatMode::dome) {
             mAutomationManager.getSource().setAzimuth(mSources[0].getAzimuth());
             mAutomationManager.getSource().setElevation(mSources[0].getElevation());
         } else {

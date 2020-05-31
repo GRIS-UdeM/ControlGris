@@ -22,7 +22,7 @@
 
 TrajectoryBoxComponent::TrajectoryBoxComponent()
 {
-    mSpatMode = SpatMode::VBAP;
+    mSpatMode = SpatMode::dome;
 
     mSourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourceLinkLabel);
@@ -339,7 +339,7 @@ void TrajectoryBoxComponent::resized()
     mDeviationEditor.setBounds(115, 100, 75, 20);
     mPositionActivateButton.setBounds(114, 130, 176, 20);
 
-    if (mSpatMode == SpatMode::LBAP) {
+    if (mSpatMode == SpatMode::cube) {
         mElevationSourceLinkCombo.setVisible(true);
         mElevationTracjectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);

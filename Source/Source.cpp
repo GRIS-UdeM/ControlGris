@@ -122,7 +122,7 @@ void Source::setPos(Point<float> const & pos)
 void Source::computeXY()
 {
     float radius;
-    if (mRadiusIsElevation) { // azimuth - elevation
+    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         radius = (90.0f - mElevation) / 90.0f;
     } else { // azimuth - distance
         radius = mDistance;
@@ -148,7 +148,7 @@ void Source::computeAzimuthElevation()
         mAzimuth = -ang;
     }
     float rad{ sqrtf(x * x + y * y) };
-    if (mRadiusIsElevation) { // azimuth - elevation
+    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         rad = std::clamp(rad, 0.0f, 1.0f);
         mElevationNoClip = mElevation = 90.0f - rad * 90.0f;
     } else { // azimuth - distance
@@ -196,12 +196,11 @@ void Source::setFixedPosition(float const x, float const y)
     }
     mFixedAzimuth = -ang;
     auto rad{ sqrtf(fx * fx + fy * fy) };
-    if (mRadiusIsElevation) { // azimuth - elevation
+    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         rad = std::clamp(rad, 0.0f, 1.0f);
         mFixedElevation = 90.0f - rad * 90.0f;
     } else { // azimuth - distance
         rad = std::max(rad, 0.0f);
-        ;
         mFixedDistance = rad;
     }
 }
@@ -210,7 +209,7 @@ void Source::setCoordinatesFromFixedSource(float const deltaAzimuth,
                                            float const deltaElevation,
                                            float const deltaDistance)
 {
-    if (mRadiusIsElevation) { // azimuth - elevation
+    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         setAzimuth(mFixedAzimuth + deltaAzimuth);
         setElevationNoClip(mFixedElevation + deltaElevation * 90.0f);
     } else { // azimuth - distance

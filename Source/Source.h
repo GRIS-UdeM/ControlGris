@@ -21,6 +21,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "ControlGrisConstants.h"
+
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
 //==============================================================================
@@ -34,7 +36,7 @@ private:
     //==============================================================================
     int mId{};
     bool mChanged{ false };
-    bool mRadiusIsElevation{ true };
+    SpatMode mSpatMode{ SpatMode::dome };
 
     float mAzimuth{};
     float mElevation{};
@@ -62,7 +64,7 @@ public:
     void setId(int const id) { mId = id; }
     int getId() const { return mId; }
 
-    void setRadiusIsElevation(bool const radiusIsElevation) { mRadiusIsElevation = radiusIsElevation; }
+    void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
 
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);

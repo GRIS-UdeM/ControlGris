@@ -27,7 +27,7 @@ constexpr int NUMBER_OF_POSITION_PRESETS = 50;
 
 //==============================================================================
 // Spatialisation modes.
-enum class SpatMode { VBAP, LBAP };
+enum class SpatMode { dome, cube };
 
 String const WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
 

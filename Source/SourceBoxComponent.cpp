@@ -124,7 +124,7 @@ void SourceBoxComponent::updateSelectedSource(Source * source, int sourceIndex, 
 {
     mSelectedSourceNumber = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSourceNumber);
-    if (spatMode == SpatMode::LBAP) {
+    if (spatMode == SpatMode::cube) {
         mCurrentAngle = source->getAzimuth();
         mCurrentRayLength = source->getDistance();
     } else {
