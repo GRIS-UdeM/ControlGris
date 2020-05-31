@@ -541,20 +541,25 @@ void ControlGrisAudioProcessor::sendOscMessage()
     OSCMessage message(oscPattern);
 
     for (int i{}; i < mNumOfSources; ++i) {
+        float const azimuth{ -mSources[i].getAzimuth() / 180.0f * MathConstants<float>::pi };
+        float const elevation{ MathConstants<float>::halfPi
+                               - mSources[i].getElevation() / 360.0f * MathConstants<float>::twoPi };
+        float const azimuthSpan{ mSources[i].getAzimuthSpan() * 2.0f };
+        float const elevationSpan{ mSources[i].getElevationSpan() * 0.5f };
+        float const distance{ mSelectedOscFormat == SpatMode::LBAP ? mSources[i].getDistance() / 0.6f
+                                                                   : mSources[i].getDistance() };
+
+        // std::cout << "Sending osc for source #" << i << ":\n\tazimuth: " << azimuth << "\n\televation: " << elevation
+        //           << "\n\tazimuthSpan: " << azimuthSpan << "\n\televationSpan" << elevationSpan
+        //           << "\n\tdistance: " << distance << "\n\n";
+
         message.clear();
-        float const azim{ -mSources[i].getAzimuth() / 180.0f * MathConstants<float>::pi };
-        float const elev{ MathConstants<float>::halfPi
-                          - mSources[i].getElevation() / 360.0f * MathConstants<float>::twoPi };
         message.addInt32(mSources[i].getId());
-        message.addFloat32(azim);
-        message.addFloat32(elev);
-        message.addFloat32(mSources[i].getAzimuthSpan() * 2.0);
-        message.addFloat32(mSources[i].getElevationSpan() * 0.5);
-        if (mSelectedOscFormat == SpatMode::LBAP) {
-            message.addFloat32(mSources[i].getDistance() / 0.6);
-        } else {
-            message.addFloat32(mSources[i].getDistance());
-        }
+        message.addFloat32(azimuth);
+        message.addFloat32(elevation);
+        message.addFloat32(azimuthSpan);
+        message.addFloat32(elevationSpan);
+        message.addFloat32(distance);
         message.addFloat32(0.0);
 
         if (!mOscSender.send(message)) {
