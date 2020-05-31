@@ -64,6 +64,7 @@ public:
     int getId() const { return mId; }
 
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
+    SpatMode getSpatMode() const { return mSpatMode; }
 
     void setAzimuth(float azimuth);
     void setNormalizedAzimuth(float value);

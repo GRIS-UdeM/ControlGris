@@ -146,13 +146,17 @@ void Source::computeAzimuthElevation()
         }
         mAzimuth = -ang;
     }
-    float rad{ std::hypotf(x, y) };
+    auto const radius{ std::hypotf(x, y) };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
-        rad = std::clamp(rad, 0.0f, 1.0f);
-        mElevationNoClip = mElevation = 90.0f - rad * 90.0f;
+        auto const clippedRadius{ std::clamp(radius, 0.0f, 1.0f) };
+        if (clippedRadius < radius) {
+            mX = -sinf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
+            mY = -cosf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
+        }
+        mElevationNoClip = mElevation = 90.0f - clippedRadius * 90.0f;
     } else { // azimuth - distance
-        rad = std::max(rad, 0.0f);
-        mDistanceNoClip = mDistance = rad;
+        mDistance = radius;
+        mDistanceNoClip = radius;
     }
 
     this->sendChangeMessage();

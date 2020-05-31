@@ -56,7 +56,11 @@ void SourceComponent::paint(Graphics & g)
 
 void SourceComponent::updatePositionInParent()
 {
-    auto const newCenter{ mSource.getPos() * mFieldComponent.getWidth() };
+    auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
+    auto const effectiveFieldComponentSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
+
+    auto const newCenter{ (mSource.getPos() * effectiveFieldComponentSize)
+                              .translated(SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS) };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
@@ -80,8 +84,13 @@ void SourceComponent::setSourcePosition(MouseEvent const & event)
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
     auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
+    auto const effectiveSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
+
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
-    mSource.setPos(eventRelativeToFieldComponent.getPosition().toFloat() / fieldComponentSize);
+    auto const newPos{ eventRelativeToFieldComponent.getPosition().toFloat().translated(-SOURCE_FIELD_COMPONENT_RADIUS,
+                                                                                        -SOURCE_FIELD_COMPONENT_RADIUS)
+                       / effectiveSize };
+    mSource.setPos(newPos);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getId());
 }
@@ -90,8 +99,6 @@ void SourceComponent::mouseDrag(MouseEvent const & event)
 {
     if (mFieldComponent.getSelectedSourceId() == mSource.getId()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
-
-        auto const fieldComponentSize{ mFieldComponent.getWidth() };
 
         this->setSourcePosition(event);
 
