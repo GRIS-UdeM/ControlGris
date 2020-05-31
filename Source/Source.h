@@ -35,7 +35,6 @@ class Source
 private:
     //==============================================================================
     int mId{};
-    bool mChanged{ false };
     SpatMode mSpatMode{ SpatMode::dome };
 
     float mAzimuth{};

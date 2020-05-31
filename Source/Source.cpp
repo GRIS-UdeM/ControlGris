@@ -91,13 +91,11 @@ void Source::setCoordinates(float const azimuth, float const elevation, float co
 void Source::setAzimuthSpan(float const azimuthSpan)
 {
     mAzimuthSpan = azimuthSpan;
-    mChanged = true;
 }
 
 void Source::setElevationSpan(float const elevationSpan)
 {
     mElevationSpan = elevationSpan;
-    mChanged = true;
 }
 
 void Source::setX(float const x)
@@ -133,7 +131,6 @@ void Source::computeXY()
     mY = radius * cosf(degreeToRadian(mAzimuth));
     mY = mY * 0.5f + 0.5f;
     mY = std::clamp(mY, 0.0f, 1.0f);
-    mChanged = true;
 }
 
 void Source::computeAzimuthElevation()
@@ -155,7 +152,6 @@ void Source::computeAzimuthElevation()
         rad = std::max(rad, 0.0f);
         mDistanceNoClip = mDistance = rad;
     }
-    mChanged = true;
 }
 
 void Source::fixSourcePosition(bool const shouldBeFixed)
