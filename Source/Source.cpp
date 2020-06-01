@@ -163,8 +163,8 @@ void Source::computeAzimuthElevation()
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
-            mX = -sinf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
-            mY = -cosf(mAzimuth / 360.0f * MathConstants<float>::twoPi);
+            mX = (-sinf(mAzimuth / 360.0f * MathConstants<float>::twoPi) + 1.0f) / 2.0f;
+            mY = (cosf(mAzimuth / 360.0f * MathConstants<float>::twoPi) + 1.0f) / 2.0f;
         }
         mElevationNoClip = mElevation = 90.0f - clippedRadius * 90.0f;
     } else { // azimuth - distance
