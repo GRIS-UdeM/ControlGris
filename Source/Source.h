@@ -19,9 +19,12 @@
  *************************************************************************/
 #pragma once
 
+#include <optional>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
+#include "ConstrainedStrongTypes.h"
 
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
@@ -37,23 +40,23 @@ private:
     int mId{};
     SpatMode mSpatMode{ SpatMode::dome };
 
-    float mAzimuth{};
-    float mElevation{};
-    float mElevationNoClip{};
+    Radians mAzimuth{};
+    Radians mElevation{};
+    Radians mElevationNoClip{};
     float mDistance{ 1.0f };
     float mDistanceNoClip{ 1.0f };
-    float mAzimuthSpan{};
-    float mElevationSpan{};
-    float mX{};
-    float mY{};
+
+    Point<float> mPosition;
+
+    Normalized mAzimuthSpan{};
+    Normalized mElevationSpan{};
 
     Colour mColour{ Colours::black };
 
-    float mFixedAzimuth{ -1.0f };
-    float mFixedElevation{ -1.0f };
-    float mFixedDistance{ -1.0f };
-    float mFixedX{};
-    float mFixedY{};
+    std::optional<Radians> mFixedAzimuth{};
+    std::optional<Radians> mFixedElevation{};
+    std::optional<float> mFixedDistance{};
+    std::optional<Point<float>> mFixedPosition{};
 
 public:
     //==============================================================================
@@ -66,58 +69,62 @@ public:
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     SpatMode getSpatMode() const { return mSpatMode; }
 
-    void setAzimuth(float azimuth);
-    void setNormalizedAzimuth(float value);
-    float getAzimuth() const { return mAzimuth; }
-    float getNormalizedAzimuth() const;
-    void setElevationNoClip(float elevation);
-    void setElevation(float elevation);
-    void setNormalizedElevation(float const value) { setElevation(value * 90.0f); }
-    float getElevation() const { return mElevation; }
-    float getNormalizedElevation() const { return mElevation / 90.0f; }
+    void setAzimuth(Radians azimuth);
+    void setAzimuth(Normalized azimuth);
+    Radians getAzimuth() const { return mAzimuth; }
+    Normalized getNormalizedAzimuth() const;
+    void setElevation(Radians elevation);
+    void setElevation(Normalized elevation);
+    void setElevationNoClip(Radians elevation);
+    Radians getElevation() const { return mElevation; }
+    Normalized getNormalizedElevation() const;
     void setDistance(float distance);
     void setDistanceNoClip(float distance);
     float getDistance() const { return mDistance; }
-    void setAzimuthSpan(float azimuthSpan);
-    float getAzimuthSpan() const { return mAzimuthSpan; }
-    void setElevationSpan(float elevationSpan);
-    float getElevationSpan() const { return mElevationSpan; }
+    void setAzimuthSpan(Normalized azimuthSpan);
+    Normalized getAzimuthSpan() const { return mAzimuthSpan; }
+    void setElevationSpan(Normalized elevationSpan);
+    Normalized getElevationSpan() const { return mElevationSpan; }
 
-    void setCoordinates(float azimuth, float elevation, float distance);
+    void setCoordinates(Radians azimuth, Radians elevation, float distance);
 
     void setX(float x);
-    float getX() const { return mX; }
+    float getX() const { return mPosition.getX(); }
     void setY(float y);
-    float getY() const { return mY; }
-    Point<float> getPos() const { return Point<float>{ mX, mY }; }
+    float getY() const { return mPosition.getY(); }
+    Point<float> const & getPos() const { return mPosition; }
     void setPos(Point<float> const & pos);
 
     void computeXY();
     void computeAzimuthElevation();
 
-    void setFixedPosition(float x, float y);
-    void setFixedElevation(float const z) { mFixedElevation = 90.0f - z * 90.0f; }
+    void setFixedPosition(Point<float> const & position);
+    void setFixedElevation(Radians fixedElevation);
 
-    void setSymmetricX(float x, float y);
-    void setSymmetricY(float x, float y);
+    void setSymmetricX(Point<float> const & position);
+    void setSymmetricY(Point<float> const & position);
 
     void fixSourcePosition(bool shouldBeFixed);
     void fixSourcePositionElevation(bool shouldBeFixed);
 
-    float getDeltaX() const { return mX - mFixedX; }
-    float getDeltaY() const { return mY - mFixedY; }
-    float getDeltaAzimuth() const { return (mAzimuth - mFixedAzimuth); }
-    float getDeltaElevation() const { return (mElevationNoClip - mFixedElevation) / 90.0f; }
-    float getDeltaDistance() const { return (mDistance - mFixedDistance); }
+    float getDeltaX() const { return mPosition.getX() - mFixedPosition.value().getX(); }
+    float getDeltaY() const { return mPosition.getY() - mFixedPosition.value().getY(); }
+    Radians getDeltaAzimuth() const { return mAzimuth - mFixedAzimuth.value(); }
+    Radians getDeltaElevation() const { return mElevationNoClip - mFixedElevation.value(); }
+    float getDeltaDistance() const { return mDistance - mFixedDistance.value(); }
 
-    void setCoordinatesFromFixedSource(float deltaAzimuth, float deltaElevation, float deltaDistance);
-    void setXYCoordinatesFromFixedSource(float deltaX, float deltaY);
-    void setElevationFromFixedSource(float const deltaY) { setElevation(mFixedElevation + deltaY * 90.0f); }
+    void setCoordinatesFromFixedSource(Radians deltaAzimuth, Radians deltaElevation, float deltaDistance);
+    void setXYCoordinatesFromFixedSource(Point<float> const & deltaPosition);
+    void setElevationFromFixedSource(Radians const deltaElevation) { setElevation(mFixedElevation.value() + deltaElevation); }
 
     void setColour(Colour const & col) { mColour = col; }
     Colour getColour() const { return mColour; }
 
 private:
+    static Radians balanceAzimuth(Radians azimuth);
+    static Radians clipElevation(Radians elevation);
+    static float clipCoordinate(float coord);
+    static Point<float> clipPosition(Point<float> const & position);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Source);
 };
