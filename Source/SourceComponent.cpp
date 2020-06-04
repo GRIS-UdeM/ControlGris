@@ -58,10 +58,10 @@ void SourceComponent::updatePositionInParent()
 {
     auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
     auto const effectiveFieldComponentSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
+    constexpr Point<float> offset{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
 
     auto const sourcePosition{ mSource.getPos() };
-    auto const newCenter{ (sourcePosition * effectiveFieldComponentSize)
-                              .translated(SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS) };
+    auto const newCenter{ sourcePosition.translated(1.0f, 1.0f) / 2.0f * effectiveFieldComponentSize + offset };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
@@ -86,14 +86,10 @@ void SourceComponent::setSourcePosition(MouseEvent const & event)
 
     auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
     auto const effectiveSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
+    constexpr Point<float> offset{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
 
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
-    auto const newPos{ eventRelativeToFieldComponent.getPosition().toFloat().translated(-SOURCE_FIELD_COMPONENT_RADIUS,
-                                                                                        -SOURCE_FIELD_COMPONENT_RADIUS)
-                       / effectiveSize };
-    if (newPos.getDistanceFrom(Point<float>{ 0.5f, 0.5f }) > 0.5f) {
-        std::cout << "cool\n";
-    }
+    auto const newPos{ (eventRelativeToFieldComponent.getPosition().toFloat() - offset) / effectiveSize * 2.0f - Point<float>{ 1.0f, 1.0f } };
     mSource.setPos(newPos);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getId());

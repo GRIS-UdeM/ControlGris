@@ -63,7 +63,7 @@ void Source::setElevation(Radians const elevation)
 
 void Source::setElevation(Normalized const normalizedElevation)
 {
-    setElevation(twoPi * static_cast<float>(normalizedElevation));
+    setElevation(halfPi * static_cast<float>(normalizedElevation));
 }
 
 void Source::setDistanceNoClip(float const distance)
@@ -154,7 +154,7 @@ void Source::computeXY()
 
 void Source::computeAzimuthElevation()
 {
-    if (mPosition.getX() != 0.0 || mPosition.getY() != 0.0) {
+    if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
         mAzimuth = Radians{ std::atan2(mPosition.getY(), mPosition.getX()) };
     }
 
@@ -277,5 +277,5 @@ float Source::clipCoordinate(float const coord)
 
 Point<float> Source::clipPosition(Point<float> const & position)
 {
-    return Point<float>{ std::clamp(position.getX(), -1.0f, 0.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
+    return Point<float>{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
 }

@@ -248,9 +248,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     auto const maxLim{ mFieldWidth - minLim };
 
     Point<float> const translated{ startPos.translated(-0.5f, -0.5f) * 2.0f };
-    float magnitude{ std::hypotf(translated.x, translated.y)
+    float magnitude{ std::hypot(translated.x, translated.y)
                      * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
-    float angle{ atan2f(translated.y, translated.x) - MathConstants<float>::halfPi };
+    float angle{ std::atan2(translated.y, translated.x) };
 
     auto const fSize{ static_cast<int>(mFieldWidth) };
     int const fSizeOver3{ fSize / 3 };

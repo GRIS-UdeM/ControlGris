@@ -199,21 +199,6 @@ Point<float> MainFieldComponent::degreeToXy(AngleVector<float> const & p, int co
     return Point<float>(effectiveWidth - x, effectiveWidth - y);
 }
 
-AngleVector<float> MainFieldComponent::xyToDegree(Point<float> const & p, int p_iwidth) const
-{
-    float const k2{ SOURCE_FIELD_COMPONENT_DIAMETER / 2.0f };
-    float const half{ (p_iwidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
-    float const x{ (p.getX() - k2 - half) / half };
-    float const y{ (p.getY() - k2 - half) / half };
-    float ang{ atan2f(x, y) / MathConstants<float>::pi * 180.0f };
-    if (ang <= -180.0f) {
-        ang += 360.0f;
-    }
-    float rad = std::hypotf(x, y);
-    rad = 90.0f - rad * 90.0f;
-    return AngleVector<float>{ -ang, rad };
-}
-
 void MainFieldComponent::setSpatMode(SpatMode const spatMode)
 {
     mSpatMode = spatMode;
