@@ -16,7 +16,7 @@ class Radians {
 public:
     constexpr Radians() = default;
     constexpr explicit Radians(float radians) : mValue(radians) {}
-    constexpr Radians(Degrees const & degrees);
+    //constexpr Radians(Degrees const & degrees);
     ~Radians() = default;
 
     constexpr Radians(Radians const & other) = default;
@@ -36,7 +36,9 @@ public:
     constexpr Radians operator+(Radians const & other) const { return Radians{ mValue + other.mValue }; }
     constexpr Radians operator-(Radians const & other) const { return Radians{ mValue - other.mValue }; }
     constexpr Radians operator*(float const value) const { return Radians{ mValue * value };}
+    constexpr Radians operator*(int const value) const { return Radians{ mValue * static_cast<float>(value)}; }
     constexpr Radians operator/(float const value) const { return Radians{ mValue / value };}
+    constexpr Radians operator/(int const value) const { return Radians{ mValue / static_cast<float>(value)}; }
     constexpr float operator/(Radians const other) const { return mValue / other.mValue; }
 
     constexpr Radians & operator+=(Radians const & other) { mValue += other.mValue; return *this;}
@@ -76,7 +78,9 @@ public:
     constexpr Degrees operator+(Degrees const & other) const { return Degrees{ mValue + other.mValue }; }
     constexpr Degrees operator-(Degrees const & other) const { return Degrees{ mValue - other.mValue }; }
     constexpr Degrees operator*(float const value) const { return Degrees{ mValue * value };}
+    constexpr Degrees operator*(int const value) const { return Degrees{ mValue * static_cast<float>(value) };}
     constexpr Degrees operator/(float const value) const { return Degrees{ mValue / value };}
+    constexpr Degrees operator/(int const value) const { return Degrees{ mValue / static_cast<float>(value) };}
     constexpr float operator/(Degrees const other) const { return mValue / other.mValue; }
 
     constexpr Degrees & operator+=(Degrees const & other) { mValue += other.mValue; return *this;}
@@ -85,6 +89,7 @@ public:
     constexpr Degrees & operator/=(float const value) { mValue /= value; return *this;}
 
     constexpr operator float() const { return mValue; }
+    constexpr operator Radians() const { return Radians{ mValue / 360.0f * MathConstants<float>::twoPi}; }
 };
 
 

@@ -18,12 +18,13 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "SourceBoxComponent.h"
+
 #include "ControlGrisConstants.h"
 
 SourceBoxComponent::SourceBoxComponent()
 {
     mSelectedSourceNumber = 0;
-    mCurrentAngle = 0.0f;
+    mCurrentAngle = {};
     mCurrentRayLength = 1.0f;
 
     mSourcePlacementLabel.setText("Source Placement:", NotificationType::dontSendNotification);
@@ -76,7 +77,7 @@ SourceBoxComponent::SourceBoxComponent()
     mAngleSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&mAngleSlider);
     mAngleSlider.onValueChange = [this] {
-        mCurrentAngle = (float)mAngleSlider.getValue();
+        mCurrentAngle = Degrees{ static_cast<float>(mAngleSlider.getValue()) };
         mListeners.call(
             [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSourceNumber, mCurrentAngle, mCurrentRayLength); });
     };
@@ -132,7 +133,7 @@ void SourceBoxComponent::updateSelectedSource(Source * source, int sourceIndex, 
         mCurrentRayLength = 1.0f - source->getNormalizedElevation();
     }
     if (mCurrentAngle < 0.0f) {
-        mCurrentAngle += 360.0f;
+        mCurrentAngle += Degrees{ 360.0f };
     }
     mAngleSlider.setValue(mCurrentAngle, NotificationType::dontSendNotification);
     mRayLengthSlider.setValue(mCurrentRayLength, NotificationType::dontSendNotification);

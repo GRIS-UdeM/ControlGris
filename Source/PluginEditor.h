@@ -114,7 +114,7 @@ public:
     // SourceBoxComponent::Listeners
     void sourceBoxSelectionChanged(int sourceNum) final;
     void sourceBoxPlacementChanged(SourcePlacement value) final;
-    void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) final;
+    void sourceBoxPositionChanged(int sourceNum, Radians angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) final;

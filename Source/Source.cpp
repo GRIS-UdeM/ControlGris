@@ -61,6 +61,11 @@ void Source::setElevation(Radians const elevation)
     }
 }
 
+void Source::setElevation(Normalized const normalizedElevation)
+{
+    setElevation(twoPi * static_cast<float>(normalizedElevation));
+}
+
 void Source::setDistanceNoClip(float const distance)
 {
     mDistanceNoClip = distance;
@@ -224,6 +229,11 @@ void Source::setCoordinatesFromFixedSource(Radians const deltaAzimuth,
     }
 }
 
+Normalized Source::getNormalizedElevation() const
+{
+    return Normalized{ mElevation / halfPi };
+}
+
 void Source::setSymmetricX(Point<float> const & position)
 {
     setPos(Point<float>{ position.getX(), 1.0f - position.getY() });
@@ -260,12 +270,12 @@ Radians Source::clipElevation(Radians const elevation)
     return Radians{ std::clamp(elevation, Radians{ 0.0f }, halfPi) };
 }
 
-float clipCoordinate(float const coord)
+float Source::clipCoordinate(float const coord)
 {
     return std::clamp(coord, -1.0f, 1.0f);
 }
 
-Point<float> clipPosition(Point<float> const & position)
+Point<float> Source::clipPosition(Point<float> const & position)
 {
     return Point<float>{ std::clamp(position.getX(), -1.0f, 0.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
 }

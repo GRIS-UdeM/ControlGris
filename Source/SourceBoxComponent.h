@@ -35,7 +35,7 @@ public:
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
         virtual void sourceBoxSelectionChanged(int sourceNum) = 0;
-        virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
+        virtual void sourceBoxPositionChanged(int sourceNum, Radians angle, float rayLen) = 0;
     };
 
 private:
@@ -43,7 +43,7 @@ private:
     ListenerList<Listener> mListeners;
 
     int mSelectedSourceNumber;
-    float mCurrentAngle;
+    Radians mCurrentAngle;
     float mCurrentRayLength;
 
     Label mSourcePlacementLabel;

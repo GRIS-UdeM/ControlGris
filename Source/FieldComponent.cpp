@@ -843,7 +843,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             mAutomationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
-        float const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
+        Degrees const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
         mSources[mSelectedSourceId].setElevation(elevation);
         mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 1); });
     }
