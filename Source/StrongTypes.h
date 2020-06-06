@@ -46,7 +46,8 @@ public:
     constexpr Radians & operator*=(float const value) { mValue *= value; return *this;}
     constexpr Radians & operator/=(float const value) { mValue /= value; return *this;}
 
-    constexpr operator float() const { return mValue; }
+    [[nodiscard]] constexpr float getAsRadians() const { return mValue; }
+    [[nodiscard]] constexpr float getAsDegrees() const { return mValue / MathConstants<float>::twoPi * 360.0f; }
 };
 
 constexpr Radians pi{ MathConstants<float>::pi };
@@ -58,7 +59,7 @@ class Degrees {
 public:
     constexpr Degrees() = default;
     constexpr explicit Degrees(float const value) : mValue(value) {}
-    constexpr Degrees(Radians const radians) : mValue(static_cast<float>(radians) / MathConstants<float>::twoPi * 360.0f) {}
+    constexpr Degrees(Radians const radians) : mValue(radians.getAsDegrees()) {}
     ~Degrees() = default;
 
     constexpr Degrees(Degrees const & other) = default;
@@ -88,8 +89,9 @@ public:
     constexpr Degrees & operator*=(float const value) { mValue *= value; return *this;}
     constexpr Degrees & operator/=(float const value) { mValue /= value; return *this;}
 
-    constexpr operator float() const { return mValue; }
     constexpr operator Radians() const { return Radians{ mValue / 360.0f * MathConstants<float>::twoPi}; }
+    [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * MathConstants<float>::twoPi; }
+    [[nodiscard]] constexpr float getAsDegrees() const { return mValue; }
 };
 
 
