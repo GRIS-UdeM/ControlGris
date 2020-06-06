@@ -132,9 +132,9 @@ void SourceBoxComponent::updateSelectedSource(Source * source, int sourceIndex, 
         mCurrentAngle = source->getAzimuth();
         mCurrentRayLength = 1.0f - source->getNormalizedElevation();
     }
-    if (mCurrentAngle < 0.0f) {
+    if (mCurrentAngle.getAsDegrees() < 0.0f) {
         mCurrentAngle += Degrees{ 360.0f };
     }
-    mAngleSlider.setValue(mCurrentAngle, NotificationType::dontSendNotification);
+    mAngleSlider.setValue(mCurrentAngle.getAsDegrees(), NotificationType::dontSendNotification);
     mRayLengthSlider.setValue(mCurrentRayLength, NotificationType::dontSendNotification);
 }

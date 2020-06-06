@@ -147,7 +147,7 @@ void Source::computeXY()
         }
     }()};
 
-    mPosition = Point<float>{ std::cos(mAzimuth), std::sin(mAzimuth) } * radius;
+    mPosition = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians()) } * radius;
 
     this->sendChangeMessage();
 }
@@ -162,7 +162,7 @@ void Source::computeAzimuthElevation()
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
-            mPosition = Point<float>{ std::cos(mAzimuth), std::sin(mAzimuth)} * clippedRadius;
+            mPosition = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians())} * clippedRadius;
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;

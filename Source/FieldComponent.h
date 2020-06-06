@@ -91,9 +91,6 @@ public:
     void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::dome) const;
     virtual void drawSources(Graphics & g) const = 0;
 
-    Point<float> posToXy(Point<float> const & p, int p_iFieldWidth) const;
-    Point<float> xyToPos(Point<float> const & p, int p_iFieldWidth) const;
-
     void setSources(Source * sources, int numberOfSources);
 
     void setSelectedSource(int selectedId);
@@ -103,6 +100,9 @@ public:
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+
+    Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
+    Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
 
     virtual AutomationManager & getAutomationManager() = 0;
     virtual AutomationManager const & getAutomationManager() const = 0;

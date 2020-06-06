@@ -181,8 +181,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mParameters.state.setProperty("oscOutputPluginId", 1, nullptr);
 
     // Trajectory box persitent settings.
-    mParameters.state.setProperty("trajectoryType", 1, nullptr);
-    mParameters.state.setProperty("trajectoryTypeAlt", 1, nullptr);
+    mParameters.state.setProperty("trajectoryType", static_cast<int>(PositionTrajectoryType::realtime), nullptr);
+    mParameters.state.setProperty("trajectoryTypeAlt", static_cast<int>(ElevationTrajectoryType::realtime), nullptr);
     mParameters.state.setProperty("backAndForth", false, nullptr);
     mParameters.state.setProperty("backAndForthAlt", false, nullptr);
     mParameters.state.setProperty("dampeningCycles", 0, nullptr);
@@ -389,7 +389,7 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(PositionSourceLink value)
         Sorter tosort[mNumOfSources];
         for (int i{}; i < mNumOfSources; ++i) {
             tosort[i].index = i;
-            tosort[i].value = mSources[i].getAzimuth();
+            tosort[i].value = mSources[i].getAzimuth().getAsRadians();
         }
         std::sort(tosort, tosort + mNumOfSources, compareLessThan);
 
@@ -541,9 +541,8 @@ void ControlGrisAudioProcessor::sendOscMessage()
     OSCMessage message(oscPattern);
 
     for (int i{}; i < mNumOfSources; ++i) {
-        float const azimuth{ -mSources[i].getAzimuth() / 180.0f * MathConstants<float>::pi };
-        float const elevation{ MathConstants<float>::halfPi
-                               - mSources[i].getElevation() / 360.0f * MathConstants<float>::twoPi };
+        float const azimuth{ mSources[i].getAzimuth().getAsRadians() };
+        float const elevation{ mSources[i].getElevation().getAsRadians() };
         float const azimuthSpan{ mSources[i].getAzimuthSpan() * 2.0f };
         float const elevationSpan{ mSources[i].getElevationSpan() * 0.5f };
         float const distance{ mSelectedOscFormat == SpatMode::cube ? mSources[i].getDistance() / 0.6f
@@ -562,10 +561,8 @@ void ControlGrisAudioProcessor::sendOscMessage()
         message.addFloat32(distance);
         message.addFloat32(0.0);
 
-        if (!mOscSender.send(message)) {
-            // std::cout << "Error: could not send OSC message." << std::endl;
-            return;
-        }
+        auto const success{ mOscSender.send(message) };
+        jassert(success);
     }
 }
 
@@ -1215,7 +1212,7 @@ void ControlGrisAudioProcessor::linkElevationSourcePositions()
         break;
     case ElevationSourceLink::linearMax:
         for (int i{}; i < mNumOfSources; ++i) {
-            auto const offset{Degrees{ 90.0f } - mElevationAutomationManager.getSourcePosition().y * Degrees{ 90.0f }};
+            auto const offset{Degrees{ 90.0f } - Degrees{ 90.0f } * mElevationAutomationManager.getSourcePosition().y };
             auto const elevation{ Degrees{ 90.0f } - (Degrees{ 60.0f } / mNumOfSources * i) - offset };
             mSources[i].setElevation(Radians{elevation});
         }

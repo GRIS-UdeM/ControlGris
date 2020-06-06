@@ -56,12 +56,7 @@ void SourceComponent::paint(Graphics & g)
 
 void SourceComponent::updatePositionInParent()
 {
-    auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
-    auto const effectiveFieldComponentSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
-    constexpr Point<float> offset{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
-
-    auto const sourcePosition{ mSource.getPos() };
-    auto const newCenter{ sourcePosition.translated(1.0f, 1.0f) / 2.0f * effectiveFieldComponentSize + offset };
+    auto const newCenter{ mFieldComponent.sourcePositionToComponentPosition(mSource.getPos()) };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
@@ -84,13 +79,9 @@ void SourceComponent::setSourcePosition(MouseEvent const & event)
 {
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
-    auto const fieldComponentSize{ static_cast<float>(mFieldComponent.getWidth()) };
-    auto const effectiveSize{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
-    constexpr Point<float> offset{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
-
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
-    auto const newPos{ (eventRelativeToFieldComponent.getPosition().toFloat() - offset) / effectiveSize * 2.0f - Point<float>{ 1.0f, 1.0f } };
-    mSource.setPos(newPos);
+    auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(eventRelativeToFieldComponent.getPosition().toFloat()) };
+    mSource.setPos(newPosition);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getId());
 }
