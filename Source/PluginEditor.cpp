@@ -317,34 +317,40 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum)
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value)
 {
     auto numOfSources = mProcessor.getNumberOfSources();
-    Degrees const azims2[2] = {  Degrees{ -90.0f }, Degrees{ 90.0f } };
-    Degrees const azims4[4] = {  Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
-    Degrees const azims6[6] = {  Degrees{ -30.0f }, Degrees{ 30.0f }, Degrees{ -90.0f }, Degrees{ 90.0f }, Degrees{ -150.0f }, Degrees{ 150.0f } };
-    Degrees const azims8[8] = {  Degrees{ -22.5f }, Degrees{ 22.5f }, Degrees{ -67.5f }, Degrees{ 67.5f }, Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
+    Degrees const azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
+    Degrees const azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
+    Degrees const azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
+                                Degrees{ 90.0f },  Degrees{ -150.0f }, Degrees{ 150.0f } };
+    Degrees const azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
+                                Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
     bool isLBAP = mProcessor.getOscFormat() == SpatMode::cube;
 
-    auto const offset{Degrees{360.0f} / numOfSources / 2.0f};
-    auto const distance{isLBAP ? 0.7f : 1.0f};
+    auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
+    auto const distance{ isLBAP ? 0.7f : 1.0f };
 
     switch (value) {
     case SourcePlacement::leftAlternate:
         for (int i{}; i < numOfSources; ++i) {
             if (numOfSources <= 2)
                 mProcessor.getSources()[i].setCoordinates(-azims2[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else if (numOfSources <= 4)
                 mProcessor.getSources()[i].setCoordinates(-azims4[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else if (numOfSources <= 6)
                 mProcessor.getSources()[i].setCoordinates(-azims6[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else
                 mProcessor.getSources()[i].setCoordinates(-azims8[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
         }
         break;
@@ -352,19 +358,23 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             if (numOfSources <= 2)
                 mProcessor.getSources()[i].setCoordinates(azims2[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else if (numOfSources <= 4)
                 mProcessor.getSources()[i].setCoordinates(azims4[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else if (numOfSources <= 6)
                 mProcessor.getSources()[i].setCoordinates(azims6[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
             else
                 mProcessor.getSources()[i].setCoordinates(azims8[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
+                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
+                                                                 : Radians{},
                                                           distance);
         }
         break;
@@ -441,7 +451,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, Radians angle, float rayLen)
 {
     if (mProcessor.getOscFormat() == SpatMode::cube) {
-        auto const currentElevation{mProcessor.getSources()[sourceNum].getElevation()};
+        auto const currentElevation{ mProcessor.getSources()[sourceNum].getElevation() };
         mProcessor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
     } else {
         mProcessor.getSources()[sourceNum].setCoordinates(angle, Degrees{ 90.0f } - (Degrees{ 90.0f } * rayLen), 1.0f);

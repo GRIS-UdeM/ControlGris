@@ -300,7 +300,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
         }
     } else if (parameterID.startsWith("elevationSpan")) {
         for (int i{}; i < mNumOfSources; ++i) {
-            mSources[i].setElevationSpan(Normalized{newValue});
+            mSources[i].setElevationSpan(Normalized{ newValue });
         }
     }
 }
@@ -402,7 +402,7 @@ void ControlGrisAudioProcessor::onSourceLinkChanged(PositionSourceLink value)
 
         auto const currentPos{ mSources[0].getAzimuth() };
         for (int i{}; i < mNumOfSources; ++i) {
-            auto const newPos{twoPi / mNumOfSources * i + currentPos};
+            auto const newPos{ twoPi / mNumOfSources * i + currentPos };
             int ioff = (i + posOfFirstSource) % mNumOfSources;
             mSources[tosort[ioff].index].setAzimuth(newPos);
         }
@@ -995,7 +995,7 @@ void ControlGrisAudioProcessor::setPluginState()
         for (int i{}; i < mNumOfSources; ++i) {
             String id(i);
             mSources[i].setAzimuth(Normalized{ mParameters.state.getProperty(String("p_azimuth_") + id) });
-            mSources[i].setElevation(Normalized{mParameters.state.getProperty(String("p_elevation_") + id)});
+            mSources[i].setElevation(Normalized{ mParameters.state.getProperty(String("p_elevation_") + id) });
             mSources[i].setDistance(mParameters.state.getProperty(String("p_distance_") + id));
             if (i == 0) {
                 mPositionAutomationManager.setSourcePosition(mSources[0].getPos());
@@ -1028,7 +1028,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
 
     if (whichField == 0) {
         if (sourceId != 0 && mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
-            Point<float> const delta{mSources[sourceId].getDeltaX(), mSources[sourceId].getDeltaY()};
+            Point<float> const delta{ mSources[sourceId].getDeltaX(), mSources[sourceId].getDeltaY() };
             mSources[0].setXYCoordinatesFromFixedSource(delta);
         }
         validatePositionSourcePositions();
@@ -1052,7 +1052,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
                 mSources[0].setElevation(sourceElevation + offset);
                 break;
             case ElevationSourceLink::deltaLock: {
-                auto const deltaElevation{mSources[sourceId].getDeltaElevation()};
+                auto const deltaElevation{ mSources[sourceId].getDeltaElevation() };
                 mSources[0].setElevationFromFixedSource(deltaElevation);
             } break;
             case ElevationSourceLink::independent:
@@ -1070,7 +1070,7 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int const sourceId,
                                                         SourceParameter const parameterId,
                                                         double const value)
 {
-    Normalized const normalized{ static_cast<float>(value)};
+    Normalized const normalized{ static_cast<float>(value) };
     String id(sourceId);
     switch (parameterId) {
     case SourceParameter::azimuth:
@@ -1157,14 +1157,14 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
     case PositionSourceLink::circularFixedAngle:
     case PositionSourceLink::circularFullyFixed: {
         mSources[0].setPos(correctedPosition);
-        auto const deltaAzimuth{mSources[0].getDeltaAzimuth()};
+        auto const deltaAzimuth{ mSources[0].getDeltaAzimuth() };
         if (getOscFormat() == SpatMode::cube) {
-            auto const deltaDistance{mSources[0].getDeltaDistance()};
+            auto const deltaDistance{ mSources[0].getDeltaDistance() };
             for (int i{ 1 }; i < mNumOfSources; ++i) {
                 mSources[i].setCoordinatesFromFixedSource(deltaAzimuth, Radians{ 0.0f }, deltaDistance);
             }
         } else {
-            auto const deltaElevation{ mSources[0].getDeltaElevation()};
+            auto const deltaElevation{ mSources[0].getDeltaElevation() };
             for (int i{ 1 }; i < mNumOfSources; ++i) {
                 mSources[i].setCoordinatesFromFixedSource(deltaAzimuth, deltaElevation, 0.0);
             }
@@ -1172,7 +1172,8 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
         break;
     }
     case PositionSourceLink::circularDeltaLock: {
-        Point<float> const delta{ mPositionAutomationManager.getSource().getDeltaX(), mPositionAutomationManager.getSource().getDeltaY()};
+        Point<float> const delta{ mPositionAutomationManager.getSource().getDeltaX(),
+                                  mPositionAutomationManager.getSource().getDeltaY() };
         for (int i{}; i < mNumOfSources; ++i) {
             mSources[i].setXYCoordinatesFromFixedSource(delta);
         }
@@ -1206,19 +1207,20 @@ void ControlGrisAudioProcessor::linkElevationSourcePositions()
         break;
     case ElevationSourceLink::linearMin:
         for (int i{}; i < mNumOfSources; ++i) {
-            auto const offset{Degrees{ mElevationAutomationManager.getSourcePosition().y * 90.0f}};
+            auto const offset{ Degrees{ mElevationAutomationManager.getSourcePosition().y * 90.0f } };
             mSources[i].setElevation(Degrees{ 60.0f } / mNumOfSources * i + offset);
         }
         break;
     case ElevationSourceLink::linearMax:
         for (int i{}; i < mNumOfSources; ++i) {
-            auto const offset{Degrees{ 90.0f } - Degrees{ 90.0f } * mElevationAutomationManager.getSourcePosition().y };
+            auto const offset{ Degrees{ 90.0f }
+                               - Degrees{ 90.0f } * mElevationAutomationManager.getSourcePosition().y };
             auto const elevation{ Degrees{ 90.0f } - (Degrees{ 60.0f } / mNumOfSources * i) - offset };
-            mSources[i].setElevation(Radians{elevation});
+            mSources[i].setElevation(Radians{ elevation });
         }
         break;
     case ElevationSourceLink::deltaLock: {
-        auto const deltaY{Radians{ mElevationAutomationManager.getSource().getDeltaY()}};
+        auto const deltaY{ Radians{ mElevationAutomationManager.getSource().getDeltaY() } };
         for (int i{}; i < mNumOfSources; ++i) {
             mSources[i].setElevationFromFixedSource(deltaY);
         }
@@ -1271,14 +1273,14 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     // Symmetric X.
     else if (sourceLink == PositionSourceLink::linkSymmetricX) {
         if (mNumOfSources == 2) {
-            Point<float> const position{ mSources[0].getX(), mSources[0].getY()};
+            Point<float> const position{ mSources[0].getX(), mSources[0].getY() };
             mSources[1].setSymmetricX(position);
         }
     }
     // Symmetric Y.
     else if (sourceLink == PositionSourceLink::linkSymmetricY) {
         if (mNumOfSources == 2) {
-            Point<float> const position{ mSources[0].getX(), mSources[0].getY()};
+            Point<float> const position{ mSources[0].getX(), mSources[0].getY() };
             mSources[1].setSymmetricY(position);
         }
     }
@@ -1318,20 +1320,20 @@ void ControlGrisAudioProcessor::validateElevationSourcePositions()
     // Linear min.
     else if (sourceLink == ElevationSourceLink::linearMin) {
         for (int i{ 1 }; i < mNumOfSources; ++i) {
-            auto const offset{mSources[0].getElevation()};
+            auto const offset{ mSources[0].getElevation() };
             mSources[i].setElevation(Degrees{ 60.0f } / mNumOfSources * i + offset);
         }
     }
     // Linear max.
     else if (sourceLink == ElevationSourceLink::linearMax) {
         for (int i{ 1 }; i < mNumOfSources; ++i) {
-            auto const offset{Degrees{ 90.0f } - mSources[0].getElevation()};
+            auto const offset{ Degrees{ 90.0f } - mSources[0].getElevation() };
             mSources[i].setElevation(Degrees{ 90.0f } - (Degrees{ 60.0f } / mNumOfSources * i) - offset);
         }
     }
     // Delta lock.
     else if (sourceLink == ElevationSourceLink::deltaLock) {
-        auto const deltaY{mSources[0].getDeltaElevation()};
+        auto const deltaY{ mSources[0].getDeltaElevation() };
         for (int i{ 1 }; i < mNumOfSources; ++i) {
             mSources[i].setElevationFromFixedSource(deltaY);
         }
@@ -1423,13 +1425,16 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
 
     mCurrentFixPosition = fpos;
     for (int i{}; i < mNumOfSources; ++i) {
-        Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0))), static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1))) };
+        Point<float> const position{
+            static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 0))),
+            static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 1)))
+        };
         mSources[i].setPos(position);
         mSources[i].setFixedPosition(position);
         if (mSelectedOscFormat == SpatMode::cube) {
             float const z{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(i, 2))) };
             mSources[i].setFixedElevation(Degrees{ 90.0f } - Degrees{ 90.0f } * z);
-            mSources[i].setElevation(Normalized{z});
+            mSources[i].setElevation(Normalized{ z });
         }
     }
 
@@ -1605,8 +1610,12 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
 {
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         String id(i);
-        mParameters.state.setProperty(String("p_azimuth_") + id,   static_cast<float>(mSources[i].getNormalizedAzimuth()), nullptr);
-        mParameters.state.setProperty(String("p_elevation_") + id, static_cast<float>(mSources[i].getNormalizedElevation()), nullptr);
+        mParameters.state.setProperty(String("p_azimuth_") + id,
+                                      static_cast<float>(mSources[i].getNormalizedAzimuth()),
+                                      nullptr);
+        mParameters.state.setProperty(String("p_elevation_") + id,
+                                      static_cast<float>(mSources[i].getNormalizedElevation()),
+                                      nullptr);
         mParameters.state.setProperty(String("p_distance_") + id, mSources[i].getDistance(), nullptr);
     }
 

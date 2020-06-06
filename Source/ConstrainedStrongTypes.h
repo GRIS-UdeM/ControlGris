@@ -16,8 +16,10 @@
 
 class Azimuth;
 
-class Normalized {
+class Normalized
+{
     float mValue{};
+
 public:
     constexpr Normalized() = default;
     constexpr explicit Normalized(float const value) : mValue(value) { clip(); }
@@ -33,6 +35,7 @@ public:
     constexpr float operator*(float const rhs) const { return mValue * rhs; }
 
     constexpr operator float() const { return mValue; }
+
 private:
     void clip() { mValue = std::clamp(mValue, 0.0f, 1.0f); }
 };

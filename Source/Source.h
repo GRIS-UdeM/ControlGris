@@ -23,8 +23,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "ControlGrisConstants.h"
 #include "ConstrainedStrongTypes.h"
+#include "ControlGrisConstants.h"
 
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
@@ -115,7 +115,10 @@ public:
 
     void setCoordinatesFromFixedSource(Radians deltaAzimuth, Radians deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(Point<float> const & deltaPosition);
-    void setElevationFromFixedSource(Radians const deltaElevation) { setElevation(mFixedElevation.value() + deltaElevation); }
+    void setElevationFromFixedSource(Radians const deltaElevation)
+    {
+        setElevation(mFixedElevation.value() + deltaElevation);
+    }
 
     void setColour(Colour const & col) { mColour = col; }
     Colour getColour() const { return mColour; }

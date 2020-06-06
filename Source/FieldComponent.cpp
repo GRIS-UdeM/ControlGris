@@ -122,21 +122,23 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, S
 
 Point<float> FieldComponent::sourcePositionToComponentPosition(Point<float> const & sourcePosition) const
 {
-    jassert( getWidth() == getHeight() );
-    auto const effectiveWidth{ static_cast<float>(getWidth()) };
+    jassert(getWidth() == getHeight());
+    auto const effectiveWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
     constexpr Point<float> sourceOffsetInComponent{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
 
-    auto const result{ (sourcePosition + Point<float>{ 1.0f, 1.0f }) / 2.0f * effectiveWidth + sourceOffsetInComponent };
+    auto const result{ (sourcePosition + Point<float>{ 1.0f, 1.0f }) / 2.0f * effectiveWidth
+                       + sourceOffsetInComponent };
     return result;
 }
 
 Point<float> FieldComponent::componentPositionToSourcePosition(Point<float> const & componentPosition) const
 {
-    jassert( getWidth() == getHeight() );
-    auto const effectiveWidth{ static_cast<float>(getWidth()) };
+    jassert(getWidth() == getHeight());
+    auto const effectiveWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
     constexpr Point<float> sourceOffsetInComponent{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
 
-    auto const result{ (componentPosition - sourceOffsetInComponent) / effectiveWidth * 2.0f - Point<float>{ 1.0f, 1.0f } };
+    auto const result{ (componentPosition - sourceOffsetInComponent) / effectiveWidth * 2.0f
+                       - Point<float>{ 1.0f, 1.0f } };
     return result;
 }
 
@@ -152,17 +154,20 @@ void MainFieldComponent::drawSources(Graphics & g) const
         int const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
         float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
         Point<float> const position{ sourcePositionToComponentPosition(mSources[sourceId].getPos()) };
-        Rectangle<float> area{position.x, position.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
+        Rectangle<float> area{ position.x,
+                               position.y,
+                               SOURCE_FIELD_COMPONENT_DIAMETER,
+                               SOURCE_FIELD_COMPONENT_DIAMETER };
         area.expand(lineThickness, lineThickness);
         g.setColour(Colour{ .2f, .2f, .2f, 1.0f });
         g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(ColourGradient{mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
-                                         position.x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         position.y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                         mSources[sourceId].getColour().withSaturation(saturation),
-                                         position.x,
-                                         position.y,
-                                         true });
+        g.setGradientFill(ColourGradient{ mSources[sourceId].getColour().withSaturation(saturation).darker(1.0f),
+                                          position.x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                          position.y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                          mSources[sourceId].getColour().withSaturation(saturation),
+                                          position.x,
+                                          position.y,
+                                          true });
         g.fillEllipse(area);
         g.setColour(Colours::white);
         g.drawFittedText(String(mSources[sourceId].getId() + 1),
@@ -267,7 +272,7 @@ void MainFieldComponent::drawCubeSpans(Graphics & g) const
         float const azimuthSpan{ width * mSources[sourceId].getAzimuthSpan() };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
         float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.5f };
-        Point<float> const position{sourcePositionToComponentPosition(mSources[sourceId].getPos()) };
+        Point<float> const position{ sourcePositionToComponentPosition(mSources[sourceId].getPos()) };
 
         g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.5f));
         g.drawEllipse(position.x - halfAzimuthSpan, position.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
@@ -278,9 +283,6 @@ void MainFieldComponent::drawCubeSpans(Graphics & g) const
 
 void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
 {
-    int const width{ getWidth() };
-    auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER };
-    constexpr Point<float> sourceOffset{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
     bool shouldDrawTrajectoryHandle{ false };
     if (mNumberOfSources == 1) {
         if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !mIsPlaying) {
@@ -296,7 +298,8 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     }
 
     if (shouldDrawTrajectoryHandle) {
-        Point<float> const rpos{ (mAutomationManager.getSource().getPos() + Point<float>{ 1.0f, 1.0f }) / 2.0f * effectiveWidth + sourceOffset };
+        Point<float> const rpos{ sourcePositionToComponentPosition(mAutomationManager.getSource().getPos())
+                                 - Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
         Rectangle<float> const rarea{ rpos.x,
                                       rpos.y,
                                       SOURCE_FIELD_COMPONENT_DIAMETER,
@@ -374,7 +377,10 @@ bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
         || mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSource().getPos()) };
-        Rectangle<float> const area{position.x - SOURCE_FIELD_COMPONENT_RADIUS, position.y - SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
+        Rectangle<float> const area{ position.x - SOURCE_FIELD_COMPONENT_RADIUS,
+                                     position.y - SOURCE_FIELD_COMPONENT_RADIUS,
+                                     SOURCE_FIELD_COMPONENT_DIAMETER,
+                                     SOURCE_FIELD_COMPONENT_DIAMETER };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
             mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
@@ -594,8 +600,11 @@ void ElevationFieldComponent::drawSources(Graphics & g) const
     for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
         auto const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
         float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
-        float const x{ static_cast<float>(sourceId) / static_cast<float>(mNumberOfSources) * (componentSize - 50.0f) + 50.0f };
-        float const y{ (Degrees{ 90.0f} - mSources[sourceId].getElevation()) / Degrees{ 90.0f} * (componentSize - 35.0f) + 5.0f };
+        float const x{ static_cast<float>(sourceId) / static_cast<float>(mNumberOfSources) * (componentSize - 50.0f)
+                       + 50.0f };
+        float const y{
+            (Degrees{ 90.0f } - mSources[sourceId].getElevation()) / Degrees{ 90.0f } * (componentSize - 35.0f) + 5.0f
+        };
         Point<float> const pos{ x, y };
         Rectangle<float> area(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
 
@@ -665,9 +674,12 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     // Draw recording trajectory handle.
     if (shouldDrawTrajectoryHandle) {
-        auto const position{sourcePositionToComponentPosition(mAutomationManager.getSourcePosition()) };
+        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSourcePosition()) };
         auto const lineThickness{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
-        Rectangle<float> const rarea{10.0f, position.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
+        Rectangle<float> const rarea{ 10.0f,
+                                      position.y,
+                                      SOURCE_FIELD_COMPONENT_DIAMETER,
+                                      SOURCE_FIELD_COMPONENT_DIAMETER };
 
         g.setColour(Colour::fromRGB(176, 176, 228));
         g.drawLine(10 + SOURCE_FIELD_COMPONENT_RADIUS,
@@ -733,7 +745,10 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
         || static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                == ElevationTrajectoryType::realtime) {
         auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSourcePosition()).withX(10.0f) };
-        Rectangle<float> const area{position.x, position.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
+        Rectangle<float> const area{ position.x,
+                                     position.y,
+                                     SOURCE_FIELD_COMPONENT_DIAMETER,
+                                     SOURCE_FIELD_COMPONENT_DIAMETER };
         if (area.contains(event.getMouseDownPosition().toFloat())) {
             mOldSelectedSourceId = mSelectedSourceId;
             mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;

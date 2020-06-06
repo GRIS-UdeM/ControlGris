@@ -80,7 +80,8 @@ void SourceComponent::setSourcePosition(MouseEvent const & event)
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
-    auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(eventRelativeToFieldComponent.getPosition().toFloat()) };
+    auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(
+        eventRelativeToFieldComponent.getPosition().toFloat()) };
     mSource.setPos(newPosition);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getId());

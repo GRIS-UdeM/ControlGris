@@ -38,7 +38,7 @@ void Source::setAzimuth(Normalized const normalizedAzimuth)
 
 Normalized Source::getNormalizedAzimuth() const
 {
-    return Normalized{ (mAzimuth + pi) / twoPi};
+    return Normalized{ (mAzimuth + pi) / twoPi };
 }
 
 void Source::setElevationNoClip(Radians const elevation)
@@ -94,7 +94,7 @@ void Source::setCoordinates(Radians const azimuth, Radians const elevation, floa
         mElevation = elevation;
         mDistance = distance;
         computeXY();
-        //computeAzimuthElevation(); // usefull?
+        // computeAzimuthElevation(); // usefull?
     }
 }
 
@@ -137,7 +137,7 @@ void Source::setPos(Point<float> const & position)
 
 void Source::computeXY()
 {
-    float const radius{[&]{
+    float const radius{ [&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
             auto const result{ mElevation / halfPi };
             jassert(result >= 0.0f && result <= 1.0f);
@@ -145,7 +145,7 @@ void Source::computeXY()
         } else { // azimuth - distance
             return mDistance;
         }
-    }()};
+    }() };
 
     mPosition = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians()) } * radius;
 
@@ -162,7 +162,8 @@ void Source::computeAzimuthElevation()
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
-            mPosition = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians())} * clippedRadius;
+            mPosition
+                = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians()) } * clippedRadius;
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;
@@ -203,8 +204,8 @@ void Source::setFixedPosition(Point<float> const & position)
 {
     auto const clippedPosition{ clipPosition(position) };
     mFixedPosition = clippedPosition;
-    mFixedAzimuth = Radians{ std::atan2(clippedPosition.getY(), clippedPosition.getX())};
-    auto const radius{clippedPosition.getDistanceFromOrigin() };
+    mFixedAzimuth = Radians{ std::atan2(clippedPosition.getY(), clippedPosition.getX()) };
+    auto const radius{ clippedPosition.getDistanceFromOrigin() };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         mFixedElevation = halfPi * clippedRadius;
