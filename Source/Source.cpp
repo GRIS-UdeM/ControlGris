@@ -162,7 +162,7 @@ void Source::computeAzimuthElevation()
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
-            mPosition = Point<float>{ std::cos(mAzimuth), std::sin(mAzimuth)} * radius;
+            mPosition = Point<float>{ std::cos(mAzimuth), std::sin(mAzimuth)} * clippedRadius;
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;
