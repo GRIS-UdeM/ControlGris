@@ -125,12 +125,12 @@ void SourceBoxComponent::updateSelectedSource(Source * source, int sourceIndex, 
 {
     mSelectedSourceNumber = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSourceNumber);
-    if (spatMode == SpatMode::cube) {
+    if (spatMode == SpatMode::dome) {
         mCurrentAngle = source->getAzimuth();
-        mCurrentRayLength = source->getDistance();
+        mCurrentRayLength = source->getNormalizedElevation();
     } else {
         mCurrentAngle = source->getAzimuth();
-        mCurrentRayLength = 1.0f - source->getNormalizedElevation();
+        mCurrentRayLength = source->getDistance();
     }
     if (mCurrentAngle.getAsDegrees() < 0.0f) {
         mCurrentAngle += Degrees{ 360.0f };

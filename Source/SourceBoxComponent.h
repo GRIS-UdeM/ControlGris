@@ -43,7 +43,7 @@ private:
     ListenerList<Listener> mListeners;
 
     int mSelectedSourceNumber;
-    Radians mCurrentAngle;
+    Degrees mCurrentAngle;
     float mCurrentRayLength;
 
     Label mSourcePlacementLabel;
