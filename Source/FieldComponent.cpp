@@ -61,9 +61,11 @@ void FieldComponent::setSources(Source * sources, int const numberOfSources)
 void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, SpatMode const spatMode) const
 {
     auto const fieldComponentSize{ getWidth() };
+    auto const fieldComponentSize_f{ static_cast<float>(fieldComponentSize) };
     auto const fieldCenter{ fieldComponentSize / 2.0f };
 
-    auto * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    jassert(lookAndFeel != nullptr);
 
     // Draw the background.
     g.setColour(lookAndFeel->getFieldColour());
@@ -75,8 +77,8 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, S
     g.setColour(Colour::fromRGB(55, 56, 57));
     constexpr int gridCount = 8;
     for (int i{ 1 }; i < gridCount; ++i) {
-        g.drawLine(fieldComponentSize * i / gridCount, 0, fieldComponentSize * i / gridCount, fieldComponentSize);
-        g.drawLine(0, fieldComponentSize * i / gridCount, fieldComponentSize, fieldComponentSize * i / gridCount);
+        g.drawLine(fieldComponentSize_f * i / gridCount, 0, fieldComponentSize_f * i / gridCount, fieldComponentSize);
+        g.drawLine(0, fieldComponentSize_f * i / gridCount, fieldComponentSize, fieldComponentSize_f * i / gridCount);
     }
     g.drawLine(0, 0, fieldComponentSize, fieldComponentSize);
     g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
@@ -109,14 +111,14 @@ void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, S
                    fieldCenter,
                    fieldComponentSize - SOURCE_FIELD_COMPONENT_RADIUS);
         g.drawLine(SOURCE_FIELD_COMPONENT_RADIUS,
-                   fieldComponentSize / 2,
+                   fieldComponentSize_f / 2,
                    fieldComponentSize - SOURCE_FIELD_COMPONENT_RADIUS,
-                   fieldComponentSize / 2);
+                   fieldComponentSize_f / 2);
     } else {
         // Draw guide lines
         g.setColour(lookAndFeel->getLightColour());
-        g.drawVerticalLine(5, 5, fieldComponentSize - 5);
-        g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize - 5);
+        g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
+        g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
     }
 }
 
