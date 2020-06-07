@@ -1139,13 +1139,12 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
 
 void ControlGrisAudioProcessor::linkPositionSourcePositions()
 {
-    auto const delta{ SOURCE_FIELD_COMPONENT_DIAMETER / mPositionAutomationManager.getFieldWidth() };
-    Point<float> automationManagerPosition{ mPositionAutomationManager.getSourcePosition() - Point<float>(0.5, 0.5) };
-    auto mag{ std::hypotf(automationManagerPosition.x, automationManagerPosition.y) };
-    auto ang{ atan2f(automationManagerPosition.y, automationManagerPosition.x) };
-    auto const x{ (mag + (mag * delta)) * cosf(ang) + 0.5f };
-    auto const y{ (mag + (mag * delta)) * sinf(ang) + 0.5f };
-    Point<float> const correctedPosition{ x, y };
+    //    auto const delta{ SOURCE_FIELD_COMPONENT_DIAMETER / mPositionAutomationManager.getFieldWidth() };
+    //    Point<float> automationManagerPosition{ mPositionAutomationManager.getSourcePosition() - Point<float>(0.5,
+    //    0.5) }; auto mag{ std::hypot(automationManagerPosition.x, automationManagerPosition.y) }; auto ang{
+    //    std::atan2(automationManagerPosition.y, automationManagerPosition.x) }; auto const x{ (mag + (mag * delta)) *
+    //    cosf(ang) + 0.5f }; auto const y{ (mag + (mag * delta)) * sinf(ang) + 0.5f }; Point<float> const
+    //    correctedPosition{ x, y };
 
     float deltaX = 0.0f, deltaY = 0.0f;
     switch (mPositionAutomationManager.getSourceLink()) {
@@ -1156,7 +1155,7 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
     case PositionSourceLink::circularFixedRadius:
     case PositionSourceLink::circularFixedAngle:
     case PositionSourceLink::circularFullyFixed: {
-        mSources[0].setPos(correctedPosition);
+        // mSources[0].setPos(correctedPosition);
         auto const deltaAzimuth{ mSources[0].getDeltaAzimuth() };
         if (getOscFormat() == SpatMode::cube) {
             auto const deltaDistance{ mSources[0].getDeltaDistance() };

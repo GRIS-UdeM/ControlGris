@@ -517,11 +517,14 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         jassertfalse;
     }
 
-    if (mTrajectoryType > PositionTrajectoryType::drawing) {
-        setSourcePosition(
-            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.0f - mTrajectoryPoints[0].y / mFieldWidth });
+    if (mTrajectoryType != PositionTrajectoryType::realtime && mTrajectoryType != PositionTrajectoryType::drawing) {
+        auto const newPosition{ (mTrajectoryPoints[0]
+                                 - Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS })
+                                    / (mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) * 2.0f
+                                - Point<float>{ 1.0f, 1.0f } };
+        setSourcePosition(newPosition);
     } else {
-        setSourcePosition(Point<float>{ 0.5f, 0.5f });
+        setSourcePosition(Point<float>{ 0.0f, 0.0f });
     }
 }
 
