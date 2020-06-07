@@ -342,8 +342,7 @@ void MainFieldComponent::paint(Graphics & g)
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
     if (mAutomationManager.getRecordingTrajectorySize() > 1) {
-        Path trajectoryPath;
-        mAutomationManager.createRecordingPath(trajectoryPath);
+        auto const trajectoryPath{ mAutomationManager.getTrajectory().createDrawablePath(getWidth()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != PositionTrajectoryType::realtime
@@ -696,8 +695,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getRecordingTrajectorySize() > 1) {
-        Path trajectoryPath{};
-        mAutomationManager.createRecordingPath(trajectoryPath);
+        auto const trajectoryPath{ mAutomationManager.getTrajectory().createDrawablePath(getWidth()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown()

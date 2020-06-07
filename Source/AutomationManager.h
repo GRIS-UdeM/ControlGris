@@ -23,6 +23,7 @@
 
 #include "ControlGrisConstants.h"
 #include "Source.h"
+#include "Trajectory.h"
 
 //==============================================================================
 class AutomationManager
@@ -62,8 +63,8 @@ protected:
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
-    Array<Point<float>> mTrajectoryPoints{};
-    Point<float> mCurrentTrajectoryPoint;
+    Trajectory mTrajectory{};
+    Point<float> mCurrentTrajectoryPoint{ MIN_FIELD_WIDTH / 2.0f, MIN_FIELD_WIDTH / 2.0f };
     Point<float> mLastRecordingPoint{};
 
     float mDegreeOfDeviationPerCycle{};
@@ -72,7 +73,7 @@ protected:
 
 public:
     //==============================================================================
-    AutomationManager();
+    AutomationManager() = default;
     virtual ~AutomationManager() = default;
     //==============================================================================
     float getFieldWidth() const { return mFieldWidth; }
@@ -91,14 +92,15 @@ public:
     Point<float> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
-    void addRecordingPoint(Point<float> const & pos) { mTrajectoryPoints.add(smoothRecordingPosition(pos)); }
-    int getRecordingTrajectorySize() const { return mTrajectoryPoints.size(); }
-    Point<float> getFirstRecordingPoint() const { return mTrajectoryPoints.getFirst(); }
-    Point<float> getLastRecordingPoint() const { return mTrajectoryPoints.getLast(); }
+    void addRecordingPoint(Point<float> const & pos) { mTrajectory.add(smoothRecordingPosition(pos)); }
+    int getRecordingTrajectorySize() const { return mTrajectory.size(); }
+    Point<float> getFirstRecordingPoint() const { return mTrajectory.getFirst(); }
+    Point<float> getLastRecordingPoint() const { return mTrajectory.getLast(); }
     Point<float> getCurrentTrajectoryPoint() const;
-    void createRecordingPath(Path & path);
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
+
+    Trajectory const & getTrajectory() const { return mTrajectory; }
 
     void setPostionSourceLink(PositionSourceLink value) { this->mSourceLink = value; }
     PositionSourceLink getSourceLink() const { return mSourceLink; }

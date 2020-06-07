@@ -1003,7 +1003,7 @@ void ControlGrisAudioProcessor::setPluginState()
         }
     }
 
-    ControlGrisAudioProcessorEditor * editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
         editor->setPluginState();
     }
