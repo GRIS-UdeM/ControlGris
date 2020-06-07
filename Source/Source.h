@@ -123,8 +123,10 @@ public:
     void setColour(Colour const & col) { mColour = col; }
     Colour getColour() const { return mColour; }
 
+    static Point<float> getPositionFromAngle(Radians const angle, float radius);
+    static Radians getAngleFromPosition(Point<float> const & position);
+
 private:
-    static Radians balanceAzimuth(Radians azimuth);
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
     static Point<float> clipPosition(Point<float> const & position);

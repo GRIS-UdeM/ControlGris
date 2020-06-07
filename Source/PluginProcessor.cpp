@@ -206,7 +206,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id...
         mSources[i].setId(i + mFirstSourceId - 1);
         // .. and coordinates.
-        mSources[i].setAzimuth(i % 2 == 0 ? Degrees{ -135.0f } : Degrees{ -45.0f });
+        mSources[i].setAzimuth(i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f });
         mSources[i].setElevation(Degrees{ 90.0f });
         mSources[i].setDistance(1.0f);
     }
@@ -541,7 +541,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
     OSCMessage message(oscPattern);
 
     for (int i{}; i < mNumOfSources; ++i) {
-        float const azimuth{ (mSources[i].getAzimuth() + Degrees{ 90.0f }).simplified().getAsRadians() };
+        float const azimuth{ mSources[i].getAzimuth().getAsRadians() };
         float const elevation{ mSources[i].getElevation().getAsRadians() };
         float const azimuthSpan{ mSources[i].getAzimuthSpan() * 2.0f };
         float const elevationSpan{ mSources[i].getElevationSpan() * 0.5f };

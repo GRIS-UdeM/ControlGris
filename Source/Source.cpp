@@ -24,7 +24,7 @@
 
 void Source::setAzimuth(Radians const azimuth)
 {
-    auto const balancedAzimuth{ balanceAzimuth(azimuth) };
+    auto const balancedAzimuth{ azimuth.simplified() };
     if (balancedAzimuth != mAzimuth) {
         mAzimuth = balancedAzimuth;
         computeXY();
@@ -85,7 +85,7 @@ void Source::setDistance(float const distance)
 
 void Source::setCoordinates(Radians const azimuth, Radians const elevation, float const distance)
 {
-    auto const balancedAzimuth{ balanceAzimuth(azimuth) };
+    auto const balancedAzimuth{ azimuth.simplified() };
     auto const clippedElevation{ clipElevation(elevation) };
     jassert(distance >= 0.0f);
 
@@ -147,23 +147,21 @@ void Source::computeXY()
         }
     }() };
 
-    mPosition = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians()) } * radius;
-
+    mPosition = getPositionFromAngle(mAzimuth, radius);
     this->sendChangeMessage();
 }
 
 void Source::computeAzimuthElevation()
 {
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
-        mAzimuth = Radians{ std::atan2(mPosition.getY(), mPosition.getX()) };
+        mAzimuth = getAngleFromPosition(mPosition).simplified();
     }
 
     auto const radius{ mPosition.getDistanceFromOrigin() };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
-            mPosition
-                = Point<float>{ std::cos(mAzimuth.getAsRadians()), std::sin(mAzimuth.getAsRadians()) } * clippedRadius;
+            mPosition = getPositionFromAngle(mAzimuth, clippedRadius);
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;
@@ -250,20 +248,24 @@ void Source::setXYCoordinatesFromFixedSource(Point<float> const & deltaPosition)
     setPos(mPosition + deltaPosition);
 }
 
+Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
+{
+    auto const rotatedAngle{ angle - halfPi };
+    Point<float> const result{ std::cos(rotatedAngle.getAsRadians()) * radius,
+                               std::sin(rotatedAngle.getAsRadians()) * radius };
+    return result;
+}
+
+Radians Source::getAngleFromPosition(Point<float> const & position)
+{
+    Radians const angle{ std::atan2(position.getY(), position.getX()) };
+    auto const rotatedAngle{ angle + halfPi };
+    return rotatedAngle;
+}
+
 void Source::setFixedElevation(Radians const fixedElevation)
 {
     mFixedElevation = clipElevation(fixedElevation);
-}
-
-Radians Source::balanceAzimuth(Radians azimuth)
-{
-    while (azimuth < -pi) {
-        azimuth += twoPi;
-    }
-    while (azimuth > pi) {
-        azimuth -= twoPi;
-    }
-    return azimuth;
 }
 
 Radians Source::clipElevation(Radians const elevation)
