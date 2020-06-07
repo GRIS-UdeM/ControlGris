@@ -248,12 +248,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                                      * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
     Radians const startPositionAngle{ std::atan2(startPosition.y, startPosition.x) };
 
-    int const fSizeOver3{ static_cast<int>(mFieldWidth) / 3 };
-    int const fSizeOver4{ static_cast<int>(mFieldWidth) / 4 };
     float x;
     float y;
-    float transX{};
-    float transY{};
     switch (mTrajectoryType) {
     case PositionTrajectoryType::realtime:
     case PositionTrajectoryType::drawing:
@@ -303,8 +299,8 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         constexpr auto NB_POINTS = 200;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * -i / (NB_POINTS - 1) };
-            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude * 0.5f;
-            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude;
+            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude * 0.5f;
             auto const mag{ std::hypot(x, y) };
             auto const ang{ std::atan2(y, x) };
             x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
@@ -391,31 +387,56 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::squareCounterClockwise: {
         constexpr auto NB_POINTS = 300;
         static_assert(NB_POINTS % 4 == 0); // much simpler that way
+        constexpr auto NB_POINTS_PER_SIDE = NB_POINTS / 4;
 
         constexpr auto sideLength{ MathConstants<float>::sqrt2 };
         constexpr auto step{ sideLength / (static_cast<float>(NB_POINTS) / 4.0f) };
+        constexpr Point<float> step_right{ step, 0.0f };
+        constexpr Point<float> step_left{ -step, 0.0f };
+        constexpr Point<float> step_down{ 0.0f, step };
+        constexpr Point<float> step_up{ 0.0f, -step };
 
         auto currentPosition{ Point<float>{ -sideLength / 2.0f, -sideLength / 2.0f } };
 
-        // top side
-        for (int i{}; i < NB_POINTS / 4; ++i) {
-            mTrajectoryPoints.add(currentPosition);
-            currentPosition.setX(currentPosition.getX() + step);
-        }
-        // right side
-        for (int i{}; i < NB_POINTS / 4; ++i) {
-            mTrajectoryPoints.add(currentPosition);
-            currentPosition.setY(currentPosition.getY() + step);
-        }
-        // bottom side
-        for (int i{}; i < NB_POINTS / 4; ++i) {
-            mTrajectoryPoints.add(currentPosition);
-            currentPosition.setX(currentPosition.getX() - step);
-        }
-        // left side
-        for (int i{}; i < NB_POINTS / 4; ++i) {
-            mTrajectoryPoints.add(currentPosition);
-            currentPosition.setY(currentPosition.getY() - step);
+        if (mTrajectoryType == PositionTrajectoryType::squareClockwise) {
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_right;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_down;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_left;
+            }
+            // left side
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_up;
+            }
+        } else {
+            // left side
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_down;
+            }
+            // bottom side
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_right;
+            }
+            // right side
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_up;
+            }
+            // top side
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPosition);
+                currentPosition += step_left;
+            }
         }
 
         // rotate, scale, translate and clip
@@ -432,40 +453,66 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     }
     case PositionTrajectoryType::triangleClockwise:
     case PositionTrajectoryType::triangleCounterClockwise: {
-        Point<float> const p1{ 0.0f, -1.0f };
-        Point<float> p2{};
-        Point<float> p3{};
+        constexpr auto NB_POINTS = 300;
+        static_assert(NB_POINTS % 3 == 0);
+        constexpr auto NB_POINTS_PER_SIDE = NB_POINTS / 3;
+
+        constexpr auto sqrt3{ 1.73205080757f };
+        constexpr auto sideLength{ sqrt3 }; // that's just how equilateral triangles work!
+        constexpr Point<float> initialPoint{ 0.0f, 1.0f };
+        constexpr auto step{ sideLength / static_cast<float>(NB_POINTS_PER_SIDE) };
+
+        constexpr auto down_right_slope{ Degrees{ -60.0f }.getAsRadians() };
+        constexpr auto down_left_slope{ Degrees{ -120.0f }.getAsRadians() };
+
+        constexpr Point<float> right_step{ step, 0.0f };
+        constexpr Point<float> left_step{ -step, 0.0f };
+        Point<float> const down_right_step{ std::cos(down_right_slope) * step, std::sin(down_right_slope) * step };
+        Point<float> const up_left_step{ -down_right_step };
+        Point<float> const down_left_step{ std::cos(down_left_slope) * step, std::sin(down_left_slope) * step };
+        Point<float> const up_right_step{ -down_left_step };
+
+        Point<float> currentPoint{ initialPoint };
         if (mTrajectoryType == PositionTrajectoryType::triangleClockwise) {
-            p2 = Point<float>{ 1.0f, 1.0f };
-            p3 = Point<float>{ -1.0f, 1.0f };
-        } else {
-            p2 = Point<float>{ -1.0f, 1.0f };
-            p3 = Point<float>{ 1.0f, 1.0f };
-        }
-        auto const step{ 1.0f / (mFieldWidth / 3.0f) };
-        transX = startPosition.x * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
-        transY = startPosition.y * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
-        auto const magnitude{ std::hypot(transX, transY) };
-        for (int i{}; i < static_cast<int>(mFieldWidth); ++i) {
-            if (i < (fSizeOver3)) {
-                x = (p2.x - p1.x) * static_cast<float>(i) * step + p1.x;
-                y = (p2.y - p1.y) * static_cast<float>(i) * step + p1.y;
-            } else if (i < (fSizeOver3 * 2)) {
-                x = (p3.x - p2.x) * static_cast<float>(i - fSizeOver3) * step + p2.x;
-                y = (p3.y - p2.y) * static_cast<float>(i - fSizeOver3) * step + p2.y;
-            } else {
-                x = (p1.x - p3.x) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.x;
-                y = (p1.y - p3.y) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.y;
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += down_right_step;
             }
-            Point<float> p(x * magnitude + (mFieldWidth / 2.0f), y * magnitude + (mFieldWidth / 2.0f));
-            p.applyTransform(AffineTransform::rotation(-startPositionAngle.getAsRadians(),
-                                                       (mFieldWidth / 2.0f),
-                                                       (mFieldWidth / 2.0f)));
-            p.x = trajectoryLimits.clipValue(p.x);
-            p.y = trajectoryLimits.clipValue(p.y);
-            mTrajectoryPoints.add(p);
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += left_step;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += up_right_step;
+            }
+        } else {
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += down_left_step;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += right_step;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += up_left_step;
+            }
         }
-    } break;
+
+        // rotate, scale, translate and clip
+        auto const rotationAngle{ (startPositionAngle + Degrees{ 30.0f }).getAsRadians() };
+        for (auto & point : mTrajectoryPoints) {
+            auto const rotated{ point.rotatedAboutOrigin(rotationAngle) };
+            auto const scaled{ rotated * trajectoryMagnitude };
+            auto const translated{ scaled + Point<float>{ halfFieldSize, halfFieldSize } };
+            Point<float> const clipped{ trajectoryLimits.clipValue(translated.getX()),
+                                        trajectoryLimits.clipValue(translated.getY()) };
+            point = clipped;
+        }
+        break;
+    }
     case PositionTrajectoryType::undefined:
         jassertfalse;
     }
