@@ -19,12 +19,7 @@
  *************************************************************************/
 #include "AutomationManager.h"
 
-#include <array>
-
 #include <algorithm>
-
-constexpr auto MAGIC_4 = 200;
-constexpr auto MAGIC_6 = 199.0f;
 
 AutomationManager::AutomationManager()
 {
@@ -193,9 +188,11 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 
     if (mActivateState) {
-        ;
-        setSourcePosition(
-            Point<float>{ mCurrentTrajectoryPoint.x / mFieldWidth, 1.0f - mCurrentTrajectoryPoint.y / mFieldWidth });
+        auto const newSourcePosition{ (mCurrentTrajectoryPoint
+                                       - Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS })
+                                          / (mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) * 2.0f
+                                      - Point<float>{ 1.0f, 1.0f } };
+        setSourcePosition(newSourcePosition);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -205,7 +202,10 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
     } else {
-        return Point<float>{ getSourcePosition().x * mFieldWidth, (1.0f - getSourcePosition().y) * mFieldWidth };
+        auto const result{ (getSourcePosition() + Point<float>{ 1.0f, 1.0f }) / 2.0f
+                               * (mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
+                           + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
+        return result;
     }
 }
 
@@ -476,19 +476,6 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         if (mTrajectoryType == PositionTrajectoryType::triangleClockwise) {
             for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
                 mTrajectoryPoints.add(currentPoint);
-                currentPoint += down_right_step;
-            }
-            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
-                mTrajectoryPoints.add(currentPoint);
-                currentPoint += left_step;
-            }
-            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
-                mTrajectoryPoints.add(currentPoint);
-                currentPoint += up_right_step;
-            }
-        } else {
-            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
-                mTrajectoryPoints.add(currentPoint);
                 currentPoint += down_left_step;
             }
             for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
@@ -498,6 +485,19 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
                 mTrajectoryPoints.add(currentPoint);
                 currentPoint += up_left_step;
+            }
+        } else {
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += down_right_step;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += left_step;
+            }
+            for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
+                mTrajectoryPoints.add(currentPoint);
+                currentPoint += up_right_step;
             }
         }
 
@@ -527,6 +527,10 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 
 void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
 {
+    constexpr auto NB_POINTS = 400;
+    static_assert(NB_POINTS % 2 == 0);
+    constexpr auto NB_POINTS_PER_GESTURE = NB_POINTS / 2;
+
     mTrajectoryType = type;
 
     mTrajectoryPoints.clear();
@@ -542,16 +546,16 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
         mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
         break;
     case ElevationTrajectoryType::downUp:
-        for (int i{}; i < MAGIC_4; ++i) {
-            float const x = (static_cast<float>(i) / MAGIC_6) * width + offset;
-            float const y = (static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
+        for (int i{}; i < NB_POINTS_PER_GESTURE; ++i) {
+            float const x = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * width + offset;
+            float const y = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
     case ElevationTrajectoryType::upDown:
-        for (int i{}; i < MAGIC_4; ++i) {
-            float const x = (static_cast<float>(i) / MAGIC_6) * width + offset;
-            float const y = (1.0f - static_cast<float>(i) / MAGIC_6) * (maxPos - minPos) + minPos;
+        for (int i{}; i < NB_POINTS_PER_GESTURE; ++i) {
+            float const x = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * width + offset;
+            float const y = (1.0f - static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * (maxPos - minPos) + minPos;
             mTrajectoryPoints.add(Point<float>{ x, y });
         }
         break;
