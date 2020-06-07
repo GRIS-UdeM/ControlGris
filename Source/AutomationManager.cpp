@@ -19,11 +19,10 @@
  *************************************************************************/
 #include "AutomationManager.h"
 
+#include <array>
+
 #include <algorithm>
 
-constexpr auto MAGIC_1 = 300;
-constexpr auto MAGIC_2 = 300.0f;
-constexpr auto MAGIC_3 = 99;
 constexpr auto MAGIC_4 = 200;
 constexpr auto MAGIC_6 = 199.0f;
 
@@ -236,27 +235,25 @@ void AutomationManager::fixSourcePosition()
     mSource.fixSourcePosition(shouldBeFixed);
 }
 
-void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
+void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
 {
     mTrajectoryType = type;
 
     mTrajectoryPoints.clear();
 
-    auto const offset{ mFieldWidth / 2.0f };
-    constexpr auto trajectoryPadding{ 8.0f };
-    Range<float> const trajectoryLimits{ trajectoryPadding, mFieldWidth - trajectoryPadding };
-    float magnitude{ std::hypot(startPos.x, startPos.y) * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
-    Radians angle{ std::atan2(startPos.y, startPos.x) };
+    auto const halfFieldSize{ mFieldWidth / 2.0f };
+    constexpr auto TRAJECTORY_PADDING{ 8.0f };
+    Range<float> const trajectoryLimits{ TRAJECTORY_PADDING, mFieldWidth - TRAJECTORY_PADDING };
+    float const trajectoryMagnitude{ std::hypot(startPosition.x, startPosition.y)
+                                     * ((mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f) };
+    Radians const startPositionAngle{ std::atan2(startPosition.y, startPosition.x) };
 
-    auto const fSize{ static_cast<int>(mFieldWidth) };
-    int const fSizeOver3{ fSize / 3 };
-    int const fSizeOver4{ fSize / 4 };
+    int const fSizeOver3{ static_cast<int>(mFieldWidth) / 3 };
+    int const fSizeOver4{ static_cast<int>(mFieldWidth) / 4 };
     float x;
     float y;
-    float step{};
     float transX{};
     float transY{};
-    float adjustedMagnitude{};
     switch (mTrajectoryType) {
     case PositionTrajectoryType::realtime:
     case PositionTrajectoryType::drawing:
@@ -265,9 +262,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::circleClockwise: {
         constexpr auto NB_POINTS = 200;
         for (int i{}; i < NB_POINTS; ++i) {
-            auto const adjustedAngle{ twoPi * i / (NB_POINTS - 1) - angle };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude + offset;
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude + offset;
+            auto const adjustedAngle{ twoPi * i / (NB_POINTS - 1) - startPositionAngle };
+            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude + halfFieldSize;
+            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -277,9 +274,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     case PositionTrajectoryType::circleCounterClockwise: {
         constexpr auto NB_POINTS = 200;
         for (int i{}; i < NB_POINTS; ++i) {
-            auto const adjustedAngle{ twoPi * -i / (NB_POINTS - 1) - angle };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude + offset;
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude + offset;
+            auto const adjustedAngle{ twoPi * -i / (NB_POINTS - 1) - startPositionAngle };
+            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude + halfFieldSize;
+            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -290,12 +287,12 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         constexpr auto NB_POINTS = 200;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * i / (NB_POINTS - 1) };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude * 0.5f;
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude;
-            auto const mag{ std::hypotf(x, y) };
-            auto const ang{ atan2f(y, x) };
-            x = mag * cosf(ang - angle.getAsRadians()) + offset;
-            y = mag * sinf(ang - angle.getAsRadians()) + offset;
+            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude * 0.5f;
+            auto const mag{ std::hypot(x, y) };
+            auto const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -306,12 +303,12 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         constexpr auto NB_POINTS = 200;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * -i / (NB_POINTS - 1) };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude * 0.5f;
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude;
-            auto const mag{ std::hypotf(x, y) };
-            auto const ang{ atan2f(y, x) };
-            x = mag * cosf(ang - angle.getAsRadians()) + offset;
-            y = mag * sinf(ang - angle.getAsRadians()) + offset;
+            x = std::cos(adjustedAngle.getAsRadians()) * trajectoryMagnitude * 0.5f;
+            y = std::sin(adjustedAngle.getAsRadians()) * trajectoryMagnitude;
+            auto const mag{ std::hypot(x, y) };
+            auto const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -320,15 +317,16 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     }
     case PositionTrajectoryType::spiralClockwiseOutIn: {
         constexpr auto NB_POINTS = 300;
-        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3 - 1;
+        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * i / NB_POINTS_PER_REVOLUTION };
-            x = std::sin(adjustedAngle.getAsRadians()) * magnitude * (1.0f - static_cast<float>(i) / NB_POINTS);
-            y = std::cos(adjustedAngle.getAsRadians()) * magnitude * (1.0f - static_cast<float>(i) / NB_POINTS);
-            auto const mag{ std::hypotf(x, y) };
-            auto const ang{ atan2f(y, x) };
-            x = mag * std::cos(ang - angle.getAsRadians()) + offset;
-            y = mag * std::sin(ang - angle.getAsRadians()) + offset;
+            auto const adjustedMagnitude{ trajectoryMagnitude * (1.0f - static_cast<float>(i) / NB_POINTS) };
+            x = std::cos(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            auto const mag{ std::hypot(x, y) };
+            auto const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -337,15 +335,16 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     }
     case PositionTrajectoryType::spiralCounterClockwiseOutIn: {
         constexpr auto NB_POINTS = 300;
-        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3 - 1;
+        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * -i / NB_POINTS_PER_REVOLUTION };
-            x = std::sin(adjustedAngle.getAsRadians()) * magnitude * (1.0f - static_cast<float>(i) / NB_POINTS);
-            y = std::cos(adjustedAngle.getAsRadians()) * magnitude * (1.0f - static_cast<float>(i) / NB_POINTS);
-            auto const mag{ std::hypotf(x, y) };
-            auto const ang{ atan2f(y, x) };
-            x = mag * std::cos(ang - angle.getAsRadians()) + offset;
-            y = mag * std::sin(ang - angle.getAsRadians()) + offset;
+            auto const adjustedMagnitude{ trajectoryMagnitude * (1.0f - static_cast<float>(i) / NB_POINTS) };
+            x = std::cos(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            auto const mag{ std::hypot(x, y) };
+            auto const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -354,15 +353,16 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     }
     case PositionTrajectoryType::spiralClockwiseInOut: {
         constexpr auto NB_POINTS = 300;
-        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3 - 1;
+        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * i / NB_POINTS_PER_REVOLUTION };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude * (static_cast<float>(i) / NB_POINTS);
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude * (static_cast<float>(i) / NB_POINTS);
-            float const mag{ std::hypotf(x, y) };
-            float const ang{ atan2f(y, x) };
-            x = mag * cosf(ang - angle.getAsRadians()) + offset;
-            y = mag * sinf(ang - angle.getAsRadians()) + offset;
+            auto const adjustedMagnitude{ trajectoryMagnitude * (static_cast<float>(i) / NB_POINTS) };
+            x = std::cos(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            float const mag{ std::hypot(x, y) };
+            float const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -371,15 +371,16 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     }
     case PositionTrajectoryType::spiralCounterClockwiseInOut: {
         constexpr auto NB_POINTS = 300;
-        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3 - 1;
+        constexpr auto NB_POINTS_PER_REVOLUTION = NB_POINTS / 3;
         for (int i{}; i < NB_POINTS; ++i) {
             auto const adjustedAngle{ twoPi * -i / NB_POINTS_PER_REVOLUTION };
-            x = std::cos(adjustedAngle.getAsRadians()) * magnitude * (static_cast<float>(i) / NB_POINTS);
-            y = std::sin(adjustedAngle.getAsRadians()) * magnitude * (static_cast<float>(i) / NB_POINTS);
-            float const mag{ std::hypotf(x, y) };
-            float const ang{ atan2f(y, x) };
-            x = mag * cosf(ang - angle.getAsRadians()) + offset;
-            y = mag * sinf(ang - angle.getAsRadians()) + offset;
+            auto const adjustedMagnitude{ trajectoryMagnitude * (static_cast<float>(i) / NB_POINTS) };
+            x = std::cos(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            y = std::sin(adjustedAngle.getAsRadians()) * adjustedMagnitude;
+            float const mag{ std::hypot(x, y) };
+            float const ang{ std::atan2(y, x) };
+            x = mag * std::cos(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
+            y = mag * std::sin(ang + startPositionAngle.getAsRadians()) + halfFieldSize;
             x = trajectoryLimits.clipValue(x);
             y = trajectoryLimits.clipValue(y);
             mTrajectoryPoints.add(Point<float>{ x, y });
@@ -387,49 +388,48 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
         break;
     }
     case PositionTrajectoryType::squareClockwise:
-    case PositionTrajectoryType::squareCounterClockwise:
-        step = 1.0f / (mFieldWidth / 4);
-        transX = startPos.x * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
-        transY = startPos.y * ((mFieldWidth / 2 - SOURCE_FIELD_COMPONENT_RADIUS));
-        magnitude = std::hypotf(transX, transY);
-        adjustedMagnitude = magnitude * MathConstants<float>::halfPi;
-        float tmp1;
-        float tmp2;
-        for (int i{}; i < fSize; ++i) {
-            if (i < fSizeOver4) {
-                tmp1 = static_cast<float>(i) * step;
-                tmp2 = 0.0f;
-            } else if (i < (fSizeOver4 * 2)) {
-                tmp1 = 1.0f;
-                tmp2 = static_cast<float>(i - fSizeOver4) * step;
-            } else if (i < (fSizeOver4 * 3)) {
-                tmp1 = 1.0f - (static_cast<float>(i - fSizeOver4 * 2) * step);
-                tmp2 = 1.0f;
-            } else {
-                tmp1 = 0.0f;
-                tmp2 = 1.0f - (static_cast<float>(i - fSizeOver4 * 3) * step);
-            }
-            if (mTrajectoryType == PositionTrajectoryType::squareClockwise) {
-                x = tmp1;
-                y = tmp2;
-            } else {
-                x = tmp2;
-                y = tmp1;
-            }
-            x *= adjustedMagnitude;
-            y *= adjustedMagnitude;
-            x = x + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
-            y = y + (mFieldWidth / 2.0f) - (adjustedMagnitude / 2);
-            Point<float> p{ x, y };
-            AffineTransform const t{ AffineTransform::rotation(-angle.getAsRadians() + MathConstants<float>::pi / 4.0f,
-                                                               (mFieldWidth / 2.0f),
-                                                               (mFieldWidth / 2.0f)) };
-            p.applyTransform(t);
-            p.x = trajectoryLimits.clipValue(p.x);
-            p.y = trajectoryLimits.clipValue(p.y);
-            mTrajectoryPoints.add(p);
+    case PositionTrajectoryType::squareCounterClockwise: {
+        constexpr auto NB_POINTS = 300;
+        static_assert(NB_POINTS % 4 == 0); // much simpler that way
+
+        constexpr auto sideLength{ MathConstants<float>::sqrt2 };
+        constexpr auto step{ sideLength / (static_cast<float>(NB_POINTS) / 4.0f) };
+
+        auto currentPosition{ Point<float>{ -sideLength / 2.0f, -sideLength / 2.0f } };
+
+        // top side
+        for (int i{}; i < NB_POINTS / 4; ++i) {
+            mTrajectoryPoints.add(currentPosition);
+            currentPosition.setX(currentPosition.getX() + step);
+        }
+        // right side
+        for (int i{}; i < NB_POINTS / 4; ++i) {
+            mTrajectoryPoints.add(currentPosition);
+            currentPosition.setY(currentPosition.getY() + step);
+        }
+        // bottom side
+        for (int i{}; i < NB_POINTS / 4; ++i) {
+            mTrajectoryPoints.add(currentPosition);
+            currentPosition.setX(currentPosition.getX() - step);
+        }
+        // left side
+        for (int i{}; i < NB_POINTS / 4; ++i) {
+            mTrajectoryPoints.add(currentPosition);
+            currentPosition.setY(currentPosition.getY() - step);
+        }
+
+        // rotate, scale, translate and clip
+        auto const rotationAngle{ (startPositionAngle - Degrees{ 45.0f }).getAsRadians() };
+        for (auto & point : mTrajectoryPoints) {
+            auto const rotated{ point.rotatedAboutOrigin(rotationAngle) };
+            auto const scaled{ rotated * trajectoryMagnitude };
+            auto const translated{ scaled + Point<float>{ halfFieldSize, halfFieldSize } };
+            Point<float> const clipped{ trajectoryLimits.clipValue(translated.getX()),
+                                        trajectoryLimits.clipValue(translated.getY()) };
+            point = clipped;
         }
         break;
+    }
     case PositionTrajectoryType::triangleClockwise:
     case PositionTrajectoryType::triangleCounterClockwise: {
         Point<float> const p1{ 0.0f, -1.0f };
@@ -442,11 +442,11 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
             p2 = Point<float>{ -1.0f, 1.0f };
             p3 = Point<float>{ 1.0f, 1.0f };
         }
-        step = 1.0f / (mFieldWidth / 3.0f);
-        transX = startPos.x * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
-        transY = startPos.y * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
-        magnitude = std::hypotf(transX, transY);
-        for (int i{}; i < fSize; ++i) {
+        auto const step{ 1.0f / (mFieldWidth / 3.0f) };
+        transX = startPosition.x * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
+        transY = startPosition.y * ((mFieldWidth / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS));
+        auto const magnitude{ std::hypot(transX, transY) };
+        for (int i{}; i < static_cast<int>(mFieldWidth); ++i) {
             if (i < (fSizeOver3)) {
                 x = (p2.x - p1.x) * static_cast<float>(i) * step + p1.x;
                 y = (p2.y - p1.y) * static_cast<float>(i) * step + p1.y;
@@ -458,8 +458,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
                 y = (p1.y - p3.y) * static_cast<float>(i - fSizeOver3 * 2) * step + p3.y;
             }
             Point<float> p(x * magnitude + (mFieldWidth / 2.0f), y * magnitude + (mFieldWidth / 2.0f));
-            p.applyTransform(
-                AffineTransform::rotation(-angle.getAsRadians(), (mFieldWidth / 2.0f), (mFieldWidth / 2.0f)));
+            p.applyTransform(AffineTransform::rotation(-startPositionAngle.getAsRadians(),
+                                                       (mFieldWidth / 2.0f),
+                                                       (mFieldWidth / 2.0f)));
             p.x = trajectoryLimits.clipValue(p.x);
             p.y = trajectoryLimits.clipValue(p.y);
             mTrajectoryPoints.add(p);
