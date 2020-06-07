@@ -321,9 +321,12 @@ void TrajectoryBoxComponent::setDurationUnit(int value)
 
 void TrajectoryBoxComponent::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    GrisLookAndFeel * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    if (lookAndFeel != nullptr) {
+        g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    } else {
+        jassertfalse;
+    }
 }
 
 void TrajectoryBoxComponent::resized()

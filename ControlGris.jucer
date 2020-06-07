@@ -9,15 +9,12 @@
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
-        <FILE id="WHwd7x" name="ConstrainedStrongTypes.cpp" compile="1" resource="0"
-              file="Source/ConstrainedStrongTypes.cpp"/>
         <FILE id="V2Cfm0" name="ConstrainedStrongTypes.h" compile="0" resource="0"
               file="Source/ConstrainedStrongTypes.h"/>
         <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
               file="Source/ControlGrisConstants.h"/>
         <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
               file="Source/ControlGrisUtilities.h"/>
-        <FILE id="Q6AX2d" name="StrongTypes.cpp" compile="1" resource="0" file="Source/StrongTypes.cpp"/>
         <FILE id="qFdGxF" name="StrongTypes.h" compile="0" resource="0" file="Source/StrongTypes.h"/>
       </GROUP>
       <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">

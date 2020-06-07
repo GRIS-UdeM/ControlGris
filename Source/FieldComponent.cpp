@@ -350,9 +350,6 @@ void MainFieldComponent::paint(Graphics & g)
         g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
     }
 
-    // Draw sources.
-    //    this->drawSources(g);
-
     // Draw spanning.
     this->drawSpans(g);
 

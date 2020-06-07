@@ -66,6 +66,16 @@ public:
 
     [[nodiscard]] constexpr float getAsRadians() const { return mValue; }
     [[nodiscard]] constexpr float getAsDegrees() const { return mValue / MathConstants<float>::twoPi * 360.0f; }
+    [[nodiscard]] constexpr Radians simplified() const
+    {
+        if (mValue < -MathConstants<float>::pi) {
+            return Radians{ mValue + MathConstants<float>::twoPi };
+        }
+        if (mValue > MathConstants<float>::pi) {
+            return Radians{ mValue - MathConstants<float>::twoPi };
+        }
+        return *this;
+    }
 };
 
 constexpr Radians pi{ MathConstants<float>::pi };
@@ -128,6 +138,18 @@ public:
     constexpr operator Radians() const { return Radians{ mValue / 360.0f * MathConstants<float>::twoPi }; }
     [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * MathConstants<float>::twoPi; }
     [[nodiscard]] constexpr float getAsDegrees() const { return mValue; }
+    [[nodiscard]] constexpr Degrees simplified() const
+    {
+        constexpr auto circle{ 360.0f };
+        constexpr auto halfCircle{ circle / 2.0f };
+        if (mValue < -halfCircle) {
+            return Degrees{ mValue + circle };
+        }
+        if (mValue > halfCircle) {
+            return Degrees{ mValue - circle };
+        }
+        return *this;
+    }
 };
 
 #endif // STRONGTYPESTEST_TYPES_H

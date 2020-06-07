@@ -541,7 +541,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
     OSCMessage message(oscPattern);
 
     for (int i{}; i < mNumOfSources; ++i) {
-        float const azimuth{ mSources[i].getAzimuth().getAsRadians() };
+        float const azimuth{ (mSources[i].getAzimuth() + Degrees{ 90.0f }).simplified().getAsRadians() };
         float const elevation{ mSources[i].getElevation().getAsRadians() };
         float const azimuthSpan{ mSources[i].getAzimuthSpan() * 2.0f };
         float const elevationSpan{ mSources[i].getElevationSpan() * 0.5f };
@@ -918,12 +918,13 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 //==============================================================================
 void ControlGrisAudioProcessor::timerCallback()
 {
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+
     if (mNewPositionPreset != 0 && mNewPositionPreset != mCurrentPositionPreset) {
         if (recallFixedPosition(mNewPositionPreset)) {
             mCurrentPositionPreset = mNewPositionPreset;
-            ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-            if (ed != nullptr) {
-                ed->updatePositionPreset(mCurrentPositionPreset);
+            if (editor != nullptr) {
+                editor->updatePositionPreset(mCurrentPositionPreset);
             }
         }
     }
@@ -966,14 +967,13 @@ void ControlGrisAudioProcessor::timerCallback()
 
     mLastTimerTime = getCurrentTime();
 
-    ControlGrisAudioProcessorEditor * editor = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-
     if (mCanStopActivate && !mIsPlaying) {
         if (mPositionAutomationManager.getPositionActivateState())
             mPositionAutomationManager.setPositionActivateState(false);
         if (mElevationAutomationManager.getPositionActivateState())
             mElevationAutomationManager.setPositionActivateState(false);
         mCanStopActivate = false;
+
         if (editor != nullptr) {
             editor->updateSpanLinkButton(false);
         }
