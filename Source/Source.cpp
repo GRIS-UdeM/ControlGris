@@ -137,15 +137,14 @@ void Source::setPos(Point<float> const & position)
 
 void Source::computeXY()
 {
-    float const radius{ [&] {
+    float const radius{ ([&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
             auto const result{ mElevation / halfPi };
             jassert(result >= 0.0f && result <= 1.0f);
             return result;
-        } else { // azimuth - distance
-            return mDistance;
         }
-    }() };
+        return mDistance;
+    }()) };
 
     mPosition = getPositionFromAngle(mAzimuth, radius);
     this->sendChangeMessage();
