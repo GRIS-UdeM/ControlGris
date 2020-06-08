@@ -36,7 +36,7 @@ void AutomationManager::setPositionActivateState(bool const newState)
         mDampeningCycleCount = 0;
         mDampeningLastDelta = 0.0;
         mCurrentPlaybackDuration = mPlaybackDuration;
-        mCurrentDegreeOfDeviation = 0.0;
+        mCurrentDegreeOfDeviation = Degrees{ 0.0f };
         mDeviationCycleCount = 0;
     } else {
         mPlaybackPosition = Point<float>{ INVALID_POSITION };
@@ -148,7 +148,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         }
     }
 
-    if (mDegreeOfDeviationPerCycle != 0) {
+    if (mDegreeOfDeviationPerCycle != Degrees{ 0.0f }) {
         bool deviationFlag{ true };
         if (mIsBackAndForth && mDampeningCycles > 0) {
             if (approximatelyEqual(currentScaleMin, currentScaleMax)) {
@@ -157,13 +157,12 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         }
         if (deviationFlag) {
             mCurrentDegreeOfDeviation
-                = static_cast<float>(mDeviationCycleCount + mTrajectoryDeltaTime) * mDegreeOfDeviationPerCycle;
-            if (mCurrentDegreeOfDeviation >= 360.0f) {
-                mCurrentDegreeOfDeviation -= 360.0f;
+                = mDegreeOfDeviationPerCycle * static_cast<float>(mDeviationCycleCount + mTrajectoryDeltaTime);
+            if (mCurrentDegreeOfDeviation >= Degrees{ 360.0f }) {
+                mCurrentDegreeOfDeviation -= Degrees{ 360.0f };
             }
         }
-        AffineTransform const t{ AffineTransform::rotation(mCurrentDegreeOfDeviation / 360.0f
-                                                               * MathConstants<float>::twoPi,
+        AffineTransform const t{ AffineTransform::rotation(mCurrentDegreeOfDeviation.getAsRadians(),
                                                            (mFieldWidth / 2.0f),
                                                            (mFieldWidth / 2.0f)) };
         mCurrentTrajectoryPoint.applyTransform(t);

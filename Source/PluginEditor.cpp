@@ -172,7 +172,7 @@ void ControlGrisAudioProcessorEditor::setPluginState()
         mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
     mTrajectoryBox.setDeviationPerCycle(mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0));
     mPositionAutomationManager.setDeviationPerCycle(
-        mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0));
+        Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
     mTrajectoryBox.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
     mTrajectoryBox.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
 
@@ -541,10 +541,10 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationDampeningCyclesChang
     mElevationAutomationManager.setPositionDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float degrees)
 {
-    mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", value, nullptr);
-    mPositionAutomationManager.setDeviationPerCycle(value);
+    mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
+    mPositionAutomationManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode)

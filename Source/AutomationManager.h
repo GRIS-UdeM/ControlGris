@@ -67,8 +67,8 @@ protected:
     Point<float> mCurrentTrajectoryPoint{ MIN_FIELD_WIDTH / 2.0f, MIN_FIELD_WIDTH / 2.0f };
     Point<float> mLastRecordingPoint{};
 
-    float mDegreeOfDeviationPerCycle{};
-    float mCurrentDegreeOfDeviation{};
+    Degrees mDegreeOfDeviationPerCycle{};
+    Degrees mCurrentDegreeOfDeviation{};
     int mDeviationCycleCount{};
 
 public:
@@ -108,7 +108,7 @@ public:
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }
 
-    void setDeviationPerCycle(float value) { this->mDegreeOfDeviationPerCycle = value; }
+    void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
 
     Source & getSource() { return mSource; }
     Source const & getSource() const { return mSource; }
