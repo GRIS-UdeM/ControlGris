@@ -17,47 +17,47 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
     switch (positionTrajectoryType) {
     case PositionTrajectoryType::circleClockwise:
         mPoints = getBasicCirclePoints();
-        invertDirection();
         break;
     case PositionTrajectoryType::circleCounterClockwise:
         mPoints = getBasicCirclePoints();
+        invertDirection();
         break;
     case PositionTrajectoryType::ellipseClockwise:
         mPoints = getBasicEllipsePoints();
-        invertDirection();
         break;
     case PositionTrajectoryType::ellipseCounterClockwise:
         mPoints = getBasicEllipsePoints();
+        invertDirection();
         break;
     case PositionTrajectoryType::spiralClockwiseInOut:
         mPoints = getBasicSpiralPoints();
-        flipOnHorizontalAxis();
         break;
     case PositionTrajectoryType::spiralCounterClockwiseInOut:
         mPoints = getBasicSpiralPoints();
+        flipOnHorizontalAxis();
         break;
     case PositionTrajectoryType::spiralClockwiseOutIn:
         mPoints = getBasicSpiralPoints();
         invertDirection();
-        flipOnHorizontalAxis();
         break;
     case PositionTrajectoryType::spiralCounterClockwiseOutIn:
         mPoints = getBasicSpiralPoints();
+        flipOnHorizontalAxis();
         invertDirection();
         break;
     case PositionTrajectoryType::squareClockwise:
         mPoints = getBasicSquarePoints();
-        invertDirection();
         break;
     case PositionTrajectoryType::squareCounterClockwise:
         mPoints = getBasicSquarePoints();
+        invertDirection();
         break;
     case PositionTrajectoryType::triangleClockwise:
         mPoints = getBasicTrianglePoints();
-        invertDirection();
         break;
     case PositionTrajectoryType::triangleCounterClockwise:
         mPoints = getBasicTrianglePoints();
+        invertDirection();
         break;
     default:
         jassertfalse;

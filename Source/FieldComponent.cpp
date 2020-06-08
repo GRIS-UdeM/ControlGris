@@ -345,10 +345,14 @@ void MainFieldComponent::paint(Graphics & g)
         auto const trajectoryPath{ mAutomationManager.getTrajectory().createDrawablePath(getWidth()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
+    // position dot
     if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != PositionTrajectoryType::realtime
         && mAutomationManager.getPositionActivateState()) {
-        Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
-        g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
+        constexpr float radius = 4.0f;
+        constexpr float diameter = radius * 2.0f;
+        Point<float> const dotCenter{ sourcePositionToComponentPosition(
+            mAutomationManager.getCurrentTrajectoryPoint()) };
+        g.fillEllipse(dotCenter.getX() - radius, dotCenter.getY() - radius, diameter, diameter);
     }
 
     // Draw spanning.

@@ -162,18 +162,12 @@ void AutomationManager::computeCurrentTrajectoryPoint()
                 mCurrentDegreeOfDeviation -= Degrees{ 360.0f };
             }
         }
-        AffineTransform const t{ AffineTransform::rotation(mCurrentDegreeOfDeviation.getAsRadians(),
-                                                           (mFieldWidth / 2.0f),
-                                                           (mFieldWidth / 2.0f)) };
-        mCurrentTrajectoryPoint.applyTransform(t);
+
+        mCurrentTrajectoryPoint = mCurrentTrajectoryPoint.rotatedAboutOrigin(mCurrentDegreeOfDeviation.getAsRadians());
     }
 
     if (mActivateState) {
-        auto const newSourcePosition{ (mCurrentTrajectoryPoint
-                                       - Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS })
-                                          / (mFieldWidth - SOURCE_FIELD_COMPONENT_DIAMETER) * 2.0f
-                                      - Point<float>{ 1.0f, 1.0f } };
-        setSourcePosition(newSourcePosition);
+        setSourcePosition(mCurrentTrajectoryPoint);
         sendTrajectoryPositionChangedEvent();
     }
 }
