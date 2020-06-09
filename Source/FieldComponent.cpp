@@ -217,9 +217,9 @@ void MainFieldComponent::drawDomeSpans(Graphics & g) const
                                            std::sin(-azimuthSpan) * clippedElevationRange.getEnd() };
 
         // Draw the path
-        Path myPath{};
-        myPath.startNewSubPath(lower_corner_a);
-        myPath.addCentredArc(
+        Path path{};
+        path.startNewSubPath(lower_corner_a);
+        path.addCentredArc(
             0.0f,
             0.0f,
             clippedElevationRange.getStart(),
@@ -228,29 +228,29 @@ void MainFieldComponent::drawDomeSpans(Graphics & g) const
             azimuthSpan
                 + MathConstants<float>::halfPi, // addCentredArc counts radians from the top-center of the ellipse
             -azimuthSpan + MathConstants<float>::halfPi);
-        myPath.lineTo(upper_corner_b); // lower right corner
-        myPath.addCentredArc(0.0f,
-                             0.0f,
-                             clippedElevationRange.getEnd(),
-                             clippedElevationRange.getEnd(),
-                             0.0f,
-                             -azimuthSpan + MathConstants<float>::halfPi,
-                             azimuthSpan + MathConstants<float>::halfPi); // upper right corner
-        myPath.closeSubPath();
+        path.lineTo(upper_corner_b); // lower right corner
+        path.addCentredArc(0.0f,
+                           0.0f,
+                           clippedElevationRange.getEnd(),
+                           clippedElevationRange.getEnd(),
+                           0.0f,
+                           -azimuthSpan + MathConstants<float>::halfPi,
+                           azimuthSpan + MathConstants<float>::halfPi); // upper right corner
+        path.closeSubPath();
 
         // rotate, scale and translate path
         auto const rotation{ azimuth - Degrees{ 90.0f } }; // correction for the way addCentredArc counts angles
         auto const transform{
             AffineTransform::rotation(rotation.getAsRadians()).scaled(magnitude).translated(fieldCenter)
         };
-        myPath.applyTransform(transform);
+        path.applyTransform(transform);
 
         // draw
         g.setColour(mSources[sourceId].getColour().withAlpha(0.1f));
-        g.fillPath(myPath);
+        g.fillPath(path);
         g.setColour(mSources[sourceId].getColour().withAlpha(0.5f));
         PathStrokeType strokeType = PathStrokeType(1.5);
-        g.strokePath(myPath, strokeType);
+        g.strokePath(path, strokeType);
     }
 }
 
@@ -288,7 +288,7 @@ void MainFieldComponent::drawTrajectoryHandle(Graphics & g) const
     }
 
     if (shouldDrawTrajectoryHandle) {
-        Point<float> const rpos{ sourcePositionToComponentPosition(mAutomationManager.getSource().getPos())
+        Point<float> const rpos{ sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos())
                                  - Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
         Rectangle<float> const rarea{ rpos.x,
                                       rpos.y,
@@ -363,10 +363,9 @@ void MainFieldComponent::paint(Graphics & g)
 
 bool MainFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
 {
-    int const width{ getWidth() };
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
         || mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSource().getPos()) };
+        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos()) };
         Rectangle<float> const area{ position.x - SOURCE_FIELD_COMPONENT_RADIUS,
                                      position.y - SOURCE_FIELD_COMPONENT_RADIUS,
                                      SOURCE_FIELD_COMPONENT_DIAMETER,
@@ -664,7 +663,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     // Draw recording trajectory handle.
     if (shouldDrawTrajectoryHandle) {
-        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSourcePosition()) };
+        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos()) };
         auto const lineThickness{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
         Rectangle<float> const rarea{ 10.0f,
                                       position.y,
@@ -733,7 +732,9 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType()) == ElevationTrajectoryType::drawing
         || static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                == ElevationTrajectoryType::realtime) {
-        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getSourcePosition()).withX(10.0f) };
+        auto const position{
+            sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos()).withX(10.0f)
+        };
         Rectangle<float> const area{ position.x,
                                      position.y,
                                      SOURCE_FIELD_COMPONENT_DIAMETER,
@@ -792,12 +793,14 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             mAutomationManager.addRecordingPoint(Point<float>{ static_cast<float>(mCurrentRecordingPositionX), y });
             y = height - event.getPosition().toFloat().y;
             y = std::clamp(y, 15.0f, height - 20.0f);
-            mAutomationManager.setSourcePosition(componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
+            mAutomationManager.getTrajectoryHandle().setPos(
+                componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
         } else if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                    == ElevationTrajectoryType::realtime) {
             float y{ height - event.y };
             y = std::clamp(y, 15.0f, height - 20.0f);
-            mAutomationManager.setSourcePosition(componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
+            mAutomationManager.getTrajectoryHandle().setPos(
+                componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
             mAutomationManager.sendTrajectoryPositionChangedEvent();
         }
     } else {
@@ -822,7 +825,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 
     if (needToAdjustAutomationManager) {
         float const y{ mSources[0].getElevation() / Degrees{ 90.0f } * (height - 15.0f) + 5.0f };
-        mAutomationManager.setSourcePosition(componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
+        mAutomationManager.getTrajectoryHandle().setPos(componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
         mAutomationManager.sendTrajectoryPositionChangedEvent();
     }
 

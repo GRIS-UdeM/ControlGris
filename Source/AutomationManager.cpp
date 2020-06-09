@@ -49,7 +49,7 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
     mTrajectory.clear();
     mTrajectory.add(currentPosition);
     mLastRecordingPoint = currentPosition;
-    setSourcePosition(Point<float>{ currentPosition.x / mFieldWidth, 1.0f - currentPosition.y / mFieldWidth });
+    mTrajectoryHandle.setPos(Point<float>{ currentPosition.x / mFieldWidth, 1.0f - currentPosition.y / mFieldWidth });
 }
 
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
@@ -167,7 +167,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 
     if (mActivateState) {
-        setSourcePosition(mCurrentTrajectoryPoint);
+        mTrajectoryHandle.setPos(mCurrentTrajectoryPoint);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -177,34 +177,34 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
     } else {
-        return getSourcePosition();
+        return mTrajectoryHandle.getPos();
     }
 }
 
-void AutomationManager::setSourceAndPlaybackPosition(Point<float> const pos)
+void AutomationManager::setTrajectoryHandleAndPlaybackPosition(Point<float> const & pos)
 {
-    setSourcePosition(pos);
+    mTrajectoryHandle.setPos(pos);
     setPlaybackPosition(pos);
 }
 
 void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     if (mActivateState || mTrajectoryType == PositionTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
+        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mTrajectoryHandle.getPos()); });
     }
 }
 
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     if (mActivateState || mTrajectoryType == ElevationTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mSource.getPos()); });
+        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mTrajectoryHandle.getPos()); });
     }
 }
 
-void AutomationManager::fixSourcePosition()
+void AutomationManager::fixTrajectoryHandlePosition()
 {
     bool const shouldBeFixed{ mSourceLink != PositionSourceLink::independent };
-    mSource.fixSourcePosition(shouldBeFixed);
+    mTrajectoryHandle.fixSourcePosition(shouldBeFixed);
 }
 
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
@@ -214,9 +214,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     mTrajectory = Trajectory{ type, startPosition };
 
     if (mTrajectoryType != PositionTrajectoryType::realtime && mTrajectoryType != PositionTrajectoryType::drawing) {
-        setSourcePosition(mTrajectory[0]);
+        mTrajectoryHandle.setPos(mTrajectory[0]);
     } else {
-        setSourcePosition(Point<float>{ 0.0f, 0.0f });
+        mTrajectoryHandle.setPos(Point<float>{ 0.0f, 0.0f });
     }
 }
 

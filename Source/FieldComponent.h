@@ -45,17 +45,6 @@
 //==============================================================================
 
 //==============================================================================
-template<typename Float>
-struct AngleVector {
-    static_assert(std::is_floating_point_v<Float>);
-
-    AngleVector(Float const angle, Float const distance) : angle(angle), distance(distance) {}
-
-    Float angle;
-    Float distance;
-};
-
-//==============================================================================
 class FieldComponent : public Component
 {
 public:
@@ -154,9 +143,6 @@ public:
 
 private:
     //==============================================================================
-    Point<float> degreeToXy(AngleVector<float> const & p, int p_iFieldWidth) const;
-    AngleVector<float> xyToDegree(Point<float> const & p, int p_iFieldWidth) const;
-
     Point<int> clipRecordingPosition(Point<int> const & pos);
 
     bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1 != INVALID_POINT; }

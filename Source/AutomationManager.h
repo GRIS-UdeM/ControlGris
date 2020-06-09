@@ -59,7 +59,7 @@ protected:
     double mCurrentPlaybackDuration{ 5.0 };
     Point<float> mPlaybackPosition{ INVALID_POSITION };
 
-    Source mSource{};
+    Source mTrajectoryHandle{};
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
@@ -110,16 +110,12 @@ public:
 
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
 
-    Source & getSource() { return mSource; }
-    Source const & getSource() const { return mSource; }
-    Point<float> getSourcePosition() const { return mSource.getPos(); }
-    void setSourcePosition(Point<float> const & pos) { mSource.setPos(pos); }
-    void setSourcePositionX(float const x) { mSource.setX(x); }
-    void setSourcePositionY(float const y) { mSource.setY(y); }
+    Source & getTrajectoryHandle() { return mTrajectoryHandle; }
+    Source const & getTrajectoryHandle() const { return mTrajectoryHandle; }
 
-    void fixSourcePosition();
+    void fixTrajectoryHandlePosition();
 
-    void setSourceAndPlaybackPosition(Point<float> pos);
+    void setTrajectoryHandleAndPlaybackPosition(Point<float> const & pos);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

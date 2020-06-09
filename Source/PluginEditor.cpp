@@ -624,10 +624,10 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
 {
     if (whichField == 0) {
-        mPositionAutomationManager.fixSourcePosition();
+        mPositionAutomationManager.fixTrajectoryHandlePosition();
         mProcessor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
     } else {
-        mElevationAutomationManager.fixSourcePosition();
+        mElevationAutomationManager.fixTrajectoryHandlePosition();
         mProcessor.onElevationSourceLinkChanged(
             static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
     }
