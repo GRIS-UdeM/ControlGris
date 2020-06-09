@@ -269,7 +269,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         if (numOfSources != 2
             && (mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
                 || mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
-            mPositionAutomationManager.setPostionSourceLink(PositionSourceLink::independent);
+            mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
             updateSourceLinkCombo(PositionSourceLink::independent);
         }
         mSelectedSource = 0;

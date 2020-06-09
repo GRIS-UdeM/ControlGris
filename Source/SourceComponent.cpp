@@ -62,7 +62,11 @@ void SourceComponent::updatePositionInParent()
 
 void SourceComponent::mouseDown(MouseEvent const & event)
 {
-    auto const sourceLink{ mFieldComponent.getAutomationManager().getSourceLink() };
+    // TODO: this should be taken care of by a subclass
+    auto automationManager{ dynamic_cast<PositionAutomationManager *>(&mFieldComponent.getAutomationManager()) };
+    jassert(automationManager != nullptr);
+
+    auto const sourceLink{ automationManager->getSourceLink() };
 
     auto * mainFieldComponent{ dynamic_cast<MainFieldComponent *>(&mFieldComponent) }; // TODO: dont do this
 

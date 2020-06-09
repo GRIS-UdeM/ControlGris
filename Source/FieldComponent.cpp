@@ -637,7 +637,6 @@ void ElevationFieldComponent::drawSources(Graphics & g) const
 
 void ElevationFieldComponent::paint(Graphics & g)
 {
-    int const width{ getWidth() };
     int const height{ getHeight() };
 
     drawFieldBackground(g, false);
@@ -781,8 +780,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     }
 
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-            == ElevationTrajectoryType::drawing) {
+        if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
             mCurrentRecordingPositionX += 1;
             if (mCurrentRecordingPositionX >= height) {
                 mCurrentRecordingPositionX = height;
@@ -795,8 +793,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
             y = std::clamp(y, 15.0f, height - 20.0f);
             mAutomationManager.getTrajectoryHandle().setPos(
                 componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
-        } else if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-                   == ElevationTrajectoryType::realtime) {
+        } else if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::realtime) {
             float y{ height - event.y };
             y = std::clamp(y, 15.0f, height - 20.0f);
             mAutomationManager.getTrajectoryHandle().setPos(
@@ -835,8 +832,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
     if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-            == ElevationTrajectoryType::drawing) {
+        if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             mSelectedSourceId = mOldSelectedSourceId;
         }

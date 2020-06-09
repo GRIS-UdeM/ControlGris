@@ -203,7 +203,15 @@ void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 
 void AutomationManager::fixTrajectoryHandlePosition()
 {
-    bool const shouldBeFixed{ mSourceLink != PositionSourceLink::independent };
+    bool shouldBeFixed{};
+    auto positionAutomationManager{ dynamic_cast<PositionAutomationManager *>(this) };
+    if (positionAutomationManager != nullptr) {
+        shouldBeFixed = positionAutomationManager->getSourceLink() != PositionSourceLink::independent;
+    } else {
+        auto elevationAutomationManager{ dynamic_cast<ElevationAutomationManager *>(this) };
+        jassert(elevationAutomationManager != nullptr);
+        shouldBeFixed = elevationAutomationManager->getSourceLink() != ElevationSourceLink::independent;
+    }
     mTrajectoryHandle.fixSourcePosition(shouldBeFixed);
 }
 

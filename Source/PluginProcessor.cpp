@@ -268,7 +268,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
             if (mNumOfSources != 2
                 && (val == PositionSourceLink::linkSymmetricX || val == PositionSourceLink::linkSymmetricY))
                 return;
-            mPositionAutomationManager.setPostionSourceLink(val);
+            mPositionAutomationManager.setSourceLink(val);
             mPositionAutomationManager.fixTrajectoryHandlePosition();
             onSourceLinkChanged(val);
             ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -279,9 +279,9 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     }
 
     if (parameterID.compare("sourceLinkAlt") == 0) {
-        auto const val = static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1);
+        auto const val = static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1);
         if (val != mElevationAutomationManager.getSourceLink()) {
-            mElevationAutomationManager.setPostionSourceLink(val);
+            mElevationAutomationManager.setSourceLink(val);
             mElevationAutomationManager.fixTrajectoryHandlePosition();
             onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(val));
             ControlGrisAudioProcessorEditor * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
@@ -332,7 +332,7 @@ void ControlGrisAudioProcessor::setPostionSourceLink(PositionSourceLink value)
             }
         }
 
-        mPositionAutomationManager.setPostionSourceLink(value);
+        mPositionAutomationManager.setSourceLink(value);
         mPositionAutomationManager.fixTrajectoryHandlePosition();
 
         onSourceLinkChanged(value);
@@ -357,7 +357,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value
             mElevationAutomationManager.setTrajectoryHandleAndPlaybackPosition(Point<float>{ 0.0f, 0.0f });
         }
 
-        mElevationAutomationManager.setPostionSourceLink(static_cast<PositionSourceLink>(value));
+        mElevationAutomationManager.setSourceLink(value);
         mElevationAutomationManager.fixTrajectoryHandlePosition();
 
         onElevationSourceLinkChanged(value);

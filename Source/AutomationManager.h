@@ -45,8 +45,6 @@ protected:
 
     float mFieldWidth{ MIN_FIELD_WIDTH };
 
-    PositionSourceLink mSourceLink{ PositionSourceLink::independent };
-
     bool mIsBackAndForth{ false };
     Direction mBackAndForthDirection{ Direction::forward };
 
@@ -102,9 +100,6 @@ public:
 
     Trajectory const & getTrajectory() const { return mTrajectory; }
 
-    void setPostionSourceLink(PositionSourceLink value) { this->mSourceLink = value; }
-    PositionSourceLink getSourceLink() const { return mSourceLink; }
-
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }
 
@@ -139,6 +134,7 @@ private:
 class PositionAutomationManager final : public AutomationManager
 {
     PositionTrajectoryType mTrajectoryType{ PositionTrajectoryType::drawing };
+    PositionSourceLink mSourceLink{ PositionSourceLink::independent };
 
 public:
     //==============================================================================
@@ -146,6 +142,9 @@ public:
     //==============================================================================
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
     PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+
+    void setSourceLink(PositionSourceLink sourceLink) { mSourceLink = sourceLink; }
+    PositionSourceLink getSourceLink() const { return mSourceLink; }
 
     void sendTrajectoryPositionChangedEvent() final;
 
@@ -158,6 +157,7 @@ private:
 class ElevationAutomationManager final : public AutomationManager
 {
     ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
+    ElevationSourceLink mSourceLink{ ElevationSourceLink::independent };
 
 public:
     //==============================================================================
@@ -165,6 +165,9 @@ public:
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+
+    void setSourceLink(ElevationSourceLink sourceLink) { mSourceLink = sourceLink; }
+    ElevationSourceLink getSourceLink() const { return mSourceLink; }
 
     void sendTrajectoryPositionChangedEvent() final;
 
