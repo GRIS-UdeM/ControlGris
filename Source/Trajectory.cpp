@@ -59,6 +59,10 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
         mPoints = getBasicTrianglePoints();
         invertDirection();
         break;
+    case PositionTrajectoryType::drawing:
+    case PositionTrajectoryType::realtime:
+        break;
+    case PositionTrajectoryType::undefined:
     default:
         jassertfalse;
     }

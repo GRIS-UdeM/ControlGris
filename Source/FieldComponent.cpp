@@ -195,69 +195,57 @@ void MainFieldComponent::setSpatMode(SpatMode const spatMode)
 
 void MainFieldComponent::drawDomeSpans(Graphics & g) const
 {
-    int const width{ getWidth() };
-    float const fieldCenter{ width / 2.0f };
+    auto const width{ getWidth() };
+    auto const halfWidth{ static_cast<float>(width) / 2.0f };
+    Point<float> const fieldCenter{ halfWidth, halfWidth };
+    auto const magnitude{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
 
     for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
         auto const azimuth{ mSources[sourceId].getAzimuth() };
-        auto const elevation{ mSources[sourceId].getElevation() };
-        auto const azimuthSpan{ Degrees{ 180.0f } * mSources[sourceId].getAzimuthSpan() };
-        auto const elevationSpan{ Degrees{ 45.0f } * mSources[sourceId].getElevationSpan() };
+        float const elevation{ mSources[sourceId].getNormalizedElevation() };
+        auto const azimuthSpan{ (Degrees{ 180.0f } * mSources[sourceId].getAzimuthSpan()).getAsRadians() };
+        float const elevationSpan{ mSources[sourceId].getElevationSpan() };
 
         // Calculate min and max elevation in degrees.
-        Point<float> minElev{ azimuth.getAsDegrees(), (elevation - elevationSpan).getAsDegrees() };
-        Point<float> maxElev{ azimuth.getAsDegrees(), (elevation + elevationSpan).getAsDegrees() };
+        Range<float> const elevationLimits{ 0.0f, 1.0f };
+        Range<float> const elevationRange{ elevation - elevationSpan, elevation + elevationSpan };
+        auto const clippedElevationRange{ elevationRange.getIntersectionWith(elevationLimits) };
 
-        if (minElev.getY() < 0.0f) {
-            maxElev.setY(maxElev.getY() - minElev.getY());
-            minElev.setY(0);
-        }
-        if (maxElev.getY() > 89.99f) {
-            minElev.setY(minElev.getY() + maxElev.getY() - 89.99f);
-            maxElev.setY(89.99f);
-        }
+        Point<float> const lower_corner_a{ std::cos(azimuthSpan) * clippedElevationRange.getStart(),
+                                           std::sin(azimuthSpan) * clippedElevationRange.getStart() };
+        Point<float> const upper_corner_b{ std::cos(-azimuthSpan) * clippedElevationRange.getEnd(),
+                                           std::sin(-azimuthSpan) * clippedElevationRange.getEnd() };
 
-        // Convert min and max elevation to xy position.
-        float const halfWidth{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
-        Point<float> const minElevPos{
-            -halfWidth * sinf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f,
-            -halfWidth * cosf(degreeToRadian(minElev.getX())) * (90.0f - minElev.getY()) / 90.0f
-        };
-        Point<float> const maxElevPos{
-            -halfWidth * sinf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f,
-            -halfWidth * cosf(degreeToRadian(maxElev.getX())) * (90.0f - maxElev.getY()) / 90.0f
-        };
-
-        // Calculate min and max radius.
-        float const minRadius{ std::hypotf(minElevPos.getX(), minElevPos.getY()) };
-        float const maxRadius{ std::hypotf(maxElevPos.getX(), maxElevPos.getY()) };
-
-        // Draw the path for spanning.
+        // Draw the path
         Path myPath{};
-        myPath.startNewSubPath(fieldCenter + minElevPos.getX(), fieldCenter + minElevPos.getY());
-        myPath.addCentredArc(fieldCenter,
-                             fieldCenter,
-                             minRadius,
-                             minRadius,
-                             0.0,
-                             -azimuth.getAsRadians(),
-                             (-azimuth + azimuthSpan).getAsRadians());
-        myPath.addCentredArc(fieldCenter,
-                             fieldCenter,
-                             maxRadius,
-                             maxRadius,
-                             0.0,
-                             (-azimuth + azimuthSpan).getAsRadians(),
-                             (-azimuth - azimuthSpan).getAsRadians());
-        myPath.addCentredArc(fieldCenter,
-                             fieldCenter,
-                             minRadius,
-                             minRadius,
-                             0.0,
-                             (-azimuth - azimuthSpan).getAsRadians(),
-                             (-azimuth).getAsRadians());
+        myPath.startNewSubPath(lower_corner_a);
+        myPath.addCentredArc(
+            0.0f,
+            0.0f,
+            clippedElevationRange.getStart(),
+            clippedElevationRange.getStart(),
+            0.0f,
+            azimuthSpan
+                + MathConstants<float>::halfPi, // addCentredArc counts radians from the top-center of the ellipse
+            -azimuthSpan + MathConstants<float>::halfPi);
+        myPath.lineTo(upper_corner_b); // lower right corner
+        myPath.addCentredArc(0.0f,
+                             0.0f,
+                             clippedElevationRange.getEnd(),
+                             clippedElevationRange.getEnd(),
+                             0.0f,
+                             -azimuthSpan + MathConstants<float>::halfPi,
+                             azimuthSpan + MathConstants<float>::halfPi); // upper right corner
         myPath.closeSubPath();
 
+        // rotate, scale and translate path
+        auto const rotation{ azimuth - Degrees{ 90.0f } }; // correction for the way addCentredArc counts angles
+        auto const transform{
+            AffineTransform::rotation(rotation.getAsRadians()).scaled(magnitude).translated(fieldCenter)
+        };
+        myPath.applyTransform(transform);
+
+        // draw
         g.setColour(mSources[sourceId].getColour().withAlpha(0.1f));
         g.fillPath(myPath);
         g.setColour(mSources[sourceId].getColour().withAlpha(0.5f));
