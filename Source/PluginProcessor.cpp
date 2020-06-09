@@ -1058,6 +1058,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
                 mSources[0].setElevationFromFixedSource(deltaElevation);
             } break;
             case ElevationSourceLink::independent:
+                break;
             case ElevationSourceLink::undefined:
                 jassertfalse;
             }

@@ -18,7 +18,6 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 #include "Source.h"
-#include "ControlGrisUtilities.h"
 
 #include <algorithm>
 

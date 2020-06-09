@@ -34,7 +34,7 @@ class Source : public juce::ChangeBroadcaster
 private:
     //==============================================================================
     int mId{};
-    SpatMode mSpatMode{ SpatMode::dome };
+    SpatMode mSpatMode{ SpatMode::cube };
 
     Radians mAzimuth{};
     Radians mElevation{};
