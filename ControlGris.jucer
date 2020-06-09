@@ -30,6 +30,10 @@
               file="Source/FieldComponent.cpp"/>
         <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
               file="Source/FieldComponent.h"/>
+        <FILE id="QKC1GD" name="FieldComponentClickableItem.cpp" compile="1"
+              resource="0" file="Source/FieldComponentClickableItem.cpp"/>
+        <FILE id="dQjtMF" name="FieldComponentClickableItem.h" compile="0"
+              resource="0" file="Source/FieldComponentClickableItem.h"/>
         <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
               file="Source/GrisLookAndFeel.h"/>
         <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
