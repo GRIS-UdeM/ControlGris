@@ -33,7 +33,7 @@ class Source : public juce::ChangeBroadcaster
 {
 private:
     //==============================================================================
-    int mId{};
+    int mId;
     SpatMode mSpatMode{ SpatMode::cube };
 
     Radians mAzimuth{};
@@ -116,7 +116,7 @@ public:
         setElevation(mFixedElevation.value() + deltaElevation);
     }
 
-    void setColour(Colour const & col) { mColour = col; }
+    void setColorFromId(int numTotalSources);
     Colour getColour() const { return mColour; }
 
     static Point<float> getPositionFromAngle(Radians const angle, float radius);

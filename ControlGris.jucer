@@ -22,18 +22,34 @@
               file="Source/SinkinSans-400Regular.otf"/>
       </GROUP>
       <GROUP id="{B6A2D2FE-2A17-10D3-12C3-DF6BC59A017A}" name="UI">
+        <GROUP id="{39B2417E-869D-1FFB-73FC-D18B9206CEE3}" name="Fields">
+          <GROUP id="{C731EA5D-DB26-8755-FBC1-8D977FCFF2F9}" name="SourceComponents">
+            <FILE id="veyR5J" name="TrajectoryHandleComponent.cpp" compile="1"
+                  resource="0" file="Source/TrajectoryHandleComponent.cpp"/>
+            <FILE id="KCAvnr" name="TrajectoryHandleComponent.h" compile="0" resource="0"
+                  file="Source/TrajectoryHandleComponent.h"/>
+            <FILE id="y527bY" name="ElevationSourceComponent.cpp" compile="1" resource="0"
+                  file="Source/ElevationSourceComponent.cpp"/>
+            <FILE id="WYi6nn" name="ElevationSourceComponent.h" compile="0" resource="0"
+                  file="Source/ElevationSourceComponent.h"/>
+            <FILE id="IAXjb2" name="PositionSourceComponent.cpp" compile="1" resource="0"
+                  file="Source/PositionSourceComponent.cpp"/>
+            <FILE id="BtcY2C" name="PositionSourceComponent.h" compile="0" resource="0"
+                  file="Source/PositionSourceComponent.h"/>
+            <FILE id="QKC1GD" name="FieldComponentClickableItem.cpp" compile="1"
+                  resource="0" file="Source/FieldComponentClickableItem.cpp"/>
+            <FILE id="dQjtMF" name="FieldComponentClickableItem.h" compile="0"
+                  resource="0" file="Source/FieldComponentClickableItem.h"/>
+          </GROUP>
+          <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
+                file="Source/FieldComponent.cpp"/>
+          <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
+                file="Source/FieldComponent.h"/>
+        </GROUP>
         <FILE id="S09fDT" name="BannerComponent.cpp" compile="1" resource="0"
               file="Source/BannerComponent.cpp"/>
         <FILE id="L94qFU" name="BannerComponent.h" compile="0" resource="0"
               file="Source/BannerComponent.h"/>
-        <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
-              file="Source/FieldComponent.cpp"/>
-        <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
-              file="Source/FieldComponent.h"/>
-        <FILE id="QKC1GD" name="FieldComponentClickableItem.cpp" compile="1"
-              resource="0" file="Source/FieldComponentClickableItem.cpp"/>
-        <FILE id="dQjtMF" name="FieldComponentClickableItem.h" compile="0"
-              resource="0" file="Source/FieldComponentClickableItem.h"/>
         <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
               file="Source/GrisLookAndFeel.h"/>
         <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
@@ -59,10 +75,6 @@
               file="Source/SourceBoxComponent.cpp"/>
         <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
               file="Source/SourceBoxComponent.h"/>
-        <FILE id="IAXjb2" name="SourceComponent.cpp" compile="1" resource="0"
-              file="Source/SourceComponent.cpp"/>
-        <FILE id="BtcY2C" name="SourceComponent.h" compile="0" resource="0"
-              file="Source/SourceComponent.h"/>
         <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
               file="Source/TrajectoryBoxComponent.cpp"/>
         <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"

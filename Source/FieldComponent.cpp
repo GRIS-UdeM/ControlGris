@@ -20,7 +20,6 @@
 #include "FieldComponent.h"
 
 #include "ControlGrisConstants.h"
-#include "ControlGrisUtilities.h"
 
 FieldComponent::FieldComponent()
 {
@@ -34,28 +33,23 @@ void FieldComponent::setSelectedSource(int const selectedId)
     repaint();
 }
 
-void FieldComponent::setSources(Source * sources, int const numberOfSources)
+void MainFieldComponent::setSources(Source * sources, int const numberOfSources)
 {
     mSources = sources;
     mNumberOfSources = numberOfSources;
+    mSelectedSourceId = 0;
+    mOldSelectedSourceId = 0;
+
+    // TODO: wrong place to call this routine!
+    for (int i{}; i < mNumberOfSources; ++i) {
+        mSources[i].setColorFromId(mNumberOfSources);
+    }
 
     mSourceComponents.clearQuick(true);
     for (int i{}; i < numberOfSources; ++i) {
-        mSourceComponents.add(new SourceComponent{ *this, sources[i] });
+        mSourceComponents.add(new PositionSourceComponent{ *this, sources[i] });
         addAndMakeVisible(mSourceComponents.getLast());
     }
-
-    mSelectedSourceId = 0;
-    mOldSelectedSourceId = 0;
-    for (int i{}; i < mNumberOfSources; ++i) {
-        auto hue{ static_cast<float>(i) / mNumberOfSources
-                  + 0.577251f }; // TODO: why is the Euler–Mascheroni constant appearing here???
-        if (hue > 1.0f) {
-            hue -= 1.0f;
-        }
-        mSources[i].setColour(Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f));
-    }
-    repaint();
 }
 
 void FieldComponent::drawFieldBackground(Graphics & g, bool const isMainField, SpatMode const spatMode) const
@@ -838,4 +832,8 @@ void ElevationFieldComponent::mouseUp(const MouseEvent & event)
         }
         repaint();
     }
+}
+
+void ElevationFieldComponent::setSources(Source * sources, int numberOfSources)
+{
 }

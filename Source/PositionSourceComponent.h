@@ -13,25 +13,24 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
+#include "FieldComponentClickableItem.h"
 
+class MainFieldComponent;
+class PositionAutomationManager;
 class Source;
-class FieldComponent;
 
-class SourceComponent final
-    : public juce::Component
+class PositionSourceComponent final
+    : public FieldComponentClickableItem
     , public juce::ChangeListener
 {
 private:
-    static constexpr int MAX_LINE_THICKNESS = 3;
-
-    FieldComponent & mFieldComponent;
+    MainFieldComponent & mFieldComponent;
+    PositionAutomationManager & mAutomationManager;
     Source & mSource;
 
 public:
-    SourceComponent(FieldComponent & fieldComponent, Source & source);
-    ~SourceComponent() final;
-
-    void paint(Graphics & g) final;
+    PositionSourceComponent(MainFieldComponent & fieldComponent, Source & source);
+    ~PositionSourceComponent() final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
@@ -43,5 +42,5 @@ private:
 
     void changeListenerCallback(ChangeBroadcaster * source) final;
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionSourceComponent);
 };

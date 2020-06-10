@@ -280,3 +280,13 @@ Point<float> Source::clipPosition(Point<float> const & position)
 {
     return Point<float>{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
 }
+
+void Source::setColorFromId(int const numTotalSources)
+{
+    auto hue{ static_cast<float>(mId) / static_cast<float>(numTotalSources)
+              + 0.577251f }; // TODO: why is the Euler–Mascheroni constant appearing here???
+    if (hue > 1.0f) {
+        hue -= 1.0f;
+    }
+    mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
+}
