@@ -24,10 +24,12 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
+#include "ElevationSourceComponent.h"
 #include "GrisLookAndFeel.h"
 #include "PositionSourceComponent.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"
+#include "TrajectoryHandleComponent.h"
 
 //==============================================================================
 // This file defines the classes that implement the 2D view (azimuth-elevation
@@ -36,7 +38,7 @@
 // Classes:
 //   FieldComponent : The base class. Implements the common attributes and
 //                    methods of the two views.
-//   MainFieldComponent : The 2D view as a cartesian plane. It is used to show
+//   PositionFieldComponent : The 2D view as a cartesian plane. It is used to show
 //                        and control two parameters, azimuth-elevation for the
 //                        VBAP algorithm and azimuth-distance for the LBAP
 //                        algorithm.
@@ -61,38 +63,39 @@ public:
 protected:
     //==============================================================================
     static constexpr Point<float> INVALID_POINT{ -1.0f, -1.0f };
-    static constexpr int TRAJECTORY_HANDLE_SOURCE_ID = -1;
-    static constexpr int NO_SELECTION_SOURCE_ID = -2;
 
     Source * mSources{};
-    OwnedArray<PositionSourceComponent> mSourceComponents{};
+    std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
 
     bool mIsPlaying{ false };
     int mNumberOfSources{};
-    int mSelectedSourceId{};
-    int mOldSelectedSourceId{};
+    std::optional<int> mSelectedSourceId{};
+    std::optional<int> mOldSelectedSourceId{};
 
 public:
     //==============================================================================
     FieldComponent();
     ~FieldComponent() override { setLookAndFeel(nullptr); }
     //==============================================================================
-    void drawFieldBackground(Graphics & g, bool isMainField, SpatMode spatMode = SpatMode::dome) const;
-    virtual void drawSources(Graphics & g) const = 0;
+    void setSources(Source * sources, int numberOfSources);
 
     void setSelectedSource(int selectedId);
-    int getSelectedSourceId() const { return mSelectedSourceId; }
+
+    std::optional<int> const & getSelectedSourceId() const { return mSelectedSourceId; }
 
     void setIsPlaying(bool const state) { mIsPlaying = state; }
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
-    Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
-    Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
-
+protected:
+    //==============================================================================
+    void drawBackgroundGrid(Graphics & g) const;
+    virtual void drawBackground(Graphics & g) const = 0;
+    //==============================================================================
     virtual void notifySourcePositionChanged(int sourceId) = 0;
-    virtual void setSources(Source * sources, int numberOfSources) = 0;
+    virtual void rebuildSourceComponents(int numberOfSources) = 0;
+    virtual void drawSpans(Graphics & g) const = 0;
 
 private:
     //==============================================================================
@@ -100,7 +103,7 @@ private:
 };
 
 //==============================================================================
-class MainFieldComponent final : public FieldComponent
+class PositionFieldComponent final : public FieldComponent
 {
     PositionAutomationManager & mAutomationManager;
 
@@ -111,27 +114,24 @@ class MainFieldComponent final : public FieldComponent
     Point<float> mLineDrawingAnchor1;
     Point<float> mLineDrawingAnchor2;
 
+    OwnedArray<PositionSourceComponent> mSourceComponents{};
+
 public:
-    MainFieldComponent(PositionAutomationManager & positionAutomationManager);
-    ~MainFieldComponent() final = default;
+    PositionFieldComponent(PositionAutomationManager & positionAutomationManager);
+    ~PositionFieldComponent() final = default;
     //==============================================================================
     PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
     PositionAutomationManager & getAutomationManager() { return mAutomationManager; }
 
-    void setSources(Source * sources, int numberOfSources) final;
+    void rebuildSourceComponents(int numberOfSources) final;
 
-    void drawSources(Graphics & g) const final;
-    void drawSpans(Graphics & g) const;
+    void drawSpans(Graphics & g) const final;
     void drawDomeSpans(Graphics & g) const;
     void drawCubeSpans(Graphics & g) const;
-    void drawTrajectoryHandle(Graphics &) const;
+
     void paint(Graphics & g) final;
 
     bool isTrajectoryHandleClicked(MouseEvent const & event); // TODO: this should be const
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void mouseMove(MouseEvent const & event) final;
-    void mouseUp(MouseEvent const & event) final;
 
     void showCircularSourceSelectionWarning();
 
@@ -139,22 +139,38 @@ public:
 
     void notifySourcePositionChanged(int sourceId) final;
 
+    Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
+    Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
+
 private:
     //==============================================================================
     Point<int> clipRecordingPosition(Point<int> const & pos);
 
     bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1 != INVALID_POINT; }
     bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2 != INVALID_POINT; }
-
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MainFieldComponent)
+    void mouseDown(MouseEvent const & event) final;
+    void mouseDrag(MouseEvent const & event) final;
+    void mouseMove(MouseEvent const & event) final;
+    void mouseUp(MouseEvent const & event) final;
+
+    void drawBackground(Graphics & g) const final;
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionFieldComponent)
 };
 
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
 {
+    static constexpr auto xPadding{ 50.0f };
+    static constexpr auto yTopPadding{ 5.0f };
+    static constexpr auto yBottomPadding{ 35.0f };
+
+    bool mCurrentlyDrawing{ false };
     ElevationAutomationManager & mAutomationManager;
     int mCurrentRecordingPositionX{};
+
+    OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
@@ -168,16 +184,20 @@ public:
     ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }
 
     void paint(Graphics & g) final;
-    void drawSources(Graphics & g) const final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
 
     void notifySourcePositionChanged(int sourceId) final;
-    void setSources(Source * sources, int numberOfSources) final;
+    void rebuildSourceComponents(int numberOfSources) final;
+
+    Point<float> sourceElevationToComponentPosition(Radians sourceElevation, int sourceId) const;
+    Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
 
 private:
+    void drawSpans(Graphics & g) const final;
+    void drawBackground(Graphics & g) const final;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
 };

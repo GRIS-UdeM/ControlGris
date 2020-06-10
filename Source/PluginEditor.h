@@ -63,7 +63,7 @@ private:
     BannerComponent mSettingsBanner;
     BannerComponent mPositionPresetBanner;
 
-    MainFieldComponent mPositionField;
+    PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
     ParametersBoxComponent mParametersBox;

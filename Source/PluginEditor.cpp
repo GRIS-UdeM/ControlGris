@@ -105,8 +105,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Add sources to the fields.
     //---------------------------
-    mPositionField.setSources(mProcessor.getSources(), mProcessor.getNumberOfSources());
-    mElevationField.setSources(mProcessor.getSources(), mProcessor.getNumberOfSources());
+    mPositionField.setSources(mProcessor.getSources().data(), mProcessor.getNumberOfSources());
+    mElevationField.setSources(mProcessor.getSources().data(), mProcessor.getNumberOfSources());
 
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mProcessor.setSelectedSourceId(mSelectedSource);
@@ -278,8 +278,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         mSettingsBox.setNumberOfSources(numOfSources);
         mTrajectoryBox.setNumberOfSources(numOfSources);
         mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-        mPositionField.setSources(mProcessor.getSources(), numOfSources);
-        mElevationField.setSources(mProcessor.getSources(), numOfSources);
+        mPositionField.setSources(mProcessor.getSources().data(), numOfSources);
+        mElevationField.setSources(mProcessor.getSources().data(), numOfSources);
         mSourceBox.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
@@ -624,10 +624,10 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, i
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
 {
     if (whichField == 0) {
-        mPositionAutomationManager.fixTrajectoryHandlePosition();
+        mPositionAutomationManager.fixPrincipalSourcePosition();
         mProcessor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
     } else {
-        mElevationAutomationManager.fixTrajectoryHandlePosition();
+        mElevationAutomationManager.fixPrincipalSourcePosition();
         mProcessor.onElevationSourceLinkChanged(
             static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
     }

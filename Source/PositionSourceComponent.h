@@ -15,7 +15,7 @@
 #include "ControlGrisConstants.h"
 #include "FieldComponentClickableItem.h"
 
-class MainFieldComponent;
+class PositionFieldComponent;
 class PositionAutomationManager;
 class Source;
 
@@ -24,12 +24,12 @@ class PositionSourceComponent final
     , public juce::ChangeListener
 {
 private:
-    MainFieldComponent & mFieldComponent;
+    PositionFieldComponent & mFieldComponent;
     PositionAutomationManager & mAutomationManager;
     Source & mSource;
 
 public:
-    PositionSourceComponent(MainFieldComponent & fieldComponent, Source & source);
+    PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
     ~PositionSourceComponent() final;
 
     void mouseDown(MouseEvent const & event) final;

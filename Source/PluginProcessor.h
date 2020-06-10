@@ -72,7 +72,7 @@ private:
     PositionSourceLink mLastSourceLink;
     ElevationSourceLink mLastElevationSourceLink;
 
-    Source mSources[MAX_NUMBER_OF_SOURCES];
+    std::array<Source, MAX_NUMBER_OF_SOURCES> mSources{};
 
     OSCSender mOscSender;
     OSCSender mOscOutputSender;
@@ -85,8 +85,8 @@ public:
     //==============================================================================
     AudioProcessorValueTreeState mParameters;
 
-    PositionAutomationManager mPositionAutomationManager;
-    ElevationAutomationManager mElevationAutomationManager;
+    PositionAutomationManager mPositionAutomationManager{ mSources.front() };
+    ElevationAutomationManager mElevationAutomationManager{ mSources.front() };
     //==============================================================================
     ControlGrisAudioProcessor();
     ~ControlGrisAudioProcessor() final;
@@ -145,8 +145,8 @@ public:
     void setNumberOfSources(int numOfSources, bool propagate = true);
     int getNumberOfSources() const { return mNumOfSources; }
 
-    Source * getSources() { return mSources; }
-    Source const * getSources() const { return mSources; }
+    auto & getSources() { return mSources; }
+    auto const & getSources() const { return mSources; }
 
     //==============================================================================
     bool createOscConnection(int oscPort);

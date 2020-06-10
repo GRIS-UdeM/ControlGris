@@ -13,15 +13,13 @@
 #include "FieldComponent.h"
 #include "Source.h"
 
-PositionSourceComponent::PositionSourceComponent(MainFieldComponent & fieldComponent, Source & source)
+PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : FieldComponentClickableItem(source.getColour(), String{ source.getId() + 1 })
     , mFieldComponent(fieldComponent)
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
     source.addChangeListener(this);
-    constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
-    this->setSize(dimension, dimension);
     this->updatePositionInParent();
 }
 

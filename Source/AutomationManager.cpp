@@ -21,6 +21,10 @@
 
 #include <algorithm>
 
+AutomationManager::AutomationManager(Source & principalSource) : mPrincipalSource(principalSource)
+{
+}
+
 void AutomationManager::setFieldWidth(float const newFieldWidth)
 {
     mFieldWidth = newFieldWidth;
@@ -43,13 +47,34 @@ void AutomationManager::setPositionActivateState(bool const newState)
     }
 }
 
+void AutomationManager::setPlaybackPositionX(float const value)
+{
+    if (mPlaybackPosition.has_value()) {
+        mPlaybackPosition->setX(value);
+    } else {
+        mPlaybackPosition = Point<float>{ value, 0.0f };
+    }
+}
+void AutomationManager::setPlaybackPositionY(float const value)
+{
+    if (mPlaybackPosition.has_value()) {
+        mPlaybackPosition->setY(value);
+    } else {
+        mPlaybackPosition = Point<float>{ 0.0f, value };
+    }
+}
+
 void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosition)
 {
-    mPlaybackPosition = Point<float>{ INVALID_POSITION };
+    jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
+            && currentPosition.getY() <= 1.0f);
+
+    mPlaybackPosition.reset();
     mTrajectory.clear();
     mTrajectory.add(currentPosition);
     mLastRecordingPoint = currentPosition;
-    mTrajectoryHandle.setPos(Point<float>{ currentPosition.x / mFieldWidth, 1.0f - currentPosition.y / mFieldWidth });
+    mTrajectoryHandlePosition = currentPosition;
+    // mPrincipalSource.setPos(currentPosition); ???
 }
 
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
@@ -167,7 +192,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 
     if (mActivateState) {
-        mTrajectoryHandle.setPos(mCurrentTrajectoryPoint);
+        mPrincipalSource.setPos(mCurrentTrajectoryPoint);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -177,31 +202,31 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
     } else {
-        return mTrajectoryHandle.getPos();
+        return mPrincipalSource.getPos();
     }
 }
 
-void AutomationManager::setTrajectoryHandleAndPlaybackPosition(Point<float> const & pos)
+void AutomationManager::setPrincipalSourceAndPlaybackPosition(Point<float> const & pos)
 {
-    mTrajectoryHandle.setPos(pos);
+    mPrincipalSource.setPos(pos);
     setPlaybackPosition(pos);
 }
 
 void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     if (mActivateState || mTrajectoryType == PositionTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mTrajectoryHandle.getPos()); });
+        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
     }
 }
 
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     if (mActivateState || mTrajectoryType == ElevationTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mTrajectoryHandle.getPos()); });
+        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
     }
 }
 
-void AutomationManager::fixTrajectoryHandlePosition()
+void AutomationManager::fixPrincipalSourcePosition()
 {
     bool shouldBeFixed{};
     auto positionAutomationManager{ dynamic_cast<PositionAutomationManager *>(this) };
@@ -212,7 +237,7 @@ void AutomationManager::fixTrajectoryHandlePosition()
         jassert(elevationAutomationManager != nullptr);
         shouldBeFixed = elevationAutomationManager->getSourceLink() != ElevationSourceLink::independent;
     }
-    mTrajectoryHandle.fixSourcePosition(shouldBeFixed);
+    mPrincipalSource.fixSourcePosition(shouldBeFixed);
 }
 
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
@@ -222,9 +247,9 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     mTrajectory = Trajectory{ type, startPosition };
 
     if (mTrajectoryType != PositionTrajectoryType::realtime && mTrajectoryType != PositionTrajectoryType::drawing) {
-        mTrajectoryHandle.setPos(mTrajectory[0]);
+        mPrincipalSource.setPos(mTrajectory[0]);
     } else {
-        mTrajectoryHandle.setPos(Point<float>{ 0.0f, 0.0f });
+        mPrincipalSource.setPos(Point<float>{ 0.0f, 0.0f });
     }
 }
 

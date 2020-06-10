@@ -55,23 +55,25 @@ protected:
     bool mActivateState{ false };
     double mPlaybackDuration{ 5.0 };
     double mCurrentPlaybackDuration{ 5.0 };
-    Point<float> mPlaybackPosition{ INVALID_POSITION };
+    std::optional<Point<float>> mPlaybackPosition{};
 
-    Source mTrajectoryHandle{};
+    Point<float> mTrajectoryHandlePosition{};
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
     Trajectory mTrajectory{};
-    Point<float> mCurrentTrajectoryPoint{ MIN_FIELD_WIDTH / 2.0f, MIN_FIELD_WIDTH / 2.0f };
+    Point<float> mCurrentTrajectoryPoint{};
     Point<float> mLastRecordingPoint{};
 
     Degrees mDegreeOfDeviationPerCycle{};
     Degrees mCurrentDegreeOfDeviation{};
     int mDeviationCycleCount{};
 
+    Source & mPrincipalSource;
+
 public:
     //==============================================================================
-    AutomationManager() = default;
+    AutomationManager(Source & principalSource);
     virtual ~AutomationManager() = default;
     //==============================================================================
     float getFieldWidth() const { return mFieldWidth; }
@@ -84,10 +86,9 @@ public:
     double getPlaybackDuration() const { return mPlaybackDuration; }
 
     void setPlaybackPosition(Point<float> const & value) { mPlaybackPosition = value; }
-    void setPlaybackPositionX(float const value) { mPlaybackPosition.x = value; }
-    void setPlaybackPositionY(float const value) { mPlaybackPosition.y = value; }
-    bool hasValidPlaybackPosition() const { return mPlaybackPosition != INVALID_POSITION; }
-    Point<float> getPlaybackPosition() const { return mPlaybackPosition; }
+    void setPlaybackPositionX(float const value);
+    void setPlaybackPositionY(float const value);
+    std::optional<Point<float>> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
     void addRecordingPoint(Point<float> const & pos) { mTrajectory.add(smoothRecordingPosition(pos)); }
@@ -98,6 +99,8 @@ public:
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
+    Point<float> const & getTrajectoryHandlePosition() const { return mTrajectoryHandlePosition; }
+
     Trajectory const & getTrajectory() const { return mTrajectory; }
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
@@ -105,12 +108,9 @@ public:
 
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
 
-    Source & getTrajectoryHandle() { return mTrajectoryHandle; }
-    Source const & getTrajectoryHandle() const { return mTrajectoryHandle; }
+    void fixPrincipalSourcePosition();
 
-    void fixTrajectoryHandlePosition();
-
-    void setTrajectoryHandleAndPlaybackPosition(Point<float> const & pos);
+    void setPrincipalSourceAndPlaybackPosition(Point<float> const & pos);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
@@ -138,7 +138,7 @@ class PositionAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    PositionAutomationManager() = default;
+    PositionAutomationManager(Source & principalSource) : AutomationManager(principalSource) {}
     //==============================================================================
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
     PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
@@ -161,7 +161,7 @@ class ElevationAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    ElevationAutomationManager() = default;
+    ElevationAutomationManager(Source & principalSource) : AutomationManager(principalSource) {}
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }

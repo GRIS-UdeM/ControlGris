@@ -15,6 +15,8 @@ FieldComponentClickableItem::FieldComponentClickableItem(Colour const colour, St
     , mIcon(icon)
 {
     jassert(icon.length() == 1);
+    constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
+    this->setSize(dimension, dimension);
 }
 
 void FieldComponentClickableItem::setSelected(bool const selected)
