@@ -10,7 +10,9 @@
 
 #include "TrajectoryHandleComponent.h"
 
-TrajectoryHandleComponent::TrajectoryHandleComponent() : FieldComponentClickableItem(Colours::blue, "X")
+TrajectoryHandleComponent::TrajectoryHandleComponent(FieldComponent & fieldComponent)
+    : FieldComponentClickableItem(Colours::blue, "X")
+    , mFieldComponent(fieldComponent)
 {
 }
 

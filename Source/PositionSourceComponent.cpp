@@ -39,7 +39,7 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
     auto const sourceLink{ mAutomationManager.getSourceLink() };
 
     if (mSource.getId() > 0 && sourceLink != PositionSourceLink::independent
-        && sourceLink != PositionSourceLink::circularDeltaLock) {
+        && sourceLink != PositionSourceLink::deltaLock) {
         mFieldComponent.showCircularSourceSelectionWarning();
     } else {
         this->setSourcePosition(event);

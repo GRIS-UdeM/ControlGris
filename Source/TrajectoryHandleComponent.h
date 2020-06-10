@@ -15,8 +15,10 @@
 class TrajectoryHandleComponent : public FieldComponentClickableItem
 {
 private:
+    FieldComponent & mFieldComponent;
+
 public:
-    TrajectoryHandleComponent();
+    TrajectoryHandleComponent(FieldComponent & fieldComponent);
 
 private:
     void mouseDown(MouseEvent const & event) final;

@@ -324,7 +324,7 @@ void ControlGrisAudioProcessor::setPostionSourceLink(PositionSourceLink value)
             return;
 
         if (mPositionAutomationManager.getTrajectoryType() != PositionTrajectoryType::drawing) {
-            if (value == PositionSourceLink::circularDeltaLock) {
+            if (value == PositionSourceLink::deltaLock) {
                 mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(Point<float>(0.5, 0.5));
             } else {
                 mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources[0].getPos());
@@ -705,7 +705,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
     }
 
     if (x != -1.0f && y != -1.0f) {
-        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
             mSources[0].setPos(Point<float>{ x, y });
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
         } else {
@@ -715,7 +715,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         }
         setPositionPreset(0);
     } else if (y != -1.0f) {
-        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
             mSources[0].setY(y);
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
         } else {
@@ -724,7 +724,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         }
         setPositionPreset(0);
     } else if (x != -1.0f) {
-        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+        if (mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
             mSources[0].setX(x);
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
         } else {
@@ -1031,7 +1031,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
     }
 
     if (whichField == 0) {
-        if (sourceId != 0 && mPositionAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+        if (sourceId != 0 && mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
             Point<float> const delta{ mSources[sourceId].getDeltaX(), mSources[sourceId].getDeltaY() };
             mSources[0].setXYCoordinatesFromFixedSource(delta);
         }
@@ -1174,7 +1174,7 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
         }
         break;
     }
-    case PositionSourceLink::circularDeltaLock: {
+    case PositionSourceLink::deltaLock: {
         Point<float> const delta{ mSources[0].getDeltaX(), mSources[0].getDeltaY() };
         for (int i{}; i < mNumOfSources; ++i) {
             mSources[i].setXYCoordinatesFromFixedSource(delta);
@@ -1238,7 +1238,7 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     auto const trajectoryType{ mPositionAutomationManager.getTrajectoryType() };
 
     if (!getIsPlaying()) {
-        if (sourceLink != PositionSourceLink::circularDeltaLock && trajectoryType != PositionTrajectoryType::drawing) {
+        if (sourceLink != PositionSourceLink::deltaLock && trajectoryType != PositionTrajectoryType::drawing) {
             mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources[0].getPos());
         } else {
             mPositionAutomationManager.setPlaybackPositionX(-1.0f);
@@ -1249,7 +1249,7 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     // Nothing to do for independent mode.
 
     // All circular modes.
-    if (sourceLink >= PositionSourceLink::circular && sourceLink < PositionSourceLink::circularDeltaLock) {
+    if (sourceLink >= PositionSourceLink::circular && sourceLink < PositionSourceLink::deltaLock) {
         auto const deltaAzimuth = mSources[0].getDeltaAzimuth();
         if (getOscFormat() == SpatMode::cube) {
             auto const deltaDistance = mSources[0].getDeltaDistance();
@@ -1264,7 +1264,7 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
         }
     }
     // Delta Lock mode.
-    else if (sourceLink == PositionSourceLink::circularDeltaLock) {
+    else if (sourceLink == PositionSourceLink::deltaLock) {
         Point<float> const delta{ mSources[0].getDeltaX(), mSources[0].getDeltaY() };
         for (int i{ 1 }; i < mNumOfSources; ++i) {
             mSources[i].setXYCoordinatesFromFixedSource(delta);

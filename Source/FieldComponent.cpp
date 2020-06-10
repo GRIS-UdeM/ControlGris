@@ -24,7 +24,8 @@
 
 FieldComponent::FieldComponent()
 {
-    mTrajectoryHandleComponent.reset(new TrajectoryHandleComponent{});
+    mTrajectoryHandleComponent.reset(new TrajectoryHandleComponent{ *this });
+    addAndMakeVisible(mTrajectoryHandleComponent.get());
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
 }
 
@@ -164,9 +165,6 @@ void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
 PositionFieldComponent::PositionFieldComponent(PositionAutomationManager & positionAutomationManager)
     : mAutomationManager(positionAutomationManager)
 {
-    mSpatMode = SpatMode::dome;
-    mLineDrawingAnchor1 = INVALID_POINT;
-    mLineDrawingAnchor2 = INVALID_POINT;
 }
 
 void PositionFieldComponent::setSpatMode(SpatMode const spatMode)
@@ -269,17 +267,17 @@ void PositionFieldComponent::paint(Graphics & g)
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !mIsPlaying) {
         shouldDrawTrajectoryHandle = true;
     } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
-               && mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+               && mAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
         shouldDrawTrajectoryHandle = true;
     }
     mTrajectoryHandleComponent->setVisible(shouldDrawTrajectoryHandle);
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
-    if (hasValidLineDrawingAnchor1() && hasValidLineDrawingAnchor2()) {
+    if (mLineDrawingAnchor1.has_value() && mLineDrawingAnchor2.has_value()) {
         Path lineDrawingPath;
-        lineDrawingPath.startNewSubPath(mLineDrawingAnchor1);
-        lineDrawingPath.lineTo(mLineDrawingAnchor2);
+        lineDrawingPath.startNewSubPath(*mLineDrawingAnchor1);
+        lineDrawingPath.lineTo(*mLineDrawingAnchor2);
         lineDrawingPath.closeSubPath();
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
@@ -354,9 +352,9 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
 
     auto const fieldComponentSize{ getWidth() };
 
-    if (hasValidLineDrawingAnchor1()) {
-        Point<float> const anchor1{ mLineDrawingAnchor1 };
-        Point<float> const anchor2{ clipRecordingPosition(event.getPosition()).toFloat() };
+    if (mLineDrawingAnchor1.has_value()) {
+        auto const anchor1{ *mLineDrawingAnchor1 };
+        auto const anchor2{ clipRecordingPosition(event.getPosition()).toFloat() };
         auto const numSteps{ static_cast<int>(jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
         auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
         auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
@@ -365,18 +363,18 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
         }
         if (event.mods.isShiftDown()) {
             mLineDrawingAnchor1 = anchor2;
-            mLineDrawingAnchor2 = INVALID_POINT;
+            mLineDrawingAnchor2.reset();
         } else {
-            mLineDrawingAnchor1 = INVALID_POINT;
-            mLineDrawingAnchor2 = INVALID_POINT;
+            mLineDrawingAnchor1.reset();
+            mLineDrawingAnchor2.reset();
         }
         repaint();
         return;
     }
 
     if (!event.mods.isShiftDown()) {
-        mLineDrawingAnchor1 = INVALID_POINT;
-        mLineDrawingAnchor2 = INVALID_POINT;
+        mLineDrawingAnchor1.reset();
+        mLineDrawingAnchor2.reset();
     }
 
     Point<int> const mouseLocation{ event.x, fieldComponentSize - event.y };
@@ -384,7 +382,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
     mSelectedSourceId.reset();
 
     // Check if we click on the trajectory handle.
-    if (mAutomationManager.getSourceLink() == PositionSourceLink::circularDeltaLock) {
+    if (mAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
         if (isTrajectoryHandleClicked(event)) {
             return;
         }
@@ -404,7 +402,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
     //             = Rectangle<float>(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
     //         if (area.contains(event.getMouseDownPosition().toFloat())) {
     //             if (i > 0 && mAutomationManager.getSourceLink() != PositionSourceLink::independent
-    //                 && mAutomationManager.getSourceLink() != PositionSourceLink::circularDeltaLock) {
+    //                 && mAutomationManager.getSourceLink() != PositionSourceLink::deltaLock) {
     //                 mShowCircularSourceSelectionWarning = true;
     //             } else {
     //                 mSelectedSourceId = i;
@@ -478,7 +476,7 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
     //            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
     //        needToAdjustAutomationManager = true;
     //    } else if (mAutomationManager.getSourceLink() >= PositionSourceLink::circular
-    //               && mAutomationManager.getSourceLink() < PositionSourceLink::circularDeltaLock
+    //               && mAutomationManager.getSourceLink() < PositionSourceLink::deltaLock
     //               && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
     //        needToAdjustAutomationManager = true;
     //    }
@@ -564,8 +562,6 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 
 void ElevationFieldComponent::paint(Graphics & g)
 {
-    int const height{ getHeight() };
-
     drawBackground(g);
 
     bool shouldDrawTrajectoryHandle{ false };

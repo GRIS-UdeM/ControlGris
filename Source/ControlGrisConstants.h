@@ -60,7 +60,7 @@ enum class PositionSourceLink {
     circularFixedRadius,
     circularFixedAngle,
     circularFullyFixed,
-    circularDeltaLock,
+    deltaLock,
     linkSymmetricX,
     linkSymmetricY
 };

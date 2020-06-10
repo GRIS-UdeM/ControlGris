@@ -62,8 +62,6 @@ public:
 
 protected:
     //==============================================================================
-    static constexpr Point<float> INVALID_POINT{ -1.0f, -1.0f };
-
     Source * mSources{};
     std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
 
@@ -107,12 +105,12 @@ class PositionFieldComponent final : public FieldComponent
 {
     PositionAutomationManager & mAutomationManager;
 
-    SpatMode mSpatMode;
+    SpatMode mSpatMode{ SpatMode::dome };
 
     bool mShowCircularSourceSelectionWarning{ false };
 
-    Point<float> mLineDrawingAnchor1;
-    Point<float> mLineDrawingAnchor2;
+    std::optional<Point<float>> mLineDrawingAnchor1{ std::nullopt };
+    std::optional<Point<float>> mLineDrawingAnchor2{ std::nullopt };
 
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 
@@ -146,8 +144,8 @@ private:
     //==============================================================================
     Point<int> clipRecordingPosition(Point<int> const & pos);
 
-    bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1 != INVALID_POINT; }
-    bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2 != INVALID_POINT; }
+    bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1.has_value(); }
+    bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2.has_value(); }
     //==============================================================================
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
