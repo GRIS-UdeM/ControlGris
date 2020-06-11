@@ -207,9 +207,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id...
         mSources[i].setId(i + mFirstSourceId - 1);
         // .. and coordinates.
-        mSources[i].setAzimuth(i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f });
-        mSources[i].setElevation(Degrees{ 90.0f });
-        mSources[i].setDistance(1.0f);
+        auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
+        mSources[i].setCoordinates(azimuth, Degrees{ 90.0f }, 1.0f);
     }
 
     mParameters.getParameter("recordingTrajectory_x")->setValue(mSources[0].getPos().x);

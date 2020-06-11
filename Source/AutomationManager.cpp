@@ -68,10 +68,11 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
             && currentPosition.getY() <= 1.0f);
+    jassert(mTrajectory.has_value());
 
     mPlaybackPosition.reset();
-    mTrajectory.clear();
-    mTrajectory.add(currentPosition);
+    mTrajectory->clear();
+    mTrajectory->add(currentPosition);
     mLastRecordingPoint = currentPosition;
     mTrajectoryHandlePosition = currentPosition;
     // mPrincipalSource.setPos(currentPosition); ???
@@ -107,11 +108,13 @@ void AutomationManager::compressTrajectoryXValues(int maxValue)
 
 void AutomationManager::computeCurrentTrajectoryPoint()
 {
+    jassert(mTrajectory.has_value());
+
     int const dampeningCyclesTimes2{ mDampeningCycles * 2 };
     double currentScaleMin{ 0.0 };
     double currentScaleMax{ 0.0 };
 
-    if (mTrajectory.size() > 0) {
+    if (mTrajectory->size() > 0) {
         if (mTrajectoryDeltaTime < mLastTrajectoryDeltaTime) {
             if (mIsBackAndForth) {
                 this->invertBackAndForthDirection();
@@ -135,22 +138,22 @@ void AutomationManager::computeCurrentTrajectoryPoint()
             trajectoryPhase = mTrajectoryDeltaTime;
         }
 
-        double delta{ trajectoryPhase * mTrajectory.size() };
+        double delta{ trajectoryPhase * mTrajectory->size() };
 
         if (mBackAndForthDirection == Direction::backward) {
-            delta = mTrajectory.size() - delta;
+            delta = mTrajectory->size() - delta;
         }
 
-        delta = std::clamp(delta, 0.0, static_cast<double>(mTrajectory.size()));
+        delta = std::clamp(delta, 0.0, static_cast<double>(mTrajectory->size()));
 
         if (mIsBackAndForth && mDampeningCycles > 0) {
             if (mDampeningCycleCount < dampeningCyclesTimes2) {
                 double const relativeDeltaTime{ (mDampeningCycleCount + mTrajectoryDeltaTime) / dampeningCyclesTimes2 };
                 mCurrentPlaybackDuration
                     = mPlaybackDuration - (std::pow(relativeDeltaTime, 2.0) * mPlaybackDuration * 0.25);
-                currentScaleMin = relativeDeltaTime * mTrajectory.size() * 0.5;
-                currentScaleMax = mTrajectory.size() - currentScaleMin;
-                double const currentScale{ (currentScaleMax - currentScaleMin) / mTrajectory.size() };
+                currentScaleMin = relativeDeltaTime * mTrajectory->size() * 0.5;
+                currentScaleMax = mTrajectory->size() - currentScaleMin;
+                double const currentScale{ (currentScaleMax - currentScaleMin) / mTrajectory->size() };
                 delta = delta * currentScale + currentScaleMin;
                 mDampeningLastDelta = delta;
             } else {
@@ -160,16 +163,16 @@ void AutomationManager::computeCurrentTrajectoryPoint()
             mDampeningLastDelta = delta;
         }
 
-        double const deltaRatio{ static_cast<double>(mTrajectory.size() - 1) / mTrajectory.size() };
+        double const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
         delta *= deltaRatio;
         auto index = static_cast<int>(delta);
-        if (index + 1 < mTrajectory.size()) {
+        if (index + 1 < mTrajectory->size()) {
             auto const frac{ static_cast<float>(delta) - static_cast<float>(index) };
-            auto const p1{ mTrajectory[index] };
-            auto const p2{ mTrajectory[index + 1] };
+            auto const p1{ mTrajectory.value()[index] };
+            auto const p2{ mTrajectory.value()[index + 1] };
             mCurrentTrajectoryPoint = p1 + (p2 - p1) * frac;
         } else {
-            mCurrentTrajectoryPoint = mTrajectory.getLast();
+            mCurrentTrajectoryPoint = mTrajectory->getLast();
         }
     }
 
@@ -195,6 +198,24 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         mPrincipalSource.setPos(mCurrentTrajectoryPoint);
         sendTrajectoryPositionChangedEvent();
     }
+}
+
+int AutomationManager::getRecordingTrajectorySize() const
+{
+    jassert(mTrajectory.has_value());
+    return mTrajectory->size();
+}
+
+Point<float> AutomationManager::getFirstRecordingPoint() const
+{
+    jassert(mTrajectory.has_value());
+    return mTrajectory->getFirst();
+}
+
+Point<float> AutomationManager::getLastRecordingPoint() const
+{
+    jassert(mTrajectory.has_value());
+    return mTrajectory->getLast();
 }
 
 Point<float> AutomationManager::getCurrentTrajectoryPoint() const
@@ -243,14 +264,18 @@ void AutomationManager::fixPrincipalSourcePosition()
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
 {
     mTrajectoryType = type;
-
-    mTrajectory = Trajectory{ type, startPosition };
-
-    if (mTrajectoryType != PositionTrajectoryType::realtime && mTrajectoryType != PositionTrajectoryType::drawing) {
-        mPrincipalSource.setPos(mTrajectory[0]);
+    if (type != PositionTrajectoryType::realtime) {
+        mTrajectory = Trajectory{ type, startPosition };
     } else {
-        mPrincipalSource.setPos(Point<float>{ 0.0f, 0.0f });
+        mTrajectory.reset();
     }
+    mPrincipalSource.setPos(startPosition);
+}
+
+void AutomationManager::addRecordingPoint(Point<float> const & pos)
+{
+    jassert(mTrajectory.has_value());
+    mTrajectory->add(smoothRecordingPosition(pos));
 }
 
 void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
@@ -261,7 +286,11 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 
     mTrajectoryType = type;
 
-    mTrajectory = Trajectory{ type };
+    if (type != ElevationTrajectoryType::realtime) {
+        mTrajectory = Trajectory{ type };
+    } else {
+        mTrajectory.reset();
+    }
 
     // TODO
     //    auto constexpr offset{ 10.0f + SOURCE_FIELD_COMPONENT_RADIUS };

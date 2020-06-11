@@ -60,8 +60,8 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
         invertDirection();
         break;
     case PositionTrajectoryType::drawing:
-    case PositionTrajectoryType::realtime:
         break;
+    case PositionTrajectoryType::realtime: // do not make a trajectory in realtime mode!
     case PositionTrajectoryType::undefined:
     default:
         jassertfalse;
@@ -75,7 +75,21 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
 
 Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType)
 {
-    // TODO
+    switch (elevationTrajectoryType) {
+    case ElevationTrajectoryType::downUp:
+        mPoints = getBasicDownUpPoints();
+        break;
+    case ElevationTrajectoryType::upDown:
+        mPoints = getBasicDownUpPoints();
+        invertDirection();
+        break;
+    case ElevationTrajectoryType::drawing:
+        break;
+    case ElevationTrajectoryType::realtime: // do not make a trajectory in realtime mode!
+    case ElevationTrajectoryType::undefined:
+    default:
+        jassertfalse;
+    }
 }
 
 void Trajectory::invertDirection()
@@ -230,6 +244,25 @@ Array<Point<float>> Trajectory::getBasicTrianglePoints()
     return result;
 }
 
+Array<Point<float>> Trajectory::getBasicDownUpPoints()
+{
+    constexpr int NB_POINTS = 200;
+
+    Array<Point<float>> result{};
+    result.ensureStorageAllocated(NB_POINTS);
+
+    constexpr Point<float> step{ 2.0f / (NB_POINTS - 1), 2.0f / (NB_POINTS - 1) };
+    constexpr Point<float> startingPoint{ -1.0f, -1.0f };
+
+    Point<float> currentPoint{ startingPoint };
+    for (int i{}; i < NB_POINTS; ++i) {
+        result.add(currentPoint);
+        currentPoint += step;
+    }
+
+    return result;
+}
+
 Path Trajectory::createDrawablePath(float const componentWidth) const
 {
     auto trajectoryPointToComponentPosition = [&](Point<float> const & point) {
@@ -240,9 +273,11 @@ Path Trajectory::createDrawablePath(float const componentWidth) const
     };
 
     Path result{};
-    result.startNewSubPath(trajectoryPointToComponentPosition(mPoints.getReference(0)));
-    for (int i{ 1 }; i < mPoints.size(); ++i) {
-        result.lineTo(trajectoryPointToComponentPosition(mPoints.getReference(i)));
+    if (!mPoints.isEmpty()) {
+        result.startNewSubPath(trajectoryPointToComponentPosition(mPoints.getReference(0)));
+        for (int i{ 1 }; i < mPoints.size(); ++i) {
+            result.lineTo(trajectoryPointToComponentPosition(mPoints.getReference(i)));
+        }
     }
     return result;
 }

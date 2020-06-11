@@ -281,8 +281,8 @@ void PositionFieldComponent::paint(Graphics & g)
         lineDrawingPath.closeSubPath();
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
-    if (mAutomationManager.getRecordingTrajectorySize() > 1) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory().createDrawablePath(getWidth()) };
+    if (mAutomationManager.getTrajectory().has_value()) {
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     // position dot
@@ -609,8 +609,8 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
-    if (mAutomationManager.getRecordingTrajectorySize() > 1) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory().createDrawablePath(getWidth()) };
+    if (mAutomationManager.getTrajectory().has_value()) {
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown()
@@ -652,6 +652,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
 
     // Check if we record a trajectory.
     // TODO
+
     //    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType()) ==
     //    ElevationTrajectoryType::drawing
     //        || static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())

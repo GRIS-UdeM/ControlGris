@@ -61,7 +61,7 @@ protected:
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
-    Trajectory mTrajectory{};
+    std::optional<Trajectory> mTrajectory{};
     Point<float> mCurrentTrajectoryPoint{};
     Point<float> mLastRecordingPoint{};
 
@@ -91,17 +91,17 @@ public:
     std::optional<Point<float>> getPlaybackPosition() const { return mPlaybackPosition; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
-    void addRecordingPoint(Point<float> const & pos) { mTrajectory.add(smoothRecordingPosition(pos)); }
-    int getRecordingTrajectorySize() const { return mTrajectory.size(); }
-    Point<float> getFirstRecordingPoint() const { return mTrajectory.getFirst(); }
-    Point<float> getLastRecordingPoint() const { return mTrajectory.getLast(); }
+    void addRecordingPoint(Point<float> const & pos);
+    int getRecordingTrajectorySize() const;
+    Point<float> getFirstRecordingPoint() const;
+    Point<float> getLastRecordingPoint() const;
     Point<float> getCurrentTrajectoryPoint() const;
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     void compressTrajectoryXValues(int maxValue);
 
     Point<float> const & getTrajectoryHandlePosition() const { return mTrajectoryHandlePosition; }
 
-    Trajectory const & getTrajectory() const { return mTrajectory; }
+    std::optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }

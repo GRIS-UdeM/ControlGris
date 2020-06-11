@@ -10,6 +10,8 @@
 
 #pragma once
 
+#include <variant>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
@@ -18,13 +20,12 @@
 //=========
 class Trajectory
 {
-protected:
+private:
     //=========
-    Array<Point<float>> mPoints;
+    Array<Point<float>> mPoints{};
 
 public:
     //=========
-    Trajectory() = default;
     Trajectory(PositionTrajectoryType positionTrajectoryType, Point<float> const & startingPoint);
     Trajectory(ElevationTrajectoryType elevationTrajectoryType);
 
@@ -59,6 +60,7 @@ private:
     static Array<Point<float>> getBasicSpiralPoints();
     static Array<Point<float>> getBasicSquarePoints();
     static Array<Point<float>> getBasicTrianglePoints();
+    static Array<Point<float>> getBasicDownUpPoints();
     //=========
     JUCE_LEAK_DETECTOR(Trajectory);
 };
