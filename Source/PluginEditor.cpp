@@ -588,8 +588,8 @@ void ControlGrisAudioProcessorEditor::refresh()
                                     mSelectedSource,
                                     mProcessor.getOscFormat());
 
-    mPositionField.setIsPlaying(mProcessor.getIsPlaying());
-    mElevationField.setIsPlaying(mProcessor.getIsPlaying());
+    mPositionField.setIsPlaying(mProcessor.isPlaying());
+    mElevationField.setIsPlaying(mProcessor.isPlaying());
 
     mPositionField.repaint();
     if (mProcessor.getOscFormat() == SpatMode::cube)

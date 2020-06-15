@@ -196,14 +196,53 @@ void Source::fixSourcePositionElevation(bool const shouldBeFixed)
     }
 }
 
+float Source::getDeltaX() const
+{
+    jassert(mFixedPosition.has_value());
+    return mPosition.getX() - mFixedPosition.value().getX();
+}
+
+float Source::getDeltaY() const
+{
+    jassert(mFixedPosition.has_value());
+    return mPosition.getY() - mFixedPosition.value().getY();
+}
+
+Point<float> Source::getDeltaPosition() const
+{
+    jassert(mFixedPosition.has_value());
+    return mPosition - mFixedPosition.value();
+}
+
+Radians Source::getDeltaAzimuth() const
+{
+    jassert(mFixedAzimuth.has_value());
+    return mAzimuth - mFixedAzimuth.value();
+}
+
+Radians Source::getDeltaElevation() const
+{
+    jassert(mFixedElevation.has_value());
+    return mElevationNoClip - mFixedElevation.value();
+}
+
+float Source::getDeltaDistance() const
+{
+    jassert(mFixedElevation.has_value());
+    return mDistance - mFixedDistance.value();
+}
+
 void Source::setFixedPosition(Point<float> const & position)
 {
     auto const clippedPosition{ clipPosition(position) };
     mFixedPosition = clippedPosition;
-    mFixedAzimuth = Radians{ std::atan2(clippedPosition.getY(), clippedPosition.getX()) };
+    mFixedAzimuth = getAngleFromPosition(clippedPosition);
     auto const radius{ clippedPosition.getDistanceFromOrigin() };
     if (mSpatMode == SpatMode::dome) { // azimuth - elevation
         auto const clippedRadius{ std::min(radius, 1.0f) };
+        if (clippedRadius < radius) {
+            mFixedPosition = getPositionFromAngle(*mFixedAzimuth, clippedRadius);
+        }
         mFixedElevation = halfPi * clippedRadius;
     } else { // azimuth - distance
         mFixedDistance = radius;

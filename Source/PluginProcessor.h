@@ -36,41 +36,41 @@ class ControlGrisAudioProcessor final
 {
 private:
     //==============================================================================
-    SpatMode mSelectedOscFormat;
-    bool mOscConnected;
-    bool mOscInputConnected;
-    bool mOscOutputConnected;
-    int mFirstSourceId;
-    int mNumOfSources;
-    int mSelectedSourceId;
-    int mCurrentOSCPort;
-    int mLastConnectedOSCPort;
-    int mCurrentOSCInputPort;
-    int mCurrentOSCOutputPort;
-    String mCurrentOSCOutputAddress;
-    bool mNeedsInitialization;
+    SpatMode mSelectedOscFormat{ SpatMode::dome };
+    bool mOscConnected{ true };
+    bool mOscInputConnected{ false };
+    bool mOscOutputConnected{ false };
+    int mFirstSourceId{ 1 };
+    int mNumOfSources{ 2 };
+    int mSelectedSourceId{ 1 };
+    int mCurrentOSCPort{ 18032 };
+    int mLastConnectedOSCPort{ -1 };
+    int mCurrentOSCInputPort{ 8000 };
+    int mCurrentOSCOutputPort{ 9000 };
+    String mCurrentOSCOutputAddress{ "192.168.1.100" };
+    bool mNeedsInitialization{ true };
 
-    double mInitTimeOnPlay;
-    double mCurrentTime;
-    double mLastTime;
-    double mLastTimerTime;
+    double mInitTimeOnPlay{ 0.0 };
+    double mCurrentTime{ 0.0 };
+    double mLastTime{ 10000000.0 };
+    double mLastTimerTime{ 10000000.0 };
 
-    bool mIsPlaying;
-    bool mCanStopActivate;
-    double mBpm;
+    bool mIsPlaying{ false };
+    bool mCanStopActivate{ false };
+    double mBpm{ 120 };
 
-    int mCurrentPositionPreset;
-    int mNewPositionPreset;
+    int mCurrentPositionPreset{ 0 };
+    int mNewPositionPreset{ 0 };
 
     // Filtering variables for OSC controller output.
-    int mLastPositionPreset;
-    float mLastTrajectory1x;
-    float mLastTrajectory1y;
-    float mLastTrajectory1z;
-    float mLastAzispan;
-    float mLastElespan;
-    PositionSourceLink mLastSourceLink;
-    ElevationSourceLink mLastElevationSourceLink;
+    int mLastPositionPreset{ 0 };
+    float mLastTrajectory1x{ -1 };
+    float mLastTrajectory1y{ -1 };
+    float mLastTrajectory1z{ -1 };
+    float mLastAzispan{ -1 };
+    float mLastElespan{ -1 };
+    PositionSourceLink mLastSourceLink{ PositionSourceLink::undefined };
+    ElevationSourceLink mLastElevationSourceLink{ ElevationSourceLink::undefined };
 
     std::array<Source, MAX_NUMBER_OF_SOURCES> mSources{};
 
@@ -181,7 +181,7 @@ public:
     double getInitTimeOnPlay() const { return std::max(mInitTimeOnPlay, 0.0); }
     double getCurrentTime() const { return std::max(mCurrentTime, 0.0); }
 
-    bool getIsPlaying() const { return mIsPlaying; }
+    bool isPlaying() const { return mIsPlaying; }
     double getBPM() const { return mBpm; }
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;

@@ -103,11 +103,12 @@ public:
     void fixSourcePosition(bool shouldBeFixed);
     void fixSourcePositionElevation(bool shouldBeFixed);
 
-    float getDeltaX() const { return mPosition.getX() - mFixedPosition.value().getX(); }
-    float getDeltaY() const { return mPosition.getY() - mFixedPosition.value().getY(); }
-    Radians getDeltaAzimuth() const { return mAzimuth - mFixedAzimuth.value(); }
-    Radians getDeltaElevation() const { return mElevationNoClip - mFixedElevation.value(); }
-    float getDeltaDistance() const { return mDistance - mFixedDistance.value(); }
+    float getDeltaX() const;
+    float getDeltaY() const;
+    Point<float> getDeltaPosition() const;
+    Radians getDeltaAzimuth() const;
+    Radians getDeltaElevation() const;
+    float getDeltaDistance() const;
 
     void setCoordinatesFromFixedSource(Radians deltaAzimuth, Radians deltaElevation, float deltaDistance);
     void setXYCoordinatesFromFixedSource(Point<float> const & deltaPosition);

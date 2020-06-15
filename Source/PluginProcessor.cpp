@@ -137,34 +137,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
     , mFixPositionData(FIXED_POSITION_DATA_TAG)
 {
-    mNumOfSources = 2;
-    mFirstSourceId = 1;
-    mSelectedSourceId = 1;
-    mSelectedOscFormat = SpatMode::dome;
-    mCurrentOSCPort = 18032;
-    mLastConnectedOSCPort = -1;
-    mOscConnected = true;
-    mOscInputConnected = false;
-    mCurrentOSCInputPort = 8000;
-    mOscOutputConnected = false;
-    mCurrentOSCOutputPort = 9000;
-    mCurrentOSCOutputAddress = String("192.168.1.100");
-
-    mInitTimeOnPlay = mCurrentTime = 0.0;
-    mLastTime = mLastTimerTime = 10000000.0;
-
-    mBpm = 120;
-
-    mNewPositionPreset = mCurrentPositionPreset = mLastPositionPreset = 0;
-
-    mLastTrajectory1x = mLastTrajectory1y = mLastTrajectory1z = -1;
-    mLastAzispan = mLastElespan = -1;
-
-    mLastSourceLink = PositionSourceLink::undefined;
-    mLastElevationSourceLink = ElevationSourceLink::undefined;
-
-    mCanStopActivate = false;
-
     // Size of the plugin window.
     mParameters.state.addChild({ "uiState", { { "width", 650 }, { "height", 700 } }, {} }, -1, nullptr);
 
@@ -324,7 +296,7 @@ void ControlGrisAudioProcessor::setPostionSourceLink(PositionSourceLink value)
 
         if (mPositionAutomationManager.getTrajectoryType() != PositionTrajectoryType::drawing) {
             if (value == PositionSourceLink::deltaLock) {
-                mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(Point<float>(0.5, 0.5));
+                mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources[0].getPos());
             } else {
                 mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources[0].getPos());
             }
@@ -1117,7 +1089,7 @@ void ControlGrisAudioProcessor::setSourceParameterValue(int const sourceId,
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager, Point<float> position)
 {
     if (manager == &mPositionAutomationManager) {
-        if (!getIsPlaying()) {
+        if (!isPlaying()) {
             mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(Point<float>(position.x, position.y));
             mParameters.getParameter("recordingTrajectory_x")->setValue(position.x);
             mParameters.getParameter("recordingTrajectory_y")->setValue(position.y);
@@ -1130,7 +1102,7 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
         mParameters.getParameter("recordingTrajectory_y")->endChangeGesture();
         linkPositionSourcePositions();
     } else if (manager == &mElevationAutomationManager) {
-        if (!getIsPlaying()) {
+        if (!isPlaying()) {
             mElevationAutomationManager.setPrincipalSourceAndPlaybackPosition(Point<float>(0.0f, position.y));
             mParameters.getParameter("recordingTrajectory_z")->setValue(position.y);
         }
@@ -1174,8 +1146,8 @@ void ControlGrisAudioProcessor::linkPositionSourcePositions()
         break;
     }
     case PositionSourceLink::deltaLock: {
-        Point<float> const delta{ mSources[0].getDeltaX(), mSources[0].getDeltaY() };
-        for (int i{}; i < mNumOfSources; ++i) {
+        Point<float> const delta{ mSources[0].getDeltaPosition() };
+        for (int i{ 1 }; i < mNumOfSources; ++i) {
             mSources[i].setXYCoordinatesFromFixedSource(delta);
         }
         break;
@@ -1236,12 +1208,11 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     auto const sourceLink{ mPositionAutomationManager.getSourceLink() };
     auto const trajectoryType{ mPositionAutomationManager.getTrajectoryType() };
 
-    if (!getIsPlaying()) {
+    if (!isPlaying()) {
         if (sourceLink != PositionSourceLink::deltaLock && trajectoryType != PositionTrajectoryType::drawing) {
             mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources[0].getPos());
         } else {
-            mPositionAutomationManager.setPlaybackPositionX(-1.0f);
-            mPositionAutomationManager.setPlaybackPositionY(-1.0f);
+            mPositionAutomationManager.resetPlaybackPosition();
         }
     }
 
@@ -1264,7 +1235,7 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     }
     // Delta Lock mode.
     else if (sourceLink == PositionSourceLink::deltaLock) {
-        Point<float> const delta{ mSources[0].getDeltaX(), mSources[0].getDeltaY() };
+        Point<float> const delta{ mSources[0].getDeltaPosition() };
         for (int i{ 1 }; i < mNumOfSources; ++i) {
             mSources[i].setXYCoordinatesFromFixedSource(delta);
         }
@@ -1287,7 +1258,10 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
     // Fix source positions.
     mPositionAutomationManager.fixPrincipalSourcePosition();
     bool shouldBeFixed = sourceLink != PositionSourceLink::independent;
-    if (static_cast<int>(sourceLink) >= 2 && static_cast<int>(sourceLink) < 6) {
+
+    if (sourceLink == PositionSourceLink::circular || sourceLink == PositionSourceLink::circularFixedAngle
+        || sourceLink == PositionSourceLink::circularFixedRadius
+        || sourceLink == PositionSourceLink::circularFullyFixed) {
         for (int i{}; i < mNumOfSources; ++i) {
             mSources[i].fixSourcePosition(shouldBeFixed);
         }
@@ -1299,14 +1273,13 @@ void ControlGrisAudioProcessor::validateElevationSourcePositions()
     auto const sourceLink{ static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()) };
     auto const trajectoryType{ mElevationAutomationManager.getTrajectoryType() };
 
-    if (!getIsPlaying()) {
+    if (!isPlaying()) {
         if (sourceLink != ElevationSourceLink::deltaLock
             && static_cast<ElevationTrajectoryType>(trajectoryType) != ElevationTrajectoryType::drawing) {
             mElevationAutomationManager.setPrincipalSourceAndPlaybackPosition(
                 Point<float>(0.0f, mSources[0].getNormalizedElevation()));
         } else {
-            mElevationAutomationManager.setPlaybackPositionX(-1.0f);
-            mElevationAutomationManager.setPlaybackPositionY(-1.0f);
+            mElevationAutomationManager.resetPlaybackPosition();
         }
     }
 

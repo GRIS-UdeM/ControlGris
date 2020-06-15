@@ -93,6 +93,7 @@ public:
     void setPlaybackPositionX(float const value);
     void setPlaybackPositionY(float const value);
     std::optional<Point<float>> getPlaybackPosition() const { return mPlaybackPosition; }
+    void resetPlaybackPosition() { mPlaybackPosition.reset(); }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
     void addRecordingPoint(Point<float> const & pos);
