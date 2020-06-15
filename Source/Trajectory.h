@@ -26,16 +26,16 @@ private:
 
 public:
     //=========
-    Trajectory(PositionTrajectoryType positionTrajectoryType, Point<float> const & startingPoint);
-    Trajectory(ElevationTrajectoryType elevationTrajectoryType);
+    Trajectory(PositionTrajectoryType positionTrajectoryType, Point<float> const & startingPoint) noexcept;
+    Trajectory(ElevationTrajectoryType elevationTrajectoryType) noexcept;
 
     Trajectory(Trajectory const &) = default;
-    Trajectory(Trajectory &&) = default;
+    Trajectory(Trajectory &&) noexcept = default;
 
-    ~Trajectory() = default;
+    ~Trajectory() noexcept = default;
 
     Trajectory & operator=(Trajectory const &) = default;
-    Trajectory & operator=(Trajectory &&) = default;
+    Trajectory & operator=(Trajectory &&) noexcept = default;
 
     Point<float> const & operator[](int const index) const { return mPoints.getReference(index); }
 

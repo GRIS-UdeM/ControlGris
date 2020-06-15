@@ -24,16 +24,17 @@
 
 FieldComponent::FieldComponent() noexcept
 {
-    mTrajectoryHandleComponent.reset(new TrajectoryHandleComponent{ *this });
+    mTrajectoryHandleComponent = std::make_unique<TrajectoryHandleComponent>(*this);
+    mTrajectoryHandleComponent->setCentrePosition(getWidth() / 2, getHeight() / 2);
     addAndMakeVisible(mTrajectoryHandleComponent.get());
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
 }
 
 void FieldComponent::setSelectedSource(int const selectedId)
 {
+    mOldSelectedSourceId = mSelectedSourceId;
     mSelectedSourceId = selectedId;
-    mOldSelectedSourceId = selectedId;
-    repaint();
+    getParentComponent()->repaint();
 }
 
 void FieldComponent::setSources(Source * sources, int const numberOfSources)
@@ -251,9 +252,9 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
     }
 }
 
-void PositionFieldComponent::showCircularSourceSelectionWarning()
+void PositionFieldComponent::setCircularSourceSelectionWarning(bool const showCircularSourceSelectionWarning)
 {
-    mShowCircularSourceSelectionWarning = true;
+    mShowCircularSourceSelectionWarning = showCircularSourceSelectionWarning;
     repaint();
 }
 
@@ -303,38 +304,7 @@ void PositionFieldComponent::paint(Graphics & g)
                          juce::Rectangle<int>(0, 0, width, 50),
                          Justification(Justification::centred),
                          1);
-        mShowCircularSourceSelectionWarning = false;
     }
-}
-
-bool PositionFieldComponent::isTrajectoryHandleClicked(MouseEvent const & event)
-{
-    // TODO
-    //    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
-    //        || mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-    //        auto const position{ sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos())
-    //        }; Rectangle<float> const area{ position.x - SOURCE_FIELD_COMPONENT_RADIUS,
-    //                                     position.y - SOURCE_FIELD_COMPONENT_RADIUS,
-    //                                     SOURCE_FIELD_COMPONENT_DIAMETER,
-    //                                     SOURCE_FIELD_COMPONENT_DIAMETER };
-    //        if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //            mOldSelectedSourceId = mSelectedSourceId;
-    //            mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
-    //            if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
-    //                mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-    //                if (event.mods.isShiftDown())
-    //                    mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
-    //            } else {
-    //                mListeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(0); });
-    //            }
-    //            repaint();
-    //            return true;
-    //        } else {
-    //            return false;
-    //        }
-    //    }
-    //    return false;
-    return false;
 }
 
 void PositionFieldComponent::drawSpans(Graphics & g) const
@@ -348,182 +318,79 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
 
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
-    jassert(getWidth() == getHeight());
-
-    auto const fieldComponentSize{ getWidth() };
-
-    if (mLineDrawingAnchor1.has_value()) {
-        auto const anchor1{ *mLineDrawingAnchor1 };
-        auto const anchor2{ clipRecordingPosition(event.getPosition()).toFloat() };
-        auto const numSteps{ static_cast<int>(jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
-        auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
-        auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
-        for (int i{ 1 }; i <= numSteps; ++i) {
-            mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
-        }
-        if (event.mods.isShiftDown()) {
-            mLineDrawingAnchor1 = anchor2;
-            mLineDrawingAnchor2.reset();
-        } else {
-            mLineDrawingAnchor1.reset();
-            mLineDrawingAnchor2.reset();
-        }
-        repaint();
-        return;
-    }
-
-    if (!event.mods.isShiftDown()) {
-        mLineDrawingAnchor1.reset();
-        mLineDrawingAnchor2.reset();
-    }
-
-    Point<int> const mouseLocation{ event.x, fieldComponentSize - event.y };
-
     mSelectedSourceId.reset();
 
-    // Check if we click on the trajectory handle.
-    if (mAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
-        if (isTrajectoryHandleClicked(event)) {
-            return;
-        }
-    }
-
-    // Check if we click on a new source.
-    //    bool clickOnSource = false;
-    //     for (int i{}; i < mNumberOfSources; ++i) {
-    //         Point<float> pos;
-    //         if (mSpatMode == SpatMode::dome) {
-    //             pos = degreeToXy(AngleVector<float>{ mSources[i].getAzimuth(), mSources[i].getElevation() },
-    //             fieldComponentSize);
-    //         } else {
-    //             pos = posToXy(mSources[i].getPos(), fieldComponentSize);
-    //         }
-    //         Rectangle<float> area
-    //             = Rectangle<float>(pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER);
-    //         if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //             if (i > 0 && mAutomationManager.getSourceLink() != PositionSourceLink::independent
-    //                 && mAutomationManager.getSourceLink() != PositionSourceLink::deltaLock) {
-    //                 mShowCircularSourceSelectionWarning = true;
-    //             } else {
-    //                 mSelectedSourceId = i;
-    //                 mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
-    //                 clickOnSource = true;
-    //             }
-    //             break;
-    //         }
-    //     }
-    //
-    //    if (clickOnSource) {
-    //        repaint();
-    //        return;
-    //    }
-
-    // If clicked in an empty space while in mode DRAWING, start a new drawing.
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
+        auto const mousePosition{ event.getPosition() };
+        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
+        auto const position{ componentPositionToSourcePosition(clippedPosition) };
+        auto const isShiftDown{ event.mods.isShiftDown() };
+
         mOldSelectedSourceId.reset();
-        mAutomationManager.resetRecordingTrajectory(
-            componentPositionToSourcePosition(event.getMouseDownPosition().toFloat()));
-        if (event.mods.isShiftDown()) {
-            mLineDrawingAnchor1 = event.getMouseDownPosition().toFloat();
+        mAutomationManager.resetRecordingTrajectory(position);
+        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
+
+        if (mLineDrawingAnchor1.has_value()) {
+            auto const anchor1{ mLineDrawingAnchor1.value() };
+            auto const anchor2{ position };
+            auto const numSteps{ static_cast<int>(
+                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
+            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
+            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
+            for (int i{ 1 }; i <= numSteps; ++i) {
+                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
+            }
+            if (isShiftDown) {
+                mLineDrawingAnchor1 = anchor2;
+                mLineDrawingAnchor2.reset();
+            } else {
+                mLineDrawingAnchor1.reset();
+                mLineDrawingAnchor2.reset();
+            }
+        } else {
+            if (isShiftDown) {
+                mLineDrawingAnchor1 = position;
+            }
         }
-        repaint();
     }
+
+    repaint();
 }
 
 void PositionFieldComponent::mouseDrag(const MouseEvent & event)
 {
-    // No selection.
-    if (!mSelectedSourceId.has_value()) {
-        return;
+    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
+        auto const mousePosition{ event.getPosition() };
+        mTrajectoryHandleComponent->setCentrePosition(mousePosition.getX(), mousePosition.getY());
+        auto const clippedPosition{ clipRecordingPosition(mousePosition) };
+        auto const relativePosition{ componentPositionToSourcePosition(clippedPosition.toFloat()) };
+
+        if (mLineDrawingAnchor1.has_value()) {
+            mLineDrawingAnchor2 = relativePosition;
+        } else {
+            mAutomationManager.addRecordingPoint(relativePosition);
+        }
+        repaint();
     }
-
-    //    auto const width{ getWidth() };
-    //    auto const height{ getHeight() };
-    //
-    //    Point<int> const mousePosition{ event.x, height - event.y };
-    //
-    //    auto * selectedSource{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? &mAutomationManager.getSource()
-    //                                                                            : &mSources[mSelectedSourceId] };
-    //
-    //    if (mSpatMode == SpatMode::dome) {
-    //        auto const pos{ xyToDegree(mousePosition.toFloat(), width) };
-    //        selectedSource->setAzimuth(pos.angle);
-    //        selectedSource->setElevationNoClip(pos.distance);
-    //    } else {
-    //        Point<float> const pos{ xyToPos(mousePosition.toFloat(), width) };
-    //        selectedSource->setX(pos.x);
-    //        selectedSource->setY(pos.y);
-    //    }
-    //
-    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-    //        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
-    //            if (hasValidLineDrawingAnchor1()) {
-    //                mLineDrawingAnchor2 = clipRecordingPosition(event.getPosition()).toFloat();
-    //            } else {
-    //                mAutomationManager.addRecordingPoint(clipRecordingPosition(event.getPosition()).toFloat());
-    //            }
-    //        } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-    //            mAutomationManager.sendTrajectoryPositionChangedEvent();
-    //        }
-    //    } else {
-    //        mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(mSelectedSourceId, 0); });
-    //    }
-    //
-    //    bool needToAdjustAutomationManager{ false };
-    //    if (mSelectedSourceId == 0 && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
-    //        && (mAutomationManager.getSourceLink() == PositionSourceLink::independent
-    //            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
-    //            || mAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
-    //        needToAdjustAutomationManager = true;
-    //    } else if (mAutomationManager.getSourceLink() >= PositionSourceLink::circular
-    //               && mAutomationManager.getSourceLink() < PositionSourceLink::deltaLock
-    //               && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-    //        needToAdjustAutomationManager = true;
-    //    }
-    //
-    //    if (needToAdjustAutomationManager) {
-    //        if (mSpatMode == SpatMode::dome) {
-    //            mAutomationManager.getSource().setAzimuth(mSources[0].getAzimuth());
-    //            mAutomationManager.getSource().setElevation(mSources[0].getElevation());
-    //        } else {
-    //            mAutomationManager.getSource().setX(mSources[0].getX());
-    //            mAutomationManager.getSource().setY(mSources[0].getY());
-    //        }
-    //        mAutomationManager.sendTrajectoryPositionChangedEvent();
-    //    }
-    //
-    //    repaint();
-}
-
-void PositionFieldComponent::mouseMove(const MouseEvent & event)
-{
-    // TODO: mouse move shouldnt do anything right?
-    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID
-    //        && mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing &&
-    //        hasValidLineDrawingAnchor1()) { mLineDrawingAnchor2 =
-    //        clipRecordingPosition(event.getPosition()).toFloat(); repaint();
-    //    }
 }
 
 void PositionFieldComponent::mouseUp(const MouseEvent & event)
 {
-    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
-    //        if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing &&
-    //        !event.mods.isShiftDown()) {
-    //            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
-    //            mSelectedSourceId = mOldSelectedSourceId;
-    //        }
-    //        repaint();
-    //    }
-    //    mShowCircularSourceSelectionWarning = false;
+    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
+        if (!event.mods.isShiftDown()) {
+            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
+            repaint();
+        }
+    }
 }
 
 Point<int> PositionFieldComponent::clipRecordingPosition(Point<int> const & pos)
 {
-    constexpr int MAGIC{ 10 }; // TODO
+    // TODO: constrain with SOURCE_COMPONENT_RADIUS instead.
 
-    int const max{ getWidth() - MAGIC };
-    Point<int> const clipped{ std::clamp(pos.x, MAGIC, max), std::clamp(pos.y, MAGIC, max) };
+    constexpr int min{ TRAJECTORY_MARGINS };
+    int const max{ getWidth() - min };
+    Point<int> const clipped{ std::clamp(pos.x, min, max), std::clamp(pos.y, min, max) };
 
     return clipped;
 }

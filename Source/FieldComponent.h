@@ -68,6 +68,8 @@ public:
 
 protected:
     //==============================================================================
+    static constexpr int TRAJECTORY_MARGINS = 10;
+    //==============================================================================
     Source * mSources{};
     std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
 
@@ -137,7 +139,7 @@ public:
 
     bool isTrajectoryHandleClicked(MouseEvent const & event); // TODO: this should be const
 
-    void showCircularSourceSelectionWarning();
+    void setCircularSourceSelectionWarning(bool showCircularSourceSelectionWarning);
 
     void setSpatMode(SpatMode spatMode);
 
@@ -155,7 +157,6 @@ private:
     //==============================================================================
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
-    void mouseMove(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
 
     void drawBackground(Graphics & g) const final;

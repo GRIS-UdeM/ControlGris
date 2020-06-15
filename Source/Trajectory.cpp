@@ -12,7 +12,7 @@
 
 #include <cmath>
 
-Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Point<float> const & startingPoint)
+Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Point<float> const & startingPoint) noexcept
 {
     switch (positionTrajectoryType) {
     case PositionTrajectoryType::circleClockwise:
@@ -73,7 +73,7 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
     scale(radius);
 }
 
-Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType)
+Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) noexcept
 {
     switch (elevationTrajectoryType) {
     case ElevationTrajectoryType::downUp:

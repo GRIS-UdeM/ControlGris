@@ -40,7 +40,7 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
 
     if (mSource.getId() > 0 && sourceLink != PositionSourceLink::independent
         && sourceLink != PositionSourceLink::deltaLock) {
-        mFieldComponent.showCircularSourceSelectionWarning();
+        mFieldComponent.setCircularSourceSelectionWarning(true);
     } else {
         this->setSourcePosition(event);
         mFieldComponent.setSelectedSource(mSource.getId());
@@ -67,15 +67,12 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
         this->setSourcePosition(event);
 
         repaint();
-
-        // TODO: what if trajectory handle?
     }
 }
 
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
-    // TODO: what if trajectory handle?
-    // TODO: maybe turn off circularSourceSelectionWarning?
+    mFieldComponent.setCircularSourceSelectionWarning(false);
 }
 
 void PositionSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
