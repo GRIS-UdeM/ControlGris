@@ -22,7 +22,7 @@
 #include "ControlGrisConstants.h"
 #include "ElevationSourceComponent.h"
 
-FieldComponent::FieldComponent()
+FieldComponent::FieldComponent() noexcept
 {
     mTrajectoryHandleComponent.reset(new TrajectoryHandleComponent{ *this });
     addAndMakeVisible(mTrajectoryHandleComponent.get());
@@ -162,7 +162,7 @@ void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
     }
 }
 
-PositionFieldComponent::PositionFieldComponent(PositionAutomationManager & positionAutomationManager)
+PositionFieldComponent::PositionFieldComponent(PositionAutomationManager & positionAutomationManager) noexcept
     : mAutomationManager(positionAutomationManager)
 {
 }

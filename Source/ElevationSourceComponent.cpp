@@ -13,7 +13,7 @@
 #include "FieldComponent.h"
 #include "Source.h"
 
-ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source)
+ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : FieldComponentClickableItem(source.getColour(), String{ source.getId() + 1 })
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mFieldComponent(fieldComponent)
@@ -23,7 +23,7 @@ ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fie
     this->updatePositionInParent();
 }
 
-ElevationSourceComponent::~ElevationSourceComponent()
+ElevationSourceComponent::~ElevationSourceComponent() noexcept
 {
     mSource.removeChangeListener(this);
 }

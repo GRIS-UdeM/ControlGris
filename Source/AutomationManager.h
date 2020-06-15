@@ -29,17 +29,21 @@
 class AutomationManager
 {
 public:
-    struct Listener {
-        virtual ~Listener() {}
+    class Listener
+    {
+    public:
+        Listener() noexcept = default;
+        virtual ~Listener() noexcept = default;
 
         virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);
     };
     //==============================================================================
     enum class Direction { forward, backward };
 
 protected:
-    //==============================================================================
-    static constexpr Point<float> INVALID_POSITION{ -1.0f, -1.0f };
     //==============================================================================
     ListenerList<Listener> mListeners;
 
@@ -73,8 +77,8 @@ protected:
 
 public:
     //==============================================================================
-    AutomationManager(Source & principalSource);
-    virtual ~AutomationManager() = default;
+    AutomationManager(Source & principalSource) noexcept;
+    virtual ~AutomationManager() noexcept = default;
     //==============================================================================
     float getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
@@ -138,7 +142,8 @@ class PositionAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    PositionAutomationManager(Source & principalSource) : AutomationManager(principalSource) {}
+    PositionAutomationManager(Source & principalSource) noexcept : AutomationManager(principalSource) {}
+    ~PositionAutomationManager() noexcept final = default;
     //==============================================================================
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
     PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
@@ -161,7 +166,8 @@ class ElevationAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    ElevationAutomationManager(Source & principalSource) : AutomationManager(principalSource) {}
+    ElevationAutomationManager(Source & principalSource) noexcept : AutomationManager(principalSource) {}
+    ~ElevationAutomationManager() noexcept final = default;
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }

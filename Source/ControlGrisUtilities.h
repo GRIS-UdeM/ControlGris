@@ -40,11 +40,12 @@ private:
 
 public:
     //==============================================================================
-    XmlElementDataSorter(String const & attributeToSortBy, bool forwards)
+    XmlElementDataSorter(String const & attributeToSortBy, bool forwards) noexcept
         : mAttributeToSort(attributeToSortBy)
         , mDirection(forwards ? 1 : -1)
     {
     }
+    ~XmlElementDataSorter() noexcept = default;
     //==============================================================================
     int compareElements(XmlElement * first, XmlElement * second) const
     {
@@ -58,4 +59,7 @@ public:
 
         return mDirection * result;
     }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XmlElementDataSorter);
 };

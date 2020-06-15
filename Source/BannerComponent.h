@@ -26,9 +26,14 @@
 // UI sections of the plugin.
 class BannerComponent final : public Label
 {
+private:
+    static Colour const backgroundColour;
+    static Colour const outlineColour;
+    static Colour const textColour;
+
 public:
-    BannerComponent();
-    ~BannerComponent() final;
+    BannerComponent() noexcept;
+    ~BannerComponent() noexcept final = default;
 
 private:
     //==============================================================================

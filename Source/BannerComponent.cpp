@@ -19,15 +19,14 @@
  *************************************************************************/
 #include "BannerComponent.h"
 
-BannerComponent::BannerComponent()
+Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
+Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
+Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+
+BannerComponent::BannerComponent() noexcept
 {
     setEditable(false, false, false);
-    setColour(Label::backgroundColourId, Colour::fromRGB(64, 64, 64));
-    setColour(Label::outlineColourId, Colour::fromRGB(16, 16, 16));
-    setColour(Label::textColourId, Colour::fromRGB(255, 255, 255));
-}
-
-BannerComponent::~BannerComponent()
-{
-    setLookAndFeel(nullptr);
+    setColour(Label::backgroundColourId, backgroundColour);
+    setColour(Label::outlineColourId, outlineColour);
+    setColour(Label::textColourId, textColour);
 }

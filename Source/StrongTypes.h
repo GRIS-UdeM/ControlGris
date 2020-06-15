@@ -16,16 +16,15 @@ class Radians
     float mValue{};
 
 public:
-    constexpr Radians() = default;
-    constexpr explicit Radians(float radians) : mValue(radians) {}
-    // constexpr Radians(Degrees const & degrees);
-    ~Radians() = default;
+    constexpr Radians() noexcept = default;
+    constexpr explicit Radians(float radians) noexcept : mValue(radians) {}
+    ~Radians() noexcept = default;
 
     constexpr Radians(Radians const & other) = default;
-    constexpr Radians(Radians && other) = default;
+    constexpr Radians(Radians && other) noexcept = default;
 
     constexpr Radians & operator=(Radians const &) = default;
-    constexpr Radians & operator=(Radians &&) = default;
+    constexpr Radians & operator=(Radians &&) noexcept = default;
 
     constexpr bool operator<(Radians const other) const { return mValue < other.mValue; }
     constexpr bool operator>(Radians const other) const { return mValue > other.mValue; }
@@ -87,16 +86,16 @@ class Degrees
     float mValue{};
 
 public:
-    constexpr Degrees() = default;
-    constexpr explicit Degrees(float const value) : mValue(value) {}
-    constexpr Degrees(Radians const radians) : mValue(radians.getAsDegrees()) {}
-    ~Degrees() = default;
+    constexpr Degrees() noexcept = default;
+    constexpr explicit Degrees(float const value) noexcept : mValue(value) {}
+    constexpr Degrees(Radians const radians) noexcept : mValue(radians.getAsDegrees()) {}
+    ~Degrees() noexcept = default;
 
     constexpr Degrees(Degrees const & other) = default;
-    constexpr Degrees(Degrees && other) = default;
+    constexpr Degrees(Degrees && other) noexcept = default;
 
     constexpr Degrees & operator=(Degrees const &) = default;
-    constexpr Degrees & operator=(Degrees &&) = default;
+    constexpr Degrees & operator=(Degrees &&) noexcept = default;
 
     constexpr bool operator<(Degrees const other) const { return mValue < other.mValue; }
     constexpr bool operator>(Degrees const other) const { return mValue > other.mValue; }

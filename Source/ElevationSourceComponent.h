@@ -29,8 +29,8 @@ private:
     Source & mSource;
 
 public:
-    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source);
-    ~ElevationSourceComponent() final;
+    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
+    ~ElevationSourceComponent() noexcept final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;

@@ -51,11 +51,17 @@ class FieldComponent : public Component
 {
 public:
     //==============================================================================
-    struct Listener {
-        virtual ~Listener() = default;
+    class Listener
+    {
+    public:
+        Listener() noexcept = default;
+        virtual ~Listener() noexcept = default;
 
         virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);
     };
     //==============================================================================
     ListenerList<Listener> mListeners{};
@@ -72,8 +78,8 @@ protected:
 
 public:
     //==============================================================================
-    FieldComponent();
-    ~FieldComponent() override { setLookAndFeel(nullptr); }
+    FieldComponent() noexcept;
+    ~FieldComponent() noexcept override = default;
     //==============================================================================
     void setSources(Source * sources, int numberOfSources);
 
@@ -115,8 +121,8 @@ class PositionFieldComponent final : public FieldComponent
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 
 public:
-    PositionFieldComponent(PositionAutomationManager & positionAutomationManager);
-    ~PositionFieldComponent() final = default;
+    PositionFieldComponent(PositionAutomationManager & positionAutomationManager) noexcept;
+    ~PositionFieldComponent() noexcept final = default;
     //==============================================================================
     PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
     PositionAutomationManager & getAutomationManager() { return mAutomationManager; }
@@ -172,11 +178,11 @@ class ElevationFieldComponent final : public FieldComponent
 
 public:
     //==============================================================================
-    ElevationFieldComponent(ElevationAutomationManager & mPositionAutomationManager)
+    ElevationFieldComponent(ElevationAutomationManager & mPositionAutomationManager) noexcept
         : mAutomationManager(mPositionAutomationManager)
     {
     }
-    ~ElevationFieldComponent() final = default;
+    ~ElevationFieldComponent() noexcept final = default;
     //==============================================================================
     ElevationAutomationManager const & getAutomationManager() const { return mAutomationManager; }
     ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }

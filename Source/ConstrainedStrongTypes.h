@@ -16,23 +16,24 @@ class Azimuth;
 
 class Normalized
 {
+private:
     float mValue{};
 
 public:
-    constexpr Normalized() = default;
-    constexpr explicit Normalized(float const value) : mValue(value) { clip(); }
+    constexpr Normalized() noexcept = default;
+    ~Normalized() noexcept = default;
 
     constexpr Normalized(Normalized const &) = default;
-    constexpr Normalized(Normalized &&) = default;
-
-    ~Normalized() = default;
+    constexpr Normalized(Normalized &&) noexcept = default;
 
     Normalized & operator=(Normalized const &) = default;
-    Normalized & operator=(Normalized &&) = default;
+    Normalized & operator=(Normalized &&) noexcept = default;
 
-    constexpr float operator*(float const rhs) const { return mValue * rhs; }
+    constexpr explicit Normalized(float const value) noexcept : mValue(value) { clip(); }
 
     constexpr operator float() const { return mValue; }
+
+    constexpr float operator*(float const rhs) const { return mValue * rhs; }
 
 private:
     void clip() { mValue = std::clamp(mValue, 0.0f, 1.0f); }

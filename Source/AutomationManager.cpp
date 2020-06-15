@@ -21,7 +21,7 @@
 
 #include <algorithm>
 
-AutomationManager::AutomationManager(Source & principalSource) : mPrincipalSource(principalSource)
+AutomationManager::AutomationManager(Source & principalSource) noexcept : mPrincipalSource(principalSource)
 {
 }
 
@@ -43,7 +43,7 @@ void AutomationManager::setPositionActivateState(bool const newState)
         mCurrentDegreeOfDeviation = Degrees{ 0.0f };
         mDeviationCycleCount = 0;
     } else {
-        mPlaybackPosition = Point<float>{ INVALID_POSITION };
+        mPlaybackPosition.reset();
     }
 }
 
