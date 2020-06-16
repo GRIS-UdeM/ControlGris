@@ -23,6 +23,7 @@
 
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
+#include "StrongTypes.h"
 
 //==============================================================================
 class SettingsBoxComponent final : public Component
@@ -36,7 +37,7 @@ public:
         virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
         virtual void settingsBoxOscActivated(bool state) = 0;
         virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
-        virtual void settingsBoxFirstSourceIdChanged(int firstSourceId) = 0;
+        virtual void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) = 0;
     };
 
 private:
@@ -68,7 +69,7 @@ public:
     // These are only setters, they dont send notification.
     //-----------------------------------------------------
     void setNumberOfSources(int numOfSources);
-    void setFirstSourceId(int firstSourceId);
+    void setFirstSourceId(SourceId firstSourceId);
     void setOscFormat(SpatMode mode);
     void setOscPortNumber(int oscPortNumber);
     void setActivateButtonState(bool shouldBeOn);

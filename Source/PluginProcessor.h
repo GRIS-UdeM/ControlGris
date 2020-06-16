@@ -36,14 +36,13 @@ class ControlGrisAudioProcessor final
 {
 private:
     //==============================================================================
-    Sources mSources{};
     SpatMode mSelectedOscFormat{ SpatMode::dome };
     bool mOscConnected{ true };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
-    int mFirstSourceId{ 1 };
+    SourceId mFirstSourceId{ 1 };
     int mNumOfSources{ 2 };
-    int mSelectedSourceId{ 1 };
+    SourceIndex mSelectedSource{};
     int mCurrentOSCPort{ 18032 };
     int mLastConnectedOSCPort{ -1 };
     int mCurrentOSCInputPort{ 8000 };
@@ -79,6 +78,8 @@ private:
 
     XmlElement mFixPositionData;
     XmlElement * mCurrentFixPosition{ nullptr };
+
+    Sources mSources{};
 
 public:
     //==============================================================================
@@ -136,10 +137,10 @@ public:
     void setOscPortNumber(int oscPortNumber);
     int getOscPortNumber() const { return mCurrentOSCPort; }
 
-    void setFirstSourceId(int firstSourceId, bool propagate = true);
-    int getFirstSourceId() const { return mFirstSourceId; }
+    void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
+    auto getFirstSourceId() const { return mFirstSourceId; }
 
-    void setSelectedSourceId(int id);
+    void setSelectedSource(SourceIndex index);
 
     void setNumberOfSources(int numOfSources, bool propagate = true);
     int getNumberOfSources() const { return mNumOfSources; }
@@ -172,8 +173,8 @@ public:
     //==============================================================================
     void setPluginState();
 
-    void sourcePositionChanged(int sourceId, int whichField);
-    void setSourceParameterValue(int sourceId, SourceParameter sourceParameter, double value);
+    void sourcePositionChanged(SourceIndex sourceIndex, int whichField);
+    void setSourceParameterValue(SourceIndex sourceIndex, SourceParameter sourceParameter, double value);
 
     void initialize();
 

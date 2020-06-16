@@ -34,7 +34,7 @@ class Source : public juce::ChangeBroadcaster
 private:
     //==============================================================================
     SourceIndex mIndex{};
-    SourceId mId{};
+    SourceId mId{ 1 };
     SpatMode mSpatMode{ SpatMode::cube };
 
     Radians mAzimuth{};
@@ -144,7 +144,11 @@ private:
         int index;
 
         bool operator!=(Iterator const & other) const { return index != other.index; }
-        Iterator operator++() const { return Iterator{ sources, index + 1 }; }
+        Iterator & operator++()
+        {
+            ++index;
+            return *this;
+        }
         Source & operator*() { return sources->get(index); }
         Source const & operator*() const { return sources->get(index); }
     };
@@ -153,12 +157,16 @@ private:
         int index;
 
         bool operator!=(ConstIterator const & other) const { return index != other.index; }
-        ConstIterator operator++() const { return ConstIterator{ sources, index + 1 }; }
+        ConstIterator & operator++()
+        {
+            ++index;
+            return *this;
+        }
         Source const & operator*() const { return sources->get(index); }
     };
 
     int mSize{ 2 };
-    Source mPrimarySource;
+    Source mPrimarySource{};
     std::array<Source, MAX_NUMBER_OF_SOURCES - 1> mSecondarySources{};
 
 public:
@@ -224,9 +232,9 @@ public:
     auto const & getSecondarySources() const { return mSecondarySources; }
 
     Iterator begin() { return Iterator{ this, 0 }; }
-    ConstIterator const begin() const { return ConstIterator{ this, 0 }; }
+    ConstIterator begin() const { return ConstIterator{ this, 0 }; }
     Iterator end() { return Iterator{ this, mSize }; }
-    ConstIterator const end() const { return ConstIterator{ this, mSize }; }
+    ConstIterator end() const { return ConstIterator{ this, mSize }; }
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sources);

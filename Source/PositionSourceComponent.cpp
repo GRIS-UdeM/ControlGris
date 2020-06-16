@@ -14,7 +14,7 @@
 #include "Source.h"
 
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
-    : FieldComponentClickableItem(source.getColour(), String{ source.getId() + 1 })
+    : FieldComponentClickableItem(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
@@ -38,12 +38,12 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     auto const sourceLink{ mAutomationManager.getSourceLink() };
 
-    if (mSource.getId() > 0 && sourceLink != PositionSourceLink::independent
+    if (!mSource.isPrimarySource() && sourceLink != PositionSourceLink::independent
         && sourceLink != PositionSourceLink::deltaLock) {
         mFieldComponent.setCircularSourceSelectionWarning(true);
     } else {
         this->setSourcePosition(event);
-        mFieldComponent.setSelectedSource(mSource.getId());
+        mFieldComponent.setSelectedSource(mSource.getIndex());
     }
 }
 
@@ -56,23 +56,25 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
         eventRelativeToFieldComponent.getPosition().toFloat()) };
     mSource.setPos(newPosition);
 
-    mFieldComponent.notifySourcePositionChanged(mSource.getId());
+    mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
 void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 {
-    if (mFieldComponent.getSelectedSourceId() == mSource.getId()) {
+    if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
-
         this->setSourcePosition(event);
-
-        repaint();
     }
 }
 
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
     mFieldComponent.setCircularSourceSelectionWarning(false);
+}
+
+SourceIndex PositionSourceComponent::getSourceIndex() const
+{
+    return mSource.getIndex();
 }
 
 void PositionSourceComponent::changeListenerCallback(ChangeBroadcaster * source)

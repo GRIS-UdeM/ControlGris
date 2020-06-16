@@ -168,16 +168,16 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // mParameters, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        String id(i);
+        String oscId(i);
         // Non-automatable, per source, mParameters.
-        mParameters.state.setProperty(String("p_azimuth_") + id, i % 2 == 0 ? -90.0 : 90.0, nullptr);
-        mParameters.state.setProperty(String("p_elevation_") + id, 0.0, nullptr);
-        mParameters.state.setProperty(String("p_distance_") + id, 1.0, nullptr);
-        mParameters.state.setProperty(String("p_x_") + id, 0.0, nullptr);
-        mParameters.state.setProperty(String("p_y_") + id, 0.0, nullptr);
+        mParameters.state.setProperty(String("p_azimuth_") + oscId, i % 2 == 0 ? -90.0 : 90.0, nullptr);
+        mParameters.state.setProperty(String("p_elevation_") + oscId, 0.0, nullptr);
+        mParameters.state.setProperty(String("p_distance_") + oscId, 1.0, nullptr);
+        mParameters.state.setProperty(String("p_x_") + oscId, 0.0, nullptr);
+        mParameters.state.setProperty(String("p_y_") + oscId, 0.0, nullptr);
 
         // Gives the source an initial id...
-        mSources.get(i).setId(i + mFirstSourceId - 1);
+        mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
         mSources.get(i).setCoordinates(azimuth, Degrees{ 90.0f }, 1.0f);
@@ -442,12 +442,12 @@ void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber)
     mParameters.state.setProperty("oscPortNumber", mCurrentOSCPort, nullptr);
 }
 
-void ControlGrisAudioProcessor::setFirstSourceId(int firstSourceId, bool propagate)
+void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, bool propagate)
 {
     mFirstSourceId = firstSourceId;
-    mParameters.state.setProperty("firstSourceId", mFirstSourceId, nullptr);
+    mParameters.state.setProperty("firstSourceId", mFirstSourceId.toInt(), nullptr);
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        mSources.get(i).setId(i + mFirstSourceId - 1);
+        mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
     }
 
     if (propagate)
@@ -460,7 +460,7 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     mParameters.state.setProperty("numberOfSources", mNumOfSources, nullptr);
 
     for (auto & source : mSources) {
-        source.setColorFromId(numOfSources);
+        source.setColorFromIndex(numOfSources);
     }
 
     if (propagate) {
@@ -468,9 +468,9 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     }
 }
 
-void ControlGrisAudioProcessor::setSelectedSourceId(int id)
+void ControlGrisAudioProcessor::setSelectedSource(SourceIndex const index)
 {
-    mSelectedSourceId = id;
+    mSelectedSource = index;
 }
 
 //==============================================================================
@@ -531,7 +531,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
         //           << "\n\tdistance: " << distance << "\n\n";
 
         message.clear();
-        message.addInt32(source.getId());
+        message.addInt32(source.getId().toInt() - 1); // osc id starts at 0
         message.addFloat32(azimuth);
         message.addFloat32(elevation);
         message.addFloat32(azimuthSpan);
@@ -684,7 +684,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
         } else {
             mSources.getPrimarySource().setX(x);
             mSources.getPrimarySource().setY(y);
-            sourcePositionChanged(0, 0);
+            sourcePositionChanged(SourceIndex{ 0 }, 0);
         }
         setPositionPreset(0);
     } else if (y != -1.0f) {
@@ -693,7 +693,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
         } else {
             mSources.getPrimarySource().setY(y);
-            sourcePositionChanged(0, 0);
+            sourcePositionChanged(SourceIndex{ 0 }, 0);
         }
         setPositionPreset(0);
     } else if (x != -1.0f) {
@@ -702,7 +702,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
             mPositionAutomationManager.sendTrajectoryPositionChangedEvent();
         } else {
             mSources.getPrimarySource().setX(x);
-            sourcePositionChanged(0, 0);
+            sourcePositionChanged(SourceIndex{ 0 }, 0);
         }
         setPositionPreset(0);
     }
@@ -970,10 +970,10 @@ void ControlGrisAudioProcessor::setPluginState()
     // If no preset is loaded, try to restore the last saved positions.
     if (mCurrentPositionPreset == 0) {
         for (auto & source : mSources) {
-            String const id{ source.getId() };
-            source.setAzimuth(Normalized{ mParameters.state.getProperty(String("p_azimuth_") + id) });
-            source.setElevation(Normalized{ mParameters.state.getProperty(String("p_elevation_") + id) });
-            source.setDistance(mParameters.state.getProperty(String("p_distance_") + id));
+            auto const index{ source.getIndex().toString() };
+            source.setAzimuth(Normalized{ mParameters.state.getProperty(String("p_azimuth_") + index) });
+            source.setElevation(Normalized{ mParameters.state.getProperty(String("p_elevation_") + index) });
+            source.setDistance(mParameters.state.getProperty(String("p_distance_") + index));
         }
     }
 
@@ -986,23 +986,32 @@ void ControlGrisAudioProcessor::setPluginState()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichField)
+void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, int whichField)
 {
     if (whichField == 0) {
         if (getOscFormat() == SpatMode::cube) {
-            setSourceParameterValue(sourceId, SourceParameter::azimuth, mSources[sourceId].getNormalizedAzimuth());
-            setSourceParameterValue(sourceId, SourceParameter::distance, mSources[sourceId].getDistance());
+            setSourceParameterValue(sourceIndex,
+                                    SourceParameter::azimuth,
+                                    mSources[sourceIndex].getNormalizedAzimuth());
+            setSourceParameterValue(sourceIndex, SourceParameter::distance, mSources[sourceIndex].getDistance());
         } else {
-            setSourceParameterValue(sourceId, SourceParameter::azimuth, mSources[sourceId].getNormalizedAzimuth());
-            setSourceParameterValue(sourceId, SourceParameter::elevation, mSources[sourceId].getNormalizedElevation());
+            setSourceParameterValue(sourceIndex,
+                                    SourceParameter::azimuth,
+                                    mSources[sourceIndex].getNormalizedAzimuth());
+            setSourceParameterValue(sourceIndex,
+                                    SourceParameter::elevation,
+                                    mSources[sourceIndex].getNormalizedElevation());
         }
     } else {
-        setSourceParameterValue(sourceId, SourceParameter::elevation, mSources[sourceId].getNormalizedElevation());
+        setSourceParameterValue(sourceIndex,
+                                SourceParameter::elevation,
+                                mSources[sourceIndex].getNormalizedElevation());
     }
 
     if (whichField == 0) {
-        if (sourceId != 0 && mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
-            Point<float> const delta{ mSources[sourceId].getDeltaX(), mSources[sourceId].getDeltaY() };
+        if (sourceIndex != SourceIndex{ 0 }
+            && mPositionAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
+            Point<float> const delta{ mSources[sourceIndex].getDeltaX(), mSources[sourceIndex].getDeltaY() };
             mSources.getPrimarySource().setXYCoordinatesFromFixedSource(delta);
         }
         validatePositionSourcePositions();
@@ -1012,12 +1021,12 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
         }
     }
     if (whichField == 1 && getOscFormat() == SpatMode::cube) {
-        if (sourceId != 0) {
-            auto const sourceElevation{ mSources[sourceId].getElevation() };
-            auto const offset{ Degrees{ 60.0f } / mNumOfSources * sourceId };
+        if (sourceIndex != SourceIndex{ 0 }) {
+            auto const sourceElevation{ mSources[sourceIndex].getElevation() };
+            auto const offset{ Degrees{ 60.0f } / mNumOfSources * sourceIndex.toInt() };
             switch (static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink())) {
             case ElevationSourceLink::fixedElevation:
-                mSources.getPrimarySource().setElevation(mSources[sourceId].getElevation());
+                mSources.getPrimarySource().setElevation(mSources[sourceIndex].getElevation());
                 break;
             case ElevationSourceLink::linearMin:
                 mSources.getPrimarySource().setElevation(sourceElevation - offset);
@@ -1026,7 +1035,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
                 mSources.getPrimarySource().setElevation(sourceElevation + offset);
                 break;
             case ElevationSourceLink::deltaLock: {
-                auto const deltaElevation{ mSources[sourceId].getDeltaElevation() };
+                auto const deltaElevation{ mSources[sourceIndex].getDeltaElevation() };
                 mSources.getPrimarySource().setElevationFromFixedSource(deltaElevation);
             } break;
             case ElevationSourceLink::independent:
@@ -1041,30 +1050,30 @@ void ControlGrisAudioProcessor::sourcePositionChanged(int sourceId, int whichFie
 
 // Called whenever a source has changed.
 //--------------------------------------
-void ControlGrisAudioProcessor::setSourceParameterValue(int const sourceId,
+void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const sourceIndex,
                                                         SourceParameter const parameterId,
                                                         double const value)
 {
     Normalized const normalized{ static_cast<float>(value) };
-    String id(sourceId);
+    auto const param_id{ sourceIndex.toString() };
     switch (parameterId) {
     case SourceParameter::azimuth:
-        mSources[sourceId].setAzimuth(normalized);
-        mParameters.state.setProperty("p_azimuth_" + id, value, nullptr);
+        mSources[sourceIndex].setAzimuth(normalized);
+        mParameters.state.setProperty("p_azimuth_" + param_id, value, nullptr);
         break;
     case SourceParameter::elevation:
-        mSources[sourceId].setElevation(normalized);
-        mParameters.state.setProperty(String("p_elevation_") + id, value, nullptr);
+        mSources[sourceIndex].setElevation(normalized);
+        mParameters.state.setProperty(String("p_elevation_") + param_id, value, nullptr);
         break;
     case SourceParameter::distance:
-        mSources[sourceId].setDistance(value);
-        mParameters.state.setProperty(String("p_distance_") + id, value, nullptr);
+        mSources[sourceIndex].setDistance(value);
+        mParameters.state.setProperty(String("p_distance_") + param_id, value, nullptr);
         break;
     case SourceParameter::x:
-        mSources[sourceId].setX(value);
+        mSources[sourceIndex].setX(value);
         break;
     case SourceParameter::y:
-        mSources[sourceId].setY(value);
+        mSources[sourceIndex].setY(value);
         break;
     case SourceParameter::azimuthSpan:
         for (auto & source : mSources) {
@@ -1408,7 +1417,8 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
         source.setPos(position);
         source.setFixedPosition(position);
         if (mSelectedOscFormat == SpatMode::cube) {
-            float const z{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 2))) };
+            float const z{ static_cast<float>(
+                mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 2))) };
             source.setFixedElevation(Degrees{ 90.0f } - Degrees{ 90.0f } * z);
             source.setElevation(Normalized{ z });
         }
@@ -1625,7 +1635,7 @@ void ControlGrisAudioProcessor::setStateInformation(const void * data, int sizeI
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
-        setFirstSourceId(valueTree.getProperty("firstSourceId", 1));
+        setFirstSourceId(SourceId{ valueTree.getProperty("firstSourceId", 1) });
         setOscOutputPluginId(valueTree.getProperty("oscOutputPluginId", 1));
 
         if (valueTree.getProperty("oscInputConnected", false)) {

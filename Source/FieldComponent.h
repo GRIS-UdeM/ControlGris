@@ -57,7 +57,7 @@ public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
 
-        virtual void fieldSourcePositionChanged(int sourceId, int whichField) = 0;
+        virtual void fieldSourcePositionChanged(SourceIndex sourceId, int whichField) = 0;
         virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
 
     private:
@@ -74,8 +74,8 @@ protected:
     std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
 
     bool mIsPlaying{ false };
-    std::optional<int> mSelectedSourceId{};
-    std::optional<int> mOldSelectedSourceId{};
+    std::optional<SourceIndex> mSelectedSource{};
+    std::optional<SourceIndex> mOldSelectedSource{};
 
 public:
     //==============================================================================
@@ -84,9 +84,9 @@ public:
     //==============================================================================
     void setSources(Sources & sources);
 
-    void setSelectedSource(int selectedId);
+    void setSelectedSource(std::optional<SourceIndex> selectedSource);
 
-    std::optional<int> const & getSelectedSourceId() const { return mSelectedSourceId; }
+    auto const & getSelectedSourceIndex() const { return mSelectedSource; }
 
     void setIsPlaying(bool const state) { mIsPlaying = state; }
 
@@ -96,9 +96,11 @@ public:
 protected:
     //==============================================================================
     void drawBackgroundGrid(Graphics & g) const;
+
     virtual void drawBackground(Graphics & g) const = 0;
+    virtual void applySourceSelectionToComponents() = 0;
     //==============================================================================
-    virtual void notifySourcePositionChanged(int sourceId) = 0;
+    virtual void notifySourcePositionChanged(SourceIndex sourceIndex) = 0;
     virtual void rebuildSourceComponents(int numberOfSources) = 0;
     virtual void drawSpans(Graphics & g) const = 0;
 
@@ -142,7 +144,7 @@ public:
 
     void setSpatMode(SpatMode spatMode);
 
-    void notifySourcePositionChanged(int sourceId) final;
+    void notifySourcePositionChanged(SourceIndex sourceIndex) final;
 
     Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
     Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
@@ -157,6 +159,7 @@ private:
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
+    void applySourceSelectionToComponents() final;
 
     void drawBackground(Graphics & g) const final;
     //==============================================================================
@@ -193,15 +196,17 @@ public:
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
 
-    void notifySourcePositionChanged(int sourceId) final;
+    void notifySourcePositionChanged(SourceIndex sourceIndex) final;
     void rebuildSourceComponents(int numberOfSources) final;
 
-    Point<float> sourceElevationToComponentPosition(Radians sourceElevation, int sourceId) const;
+    Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
     Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
 
 private:
+    //==============================================================================
     void drawSpans(Graphics & g) const final;
     void drawBackground(Graphics & g) const final;
+    void applySourceSelectionToComponents() final;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
 };

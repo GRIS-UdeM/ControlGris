@@ -34,15 +34,15 @@ public:
         virtual ~Listener() {}
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
-        virtual void sourceBoxSelectionChanged(int sourceNum) = 0;
-        virtual void sourceBoxPositionChanged(int sourceNum, Radians angle, float rayLen) = 0;
+        virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
+        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) = 0;
     };
 
 private:
     //==============================================================================
     ListenerList<Listener> mListeners;
 
-    int mSelectedSourceNumber;
+    SourceIndex mSelectedSource;
     Degrees mCurrentAngle;
     float mCurrentRayLength;
 
@@ -66,8 +66,8 @@ public:
     void paint(Graphics &) final;
     void resized() final;
 
-    void setNumberOfSources(int numOfSources, int firstSourceId);
-    void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
+    void setNumberOfSources(int numOfSources, SourceId firstSourceId);
+    void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

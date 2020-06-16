@@ -84,11 +84,12 @@ SettingsBoxComponent::SettingsBoxComponent()
     mFirstSourceIdEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
     mFirstSourceIdEditor.onFocusLost = [this] {
         if (!mFirstSourceIdEditor.isEmpty()) {
-            mListeners.call(
-                [&](Listener & l) { l.settingsBoxFirstSourceIdChanged(mFirstSourceIdEditor.getText().getIntValue()); });
+            mListeners.call([&](Listener & l) {
+                l.settingsBoxFirstSourceIdChanged(SourceId{ mFirstSourceIdEditor.getText().getIntValue() });
+            });
         } else {
             mListeners.call([&](Listener & l) {
-                l.settingsBoxFirstSourceIdChanged(1);
+                l.settingsBoxFirstSourceIdChanged(SourceId{ 1 });
                 mFirstSourceIdEditor.setText("1");
             });
         }
@@ -123,9 +124,9 @@ void SettingsBoxComponent::setNumberOfSources(int numOfSources)
     mNumOfSourcesEditor.setText(String(numOfSources));
 }
 
-void SettingsBoxComponent::setFirstSourceId(int firstSourceId)
+void SettingsBoxComponent::setFirstSourceId(SourceId const firstSourceId)
 {
-    mFirstSourceIdEditor.setText(String(firstSourceId));
+    mFirstSourceIdEditor.setText(firstSourceId.toString());
 }
 
 void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)

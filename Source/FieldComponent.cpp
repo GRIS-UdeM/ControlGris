@@ -30,18 +30,18 @@ FieldComponent::FieldComponent() noexcept
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
 }
 
-void FieldComponent::setSelectedSource(int const selectedId)
+void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
 {
-    mOldSelectedSourceId = mSelectedSourceId;
-    mSelectedSourceId = selectedId;
-    getParentComponent()->repaint();
+    mOldSelectedSource = mSelectedSource;
+    mSelectedSource = selectedSource;
+    applySourceSelectionToComponents();
 }
 
 void FieldComponent::setSources(Sources & sources)
 {
     mSources = &sources;
-    mSelectedSourceId.reset();
-    mOldSelectedSourceId.reset();
+    mSelectedSource.reset();
+    mOldSelectedSource.reset();
 
     rebuildSourceComponents(sources.size());
 }
@@ -69,6 +69,35 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
     }
     g.drawLine(0, 0, fieldComponentSize, fieldComponentSize);
     g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
+}
+
+void PositionFieldComponent::applySourceSelectionToComponents()
+{
+    if (mSelectedSource.has_value()) {
+        for (auto component : mSourceComponents) {
+            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            component->setSelected(selected);
+        }
+    } else {
+        for (auto component : mSourceComponents) {
+            component->setSelected(false);
+        }
+    }
+}
+
+void ElevationFieldComponent::applySourceSelectionToComponents()
+{
+    // TODO: this is a dupe of PositionFieldComponent::applySourceSelectionToComponents()
+    if (mSelectedSource.has_value()) {
+        for (auto component : mSourceComponents) {
+            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            component->setSelected(selected);
+        }
+    } else {
+        for (auto component : mSourceComponents) {
+            component->setSelected(false);
+        }
+    }
 }
 
 void PositionFieldComponent::drawBackground(Graphics & g) const
@@ -148,9 +177,9 @@ Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<flo
     return result;
 }
 
-void PositionFieldComponent::notifySourcePositionChanged(int sourceId)
+void PositionFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
-    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceId, 0); });
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 0); });
 }
 
 void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
@@ -241,7 +270,7 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
     for (auto const & source : *mSources) {
         float const azimuthSpan{ width * source.getAzimuthSpan() };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
-        float const saturation{ (source.getId() == mSelectedSourceId) ? 1.0f : 0.5f };
+        float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.5f };
         Point<float> const position{ sourcePositionToComponentPosition(source.getPos()) };
 
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
@@ -317,7 +346,7 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
 
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
-    mSelectedSourceId.reset();
+    setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition() };
@@ -325,7 +354,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
         auto const position{ componentPositionToSourcePosition(clippedPosition) };
         auto const isShiftDown{ event.mods.isShiftDown() };
 
-        mOldSelectedSourceId.reset();
+        mOldSelectedSource.reset();
         mAutomationManager.resetRecordingTrajectory(position);
         mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
 
@@ -402,8 +431,8 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 
     float sourceIndex{};
     for (auto const & source : *mSources) {
-        auto const lineThickness{ (source.getId() == mSelectedSourceId) ? 3 : 1 };
-        float const saturation{ (source.getId() == mSelectedSourceId) ? 1.0f : 0.75f };
+        auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 3 : 1 };
+        float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         float const x{ sourceIndex / static_cast<float>(mSources->size()) * (componentSize - 50.0f) + 50.0f };
         float const y{ (Degrees{ 90.0f } - source.getElevation()) / Degrees{ 90.0f } * (componentSize - 35.0f) + 5.0f };
         Point<float> const pos{ x, y };
@@ -452,7 +481,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     // TODO
     //    if (shouldDrawTrajectoryHandle) {
     //        auto const position{ sourceElevationToComponentPosition(mSources[0].getElevation()) };
-    //        auto const lineThickness{ mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
+    //        auto const lineThickness{ mSelectedSource == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
     //        Rectangle<float> const rarea{ 10.0f,
     //                                      position.y,
     //                                      SOURCE_FIELD_COMPONENT_DIAMETER,
@@ -492,7 +521,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     auto const width{ getWidth() };
     auto const height{ getHeight() };
 
-    mSelectedSourceId.reset();
+    mSelectedSource.reset();
 
     // Check if we click on a new source.
     //    bool clickOnSource{ false };
@@ -504,7 +533,7 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     //        Point<float> const pos{ x, y };
     //        Rectangle<float> const area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER,
     //        SOURCE_FIELD_COMPONENT_DIAMETER }; if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //            mSelectedSourceId = sourceIndex;
+    //            mSelectedSource = sourceIndex;
     //            mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
     //            clickOnSource = true;
     //            break;
@@ -531,8 +560,8 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     //                                     SOURCE_FIELD_COMPONENT_DIAMETER,
     //                                     SOURCE_FIELD_COMPONENT_DIAMETER };
     //        if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //            mOldSelectedSourceId = mSelectedSourceId;
-    //            mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
+    //            mOldSelectedSource = mSelectedSource;
+    //            mSelectedSource = TRAJECTORY_HANDLE_SOURCE_ID;
     //            if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
     //                == ElevationTrajectoryType::drawing) {
     //                mCurrentRecordingPositionX = 10 + SOURCE_FIELD_COMPONENT_RADIUS;
@@ -548,8 +577,8 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     //    // If clicked in an empty space while in mode DRAWING, start a new drawing.
     //    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
     //        == ElevationTrajectoryType::drawing) {
-    //        mOldSelectedSourceId = mSelectedSourceId;
-    //        mSelectedSourceId = TRAJECTORY_HANDLE_SOURCE_ID;
+    //        mOldSelectedSource = mSelectedSource;
+    //        mSelectedSource = TRAJECTORY_HANDLE_SOURCE_ID;
     //        mCurrentRecordingPositionX = 10 + static_cast<int>(SOURCE_FIELD_COMPONENT_RADIUS);
     //        mAutomationManager.resetRecordingTrajectory(
     //            Point<float>{ static_cast<float>(mCurrentRecordingPositionX), event.getMouseDownPosition().toFloat().y
@@ -558,9 +587,9 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     //    }
 }
 
-void ElevationFieldComponent::notifySourcePositionChanged(int sourceId)
+void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
-    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceId, 1); });
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
 }
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
@@ -568,12 +597,12 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     auto const height{ static_cast<float>(getHeight()) };
 
     // No selection.
-    if (!mSelectedSourceId.has_value()) {
+    if (!mSelectedSource.has_value()) {
         return;
     }
-    auto const selectedSourceId{ mSelectedSourceId.value() };
+    auto const selectedSourceId{ mSelectedSource.value() };
 
-    //    if (mSelectedSourceId == TRAJECTORY_HANDLE_SOURCE_ID) {
+    //    if (mSelectedSource == TRAJECTORY_HANDLE_SOURCE_ID) {
     //        if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
     //            mCurrentRecordingPositionX += 1;
     //            if (mCurrentRecordingPositionX >= height) {
@@ -601,7 +630,7 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 
     //    bool needToAdjustAutomationManager{ false };
     //    if (static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink()) == ElevationSourceLink::independent
-    //        && mSelectedSourceId == 0
+    //        && mSelectedSource == 0
     //        && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
     //               == ElevationTrajectoryType::realtime) {
     //        needToAdjustAutomationManager = true;
@@ -628,7 +657,7 @@ void ElevationFieldComponent::mouseUp(const MouseEvent & event)
     if (mCurrentlyDrawing) {
         if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
-            mSelectedSourceId = mOldSelectedSourceId;
+            mSelectedSource = mOldSelectedSource;
         }
         repaint();
     }
@@ -644,13 +673,13 @@ void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
 }
 
 Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians const sourceElevation,
-                                                                         int const sourceId) const
+                                                                         SourceIndex const index) const
 {
     auto const availableWidth{ getWidth() - (xPadding * 2) };
     auto const widthPerSource{ availableWidth / static_cast<float>(mSources->size()) };
     auto const height{ getHeight() - yTopPadding - yBottomPadding };
 
-    Point<float> const result{ widthPerSource * sourceId + widthPerSource / 2.0f,
+    Point<float> const result{ widthPerSource * index.toInt() + widthPerSource / 2.0f,
                                sourceElevation / Degrees{ 90.0f } * height };
 
     return result;

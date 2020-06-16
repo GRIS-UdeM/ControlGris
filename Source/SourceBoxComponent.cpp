@@ -23,7 +23,7 @@
 
 SourceBoxComponent::SourceBoxComponent()
 {
-    mSelectedSourceNumber = 0;
+    mSelectedSource = SourceIndex{};
     mCurrentAngle = {};
     mCurrentRayLength = 1.0f;
 
@@ -48,10 +48,10 @@ SourceBoxComponent::SourceBoxComponent()
     for (int i{ 1 }; i <= 8; ++i) {
         mSourceNumberCombo.addItem(String(i), i);
     }
-    mSourceNumberCombo.setSelectedId(mSelectedSourceNumber);
+    mSourceNumberCombo.setSelectedId(mSelectedSource.toInt());
     mSourceNumberCombo.onChange = [this] {
-        mSelectedSourceNumber = mSourceNumberCombo.getSelectedItemIndex();
-        mListeners.call([&](Listener & l) { l.sourceBoxSelectionChanged(mSelectedSourceNumber); });
+        mSelectedSource = SourceIndex{ mSourceNumberCombo.getSelectedItemIndex() };
+        mListeners.call([&](Listener & l) { l.sourceBoxSelectionChanged(mSelectedSource); });
     };
 
     mRayLengthLabel.setText("Ray Length:", NotificationType::dontSendNotification);
@@ -65,7 +65,7 @@ SourceBoxComponent::SourceBoxComponent()
     mRayLengthSlider.onValueChange = [this] {
         mCurrentRayLength = (float)mRayLengthSlider.getValue();
         mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSourceNumber, mCurrentAngle, mCurrentRayLength); });
+            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAngle, mCurrentRayLength); });
     };
 
     mAngleLabel.setText("Angle:", NotificationType::dontSendNotification);
@@ -79,7 +79,7 @@ SourceBoxComponent::SourceBoxComponent()
     mAngleSlider.onValueChange = [this] {
         mCurrentAngle = Degrees{ static_cast<float>(mAngleSlider.getValue()) };
         mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSourceNumber, mCurrentAngle, mCurrentRayLength); });
+            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAngle, mCurrentRayLength); });
     };
 }
 
@@ -110,21 +110,21 @@ void SourceBoxComponent::resized()
     mAngleSlider.setBounds(380, 70, 200, 20);
 }
 
-void SourceBoxComponent::setNumberOfSources(int numOfSources, int firstSourceId)
+void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
 {
     mSourceNumberCombo.clear();
-    for (int i = firstSourceId; i < firstSourceId + numOfSources; ++i) {
-        mSourceNumberCombo.addItem(String(i), i);
+    for (auto id = firstSourceId; id < firstSourceId + numOfSources; ++id) {
+        mSourceNumberCombo.addItem(id.toString(), id.toInt());
     }
-    if (mSelectedSourceNumber >= numOfSources)
-        mSelectedSourceNumber = 0;
-    mSourceNumberCombo.setSelectedItemIndex(mSelectedSourceNumber);
+    if (mSelectedSource >= SourceIndex{ numOfSources })
+        mSelectedSource = SourceIndex{ 0 };
+    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
 }
 
-void SourceBoxComponent::updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode)
+void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode spatMode)
 {
-    mSelectedSourceNumber = sourceIndex;
-    mSourceNumberCombo.setSelectedItemIndex(mSelectedSourceNumber);
+    mSelectedSource = sourceIndex;
+    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
     if (spatMode == SpatMode::dome) {
         mCurrentAngle = source->getAzimuth();
         mCurrentRayLength = source->getNormalizedElevation();

@@ -126,7 +126,7 @@ void ParametersBoxComponent::paint(Graphics & g)
     g.fillEllipse(area);
 
     g.setColour(Colours::white);
-    g.drawFittedText(String(mSelectedSource->getId() + 1),
+    g.drawFittedText(mSelectedSource->getId().toString(),
                      area.getSmallestIntegerContainer(),
                      Justification(Justification::centred),
                      1);

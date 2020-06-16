@@ -79,7 +79,7 @@ private:
     PositionPresetComponent mPositionPresetBox;
 
     bool mIsInsideSetPluginState;
-    int mSelectedSource;
+    SourceIndex mSelectedSource;
 
     Value mLastUIWidth;
     Value mLastUIHeight;
@@ -97,7 +97,7 @@ public:
     void valueChanged(Value &) final;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(int sourceId, int whichField) final;
+    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) final;
     void fieldTrajectoryHandleClicked(int whichField) final;
 
     // ParametersBoxComponent::Listeners
@@ -109,12 +109,12 @@ public:
     void settingsBoxOscPortNumberChanged(int oscPort) final;
     void settingsBoxOscActivated(bool state) final;
     void settingsBoxNumberOfSourcesChanged(int numOfSources) final;
-    void settingsBoxFirstSourceIdChanged(int firstSourceId) final;
+    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) final;
 
     // SourceBoxComponent::Listeners
-    void sourceBoxSelectionChanged(int sourceNum) final;
+    void sourceBoxSelectionChanged(SourceIndex sourceIndex) final;
     void sourceBoxPlacementChanged(SourcePlacement value) final;
-    void sourceBoxPositionChanged(int sourceNum, Radians angle, float rayLen) final;
+    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) final;

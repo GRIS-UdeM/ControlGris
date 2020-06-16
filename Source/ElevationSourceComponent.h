@@ -14,6 +14,7 @@
 
 #include "ControlGrisConstants.h"
 #include "FieldComponentClickableItem.h"
+#include "StrongTypes.h"
 
 class ElevationFieldComponent;
 class ElevationAutomationManager;
@@ -35,6 +36,8 @@ public:
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
+
+    SourceIndex getSourceIndex() const;
 
 private:
     void updatePositionInParent();

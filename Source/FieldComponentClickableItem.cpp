@@ -14,7 +14,6 @@ FieldComponentClickableItem::FieldComponentClickableItem(Colour const colour, St
     : mColour(colour)
     , mIcon(icon)
 {
-    jassert(icon.length() == 1);
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
     this->setSize(dimension, dimension);
 }

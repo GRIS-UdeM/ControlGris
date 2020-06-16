@@ -14,7 +14,7 @@
 #include "Source.h"
 
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
-    : FieldComponentClickableItem(source.getColour(), String{ source.getId() + 1 })
+    : FieldComponentClickableItem(source.getColour(), source.getId().toString())
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mFieldComponent(fieldComponent)
     , mSource(source)
@@ -30,13 +30,14 @@ ElevationSourceComponent::~ElevationSourceComponent() noexcept
 
 void ElevationSourceComponent::updatePositionInParent()
 {
-    auto const newCenter{ mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(), mSource.getId()) };
+    auto const newCenter{ mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(),
+                                                                             mSource.getIndex()) };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
-    mFieldComponent.setSelectedSource(mSource.getId());
+    mFieldComponent.setSelectedSource(mSource.getIndex());
     this->setSourcePosition(event);
 }
 
@@ -48,19 +49,14 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
 
     mSource.setElevation(newElevation);
 
-    mFieldComponent.notifySourcePositionChanged(mSource.getId());
+    mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
 void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 {
-    if (mFieldComponent.getSelectedSourceId() == mSource.getId()) {
+    if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
-
         this->setSourcePosition(event);
-
-        repaint();
-
-        // TODO: what if trajectory handle?
     }
 }
 
@@ -68,6 +64,11 @@ void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
     // TODO: what if trajectory handle?
     // TODO: maybe turn off circularSourceSelectionWarning?
+}
+
+SourceIndex ElevationSourceComponent::getSourceIndex() const
+{
+    return mSource.getIndex();
 }
 
 void ElevationSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
