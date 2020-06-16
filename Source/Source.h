@@ -236,6 +236,6 @@ public:
     Iterator end() { return Iterator{ this, mSize }; }
     ConstIterator end() const { return ConstIterator{ this, mSize }; }
 
-private:
+    // private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Sources);
 };

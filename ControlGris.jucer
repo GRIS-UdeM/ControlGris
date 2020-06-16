@@ -90,6 +90,10 @@
             file="Source/PluginProcessor.h"/>
       <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
       <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
+      <FILE id="aKLewA" name="SourceLinkEnforcer.cpp" compile="1" resource="0"
+            file="Source/SourceLinkEnforcer.cpp"/>
+      <FILE id="oI6Fsq" name="SourceLinkEnforcer.h" compile="0" resource="0"
+            file="Source/SourceLinkEnforcer.h"/>
       <FILE id="F8muZf" name="Trajectory.cpp" compile="1" resource="0" file="Source/Trajectory.cpp"/>
       <FILE id="lKokDW" name="Trajectory.h" compile="0" resource="0" file="Source/Trajectory.h"/>
     </GROUP>
