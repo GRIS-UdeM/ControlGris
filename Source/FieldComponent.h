@@ -70,11 +70,10 @@ protected:
     //==============================================================================
     static constexpr int TRAJECTORY_MARGINS = 10;
     //==============================================================================
-    Source * mSources{};
+    Sources * mSources;
     std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
 
     bool mIsPlaying{ false };
-    int mNumberOfSources{};
     std::optional<int> mSelectedSourceId{};
     std::optional<int> mOldSelectedSourceId{};
 
@@ -83,7 +82,7 @@ public:
     FieldComponent() noexcept;
     ~FieldComponent() noexcept override = default;
     //==============================================================================
-    void setSources(Source * sources, int numberOfSources);
+    void setSources(Sources & sources);
 
     void setSelectedSource(int selectedId);
 

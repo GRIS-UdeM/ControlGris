@@ -36,6 +36,7 @@ class ControlGrisAudioProcessor final
 {
 private:
     //==============================================================================
+    Sources mSources{};
     SpatMode mSelectedOscFormat{ SpatMode::dome };
     bool mOscConnected{ true };
     bool mOscInputConnected{ false };
@@ -72,8 +73,6 @@ private:
     PositionSourceLink mLastSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mLastElevationSourceLink{ ElevationSourceLink::undefined };
 
-    std::array<Source, MAX_NUMBER_OF_SOURCES> mSources{};
-
     OSCSender mOscSender;
     OSCSender mOscOutputSender;
     OSCReceiver mOscInputReceiver;
@@ -85,8 +84,8 @@ public:
     //==============================================================================
     AudioProcessorValueTreeState mParameters;
 
-    PositionAutomationManager mPositionAutomationManager{ mSources.front() };
-    ElevationAutomationManager mElevationAutomationManager{ mSources.front() };
+    PositionAutomationManager mPositionAutomationManager{ mSources.getPrimarySource() };
+    ElevationAutomationManager mElevationAutomationManager{ mSources.getPrimarySource() };
     //==============================================================================
     ControlGrisAudioProcessor();
     ~ControlGrisAudioProcessor() final;

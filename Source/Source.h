@@ -33,7 +33,7 @@ class Source : public juce::ChangeBroadcaster
 {
 private:
     //==============================================================================
-    int mId;
+    int mIndex; // always goes from 0 to (MAX_SOURCE_NUMBER - 1)
     SpatMode mSpatMode{ SpatMode::cube };
 
     Radians mAzimuth{};
@@ -59,8 +59,8 @@ public:
     Source() noexcept = default;
     ~Source() noexcept = default;
     //==============================================================================
-    void setId(int const id) { mId = id; }
-    int getId() const { return mId; }
+    void setIndex(int const index) { mIndex = index; }
+    int getIndex() const { return mIndex; }
 
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     SpatMode getSpatMode() const { return mSpatMode; }
@@ -157,13 +157,15 @@ private:
     std::array<Source, MAX_NUMBER_OF_SOURCES - 1> mSecondarySources{};
 
 public:
-    Sources() noexcept { setFirstId(0); }
+    Sources() noexcept { initIndexes(); }
     ~Sources() noexcept = default;
 
     int size() const { return mSize; }
-    void setSize(int const size) {
+    void setSize(int const size)
+    {
         jassert(size >= 1 && size < MAX_NUMBER_OF_SOURCES);
-        mSize = size; }
+        mSize = size;
+    }
 
     Source & get(int const index)
     {
@@ -198,11 +200,12 @@ public:
         return mSecondarySources[index - 1];
     }
 
-    void setFirstId(int id)
+    void initIndexes()
     {
-        mPrimarySource.setId(id++);
+        int currentIndex{};
+        mPrimarySource.setIndex(currentIndex++);
         for (auto & secondarySource : mSecondarySources) {
-            secondarySource.setId(id++);
+            secondarySource.setIndex(currentIndex++);
         }
     }
 

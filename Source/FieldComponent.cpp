@@ -37,14 +37,13 @@ void FieldComponent::setSelectedSource(int const selectedId)
     getParentComponent()->repaint();
 }
 
-void FieldComponent::setSources(Source * sources, int const numberOfSources)
+void FieldComponent::setSources(Sources & sources)
 {
-    mSources = sources;
-    mNumberOfSources = numberOfSources;
+    mSources = &sources;
     mSelectedSourceId.reset();
     mOldSelectedSourceId.reset();
 
-    rebuildSourceComponents(numberOfSources);
+    rebuildSourceComponents(sources.size());
 }
 
 void FieldComponent::drawBackgroundGrid(Graphics & g) const
@@ -157,8 +156,8 @@ void PositionFieldComponent::notifySourcePositionChanged(int sourceId)
 void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
 {
     mSourceComponents.clearQuick(true);
-    for (int i{}; i < numberOfSources; ++i) {
-        mSourceComponents.add(new PositionSourceComponent{ *this, mSources[i] });
+    for (auto & source : *mSources) {
+        mSourceComponents.add(new PositionSourceComponent{ *this, source });
         addAndMakeVisible(mSourceComponents.getLast());
     }
 }
@@ -181,11 +180,11 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
     Point<float> const fieldCenter{ halfWidth, halfWidth };
     auto const magnitude{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
 
-    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
-        auto const azimuth{ mSources[sourceId].getAzimuth() };
-        float const elevation{ mSources[sourceId].getNormalizedElevation() };
-        auto const azimuthSpan{ (Degrees{ 180.0f } * mSources[sourceId].getAzimuthSpan()).getAsRadians() };
-        float const elevationSpan{ mSources[sourceId].getElevationSpan() };
+    for (auto const & source : *mSources) {
+        auto const azimuth{ source.getAzimuth() };
+        float const elevation{ source.getNormalizedElevation() };
+        auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan()).getAsRadians() };
+        float const elevationSpan{ source.getElevationSpan() };
 
         // Calculate min and max elevation in degrees.
         Range<float> const elevationLimits{ 0.0f, 1.0f };
@@ -227,9 +226,9 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
         path.applyTransform(transform);
 
         // draw
-        g.setColour(mSources[sourceId].getColour().withAlpha(0.1f));
+        g.setColour(source.getColour().withAlpha(0.1f));
         g.fillPath(path);
-        g.setColour(mSources[sourceId].getColour().withAlpha(0.5f));
+        g.setColour(source.getColour().withAlpha(0.5f));
         PathStrokeType strokeType = PathStrokeType(1.5);
         g.strokePath(path, strokeType);
     }
@@ -239,15 +238,15 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 {
     auto const width{ getWidth() };
 
-    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
-        float const azimuthSpan{ width * mSources[sourceId].getAzimuthSpan() };
+    for (auto const & source : *mSources) {
+        float const azimuthSpan{ width * source.getAzimuthSpan() };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
-        float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.5f };
-        Point<float> const position{ sourcePositionToComponentPosition(mSources[sourceId].getPos()) };
+        float const saturation{ (source.getId() == mSelectedSourceId) ? 1.0f : 0.5f };
+        Point<float> const position{ sourcePositionToComponentPosition(source.getPos()) };
 
-        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.5f));
+        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
         g.drawEllipse(position.x - halfAzimuthSpan, position.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
-        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.1f));
+        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
         g.fillEllipse(position.x - halfAzimuthSpan, position.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
     }
 }
@@ -401,29 +400,28 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
     jassert(getWidth() == getHeight());
     auto const componentSize{ this->getWidth() };
 
-    for (int sourceId{}; sourceId < mNumberOfSources; ++sourceId) {
-        auto const lineThickness{ (sourceId == mSelectedSourceId) ? 3 : 1 };
-        float const saturation{ (sourceId == mSelectedSourceId) ? 1.0f : 0.75f };
-        float const x{ static_cast<float>(sourceId) / static_cast<float>(mNumberOfSources) * (componentSize - 50.0f)
-                       + 50.0f };
-        float const y{
-            (Degrees{ 90.0f } - mSources[sourceId].getElevation()) / Degrees{ 90.0f } * (componentSize - 35.0f) + 5.0f
-        };
+    float sourceIndex{};
+    for (auto const & source : *mSources) {
+        auto const lineThickness{ (source.getId() == mSelectedSourceId) ? 3 : 1 };
+        float const saturation{ (source.getId() == mSelectedSourceId) ? 1.0f : 0.75f };
+        float const x{ sourceIndex / static_cast<float>(mSources->size()) * (componentSize - 50.0f) + 50.0f };
+        float const y{ (Degrees{ 90.0f } - source.getElevation()) / Degrees{ 90.0f } * (componentSize - 35.0f) + 5.0f };
         Point<float> const pos{ x, y };
 
         // draw Spans
-        float const elevationSpan{ 50.0f * mSources[sourceId].getElevationSpan() };
-        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.5f));
+        float const elevationSpan{ 50.0f * source.getElevationSpan() };
+        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
         g.drawRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
                    pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
                    elevationSpan,
                    componentSize - 5.0f,
                    1.5);
-        g.setColour(mSources[sourceId].getColour().withSaturation(saturation).withAlpha(0.1f));
+        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
         g.fillRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
                    pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
                    elevationSpan,
                    componentSize - 5.0f);
+        sourceIndex += 1.0f;
     }
 }
 
@@ -432,7 +430,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     drawBackground(g);
 
     bool shouldDrawTrajectoryHandle{ false };
-    if (mNumberOfSources == 1) {
+    if (mSources->size() == 1) {
         if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                 == ElevationTrajectoryType::drawing
             && !mIsPlaying) {
@@ -497,25 +495,26 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     mSelectedSourceId.reset();
 
     // Check if we click on a new source.
-    bool clickOnSource{ false };
-    for (int sourceIndex{}; sourceIndex < mNumberOfSources; ++sourceIndex) {
-        float const x{ static_cast<float>(sourceIndex) / mNumberOfSources * (width - 50.0f) + 50.0f };
-        float const y{ (Degrees{ 90.0f } - mSources[sourceIndex].getElevation()) / Degrees{ 90.0f } * (height - 35.0f)
-                       + 5.0f };
-        Point<float> const pos{ x, y };
-        Rectangle<float> const area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER };
-        if (area.contains(event.getMouseDownPosition().toFloat())) {
-            mSelectedSourceId = sourceIndex;
-            mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
-            clickOnSource = true;
-            break;
-        }
-    }
+    //    bool clickOnSource{ false };
+    //    for (int sourceIndex{}; sourceIndex < mNumberOfSources; ++sourceIndex) {
+    //        float const x{ static_cast<float>(sourceIndex) / mNumberOfSources * (width - 50.0f) + 50.0f };
+    //        float const y{ (Degrees{ 90.0f } - mSources[sourceIndex].getElevation()) / Degrees{ 90.0f } * (height
+    //        - 35.0f)
+    //                       + 5.0f };
+    //        Point<float> const pos{ x, y };
+    //        Rectangle<float> const area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER,
+    //        SOURCE_FIELD_COMPONENT_DIAMETER }; if (area.contains(event.getMouseDownPosition().toFloat())) {
+    //            mSelectedSourceId = sourceIndex;
+    //            mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
+    //            clickOnSource = true;
+    //            break;
+    //        }
+    //    }
 
-    if (clickOnSource) {
-        repaint();
-        return;
-    }
+    //    if (clickOnSource) {
+    //        repaint();
+    //        return;
+    //    }
 
     // Check if we record a trajectory.
     // TODO
@@ -595,9 +594,9 @@ void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
     //            mAutomationManager.sendTrajectoryPositionChangedEvent();
     //        }
     //    } else {
-    Degrees const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
-    mSources[selectedSourceId].setElevation(elevation);
-    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(selectedSourceId, 1); });
+    //    Degrees const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
+    //    mSources[selectedSourceId].setElevation(elevation);
+    //    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(selectedSourceId, 1); });
     //    }
 
     //    bool needToAdjustAutomationManager{ false };
@@ -638,8 +637,8 @@ void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
 {
     mSourceComponents.clearQuick(true);
-    for (int i{}; i < numberOfSources; ++i) {
-        mSourceComponents.add(new ElevationSourceComponent{ *this, mSources[i] });
+    for (auto & source : *mSources) {
+        mSourceComponents.add(new ElevationSourceComponent{ *this, source });
         addAndMakeVisible(mSourceComponents.getLast());
     }
 }
@@ -648,7 +647,7 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
                                                                          int const sourceId) const
 {
     auto const availableWidth{ getWidth() - (xPadding * 2) };
-    auto const widthPerSource{ availableWidth / static_cast<float>(mNumberOfSources) };
+    auto const widthPerSource{ availableWidth / static_cast<float>(mSources->size()) };
     auto const height{ getHeight() - yTopPadding - yBottomPadding };
 
     Point<float> const result{ widthPerSource * sourceId + widthPerSource / 2.0f,

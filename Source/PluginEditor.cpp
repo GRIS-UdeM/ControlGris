@@ -105,8 +105,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Add sources to the fields.
     //---------------------------
-    mPositionField.setSources(mProcessor.getSources().data(), mProcessor.getNumberOfSources());
-    mElevationField.setSources(mProcessor.getSources().data(), mProcessor.getNumberOfSources());
+    mPositionField.setSources(mProcessor.getSources());
+    mElevationField.setSources(mProcessor.getSources());
 
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mProcessor.setSelectedSourceId(mSelectedSource);
@@ -278,8 +278,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         mSettingsBox.setNumberOfSources(numOfSources);
         mTrajectoryBox.setNumberOfSources(numOfSources);
         mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-        mPositionField.setSources(mProcessor.getSources().data(), numOfSources);
-        mElevationField.setSources(mProcessor.getSources().data(), numOfSources);
+        mPositionField.setSources(mProcessor.getSources());
+        mElevationField.setSources(mProcessor.getSources());
         mSourceBox.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
