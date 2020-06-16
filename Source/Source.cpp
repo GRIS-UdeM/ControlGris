@@ -320,10 +320,9 @@ Point<float> Source::clipPosition(Point<float> const & position)
     return Point<float>{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
 }
 
-void Source::setColorFromId(int const numTotalSources)
+void Source::setColorFromIndex(int const numTotalSources)
 {
-    auto hue{ static_cast<float>(mId) / static_cast<float>(numTotalSources)
-              + 0.577251f }; // TODO: why is the Euler–Mascheroni constant appearing here???
+    auto hue{ static_cast<float>(mIndex.toInt()) / static_cast<float>(numTotalSources) + 0.577251f };
     if (hue > 1.0f) {
         hue -= 1.0f;
     }

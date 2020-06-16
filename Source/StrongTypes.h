@@ -151,4 +151,87 @@ public:
     }
 };
 
+class SourceIndex
+{
+private:
+    int mValue{};
+
+public:
+    constexpr SourceIndex() noexcept = default;
+    ~SourceIndex() noexcept = default;
+
+    constexpr SourceIndex(SourceIndex const &) = default;
+    constexpr SourceIndex(SourceIndex &&) noexcept = default;
+
+    constexpr SourceIndex & operator=(SourceIndex const &) = default;
+    constexpr SourceIndex & operator=(SourceIndex &&) noexcept = default;
+
+    constexpr explicit SourceIndex(int index) noexcept : mValue(index) {}
+
+    constexpr int toInt() const { return mValue; }
+    String toString() const { return String{ mValue }; }
+
+    constexpr bool operator==(SourceIndex const & other) const { return mValue == other.mValue; }
+    constexpr bool operator!=(SourceIndex const & other) const { return mValue != other.mValue; }
+    constexpr bool operator<(SourceIndex const & other) const { return mValue < other.mValue; }
+    constexpr bool operator>=(SourceIndex const & other) const { return mValue >= other.mValue; }
+
+    constexpr SourceIndex & operator++()
+    {
+        ++mValue;
+        return *this;
+    }
+    constexpr SourceIndex operator++(int)
+    {
+        SourceIndex const temp{ *this };
+        ++mValue;
+        return temp;
+    }
+
+    constexpr bool isValid() const { return mValue >= 0 && mValue < 8; } // TODO: remove magic number
+};
+
+class SourceId
+{
+private:
+    int mValue{};
+
+public:
+    constexpr SourceId() noexcept = default;
+    ~SourceId() noexcept = default;
+
+    constexpr SourceId(SourceId const &) = default;
+    constexpr SourceId(SourceId &&) noexcept = default;
+
+    constexpr SourceId & operator=(SourceId const &) = default;
+    constexpr SourceId & operator=(SourceId &&) noexcept = default;
+
+    constexpr explicit SourceId(int index) noexcept : mValue(index) {}
+
+    constexpr int toInt() const { return mValue; }
+    String toString() const { return String{ mValue }; }
+
+    constexpr bool operator==(SourceId const & other) const { return mValue == other.mValue; }
+    constexpr bool operator!=(SourceId const & other) const { return mValue != other.mValue; }
+    constexpr bool operator<(SourceId const & other) const { return mValue < other.mValue; }
+    constexpr bool operator>=(SourceId const & other) const { return mValue >= other.mValue; }
+
+    constexpr SourceId operator+(SourceId const & other) const { return SourceId{ mValue + other.mValue }; }
+    constexpr SourceId operator+(int const value) const { return SourceId{ mValue + value }; }
+
+    constexpr SourceId & operator++()
+    {
+        ++mValue;
+        return *this;
+    }
+    constexpr SourceId operator++(int)
+    {
+        SourceId const temp{ *this };
+        ++mValue;
+        return temp;
+    }
+
+    constexpr bool isValid() const { return mValue > 0 && mValue <= 128; } // TODO: remove magic number
+};
+
 #endif // STRONGTYPESTEST_TYPES_H

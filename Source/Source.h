@@ -33,7 +33,8 @@ class Source : public juce::ChangeBroadcaster
 {
 private:
     //==============================================================================
-    int mIndex; // always goes from 0 to (MAX_SOURCE_NUMBER - 1)
+    SourceIndex mIndex{};
+    SourceId mId{};
     SpatMode mSpatMode{ SpatMode::cube };
 
     Radians mAzimuth{};
@@ -59,8 +60,11 @@ public:
     Source() noexcept = default;
     ~Source() noexcept = default;
     //==============================================================================
-    void setIndex(int const index) { mIndex = index; }
-    int getIndex() const { return mIndex; }
+    void setIndex(SourceIndex const index) { mIndex = index; }
+    SourceIndex getIndex() const { return mIndex; }
+
+    void setId(SourceId const id) { mId = id; }
+    SourceId getId() const { return mId; }
 
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     SpatMode getSpatMode() const { return mSpatMode; }
@@ -83,6 +87,7 @@ public:
     Normalized getElevationSpan() const { return mElevationSpan; }
 
     void setCoordinates(Radians azimuth, Radians elevation, float distance);
+    bool isPrimarySource() const { return mIndex == SourceIndex{ 0 }; }
 
     void setX(float x);
     float getX() const { return mPosition.getX(); }
@@ -117,7 +122,7 @@ public:
         setElevation(mFixedElevation.value() + deltaElevation);
     }
 
-    void setColorFromId(int numTotalSources);
+    void setColorFromIndex(int numTotalSources);
     Colour getColour() const { return mColour; }
 
     static Point<float> getPositionFromAngle(Radians const angle, float radius);
@@ -183,6 +188,8 @@ public:
         }
         return mSecondarySources[index - 1];
     }
+    Source & get(SourceIndex const index) { return get(index.toInt()); }
+    Source const & get(SourceIndex const index) const { return get(index.toInt()); }
     Source & operator[](int const index)
     {
         jassert(index >= 0 && index < MAX_NUMBER_OF_SOURCES); // TODO: should check for mSize
@@ -199,10 +206,12 @@ public:
         }
         return mSecondarySources[index - 1];
     }
+    Source & operator[](SourceIndex const index) { return (*this)[index.toInt()]; }
+    Source const & operator[](SourceIndex const index) const { return (*this)[index.toInt()]; }
 
     void initIndexes()
     {
-        int currentIndex{};
+        SourceIndex currentIndex{};
         mPrimarySource.setIndex(currentIndex++);
         for (auto & secondarySource : mSecondarySources) {
             secondarySource.setIndex(currentIndex++);
