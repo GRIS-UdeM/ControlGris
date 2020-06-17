@@ -36,15 +36,8 @@ void PositionSourceComponent::updatePositionInParent()
 
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
-    auto const sourceLink{ mAutomationManager.getSourceLink() };
-
-    if (!mSource.isPrimarySource() && sourceLink != PositionSourceLink::independent
-        && sourceLink != PositionSourceLink::deltaLock) {
-        mFieldComponent.setCircularSourceSelectionWarning(true);
-    } else {
-        this->setSourcePosition(event);
-        mFieldComponent.setSelectedSource(mSource.getIndex());
-    }
+    this->setSourcePosition(event);
+    mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
 void PositionSourceComponent::setSourcePosition(MouseEvent const & event)

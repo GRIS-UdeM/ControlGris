@@ -49,6 +49,7 @@ public:
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceChangeBroadcaster);
     };
+
 private:
     //==============================================================================
     SourceChangeBroadcaster mGuiChangeBroadcaster{ *this };
@@ -135,9 +136,9 @@ public:
     static Radians getAngleFromPosition(Point<float> const & position);
 
 private:
+    Point<float> clipPosition(Point<float> const & position) const;
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
-    static Point<float> clipPosition(Point<float> const & position);
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Source);
 };

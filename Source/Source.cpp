@@ -197,9 +197,19 @@ float Source::clipCoordinate(float const coord)
     return std::clamp(coord, -1.0f, 1.0f);
 }
 
-Point<float> Source::clipPosition(Point<float> const & position)
+Point<float> Source::clipPosition(Point<float> const & position) const
 {
-    return Point<float>{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
+    if (mSpatMode == SpatMode::dome) {
+        auto const radius{ position.getDistanceFromOrigin() };
+        if (radius > 1.0f) {
+            auto const angle{ getAngleFromPosition(position) };
+            return getPositionFromAngle(angle, 1.0f);
+        } else {
+            return position;
+        }
+    } else {
+        return Point<float>{ clipCoordinate(position.getX()), clipCoordinate(position.getY()) };
+    }
 }
 
 void Source::setColorFromIndex(int const numTotalSources)
