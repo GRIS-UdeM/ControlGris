@@ -44,12 +44,7 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
 {
     auto const clippedElevation{ clipElevation(elevation) };
     if (clippedElevation != mElevation) {
-        if (clippedElevation != elevation) {
-            mElevation = clippedElevation;
-        } else {
-            mElevation = clippedElevation;
-            mElevationNoClip = elevation;
-        }
+        mElevation = clippedElevation;
         computeXY(sourceLinkNotification);
     }
 }
@@ -65,7 +60,6 @@ void Source::setDistance(float const distance, SourceLinkNotification const sour
 
     if (distance != mDistance) {
         mDistance = distance;
-        mDistanceNoClip = distance;
         computeXY(sourceLinkNotification);
     }
 }
@@ -157,10 +151,8 @@ void Source::computeAzimuthElevation(SourceLinkNotification const sourceLinkNoti
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;
-        mElevationNoClip = elevation;
     } else { // azimuth - distance
         mDistance = radius;
-        mDistanceNoClip = radius;
     }
 
     mGuiChangeBroadcaster.sendChangeMessage();

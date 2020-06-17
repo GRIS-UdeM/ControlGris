@@ -60,9 +60,7 @@ private:
 
     Radians mAzimuth{};
     Radians mElevation{};
-    Radians mElevationNoClip{};
     float mDistance{ 1.0f };
-    float mDistanceNoClip{ 1.0f };
 
     Point<float> mPosition{};
 
@@ -70,11 +68,6 @@ private:
     Normalized mElevationSpan{};
 
     Colour mColour{ Colours::black };
-
-    std::optional<Radians> mFixedAzimuth{};
-    std::optional<Radians> mFixedElevation{};
-    std::optional<float> mFixedDistance{};
-    std::optional<Point<float>> mFixedPosition{};
 
 public:
     //==============================================================================
@@ -94,10 +87,12 @@ public:
     void setAzimuth(Normalized azimuth, SourceLinkNotification sourceLinkNotification);
     Radians getAzimuth() const { return mAzimuth; }
     Normalized getNormalizedAzimuth() const;
+
     void setElevation(Radians elevation, SourceLinkNotification sourceLinkNotification);
     void setElevation(Normalized elevation, SourceLinkNotification sourceLinkNotification);
     Radians getElevation() const { return mElevation; }
     Normalized getNormalizedElevation() const;
+
     void setDistance(float distance, SourceLinkNotification sourceLinkNotification);
     float getDistance() const { return mDistance; }
     void setAzimuthSpan(Normalized azimuthSpan);
