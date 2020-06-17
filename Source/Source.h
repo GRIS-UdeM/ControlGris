@@ -28,11 +28,31 @@
 
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
+enum class SourceLinkNotification { notify, silent };
 //==============================================================================
-class Source : public juce::ChangeBroadcaster
+class Source
 {
+public:
+    //==============================================================================
+    class SourceChangeBroadcaster : public juce::ChangeBroadcaster
+    {
+    private:
+        Source & mSource;
+
+    public:
+        SourceChangeBroadcaster(Source & source) noexcept : mSource(source) {}
+        ~SourceChangeBroadcaster() noexcept = default;
+
+        Source & getSource() { return mSource; }
+        Source const & getSource() const { return mSource; }
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceChangeBroadcaster);
+    };
 private:
     //==============================================================================
+    SourceChangeBroadcaster mGuiChangeBroadcaster{ *this };
+    SourceChangeBroadcaster mSourceLinkChangeBroadcaster{ *this };
     SourceIndex mIndex{};
     SourceId mId{ 1 };
     SpatMode mSpatMode{ SpatMode::cube };
@@ -69,61 +89,47 @@ public:
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     SpatMode getSpatMode() const { return mSpatMode; }
 
-    void setAzimuth(Radians azimuth);
-    void setAzimuth(Normalized azimuth);
+    void setAzimuth(Radians azimuth, SourceLinkNotification sourceLinkNotification);
+    void setAzimuth(Normalized azimuth, SourceLinkNotification sourceLinkNotification);
     Radians getAzimuth() const { return mAzimuth; }
     Normalized getNormalizedAzimuth() const;
-    void setElevation(Radians elevation);
-    void setElevation(Normalized elevation);
-    void setElevationNoClip(Radians elevation);
+    void setElevation(Radians elevation, SourceLinkNotification sourceLinkNotification);
+    void setElevation(Normalized elevation, SourceLinkNotification sourceLinkNotification);
     Radians getElevation() const { return mElevation; }
     Normalized getNormalizedElevation() const;
-    void setDistance(float distance);
-    void setDistanceNoClip(float distance);
+    void setDistance(float distance, SourceLinkNotification sourceLinkNotification);
     float getDistance() const { return mDistance; }
     void setAzimuthSpan(Normalized azimuthSpan);
     Normalized getAzimuthSpan() const { return mAzimuthSpan; }
     void setElevationSpan(Normalized elevationSpan);
     Normalized getElevationSpan() const { return mElevationSpan; }
 
-    void setCoordinates(Radians azimuth, Radians elevation, float distance);
+    void setCoordinates(Radians azimuth,
+                        Radians elevation,
+                        float distance,
+                        SourceLinkNotification sourceLinkNotification);
     bool isPrimarySource() const { return mIndex == SourceIndex{ 0 }; }
 
-    void setX(float x);
+    void setX(float x, SourceLinkNotification sourceLinkNotification);
     float getX() const { return mPosition.getX(); }
-    void setY(float y);
+    void setY(float y, SourceLinkNotification sourceLinkNotification);
     float getY() const { return mPosition.getY(); }
     Point<float> const & getPos() const { return mPosition; }
-    void setPos(Point<float> const & pos);
+    void setPos(Point<float> const & pos, SourceLinkNotification sourceLinkNotification);
 
-    void computeXY();
-    void computeAzimuthElevation();
-
-    void setFixedPosition(Point<float> const & position);
-    void setFixedElevation(Radians fixedElevation);
-
-    void setSymmetricX(Point<float> const & position);
-    void setSymmetricY(Point<float> const & position);
-
-    void fixSourcePosition(bool shouldBeFixed);
-    void fixSourcePositionElevation(bool shouldBeFixed);
-
-    float getDeltaX() const;
-    float getDeltaY() const;
-    Point<float> getDeltaPosition() const;
-    Radians getDeltaAzimuth() const;
-    Radians getDeltaElevation() const;
-    float getDeltaDistance() const;
-
-    void setCoordinatesFromFixedSource(Radians deltaAzimuth, Radians deltaElevation, float deltaDistance);
-    void setXYCoordinatesFromFixedSource(Point<float> const & deltaPosition);
-    void setElevationFromFixedSource(Radians const deltaElevation)
-    {
-        setElevation(mFixedElevation.value() + deltaElevation);
-    }
+    void computeXY(SourceLinkNotification sourceLinkNotification);
+    void computeAzimuthElevation(SourceLinkNotification sourceLinkNotification);
 
     void setColorFromIndex(int numTotalSources);
     Colour getColour() const { return mColour; }
+
+    void addGuiChangeListener(ChangeListener * listener) { mGuiChangeBroadcaster.addChangeListener(listener); }
+    void removeGuiChangeListener(ChangeListener * listener) { mGuiChangeBroadcaster.removeChangeListener(listener); }
+    void addSourceLinkListener(ChangeListener * listener) { mSourceLinkChangeBroadcaster.addChangeListener(listener); }
+    void removeSourceLinkListener(ChangeListener * listener)
+    {
+        mSourceLinkChangeBroadcaster.removeChangeListener(listener);
+    }
 
     static Point<float> getPositionFromAngle(Radians const angle, float radius);
     static Radians getAngleFromPosition(Point<float> const & position);

@@ -19,13 +19,13 @@ PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldC
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
-    source.addChangeListener(this);
+    source.addGuiChangeListener(this);
     this->updatePositionInParent();
 }
 
 PositionSourceComponent::~PositionSourceComponent()
 {
-    mSource.removeChangeListener(this);
+    mSource.removeGuiChangeListener(this);
 }
 
 void PositionSourceComponent::updatePositionInParent()
@@ -54,7 +54,7 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-    mSource.setPos(newPosition);
+    mSource.setPos(newPosition, SourceLinkNotification::notify);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }

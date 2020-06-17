@@ -19,13 +19,13 @@ ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fie
     , mFieldComponent(fieldComponent)
     , mSource(source)
 {
-    source.addChangeListener(this);
+    source.addGuiChangeListener(this);
     this->updatePositionInParent();
 }
 
 ElevationSourceComponent::~ElevationSourceComponent() noexcept
 {
-    mSource.removeChangeListener(this);
+    mSource.removeGuiChangeListener(this);
 }
 
 void ElevationSourceComponent::updatePositionInParent()
@@ -47,7 +47,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
 
-    mSource.setElevation(newElevation);
+    mSource.setElevation(newElevation, SourceLinkNotification::notify);
 
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }

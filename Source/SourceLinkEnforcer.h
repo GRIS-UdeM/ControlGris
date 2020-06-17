@@ -19,7 +19,7 @@
 
 using AnySourceLink = std::variant<PositionSourceLink, ElevationSourceLink>;
 
-class SourceLinkEnforcer
+class SourceLinkEnforcer : juce::ChangeListener
 {
 private:
     struct SourceSnapshot {
@@ -45,7 +45,7 @@ private:
 
 public:
     SourceLinkEnforcer(Sources & sources, AnySourceLink const sourceLink = PositionSourceLink::independent) noexcept;
-    ~SourceLinkEnforcer() noexcept = default;
+    ~SourceLinkEnforcer() noexcept;
 
     void setSourceLink(AnySourceLink sourceLink);
 
@@ -55,6 +55,8 @@ public:
 private:
     void applyCircular();
     void snapAll();
+
+    void changeListenerCallback(ChangeBroadcaster * source) final;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceLinkEnforcer);
 };

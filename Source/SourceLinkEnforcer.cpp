@@ -15,6 +15,16 @@ SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, AnySourceLink const so
     , mSourceLink(sourceLink)
 {
     snapAll();
+    for (auto & source : sources) {
+        source.addSourceLinkListener(this);
+    }
+}
+
+SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
+{
+    for (auto & source : mSources) {
+        source.removeSourceLinkListener(this);
+    }
 }
 
 void SourceLinkEnforcer::setSourceLink(AnySourceLink sourceLink)
@@ -35,22 +45,12 @@ void SourceLinkEnforcer::primarySourceMoved()
             applyCircular();
             break;
         case PositionSourceLink::circularFixedRadius:
-            //
-            break;
         case PositionSourceLink::circularFixedAngle:
-            //
-            break;
         case PositionSourceLink::circularFullyFixed:
-            //
-            break;
         case PositionSourceLink::linkSymmetricX:
-            //
-            break;
         case PositionSourceLink::linkSymmetricY:
-            //
-            break;
         case PositionSourceLink::deltaLock:
-            //
+            jassertfalse;
             break;
         case PositionSourceLink::undefined:
         default:
@@ -71,15 +71,16 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
 void SourceLinkEnforcer::applyCircular()
 {
+    auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
     auto const rotation{ mSources.getPrimarySource().getAzimuth() - mPrimarySourceSnapshot.azimuth };
     auto const primarySourceInitialRadius{ mPrimarySourceSnapshot.position.getDistanceFromOrigin() };
     auto const radiusRatio{ primarySourceInitialRadius == 0.0f
-                                ? std::nextafter(0.0f, 1.0f)
+                                ? notQuiteZero
                                 : mSources.getPrimarySource().getPos().getDistanceFromOrigin()
                                       / primarySourceInitialRadius };
     for (auto & snapShot : mSecondarySourcesSnapshots) {
         auto const newPosition{ snapShot.position.rotatedAboutOrigin(rotation.getAsRadians()) * radiusRatio };
-        snapShot.source->setPos(newPosition);
+        snapShot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 }
 
@@ -92,5 +93,19 @@ void SourceLinkEnforcer::snapAll()
         newItem.source = &secondarySource;
         newItem.snapShot();
         mSecondarySourcesSnapshots.add(newItem);
+    }
+}
+
+void SourceLinkEnforcer::changeListenerCallback(ChangeBroadcaster * broadcaster)
+{
+    auto sourceChangeBroadcaster{ dynamic_cast<Source::SourceChangeBroadcaster *>(broadcaster) };
+    jassert(sourceChangeBroadcaster != nullptr);
+    if (sourceChangeBroadcaster != nullptr) {
+        auto & source{ sourceChangeBroadcaster->getSource() };
+        if (source.isPrimarySource()) {
+            primarySourceMoved();
+        } else {
+            secondarySourceMoved(source.getIndex());
+        }
     }
 }

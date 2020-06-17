@@ -100,7 +100,7 @@ public:
     void setElevationDampeningEnabled(bool state);
     void setPositionDampeningCycles(int value);
     void setElevationDampeningCycles(int value);
-    void setPostionSourceLink(PositionSourceLink value);
+    void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);

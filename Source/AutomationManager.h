@@ -113,8 +113,6 @@ public:
 
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
 
-    void fixPrincipalSourcePosition();
-
     void setPrincipalSourceAndPlaybackPosition(Point<float> const & pos);
 
     void addListener(Listener * l) { mListeners.add(l); }

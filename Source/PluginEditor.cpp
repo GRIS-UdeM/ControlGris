@@ -77,7 +77,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mTrajectoryBox.setLookAndFeel(&mGrisLookAndFeel);
     mTrajectoryBox.addListener(this);
     addAndMakeVisible(mTrajectoryBox);
-    mTrajectoryBox.setPostionSourceLink(mPositionAutomationManager.getSourceLink());
+    mTrajectoryBox.setPositionSourceLink(mPositionAutomationManager.getSourceLink());
     mTrajectoryBox.setElevationSourceLink(
         static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
 
@@ -315,7 +315,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
                                     mProcessor.getOscFormat());
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value)
+void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
 {
     auto numOfSources = mProcessor.getNumberOfSources();
     Degrees const azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
@@ -330,97 +330,94 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
     auto const distance{ isLBAP ? 0.7f : 1.0f };
 
-    switch (value) {
-    case SourcePlacement::leftAlternate:
+    switch (sourcePlacement) {
+    case SourcePlacement::leftAlternate: {
         for (int i{}; i < numOfSources; ++i) {
-            if (numOfSources <= 2)
-                mProcessor.getSources()[i].setCoordinates(-azims2[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else if (numOfSources <= 4)
-                mProcessor.getSources()[i].setCoordinates(-azims4[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else if (numOfSources <= 6)
-                mProcessor.getSources()[i].setCoordinates(-azims6[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else
-                mProcessor.getSources()[i].setCoordinates(-azims8[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            if (numOfSources <= 2) {
+                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
+
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
         }
         break;
-    case SourcePlacement::rightAlternate:
+    }
+    case SourcePlacement::rightAlternate: {
         for (int i{}; i < numOfSources; ++i) {
-            if (numOfSources <= 2)
-                mProcessor.getSources()[i].setCoordinates(azims2[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else if (numOfSources <= 4)
-                mProcessor.getSources()[i].setCoordinates(azims4[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else if (numOfSources <= 6)
-                mProcessor.getSources()[i].setCoordinates(azims6[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
-            else
-                mProcessor.getSources()[i].setCoordinates(azims8[i],
-                                                          isLBAP ? mProcessor.getSources()[i].getElevation()
-                                                                 : Radians{},
-                                                          distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            if (numOfSources <= 2) {
+                source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
         }
         break;
-    case SourcePlacement::leftClockwise:
+    }
+    case SourcePlacement::leftClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * -i + offset,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::leftCounterClockwise:
+    }
+    case SourcePlacement::leftCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * i + offset,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::rightClockwise:
+    }
+    case SourcePlacement::rightClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * -i - offset,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::rightCounterClockwise:
+    }
+    case SourcePlacement::rightCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * i - offset,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::topClockwise:
+    }
+    case SourcePlacement::topClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * -i,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::topCounterClockwise:
+    }
+    case SourcePlacement::topCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            mProcessor.getSources()[i].setCoordinates(Degrees{ 360.0f } / numOfSources * i,
-                                                      isLBAP ? mProcessor.getSources()[i].getElevation() : Radians{},
-                                                      distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
+            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
+    }
     case SourcePlacement::undefined:
         jassertfalse;
     }
@@ -439,12 +436,12 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
                                     mSelectedSource,
                                     mProcessor.getOscFormat());
 
-    for (int i{}; i < numOfSources; ++i) {
-        mProcessor.getSources()[i].fixSourcePosition(true);
-    }
+    //    for (int i{}; i < numOfSources; ++i) {
+    //        mProcessor.getSources()[i].fixSourcePosition(true);
+    //    }
 
     mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-                                                 mProcessor.getSources()[0].getPos());
+                                                 mProcessor.getSources().getPrimarySource().getPos());
 
     repaint();
 }
@@ -453,19 +450,19 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
                                                                Radians angle,
                                                                float rayLen)
 {
-    if (mProcessor.getOscFormat() == SpatMode::cube) {
-        auto const currentElevation{ mProcessor.getSources()[sourceIndex].getElevation() };
-        mProcessor.getSources()[sourceIndex].setCoordinates(angle, currentElevation, rayLen);
+    auto & source{ mProcessor.getSources()[sourceIndex] };
+    if (mProcessor.getOscFormat() == SpatMode::dome) {
+        auto const elevation{ Degrees{ 90.0f } - (Degrees{ 90.0f } * rayLen) };
+        source.setCoordinates(angle, elevation, 1.0f, SourceLinkNotification::notify);
     } else {
-        mProcessor.getSources()[sourceIndex].setCoordinates(angle,
-                                                            Degrees{ 90.0f } - (Degrees{ 90.0f } * rayLen),
-                                                            1.0f);
+        auto const currentElevation{ source.getElevation() };
+        source.setCoordinates(angle, currentElevation, rayLen, SourceLinkNotification::notify);
     }
 
-    mProcessor.getSources()[sourceIndex].fixSourcePosition(true);
+    //    source.fixSourcePosition(true);
 
     mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-                                                 mProcessor.getSources()[0].getPos());
+                                                 mProcessor.getSources().getPrimarySource().getPos());
 
     repaint();
 }
@@ -475,11 +472,12 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
 void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParameter const sourceParameter,
                                                                     double const value)
 {
-    mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, value);
+    mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, static_cast<float>(value));
 
     mPositionField.repaint();
-    if (mProcessor.getOscFormat() == SpatMode::cube)
+    if (mProcessor.getOscFormat() == SpatMode::cube) {
         mElevationField.repaint();
+    }
 }
 
 void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
@@ -497,7 +495,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value)
 {
-    mProcessor.setPostionSourceLink(value);
+    mProcessor.setPositionSourceLink(value);
     mPositionField.repaint();
 }
 
@@ -627,14 +625,14 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
 {
-    if (whichField == 0) {
-        mPositionAutomationManager.fixPrincipalSourcePosition();
-        mProcessor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
-    } else {
-        mElevationAutomationManager.fixPrincipalSourcePosition();
-        mProcessor.onElevationSourceLinkChanged(
-            static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
-    }
+    //    if (whichField == 0) {
+    //        mPositionAutomationManager.fixPrincipalSourcePosition();
+    //        mProcessor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
+    //    } else {
+    //        mElevationAutomationManager.fixPrincipalSourcePosition();
+    //        mProcessor.onElevationSourceLinkChanged(
+    //            static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
+    //    }
 }
 
 // PositionPresetComponent::Listener callback.

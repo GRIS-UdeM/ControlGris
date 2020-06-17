@@ -195,7 +195,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 
     if (mActivateState) {
-        mPrincipalSource.setPos(mCurrentTrajectoryPoint);
+        mPrincipalSource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -229,7 +229,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 
 void AutomationManager::setPrincipalSourceAndPlaybackPosition(Point<float> const & pos)
 {
-    mPrincipalSource.setPos(pos);
+    mPrincipalSource.setPos(pos, SourceLinkNotification::notify);
     setPlaybackPosition(pos);
 }
 
@@ -247,20 +247,6 @@ void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
     }
 }
 
-void AutomationManager::fixPrincipalSourcePosition()
-{
-    bool shouldBeFixed{};
-    auto positionAutomationManager{ dynamic_cast<PositionAutomationManager *>(this) };
-    if (positionAutomationManager != nullptr) {
-        shouldBeFixed = positionAutomationManager->getSourceLink() != PositionSourceLink::independent;
-    } else {
-        auto elevationAutomationManager{ dynamic_cast<ElevationAutomationManager *>(this) };
-        jassert(elevationAutomationManager != nullptr);
-        shouldBeFixed = elevationAutomationManager->getSourceLink() != ElevationSourceLink::independent;
-    }
-    mPrincipalSource.fixSourcePosition(shouldBeFixed);
-}
-
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
 {
     mTrajectoryType = type;
@@ -269,7 +255,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory.reset();
     }
-    mPrincipalSource.setPos(startPosition);
+    mPrincipalSource.setPos(startPosition, SourceLinkNotification::notify);
 }
 
 void AutomationManager::addRecordingPoint(Point<float> const & pos)

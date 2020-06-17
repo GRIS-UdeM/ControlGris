@@ -281,7 +281,7 @@ void TrajectoryBoxComponent::setDeviationPerCycle(float value)
     mDeviationEditor.setText(String(value));
 }
 
-void TrajectoryBoxComponent::setPostionSourceLink(PositionSourceLink value)
+void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink value)
 {
     mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }

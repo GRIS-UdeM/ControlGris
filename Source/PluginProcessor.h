@@ -25,6 +25,7 @@
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
 #include "Source.h"
+#include "SourceLinkEnforcer.h"
 
 //==============================================================================
 class ControlGrisAudioProcessor final
@@ -80,6 +81,7 @@ private:
     XmlElement * mCurrentFixPosition{ nullptr };
 
     Sources mSources{};
+    SourceLinkEnforcer mSourceLinkEnforcer{ mSources };
 
 public:
     //==============================================================================
@@ -92,7 +94,7 @@ public:
     ~ControlGrisAudioProcessor() final;
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) final;
-    void releaseResources() final;
+    void releaseResources() final {}
 
 #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout & layouts) const final;
@@ -161,7 +163,7 @@ public:
     void oscMessageReceived(const OSCMessage & message) final;
     void oscBundleReceived(const OSCBundle & bundle) final;
 
-    bool createOscOutputConnection(String oscAddress, int oscPort);
+    bool createOscOutputConnection(String const & oscAddress, int oscPort);
     bool disconnectOSCOutput(String oscAddress, int oscPort);
     bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
@@ -174,7 +176,7 @@ public:
     void setPluginState();
 
     void sourcePositionChanged(SourceIndex sourceIndex, int whichField);
-    void setSourceParameterValue(SourceIndex sourceIndex, SourceParameter sourceParameter, double value);
+    void setSourceParameterValue(SourceIndex sourceIndex, SourceParameter sourceParameter, float value);
 
     void initialize();
 
@@ -186,13 +188,8 @@ public:
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
-    void setPostionSourceLink(PositionSourceLink value);
+    void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
-    void onSourceLinkChanged(PositionSourceLink value);
-    void onElevationSourceLinkChanged(ElevationSourceLink value);
-
-    void linkPositionSourcePositions();
-    void linkElevationSourcePositions();
 
     // These are called after a source has changed from mouse movement in a field (or from an OSC message).
     void validatePositionSourcePositions();
@@ -202,7 +199,7 @@ public:
 
     void addNewFixedPosition(int id);
     bool recallFixedPosition(int id);
-    void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
+    static void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
     XmlElement * getFixedPositionData() { return &mFixPositionData; } // retrieve all data.
     XmlElement const * getFixedPositionData() const { return &mFixPositionData; }
     void deleteFixedPosition(int id);
