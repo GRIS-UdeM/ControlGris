@@ -14,10 +14,7 @@ SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, AnySourceLink const so
     : mSources(sources)
     , mSourceLink(sourceLink)
 {
-    snapAll();
-    for (auto & source : sources) {
-        source.addSourceLinkListener(this);
-    }
+    reset();
 }
 
 SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
@@ -33,6 +30,11 @@ void SourceLinkEnforcer::setSourceLink(AnySourceLink sourceLink)
         mSourceLink = sourceLink;
         snapAll();
     }
+}
+
+void SourceLinkEnforcer::numberOfSourcesChanged()
+{
+    reset();
 }
 
 void SourceLinkEnforcer::primarySourceMoved()
@@ -109,6 +111,17 @@ void SourceLinkEnforcer::snapAll()
         newItem.source = &secondarySource;
         newItem.takeSnapshot();
         mSecondarySourcesSnapshots.add(newItem);
+    }
+}
+
+void SourceLinkEnforcer::reset()
+{
+    for (auto & source : mSources) {
+        source.removeSourceLinkListener(this);
+    }
+    snapAll();
+    for (auto & source : mSources) {
+        source.addSourceLinkListener(this);
     }
 }
 

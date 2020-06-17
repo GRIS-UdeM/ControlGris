@@ -183,7 +183,13 @@ Point<float> Source::getPositionFromAngle(Radians const angle, float const radiu
 
 Radians Source::getAngleFromPosition(Point<float> const & position)
 {
-    Radians const angle{ std::atan2(position.getY(), position.getX()) };
+    auto const getAngle = [](Point<float> const & position) {
+        if (position.getX() == 0.0f && position.getY() == 0.0f) {
+            return 0.0f;
+        }
+        return std::atan2(position.getY(), position.getX());
+    };
+    Radians const angle{ getAngle(position) };
     auto const rotatedAngle{ angle + halfPi };
     return rotatedAngle;
 }

@@ -227,7 +227,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     if (parameterID.compare("sourceLink") == 0) {
         auto const val = static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1);
         if (val != mPositionAutomationManager.getSourceLink()) {
-            if (mNumOfSources != 2
+            if (mSources.size() != 2
                 && (val == PositionSourceLink::linkSymmetricX || val == PositionSourceLink::linkSymmetricY))
                 return;
             mPositionAutomationManager.setSourceLink(val);
@@ -282,7 +282,7 @@ bool compareLessThan(const Sorter & a, const Sorter & b)
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
     if (newSourceLink != mPositionAutomationManager.getSourceLink()) {
-        if (mNumOfSources != 2
+        if (mSources.size() != 2
             && (newSourceLink == PositionSourceLink::linkSymmetricX
                 || newSourceLink == PositionSourceLink::linkSymmetricY)) {
             // TODO: the symmetric links should not be available when only 2 sources are present
@@ -364,12 +364,14 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
 
 void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
 {
-    mNumOfSources = numOfSources;
-    mParameters.state.setProperty("numberOfSources", mNumOfSources, nullptr);
+    mSources.setSize(numOfSources);
+    mParameters.state.setProperty("numberOfSources", mSources.size(), nullptr);
 
     for (auto & source : mSources) {
         source.setColorFromIndex(numOfSources);
     }
+
+    mSourceLinkEnforcer.numberOfSourcesChanged();
 
     if (propagate) {
         sendOscMessage();
@@ -919,7 +921,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
     if (whichField == 1 && getOscFormat() == SpatMode::cube) {
         if (sourceIndex != SourceIndex{ 0 }) {
             auto const sourceElevation{ mSources[sourceIndex].getElevation() };
-            auto const offset{ Degrees{ 60.0f } / mNumOfSources * sourceIndex.toInt() };
+            auto const offset{ Degrees{ 60.0f } / mSources.size() * sourceIndex.toInt() };
         }
         validateElevationSourcePositions();
     }

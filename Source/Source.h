@@ -183,7 +183,7 @@ public:
     int size() const { return mSize; }
     void setSize(int const size)
     {
-        jassert(size >= 1 && size < MAX_NUMBER_OF_SOURCES);
+        jassert(size >= 1 && size <= MAX_NUMBER_OF_SOURCES);
         mSize = size;
     }
 

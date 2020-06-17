@@ -146,7 +146,7 @@ void ControlGrisAudioProcessorEditor::setPluginState()
     settingsBoxOscPortNumberChanged(mProcessor.getOscPortNumber());
     settingsBoxOscActivated(mProcessor.getOscConnected());
     settingsBoxFirstSourceIdChanged(mProcessor.getFirstSourceId());
-    settingsBoxNumberOfSourcesChanged(mProcessor.getNumberOfSources());
+    settingsBoxNumberOfSourcesChanged(mProcessor.getSources().size());
 
     mInterfaceBox.setOscOutputPluginId(mAudioProcessorValueTreeState.state.getProperty("oscOutputPluginId", 1));
     mInterfaceBox.setOscReceiveToggleState(mAudioProcessorValueTreeState.state.getProperty("oscInputConnected", false));
@@ -262,8 +262,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state)
 void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources)
 {
     bool initSourcePlacement = false;
-    if (mProcessor.getNumberOfSources() != numOfSources || mIsInsideSetPluginState) {
-        if (mProcessor.getNumberOfSources() != numOfSources) {
+    if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
+        if (mProcessor.getSources().size() != numOfSources) {
             initSourcePlacement = true;
         }
         if (numOfSources != 2
@@ -292,10 +292,10 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(SourceId c
     mProcessor.setFirstSourceId(firstSourceId);
     mSettingsBox.setFirstSourceId(firstSourceId);
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-    mSourceBox.setNumberOfSources(mProcessor.getNumberOfSources(), firstSourceId);
+    mSourceBox.setNumberOfSources(mProcessor.getSources().size(), firstSourceId);
 
-    mPositionField.rebuildSourceComponents(mProcessor.getNumberOfSources());
-    mElevationField.rebuildSourceComponents(mProcessor.getNumberOfSources());
+    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
     if (mProcessor.getOscFormat() == SpatMode::cube)
         mElevationField.repaint();
 }
@@ -317,7 +317,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
 
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
 {
-    auto numOfSources = mProcessor.getNumberOfSources();
+    auto numOfSources = mProcessor.getSources().size();
     Degrees const azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
     Degrees const azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
     Degrees const azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },

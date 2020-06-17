@@ -17,7 +17,12 @@ class Radians
 
 public:
     constexpr Radians() noexcept = default;
-    constexpr explicit Radians(float radians) noexcept : mValue(radians) {}
+    constexpr explicit Radians(float value) noexcept : mValue(value)
+    {
+        if (std::isnan(value)) {
+            jassertfalse;
+        }
+    }
     ~Radians() noexcept = default;
 
     constexpr Radians(Radians const & other) = default;
@@ -87,8 +92,13 @@ class Degrees
 
 public:
     constexpr Degrees() noexcept = default;
-    constexpr explicit Degrees(float const value) noexcept : mValue(value) {}
-    constexpr Degrees(Radians const radians) noexcept : mValue(radians.getAsDegrees()) {}
+    constexpr explicit Degrees(float const value) noexcept : mValue(value)
+    {
+        if (std::isnan(value)) {
+            jassertfalse;
+        }
+    }
+    constexpr Degrees(Radians const radians) noexcept : Degrees(radians.getAsDegrees()) {}
     ~Degrees() noexcept = default;
 
     constexpr Degrees(Degrees const & other) = default;

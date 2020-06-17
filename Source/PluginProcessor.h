@@ -42,7 +42,6 @@ private:
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
-    int mNumOfSources{ 2 };
     SourceIndex mSelectedSource{};
     int mCurrentOSCPort{ 18032 };
     int mLastConnectedOSCPort{ -1 };
@@ -145,7 +144,6 @@ public:
     void setSelectedSource(SourceIndex index);
 
     void setNumberOfSources(int numOfSources, bool propagate = true);
-    int getNumberOfSources() const { return mNumOfSources; }
 
     auto & getSources() { return mSources; }
     auto const & getSources() const { return mSources; }

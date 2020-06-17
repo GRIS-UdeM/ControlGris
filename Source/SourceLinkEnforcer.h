@@ -51,9 +51,11 @@ public:
 
     void primarySourceMoved();
     void secondarySourceMoved(SourceIndex sourceIndex);
+    void numberOfSourcesChanged();
 
 private:
     void snapAll();
+    void reset();
 
     void changeListenerCallback(ChangeBroadcaster * source) final;
 
@@ -104,10 +106,11 @@ public:
         auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
         mRotation = primarySourceSnapshot.source->getAzimuth() - primarySourceSnapshot.azimuth;
         auto const primarySourceInitialRadius{ primarySourceSnapshot.position.getDistanceFromOrigin() };
-        mRadiusRatio
-            = primarySourceInitialRadius == 0.0f
-                  ? notQuiteZero
-                  : primarySourceSnapshot.source->getPos().getDistanceFromOrigin() / primarySourceInitialRadius;
+        auto const radius{ primarySourceInitialRadius == 0.0f
+                               ? notQuiteZero
+                               : primarySourceSnapshot.source->getPos().getDistanceFromOrigin()
+                                     / primarySourceInitialRadius };
+        mRadiusRatio = radius == 0.0f ? notQuiteZero : radius;
     }
 
     void apply_impl(SourceSnapshot & snapshot) const
