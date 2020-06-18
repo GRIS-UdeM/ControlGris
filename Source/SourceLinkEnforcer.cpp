@@ -171,6 +171,35 @@ private:
     }
 };
 
+class CircularFullyFixedStrategy : public LinkStrategy
+{
+    Radians mDeviationPerSource;
+    Radians mPrimaySourceAngle;
+    float mRadius;
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int const numberOfSources) final
+    {
+        mDeviationPerSource = Degrees{ 360.0f } / numberOfSources;
+        auto const primarySourcePosition{ primarySourceSnapshot.source->getPos() };
+        mPrimaySourceAngle = Radians{ std::atan2(primarySourcePosition.getY(), primarySourcePosition.getX()) };
+        mRadius = primarySourcePosition.getDistanceFromOrigin();
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const secondaryIndex{ snapshot.source->getIndex() };
+        auto const angle{ mPrimaySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
+        Point<float> newPosition{ std::cos(angle.getAsRadians()) * mRadius, std::sin(angle.getAsRadians()) * mRadius };
+
+        snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
+    }
+
+    SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
+    {
+        return snapshot;
+    }
+};
+
 std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
 {
     if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
@@ -184,6 +213,7 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         case PositionSourceLink::circularFixedAngle:
             return std::make_unique<CircularFixedAngleStrategy>();
         case PositionSourceLink::circularFullyFixed:
+            return std::make_unique<CircularFullyFixedStrategy>();
         case PositionSourceLink::linkSymmetricX:
         case PositionSourceLink::linkSymmetricY:
         case PositionSourceLink::deltaLock:
