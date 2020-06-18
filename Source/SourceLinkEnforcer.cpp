@@ -24,9 +24,9 @@ public:
     LinkStrategy & operator=(LinkStrategy const &) = default;
     LinkStrategy & operator=(LinkStrategy &&) = default;
 
-    void calculateParams(SourceSnapshot const & primarySourceSnapshot)
+    void calculateParams(SourceSnapshot const & primarySourceSnapshot, int const numberOfSources)
     {
-        calculateParams_impl(primarySourceSnapshot);
+        calculateParams_impl(primarySourceSnapshot, numberOfSources);
         mInitialized = true;
     }
 
@@ -50,7 +50,7 @@ public:
     }
 
 private:
-    virtual void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot) = 0;
+    virtual void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int numberOfSources) = 0;
     virtual void apply_impl(SourceSnapshot & snapshot) const = 0;
     virtual SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const = 0;
 };
@@ -61,7 +61,8 @@ private:
     Radians mRotation;
     float mRadiusRatio;
 
-    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot) final
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
     {
         auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
         mRotation = primarySourceSnapshot.source->getAzimuth() - primarySourceSnapshot.azimuth;
@@ -96,7 +97,8 @@ private:
     Radians mRotation;
     float mRadius;
 
-    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot) final
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
     {
         mRotation = primarySourceSnapshot.source->getAzimuth() - primarySourceSnapshot.azimuth;
         mRadius = primarySourceSnapshot.source->getPos().getDistanceFromOrigin();
@@ -119,11 +121,95 @@ private:
         Radians const sourceAngle{ std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
         auto const inversedAngle{ (sourceAngle - mRotation).getAsRadians() };
         Point<float> const newPosition{ std::cos(inversedAngle) * mRadius, std::sin(inversedAngle) * mRadius };
+
+        result.position = newPosition;
+        return result;
+    }
+};
+
+class CircularFixedAngleStrategy : public LinkStrategy
+{
+private:
+    Radians mDeviationPerSource;
+    Radians mPrimaySourceAngle;
+    float mRadiusRatio;
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int const numberOfSources) final
+    {
+        auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
+        auto const initialRadius{ std::max(primarySourceSnapshot.position.getDistanceFromOrigin(), notQuiteZero) };
+        mRadiusRatio
+            = std::max(primarySourceSnapshot.source->getPos().getDistanceFromOrigin() / initialRadius, notQuiteZero);
+
+        auto const sourcePosition{ primarySourceSnapshot.source->getPos() };
+        mPrimaySourceAngle = Radians{ std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
+        mDeviationPerSource = Degrees{ 360 } / numberOfSources;
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const sourceIndex{ snapshot.source->getIndex() };
+        auto const newAngle{ mPrimaySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
+        auto const initialRadius{ snapshot.position.getDistanceFromOrigin() };
+        auto const newRadius{ initialRadius * mRadiusRatio };
+        Point<float> const newPosition{ std::cos(newAngle.getAsRadians()) * newRadius,
+                                        std::sin(newAngle.getAsRadians()) * newRadius };
+
+        snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
+    }
+
+    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        SourceSnapshot result{ snapshot };
+
+        auto const newRadius{ snapshot.source->getPos().getDistanceFromOrigin() / mRadiusRatio };
+        Point<float> const newPosition{ newRadius, 0.0f }; // we only care about changing the radius
+
         result.position = newPosition;
 
         return result;
     }
 };
+
+std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
+{
+    if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
+        switch (std::get<PositionSourceLink>(sourceLink)) {
+        case PositionSourceLink::independent:
+            return nullptr;
+        case PositionSourceLink::circular:
+            return std::make_unique<CircularStrategy>();
+        case PositionSourceLink::circularFixedRadius:
+            return std::make_unique<CircularFixedRadiusStrategy>();
+        case PositionSourceLink::circularFixedAngle:
+            return std::make_unique<CircularFixedAngleStrategy>();
+        case PositionSourceLink::circularFullyFixed:
+        case PositionSourceLink::linkSymmetricX:
+        case PositionSourceLink::linkSymmetricY:
+        case PositionSourceLink::deltaLock:
+            return nullptr;
+        case PositionSourceLink::undefined:
+        default:
+            jassertfalse;
+        }
+    } else {
+        jassert(std::holds_alternative<ElevationSourceLink>(sourceLink));
+        switch (std::get<ElevationSourceLink>(sourceLink)) {
+        case ElevationSourceLink::independent:
+            return nullptr;
+        case ElevationSourceLink::fixedElevation:
+        case ElevationSourceLink::linearMin:
+        case ElevationSourceLink::linearMax:
+        case ElevationSourceLink::deltaLock:
+            return nullptr;
+        case ElevationSourceLink::undefined:
+        default:
+            jassertfalse;
+        }
+    }
+    jassertfalse;
+    return nullptr;
+}
 
 SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, AnySourceLink const sourceLink) noexcept
     : mSources(sources)
@@ -154,37 +240,10 @@ void SourceLinkEnforcer::numberOfSourcesChanged()
 
 void SourceLinkEnforcer::primarySourceMoved()
 {
-    std::unique_ptr<LinkStrategy> strategy{};
-
-    if (std::holds_alternative<PositionSourceLink>(mSourceLink)) {
-        switch (std::get<PositionSourceLink>(mSourceLink)) {
-        case PositionSourceLink::independent:
-            break;
-        case PositionSourceLink::circular: {
-            strategy.reset(new CircularStrategy{});
-            break;
-        }
-        case PositionSourceLink::circularFixedRadius: {
-            strategy.reset(new CircularFixedRadiusStrategy{});
-            break;
-        }
-        case PositionSourceLink::circularFixedAngle:
-        case PositionSourceLink::circularFullyFixed:
-        case PositionSourceLink::linkSymmetricX:
-        case PositionSourceLink::linkSymmetricY:
-        case PositionSourceLink::deltaLock:
-            jassertfalse;
-            break;
-        case PositionSourceLink::undefined:
-        default:
-            jassertfalse;
-        }
-    } else {
-        jassert(std::holds_alternative<ElevationSourceLink>(mSourceLink));
-    }
+    auto strategy{ getLinkStrategy(mSourceLink) };
 
     if (strategy != nullptr) {
-        strategy->calculateParams(mPrimarySourceSnapshot);
+        strategy->calculateParams(mPrimarySourceSnapshot, mSources.size());
         strategy->apply(mSecondarySourcesSnapshots);
     }
 }
@@ -194,38 +253,10 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
     auto const secondaryIndex{ sourceIndex.toInt() - 1 };
     auto & snapshot{ mSecondarySourcesSnapshots.getReference(secondaryIndex) };
-
-    std::unique_ptr<LinkStrategy> strategy{};
-
-    if (std::holds_alternative<PositionSourceLink>(mSourceLink)) {
-        switch (std::get<PositionSourceLink>(mSourceLink)) {
-        case PositionSourceLink::independent:
-            break;
-        case PositionSourceLink::circular: {
-            strategy.reset(new CircularStrategy{});
-            break;
-        }
-        case PositionSourceLink::circularFixedRadius: {
-            strategy.reset(new CircularFixedRadiusStrategy{});
-            break;
-        }
-        case PositionSourceLink::circularFixedAngle:
-        case PositionSourceLink::circularFullyFixed:
-        case PositionSourceLink::linkSymmetricX:
-        case PositionSourceLink::linkSymmetricY:
-        case PositionSourceLink::deltaLock:
-            jassertfalse;
-            break;
-        case PositionSourceLink::undefined:
-        default:
-            jassertfalse;
-        }
-    } else {
-        jassert(std::holds_alternative<ElevationSourceLink>(mSourceLink));
-    }
+    auto strategy{ getLinkStrategy(mSourceLink) };
 
     if (strategy != nullptr) {
-        strategy->calculateParams(mPrimarySourceSnapshot);
+        strategy->calculateParams(mPrimarySourceSnapshot, mSources.size());
         snapshot = strategy->getInversedSnapshot(snapshot);
     }
 
