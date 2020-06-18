@@ -32,7 +32,7 @@ public:
 
     void apply(Array<SourceSnapshot> & secondarySnapshots) const
     {
-        for (auto & snapshot : secondarySnapshots) {
+        for (auto & snapshot : secondarySnapshots) { // TODO: this is applied to more sources than it should
             apply(snapshot);
         }
     }
@@ -247,6 +247,33 @@ class LinkSymmetricYStrategy : public LinkStrategy
     }
 };
 
+class DeltaLockStrategy : public LinkStrategy
+{
+    Point<float> mDelta;
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mDelta = primarySourceSnapshot.source->getPos() - primarySourceSnapshot.position;
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const newPosition{ snapshot.position + mDelta };
+        snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
+    }
+
+    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        SourceSnapshot result{ snapshot };
+
+        auto const initialPos{ snapshot.source->getPos() - mDelta };
+        result.position = initialPos;
+
+        return result;
+    }
+};
+
 std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
 {
     if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
@@ -266,7 +293,7 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         case PositionSourceLink::linkSymmetricY:
             return std::make_unique<LinkSymmetricYStrategy>();
         case PositionSourceLink::deltaLock:
-            return nullptr;
+            return std::make_unique<DeltaLockStrategy>();
         case PositionSourceLink::undefined:
         default:
             jassertfalse;
