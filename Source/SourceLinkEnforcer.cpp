@@ -224,6 +224,29 @@ class LinkSymmetricXStrategy : public LinkStrategy
     }
 };
 
+class LinkSymmetricYStrategy : public LinkStrategy
+{
+    Point<float> mPrimaryPosition;
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mPrimaryPosition = primarySourceSnapshot.source->getPos();
+    }
+
+    void apply_impl([[maybe_unused]] SourceSnapshot & snapshot) const final
+    {
+        Point<float> const newPosition{ mPrimaryPosition.getX(), -mPrimaryPosition.getY() };
+        snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
+    }
+
+    SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
+    {
+        // nothing to do here!
+        return snapshot;
+    }
+};
+
 std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
 {
     if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
@@ -241,6 +264,7 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         case PositionSourceLink::linkSymmetricX:
             return std::make_unique<LinkSymmetricXStrategy>();
         case PositionSourceLink::linkSymmetricY:
+            return std::make_unique<LinkSymmetricYStrategy>();
         case PositionSourceLink::deltaLock:
             return nullptr;
         case PositionSourceLink::undefined:
