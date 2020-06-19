@@ -62,8 +62,6 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
-    // TODO: what if trajectory handle?
-    // TODO: maybe turn off circularSourceSelectionWarning?
 }
 
 SourceIndex ElevationSourceComponent::getSourceIndex() const

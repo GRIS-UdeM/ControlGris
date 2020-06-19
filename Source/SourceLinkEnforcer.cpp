@@ -43,7 +43,7 @@ public:
         apply_impl(snapshot);
     }
 
-    SourceSnapshot getInversedSnapshot(SourceSnapshot const & snapshot) const
+    [[nodiscard]] SourceSnapshot getInversedSnapshot(SourceSnapshot const & snapshot) const
     {
         jassert(mInitialized);
         return getInversedSnapshot_impl(snapshot);
@@ -52,14 +52,14 @@ public:
 private:
     virtual void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int numberOfSources) = 0;
     virtual void apply_impl(SourceSnapshot & snapshot) const = 0;
-    virtual SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const = 0;
+    [[nodiscard]] virtual SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const = 0;
 };
 
 class CircularStrategy final : public LinkStrategy
 {
 private:
-    Radians mRotation;
-    float mRadiusRatio;
+    Radians mRotation{};
+    float mRadiusRatio{};
 
     void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
@@ -80,7 +80,7 @@ private:
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
     {
         SourceSnapshot result{ snapshot };
         auto const newPosition{
@@ -94,8 +94,8 @@ private:
 class CircularFixedRadiusStrategy : public LinkStrategy
 {
 private:
-    Radians mRotation;
-    float mRadius;
+    Radians mRotation{};
+    float mRadius{};
 
     void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
@@ -113,7 +113,7 @@ private:
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
     {
         auto const sourcePosition{ snapshot.source->getPos() };
         SourceSnapshot result{ snapshot };
@@ -130,9 +130,9 @@ private:
 class CircularFixedAngleStrategy : public LinkStrategy
 {
 private:
-    Radians mDeviationPerSource;
-    Radians mPrimaySourceAngle;
-    float mRadiusRatio;
+    Radians mDeviationPerSource{};
+    Radians mPrimaySourceAngle{};
+    float mRadiusRatio{};
 
     void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int const numberOfSources) final
     {
@@ -158,7 +158,7 @@ private:
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
     {
         SourceSnapshot result{ snapshot };
 
@@ -173,9 +173,9 @@ private:
 
 class CircularFullyFixedStrategy : public LinkStrategy
 {
-    Radians mDeviationPerSource;
-    Radians mPrimaySourceAngle;
-    float mRadius;
+    Radians mDeviationPerSource{};
+    Radians mPrimaySourceAngle{};
+    float mRadius{};
 
     void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot, int const numberOfSources) final
     {
@@ -194,7 +194,7 @@ class CircularFullyFixedStrategy : public LinkStrategy
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -217,7 +217,7 @@ class LinkSymmetricXStrategy : public LinkStrategy
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -240,7 +240,7 @@ class LinkSymmetricYStrategy : public LinkStrategy
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -263,7 +263,7 @@ class DeltaLockStrategy : public LinkStrategy
         snapshot.source->setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
     {
         SourceSnapshot result{ snapshot };
 

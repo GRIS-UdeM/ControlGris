@@ -221,7 +221,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
     } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSelectedOscFormat == SpatMode::cube) {
-        mElevationAutomationManager.setPlaybackPositionY(newValue);
+        mElevationAutomationManager.setPlaybackPositionY(newValue); // TODO: z = y ?
     }
 
     if (parameterID.compare("sourceLink") == 0) {
@@ -282,26 +282,14 @@ bool compareLessThan(const Sorter & a, const Sorter & b)
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
     if (newSourceLink != mPositionAutomationManager.getSourceLink()) {
-        if (mSources.size() != 2
-            && (newSourceLink == PositionSourceLink::linkSymmetricX
-                || newSourceLink == PositionSourceLink::linkSymmetricY)) {
-            // TODO: the symmetric links should not be available when only 2 sources are present
-            return;
-        }
-
-        if (mPositionAutomationManager.getTrajectoryType() != PositionTrajectoryType::drawing) {
-            mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(mSources.getPrimarySource().getPos());
-        }
-
         mPositionAutomationManager.setSourceLink(newSourceLink);
-        //        mPositionAutomationManager.fixPrincipalSourcePosition();
-        //        onSourceLinkChanged(value);
 
         auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
         mParameters.getParameter("sourceLink")->beginChangeGesture();
         mParameters.getParameter("sourceLink")
             ->setValueNotifyingHost((static_cast<float>(newSourceLink) - 1.0f) / howMany);
         mParameters.getParameter("sourceLink")->endChangeGesture();
+
         auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (editor != nullptr) {
             editor->updateSourceLinkCombo(newSourceLink);
@@ -313,21 +301,14 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSour
 
 void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink value)
 {
-    if (value != static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink())) {
-        if (value == ElevationSourceLink::deltaLock
-            && static_cast<ElevationTrajectoryType>(mElevationAutomationManager.getTrajectoryType())
-                   != ElevationTrajectoryType::drawing) {
-            mElevationAutomationManager.setPrincipalSourceAndPlaybackPosition(Point<float>{ 0.0f, 0.0f });
-        }
-
+    if (value != mElevationAutomationManager.getSourceLink()) {
         mElevationAutomationManager.setSourceLink(value);
-        //        mElevationAutomationManager.fixPrincipalSourcePosition();
-        //        onElevationSourceLinkChanged(value);
 
         mParameters.getParameter("sourceLinkAlt")->beginChangeGesture();
         mParameters.getParameter("sourceLinkAlt")->setValueNotifyingHost((static_cast<float>(value) - 1.0f) / 4.0f);
         mParameters.getParameter("sourceLinkAlt")->endChangeGesture();
-        auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+
+        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
             ed->updateElevationSourceLinkCombo(value);
         }
@@ -804,12 +785,8 @@ void ControlGrisAudioProcessor::timerCallback()
     }
 
     // MainField automation.
-    if (mPositionAutomationManager.getPositionActivateState()) {
-        if (mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-            //...
-        } else if (mLastTimerTime != getCurrentTime()) {
-            mPositionAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
-        }
+    if (mPositionAutomationManager.getPositionActivateState() && mLastTimerTime != getCurrentTime()) {
+        mPositionAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
     } else if (mIsPlaying && mPositionAutomationManager.getPlaybackPosition().has_value()) {
         mSources.getPrimarySource().setPos(mPositionAutomationManager.getPlaybackPosition().value(),
                                            SourceLinkNotification::notify);
@@ -819,7 +796,6 @@ void ControlGrisAudioProcessor::timerCallback()
         recallFixedPosition(preset);
         mSources.getPrimarySource().setPos(mPositionAutomationManager.getPlaybackPosition().value(),
                                            SourceLinkNotification::notify);
-        //        linkPositionSourcePositions();
     }
 
     // ElevationField automation.
@@ -837,9 +813,9 @@ void ControlGrisAudioProcessor::timerCallback()
                && mSources.getPrimarySource().getPos() != mElevationAutomationManager.getPlaybackPosition().value()) {
         int preset = (int)mParameters.getParameterAsValue("positionPreset").getValue();
         recallFixedPosition(preset);
-        mSources.getPrimarySource().setPos(mElevationAutomationManager.getPlaybackPosition().value(),
-                                           SourceLinkNotification::notify);
-        //        linkElevationSourcePositions();
+        // this is really screwing everything up, but I dont know why!
+        //        mSources.getPrimarySource().setPos(mElevationAutomationManager.getPlaybackPosition().value(),
+        //                                           SourceLinkNotification::notify);
     }
 
     mLastTimerTime = getCurrentTime();
@@ -1017,16 +993,16 @@ void ControlGrisAudioProcessor::validatePositionSourcePositions()
 
 void ControlGrisAudioProcessor::validateElevationSourcePositions()
 {
-    auto const sourceLink{ static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()) };
+    auto const sourceLink{ mElevationAutomationManager.getSourceLink() };
     auto const trajectoryType{ mElevationAutomationManager.getTrajectoryType() };
 
     if (!isPlaying()) {
-        if (sourceLink != ElevationSourceLink::deltaLock
-            && static_cast<ElevationTrajectoryType>(trajectoryType) != ElevationTrajectoryType::drawing) {
-            mElevationAutomationManager.setPrincipalSourceAndPlaybackPosition(
-                Point<float>(0.0f, mSources.getPrimarySource().getNormalizedElevation()));
-        } else {
+        if (sourceLink == ElevationSourceLink::deltaLock || trajectoryType == ElevationTrajectoryType::drawing) {
             mElevationAutomationManager.resetPlaybackPosition();
+        } else {
+            auto const newPosition{ Point<float>{ 0.0f, mSources.getPrimarySource().getNormalizedElevation() } };
+            //            mElevationAutomationManager.setPrincipalSourceAndPlaybackPosition(newPosition);
+            mElevationAutomationManager.setPlaybackPosition(newPosition);
         }
     }
 }

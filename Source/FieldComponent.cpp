@@ -149,6 +149,8 @@ void ElevationFieldComponent::drawBackground(Graphics & g) const
     auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     jassert(lookAndFeel != nullptr);
 
+    drawBackgroundGrid(g);
+
     g.setColour(lookAndFeel->getLightColour());
     g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
     g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);

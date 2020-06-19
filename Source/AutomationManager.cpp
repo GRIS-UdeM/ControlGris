@@ -93,19 +93,6 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
     computeCurrentTrajectoryPoint();
 }
 
-void AutomationManager::compressTrajectoryXValues(int maxValue)
-{
-    // TODO: what does this do ???
-    //    auto const offset{ static_cast<int>(10.0f + SOURCE_FIELD_COMPONENT_RADIUS) };
-    //    maxValue -= offset;
-    //    int const size{ getRecordingTrajectorySize() };
-    //    auto const delta{ static_cast<float>(maxValue) / (static_cast<float>(size) + 1.0f) };
-    //    for (int i{}; i < size; ++i) {
-    //        mTrajectoryPoints.data()[i].setX(static_cast<float>(i) * delta + offset);
-    //    }
-    jassertfalse;
-}
-
 void AutomationManager::computeCurrentTrajectoryPoint()
 {
     jassert(mTrajectory.has_value());
