@@ -27,6 +27,7 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sour
     if (balancedAzimuth != mAzimuth) {
         mAzimuth = balancedAzimuth;
         computeXY(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -46,6 +47,7 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
     if (clippedElevation != mElevation) {
         mElevation = clippedElevation;
         computeXY(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -61,6 +63,7 @@ void Source::setDistance(float const distance, SourceLinkNotification const sour
     if (distance != mDistance) {
         mDistance = distance;
         computeXY(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -78,17 +81,24 @@ void Source::setCoordinates(Radians const azimuth,
         mElevation = elevation;
         mDistance = distance;
         computeXY(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
 void Source::setAzimuthSpan(Normalized const azimuthSpan)
 {
-    mAzimuthSpan = azimuthSpan;
+    if (mAzimuthSpan != azimuthSpan) {
+        mAzimuthSpan = azimuthSpan;
+        mGuiChangeBroadcaster.sendChangeMessage();
+    }
 }
 
 void Source::setElevationSpan(Normalized const elevationSpan)
 {
-    mElevationSpan = elevationSpan;
+    if (mElevationSpan != elevationSpan) {
+        mElevationSpan = elevationSpan;
+        mGuiChangeBroadcaster.sendChangeMessage();
+    }
 }
 
 void Source::setX(float const x, SourceLinkNotification const sourceLinkNotification)
@@ -97,6 +107,7 @@ void Source::setX(float const x, SourceLinkNotification const sourceLinkNotifica
     if (clippedX != mPosition.getX()) {
         mPosition.setX(clippedX);
         computeAzimuthElevation(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -106,6 +117,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
     if (y != mPosition.getY()) {
         mPosition.setY(clippedY);
         computeAzimuthElevation(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -115,6 +127,7 @@ void Source::setPos(Point<float> const & position, SourceLinkNotification const 
     if (mPosition != clippedPosition) {
         mPosition = clippedPosition;
         computeAzimuthElevation(sourceLinkNotification);
+        sendNotifications(sourceLinkNotification);
     }
 }
 
@@ -130,11 +143,6 @@ void Source::computeXY(SourceLinkNotification const sourceLinkNotification)
     }()) };
 
     mPosition = getPositionFromAngle(mAzimuth, radius);
-
-    mGuiChangeBroadcaster.sendChangeMessage();
-    if (sourceLinkNotification == SourceLinkNotification::notify) {
-        mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
-    }
 }
 
 void Source::computeAzimuthElevation(SourceLinkNotification const sourceLinkNotification)
@@ -154,17 +162,13 @@ void Source::computeAzimuthElevation(SourceLinkNotification const sourceLinkNoti
     } else { // azimuth - distance
         mDistance = radius;
     }
-
-    mGuiChangeBroadcaster.sendChangeMessage();
-    if (sourceLinkNotification == SourceLinkNotification::notify) {
-        mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
-    }
 }
 
 Normalized Source::getNormalizedElevation() const
 {
     return Normalized{ mElevation / halfPi };
 }
+
 Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
 {
     auto const rotatedAngle{ angle - halfPi };
@@ -185,6 +189,15 @@ Radians Source::getAngleFromPosition(Point<float> const & position)
     auto const rotatedAngle{ angle + halfPi };
     return rotatedAngle;
 }
+
+void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
+{
+    mGuiChangeBroadcaster.sendChangeMessage();
+    if (sourceLinkNotification == SourceLinkNotification::notify) {
+        mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
+    }
+}
+
 Radians Source::clipElevation(Radians const elevation)
 {
     return Radians{ std::clamp(elevation, Radians{ 0.0f }, halfPi) };
@@ -217,4 +230,5 @@ void Source::setColorFromIndex(int const numTotalSources)
         hue -= 1.0f;
     }
     mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
+    mGuiChangeBroadcaster.sendChangeMessage();
 }

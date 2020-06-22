@@ -131,6 +131,7 @@ public:
     static Radians getAngleFromPosition(Point<float> const & position);
 
 private:
+    void sendNotifications(SourceLinkNotification sourceLinkNotification);
     Point<float> clipPosition(Point<float> const & position) const;
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
