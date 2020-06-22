@@ -80,7 +80,8 @@ private:
     XmlElement * mCurrentFixPosition{ nullptr };
 
     Sources mSources{};
-    SourceLinkEnforcer mSourceLinkEnforcer{ mSources };
+    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources };
+    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
 
 public:
     //==============================================================================
@@ -188,10 +189,6 @@ public:
 
     void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
-
-    // These are called after a source has changed from mouse movement in a field (or from an OSC message).
-    void validatePositionSourcePositions();
-    void validateElevationSourcePositions();
 
     void setPositionPreset(int presetNumber);
 

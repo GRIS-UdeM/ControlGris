@@ -452,7 +452,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
 {
     auto & source{ mProcessor.getSources()[sourceIndex] };
     if (mProcessor.getOscFormat() == SpatMode::dome) {
-        auto const elevation{ Degrees{ 90.0f } - (Degrees{ 90.0f } * rayLen) };
+        auto const elevation{ MAX_ELEVATION - (MAX_ELEVATION * rayLen) };
         source.setCoordinates(angle, elevation, 1.0f, SourceLinkNotification::notify);
     } else {
         auto const currentElevation{ source.getElevation() };

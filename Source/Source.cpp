@@ -26,7 +26,7 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sour
     auto const balancedAzimuth{ azimuth.simplified() };
     if (balancedAzimuth != mAzimuth) {
         mAzimuth = balancedAzimuth;
-        computeXY(sourceLinkNotification);
+        computeXY();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -46,7 +46,7 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
     auto const clippedElevation{ clipElevation(elevation) };
     if (clippedElevation != mElevation) {
         mElevation = clippedElevation;
-        computeXY(sourceLinkNotification);
+        computeXY();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -62,7 +62,7 @@ void Source::setDistance(float const distance, SourceLinkNotification const sour
 
     if (distance != mDistance) {
         mDistance = distance;
-        computeXY(sourceLinkNotification);
+        computeXY();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -80,7 +80,7 @@ void Source::setCoordinates(Radians const azimuth,
         mAzimuth = azimuth;
         mElevation = elevation;
         mDistance = distance;
-        computeXY(sourceLinkNotification);
+        computeXY();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -106,7 +106,7 @@ void Source::setX(float const x, SourceLinkNotification const sourceLinkNotifica
     auto const clippedX{ clipCoordinate(x) };
     if (clippedX != mPosition.getX()) {
         mPosition.setX(clippedX);
-        computeAzimuthElevation(sourceLinkNotification);
+        computeAzimuthElevation();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -116,7 +116,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
     auto const clippedY{ clipCoordinate(y) };
     if (y != mPosition.getY()) {
         mPosition.setY(clippedY);
-        computeAzimuthElevation(sourceLinkNotification);
+        computeAzimuthElevation();
         sendNotifications(sourceLinkNotification);
     }
 }
@@ -126,16 +126,16 @@ void Source::setPos(Point<float> const & position, SourceLinkNotification const 
     auto const clippedPosition{ clipPosition(position) };
     if (mPosition != clippedPosition) {
         mPosition = clippedPosition;
-        computeAzimuthElevation(sourceLinkNotification);
+        computeAzimuthElevation();
         sendNotifications(sourceLinkNotification);
     }
 }
 
-void Source::computeXY(SourceLinkNotification const sourceLinkNotification)
+void Source::computeXY()
 {
     float const radius{ ([&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
-            auto const result{ mElevation / halfPi };
+            auto const result{ mElevation / MAX_ELEVATION };
             jassert(result >= 0.0f && result <= 1.0f);
             return result;
         }
@@ -145,7 +145,7 @@ void Source::computeXY(SourceLinkNotification const sourceLinkNotification)
     mPosition = getPositionFromAngle(mAzimuth, radius);
 }
 
-void Source::computeAzimuthElevation(SourceLinkNotification const sourceLinkNotification)
+void Source::computeAzimuthElevation()
 {
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
         mAzimuth = getAngleFromPosition(mPosition).simplified();

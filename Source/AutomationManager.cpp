@@ -49,19 +49,11 @@ void AutomationManager::setPositionActivateState(bool const newState)
 
 void AutomationManager::setPlaybackPositionX(float const value)
 {
-    if (mPlaybackPosition.has_value()) {
-        mPlaybackPosition->setX(value);
-    } else {
-        mPlaybackPosition = Point<float>{ value, 0.0f };
-    }
+    mPlaybackPosition.x = value;
 }
 void AutomationManager::setPlaybackPositionY(float const value)
 {
-    if (mPlaybackPosition.has_value()) {
-        mPlaybackPosition->setY(value);
-    } else {
-        mPlaybackPosition = Point<float>{ 0.0f, value };
-    }
+    mPlaybackPosition.y = value;
 }
 
 void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosition)

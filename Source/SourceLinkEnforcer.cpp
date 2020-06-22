@@ -10,6 +10,8 @@
 
 #include "SourceLinkEnforcer.h"
 
+#include "ControlGrisConstants.h"
+
 class LinkStrategy
 {
     bool mInitialized{ false };
@@ -274,6 +276,106 @@ class DeltaLockStrategy : public LinkStrategy
     }
 };
 
+class FixedElevationStrategy : public LinkStrategy
+{
+    Radians mElevation{};
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mElevation = primarySourceSnapshot.source->getElevation();
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        snapshot.source->setElevation(mElevation, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        return snapshot;
+    }
+};
+
+class LinearMinElevationStrategy : public LinkStrategy
+{
+    static constexpr Radians ELEVATION_DIFF{ -MAX_ELEVATION / 3.0f * 2.0f };
+    Radians mBaseElevation{};
+    Radians mElevationPerSource{};
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mBaseElevation = primarySourceSnapshot.source->getElevation();
+        mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const sourceIndex{ snapshot.source->getIndex().toInt() };
+        auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
+        snapshot.source->setElevation(newElevation, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        return snapshot;
+    }
+};
+
+class LinearMaxElevationStrategy : public LinkStrategy
+{
+    static constexpr Radians ELEVATION_DIFF{ MAX_ELEVATION / 3.0f * 2.0f };
+    Radians mBaseElevation{};
+    Radians mElevationPerSource{};
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mBaseElevation = primarySourceSnapshot.source->getElevation();
+        mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const sourceIndex{ snapshot.source->getIndex().toInt() };
+        auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
+        snapshot.source->setElevation(newElevation, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        return snapshot;
+    }
+};
+
+class DeltaLockElevationStrategy : public LinkStrategy
+{
+    Radians mDelta;
+
+    void calculateParams_impl(SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+        mDelta = primarySourceSnapshot.source->getElevation() - primarySourceSnapshot.elevation;
+    }
+
+    void apply_impl(SourceSnapshot & snapshot) const final
+    {
+        auto const newElevation{ snapshot.elevation + mDelta };
+        snapshot.source->setElevation(newElevation, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(SourceSnapshot const & snapshot) const final
+    {
+        SourceSnapshot result{ snapshot };
+
+        auto const initialElevation{ snapshot.source->getElevation() - mDelta };
+        result.elevation = initialElevation;
+
+        return result;
+    }
+};
+
 std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
 {
     if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
@@ -304,10 +406,13 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         case ElevationSourceLink::independent:
             return nullptr;
         case ElevationSourceLink::fixedElevation:
+            return std::make_unique<FixedElevationStrategy>();
         case ElevationSourceLink::linearMin:
+            return std::make_unique<LinearMinElevationStrategy>();
         case ElevationSourceLink::linearMax:
+            return std::make_unique<LinearMaxElevationStrategy>();
         case ElevationSourceLink::deltaLock:
-            return nullptr;
+            return std::make_unique<DeltaLockElevationStrategy>();
         case ElevationSourceLink::undefined:
         default:
             jassertfalse;

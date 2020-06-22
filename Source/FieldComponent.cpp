@@ -638,7 +638,7 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
 
     auto const x{ widthPerSource * static_cast<float>(index.toInt()) + widthBetweenSources
                   + SOURCE_FIELD_COMPONENT_RADIUS };
-    auto const y{ sourceElevation / Degrees{ 90.0f } * availableHeight + SOURCE_FIELD_COMPONENT_RADIUS };
+    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + SOURCE_FIELD_COMPONENT_RADIUS };
     Point<float> const result{ x, y };
 
     return result;
@@ -648,6 +648,6 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float>
 {
     auto const height{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    Radians const result{ Degrees{ 90.0f } * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_RADIUS) / height) };
+    Radians const result{ MAX_ELEVATION * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_RADIUS) / height) };
     return result;
 }

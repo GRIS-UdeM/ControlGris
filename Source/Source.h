@@ -113,8 +113,8 @@ public:
     Point<float> const & getPos() const { return mPosition; }
     void setPos(Point<float> const & pos, SourceLinkNotification sourceLinkNotification);
 
-    void computeXY(SourceLinkNotification sourceLinkNotification);
-    void computeAzimuthElevation(SourceLinkNotification sourceLinkNotification);
+    void computeXY();
+    void computeAzimuthElevation();
 
     void setColorFromIndex(int numTotalSources);
     Colour getColour() const { return mColour; }

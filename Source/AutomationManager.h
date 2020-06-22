@@ -26,6 +26,36 @@
 #include "Trajectory.h"
 
 //==============================================================================
+struct PlaybackPosition {
+    std::optional<float> x{};
+    std::optional<float> y{};
+
+    void reset()
+    {
+        x.reset();
+        y.reset();
+    }
+
+    bool operator!=(Point<float> const & point) const
+    {
+        if (!isValid()) {
+            return true;
+        }
+        return x.value() != point.getX() || y.value() != point.getY();
+    }
+
+    bool isValid() const { return x.has_value() && y.has_value(); }
+
+    PlaybackPosition & operator=(Point<float> const & point)
+    {
+        x = point.getX();
+        y = point.getY();
+        return *this;
+    }
+
+    Point<float> value() const { return Point<float>{ x.value(), y.value() }; }
+};
+
 class AutomationManager
 {
 public:
@@ -59,7 +89,7 @@ protected:
     bool mActivateState{ false };
     double mPlaybackDuration{ 5.0 };
     double mCurrentPlaybackDuration{ 5.0 };
-    std::optional<Point<float>> mPlaybackPosition{};
+    PlaybackPosition mPlaybackPosition{};
 
     Point<float> mTrajectoryHandlePosition{};
 
@@ -92,7 +122,8 @@ public:
     void setPlaybackPosition(Point<float> const & value) { mPlaybackPosition = value; }
     void setPlaybackPositionX(float const value);
     void setPlaybackPositionY(float const value);
-    std::optional<Point<float>> getPlaybackPosition() const { return mPlaybackPosition; }
+    PlaybackPosition const & getPlaybackPosition() const { return mPlaybackPosition; }
+    PlaybackPosition & getPlaybackPosition() { return mPlaybackPosition; }
     void resetPlaybackPosition() { mPlaybackPosition.reset(); }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
@@ -170,6 +201,7 @@ public:
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+    void setPrincipalSourceAndPlaybackElevation(Radians elevation);
 
     void setSourceLink(ElevationSourceLink sourceLink) { mSourceLink = sourceLink; }
     ElevationSourceLink getSourceLink() const { return mSourceLink; }
