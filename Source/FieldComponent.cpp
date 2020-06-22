@@ -429,29 +429,25 @@ Point<int> PositionFieldComponent::clipRecordingPosition(Point<int> const & pos)
 void ElevationFieldComponent::drawSpans(Graphics & g) const
 {
     jassert(getWidth() == getHeight());
-    auto const componentSize{ this->getWidth() };
+    auto const componentSize{ static_cast<float>(this->getWidth()) };
+    constexpr auto MIN_SPAN_WIDTH = 2.0f;
 
     float sourceIndex{};
     for (auto const & source : *mSources) {
         auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 3 : 1 };
-        float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
-        float const x{ sourceIndex / static_cast<float>(mSources->size()) * (componentSize - 50.0f) + 50.0f };
-        float const y{ (Degrees{ 90.0f } - source.getElevation()) / Degrees{ 90.0f } * (componentSize - 35.0f) + 5.0f };
-        Point<float> const pos{ x, y };
+        auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
+        auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
 
         // draw Spans
-        float const elevationSpan{ 50.0f * source.getElevationSpan() };
+        float const elevationSpan{ 50.0f * source.getElevationSpan() + MIN_SPAN_WIDTH };
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
-                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
+        g.drawRect(position.getX() - elevationSpan / 2.0f,
+                   position.getY() + lineThickness / 2.0f,
                    elevationSpan,
-                   componentSize - 5.0f,
-                   1.5);
+                   componentSize,
+                   1.5f);
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
-        g.fillRect(pos.x + SOURCE_FIELD_COMPONENT_RADIUS - elevationSpan / 2,
-                   pos.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2,
-                   elevationSpan,
-                   componentSize - 5.0f);
+        g.fillRect(position.x - elevationSpan / 2.0f, position.y + lineThickness / 2.0f, elevationSpan, componentSize);
         sourceIndex += 1.0f;
     }
 }
@@ -459,25 +455,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 void ElevationFieldComponent::paint(Graphics & g)
 {
     drawBackground(g);
-
-    bool shouldDrawTrajectoryHandle{ false };
-    if (mSources->size() == 1) {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-                == ElevationTrajectoryType::drawing
-            && !mIsPlaying) {
-            shouldDrawTrajectoryHandle = true;
-        }
-    } else {
-        if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-                == ElevationTrajectoryType::drawing
-            && !mIsPlaying) {
-            shouldDrawTrajectoryHandle = true;
-        } else if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::realtime
-                   && static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink())
-                          == ElevationSourceLink::deltaLock) {
-            shouldDrawTrajectoryHandle = true;
-        }
-    }
+    drawSpans(g);
 
     // Draw recording trajectory handle.
     // TODO
@@ -506,7 +484,8 @@ void ElevationFieldComponent::paint(Graphics & g)
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth()) };
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(
+            static_cast<float>(getWidth())) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown()
@@ -520,32 +499,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 
 void ElevationFieldComponent::mouseDown(const MouseEvent & event)
 {
-    auto const width{ getWidth() };
-    auto const height{ getHeight() };
-
     mSelectedSource.reset();
-
-    // Check if we click on a new source.
-    //    bool clickOnSource{ false };
-    //    for (int sourceIndex{}; sourceIndex < mNumberOfSources; ++sourceIndex) {
-    //        float const x{ static_cast<float>(sourceIndex) / mNumberOfSources * (width - 50.0f) + 50.0f };
-    //        float const y{ (Degrees{ 90.0f } - mSources[sourceIndex].getElevation()) / Degrees{ 90.0f } * (height
-    //        - 35.0f)
-    //                       + 5.0f };
-    //        Point<float> const pos{ x, y };
-    //        Rectangle<float> const area{ pos.x, pos.y, SOURCE_FIELD_COMPONENT_DIAMETER,
-    //        SOURCE_FIELD_COMPONENT_DIAMETER }; if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //            mSelectedSource = sourceIndex;
-    //            mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
-    //            clickOnSource = true;
-    //            break;
-    //        }
-    //    }
-
-    //    if (clickOnSource) {
-    //        repaint();
-    //        return;
-    //    }
 
     // Check if we record a trajectory.
     // TODO
@@ -677,20 +631,23 @@ void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
 Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians const sourceElevation,
                                                                          SourceIndex const index) const
 {
-    auto const availableWidth{ getWidth() - (xPadding * 2) };
+    auto const availableWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
+    auto const availableHeight{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER };
     auto const widthPerSource{ availableWidth / static_cast<float>(mSources->size()) };
-    auto const height{ getHeight() - yTopPadding - yBottomPadding };
+    auto const widthBetweenSources{ widthPerSource / 2.0f };
 
-    Point<float> const result{ widthPerSource * index.toInt() + widthPerSource / 2.0f,
-                               sourceElevation / Degrees{ 90.0f } * height };
+    auto const x{ widthPerSource * static_cast<float>(index.toInt()) + widthBetweenSources
+                  + SOURCE_FIELD_COMPONENT_RADIUS };
+    auto const y{ sourceElevation / Degrees{ 90.0f } * availableHeight + SOURCE_FIELD_COMPONENT_RADIUS };
+    Point<float> const result{ x, y };
 
     return result;
 }
 
 Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float> const & componentPosition) const
 {
-    auto const height{ getHeight() - yTopPadding - yBottomPadding };
+    auto const height{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    Radians const result{ Degrees{ 90.0f } * ((componentPosition.getY() - yTopPadding) / height) };
+    Radians const result{ Degrees{ 90.0f } * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_RADIUS) / height) };
     return result;
 }

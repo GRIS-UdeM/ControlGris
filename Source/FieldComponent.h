@@ -169,10 +169,6 @@ private:
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
 {
-    static constexpr auto xPadding{ 50.0f };
-    static constexpr auto yTopPadding{ 5.0f };
-    static constexpr auto yBottomPadding{ 35.0f };
-
     bool mCurrentlyDrawing{ false };
     ElevationAutomationManager & mAutomationManager;
     int mCurrentRecordingPositionX{};
