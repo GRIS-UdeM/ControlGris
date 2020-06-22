@@ -444,12 +444,7 @@ void SourceLinkEnforcer::setSourceLink(AnySourceLink sourceLink)
     }
 }
 
-void SourceLinkEnforcer::numberOfSourcesChanged()
-{
-    reset();
-}
-
-void SourceLinkEnforcer::primarySourceMoved()
+void SourceLinkEnforcer::enforceSourceLink()
 {
     auto strategy{ getLinkStrategy(mSourceLink) };
 
@@ -457,6 +452,16 @@ void SourceLinkEnforcer::primarySourceMoved()
         strategy->calculateParams(mPrimarySourceSnapshot, mSources.size());
         strategy->apply(mSecondarySourcesSnapshots);
     }
+}
+
+void SourceLinkEnforcer::numberOfSourcesChanged()
+{
+    reset();
+}
+
+void SourceLinkEnforcer::primarySourceMoved()
+{
+    enforceSourceLink();
 }
 
 void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)

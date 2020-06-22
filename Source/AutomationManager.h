@@ -150,6 +150,7 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
     virtual void sendTrajectoryPositionChangedEvent() = 0;
+    virtual void applyCurrentTrajectoryPointToPrimarySource() = 0;
 
 private:
     //==============================================================================
@@ -181,6 +182,8 @@ public:
     void setSourceLink(PositionSourceLink sourceLink) { mSourceLink = sourceLink; }
     PositionSourceLink getSourceLink() const { return mSourceLink; }
 
+    void applyCurrentTrajectoryPointToPrimarySource() final;
+
     void sendTrajectoryPositionChangedEvent() final;
 
 private:
@@ -207,6 +210,7 @@ public:
     ElevationSourceLink getSourceLink() const { return mSourceLink; }
 
     void sendTrajectoryPositionChangedEvent() final;
+    void applyCurrentTrajectoryPointToPrimarySource() final;
 
 private:
     //==============================================================================

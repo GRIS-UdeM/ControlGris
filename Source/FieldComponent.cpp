@@ -267,18 +267,26 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
 
 void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 {
-    auto const width{ getWidth() };
+    // TODO : there is probably some reasonning behind this value in SpatGRIS2 source.
+    constexpr float MAGIC_MAX_SPAN_RATIO = 0.8f;
+
+    auto const width{ static_cast<float>(getWidth()) };
+    auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER };
 
     for (auto const & source : *mSources) {
-        float const azimuthSpan{ width * source.getAzimuthSpan() };
-        float const halfAzimuthSpan{ azimuthSpan / 2.0f - SOURCE_FIELD_COMPONENT_RADIUS };
+        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan() * MAGIC_MAX_SPAN_RATIO };
+        float const halfAzimuthSpan{ azimuthSpan / 2.0f };
         float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.5f };
-        Point<float> const position{ sourcePositionToComponentPosition(source.getPos()) };
+        Point<float> const center{ sourcePositionToComponentPosition(source.getPos()) };
+        Rectangle<float> const area{ center.getX() - halfAzimuthSpan,
+                                     center.getY() - halfAzimuthSpan,
+                                     azimuthSpan,
+                                     azimuthSpan };
 
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawEllipse(position.x - halfAzimuthSpan, position.y - halfAzimuthSpan, azimuthSpan, azimuthSpan, 1.5f);
+        g.drawEllipse(area, 1.5f);
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
-        g.fillEllipse(position.x - halfAzimuthSpan, position.y - halfAzimuthSpan, azimuthSpan, azimuthSpan);
+        g.fillEllipse(area);
     }
 }
 

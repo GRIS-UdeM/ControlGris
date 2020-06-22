@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "PluginEditor.h"
 
 #include "ControlGrisConstants.h"
@@ -436,10 +437,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
                                     mSelectedSource,
                                     mProcessor.getOscFormat());
 
-    //    for (int i{}; i < numOfSources; ++i) {
-    //        mProcessor.getSources()[i].fixSourcePosition(true);
-    //    }
-
     mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
                                                  mProcessor.getSources().getPrimarySource().getPos());
 
@@ -458,8 +455,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
         auto const currentElevation{ source.getElevation() };
         source.setCoordinates(angle, currentElevation, rayLen, SourceLinkNotification::notify);
     }
-
-    //    source.fixSourcePosition(true);
 
     mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
                                                  mProcessor.getSources().getPrimarySource().getPos());

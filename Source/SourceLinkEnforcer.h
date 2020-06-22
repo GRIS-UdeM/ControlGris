@@ -48,12 +48,12 @@ public:
     ~SourceLinkEnforcer() noexcept;
 
     void setSourceLink(AnySourceLink sourceLink);
-
-    void primarySourceMoved();
-    void secondarySourceMoved(SourceIndex sourceIndex);
     void numberOfSourcesChanged();
+    void enforceSourceLink();
 
 private:
+    void primarySourceMoved();
+    void secondarySourceMoved(SourceIndex sourceIndex);
     void snapAll();
     void reset();
 

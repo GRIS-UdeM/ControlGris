@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "PluginProcessor.h"
 
 #include "PluginEditor.h"
@@ -268,16 +269,6 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     }
 }
 
-//== Tools for sorting mSources based on azimuth values. ==
-struct Sorter {
-    int index;
-    float value;
-};
-
-bool compareLessThan(const Sorter & a, const Sorter & b)
-{
-    return a.value <= b.value;
-}
 //========================================================
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
@@ -296,6 +287,7 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSour
         }
 
         mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
+        mPositionSourceLinkEnforcer.enforceSourceLink();
     }
 }
 
@@ -315,6 +307,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
         }
 
         mElevationSourceLinkEnforcer.setSourceLink(newSourceLink);
+        mElevationSourceLinkEnforcer.enforceSourceLink();
     }
 }
 
@@ -806,10 +799,8 @@ void ControlGrisAudioProcessor::timerCallback()
 
     // ElevationField automation.
     if (getOscFormat() == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
-        if (static_cast<ElevationTrajectoryType>(mElevationAutomationManager.getTrajectoryType())
-            == ElevationTrajectoryType::realtime) {
-            //...
-        } else if (mLastTimerTime != getCurrentTime()) {
+        if (mElevationAutomationManager.getTrajectoryType() != ElevationTrajectoryType::realtime
+            && mLastTimerTime != getCurrentTime()) {
             mElevationAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
         }
     } else if (mIsPlaying && mElevationAutomationManager.getPlaybackPosition().isValid()) {
@@ -891,19 +882,6 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
         setSourceParameterValue(sourceIndex,
                                 SourceParameter::elevation,
                                 mSources[sourceIndex].getNormalizedElevation());
-    }
-
-    if (whichField == 0) {
-        if (mPositionAutomationManager.getTrajectoryType() >= PositionTrajectoryType::circleClockwise) {
-            mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-                                                         mSources.getPrimarySource().getPos());
-        }
-    }
-    if (whichField == 1 && getOscFormat() == SpatMode::cube) {
-        if (sourceIndex != SourceIndex{ 0 }) {
-            auto const sourceElevation{ mSources[sourceIndex].getElevation() };
-            auto const offset{ Degrees{ 60.0f } / mSources.size() * sourceIndex.toInt() };
-        }
     }
 }
 

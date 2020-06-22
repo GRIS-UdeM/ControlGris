@@ -83,6 +83,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
     mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0f);
     computeCurrentTrajectoryPoint();
+    applyCurrentTrajectoryPointToPrimarySource();
 }
 
 void AutomationManager::computeCurrentTrajectoryPoint()
@@ -171,11 +172,6 @@ void AutomationManager::computeCurrentTrajectoryPoint()
         }
 
         mCurrentTrajectoryPoint = mCurrentTrajectoryPoint.rotatedAboutOrigin(mCurrentDegreeOfDeviation.getAsRadians());
-    }
-
-    if (mActivateState) {
-        mPrincipalSource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
-        sendTrajectoryPositionChangedEvent();
     }
 }
 
@@ -292,4 +288,21 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
     //    } else {
     //        setSourcePosition(Point<float>{ 0.5f, 0.5f });
     //    }
+}
+
+void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
+{
+    if (mActivateState) {
+        mPrincipalSource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
+        sendTrajectoryPositionChangedEvent();
+    }
+}
+
+void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
+{
+    if (mActivateState) {
+        auto const currentElevation{ MAX_ELEVATION * (mCurrentTrajectoryPoint.getY() + 1.0f) / 2.0f };
+        mPrincipalSource.setElevation(currentElevation, SourceLinkNotification::notify);
+        sendTrajectoryPositionChangedEvent();
+    }
 }
