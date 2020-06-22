@@ -864,24 +864,17 @@ void ControlGrisAudioProcessor::setPluginState()
 //==============================================================================
 void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, int whichField)
 {
+    auto const & source{ mSources[sourceIndex] };
     if (whichField == 0) {
-        if (getOscFormat() == SpatMode::cube) {
-            setSourceParameterValue(sourceIndex,
-                                    SourceParameter::azimuth,
-                                    mSources[sourceIndex].getNormalizedAzimuth());
-            setSourceParameterValue(sourceIndex, SourceParameter::distance, mSources[sourceIndex].getDistance());
+        if (getOscFormat() == SpatMode::dome) {
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
+            setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
         } else {
-            setSourceParameterValue(sourceIndex,
-                                    SourceParameter::azimuth,
-                                    mSources[sourceIndex].getNormalizedAzimuth());
-            setSourceParameterValue(sourceIndex,
-                                    SourceParameter::elevation,
-                                    mSources[sourceIndex].getNormalizedElevation());
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
+            setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
         }
     } else {
-        setSourceParameterValue(sourceIndex,
-                                SourceParameter::elevation,
-                                mSources[sourceIndex].getNormalizedElevation());
+        setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
     }
 }
 

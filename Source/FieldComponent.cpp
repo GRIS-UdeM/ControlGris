@@ -465,30 +465,6 @@ void ElevationFieldComponent::paint(Graphics & g)
     drawBackground(g);
     drawSpans(g);
 
-    // Draw recording trajectory handle.
-    // TODO
-    //    if (shouldDrawTrajectoryHandle) {
-    //        auto const position{ sourceElevationToComponentPosition(mSources[0].getElevation()) };
-    //        auto const lineThickness{ mSelectedSource == TRAJECTORY_HANDLE_SOURCE_ID ? 3 : 1 };
-    //        Rectangle<float> const rarea{ 10.0f,
-    //                                      position.y,
-    //                                      SOURCE_FIELD_COMPONENT_DIAMETER,
-    //                                      SOURCE_FIELD_COMPONENT_DIAMETER };
-    //
-    //        g.setColour(Colour::fromRGB(176, 176, 228));
-    //        g.drawLine(10 + SOURCE_FIELD_COMPONENT_RADIUS,
-    //                   position.y + SOURCE_FIELD_COMPONENT_DIAMETER + lineThickness / 2.0f,
-    //                   10 + SOURCE_FIELD_COMPONENT_RADIUS,
-    //                   height - 5,
-    //                   lineThickness);
-    //        g.fillEllipse(rarea);
-    //        g.setColour(Colour::fromRGB(64, 64, 128));
-    //        g.drawEllipse(rarea, 1);
-    //        g.setColour(Colours::white);
-    //        g.drawFittedText(String("X"), rarea.getSmallestIntegerContainer(), Justification(Justification::centred),
-    //        1);
-    //    }
-
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
@@ -509,46 +485,43 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
 {
     mSelectedSource.reset();
 
-    // Check if we record a trajectory.
-    // TODO
+    setSelectedSource(std::nullopt);
 
-    //    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType()) ==
-    //    ElevationTrajectoryType::drawing
-    //        || static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-    //               == ElevationTrajectoryType::realtime) {
-    //        auto const position{
-    //            sourcePositionToComponentPosition(mAutomationManager.getTrajectoryHandle().getPos()).withX(10.0f)
-    //        };
-    //        Rectangle<float> const area{ position.x,
-    //                                     position.y,
-    //                                     SOURCE_FIELD_COMPONENT_DIAMETER,
-    //                                     SOURCE_FIELD_COMPONENT_DIAMETER };
-    //        if (area.contains(event.getMouseDownPosition().toFloat())) {
-    //            mOldSelectedSource = mSelectedSource;
-    //            mSelectedSource = TRAJECTORY_HANDLE_SOURCE_ID;
-    //            if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-    //                == ElevationTrajectoryType::drawing) {
-    //                mCurrentRecordingPositionX = 10 + SOURCE_FIELD_COMPONENT_RADIUS;
-    //                mAutomationManager.resetRecordingTrajectory(event.getMouseDownPosition().toFloat());
-    //            } else {
-    //                mListeners.call([&](Listener & l) { l.fieldTrajectoryHandleClicked(1); });
-    //            }
-    //            repaint();
-    //            return;
-    //        }
-    //    }
-    //
-    //    // If clicked in an empty space while in mode DRAWING, start a new drawing.
-    //    if (static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-    //        == ElevationTrajectoryType::drawing) {
-    //        mOldSelectedSource = mSelectedSource;
-    //        mSelectedSource = TRAJECTORY_HANDLE_SOURCE_ID;
-    //        mCurrentRecordingPositionX = 10 + static_cast<int>(SOURCE_FIELD_COMPONENT_RADIUS);
-    //        mAutomationManager.resetRecordingTrajectory(
-    //            Point<float>{ static_cast<float>(mCurrentRecordingPositionX), event.getMouseDownPosition().toFloat().y
-    //            });
-    //        repaint();
-    //    }
+    if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
+        auto const mousePosition{ event.getPosition() };
+        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
+        auto const position{ componentPositionToSourcePosition(clippedPosition) };
+        auto const isShiftDown{ event.mods.isShiftDown() };
+
+        mOldSelectedSource.reset();
+        mAutomationManager.resetRecordingTrajectory(position);
+        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
+
+        if (mLineDrawingAnchor1.has_value()) {
+            auto const anchor1{ mLineDrawingAnchor1.value() };
+            auto const anchor2{ position };
+            auto const numSteps{ static_cast<int>(
+                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
+            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
+            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
+            for (int i{ 1 }; i <= numSteps; ++i) {
+                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
+            }
+            if (isShiftDown) {
+                mLineDrawingAnchor1 = anchor2;
+                mLineDrawingAnchor2.reset();
+            } else {
+                mLineDrawingAnchor1.reset();
+                mLineDrawingAnchor2.reset();
+            }
+        } else {
+            if (isShiftDown) {
+                mLineDrawingAnchor1 = position;
+            }
+        }
+    }
+
+    repaint();
 }
 
 void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
