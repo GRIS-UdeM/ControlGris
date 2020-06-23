@@ -23,6 +23,7 @@ class Trajectory
 private:
     //=========
     Array<Point<float>> mPoints{};
+    std::variant<PositionTrajectoryType, ElevationTrajectoryType> mTrajectoryType;
 
 public:
     //=========
@@ -46,7 +47,7 @@ public:
     void add(Point<float> const & point) { mPoints.add(point); }
     int size() const { return mPoints.size(); }
 
-    Path createDrawablePath(float componentWidth) const;
+    Path createDrawablePath(float componentWidth, SpatMode spatMode) const;
 
 private:
     //=========

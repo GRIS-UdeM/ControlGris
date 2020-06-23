@@ -9,10 +9,12 @@
 */
 
 #include "Trajectory.h"
+#include "Source.h"
 
 #include <cmath>
 
 Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Point<float> const & startingPoint) noexcept
+    : mTrajectoryType(positionTrajectoryType)
 {
     switch (positionTrajectoryType) {
     case PositionTrajectoryType::circleClockwise:
@@ -74,6 +76,7 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
 }
 
 Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) noexcept
+    : mTrajectoryType(elevationTrajectoryType)
 {
     switch (elevationTrajectoryType) {
     case ElevationTrajectoryType::downUp:
@@ -263,20 +266,21 @@ Array<Point<float>> Trajectory::getBasicDownUpPoints()
     return result;
 }
 
-Path Trajectory::createDrawablePath(float const componentWidth) const
+Path Trajectory::createDrawablePath(float const componentWidth, SpatMode const spatMode) const
 {
-    auto trajectoryPointToComponentPosition = [&](Point<float> const & point) {
-        auto const newPoint{ (point + Point<float>{ 1.0f, 1.0f }) / 2.0f
-                                 * (componentWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
-                             + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
-        return newPoint;
+    auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
+        auto const clippedPoint{ Source::clipPosition(trajectoryPosition, spatMode) };
+        auto const result{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f
+                               * (componentWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
+                           + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
+        return result;
     };
 
     Path result{};
     if (!mPoints.isEmpty()) {
-        result.startNewSubPath(trajectoryPointToComponentPosition(mPoints.getReference(0)));
+        result.startNewSubPath(trajectoryPositionToComponentPosition(mPoints.getReference(0)));
         for (int i{ 1 }; i < mPoints.size(); ++i) {
-            result.lineTo(trajectoryPointToComponentPosition(mPoints.getReference(i)));
+            result.lineTo(trajectoryPositionToComponentPosition(mPoints.getReference(i)));
         }
     }
     return result;

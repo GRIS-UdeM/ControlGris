@@ -151,8 +151,6 @@ public:
 
 private:
     //==============================================================================
-    Point<int> clipRecordingPosition(Point<int> const & pos);
-
     bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1.has_value(); }
     bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2.has_value(); }
     //==============================================================================

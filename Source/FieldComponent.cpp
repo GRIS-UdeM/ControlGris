@@ -321,7 +321,7 @@ void PositionFieldComponent::paint(Graphics & g)
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
     if (mAutomationManager.getTrajectory().has_value()) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth()) };
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth(), mSpatMode) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     // position dot
@@ -359,13 +359,14 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
     setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
-        auto const mousePosition{ event.getPosition() };
-        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
-        auto const position{ componentPositionToSourcePosition(clippedPosition) };
+        auto const mousePosition{ event.getPosition().toFloat() };
+        auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition) };
+        auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
         auto const isShiftDown{ event.mods.isShiftDown() };
 
         mOldSelectedSource.reset();
         mAutomationManager.resetRecordingTrajectory(position);
+        mSources->getPrimarySource().setPos(position, SourceLinkNotification::notify);
         mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
 
         if (mLineDrawingAnchor1.has_value()) {
@@ -400,13 +401,13 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition() };
         mTrajectoryHandleComponent->setCentrePosition(mousePosition.getX(), mousePosition.getY());
-        auto const clippedPosition{ clipRecordingPosition(mousePosition) };
-        auto const relativePosition{ componentPositionToSourcePosition(clippedPosition.toFloat()) };
+        auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition.toFloat()) };
+        auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
 
         if (mLineDrawingAnchor1.has_value()) {
-            mLineDrawingAnchor2 = relativePosition;
+            mLineDrawingAnchor2 = position;
         } else {
-            mAutomationManager.addRecordingPoint(relativePosition);
+            mAutomationManager.addRecordingPoint(position);
         }
         repaint();
     }
@@ -420,17 +421,6 @@ void PositionFieldComponent::mouseUp(const MouseEvent & event)
             repaint();
         }
     }
-}
-
-Point<int> PositionFieldComponent::clipRecordingPosition(Point<int> const & pos)
-{
-    // TODO: constrain with SOURCE_COMPONENT_RADIUS instead.
-
-    constexpr int min{ TRAJECTORY_MARGINS };
-    int const max{ getWidth() - min };
-    Point<int> const clipped{ std::clamp(pos.x, min, max), std::clamp(pos.y, min, max) };
-
-    return clipped;
 }
 
 //==============================================================================
@@ -469,7 +459,8 @@ void ElevationFieldComponent::paint(Graphics & g)
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(
-            static_cast<float>(getWidth())) };
+            static_cast<float>(getWidth()),
+            mSources->getPrimarySource().getSpatMode()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     if (mIsPlaying && !isMouseButtonDown()
@@ -488,12 +479,10 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
-        //        auto const mousePosition{ event.getPosition() };
-        //        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
-        //        auto const position{ componentPositionToSourcePosition(clippedPosition) };
-        //        auto const isShiftDown{ event.mods.isShiftDown() };
-        //
-        //        mOldSelectedSource.reset();
+        auto const mousePosition{ event.getPosition().toFloat() };
+        auto const elevation{ componentPositionToSourceElevation(mousePosition) };
+
+        mOldSelectedSource.reset();
         //        mAutomationManager.resetRecordingTrajectory(position);
         //        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
         //

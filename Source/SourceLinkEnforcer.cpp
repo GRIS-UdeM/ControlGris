@@ -474,9 +474,8 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     if (strategy != nullptr) {
         strategy->calculateParams(mPrimarySourceSnapshot, mSources.size());
         snapshot = strategy->getInversedSnapshot(snapshot);
+        primarySourceMoved(); // some positions are invalid - fix them right away
     }
-
-    primarySourceMoved(); // some positions are invalid - fix them right away
 }
 
 void SourceLinkEnforcer::snapAll()

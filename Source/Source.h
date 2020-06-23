@@ -130,9 +130,12 @@ public:
     static Point<float> getPositionFromAngle(Radians const angle, float radius);
     static Radians getAngleFromPosition(Point<float> const & position);
 
+    static Point<float> clipPosition(Point<float> const & position, SpatMode spatMode);
+    static Point<float> clipDomePosition(Point<float> const & position);
+    static Point<float> clipCubePosition(Point<float> const & position);
+
 private:
     void sendNotifications(SourceLinkNotification sourceLinkNotification);
-    Point<float> clipPosition(Point<float> const & position) const;
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
     //==============================================================================

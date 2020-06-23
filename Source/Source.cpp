@@ -123,7 +123,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
 
 void Source::setPos(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
 {
-    auto const clippedPosition{ clipPosition(position) };
+    auto const clippedPosition{ clipPosition(position, mSpatMode) };
     if (mPosition != clippedPosition) {
         mPosition = clippedPosition;
         computeAzimuthElevation();
@@ -190,6 +190,37 @@ Radians Source::getAngleFromPosition(Point<float> const & position)
     return rotatedAngle;
 }
 
+Point<float> Source::clipDomePosition(Point<float> const & position)
+{
+    Point<float> result{};
+    auto const radius{ position.getDistanceFromOrigin() };
+    if (radius > 1.0f) {
+        auto const angle{ std::atan2(position.getY(), position.getX()) };
+        result = Point<float>{ std::cos(angle), std::sin(angle) };
+    } else {
+        result = position;
+    }
+    return result;
+}
+
+Point<float> Source::clipCubePosition(Point<float> const & position)
+{
+    Point<float> const result{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
+    return result;
+}
+
+Point<float> Source::clipPosition(Point<float> const & position, SpatMode const spatMode)
+{
+    Point<float> result{};
+    if (spatMode == SpatMode::dome) {
+        result = clipDomePosition(position);
+    } else {
+        jassert(spatMode == SpatMode::cube);
+        result = clipCubePosition(position);
+    }
+    return result;
+}
+
 void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
 {
     mGuiChangeBroadcaster.sendChangeMessage();
@@ -206,21 +237,6 @@ Radians Source::clipElevation(Radians const elevation)
 float Source::clipCoordinate(float const coord)
 {
     return std::clamp(coord, -1.0f, 1.0f);
-}
-
-Point<float> Source::clipPosition(Point<float> const & position) const
-{
-    if (mSpatMode == SpatMode::dome) {
-        auto const radius{ position.getDistanceFromOrigin() };
-        if (radius > 1.0f) {
-            auto const angle{ getAngleFromPosition(position) };
-            return getPositionFromAngle(angle, 1.0f);
-        } else {
-            return position;
-        }
-    } else {
-        return Point<float>{ clipCoordinate(position.getX()), clipCoordinate(position.getY()) };
-    }
 }
 
 void Source::setColorFromIndex(int const numTotalSources)
