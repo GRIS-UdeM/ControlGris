@@ -19,29 +19,33 @@
 
 using AnySourceLink = std::variant<PositionSourceLink, ElevationSourceLink>;
 
-struct SourceSnapshot {
-    Source * source;
-    Radians azimuth;
-    Radians elevation;
-    float distance; // TODO: useful?
-    Point<float> position;
-
-    void takeSnapshot()
+struct SourceCoords {
+    SourceCoords() noexcept = default;
+    SourceCoords(Source const & source) noexcept
+        : azimuth(source.getAzimuth())
+        , elevation(source.getElevation())
+        , distance(source.getDistance())
+        , position(source.getPos())
     {
-        azimuth = source->getAzimuth();
-        elevation = source->getElevation();
-        distance = source->getDistance();
-        position = source->getPos();
     }
+
+    Radians azimuth{};
+    Radians elevation{};
+    float distance{}; // TODO: useful?
+    Point<float> position{};
+};
+
+struct SourceLinkParameters {
+    SourceCoords primarySourceInitialCoords{};
+    Array<SourceCoords> secondarySourcesInitialCoords{};
 };
 
 class SourceLinkEnforcer : juce::ChangeListener
 {
 private:
     Sources & mSources;
-    SourceSnapshot mPrimarySourceSnapshot;
-    Array<SourceSnapshot> mSecondarySourcesSnapshots;
-    AnySourceLink mSourceLink;
+    SourceLinkParameters mParameters{};
+    AnySourceLink mSourceLink{};
 
 public:
     SourceLinkEnforcer(Sources & sources, AnySourceLink const sourceLink = PositionSourceLink::independent) noexcept;
@@ -50,6 +54,8 @@ public:
     void setSourceLink(AnySourceLink sourceLink);
     void numberOfSourcesChanged();
     void enforceSourceLink();
+
+    auto const & getParameters() const { return mParameters; }
 
 private:
     void primarySourceMoved();

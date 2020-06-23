@@ -20,7 +20,7 @@
 //=========
 class Trajectory
 {
-private:
+protected:
     //=========
     Array<Point<float>> mPoints{};
 
