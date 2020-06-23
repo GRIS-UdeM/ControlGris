@@ -14,7 +14,6 @@
 #include <cmath>
 
 Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Point<float> const & startingPoint) noexcept
-    : mTrajectoryType(positionTrajectoryType)
 {
     switch (positionTrajectoryType) {
     case PositionTrajectoryType::circleClockwise:
@@ -76,7 +75,6 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
 }
 
 Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) noexcept
-    : mTrajectoryType(elevationTrajectoryType)
 {
     switch (elevationTrajectoryType) {
     case ElevationTrajectoryType::downUp:
@@ -93,6 +91,41 @@ Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) no
     default:
         jassertfalse;
     }
+}
+
+Path Trajectory::getDrawablePath(float componentWidth, SpatMode spatMode) const
+{
+    auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
+        auto const clippedPoint{ Source::clipPosition(trajectoryPosition, spatMode) };
+        auto const result{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f
+                               * (componentWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
+                           + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
+        return result;
+    };
+
+    Path result{};
+    if (!mPoints.isEmpty()) {
+        result.startNewSubPath(trajectoryPositionToComponentPosition(mPoints.getReference(0)));
+        for (int i{ 1 }; i < mPoints.size(); ++i) {
+            result.lineTo(trajectoryPositionToComponentPosition(mPoints.getReference(i)));
+        }
+    }
+    return result;
+}
+
+Point<float> Trajectory::getPosition(Normalized const normalized) const
+{
+    auto const nbPoints{ static_cast<float>(mPoints.size()) };
+    auto const index_a{ static_cast<int>(std::floor(normalized.toFloat() * nbPoints)) };
+    auto const index_b{ static_cast<int>(std::ceil(normalized.toFloat() * nbPoints)) };
+    auto const balance{ std::fmod(normalized.toFloat() * nbPoints, 1.0f) };
+
+    auto const & point_a{ mPoints.getReference(index_a) };
+    auto const & point_b{ mPoints.getReference(index_b) };
+
+    auto const result{ point_a * (1.0f - balance) + point_b * balance };
+
+    return result;
 }
 
 void Trajectory::invertDirection()
@@ -263,25 +296,5 @@ Array<Point<float>> Trajectory::getBasicDownUpPoints()
         currentPoint += step;
     }
 
-    return result;
-}
-
-Path Trajectory::createDrawablePath(float const componentWidth, SpatMode const spatMode) const
-{
-    auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
-        auto const clippedPoint{ Source::clipPosition(trajectoryPosition, spatMode) };
-        auto const result{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f
-                               * (componentWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
-                           + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
-        return result;
-    };
-
-    Path result{};
-    if (!mPoints.isEmpty()) {
-        result.startNewSubPath(trajectoryPositionToComponentPosition(mPoints.getReference(0)));
-        for (int i{ 1 }; i < mPoints.size(); ++i) {
-            result.lineTo(trajectoryPositionToComponentPosition(mPoints.getReference(i)));
-        }
-    }
     return result;
 }

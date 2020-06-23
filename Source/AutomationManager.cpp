@@ -66,7 +66,7 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
 
     mPlaybackPosition.reset();
     mTrajectory->clear();
-    mTrajectory->add(currentPosition);
+    mTrajectory->addPoint(currentPosition);
     mLastRecordingPoint = currentPosition;
     mTrajectoryHandlePosition = currentPosition;
     // mPrincipalSource.setPos(currentPosition); ???
@@ -147,14 +147,12 @@ void AutomationManager::computeCurrentTrajectoryPoint()
 
         double const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
         delta *= deltaRatio;
-        auto index = static_cast<int>(delta);
+        auto index{ static_cast<int>(delta) };
         if (index + 1 < mTrajectory->size()) {
-            auto const frac{ static_cast<float>(delta) - static_cast<float>(index) };
-            auto const p1{ mTrajectory.value()[index] };
-            auto const p2{ mTrajectory.value()[index + 1] };
-            mCurrentTrajectoryPoint = p1 + (p2 - p1) * frac;
+            Normalized const progression{ static_cast<float>(delta / mTrajectory->size()) };
+            mCurrentTrajectoryPoint = mTrajectory->getPosition(progression);
         } else {
-            mCurrentTrajectoryPoint = mTrajectory->getLast();
+            mCurrentTrajectoryPoint = mTrajectory->getEndPosition();
         }
     }
 
@@ -186,13 +184,13 @@ int AutomationManager::getRecordingTrajectorySize() const
 Point<float> AutomationManager::getFirstRecordingPoint() const
 {
     jassert(mTrajectory.has_value());
-    return mTrajectory->getFirst();
+    return mTrajectory->getStartPosition();
 }
 
 Point<float> AutomationManager::getLastRecordingPoint() const
 {
     jassert(mTrajectory.has_value());
-    return mTrajectory->getLast();
+    return mTrajectory->getEndPosition();
 }
 
 Point<float> AutomationManager::getCurrentTrajectoryPoint() const
@@ -238,7 +236,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 void AutomationManager::addRecordingPoint(Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
-    mTrajectory->add(smoothRecordingPosition(pos));
+    mTrajectory->addPoint(smoothRecordingPosition(pos));
 }
 
 void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)

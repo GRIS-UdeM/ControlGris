@@ -32,6 +32,7 @@ public:
     constexpr explicit Normalized(float const value) noexcept : mValue(value) { clip(); }
 
     constexpr operator float() const { return mValue; }
+    constexpr float toFloat() const { return mValue; }
 
     constexpr float operator*(float const rhs) const { return mValue * rhs; }
 

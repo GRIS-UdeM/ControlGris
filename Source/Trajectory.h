@@ -14,8 +14,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "ConstrainedStrongTypes.h"
 #include "ControlGrisConstants.h"
-#include "StrongTypes.h"
 
 //=========
 class Trajectory
@@ -23,7 +23,6 @@ class Trajectory
 private:
     //=========
     Array<Point<float>> mPoints{};
-    std::variant<PositionTrajectoryType, ElevationTrajectoryType> mTrajectoryType;
 
 public:
     //=========
@@ -38,16 +37,15 @@ public:
     Trajectory & operator=(Trajectory const &) = default;
     Trajectory & operator=(Trajectory &&) noexcept = default;
 
-    Point<float> const & operator[](int const index) const { return mPoints.getReference(index); }
-
-    Point<float> const & getFirst() const { return mPoints.getReference(0); }
-    Point<float> const & getLast() const { return mPoints.getReference(mPoints.size() - 1); }
+    Point<float> const & getStartPosition() const { return mPoints.getReference(0); }
+    Point<float> const & getEndPosition() const { return mPoints.getReference(mPoints.size() - 1); }
+    Point<float> getPosition(Normalized normalized) const;
 
     void clear() { mPoints.clear(); }
-    void add(Point<float> const & point) { mPoints.add(point); }
+    void addPoint(Point<float> const & point) { mPoints.add(point); }
     int size() const { return mPoints.size(); }
 
-    Path createDrawablePath(float componentWidth, SpatMode spatMode) const;
+    Path getDrawablePath(float componentWidth, SpatMode spatMode) const;
 
 private:
     //=========

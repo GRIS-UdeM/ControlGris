@@ -25,9 +25,9 @@
 FieldComponent::FieldComponent() noexcept
 {
     mTrajectoryHandleComponent = std::make_unique<TrajectoryHandleComponent>(*this);
-    mTrajectoryHandleComponent->setCentrePosition(getWidth() / 2, getHeight() / 2);
     addAndMakeVisible(mTrajectoryHandleComponent.get());
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
+    mTrajectoryHandleComponent->setCentrePosition(getWidth() / 2, getHeight() / 2);
 }
 
 void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
@@ -303,14 +303,8 @@ void PositionFieldComponent::paint(Graphics & g)
 
     drawBackground(g);
 
-    bool shouldDrawTrajectoryHandle{ false };
-    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing && !mIsPlaying) {
-        shouldDrawTrajectoryHandle = true;
-    } else if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime
-               && mAutomationManager.getSourceLink() == PositionSourceLink::deltaLock) {
-        shouldDrawTrajectoryHandle = true;
-    }
-    mTrajectoryHandleComponent->setVisible(shouldDrawTrajectoryHandle);
+    mTrajectoryHandleComponent->setVisible(mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
+                                           && !mIsPlaying);
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
@@ -322,7 +316,7 @@ void PositionFieldComponent::paint(Graphics & g)
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
     if (mAutomationManager.getTrajectory().has_value()) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(getWidth(), mSpatMode) };
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(getWidth(), mSpatMode) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     // position dot
@@ -465,10 +459,13 @@ void ElevationFieldComponent::paint(Graphics & g)
     drawBackground(g);
     drawSpans(g);
 
+    mTrajectoryHandleComponent->setVisible(mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing
+                                           && !mIsPlaying);
+
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory()->createDrawablePath(
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(
             static_cast<float>(getWidth()),
             mSources->getPrimarySource().getSpatMode()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
