@@ -314,20 +314,18 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 //==============================================================================
 void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 {
-    if (spatMode != mSpatMode) {
-        mSpatMode = spatMode;
-        mParameters.state.setProperty("oscFormat", static_cast<int>(mSpatMode), nullptr);
-        for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-            mSources.get(i).setSpatMode(spatMode);
-        }
+    mSpatMode = spatMode;
+    mParameters.state.setProperty("oscFormat", static_cast<int>(mSpatMode), nullptr);
+    for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
+        mSources.get(i).setSpatMode(spatMode);
+    }
 
-        if (spatMode == SpatMode::dome) {
-            // remove cube-specific gadgets
-            // TODO : this is a bad idea! It leaves the plugin in an inconsistent state when going back to CUBE mode.
-            mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
-            mElevationAutomationManager.setSourceLink(ElevationSourceLink::independent);
-            mElevationAutomationManager.setTrajectoryType(ElevationTrajectoryType::undefined);
-        }
+    if (spatMode == SpatMode::dome) {
+        // remove cube-specific gadgets
+        // TODO : this is a bad idea! It leaves the plugin in an inconsistent state when going back to CUBE mode.
+        //            mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
+        //            mElevationAutomationManager.setSourceLink(ElevationSourceLink::independent);
+        //            mElevationAutomationManager.setTrajectoryType(ElevationTrajectoryType::undefined);
     }
 }
 
@@ -938,8 +936,31 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
     }
 }
 
+void ControlGrisAudioProcessor::beginSourcePositionChangeGesture()
+{
+    mParameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
+    mParameters.getParameter("recordingTrajectory_y")->beginChangeGesture();
+}
+
+void ControlGrisAudioProcessor::endSourcePositionChangeGesture()
+{
+    mParameters.getParameter("recordingTrajectory_x")->endChangeGesture();
+    mParameters.getParameter("recordingTrajectory_y")->endChangeGesture();
+}
+
+void ControlGrisAudioProcessor::beginSourceElevationChangeGesture()
+{
+    mParameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
+}
+
+void ControlGrisAudioProcessor::endSourceElevationChangeGesture()
+{
+    mParameters.getParameter("recordingTrajectory_z")->endChangeGesture();
+}
+
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager, Point<float> position)
 {
+    // TODO: change gestures might have to be initiated some other way ? (osc input)
     auto const normalizedPosition{ (position + Point<float>{ 1.0f, 1.0f }) / 2.0f };
     if (manager == &mPositionAutomationManager) {
         if (!isPlaying()) {
@@ -947,21 +968,18 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
             mParameters.getParameter("recordingTrajectory_x")->setValue(normalizedPosition.getX());
             mParameters.getParameter("recordingTrajectory_y")->setValue(normalizedPosition.getY());
         }
-        mParameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
+
         mParameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(normalizedPosition.getX());
-        mParameters.getParameter("recordingTrajectory_x")->endChangeGesture();
-        mParameters.getParameter("recordingTrajectory_y")->beginChangeGesture();
         mParameters.getParameter("recordingTrajectory_y")->setValueNotifyingHost(normalizedPosition.getY());
-        mParameters.getParameter("recordingTrajectory_y")->endChangeGesture();
+
     } else if (manager == &mElevationAutomationManager) {
         if (!isPlaying()) {
             //            mElevationAutomationManager.setPrincipalSourceAndPlaybackElevation(position.y); // TODO: this
             //            is broken!
             mParameters.getParameter("recordingTrajectory_z")->setValue(position.y);
         }
-        mParameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
+
         mParameters.getParameter("recordingTrajectory_z")->setValueNotifyingHost(position.y);
-        mParameters.getParameter("recordingTrajectory_z")->endChangeGesture();
     }
 }
 

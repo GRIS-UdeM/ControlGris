@@ -21,7 +21,9 @@
 
 #include <algorithm>
 
-AutomationManager::AutomationManager(Source & principalSource) noexcept : mPrincipalSource(principalSource)
+AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+    : mProcessor(processor)
+    , mPrincipalSource(principalSource)
 {
 }
 

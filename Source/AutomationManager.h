@@ -25,6 +25,8 @@
 #include "Source.h"
 #include "Trajectory.h"
 
+class ControlGrisAudioProcessor;
+
 //==============================================================================
 struct PlaybackPosition {
     std::optional<float> x{};
@@ -75,6 +77,8 @@ public:
 
 protected:
     //==============================================================================
+    ControlGrisAudioProcessor & mProcessor;
+
     ListenerList<Listener> mListeners;
 
     float mFieldWidth{ MIN_FIELD_WIDTH };
@@ -107,9 +111,11 @@ protected:
 
 public:
     //==============================================================================
-    AutomationManager(Source & principalSource) noexcept;
+    AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
     virtual ~AutomationManager() noexcept = default;
     //==============================================================================
+    ControlGrisAudioProcessor & getProcessor() { return mProcessor; }
+
     float getFieldWidth() const { return mFieldWidth; }
     void setFieldWidth(float newFieldWidth);
 
@@ -173,7 +179,10 @@ class PositionAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    PositionAutomationManager(Source & principalSource) noexcept : AutomationManager(principalSource) {}
+    PositionAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+        : AutomationManager(processor, principalSource)
+    {
+    }
     ~PositionAutomationManager() noexcept final = default;
     //==============================================================================
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
@@ -199,7 +208,10 @@ class ElevationAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
-    ElevationAutomationManager(Source & principalSource) noexcept : AutomationManager(principalSource) {}
+    ElevationAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+        : AutomationManager(processor, principalSource)
+    {
+    }
     ~ElevationAutomationManager() noexcept final = default;
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);

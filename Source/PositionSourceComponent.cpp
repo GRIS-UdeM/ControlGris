@@ -11,6 +11,7 @@
 #include "PositionSourceComponent.h"
 
 #include "FieldComponent.h"
+#include "PluginProcessor.h"
 #include "Source.h"
 
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
@@ -36,7 +37,13 @@ void PositionSourceComponent::updatePositionInParent()
 
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.getProcessor().beginSourcePositionChangeGesture();
+    }
     this->setSourcePosition(event);
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.sendTrajectoryPositionChangedEvent();
+    }
     mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
@@ -57,12 +64,17 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
     if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
         this->setSourcePosition(event);
+        if (mSource.isPrimarySource()) {
+            mAutomationManager.sendTrajectoryPositionChangedEvent();
+        }
     }
 }
 
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
-    mFieldComponent.setCircularSourceSelectionWarning(false);
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.getProcessor().endSourcePositionChangeGesture();
+    }
 }
 
 SourceIndex PositionSourceComponent::getSourceIndex() const

@@ -87,8 +87,8 @@ public:
     //==============================================================================
     AudioProcessorValueTreeState mParameters;
 
-    PositionAutomationManager mPositionAutomationManager{ mSources.getPrimarySource() };
-    ElevationAutomationManager mElevationAutomationManager{ mSources.getPrimarySource() };
+    PositionAutomationManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
+    ElevationAutomationManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
     //==============================================================================
     ControlGrisAudioProcessor();
     ~ControlGrisAudioProcessor() final;
@@ -184,6 +184,11 @@ public:
 
     bool isPlaying() const { return mIsPlaying; }
     double getBPM() const { return mBpm; }
+
+    void beginSourcePositionChangeGesture();
+    void endSourcePositionChangeGesture();
+    void beginSourceElevationChangeGesture();
+    void endSourceElevationChangeGesture();
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 
