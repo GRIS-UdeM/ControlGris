@@ -436,7 +436,7 @@ SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
     }
 }
 
-void SourceLinkEnforcer::setSourceLink(AnySourceLink sourceLink)
+void SourceLinkEnforcer::setSourceLink(AnySourceLink const sourceLink)
 {
     if (sourceLink != mSourceLink) {
         mSourceLink = sourceLink;

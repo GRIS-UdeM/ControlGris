@@ -179,7 +179,7 @@ public:
     void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
     PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
-    void setSourceLink(PositionSourceLink sourceLink) { mSourceLink = sourceLink; }
+    void setSourceLink(PositionSourceLink const sourceLink) { mSourceLink = sourceLink; }
     PositionSourceLink getSourceLink() const { return mSourceLink; }
 
     void applyCurrentTrajectoryPointToPrimarySource() final;

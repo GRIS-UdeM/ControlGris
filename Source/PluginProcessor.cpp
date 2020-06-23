@@ -221,7 +221,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
         mPositionAutomationManager.setPlaybackPositionX(newValue);
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
-    } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSelectedOscFormat == SpatMode::cube) {
+    } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSpatMode == SpatMode::cube) {
         mElevationAutomationManager.setPlaybackPositionY(newValue); // TODO: z = y ?
     }
 
@@ -312,12 +312,22 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setOscFormat(SpatMode const oscFormat)
+void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 {
-    mSelectedOscFormat = oscFormat;
-    mParameters.state.setProperty("oscFormat", static_cast<int>(mSelectedOscFormat), nullptr);
-    for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        mSources.get(i).setSpatMode(oscFormat);
+    if (spatMode != mSpatMode) {
+        mSpatMode = spatMode;
+        mParameters.state.setProperty("oscFormat", static_cast<int>(mSpatMode), nullptr);
+        for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
+            mSources.get(i).setSpatMode(spatMode);
+        }
+
+        if (spatMode == SpatMode::dome) {
+            // remove cube-specific gadgets
+            // TODO : this is a bad idea! It leaves the plugin in an inconsistent state when going back to CUBE mode.
+            mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
+            mElevationAutomationManager.setSourceLink(ElevationSourceLink::independent);
+            mElevationAutomationManager.setTrajectoryType(ElevationTrajectoryType::undefined);
+        }
     }
 }
 
@@ -411,8 +421,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
         float const elevation{ source.getElevation().getAsRadians() };
         float const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
         float const elevationSpan{ source.getElevationSpan() * 0.5f };
-        float const distance{ mSelectedOscFormat == SpatMode::cube ? source.getDistance() / 0.6f
-                                                                   : source.getDistance() };
+        float const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
 
         // std::cout << "Sending osc for source #" << i << ":\n\tazimuth: " << azimuth << "\n\televation: " << elevation
         //           << "\n\tazimuthSpan: " << azimuthSpan << "\n\televationSpan" << elevationSpan
@@ -798,7 +807,7 @@ void ControlGrisAudioProcessor::timerCallback()
     }
 
     // ElevationField automation.
-    if (getOscFormat() == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
+    if (getSpatMode() == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
         if (mElevationAutomationManager.getTrajectoryType() != ElevationTrajectoryType::realtime
             && mLastTimerTime != getCurrentTime()) {
             mElevationAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
@@ -866,7 +875,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
 {
     auto const & source{ mSources[sourceIndex] };
     if (whichField == 0) {
-        if (getOscFormat() == SpatMode::dome) {
+        if (getSpatMode() == SpatMode::dome) {
             setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
             setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
         } else {
@@ -986,7 +995,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         newData->setAttribute(getFixedPosSourceName(i, 0), mSources[i].getX());
         newData->setAttribute(getFixedPosSourceName(i, 1), mSources[i].getY());
-        if (mSelectedOscFormat == SpatMode::cube) {
+        if (mSpatMode == SpatMode::cube) {
             newData->setAttribute(getFixedPosSourceName(i, 2), mSources[i].getNormalizedElevation());
         }
     }
@@ -1041,7 +1050,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
     //        };
     //        source.setPos(position);
     //        source.setFixedPosition(position);
-    //        if (mSelectedOscFormat == SpatMode::cube) {
+    //        if (mSpatMode == SpatMode::cube) {
     //            float const z{ static_cast<float>(
     //                mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 2))) };
     //            source.setFixedElevation(Degrees{ 90.0f } - Degrees{ 90.0f } * z);
@@ -1253,7 +1262,7 @@ void ControlGrisAudioProcessor::setStateInformation(const void * data, int sizeI
         // Set global settings values.
         //----------------------------
         ValueTree valueTree = ValueTree::fromXml(*xmlState);
-        setOscFormat((SpatMode)(int)valueTree.getProperty("oscFormat", 0));
+        setSpatMode((SpatMode)(int)valueTree.getProperty("oscFormat", 0));
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);

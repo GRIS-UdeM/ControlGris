@@ -37,7 +37,7 @@ class ControlGrisAudioProcessor final
 {
 private:
     //==============================================================================
-    SpatMode mSelectedOscFormat{ SpatMode::dome };
+    SpatMode mSpatMode{ SpatMode::dome };
     bool mOscConnected{ true };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
@@ -133,8 +133,8 @@ public:
     void parameterChanged(String const & parameterID, float newValue) final;
 
     //==============================================================================
-    void setOscFormat(SpatMode oscFormat);
-    SpatMode getOscFormat() const { return mSelectedOscFormat; }
+    void setSpatMode(SpatMode spatMode);
+    SpatMode getSpatMode() const { return mSpatMode; }
 
     void setOscPortNumber(int oscPortNumber);
     int getOscPortNumber() const { return mCurrentOSCPort; }

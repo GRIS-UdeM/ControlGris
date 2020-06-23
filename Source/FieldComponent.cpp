@@ -269,12 +269,13 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 {
     // TODO : there is probably some reasonning behind this value in SpatGRIS2 source.
     constexpr float MAGIC_MAX_SPAN_RATIO = 0.8f;
+    constexpr float MIN_SPAN_WIDTH = SOURCE_FIELD_COMPONENT_DIAMETER;
 
     auto const width{ static_cast<float>(getWidth()) };
-    auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER };
+    auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER - MIN_SPAN_WIDTH };
 
     for (auto const & source : *mSources) {
-        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan() * MAGIC_MAX_SPAN_RATIO };
+        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan() * MAGIC_MAX_SPAN_RATIO + MIN_SPAN_WIDTH };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f };
         float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.5f };
         Point<float> const center{ sourcePositionToComponentPosition(source.getPos()) };
@@ -428,24 +429,33 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 {
     jassert(getWidth() == getHeight());
     auto const componentSize{ static_cast<float>(this->getWidth()) };
-    constexpr auto MIN_SPAN_WIDTH = 2.0f;
+    auto const effectiveComponentSize{ componentSize - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f };
 
     float sourceIndex{};
     for (auto const & source : *mSources) {
         auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 3 : 1 };
         auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
+        constexpr auto anchorThickness = 5;
+        auto const halfSpanHeight{ static_cast<float>(source.getElevationSpan()) * effectiveComponentSize };
+        auto const spanHeight{ halfSpanHeight * 2.0f };
+        Line<float> anchor{ position, position.translated(0, componentSize) };
+        Rectangle<float> unclippedSpanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
+                                            position.getY() - halfSpanHeight,
+                                            SOURCE_FIELD_COMPONENT_DIAMETER,
+                                            spanHeight };
+        Rectangle<float> const limits{ SOURCE_FIELD_COMPONENT_DIAMETER,
+                                       SOURCE_FIELD_COMPONENT_DIAMETER,
+                                       effectiveComponentSize,
+                                       effectiveComponentSize };
+        auto const spanArea{ unclippedSpanArea.getIntersection(limits) };
 
         // draw Spans
-        float const elevationSpan{ 50.0f * source.getElevationSpan() + MIN_SPAN_WIDTH };
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawRect(position.getX() - elevationSpan / 2.0f,
-                   position.getY() + lineThickness / 2.0f,
-                   elevationSpan,
-                   componentSize,
-                   1.5f);
+        g.drawLine(anchor, anchorThickness);
+        g.drawRect(spanArea, lineThickness);
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
-        g.fillRect(position.x - elevationSpan / 2.0f, position.y + lineThickness / 2.0f, elevationSpan, componentSize);
+        g.fillRect(spanArea);
         sourceIndex += 1.0f;
     }
 }
@@ -603,13 +613,14 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
                                                                          SourceIndex const index) const
 {
     auto const availableWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
-    auto const availableHeight{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER };
+    auto const availableHeight{ static_cast<float>(getHeight())
+                                - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f }; // more padding looks better
     auto const widthPerSource{ availableWidth / static_cast<float>(mSources->size()) };
     auto const widthBetweenSources{ widthPerSource / 2.0f };
 
     auto const x{ widthPerSource * static_cast<float>(index.toInt()) + widthBetweenSources
                   + SOURCE_FIELD_COMPONENT_RADIUS };
-    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + SOURCE_FIELD_COMPONENT_RADIUS };
+    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + SOURCE_FIELD_COMPONENT_DIAMETER };
     Point<float> const result{ x, y };
 
     return result;
@@ -617,8 +628,9 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
 
 Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float> const & componentPosition) const
 {
-    auto const height{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER };
+    auto const effectiveHeight{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f };
 
-    Radians const result{ MAX_ELEVATION * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_RADIUS) / height) };
+    Radians const result{ MAX_ELEVATION
+                          * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_DIAMETER) / effectiveHeight) };
     return result;
 }
