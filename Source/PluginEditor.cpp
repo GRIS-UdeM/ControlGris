@@ -319,12 +319,12 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
 {
     auto numOfSources = mProcessor.getSources().size();
-    Degrees const azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
-    Degrees const azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
-    Degrees const azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
-                                Degrees{ 90.0f },  Degrees{ -150.0f }, Degrees{ 150.0f } };
-    Degrees const azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
-                                Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
+    constexpr Degrees azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
+    constexpr Degrees azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
+    constexpr Degrees azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
+                                    Degrees{ 90.0f },  Degrees{ -150.0f }, Degrees{ 150.0f } };
+    constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
+                                    Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
     bool isLBAP = mProcessor.getSpatMode() == SpatMode::cube;
 
@@ -335,7 +335,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::leftAlternate: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
                 source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
 
@@ -352,7 +352,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::rightAlternate: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
                 source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
             } else if (numOfSources <= 4) {
@@ -369,7 +369,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -378,7 +378,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -387,7 +387,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -396,7 +396,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -405,7 +405,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -414,7 +414,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
-            auto const elevation{ isLBAP ? source.getElevation() : Radians{} };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
