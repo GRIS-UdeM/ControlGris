@@ -873,8 +873,11 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
             setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
             setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
         }
+        mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+                                                     mSources.getPrimarySource().getPos());
     } else {
         setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
+        mElevationAutomationManager.setTrajectoryType(mElevationAutomationManager.getTrajectoryType());
     }
 }
 

@@ -488,37 +488,38 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
     setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
-        auto const mousePosition{ event.getPosition() };
-        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
-        auto const position{ componentPositionToSourcePosition(clippedPosition) };
-        auto const isShiftDown{ event.mods.isShiftDown() };
-
-        mOldSelectedSource.reset();
-        mAutomationManager.resetRecordingTrajectory(position);
-        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
-
-        if (mLineDrawingAnchor1.has_value()) {
-            auto const anchor1{ mLineDrawingAnchor1.value() };
-            auto const anchor2{ position };
-            auto const numSteps{ static_cast<int>(
-                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
-            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
-            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
-            for (int i{ 1 }; i <= numSteps; ++i) {
-                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
-            }
-            if (isShiftDown) {
-                mLineDrawingAnchor1 = anchor2;
-                mLineDrawingAnchor2.reset();
-            } else {
-                mLineDrawingAnchor1.reset();
-                mLineDrawingAnchor2.reset();
-            }
-        } else {
-            if (isShiftDown) {
-                mLineDrawingAnchor1 = position;
-            }
-        }
+        //        auto const mousePosition{ event.getPosition() };
+        //        auto const clippedPosition{ clipRecordingPosition(mousePosition).toFloat() };
+        //        auto const position{ componentPositionToSourcePosition(clippedPosition) };
+        //        auto const isShiftDown{ event.mods.isShiftDown() };
+        //
+        //        mOldSelectedSource.reset();
+        //        mAutomationManager.resetRecordingTrajectory(position);
+        //        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
+        //
+        //        if (mLineDrawingAnchor1.has_value()) {
+        //            auto const anchor1{ mLineDrawingAnchor1.value() };
+        //            auto const anchor2{ position };
+        //            auto const numSteps{ static_cast<int>(
+        //                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
+        //            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
+        //            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
+        //            for (int i{ 1 }; i <= numSteps; ++i) {
+        //                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i
+        //                });
+        //            }
+        //            if (isShiftDown) {
+        //                mLineDrawingAnchor1 = anchor2;
+        //                mLineDrawingAnchor2.reset();
+        //            } else {
+        //                mLineDrawingAnchor1.reset();
+        //                mLineDrawingAnchor2.reset();
+        //            }
+        //        } else {
+        //            if (isShiftDown) {
+        //                mLineDrawingAnchor1 = position;
+        //            }
+        //        }
     }
 
     repaint();

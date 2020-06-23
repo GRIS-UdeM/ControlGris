@@ -241,10 +241,6 @@ void AutomationManager::addRecordingPoint(Point<float> const & pos)
 
 void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
 {
-    constexpr auto NB_POINTS = 400;
-    static_assert(NB_POINTS % 2 == 0);
-    constexpr auto NB_POINTS_PER_GESTURE = NB_POINTS / 2;
-
     mTrajectoryType = type;
 
     if (type != ElevationTrajectoryType::realtime) {
@@ -254,34 +250,6 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
     }
 
     // TODO
-    //    auto constexpr offset{ 10.0f + SOURCE_FIELD_COMPONENT_RADIUS };
-    //    auto const width{ mFieldWidth - offset };
-    //    auto constexpr minPos{ 15.0f };
-    //    auto const maxPos{ mFieldWidth - 20.0f };
-    //
-    //    switch (type) {
-    //    case ElevationTrajectoryType::realtime:
-    //    case ElevationTrajectoryType::drawing:
-    //        mPlaybackPosition = Point<float>{ -1.0f, -1.0f };
-    //        break;
-    //    case ElevationTrajectoryType::downUp:
-    //        for (int i{}; i < NB_POINTS_PER_GESTURE; ++i) {
-    //            float const x = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * width + offset;
-    //            float const y = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * (maxPos - minPos) + minPos;
-    //            mTrajectoryPoints.add(Point<float>{ x, y });
-    //        }
-    //        break;
-    //    case ElevationTrajectoryType::upDown:
-    //        for (int i{}; i < NB_POINTS_PER_GESTURE; ++i) {
-    //            float const x = (static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * width + offset;
-    //            float const y = (1.0f - static_cast<float>(i) / (NB_POINTS_PER_GESTURE - 1)) * (maxPos - minPos) +
-    //            minPos; mTrajectoryPoints.add(Point<float>{ x, y });
-    //        }
-    //        break;
-    //    case ElevationTrajectoryType::undefined:
-    //        jassertfalse;
-    //    }
-    //
     //    if (type > ElevationTrajectoryType::drawing) {
     //        setSourcePosition(
     //            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.0f - mTrajectoryPoints[0].y / mFieldWidth });
