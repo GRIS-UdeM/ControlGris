@@ -36,8 +36,7 @@ public:
 
     void apply(std::array<Source, MAX_NUMBER_OF_SOURCES - 1> & sources, Array<SourceCoords> const & snapshots) const
     {
-        jassert(sources.size() == snapshots.size());
-        for (int i{}; i < sources.size(); ++i) { // TODO: this is applied to more sources than it should
+        for (int i{}; i < snapshots.size(); ++i) { // TODO: this is applied to more sources than it should
             auto & source{ sources[i] };
             auto const & snapshot{ snapshots.getReference(i) };
             apply(source, snapshot);
@@ -481,6 +480,12 @@ void SourceLinkEnforcer::enforceSourceLink()
         strategy->calculateParams(mSources.getPrimarySource(), mParameters.primarySourceInitialCoords, mSources.size());
         strategy->apply(mSources.getSecondarySources(), mParameters.secondarySourcesInitialCoords);
     }
+}
+
+void SourceLinkEnforcer::loadParameters(SourceLinkParameters const & parameters)
+{
+    mParameters = parameters;
+    enforceSourceLink();
 }
 
 void SourceLinkEnforcer::numberOfSourcesChanged()

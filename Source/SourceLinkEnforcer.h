@@ -38,6 +38,24 @@ struct SourceCoords {
 struct SourceLinkParameters {
     SourceCoords primarySourceInitialCoords{};
     Array<SourceCoords> secondarySourcesInitialCoords{};
+
+    SourceCoords const & operator[](SourceIndex const index) const
+    {
+        jassert(index.toInt() >= 0 && index.toInt() < secondarySourcesInitialCoords.size() + 1);
+        if (index.toInt() == 0) {
+            return primarySourceInitialCoords;
+        }
+        return secondarySourcesInitialCoords.getReference(index.toInt() - 1);
+    }
+    SourceCoords & operator[](SourceIndex const index)
+    {
+        jassert(index.toInt() >= 0 && index.toInt() < secondarySourcesInitialCoords.size() + 1);
+        if (index.toInt() == 0) {
+            return primarySourceInitialCoords;
+        }
+        return secondarySourcesInitialCoords.getReference(index.toInt() - 1);
+    }
+    int size() const { return secondarySourcesInitialCoords.size() + 1; }
 };
 
 class SourceLinkEnforcer : juce::ChangeListener
@@ -56,6 +74,7 @@ public:
     void enforceSourceLink();
 
     auto const & getParameters() const { return mParameters; }
+    void loadParameters(SourceLinkParameters const & parameters);
 
 private:
     void primarySourceMoved();

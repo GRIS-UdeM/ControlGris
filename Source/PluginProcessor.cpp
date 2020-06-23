@@ -22,18 +22,21 @@
 
 #include "PluginEditor.h"
 
-String getFixedPosSourceName(int index, int dimension)
+enum FixedPositionType { position, snapshot };
+
+String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
 {
+    String const type{ fixedPositionType == FixedPositionType::position ? "_position" : "_snapshot" };
     String result{};
     switch (dimension) {
     case 0:
-        result = String("S") + String(index + 1) + String("_X");
+        result = String("S") + String(index.toInt() + 1) + type + String("_X");
         break;
     case 1:
-        result = String("S") + String(index + 1) + String("_Y");
+        result = String("S") + String(index.toInt() + 1) + type + String("_Y");
         break;
     case 2:
-        result = String("S") + String(index + 1) + String("_Z");
+        result = String("S") + String(index.toInt() + 1) + type + String("_Z");
         break;
     default:
         jassertfalse; // how did you get there?
@@ -1008,15 +1011,26 @@ void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
 void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
 {
     // Build a new fixed position element.
-    XmlElement * newData = new XmlElement("ITEM");
+    auto * newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
-    for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        newData->setAttribute(getFixedPosSourceName(i, 0), mSources[i].getX());
-        newData->setAttribute(getFixedPosSourceName(i, 1), mSources[i].getY());
-        if (mSpatMode == SpatMode::cube) {
-            newData->setAttribute(getFixedPosSourceName(i, 2), mSources[i].getNormalizedElevation());
-        }
+    auto const positionParameters{ mPositionSourceLinkEnforcer.getParameters() };
+    auto const elevationParameters{ mElevationSourceLinkEnforcer.getParameters() };
+    SourceIndex const numberOfSources{ positionParameters.size() };
+    for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
+        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 0),
+                              positionParameters[sourceIndex].position.getX());
+        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 1),
+                              positionParameters[sourceIndex].position.getY());
+        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 2),
+                              elevationParameters[sourceIndex].elevation.getAsRadians());
     }
+
+    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0),
+                          mSources.getPrimarySource().getPos().getX());
+    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1),
+                          mSources.getPrimarySource().getPos().getY());
+    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2),
+                          mSources.getPrimarySource().getElevation().getAsRadians());
 
     // Replace an element if the new one has the same ID as one already saved.
     bool found{ false };
@@ -1043,41 +1057,65 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
 
 bool ControlGrisAudioProcessor::recallFixedPosition(int id)
 {
-    // TODO
+    bool found = false;
+    XmlElement * fpos = mFixPositionData.getFirstChildElement();
+    while (fpos) {
+        if (fpos->getIntAttribute("ID") == id) {
+            found = true;
+            break;
+        }
+        fpos = fpos->getNextElement();
+    }
 
-    //    bool found = false;
-    //    XmlElement * fpos = mFixPositionData.getFirstChildElement();
-    //    while (fpos) {
-    //        if (fpos->getIntAttribute("ID") == id) {
-    //            found = true;
-    //            break;
-    //        }
-    //        fpos = fpos->getNextElement();
-    //    }
-    //
-    //    if (!found) {
-    //        return false;
-    //    }
-    //
-    //    mCurrentFixPosition = fpos;
-    //    int index{};
-    //    for (auto & source : mSources) {
-    //        Point<float> const position{
-    //            static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 0))),
-    //            static_cast<float>(mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 1)))
-    //        };
-    //        source.setPos(position);
-    //        source.setFixedPosition(position);
-    //        if (mSpatMode == SpatMode::cube) {
-    //            float const z{ static_cast<float>(
-    //                mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(index, 2))) };
-    //            source.setFixedElevation(Degrees{ 90.0f } - Degrees{ 90.0f } * z);
-    //            source.setElevation(Normalized{ z });
-    //        }
-    //        ++index;
-    //    }
-    //
-    //    return true;
+    if (!found) {
+        return false;
+    }
+
+    mCurrentFixPosition = fpos;
+    SourceLinkParameters parameters{};
+    for (auto & source : mSources) {
+        auto const index{ source.getIndex() };
+        auto const xPosId{ getFixedPosSourceName(FixedPositionType::snapshot, index, 0) };
+        auto const yPosId{ getFixedPosSourceName(FixedPositionType::snapshot, index, 1) };
+        if (!mCurrentFixPosition->hasAttribute(xPosId) || !mCurrentFixPosition->hasAttribute(yPosId)) {
+            break;
+        }
+        Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
+                                     static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
+        SourceCoords newSnapshot{};
+        newSnapshot.position = position;
+
+        if (mSpatMode == SpatMode::cube) {
+            auto const zPosId{ getFixedPosSourceName(FixedPositionType::snapshot, index, 2) };
+            if (!mCurrentFixPosition->hasAttribute(zPosId)) {
+                break;
+            }
+            auto const normalizedElevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(
+                getFixedPosSourceName(FixedPositionType::snapshot, index, 2))) };
+            newSnapshot.elevation = MAX_ELEVATION * normalizedElevation;
+        }
+
+        if (index.toInt() == 0) {
+            parameters.primarySourceInitialCoords = newSnapshot;
+
+        } else {
+            parameters.secondarySourcesInitialCoords.add(newSnapshot);
+        }
+    }
+
+    mPositionSourceLinkEnforcer.loadParameters(parameters);
+
+    auto const xPosId{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0) };
+    auto const yPosId{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1) };
+    auto const zPosId{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2) };
+    Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
+                                 static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
+    mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
+    if (mSpatMode == SpatMode::cube) {
+        mElevationSourceLinkEnforcer.loadParameters(parameters);
+        Radians const elevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(zPosId)) };
+        mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
+    }
 
     return true;
 }
@@ -1091,14 +1129,26 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement * src, Xm
     {
         auto * newData = new XmlElement("ITEM");
         newData->setAttribute("ID", element->getIntAttribute("ID"));
-        for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-            newData->setAttribute(getFixedPosSourceName(i, 0),
-                                  element->getDoubleAttribute(getFixedPosSourceName(i, 0)));
-            newData->setAttribute(getFixedPosSourceName(i, 1),
-                                  element->getDoubleAttribute(getFixedPosSourceName(i, 1)));
-            newData->setAttribute(getFixedPosSourceName(i, 2),
-                                  element->getDoubleAttribute(getFixedPosSourceName(i, 2)));
+        for (SourceIndex i{}; i < SourceIndex{ MAX_NUMBER_OF_SOURCES }; ++i) {
+            newData->setAttribute(
+                getFixedPosSourceName(FixedPositionType::snapshot, i, 0),
+                element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::snapshot, i, 0)));
+            newData->setAttribute(
+                getFixedPosSourceName(FixedPositionType::snapshot, i, 1),
+                element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::snapshot, i, 1)));
+            newData->setAttribute(
+                getFixedPosSourceName(FixedPositionType::snapshot, i, 2),
+                element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::snapshot, i, 2)));
         }
+        newData->setAttribute(
+            getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0),
+            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0)));
+        newData->setAttribute(
+            getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1),
+            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1)));
+        newData->setAttribute(
+            getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2),
+            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2)));
 
         dest->addChildElement(newData);
     }
