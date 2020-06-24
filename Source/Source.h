@@ -107,6 +107,8 @@ public:
     bool isPrimarySource() const { return mIndex == SourceIndex{ 0 }; }
 
     void setX(float x, SourceLinkNotification sourceLinkNotification);
+    void setX(Normalized x, SourceLinkNotification sourceLinkNotification);
+    void setY(Normalized y, SourceLinkNotification sourceLinkNotification);
     float getX() const { return mPosition.getX(); }
     void setY(float y, SourceLinkNotification sourceLinkNotification);
     float getY() const { return mPosition.getY(); }

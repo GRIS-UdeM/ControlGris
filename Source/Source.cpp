@@ -111,6 +111,16 @@ void Source::setX(float const x, SourceLinkNotification const sourceLinkNotifica
     }
 }
 
+void Source::setX(Normalized const x, SourceLinkNotification const sourceLinkNotification)
+{
+    setX(x.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
+}
+
+void Source::setY(Normalized const y, SourceLinkNotification const sourceLinkNotification)
+{
+    setY(y.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
+}
+
 void Source::setY(float const y, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedY{ clipCoordinate(y) };

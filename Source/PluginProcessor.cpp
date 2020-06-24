@@ -214,18 +214,26 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 }
 
 //==============================================================================
+/* Somehow, this callback is not happening on the message thread. This will make some broadcaster callbacks fail in the
+ * Source class. Source-modifiying functions must be asynchronously forward to the message thread. */
 void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
-
+    Normalized const normalized{ newValue };
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         mPositionAutomationManager.setPlaybackPositionX(newValue);
+        auto callback = [=]() { mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify); };
+        MessageManager::callAsync(callback);
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
+        auto callback = [=]() { mSources.getPrimarySource().setY(normalized, SourceLinkNotification::notify); };
+        MessageManager::callAsync(callback);
     } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSpatMode == SpatMode::cube) {
-        mElevationAutomationManager.setPlaybackPositionY(newValue); // TODO: z = y ?
+        mElevationAutomationManager.setPlaybackPositionY(newValue);
+        auto callback = [=]() { mSources.getPrimarySource().setElevation(normalized, SourceLinkNotification::notify); };
+        MessageManager::callAsync(callback);
     }
 
     if (parameterID.compare("sourceLink") == 0) {
@@ -263,11 +271,11 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
 
     if (parameterID.startsWith("azimuthSpan")) {
         for (auto & source : mSources) {
-            source.setAzimuthSpan(Normalized{ newValue });
+            source.setAzimuthSpan(normalized);
         }
     } else if (parameterID.startsWith("elevationSpan")) {
         for (auto & source : mSources) {
-            source.setElevationSpan(Normalized{ newValue });
+            source.setElevationSpan(normalized);
         }
     }
 }
@@ -793,7 +801,7 @@ void ControlGrisAudioProcessor::timerCallback()
         }
     }
 
-    // MainField automation.
+    // Position automation.
     if (mPositionAutomationManager.getPositionActivateState() && mLastTimerTime != getCurrentTime()) {
         mPositionAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
     } else if (mIsPlaying && mPositionAutomationManager.getPlaybackPosition().isValid()) {
@@ -1257,7 +1265,9 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 
 void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBuffer & midiMessages)
 {
-    int started = mIsPlaying;
+    bool const isActive{ mPositionAutomationManager.getPositionActivateState() };
+
+    auto const wasPlaying{ mIsPlaying };
     AudioPlayHead * audioPlayHead = getPlayHead();
     if (audioPlayHead != nullptr) {
         AudioPlayHead::CurrentPositionInfo currentPositionInfo{};
@@ -1273,10 +1283,25 @@ void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBu
         }
     }
 
-    if (!started && mIsPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
-        PluginHostType hostType;  // calling prepareToPlay every time the sequence starts.
+    if (!wasPlaying && mIsPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
+        PluginHostType hostType;     // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
+        }
+    }
+
+    static bool gestureStarted{ false };
+    if (isActive && mIsPlaying && !gestureStarted) {
+        gestureStarted = true;
+        beginSourcePositionChangeGesture();
+        if (mSpatMode == SpatMode::cube) {
+            beginSourceElevationChangeGesture();
+        }
+    } else if ((!isActive || !mIsPlaying) && gestureStarted) {
+        gestureStarted = false;
+        endSourcePositionChangeGesture();
+        if (mSpatMode == SpatMode::cube) {
+            endSourceElevationChangeGesture();
         }
     }
     mLastTime = mCurrentTime;

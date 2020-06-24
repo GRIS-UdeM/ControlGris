@@ -90,7 +90,10 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 
 void AutomationManager::computeCurrentTrajectoryPoint()
 {
-    jassert(mTrajectory.has_value());
+    if (!mTrajectory.has_value()) {
+        mCurrentTrajectoryPoint = mPrincipalSource.getPos();
+        return;
+    }
 
     int const dampeningCyclesTimes2{ mDampeningCycles * 2 };
     double currentScaleMin{ 0.0 };
