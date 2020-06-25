@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "AutomationManager.h"
 
 #include <algorithm>

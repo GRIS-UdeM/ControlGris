@@ -214,26 +214,25 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 }
 
 //==============================================================================
-/* Somehow, this callback is not happening on the message thread. This will make some broadcaster callbacks fail in the
- * Source class. Source-modifiying functions must be asynchronously forward to the message thread. */
 void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
+    MessageManagerLock const
+        messageManagerLock{}; /* Somehow, this callback is not happening on the message thread. This will make some
+                               * broadcaster callbacks fail in the Source class. Source-modifiying and painting
+                               * functions must be asynchronously forwarded to the message thread. */
     Normalized const normalized{ newValue };
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         mPositionAutomationManager.setPlaybackPositionX(newValue);
-        auto callback = [=]() { mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify); };
-        MessageManager::callAsync(callback);
+        mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify);
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
-        auto callback = [=]() { mSources.getPrimarySource().setY(normalized, SourceLinkNotification::notify); };
-        MessageManager::callAsync(callback);
+        mSources.getPrimarySource().setY(normalized, SourceLinkNotification::notify);
     } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSpatMode == SpatMode::cube) {
         mElevationAutomationManager.setPlaybackPositionY(newValue);
-        auto callback = [=]() { mSources.getPrimarySource().setElevation(normalized, SourceLinkNotification::notify); };
-        MessageManager::callAsync(callback);
+        mSources.getPrimarySource().setElevation(normalized, SourceLinkNotification::notify);
     }
 
     if (parameterID.compare("sourceLink") == 0) {
@@ -1224,6 +1223,7 @@ void ControlGrisAudioProcessor::initialize()
     // If a preset is actually selected, we always recall it on initialize because
     // the automation won't trigger parameterChanged if it stays on the same value.
     if (mCurrentPositionPreset != 0) {
+        MessageManagerLock const messageManagerLock{};
         if (recallFixedPosition(mCurrentPositionPreset)) {
             auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
