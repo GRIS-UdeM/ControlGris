@@ -67,7 +67,8 @@ public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
 
-        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) = 0;
+        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation)
+            = 0;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);

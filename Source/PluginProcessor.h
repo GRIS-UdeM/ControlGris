@@ -60,15 +60,14 @@ private:
     double mBpm{ 120 };
 
     int mCurrentPositionPreset{ 0 };
-    int mNewPositionPreset{ 0 };
 
     // Filtering variables for OSC controller output.
     int mLastPositionPreset{ 0 };
     float mLastTrajectory1x{ -1 };
     float mLastTrajectory1y{ -1 };
     float mLastTrajectory1z{ -1 };
-    float mLastAzispan{ -1 };
-    float mLastElespan{ -1 };
+    Normalized mLastAzispan{ -1 };
+    Normalized mLastElespan{ -1 };
     PositionSourceLink mLastSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mLastElevationSourceLink{ ElevationSourceLink::undefined };
 
@@ -185,16 +184,16 @@ public:
     bool isPlaying() const { return mIsPlaying; }
     double getBPM() const { return mBpm; }
 
-    void beginSourcePositionChangeGesture();
-    void endSourcePositionChangeGesture();
-    void beginSourceElevationChangeGesture();
-    void endSourceElevationChangeGesture();
-    void beginAzimuthSpanChangeGesture();
-    void endAzimuthSpanChangeGesture();
-    void beginElevationSpanChangeGesture();
-    void endElevationSpanChangeGesture();
+    void beginSourcePositionChangeGesture() const;
+    void endSourcePositionChangeGesture() const;
+    void beginSourceElevationChangeGesture() const;
+    void endSourceElevationChangeGesture() const;
+    void beginAzimuthSpanChangeGesture() const;
+    void endAzimuthSpanChangeGesture() const;
+    void beginElevationSpanChangeGesture() const;
+    void endElevationSpanChangeGesture() const;
 
-    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
+    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation) final;
 
     void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);

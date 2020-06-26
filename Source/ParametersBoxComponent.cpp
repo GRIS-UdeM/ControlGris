@@ -48,8 +48,8 @@ ParametersBoxComponent::ParametersBoxComponent()
 void ParametersBoxComponent::setSelectedSource(Source * source)
 {
     mSelectedSource = source;
-    mAzimuthSpan.setValue(mSelectedSource->getAzimuthSpan(), NotificationType::dontSendNotification);
-    mElevationSpan.setValue(mSelectedSource->getElevationSpan(), NotificationType::dontSendNotification);
+    mAzimuthSpan.setValue(mSelectedSource->getAzimuthSpan().toFloat(), NotificationType::dontSendNotification);
+    mElevationSpan.setValue(mSelectedSource->getElevationSpan().toFloat(), NotificationType::dontSendNotification);
     repaint();
 }
 

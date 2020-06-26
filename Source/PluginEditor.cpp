@@ -426,10 +426,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
                                            SourceParameter::azimuth,
-                                           mProcessor.getSources()[i].getNormalizedAzimuth());
+                                           mProcessor.getSources()[i].getNormalizedAzimuth().toFloat());
         mProcessor.setSourceParameterValue(i,
                                            SourceParameter::elevation,
-                                           mProcessor.getSources()[i].getNormalizedElevation());
+                                           mProcessor.getSources()[i].getNormalizedElevation().toFloat());
         mProcessor.setSourceParameterValue(i, SourceParameter::distance, mProcessor.getSources()[i].getDistance());
     }
 
@@ -635,14 +635,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 
 void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
 {
-    //    if (whichField == 0) {
-    //        mPositionAutomationManager.fixPrincipalSourcePosition();
-    //        mProcessor.onSourceLinkChanged(mPositionAutomationManager.getSourceLink());
-    //    } else {
-    //        mElevationAutomationManager.fixPrincipalSourcePosition();
-    //        mProcessor.onElevationSourceLinkChanged(
-    //            static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
-    //    }
+    // TODO : remove me!
 }
 
 // PositionPresetComponent::Listener callback.

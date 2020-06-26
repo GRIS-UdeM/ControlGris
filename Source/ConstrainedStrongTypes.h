@@ -29,13 +29,19 @@ public:
     Normalized & operator=(Normalized const &) = default;
     Normalized & operator=(Normalized &&) noexcept = default;
 
-    constexpr explicit Normalized(float const value) noexcept : mValue(value) { clip(); }
+    constexpr explicit Normalized(float const value) noexcept : mValue(value)
+    {
+        if (std::isnan(value)) {
+            jassertfalse;
+        }
+    }
 
-    constexpr operator float() const { return mValue; }
+    constexpr Normalized operator-(Normalized const other) const { return Normalized{ mValue - other.mValue }; }
+    constexpr Normalized operator+(Normalized const other) const { return Normalized{ mValue + other.mValue }; }
+
+    constexpr bool operator!=(Normalized const other) const { return mValue != other.mValue; }
+
     constexpr float toFloat() const { return mValue; }
 
     constexpr float operator*(float const rhs) const { return mValue * rhs; }
-
-private:
-    void clip() { mValue = std::clamp(mValue, 0.0f, 1.0f); }
 };

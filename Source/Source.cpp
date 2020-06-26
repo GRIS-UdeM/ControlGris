@@ -33,7 +33,7 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sour
 
 void Source::setAzimuth(Normalized const normalizedAzimuth, SourceLinkNotification const sourceLinkNotification)
 {
-    this->setAzimuth(twoPi * normalizedAzimuth - pi, sourceLinkNotification);
+    this->setAzimuth(twoPi * normalizedAzimuth.toFloat() - pi, sourceLinkNotification);
 }
 
 Normalized Source::getNormalizedAzimuth() const
@@ -53,7 +53,8 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
 
 void Source::setElevation(Normalized const normalizedElevation, SourceLinkNotification const sourceLinkNotification)
 {
-    setElevation(halfPi * static_cast<float>(normalizedElevation), sourceLinkNotification);
+    auto const newValue{ halfPi * normalizedElevation.toFloat() };
+    setElevation(newValue, sourceLinkNotification);
 }
 
 void Source::setDistance(float const distance, SourceLinkNotification const sourceLinkNotification)

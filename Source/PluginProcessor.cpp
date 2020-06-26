@@ -232,7 +232,8 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
         mSources.getPrimarySource().setY(normalized, SourceLinkNotification::notify);
     } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSpatMode == SpatMode::cube) {
         mElevationAutomationManager.setPlaybackPositionY(newValue);
-        mSources.getPrimarySource().setElevation(normalized, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setElevation(MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()),
+                                                 SourceLinkNotification::notify);
     }
 
     if (parameterID.compare("sourceLink") == 0) {
@@ -252,7 +253,8 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     }
 
     if (parameterID.compare("positionPreset") == 0) {
-        mNewPositionPreset = (int)newValue;
+        auto const value{ static_cast<int>(newValue) };
+        setPositionPreset(value);
     }
 
     if (parameterID.startsWith("azimuthSpan")) {
@@ -319,10 +321,10 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 
     if (spatMode == SpatMode::dome) {
         // remove cube-specific gadgets
-        // TODO : this is a bad idea! It leaves the plugin in an inconsistent state when going back to CUBE mode.
-        //            mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
-        //            mElevationAutomationManager.setSourceLink(ElevationSourceLink::independent);
-        //            mElevationAutomationManager.setTrajectoryType(ElevationTrajectoryType::undefined);
+        mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
+    } else {
+        jassert(spatMode == SpatMode::cube);
+        mElevationSourceLinkEnforcer.setSourceLink(mElevationAutomationManager.getSourceLink());
     }
 }
 
@@ -715,7 +717,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     if (mLastAzispan != mSources.getPrimarySource().getAzimuthSpan()) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/azispan"));
-        message.addFloat32(mSources.getPrimarySource().getAzimuthSpan());
+        message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
         mLastAzispan = mSources.getPrimarySource().getAzimuthSpan();
@@ -723,7 +725,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     if (mLastElespan != mSources.getPrimarySource().getElevationSpan()) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/elespan"));
-        message.addFloat32(mSources.getPrimarySource().getElevationSpan());
+        message.addFloat32(mSources.getPrimarySource().getElevationSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
         mLastElespan = mSources.getPrimarySource().getElevationSpan();
@@ -774,49 +776,17 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 //==============================================================================
 void ControlGrisAudioProcessor::timerCallback()
 {
-    // TODO: playback position is broken
-
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
 
-    if (mNewPositionPreset != 0 && mNewPositionPreset != mCurrentPositionPreset) {
-        if (recallFixedPosition(mNewPositionPreset)) {
-            mCurrentPositionPreset = mNewPositionPreset;
-            if (editor != nullptr) {
-                editor->updatePositionPreset(mCurrentPositionPreset);
-            }
+    // automation
+    if (mLastTimerTime != getCurrentTime()) {
+        auto const deltaTime{ getCurrentTime() - getInitTimeOnPlay() };
+        if (mPositionAutomationManager.getPositionActivateState()) {
+            mPositionAutomationManager.setTrajectoryDeltaTime(deltaTime);
         }
-    }
-
-    // Position automation.
-    if (mPositionAutomationManager.getPositionActivateState() && mLastTimerTime != getCurrentTime()) {
-        mPositionAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
-    } else if (mIsPlaying && mPositionAutomationManager.getPlaybackPosition().isValid()) {
-        //        mSources.getPrimarySource().setPos(mPositionAutomationManager.getPlaybackPosition().value(),
-        //                                           SourceLinkNotification::notify);
-    } else if (mPositionAutomationManager.getPlaybackPosition().isValid()
-               && mPositionAutomationManager.getPlaybackPosition() != mSources.getPrimarySource().getPos()) {
-        auto const preset{ static_cast<int>(mParameters.getParameterAsValue("positionPreset").getValue()) };
-        recallFixedPosition(preset);
-        //        mSources.getPrimarySource().setPos(mPositionAutomationManager.getPlaybackPosition().value(),
-        //                                           SourceLinkNotification::notify);
-    }
-
-    // ElevationField automation.
-    if (getSpatMode() == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
-        if (mElevationAutomationManager.getTrajectoryType() != ElevationTrajectoryType::realtime
-            && mLastTimerTime != getCurrentTime()) {
-            mElevationAutomationManager.setTrajectoryDeltaTime(getCurrentTime() - getInitTimeOnPlay());
+        if (mSpatMode == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
+            mElevationAutomationManager.setTrajectoryDeltaTime(deltaTime);
         }
-    } else if (mIsPlaying && mElevationAutomationManager.getPlaybackPosition().isValid()) {
-        //        mSources.getPrimarySource().setPos(mElevationAutomationManager.getPlaybackPosition().value(),
-        //                                           SourceLinkNotification::notify);
-    } else if (mElevationAutomationManager.getPlaybackPosition().isValid()
-               && mSources.getPrimarySource().getPos() != mElevationAutomationManager.getPlaybackPosition().value()) {
-        int preset = (int)mParameters.getParameterAsValue("positionPreset").getValue();
-        recallFixedPosition(preset);
-        // this is really screwing everything up, but I dont know why!
-        //        mSources.getPrimarySource().setPos(mElevationAutomationManager.getPlaybackPosition().value(),
-        //                                           SourceLinkNotification::notify);
     }
 
     mLastTimerTime = getCurrentTime();
@@ -871,10 +841,10 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
     auto const & source{ mSources[sourceIndex] };
     if (whichField == 0) {
         if (getSpatMode() == SpatMode::dome) {
-            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
-            setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().toFloat());
+            setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
         } else {
-            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth());
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().toFloat());
             setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
         }
         if (source.isPrimarySource()) {
@@ -882,9 +852,12 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
                                                          mSources.getPrimarySource().getPos());
         }
     } else {
-        setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation());
+        setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
         mElevationAutomationManager.setTrajectoryType(mElevationAutomationManager.getTrajectoryType());
     }
+
+    //    // any position change invalidates current preset.
+    //    setPositionPreset(0);
 }
 
 // Called whenever a source has changed.
@@ -893,26 +866,30 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
                                                         SourceParameter const parameterId,
                                                         float const value)
 {
+    if (sourceIndex != SourceIndex{ 0 }) {
+        return; // TODO : why do we have to do this?
+    }
     Normalized const normalized{ static_cast<float>(value) };
     auto const param_id{ sourceIndex.toString() };
+    auto & source{ mSources[sourceIndex] };
     switch (parameterId) {
     case SourceParameter::azimuth:
-        mSources[sourceIndex].setAzimuth(normalized, SourceLinkNotification::notify);
+        source.setAzimuth(normalized, SourceLinkNotification::notify);
         mParameters.state.setProperty("p_azimuth_" + param_id, value, nullptr);
         break;
     case SourceParameter::elevation:
-        mSources[sourceIndex].setElevation(normalized, SourceLinkNotification::notify);
+        source.setElevation(normalized, SourceLinkNotification::notify);
         mParameters.state.setProperty(String("p_elevation_") + param_id, value, nullptr);
         break;
     case SourceParameter::distance:
-        mSources[sourceIndex].setDistance(value, SourceLinkNotification::notify);
+        source.setDistance(value, SourceLinkNotification::notify);
         mParameters.state.setProperty(String("p_distance_") + param_id, value, nullptr);
         break;
     case SourceParameter::x:
-        mSources[sourceIndex].setX(value, SourceLinkNotification::notify);
+        source.setX(value, SourceLinkNotification::notify);
         break;
     case SourceParameter::y:
-        mSources[sourceIndex].setY(value, SourceLinkNotification::notify);
+        source.setY(value, SourceLinkNotification::notify);
         break;
     case SourceParameter::azimuthSpan:
         for (auto & source : mSources) {
@@ -929,49 +906,51 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
     }
 }
 
-void ControlGrisAudioProcessor::beginSourcePositionChangeGesture()
+void ControlGrisAudioProcessor::beginSourcePositionChangeGesture() const
 {
     mParameters.getParameter("recordingTrajectory_x")->beginChangeGesture();
     mParameters.getParameter("recordingTrajectory_y")->beginChangeGesture();
 }
 
-void ControlGrisAudioProcessor::endSourcePositionChangeGesture()
+void ControlGrisAudioProcessor::endSourcePositionChangeGesture() const
 {
     mParameters.getParameter("recordingTrajectory_x")->endChangeGesture();
     mParameters.getParameter("recordingTrajectory_y")->endChangeGesture();
 }
 
-void ControlGrisAudioProcessor::beginSourceElevationChangeGesture()
+void ControlGrisAudioProcessor::beginSourceElevationChangeGesture() const
 {
     mParameters.getParameter("recordingTrajectory_z")->beginChangeGesture();
 }
 
-void ControlGrisAudioProcessor::endSourceElevationChangeGesture()
+void ControlGrisAudioProcessor::endSourceElevationChangeGesture() const
 {
     mParameters.getParameter("recordingTrajectory_z")->endChangeGesture();
 }
 
-void ControlGrisAudioProcessor::beginAzimuthSpanChangeGesture()
+void ControlGrisAudioProcessor::beginAzimuthSpanChangeGesture() const
 {
     mParameters.getParameter("azimuthSpan")->beginChangeGesture();
 }
 
-void ControlGrisAudioProcessor::endAzimuthSpanChangeGesture()
+void ControlGrisAudioProcessor::endAzimuthSpanChangeGesture() const
 {
     mParameters.getParameter("azimuthSpan")->endChangeGesture();
 }
 
-void ControlGrisAudioProcessor::beginElevationSpanChangeGesture()
+void ControlGrisAudioProcessor::beginElevationSpanChangeGesture() const
 {
     mParameters.getParameter("elevationSpan")->beginChangeGesture();
 }
 
-void ControlGrisAudioProcessor::endElevationSpanChangeGesture()
+void ControlGrisAudioProcessor::endElevationSpanChangeGesture() const
 {
     mParameters.getParameter("elevationSpan")->endChangeGesture();
 }
 
-void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager, Point<float> position)
+void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager,
+                                                          Point<float> const position,
+                                                          Radians const elevation)
 {
     // TODO: change gestures might have to be initiated some other way ? (osc input)
     auto const normalizedPosition{ (position + Point<float>{ 1.0f, 1.0f }) / 2.0f };
@@ -986,34 +965,29 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
         mParameters.getParameter("recordingTrajectory_y")->setValueNotifyingHost(normalizedPosition.getY());
 
     } else if (manager == &mElevationAutomationManager) {
+        auto const normalizedElevation{ 1.0f - elevation / MAX_ELEVATION };
         if (!isPlaying()) {
-            //            mElevationAutomationManager.setPrincipalSourceAndPlaybackElevation(position.y); // TODO: this
-            //            is broken!
-            mParameters.getParameter("recordingTrajectory_z")->setValue(position.y);
+            mParameters.getParameter("recordingTrajectory_z")->setValue(normalizedElevation);
         }
 
-        mParameters.getParameter("recordingTrajectory_z")->setValueNotifyingHost(position.y);
+        mParameters.getParameter("recordingTrajectory_z")->setValueNotifyingHost(normalizedElevation);
     }
 }
 
 //==============================================================================
 void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
 {
-    if (presetNumber != mCurrentPositionPreset) {
-        if (presetNumber == 0) {
-            mNewPositionPreset = mCurrentPositionPreset = 0;
-            mParameters.getParameter("positionPreset")->beginChangeGesture();
-            mParameters.getParameter("positionPreset")->setValueNotifyingHost(0.0f);
-            mParameters.getParameter("positionPreset")->endChangeGesture();
-        } else if (recallFixedPosition(presetNumber)) {
-            mCurrentPositionPreset = presetNumber;
-            auto const value{ presetNumber / static_cast<float>(NUMBER_OF_POSITION_PRESETS + 1) };
-            mParameters.getParameter("positionPreset")->beginChangeGesture();
-            mParameters.getParameter("positionPreset")->setValueNotifyingHost(value);
-            mParameters.getParameter("positionPreset")->endChangeGesture();
-            mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-                                                         mSources.getPrimarySource().getPos());
-        }
+    if (presetNumber != 0 && presetNumber != mCurrentPositionPreset) {
+        mCurrentPositionPreset = presetNumber;
+
+        mParameters.getParameter("positionPreset")->beginChangeGesture();
+        auto const normalizedPresetNumber{ static_cast<float>(presetNumber)
+                                           / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
+        mParameters.getParameter("positionPreset")->setValueNotifyingHost(normalizedPresetNumber);
+        mParameters.getParameter("positionPreset")->endChangeGesture();
+        recallFixedPosition(presetNumber);
+    } else {
+        mCurrentPositionPreset = presetNumber;
     }
 }
 
@@ -1032,7 +1006,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
         auto const zName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 2) };
 
         auto const position{ positionSnapshots[sourceIndex].position };
-        auto const zValue{ elevationSnapshots[sourceIndex].z.getAsRadians() };
+        auto const zValue{ elevationSnapshots[sourceIndex].z / MAX_ELEVATION };
 
         newData->setAttribute(xName, position.getX());
         newData->setAttribute(yName, position.getY());
@@ -1044,7 +1018,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     auto const zName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
 
     auto const position{ mSources.getPrimarySource().getPos() };
-    auto const zValue{ mSources.getPrimarySource().getElevation().getAsRadians() };
+    auto const zValue{ mSources.getPrimarySource().getElevation() / MAX_ELEVATION };
 
     newData->setAttribute(xName, position.getX());
     newData->setAttribute(yName, position.getY());
@@ -1069,8 +1043,6 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
 
     XmlElementDataSorter sorter("ID", true);
     mFixPositionData.sortChildElements(sorter);
-
-    recallFixedPosition(id);
 }
 
 bool ControlGrisAudioProcessor::recallFixedPosition(int id)
@@ -1093,68 +1065,61 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
     mCurrentFixPosition = fpos;
     SourcesSnapshots snapshots{};
     for (auto & source : mSources) {
+        SourceSnapshot snapshot{};
         auto const index{ source.getIndex() };
         auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
         auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
-        if (!mCurrentFixPosition->hasAttribute(xPosId) || !mCurrentFixPosition->hasAttribute(yPosId)) {
-            break;
-        }
-        Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
-                                     static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
-        SourceSnapshot newSnapshot{};
-        newSnapshot.position = position;
-
-        if (mSpatMode == SpatMode::cube) {
+        if (mCurrentFixPosition->hasAttribute(xPosId) && mCurrentFixPosition->hasAttribute(yPosId)) {
+            Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
+                                         static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
+            snapshot.position = position;
             auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
-            if (!mCurrentFixPosition->hasAttribute(zPosId)) {
-                break;
+            if (mCurrentFixPosition->hasAttribute(zPosId)) {
+                auto const normalizedElevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(
+                    getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
+                snapshot.z = MAX_ELEVATION * normalizedElevation;
             }
-            auto const normalizedElevation{ static_cast<float>(
-                mCurrentFixPosition->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
-            newSnapshot.z = MAX_ELEVATION * normalizedElevation;
         }
-
-        if (index.toInt() == 0) {
-            snapshots.primary = newSnapshot;
+        if (source.isPrimarySource()) {
+            snapshots.primary = snapshot;
         } else {
-            snapshots.secondaries.add(newSnapshot);
+            snapshots.secondaries.add(snapshot);
         }
     }
 
     mPositionSourceLinkEnforcer.loadSnapshots(snapshots);
-
-    auto const xPosId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
-    auto const yPosId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
-    auto const zPosId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
-
-    Point<float> terminalPosition{};
-    if (mCurrentFixPosition->hasAttribute(xPosId) && mCurrentFixPosition->hasAttribute(yPosId)) {
-        terminalPosition.setXY(static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
-                               static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)));
-    } else {
-        auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, SourceIndex{ 0 }, 0) };
-        auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, SourceIndex{ 0 }, 1) };
-        if (mCurrentFixPosition->hasAttribute(xPosId) && mCurrentFixPosition->hasAttribute(yPosId)) {
-            terminalPosition.setXY(static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
-                                   static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)));
-        }
-    }
-    mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
     if (mSpatMode == SpatMode::cube) {
         mElevationSourceLinkEnforcer.loadSnapshots(snapshots);
+    }
+
+    auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
+    auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
+    auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
+
+    Point<float> terminalPosition{};
+    if (mCurrentFixPosition->hasAttribute(xTerminalPositionId)
+        && mCurrentFixPosition->hasAttribute(yTerminalPositionId)) {
+        terminalPosition.setXY(static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xTerminalPositionId)),
+                               static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yTerminalPositionId)));
+    } else {
+        terminalPosition = snapshots.primary.position;
+    }
+    mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
+
+    if (mSpatMode == SpatMode::cube) {
         Radians elevation{};
-        if (mCurrentFixPosition->hasAttribute(zPosId)) {
-            elevation = Radians{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(zPosId)) };
+        if (mCurrentFixPosition->hasAttribute(zTerminalPositionId)) {
+            elevation
+                = MAX_ELEVATION * static_cast<float>(mCurrentFixPosition->getDoubleAttribute(zTerminalPositionId));
         } else {
-            auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, SourceIndex{ 0 }, 2) };
-            if (mCurrentFixPosition->hasAttribute(zPosId)) {
-                auto const normalizedElevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(
-                    getFixedPosSourceName(FixedPositionType::initial, SourceIndex{ 0 }, 2))) };
-                elevation = MAX_ELEVATION * normalizedElevation;
-            }
+            elevation = snapshots.primary.z;
         };
         mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
     }
+
+    // refresh trajectory
+    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+                                                 mSources.getPrimarySource().getPos());
 
     return true;
 }
@@ -1294,7 +1259,8 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 
 void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBuffer & midiMessages)
 {
-    bool const isActive{ mPositionAutomationManager.getPositionActivateState() };
+    bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
+    bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };
 
     auto const wasPlaying{ mIsPlaying };
     AudioPlayHead * audioPlayHead = getPlayHead();
@@ -1319,17 +1285,21 @@ void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBu
         }
     }
 
-    static bool gestureStarted{ false };
-    if (isActive && mIsPlaying && !gestureStarted) {
-        gestureStarted = true;
+    static bool positionGestureStarted{ false };
+    static bool elevationGestureStarted{ false };
+    if (isPositionTrajectoryActive && mIsPlaying && !positionGestureStarted) {
+        positionGestureStarted = true;
         beginSourcePositionChangeGesture();
-        if (mSpatMode == SpatMode::cube) {
-            beginSourceElevationChangeGesture();
-        }
-    } else if ((!isActive || !mIsPlaying) && gestureStarted) {
-        gestureStarted = false;
+    } else if ((!isPositionTrajectoryActive || !mIsPlaying) && positionGestureStarted) {
+        positionGestureStarted = false;
         endSourcePositionChangeGesture();
-        if (mSpatMode == SpatMode::cube) {
+    }
+    if (mSpatMode == SpatMode::cube) {
+        if (isElevationTrajectoryActive && mIsPlaying && !elevationGestureStarted) {
+            elevationGestureStarted = true;
+            beginSourceElevationChangeGesture();
+        } else if ((!isElevationTrajectoryActive || !mIsPlaying) && elevationGestureStarted) {
+            elevationGestureStarted = false;
             endSourceElevationChangeGesture();
         }
     }
@@ -1350,11 +1320,9 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
 {
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
         String id(i);
-        mParameters.state.setProperty(String("p_azimuth_") + id,
-                                      static_cast<float>(mSources[i].getNormalizedAzimuth()),
-                                      nullptr);
+        mParameters.state.setProperty(String("p_azimuth_") + id, mSources[i].getNormalizedAzimuth().toFloat(), nullptr);
         mParameters.state.setProperty(String("p_elevation_") + id,
-                                      static_cast<float>(mSources[i].getNormalizedElevation()),
+                                      mSources[i].getNormalizedElevation().toFloat(),
                                       nullptr);
         mParameters.state.setProperty(String("p_distance_") + id, mSources[i].getDistance(), nullptr);
     }

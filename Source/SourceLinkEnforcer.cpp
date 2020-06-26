@@ -65,6 +65,29 @@ private:
                                                                   SourceSnapshot const & snapshot) const = 0;
 };
 
+// only use full to recall saved positions
+class IndependentStrategy : public LinkStrategy
+{
+private:
+    void calculateParams_impl([[maybe_unused]] Source const & primarySource,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+    }
+
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    {
+        source.setPos(snapshot.position, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
+    {
+        SourceSnapshot const result{ source };
+        return result;
+    }
+};
+
 class CircularStrategy final : public LinkStrategy
 {
 private:
@@ -75,7 +98,7 @@ private:
                               SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
-        auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
+        auto constexpr notQuiteZero{ 0.01f };
         auto const initialAngle{ Radians::fromPoint(primarySourceSnapshot.position) };
         auto const terminalAngle{ Radians::fromPoint(primarySource.getPos()) };
         mRotation = terminalAngle - initialAngle;
@@ -300,6 +323,29 @@ class DeltaLockStrategy : public LinkStrategy
     }
 };
 
+// only use full to recall saved positions
+class IndependentElevationStrategy : public LinkStrategy
+{
+private:
+    void calculateParams_impl([[maybe_unused]] Source const & primarySource,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] int const numberOfSources) final
+    {
+    }
+
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    {
+        source.setElevation(snapshot.z, SourceLinkNotification::silent);
+    }
+
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
+    {
+        SourceSnapshot const result{ source };
+        return result;
+    }
+};
+
 class FixedElevationStrategy : public LinkStrategy
 {
     Radians mElevation{};
@@ -413,7 +459,7 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
     if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
         switch (std::get<PositionSourceLink>(sourceLink)) {
         case PositionSourceLink::independent:
-            return nullptr;
+            return std::make_unique<IndependentStrategy>();
         case PositionSourceLink::circular:
             return std::make_unique<CircularStrategy>();
         case PositionSourceLink::circularFixedRadius:
@@ -436,7 +482,8 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         jassert(std::holds_alternative<ElevationSourceLink>(sourceLink));
         switch (std::get<ElevationSourceLink>(sourceLink)) {
         case ElevationSourceLink::independent:
-            return nullptr;
+            return std::make_unique<IndependentElevationStrategy>();
+            ;
         case ElevationSourceLink::fixedElevation:
             return std::make_unique<FixedElevationStrategy>();
         case ElevationSourceLink::linearMin:

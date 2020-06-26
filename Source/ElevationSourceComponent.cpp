@@ -39,7 +39,7 @@ void ElevationSourceComponent::updatePositionInParent()
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
     if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().beginSourcePositionChangeGesture();
+        mAutomationManager.getProcessor().beginSourceElevationChangeGesture();
     }
     this->setSourcePosition(event);
     mFieldComponent.setSelectedSource(mSource.getIndex());

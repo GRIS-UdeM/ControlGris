@@ -213,13 +213,14 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
 
     for (auto const & source : *mSources) {
         auto const azimuth{ source.getAzimuth() };
-        float const elevation{ source.getNormalizedElevation() };
-        auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan()).getAsRadians() };
-        float const elevationSpan{ source.getElevationSpan() };
+        auto const elevation{ source.getNormalizedElevation() };
+        auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan().toFloat()).getAsRadians() };
+        auto const elevationSpan{ source.getElevationSpan() };
 
         // Calculate min and max elevation in degrees.
         Range<float> const elevationLimits{ 0.0f, 1.0f };
-        Range<float> const elevationRange{ elevation - elevationSpan, elevation + elevationSpan };
+        Range<float> const elevationRange{ (elevation - elevationSpan).toFloat(),
+                                           (elevation + elevationSpan).toFloat() };
         auto const clippedElevationRange{ elevationRange.getIntersectionWith(elevationLimits) };
 
         Point<float> const lower_corner_a{ std::cos(azimuthSpan) * clippedElevationRange.getStart(),
@@ -275,7 +276,8 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
     auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER - MIN_SPAN_WIDTH };
 
     for (auto const & source : *mSources) {
-        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan() * MAGIC_MAX_SPAN_RATIO + MIN_SPAN_WIDTH };
+        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().toFloat() * MAGIC_MAX_SPAN_RATIO
+                                 + MIN_SPAN_WIDTH };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f };
         float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.5f };
         Point<float> const center{ sourcePositionToComponentPosition(source.getPos()) };
@@ -431,7 +433,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
         auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
         constexpr auto anchorThickness = 5;
-        auto const halfSpanHeight{ static_cast<float>(source.getElevationSpan()) * effectiveComponentSize };
+        auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveComponentSize };
         auto const spanHeight{ halfSpanHeight * 2.0f };
         Line<float> anchor{ position, position.translated(0, componentSize) };
         Rectangle<float> unclippedSpanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
