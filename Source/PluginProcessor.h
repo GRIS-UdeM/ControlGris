@@ -189,6 +189,10 @@ public:
     void endSourcePositionChangeGesture();
     void beginSourceElevationChangeGesture();
     void endSourceElevationChangeGesture();
+    void beginAzimuthSpanChangeGesture();
+    void endAzimuthSpanChangeGesture();
+    void beginElevationSpanChangeGesture();
+    void endElevationSpanChangeGesture();
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
 

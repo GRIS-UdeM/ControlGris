@@ -41,9 +41,6 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
         mAutomationManager.getProcessor().beginSourcePositionChangeGesture();
     }
     this->setSourcePosition(event);
-    if (mSource.isPrimarySource()) {
-        mAutomationManager.sendTrajectoryPositionChangedEvent();
-    }
     mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
@@ -56,6 +53,9 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
         eventRelativeToFieldComponent.getPosition().toFloat()) };
     mSource.setPos(newPosition, SourceLinkNotification::notify);
 
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.sendTrajectoryPositionChangedEvent();
+    }
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
@@ -64,9 +64,6 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
     if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
         this->setSourcePosition(event);
-        if (mSource.isPrimarySource()) {
-            mAutomationManager.sendTrajectoryPositionChangedEvent();
-        }
     }
 }
 

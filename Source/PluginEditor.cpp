@@ -486,6 +486,26 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
                                     mProcessor.getSpatMode());
 }
 
+void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
+{
+    mProcessor.beginAzimuthSpanChangeGesture();
+}
+
+void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
+{
+    mProcessor.endAzimuthSpanChangeGesture();
+}
+
+void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
+{
+    mProcessor.beginElevationSpanChangeGesture();
+}
+
+void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
+{
+    mProcessor.endElevationSpanChangeGesture();
+}
+
 // TrajectoryBoxComponent::Listener callbacks.
 //--------------------------------------------
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value)

@@ -237,26 +237,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
 
     if (parameterID.compare("sourceLink") == 0) {
         auto const val = static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1);
-        if (val != mPositionAutomationManager.getSourceLink()) {
-            if (mSources.size() != 2
-                && (val == PositionSourceLink::linkSymmetricX || val == PositionSourceLink::linkSymmetricY))
-                return;
-            mPositionAutomationManager.setSourceLink(val);
-            //            mPositionAutomationManager.fixPrincipalSourcePosition();
-            //            onSourceLinkChanged(val);
-            auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-            if (ed != nullptr) {
-                ed->updateSourceLinkCombo(val);
-            }
-        }
+        setPositionSourceLink(val);
     }
 
     if (parameterID.compare("sourceLinkAlt") == 0) {
         auto const val = static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1);
         if (val != mElevationAutomationManager.getSourceLink()) {
-            mElevationAutomationManager.setSourceLink(val);
-            //            mElevationAutomationManager.fixPrincipalSourcePosition();
-            //            onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(val));
+            setElevationSourceLink(val);
             auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
             if (ed != nullptr) {
                 ed->updateElevationSourceLinkCombo(static_cast<ElevationSourceLink>(val));
@@ -280,7 +267,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
 }
 
 //========================================================
-void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
+void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const newSourceLink)
 {
     if (newSourceLink != mPositionAutomationManager.getSourceLink()) {
         mPositionAutomationManager.setSourceLink(newSourceLink);
@@ -931,17 +918,13 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
         for (auto & source : mSources) {
             source.setAzimuthSpan(normalized);
         }
-        mParameters.getParameter("azimuthSpan")->beginChangeGesture();
         mParameters.getParameter("azimuthSpan")->setValueNotifyingHost(value);
-        mParameters.getParameter("azimuthSpan")->endChangeGesture();
         break;
     case SourceParameter::elevationSpan:
         for (auto & source : mSources) {
             source.setElevationSpan(normalized);
         }
-        mParameters.getParameter("elevationSpan")->beginChangeGesture();
         mParameters.getParameter("elevationSpan")->setValueNotifyingHost(value);
-        mParameters.getParameter("elevationSpan")->endChangeGesture();
         break;
     }
 }
@@ -966,6 +949,26 @@ void ControlGrisAudioProcessor::beginSourceElevationChangeGesture()
 void ControlGrisAudioProcessor::endSourceElevationChangeGesture()
 {
     mParameters.getParameter("recordingTrajectory_z")->endChangeGesture();
+}
+
+void ControlGrisAudioProcessor::beginAzimuthSpanChangeGesture()
+{
+    mParameters.getParameter("azimuthSpan")->beginChangeGesture();
+}
+
+void ControlGrisAudioProcessor::endAzimuthSpanChangeGesture()
+{
+    mParameters.getParameter("azimuthSpan")->endChangeGesture();
+}
+
+void ControlGrisAudioProcessor::beginElevationSpanChangeGesture()
+{
+    mParameters.getParameter("elevationSpan")->beginChangeGesture();
+}
+
+void ControlGrisAudioProcessor::endElevationSpanChangeGesture()
+{
+    mParameters.getParameter("elevationSpan")->endChangeGesture();
 }
 
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager, Point<float> position)
@@ -1024,20 +1027,28 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     auto const elevationParameters{ mElevationSourceLinkEnforcer.getParameters() };
     SourceIndex const numberOfSources{ positionParameters.size() };
     for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
-        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 0),
-                              positionParameters[sourceIndex].position.getX());
-        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 1),
-                              positionParameters[sourceIndex].position.getY());
-        newData->setAttribute(getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 2),
-                              elevationParameters[sourceIndex].elevation.getAsRadians());
+        auto const xName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 0) };
+        auto const yName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 1) };
+        auto const zName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 2) };
+
+        auto const position{ positionParameters[sourceIndex].position };
+        auto const zValue{ elevationParameters[sourceIndex].elevation.getAsRadians() };
+
+        newData->setAttribute(xName, position.getX());
+        newData->setAttribute(yName, position.getY());
+        newData->setAttribute(zName, zValue);
     }
 
-    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0),
-                          mSources.getPrimarySource().getPos().getX());
-    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1),
-                          mSources.getPrimarySource().getPos().getY());
-    newData->setAttribute(getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2),
-                          mSources.getPrimarySource().getElevation().getAsRadians());
+    auto const xName{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0) };
+    auto const yName{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1) };
+    auto const zName{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 2) };
+
+    auto const position{ mSources.getPrimarySource().getPos() };
+    auto const zValue{ mSources.getPrimarySource().getElevation().getAsRadians() };
+
+    newData->setAttribute(xName, position.getX());
+    newData->setAttribute(yName, position.getY());
+    newData->setAttribute(zName, zValue);
 
     // Replace an element if the new one has the same ID as one already saved.
     bool found{ false };

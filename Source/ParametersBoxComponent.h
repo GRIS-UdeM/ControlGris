@@ -34,6 +34,10 @@ public:
     struct Listener {
         virtual ~Listener() {}
 
+        virtual void parametersBoxAzimuthSpanDragStarted() = 0;
+        virtual void parametersBoxAzimuthSpanDragEnded() = 0;
+        virtual void parametersBoxElevationSpanDragStarted() = 0;
+        virtual void parametersBoxElevationSpanDragEnded() = 0;
         virtual void parametersBoxSelectedSourceClicked() = 0;
         virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
     };

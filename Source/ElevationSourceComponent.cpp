@@ -11,6 +11,7 @@
 #include "ElevationSourceComponent.h"
 
 #include "FieldComponent.h"
+#include "PluginProcessor.h"
 #include "Source.h"
 
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
@@ -37,8 +38,11 @@ void ElevationSourceComponent::updatePositionInParent()
 
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
-    mFieldComponent.setSelectedSource(mSource.getIndex());
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.getProcessor().beginSourcePositionChangeGesture();
+    }
     this->setSourcePosition(event);
+    mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
 void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
@@ -46,9 +50,11 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-
     mSource.setElevation(newElevation, SourceLinkNotification::notify);
 
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.sendTrajectoryPositionChangedEvent();
+    }
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
@@ -62,6 +68,9 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
+    if (mSource.isPrimarySource()) {
+        mAutomationManager.getProcessor().endSourceElevationChangeGesture();
+    }
 }
 
 SourceIndex ElevationSourceComponent::getSourceIndex() const

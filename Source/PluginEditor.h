@@ -103,6 +103,10 @@ public:
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() final;
     void parametersBoxParameterChanged(SourceParameter sourceId, double value) final;
+    void parametersBoxAzimuthSpanDragStarted() final;
+    void parametersBoxAzimuthSpanDragEnded() final;
+    void parametersBoxElevationSpanDragStarted() final;
+    void parametersBoxElevationSpanDragEnded() final;
 
     // SettingsBoxComponent::Listeners
     void settingsBoxOscFormatChanged(SpatMode mode) final;

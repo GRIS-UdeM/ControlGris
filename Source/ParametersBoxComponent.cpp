@@ -30,6 +30,13 @@ ParametersBoxComponent::ParametersBoxComponent()
     mAzimuthSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
     mAzimuthSpan.setRange(0.0, 1.0);
     mAzimuthSpan.addListener(this);
+    mAzimuthSpan.onDragStart
+        = [&]() { mListeners.call([&](Listener & l) { l.parametersBoxAzimuthSpanDragStarted(); }); };
+    mAzimuthSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.parametersBoxAzimuthSpanDragEnded(); }); };
+    mElevationSpan.onDragStart
+        = [&]() { mListeners.call([&](Listener & l) { l.parametersBoxElevationSpanDragStarted(); }); };
+    mElevationSpan.onDragEnd
+        = [&]() { mListeners.call([&](Listener & l) { l.parametersBoxElevationSpanDragEnded(); }); };
     addAndMakeVisible(&mAzimuthSpan);
 
     mElevationSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
