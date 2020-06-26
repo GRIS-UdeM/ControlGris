@@ -1075,6 +1075,7 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
 
 bool ControlGrisAudioProcessor::recallFixedPosition(int id)
 {
+    // TODO : this is a mess
     bool found = false;
     XmlElement * fpos = mFixPositionData.getFirstChildElement();
     while (fpos) {
