@@ -19,50 +19,42 @@
 
 using AnySourceLink = std::variant<PositionSourceLink, ElevationSourceLink>;
 
-struct SourceCoords {
-    SourceCoords() noexcept = default;
-    SourceCoords(Source const & source) noexcept
-        : azimuth(source.getAzimuth())
-        , elevation(source.getElevation())
-        , distance(source.getDistance())
-        , position(source.getPos())
-    {
-    }
+struct SourceSnapshot {
+    SourceSnapshot() noexcept = default;
+    SourceSnapshot(Source const & source) noexcept : position(source.getPos()), z(source.getElevation()) {}
 
-    Radians azimuth{};
-    Radians elevation{};
-    float distance{}; // TODO: useful?
-    Point<float> position{};
+    Point<float> position;
+    Radians z; // height in CUBE mode, elevation in DOME mode
 };
 
-struct SourceLinkParameters {
-    SourceCoords primarySourceInitialCoords{};
-    Array<SourceCoords> secondarySourcesInitialCoords{};
+struct SourcesSnapshots {
+    SourceSnapshot primary{};
+    Array<SourceSnapshot> secondaries{};
 
-    SourceCoords const & operator[](SourceIndex const index) const
+    SourceSnapshot const & operator[](SourceIndex const index) const
     {
-        jassert(index.toInt() >= 0 && index.toInt() < secondarySourcesInitialCoords.size() + 1);
+        jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
         if (index.toInt() == 0) {
-            return primarySourceInitialCoords;
+            return primary;
         }
-        return secondarySourcesInitialCoords.getReference(index.toInt() - 1);
+        return secondaries.getReference(index.toInt() - 1);
     }
-    SourceCoords & operator[](SourceIndex const index)
+    SourceSnapshot & operator[](SourceIndex const index)
     {
-        jassert(index.toInt() >= 0 && index.toInt() < secondarySourcesInitialCoords.size() + 1);
+        jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
         if (index.toInt() == 0) {
-            return primarySourceInitialCoords;
+            return primary;
         }
-        return secondarySourcesInitialCoords.getReference(index.toInt() - 1);
+        return secondaries.getReference(index.toInt() - 1);
     }
-    int size() const { return secondarySourcesInitialCoords.size() + 1; }
+    int size() const { return secondaries.size() + 1; }
 };
 
 class SourceLinkEnforcer : juce::ChangeListener
 {
 private:
     Sources & mSources;
-    SourceLinkParameters mParameters{};
+    SourcesSnapshots mSnapshots{};
     AnySourceLink mSourceLink{};
 
 public:
@@ -73,8 +65,8 @@ public:
     void numberOfSourcesChanged();
     void enforceSourceLink();
 
-    auto const & getParameters() const { return mParameters; }
-    void loadParameters(SourceLinkParameters const & parameters);
+    auto const & getSnapshots() const { return mSnapshots; }
+    void loadSnapshots(SourcesSnapshots const & snapshots);
 
 private:
     void primarySourceMoved();

@@ -1023,16 +1023,16 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     // Build a new fixed position element.
     auto * newData = new XmlElement("ITEM");
     newData->setAttribute("ID", id);
-    auto const positionParameters{ mPositionSourceLinkEnforcer.getParameters() };
-    auto const elevationParameters{ mElevationSourceLinkEnforcer.getParameters() };
-    SourceIndex const numberOfSources{ positionParameters.size() };
+    auto const positionSnapshots{ mPositionSourceLinkEnforcer.getSnapshots() };
+    auto const elevationSnapshots{ mElevationSourceLinkEnforcer.getSnapshots() };
+    SourceIndex const numberOfSources{ positionSnapshots.size() };
     for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
         auto const xName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 0) };
         auto const yName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 1) };
         auto const zName{ getFixedPosSourceName(FixedPositionType::snapshot, sourceIndex, 2) };
 
-        auto const position{ positionParameters[sourceIndex].position };
-        auto const zValue{ elevationParameters[sourceIndex].elevation.getAsRadians() };
+        auto const position{ positionSnapshots[sourceIndex].position };
+        auto const zValue{ elevationSnapshots[sourceIndex].z.getAsRadians() };
 
         newData->setAttribute(xName, position.getX());
         newData->setAttribute(yName, position.getY());
@@ -1090,7 +1090,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
     }
 
     mCurrentFixPosition = fpos;
-    SourceLinkParameters parameters{};
+    SourcesSnapshots snapshots{};
     for (auto & source : mSources) {
         auto const index{ source.getIndex() };
         auto const xPosId{ getFixedPosSourceName(FixedPositionType::snapshot, index, 0) };
@@ -1100,7 +1100,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
         }
         Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
                                      static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
-        SourceCoords newSnapshot{};
+        SourceSnapshot newSnapshot{};
         newSnapshot.position = position;
 
         if (mSpatMode == SpatMode::cube) {
@@ -1110,18 +1110,17 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
             }
             auto const normalizedElevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(
                 getFixedPosSourceName(FixedPositionType::snapshot, index, 2))) };
-            newSnapshot.elevation = MAX_ELEVATION * normalizedElevation;
+            newSnapshot.z = MAX_ELEVATION * normalizedElevation;
         }
 
         if (index.toInt() == 0) {
-            parameters.primarySourceInitialCoords = newSnapshot;
-
+            snapshots.primary = newSnapshot;
         } else {
-            parameters.secondarySourcesInitialCoords.add(newSnapshot);
+            snapshots.secondaries.add(newSnapshot);
         }
     }
 
-    mPositionSourceLinkEnforcer.loadParameters(parameters);
+    mPositionSourceLinkEnforcer.loadSnapshots(snapshots);
 
     auto const xPosId{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 0) };
     auto const yPosId{ getFixedPosSourceName(FixedPositionType::position, SourceIndex{ 0 }, 1) };
@@ -1130,7 +1129,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
                                  static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
     mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
     if (mSpatMode == SpatMode::cube) {
-        mElevationSourceLinkEnforcer.loadParameters(parameters);
+        mElevationSourceLinkEnforcer.loadSnapshots(snapshots);
         Radians const elevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(zPosId)) };
         mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
     }

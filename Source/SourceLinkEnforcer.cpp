@@ -27,14 +27,14 @@ public:
     LinkStrategy & operator=(LinkStrategy &&) = default;
 
     void calculateParams(Source const & primarySource,
-                         SourceCoords const & primarySourceSnapshot,
+                         SourceSnapshot const & primarySourceSnapshot,
                          int const numberOfSources)
     {
         calculateParams_impl(primarySource, primarySourceSnapshot, numberOfSources);
         mInitialized = true;
     }
 
-    void apply(std::array<Source, MAX_NUMBER_OF_SOURCES - 1> & sources, Array<SourceCoords> const & snapshots) const
+    void apply(std::array<Source, MAX_NUMBER_OF_SOURCES - 1> & sources, Array<SourceSnapshot> const & snapshots) const
     {
         for (int i{}; i < snapshots.size(); ++i) { // TODO: this is applied to more sources than it should
             auto & source{ sources[i] };
@@ -43,13 +43,13 @@ public:
         }
     }
 
-    void apply(Source & source, SourceCoords const & snapshot) const
+    void apply(Source & source, SourceSnapshot const & snapshot) const
     {
         jassert(mInitialized);
         apply_impl(source, snapshot);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot(Source const & source, SourceCoords const & snapshot) const
+    [[nodiscard]] SourceSnapshot getInversedSnapshot(Source const & source, SourceSnapshot const & snapshot) const
     {
         jassert(mInitialized);
         return getInversedSnapshot_impl(source, snapshot);
@@ -57,12 +57,12 @@ public:
 
 private:
     virtual void calculateParams_impl(Source const & primarySource,
-                                      SourceCoords const & primarySourceSnapshot,
+                                      SourceSnapshot const & primarySourceSnapshot,
                                       int numberOfSources)
         = 0;
-    virtual void apply_impl(Source & source, SourceCoords const & snapshot) const = 0;
-    [[nodiscard]] virtual SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                                SourceCoords const & snapshot) const = 0;
+    virtual void apply_impl(Source & source, SourceSnapshot const & snapshot) const = 0;
+    [[nodiscard]] virtual SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                                  SourceSnapshot const & snapshot) const = 0;
 };
 
 class CircularStrategy final : public LinkStrategy
@@ -72,11 +72,13 @@ private:
     float mRadiusRatio{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
-        mRotation = primarySource.getAzimuth() - primarySourceSnapshot.azimuth;
+        auto const initialAngle{ Radians::fromPoint(primarySourceSnapshot.position) };
+        auto const terminalAngle{ Radians::fromPoint(primarySource.getPos()) };
+        mRotation = terminalAngle - initialAngle;
         auto const primarySourceInitialRadius{ primarySourceSnapshot.position.getDistanceFromOrigin() };
         auto const radius{ primarySourceInitialRadius == 0.0f
                                ? notQuiteZero
@@ -84,16 +86,16 @@ private:
         mRadiusRatio = radius == 0.0f ? notQuiteZero : radius;
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const newPosition{ snapshot.position.rotatedAboutOrigin(mRotation.getAsRadians()) * mRadiusRatio };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
-        SourceCoords result{ snapshot };
+        SourceSnapshot result{ snapshot };
         auto const newPosition{ (source.getPos() / mRadiusRatio).rotatedAboutOrigin(-mRotation.getAsRadians()) };
         result.position = newPosition;
         return result;
@@ -107,14 +109,16 @@ private:
     float mRadius{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
-        mRotation = primarySource.getAzimuth() - primarySourceSnapshot.azimuth;
+        auto const initialAngle{ Radians::fromPoint(primarySource.getPos()) };
+        auto const terminalAngle{ Radians::fromPoint(primarySourceSnapshot.position) };
+        mRotation = initialAngle - terminalAngle;
         mRadius = primarySource.getPos().getDistanceFromOrigin();
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         Radians const oldAngle{ std::atan2(snapshot.position.getY(), snapshot.position.getX()) };
         auto const newAngle{ (mRotation + oldAngle).getAsRadians() };
@@ -123,11 +127,11 @@ private:
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
         auto const sourcePosition{ source.getPos() };
-        SourceCoords result{ snapshot };
+        SourceSnapshot result{ snapshot };
 
         Radians const sourceAngle{ std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
         auto const inversedAngle{ (sourceAngle - mRotation).getAsRadians() };
@@ -146,7 +150,7 @@ private:
     float mRadiusRatio{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               int const numberOfSources) final
     {
         auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) };
@@ -158,7 +162,7 @@ private:
         mDeviationPerSource = Degrees{ 360 } / numberOfSources;
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex() };
         auto const newAngle{ mPrimaySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
@@ -170,10 +174,10 @@ private:
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
-        SourceCoords result{ snapshot };
+        SourceSnapshot result{ snapshot };
 
         auto const newRadius{ source.getPos().getDistanceFromOrigin() / mRadiusRatio };
         Point<float> const newPosition{ newRadius, 0.0f }; // we only care about changing the radius
@@ -191,7 +195,7 @@ class CircularFullyFixedStrategy : public LinkStrategy
     float mRadius{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               int const numberOfSources) final
     {
         mDeviationPerSource = Degrees{ 360.0f } / numberOfSources;
@@ -200,7 +204,7 @@ class CircularFullyFixedStrategy : public LinkStrategy
         mRadius = primarySourcePosition.getDistanceFromOrigin();
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const secondaryIndex{ source.getIndex() };
         auto const angle{ mPrimaySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
@@ -209,8 +213,8 @@ class CircularFullyFixedStrategy : public LinkStrategy
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl([[maybe_unused]] Source const & source,
-                                                        [[maybe_unused]] SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
+                                                          [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -222,20 +226,20 @@ class LinkSymmetricXStrategy : public LinkStrategy
     Point<float> mPrimaryPosition;
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mPrimaryPosition = primarySource.getPos();
     }
 
-    void apply_impl(Source & source, [[maybe_unused]] SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         Point<float> const newPosition{ -mPrimaryPosition.getX(), mPrimaryPosition.getY() };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl([[maybe_unused]] Source const & source,
-                                                        [[maybe_unused]] SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
+                                                          [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -247,20 +251,20 @@ class LinkSymmetricYStrategy : public LinkStrategy
     Point<float> mPrimaryPosition;
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mPrimaryPosition = primarySource.getPos();
     }
 
-    void apply_impl(Source & source, [[maybe_unused]] SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         Point<float> const newPosition{ mPrimaryPosition.getX(), -mPrimaryPosition.getY() };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl([[maybe_unused]] Source const & source,
-                                                        [[maybe_unused]] SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
+                                                          [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         // nothing to do here!
         return snapshot;
@@ -272,22 +276,22 @@ class DeltaLockStrategy : public LinkStrategy
     Point<float> mDelta;
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mDelta = primarySource.getPos() - primarySourceSnapshot.position;
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const newPosition{ snapshot.position + mDelta };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
-        SourceCoords result{ snapshot };
+        SourceSnapshot result{ snapshot };
 
         auto const initialPos{ source.getPos() - mDelta };
         result.position = initialPos;
@@ -301,19 +305,19 @@ class FixedElevationStrategy : public LinkStrategy
     Radians mElevation{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mElevation = primarySource.getElevation();
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         source.setElevation(mElevation, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
         return snapshot;
     }
@@ -326,22 +330,22 @@ class LinearMinElevationStrategy : public LinkStrategy
     Radians mElevationPerSource{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mBaseElevation = primarySource.getElevation();
         mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
         source.setElevation(newElevation, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
         return snapshot;
     }
@@ -354,22 +358,22 @@ class LinearMaxElevationStrategy : public LinkStrategy
     Radians mElevationPerSource{};
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mBaseElevation = primarySource.getElevation();
         mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
         source.setElevation(newElevation, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
         return snapshot;
     }
@@ -380,25 +384,25 @@ class DeltaLockElevationStrategy : public LinkStrategy
     Radians mDelta;
 
     void calculateParams_impl(Source const & primarySource,
-                              SourceCoords const & primarySourceSnapshot,
+                              SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
-        mDelta = primarySource.getElevation() - primarySourceSnapshot.elevation;
+        mDelta = primarySource.getElevation() - primarySourceSnapshot.z;
     }
 
-    void apply_impl(Source & source, SourceCoords const & snapshot) const final
+    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
-        auto const newElevation{ snapshot.elevation + mDelta };
+        auto const newElevation{ snapshot.z + mDelta };
         source.setElevation(newElevation, SourceLinkNotification::silent);
     }
 
-    [[nodiscard]] SourceCoords getInversedSnapshot_impl(Source const & source,
-                                                        SourceCoords const & snapshot) const final
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+                                                          SourceSnapshot const & snapshot) const final
     {
-        SourceCoords result{ snapshot };
+        SourceSnapshot result{ snapshot };
 
         auto const initialElevation{ source.getElevation() - mDelta };
-        result.elevation = initialElevation;
+        result.z = initialElevation;
 
         return result;
     }
@@ -477,14 +481,14 @@ void SourceLinkEnforcer::enforceSourceLink()
     auto strategy{ getLinkStrategy(mSourceLink) };
 
     if (strategy != nullptr) {
-        strategy->calculateParams(mSources.getPrimarySource(), mParameters.primarySourceInitialCoords, mSources.size());
-        strategy->apply(mSources.getSecondarySources(), mParameters.secondarySourcesInitialCoords);
+        strategy->calculateParams(mSources.getPrimarySource(), mSnapshots.primary, mSources.size());
+        strategy->apply(mSources.getSecondarySources(), mSnapshots.secondaries);
     }
 }
 
-void SourceLinkEnforcer::loadParameters(SourceLinkParameters const & parameters)
+void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
 {
-    mParameters = parameters;
+    mSnapshots = snapshots;
     enforceSourceLink();
 }
 
@@ -503,11 +507,11 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
     auto & source{ mSources[sourceIndex] };
     auto const secondaryIndex{ sourceIndex.toInt() - 1 };
-    auto & snapshot{ mParameters.secondarySourcesInitialCoords.getReference(secondaryIndex) };
+    auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
     auto strategy{ getLinkStrategy(mSourceLink) };
 
     if (strategy != nullptr) {
-        strategy->calculateParams(mSources.getPrimarySource(), mParameters.primarySourceInitialCoords, mSources.size());
+        strategy->calculateParams(mSources.getPrimarySource(), mSnapshots.primary, mSources.size());
         snapshot = strategy->getInversedSnapshot(source, snapshot);
         primarySourceMoved(); // some positions are invalid - fix them right away
     }
@@ -515,10 +519,10 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
 void SourceLinkEnforcer::snapAll()
 {
-    mParameters.primarySourceInitialCoords = SourceCoords{ mSources.getPrimarySource() };
-    mParameters.secondarySourcesInitialCoords.clearQuick();
+    mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
+    mSnapshots.secondaries.clearQuick();
     for (int i{}; i < mSources.getSecondarySources().size(); ++i) {
-        mParameters.secondarySourcesInitialCoords.add(SourceCoords{ mSources.getSecondarySources()[i] });
+        mSnapshots.secondaries.add(SourceSnapshot{ mSources.getSecondarySources()[i] });
     }
 }
 

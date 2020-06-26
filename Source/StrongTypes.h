@@ -80,6 +80,13 @@ public:
         }
         return *this;
     }
+    static Radians fromPoint(Point<float> const & point)
+    {
+        if (point.getX() == 0.0f && point.getY() == 0.0f) {
+            return Radians{};
+        }
+        return Radians{ std::atan2(point.getY(), point.getX()) };
+    }
 };
 
 constexpr Radians pi{ MathConstants<float>::pi };
