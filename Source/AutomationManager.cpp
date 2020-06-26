@@ -214,16 +214,12 @@ void AutomationManager::setPrincipalSourceAndPlaybackPosition(Point<float> const
 
 void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
-    if (mActivateState || mTrajectoryType == PositionTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
-    }
+    mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
 }
 
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
-    if (mActivateState || mTrajectoryType == ElevationTrajectoryType::realtime) {
-        mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
-    }
+    mListeners.call([&](Listener & l) { l.trajectoryPositionChanged(this, mPrincipalSource.getPos()); });
 }
 
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
