@@ -1346,6 +1346,8 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
 
 void ControlGrisAudioProcessor::setStateInformation(const void * data, int sizeInBytes)
 {
+    MessageManagerLock mmLock{};
+
     std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
 
     if (xmlState != nullptr) {
