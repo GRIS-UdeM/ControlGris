@@ -45,7 +45,7 @@ public:
     void addPoint(Point<float> const & point) { mPoints.add(point); }
     int size() const { return mPoints.size(); }
 
-    Path getDrawablePath(float componentWidth, SpatMode spatMode) const;
+    Path getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const;
 
 private:
     //=========

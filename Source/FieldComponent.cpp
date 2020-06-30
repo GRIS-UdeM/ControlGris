@@ -159,23 +159,31 @@ void ElevationFieldComponent::drawBackground(Graphics & g) const
 //==============================================================================
 Point<float> PositionFieldComponent::sourcePositionToComponentPosition(Point<float> const & sourcePosition) const
 {
-    jassert(getWidth() == getHeight());
-    auto const effectiveWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
-    constexpr Point<float> sourceOffsetInComponent{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
-
-    auto const result{ (sourcePosition + Point<float>{ 1.0f, 1.0f }) / 2.0f * effectiveWidth
-                       + sourceOffsetInComponent };
+    auto const effectiveArea{ getEffectiveArea() };
+    auto const normalizedPosition{ (sourcePosition + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+    auto const result{ normalizedPosition * effectiveArea.getWidth() + effectiveArea.getPosition() };
     return result;
 }
 
 Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<float> const & componentPosition) const
 {
-    jassert(getWidth() == getHeight());
-    auto const effectiveWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
-    constexpr Point<float> sourceOffsetInComponent{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS };
+    auto const effectiveArea{ getEffectiveArea() };
+    auto const normalizedPosition{ (componentPosition - effectiveArea.getPosition()) / effectiveArea.getWidth() };
+    auto const result{ normalizedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+    return result;
+}
 
-    auto const result{ (componentPosition - sourceOffsetInComponent) / effectiveWidth * 2.0f
-                       - Point<float>{ 1.0f, 1.0f } };
+Rectangle<float> PositionFieldComponent::getEffectiveArea() const
+{
+    jassert(getWidth() == getHeight());
+
+    auto const componentSize{ static_cast<float>(getWidth()) };
+    auto const effectiveSize{ componentSize - SOURCE_FIELD_COMPONENT_RADIUS * 2.0f };
+
+    Rectangle<float> const result{ SOURCE_FIELD_COMPONENT_RADIUS,
+                                   SOURCE_FIELD_COMPONENT_RADIUS,
+                                   effectiveSize,
+                                   effectiveSize };
     return result;
 }
 
@@ -268,12 +276,11 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
 
 void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 {
-    // TODO : there is probably some reasonning behind this value in SpatGRIS2 source.
-    constexpr float MAGIC_MAX_SPAN_RATIO = 0.8f;
     constexpr float MIN_SPAN_WIDTH = SOURCE_FIELD_COMPONENT_DIAMETER;
+    constexpr float MAGIC_MAX_SPAN_RATIO
+        = 0.8f; // TODO : there is probably some reasonning behind this value in SpatGRIS2 source.
 
-    auto const width{ static_cast<float>(getWidth()) };
-    auto const effectiveWidth{ width - SOURCE_FIELD_COMPONENT_DIAMETER - MIN_SPAN_WIDTH };
+    auto const effectiveWidth{ getEffectiveArea().getWidth() };
 
     for (auto const & source : *mSources) {
         float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().toFloat() * MAGIC_MAX_SPAN_RATIO
@@ -301,7 +308,7 @@ void PositionFieldComponent::setCircularSourceSelectionWarning(bool const showCi
 
 void PositionFieldComponent::paint(Graphics & g)
 {
-    int const width{ getWidth() };
+    int const componentSize{ getWidth() };
 
     drawBackground(g);
 
@@ -318,7 +325,7 @@ void PositionFieldComponent::paint(Graphics & g)
         g.strokePath(lineDrawingPath, PathStrokeType(.75f));
     }
     if (mAutomationManager.getTrajectory().has_value()) {
-        auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(getWidth(), mSpatMode) };
+        auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(getEffectiveArea(), mSpatMode) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
     // position dot
@@ -336,7 +343,7 @@ void PositionFieldComponent::paint(Graphics & g)
     if (mShowCircularSourceSelectionWarning) {
         g.setColour(Colours::white);
         g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION,
-                         juce::Rectangle<int>(0, 0, width, 50),
+                         juce::Rectangle<int>(0, 0, componentSize, 50),
                          Justification(Justification::centred),
                          1);
     }
@@ -424,8 +431,8 @@ void PositionFieldComponent::mouseUp(const MouseEvent & event)
 void ElevationFieldComponent::drawSpans(Graphics & g) const
 {
     jassert(getWidth() == getHeight());
-    auto const componentSize{ static_cast<float>(this->getWidth()) };
-    auto const effectiveComponentSize{ componentSize - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f };
+    auto const componentSize{ static_cast<float>(getWidth()) };
+    auto const effectiveArea{ getEffectiveArea() };
 
     float sourceIndex{};
     for (auto const & source : *mSources) {
@@ -433,18 +440,14 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
         auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
         constexpr auto anchorThickness = 5;
-        auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveComponentSize };
+        auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveArea.getHeight() };
         auto const spanHeight{ halfSpanHeight * 2.0f };
         Line<float> anchor{ position, position.translated(0, componentSize) };
         Rectangle<float> unclippedSpanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
                                             position.getY() - halfSpanHeight,
                                             SOURCE_FIELD_COMPONENT_DIAMETER,
                                             spanHeight };
-        Rectangle<float> const limits{ SOURCE_FIELD_COMPONENT_DIAMETER,
-                                       SOURCE_FIELD_COMPONENT_DIAMETER,
-                                       effectiveComponentSize,
-                                       effectiveComponentSize };
-        auto const spanArea{ unclippedSpanArea.getIntersection(limits) };
+        auto const spanArea{ unclippedSpanArea.getIntersection(effectiveArea) };
 
         // draw Spans
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
@@ -468,7 +471,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(
-            static_cast<float>(getWidth()),
+            getEffectiveArea(),
             mSources->getPrimarySource().getSpatMode()) };
         g.strokePath(trajectoryPath, PathStrokeType(.75f));
     }
@@ -611,15 +614,14 @@ void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
 Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians const sourceElevation,
                                                                          SourceIndex const index) const
 {
-    auto const availableWidth{ static_cast<float>(getWidth()) - SOURCE_FIELD_COMPONENT_DIAMETER };
-    auto const availableHeight{ static_cast<float>(getHeight())
-                                - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f }; // more padding looks better
-    auto const widthPerSource{ availableWidth / static_cast<float>(mSources->size()) };
-    auto const widthBetweenSources{ widthPerSource / 2.0f };
+    auto const availableWidth{ static_cast<float>(getWidth()) - LEFT_PADDING - RIGHT_PADDING };
+    auto const availableHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
+    auto const widthBetweenEachSource{ availableWidth / static_cast<float>(mSources->size() + 1) };
 
-    auto const x{ widthPerSource * static_cast<float>(index.toInt()) + widthBetweenSources
-                  + SOURCE_FIELD_COMPONENT_RADIUS };
-    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + SOURCE_FIELD_COMPONENT_DIAMETER };
+    auto const x{
+        LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.toInt() + 1))
+    }; // We add +1 to the index for the drawing handle.
+    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     Point<float> const result{ x, y };
 
     return result;
@@ -627,9 +629,20 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
 
 Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float> const & componentPosition) const
 {
-    auto const effectiveHeight{ static_cast<float>(getHeight()) - SOURCE_FIELD_COMPONENT_DIAMETER * 2.0f };
+    auto const effectiveHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
 
-    Radians const result{ MAX_ELEVATION
-                          * ((componentPosition.getY() - SOURCE_FIELD_COMPONENT_DIAMETER) / effectiveHeight) };
+    Radians const result{ MAX_ELEVATION * ((componentPosition.getY() - TOP_PADDING) / effectiveHeight) };
+    return result;
+}
+
+Rectangle<float> ElevationFieldComponent::getEffectiveArea() const
+{
+    jassert(getWidth() == getHeight());
+
+    auto const componentSize{ static_cast<float>(getWidth()) };
+    auto const effectiveWidth{ componentSize - LEFT_PADDING - RIGHT_PADDING };
+    auto const effectiveHeight{ componentSize - TOP_PADDING - BOTTOM_PADDING };
+
+    Rectangle<float> const result{ LEFT_PADDING, TOP_PADDING, effectiveWidth, effectiveHeight };
     return result;
 }

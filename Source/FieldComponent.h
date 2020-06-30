@@ -93,6 +93,8 @@ public:
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
+    virtual Rectangle<float> getEffectiveArea() const = 0;
+
 protected:
     //==============================================================================
     void drawBackgroundGrid(Graphics & g) const;
@@ -149,6 +151,8 @@ public:
     Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
     Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
 
+    Rectangle<float> getEffectiveArea() const final;
+
 private:
     //==============================================================================
     bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1.has_value(); }
@@ -167,6 +171,11 @@ private:
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
 {
+    static constexpr auto TOP_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
+    static constexpr auto BOTTOM_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
+    static constexpr auto LEFT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
+    static constexpr auto RIGHT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
+
     bool mCurrentlyDrawing{ false };
     ElevationAutomationManager & mAutomationManager;
     int mCurrentRecordingPositionX{};
@@ -195,6 +204,8 @@ public:
 
     Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
     Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
+
+    Rectangle<float> getEffectiveArea() const final;
 
 private:
     //==============================================================================

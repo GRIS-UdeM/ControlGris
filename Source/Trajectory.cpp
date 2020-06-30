@@ -93,14 +93,14 @@ Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) no
     }
 }
 
-Path Trajectory::getDrawablePath(float componentWidth, SpatMode spatMode) const
+Path Trajectory::getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const
 {
     auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
         auto const clippedPoint{ Source::clipPosition(trajectoryPosition, spatMode) };
-        auto const result{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f
-                               * (componentWidth - SOURCE_FIELD_COMPONENT_DIAMETER)
-                           + Point<float>{ SOURCE_FIELD_COMPONENT_RADIUS, SOURCE_FIELD_COMPONENT_RADIUS } };
-        return result;
+        auto const normalizedPoint{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+        auto const x{ normalizedPoint.getX() * drawArea.getWidth() + drawArea.getX() };
+        auto const y{ normalizedPoint.getY() * drawArea.getHeight() + drawArea.getY() };
+        return Point<float>{ x, y };
     };
 
     Path result{};
