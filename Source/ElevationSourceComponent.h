@@ -13,7 +13,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
-#include "FieldComponentClickableItem.h"
+#include "SourceComponent.h"
 #include "StrongTypes.h"
 
 class ElevationFieldComponent;
@@ -21,7 +21,7 @@ class ElevationAutomationManager;
 class Source;
 
 class ElevationSourceComponent final
-    : public FieldComponentClickableItem
+    : public SourceComponent
     , public juce::ChangeListener
 {
 private:

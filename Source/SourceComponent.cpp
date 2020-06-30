@@ -8,23 +8,21 @@
   ==============================================================================
 */
 
-#include "FieldComponentClickableItem.h"
+#include "SourceComponent.h"
 
-FieldComponentClickableItem::FieldComponentClickableItem(Colour const colour, String const & icon)
-    : mColour(colour)
-    , mIcon(icon)
+SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
     this->setSize(dimension, dimension);
 }
 
-void FieldComponentClickableItem::setSelected(bool const selected)
+void SourceComponent::setSelected(bool const selected)
 {
     mSelected = selected;
     repaint();
 }
 
-void FieldComponentClickableItem::paint(Graphics & g)
+void SourceComponent::paint(Graphics & g)
 {
     int const lineThickness{ (mSelected) ? MAX_LINE_THICKNESS : 1 };
     float const saturation{ (mSelected) ? 1.0f : 0.75f };

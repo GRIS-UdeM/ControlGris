@@ -29,7 +29,6 @@
 #include "PositionSourceComponent.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"
-#include "TrajectoryHandleComponent.h"
 
 //==============================================================================
 // This file defines the classes that implement the 2D view (azimuth-elevation
@@ -71,7 +70,7 @@ protected:
     static constexpr int TRAJECTORY_MARGINS = 10;
     //==============================================================================
     Sources * mSources;
-    std::unique_ptr<TrajectoryHandleComponent> mTrajectoryHandleComponent{};
+    std::unique_ptr<SourceComponent> mTrajectoryHandleComponent{};
 
     bool mIsPlaying{ false };
     std::optional<SourceIndex> mSelectedSource{};

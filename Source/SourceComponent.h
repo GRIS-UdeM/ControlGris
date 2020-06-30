@@ -17,7 +17,7 @@
 class Source;
 class FieldComponent;
 
-class FieldComponentClickableItem : public juce::Component
+class SourceComponent : public juce::Component
 {
 private:
     Colour mColour;
@@ -28,17 +28,12 @@ protected:
     static constexpr int MAX_LINE_THICKNESS = 3;
 
 public:
-    FieldComponentClickableItem(Colour colour, String const & icon);
-    virtual ~FieldComponentClickableItem() = default;
+    SourceComponent(Colour colour, String const & icon);
+    virtual ~SourceComponent() = default;
 
     void setSelected(bool selected);
-
     void paint(Graphics & g) final;
 
-    void mouseDown(MouseEvent const & event) override = 0;
-    void mouseDrag(MouseEvent const & event) override = 0;
-    void mouseUp(MouseEvent const & event) override = 0;
-
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponentClickableItem);
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent);
 };

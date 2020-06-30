@@ -70,7 +70,6 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
     mTrajectory->addPoint(currentPosition);
     mLastRecordingPoint = currentPosition;
     mTrajectoryHandlePosition = currentPosition;
-    // mPrincipalSource.setPos(currentPosition); ???
 }
 
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
@@ -229,10 +228,10 @@ void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
 {
     mTrajectoryType = type;
-    if (type != PositionTrajectoryType::realtime) {
-        mTrajectory = Trajectory{ type, startPosition };
-    } else {
+    if (type == PositionTrajectoryType::realtime) {
         mTrajectory.reset();
+    } else {
+        mTrajectory = Trajectory{ type, startPosition };
     }
     mPrincipalSource.setPos(startPosition, SourceLinkNotification::notify);
 }
@@ -252,14 +251,6 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
     } else {
         mTrajectory.reset();
     }
-
-    // TODO
-    //    if (type > ElevationTrajectoryType::drawing) {
-    //        setSourcePosition(
-    //            Point<float>{ mTrajectoryPoints[0].x / mFieldWidth, 1.0f - mTrajectoryPoints[0].y / mFieldWidth });
-    //    } else {
-    //        setSourcePosition(Point<float>{ 0.5f, 0.5f });
-    //    }
 }
 
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()

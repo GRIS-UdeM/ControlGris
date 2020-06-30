@@ -24,10 +24,6 @@
       <GROUP id="{B6A2D2FE-2A17-10D3-12C3-DF6BC59A017A}" name="UI">
         <GROUP id="{39B2417E-869D-1FFB-73FC-D18B9206CEE3}" name="Fields">
           <GROUP id="{C731EA5D-DB26-8755-FBC1-8D977FCFF2F9}" name="SourceComponents">
-            <FILE id="veyR5J" name="TrajectoryHandleComponent.cpp" compile="1"
-                  resource="0" file="Source/TrajectoryHandleComponent.cpp"/>
-            <FILE id="KCAvnr" name="TrajectoryHandleComponent.h" compile="0" resource="0"
-                  file="Source/TrajectoryHandleComponent.h"/>
             <FILE id="y527bY" name="ElevationSourceComponent.cpp" compile="1" resource="0"
                   file="Source/ElevationSourceComponent.cpp"/>
             <FILE id="WYi6nn" name="ElevationSourceComponent.h" compile="0" resource="0"
@@ -36,10 +32,10 @@
                   file="Source/PositionSourceComponent.cpp"/>
             <FILE id="BtcY2C" name="PositionSourceComponent.h" compile="0" resource="0"
                   file="Source/PositionSourceComponent.h"/>
-            <FILE id="QKC1GD" name="FieldComponentClickableItem.cpp" compile="1"
-                  resource="0" file="Source/FieldComponentClickableItem.cpp"/>
-            <FILE id="dQjtMF" name="FieldComponentClickableItem.h" compile="0"
-                  resource="0" file="Source/FieldComponentClickableItem.h"/>
+            <FILE id="QKC1GD" name="SourceComponent.cpp" compile="1" resource="0"
+                  file="Source/SourceComponent.cpp"/>
+            <FILE id="dQjtMF" name="SourceComponent.h" compile="0" resource="0"
+                  file="Source/SourceComponent.h"/>
           </GROUP>
           <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
                 file="Source/FieldComponent.cpp"/>

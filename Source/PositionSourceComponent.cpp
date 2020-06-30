@@ -15,7 +15,7 @@
 #include "Source.h"
 
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
-    : FieldComponentClickableItem(source.getColour(), source.getId().toString())
+    : SourceComponent(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)

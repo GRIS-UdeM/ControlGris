@@ -15,7 +15,7 @@
 #include "Source.h"
 
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
-    : FieldComponentClickableItem(source.getColour(), source.getId().toString())
+    : SourceComponent(source.getColour(), source.getId().toString())
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mFieldComponent(fieldComponent)
     , mSource(source)

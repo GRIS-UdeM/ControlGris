@@ -24,10 +24,12 @@
 
 FieldComponent::FieldComponent() noexcept
 {
-    mTrajectoryHandleComponent = std::make_unique<TrajectoryHandleComponent>(*this);
-    addAndMakeVisible(mTrajectoryHandleComponent.get());
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
+
+    mTrajectoryHandleComponent = std::make_unique<SourceComponent>(Colour::fromRGB(120, 120, 120), "X");
+    mTrajectoryHandleComponent->setInterceptsMouseClicks(false, false);
     mTrajectoryHandleComponent->setCentrePosition(getWidth() / 2, getHeight() / 2);
+    addAndMakeVisible(mTrajectoryHandleComponent.get());
 }
 
 void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)

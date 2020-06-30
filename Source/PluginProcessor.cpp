@@ -1214,17 +1214,18 @@ void ControlGrisAudioProcessor::initialize()
     mLastTime = mLastTimerTime = 10000000.0;
     mCanStopActivate = true;
 
+    // TODO : is this necessary?
     // If a preset is actually selected, we always recall it on initialize because
     // the automation won't trigger parameterChanged if it stays on the same value.
-    if (mCurrentPositionPreset != 0) {
-        MessageManagerLock const messageManagerLock{};
-        if (recallFixedPosition(mCurrentPositionPreset)) {
-            auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-            if (ed != nullptr) {
-                ed->updatePositionPreset(mCurrentPositionPreset);
-            }
-        }
-    }
+    //    if (mCurrentPositionPreset != 0) {
+    //        MessageManagerLock const messageManagerLock{};
+    //        if (recallFixedPosition(mCurrentPositionPreset)) {
+    //            auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
+    //            if (ed != nullptr) {
+    //                ed->updatePositionPreset(mCurrentPositionPreset);
+    //            }
+    //        }
+    //    }
 }
 
 void ControlGrisAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
