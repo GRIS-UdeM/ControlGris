@@ -27,10 +27,18 @@ FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
 }
 
+FieldComponent::~FieldComponent() noexcept
+{
+    for (SourceIndex i{}; i < SourceIndex{ MAX_NUMBER_OF_SOURCES - 1 }; ++i) {
+        mSources[i].removeGuiChangeListener(this);
+    }
+}
+
 void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
 {
     mOldSelectedSource = mSelectedSource;
     mSelectedSource = selectedSource;
+
     applySourceSelectionToComponents();
 }
 
@@ -38,6 +46,10 @@ void FieldComponent::refreshSources()
 {
     mSelectedSource.reset();
     mOldSelectedSource.reset();
+
+    for (auto & source : mSources) {
+        source.addGuiChangeListener(this);
+    }
 
     rebuildSourceComponents(mSources.size());
 }
@@ -65,6 +77,11 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
     }
     g.drawLine(0, 0, fieldComponentSize, fieldComponentSize);
     g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
+}
+
+void FieldComponent::changeListenerCallback(ChangeBroadcaster * broadcaster)
+{
+    repaint();
 }
 
 void PositionFieldComponent::applySourceSelectionToComponents()

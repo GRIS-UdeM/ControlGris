@@ -47,10 +47,13 @@ ParametersBoxComponent::ParametersBoxComponent()
 
 void ParametersBoxComponent::setSelectedSource(Source * source)
 {
-    mSelectedSource = source;
-    mAzimuthSpan.setValue(mSelectedSource->getAzimuthSpan().toFloat(), NotificationType::dontSendNotification);
-    mElevationSpan.setValue(mSelectedSource->getElevationSpan().toFloat(), NotificationType::dontSendNotification);
-    repaint();
+    if (mSelectedSource != source || source->getAzimuthSpan().toFloat() != mAzimuthSpan.getValue()
+        || mElevationSpan.getValue() != source->getElevationSpan().toFloat()) {
+        mSelectedSource = source;
+        mAzimuthSpan.setValue(source->getAzimuthSpan().toFloat(), NotificationType::dontSendNotification);
+        mElevationSpan.setValue(source->getElevationSpan().toFloat(), NotificationType::dontSendNotification);
+        repaint();
+    }
 }
 
 void ParametersBoxComponent::setDistanceEnabled(bool const distanceEnabled)

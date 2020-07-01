@@ -47,7 +47,9 @@
 //==============================================================================
 
 //==============================================================================
-class FieldComponent : public Component
+class FieldComponent
+    : public Component
+    , public ChangeListener
 {
 public:
     //==============================================================================
@@ -79,7 +81,7 @@ protected:
 public:
     //==============================================================================
     FieldComponent(Sources & sources) noexcept;
-    ~FieldComponent() noexcept override = default;
+    ~FieldComponent() noexcept override;
     //==============================================================================
     void refreshSources();
 
@@ -106,6 +108,8 @@ protected:
     virtual void drawSpans(Graphics & g) const = 0;
 
 private:
+    //==============================================================================
+    void changeListenerCallback(ChangeBroadcaster * broadcaster) final;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponent)
 };

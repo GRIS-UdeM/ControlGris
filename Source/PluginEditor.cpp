@@ -606,10 +606,6 @@ void ControlGrisAudioProcessorEditor::refresh()
     mPositionField.setIsPlaying(mProcessor.isPlaying());
     mElevationField.setIsPlaying(mProcessor.isPlaying());
 
-    mPositionField.repaint();
-    if (mProcessor.getSpatMode() == SpatMode::cube)
-        mElevationField.repaint();
-
     if (mTrajectoryBox.getPositionActivateState() != mPositionAutomationManager.getPositionActivateState()) {
         mTrajectoryBox.setPositionActivateState(mPositionAutomationManager.getPositionActivateState());
     }
