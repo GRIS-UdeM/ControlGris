@@ -224,12 +224,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
                                * broadcaster callbacks fail in the Source class. Source-modifiying and painting
                                * functions must be asynchronously forwarded to the message thread. */
     Normalized const normalized{ newValue };
+    Normalized const invNormalized{ 1.0f - newValue };
     if (parameterID.compare("recordingTrajectory_x") == 0) {
         mPositionAutomationManager.setPlaybackPositionX(newValue);
         mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify);
     } else if (parameterID.compare("recordingTrajectory_y") == 0) {
         mPositionAutomationManager.setPlaybackPositionY(newValue);
-        mSources.getPrimarySource().setY(normalized, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setY(invNormalized, SourceLinkNotification::notify);
     } else if (parameterID.compare("recordingTrajectory_z") == 0 && mSpatMode == SpatMode::cube) {
         mElevationAutomationManager.setPlaybackPositionY(newValue);
         mSources.getPrimarySource().setElevation(MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()),
@@ -954,11 +955,11 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
         if (!isPlaying()) {
             mPositionAutomationManager.setPrincipalSourceAndPlaybackPosition(position);
             mParameters.getParameter("recordingTrajectory_x")->setValue(normalizedPosition.getX());
-            mParameters.getParameter("recordingTrajectory_y")->setValue(normalizedPosition.getY());
+            mParameters.getParameter("recordingTrajectory_y")->setValue(1.0f - normalizedPosition.getY());
         }
 
         mParameters.getParameter("recordingTrajectory_x")->setValueNotifyingHost(normalizedPosition.getX());
-        mParameters.getParameter("recordingTrajectory_y")->setValueNotifyingHost(normalizedPosition.getY());
+        mParameters.getParameter("recordingTrajectory_y")->setValueNotifyingHost(1.0f - normalizedPosition.getY());
 
     } else if (manager == &mElevationAutomationManager) {
         auto const normalizedElevation{ 1.0f - elevation / MAX_ELEVATION };
