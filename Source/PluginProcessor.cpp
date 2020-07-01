@@ -866,9 +866,9 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
                                                         SourceParameter const parameterId,
                                                         float const value)
 {
-    if (sourceIndex != SourceIndex{ 0 }) {
-        return; // TODO : why do we have to do this?
-    }
+    //    if (sourceIndex != SourceIndex{ 0 }) {
+    //        return; // TODO : why do we have to do this?
+    //    }
     Normalized const normalized{ static_cast<float>(value) };
     auto const param_id{ sourceIndex.toString() };
     auto & source{ mSources[sourceIndex] };
