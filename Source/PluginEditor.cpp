@@ -472,6 +472,9 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParame
 
 void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 {
+    // increment source index
+    mSelectedSource = SourceIndex{ (mSelectedSource.toInt() + 1) % mProcessor.getSources().size() };
+
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
