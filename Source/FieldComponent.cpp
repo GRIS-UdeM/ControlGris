@@ -188,10 +188,11 @@ void PositionFieldComponent::notifySourcePositionChanged(SourceIndex const sourc
     mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 0); });
 }
 
-void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
+void PositionFieldComponent::rebuildSourceComponents(int const numberOfSources)
 {
     mSourceComponents.clearQuick(true);
-    for (auto & source : mSources) {
+    for (int i{ numberOfSources - 1 }; i >= 0; --i) {
+        auto & source{ mSources[i] };
         mSourceComponents.add(new PositionSourceComponent{ *this, source });
         addAndMakeVisible(mSourceComponents.getLast());
     }
@@ -480,10 +481,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
-    if (trajectoryType == ElevationTrajectoryType::drawing) {
-        auto const trajectoryPath{ mAutomationManager.getDrawingTrajectory().getDrawablePath(getEffectiveArea()) };
-        g.strokePath(trajectoryPath, PathStrokeType{ 0.75f });
-    } else if (mAutomationManager.getTrajectory().has_value()) {
+    if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(
             getEffectiveArea(),
             mSources.getPrimarySource().getSpatMode()) };
@@ -616,7 +614,7 @@ void ElevationFieldComponent::mouseUp(const MouseEvent & event)
     }
 }
 
-void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
+void ElevationFieldComponent::rebuildSourceComponents(int const numberOfSources)
 {
     mSourceComponents.clearQuick(true);
     for (auto & source : mSources) {
@@ -636,7 +634,7 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
         LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.toInt() + 1))
     }; // We add +1 to the index for the drawing handle.
     auto const clippedElevation{ sourceElevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
-    auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
+    auto const y{ clippedElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     Point<float> const result{ x, y };
 
     return result;

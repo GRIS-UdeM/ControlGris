@@ -13,9 +13,10 @@
 
 #include <cmath>
 
-Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Point<float> const & startingPoint) noexcept
+Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float> const & startingPoint) noexcept
+    : mTrajectoryType(trajectoryType)
 {
-    switch (positionTrajectoryType) {
+    switch (trajectoryType) {
     case PositionTrajectoryType::circleClockwise:
         mPoints = getBasicCirclePoints();
         break;
@@ -74,9 +75,9 @@ Trajectory::Trajectory(PositionTrajectoryType const positionTrajectoryType, Poin
     scale(radius);
 }
 
-Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) noexcept
+Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept : mTrajectoryType(trajectoryType)
 {
-    switch (elevationTrajectoryType) {
+    switch (trajectoryType) {
     case ElevationTrajectoryType::downUp:
         mPoints = getBasicDownUpPoints();
         break;
@@ -85,6 +86,7 @@ Trajectory::Trajectory(ElevationTrajectoryType const elevationTrajectoryType) no
         invertDirection();
         break;
     case ElevationTrajectoryType::drawing:
+        mPoints.clear();
         break;
     case ElevationTrajectoryType::realtime: // do not make a trajectory in realtime mode!
     case ElevationTrajectoryType::undefined:
@@ -127,6 +129,25 @@ Point<float> Trajectory::getPosition(Normalized const normalized) const
     auto const result{ point_a * (1.0f - balance) + point_b * balance };
 
     return result;
+}
+
+void Trajectory::addPoint(Point<float> const & point)
+{
+    mPoints.add(point);
+
+    // elevation drawing works differently. We need to space the points evenly on the x axis.
+    if (std::holds_alternative<ElevationTrajectoryType>(mTrajectoryType)
+        && std::get<ElevationTrajectoryType>(mTrajectoryType) == ElevationTrajectoryType::drawing
+        && mPoints.size() > 1) {
+        constexpr auto FIELD_WIDTH{ 2.0f }; // space between [ -1, 1 ]
+        auto const distanceBetweenPoints{ FIELD_WIDTH / (static_cast<float>(mPoints.size() - 1)) };
+        constexpr auto FIELD_X_START{ -1.0f };
+        float x{ FIELD_X_START };
+        for (auto & it : mPoints) {
+            it.setX(x);
+            x += distanceBetweenPoints;
+        }
+    }
 }
 
 void Trajectory::invertDirection()

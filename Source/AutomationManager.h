@@ -22,7 +22,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
-#include "ElevationDrawingTrajectory.h"
 #include "Source.h"
 #include "Trajectory.h"
 
@@ -207,7 +206,6 @@ class ElevationAutomationManager final : public AutomationManager
 {
     ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
     ElevationSourceLink mSourceLink{ ElevationSourceLink::independent };
-    ElevationDrawingTrajectory mDrawingTrajectory{};
 
 public:
     //==============================================================================
@@ -223,9 +221,6 @@ public:
 
     void setSourceLink(ElevationSourceLink sourceLink) { mSourceLink = sourceLink; }
     ElevationSourceLink getSourceLink() const { return mSourceLink; }
-
-    ElevationDrawingTrajectory const & getDrawingTrajectory() const { return mDrawingTrajectory; }
-    ElevationDrawingTrajectory & getDrawingTrajectory() { return mDrawingTrajectory; }
 
     void sendTrajectoryPositionChangedEvent() final;
     void applyCurrentTrajectoryPointToPrimarySource() final;

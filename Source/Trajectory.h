@@ -17,12 +17,15 @@
 #include "ConstrainedStrongTypes.h"
 #include "ControlGrisConstants.h"
 
+using AnyTrajectoryType = std::variant<PositionTrajectoryType, ElevationTrajectoryType>;
+
 //=========
 class Trajectory
 {
 protected:
     //=========
     Array<Point<float>> mPoints{};
+    AnyTrajectoryType mTrajectoryType{ PositionTrajectoryType::realtime };
 
 public:
     //=========
@@ -42,7 +45,7 @@ public:
     Point<float> getPosition(Normalized normalized) const;
 
     void clear() { mPoints.clear(); }
-    void addPoint(Point<float> const & point) { mPoints.add(point); }
+    void addPoint(Point<float> const & point);
     int size() const { return mPoints.size(); }
 
     Path getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const;

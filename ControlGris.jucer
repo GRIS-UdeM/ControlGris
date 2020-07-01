@@ -50,10 +50,6 @@
               file="Source/BannerComponent.cpp"/>
         <FILE id="L94qFU" name="BannerComponent.h" compile="0" resource="0"
               file="Source/BannerComponent.h"/>
-        <FILE id="x0MBs6" name="ElevationDrawingTrajectory.cpp" compile="1"
-              resource="0" file="Source/ElevationDrawingTrajectory.cpp"/>
-        <FILE id="J735WP" name="ElevationDrawingTrajectory.h" compile="0" resource="0"
-              file="Source/ElevationDrawingTrajectory.h"/>
         <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
               file="Source/GrisLookAndFeel.h"/>
         <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
