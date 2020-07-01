@@ -499,17 +499,18 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
         auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveArea.getHeight() };
         auto const spanHeight{ halfSpanHeight * 2.0f };
 
-        Rectangle<float> unclippedSpanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
-                                            position.getY() - halfSpanHeight,
-                                            SOURCE_FIELD_COMPONENT_DIAMETER,
-                                            spanHeight };
-        auto const spanArea{ unclippedSpanArea.getIntersection(effectiveArea) };
+        Rectangle<float> spanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
+                                   position.getY() - halfSpanHeight,
+                                   SOURCE_FIELD_COMPONENT_DIAMETER,
+                                   spanHeight };
 
         drawAnchor(g, position, source.getColour(), saturation, componentSize);
         // draw Spans
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.3f));
-        g.drawRect(spanArea, lineThickness);
-        g.fillRect(spanArea);
+        auto const oldBounds{ g.getClipBounds() };
+        g.reduceClipRegion(effectiveArea.toNearestInt()); // TODO: this clips everything after!
+        g.drawEllipse(spanArea, lineThickness);
+        g.fillEllipse(spanArea);
         sourceIndex += 1.0f;
     }
 
