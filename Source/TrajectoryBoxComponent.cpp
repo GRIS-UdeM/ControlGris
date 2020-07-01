@@ -232,13 +232,13 @@ void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
 
 void TrajectoryBoxComponent::setPositionBackAndForth(bool state)
 {
-    mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+    mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
 void TrajectoryBoxComponent::setElevationBackAndForth(bool state)
 {
-    mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
+    mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 

@@ -119,8 +119,8 @@ class PositionFieldComponent final : public FieldComponent
 
     bool mShowCircularSourceSelectionWarning{ false };
 
-    std::optional<Point<float>> mLineDrawingAnchor1{ std::nullopt };
-    std::optional<Point<float>> mLineDrawingAnchor2{ std::nullopt };
+    std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
+    std::optional<Point<float>> mLineDrawingEndPosition{ std::nullopt };
 
     SourceComponent mDrawingHandleComponent{ Colour::fromRGB(120, 120, 120), "X" };
 
@@ -150,18 +150,18 @@ public:
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
 
     Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
+    Line<float> sourcePositionToComponentPosition(Line<float> const & sourcePosition) const;
     Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
+    Line<float> componentPositionToSourcePosition(Line<float> const & componentPosition) const;
 
     Rectangle<float> getEffectiveArea() const final;
 
 private:
     //==============================================================================
-    bool hasValidLineDrawingAnchor1() const { return mLineDrawingAnchor1.has_value(); }
-    bool hasValidLineDrawingAnchor2() const { return mLineDrawingAnchor2.has_value(); }
-    //==============================================================================
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
+    void mouseMove(MouseEvent const & event) final;
     void applySourceSelectionToComponents() final;
 
     void drawBackground(Graphics & g) const final;

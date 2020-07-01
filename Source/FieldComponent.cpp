@@ -161,11 +161,25 @@ Point<float> PositionFieldComponent::sourcePositionToComponentPosition(Point<flo
     return result;
 }
 
+Line<float> PositionFieldComponent::sourcePositionToComponentPosition(Line<float> const & sourcePosition) const
+{
+    Line<float> result{ sourcePositionToComponentPosition(sourcePosition.getStart()),
+                        sourcePositionToComponentPosition(sourcePosition.getEnd()) };
+    return result;
+}
+
 Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<float> const & componentPosition) const
 {
     auto const effectiveArea{ getEffectiveArea() };
     auto const normalizedPosition{ (componentPosition - effectiveArea.getPosition()) / effectiveArea.getWidth() };
     auto const result{ normalizedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+    return result;
+}
+
+Line<float> PositionFieldComponent::componentPositionToSourcePosition(Line<float> const & componentPosition) const
+{
+    Line<float> const result{ componentPositionToSourcePosition(componentPosition.getStart()),
+                              componentPositionToSourcePosition(componentPosition.getEnd()) };
     return result;
 }
 
@@ -319,12 +333,10 @@ void PositionFieldComponent::paint(Graphics & g)
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
-    if (mLineDrawingAnchor1.has_value() && mLineDrawingAnchor2.has_value()) {
-        Path lineDrawingPath;
-        lineDrawingPath.startNewSubPath(*mLineDrawingAnchor1);
-        lineDrawingPath.lineTo(*mLineDrawingAnchor2);
-        lineDrawingPath.closeSubPath();
-        g.strokePath(lineDrawingPath, PathStrokeType(.75f));
+    if (mLineDrawingStartPosition.has_value() && mLineDrawingEndPosition.has_value()) {
+        Line<float> lineInSourceSpace{ *mLineDrawingStartPosition, *mLineDrawingEndPosition };
+        auto const lineInComponentSpace{ sourcePositionToComponentPosition(lineInSourceSpace) };
+        g.drawLine(lineInComponentSpace, 0.75f);
     }
     if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(getEffectiveArea(), mSpatMode) };
@@ -368,33 +380,39 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
         auto const mousePosition{ event.getPosition().toFloat() };
         auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition) };
         auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
-        auto const isShiftDown{ event.mods.isShiftDown() };
 
         mOldSelectedSource.reset();
-        mAutomationManager.resetRecordingTrajectory(position);
-        mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
         mDrawingHandleComponent.setCentrePosition(sourcePositionToComponentPosition(position).toInt());
 
-        if (mLineDrawingAnchor1.has_value()) {
-            auto const anchor1{ mLineDrawingAnchor1.value() };
-            auto const anchor2{ position };
-            auto const numSteps{ static_cast<int>(
-                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
-            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
-            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
-            for (int i{ 1 }; i <= numSteps; ++i) {
-                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i });
+        auto const isShiftDown{ event.mods.isShiftDown() };
+        auto const isCurrentlyDrawingStraightLine{ mLineDrawingStartPosition.has_value() };
+
+        if (isCurrentlyDrawingStraightLine) {
+            // bake current line into drawing
+            mLineDrawingEndPosition = position;
+            Line<float> const lineInSourceSpace{ *mLineDrawingStartPosition, *mLineDrawingEndPosition };
+            auto const lineInComponentSpace{ sourcePositionToComponentPosition(lineInSourceSpace) };
+            auto const nbPoints{ static_cast<int>(std::round(lineInComponentSpace.getLength())) };
+            for (int i{}; i < nbPoints; ++i) {
+                auto const progression{ static_cast<float>(i) / (static_cast<float>(nbPoints - 1)) };
+                auto const newPoint{ lineInSourceSpace.getPointAlongLineProportionally(progression) };
+                mAutomationManager.addRecordingPoint(newPoint);
             }
             if (isShiftDown) {
-                mLineDrawingAnchor1 = anchor2;
-                mLineDrawingAnchor2.reset();
+                // start a new line from the old one
+                mLineDrawingStartPosition = mLineDrawingEndPosition;
             } else {
-                mLineDrawingAnchor1.reset();
-                mLineDrawingAnchor2.reset();
+                // finish gesture
+                mLineDrawingStartPosition.reset();
             }
+            mLineDrawingEndPosition.reset();
         } else {
+            // not currently drawing a straight line
+            mAutomationManager.resetRecordingTrajectory(position);
+            mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
             if (isShiftDown) {
-                mLineDrawingAnchor1 = position;
+                // start a new Line
+                mLineDrawingStartPosition = position;
             }
         }
     }
@@ -410,8 +428,8 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
         auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition.toFloat()) };
         auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
 
-        if (mLineDrawingAnchor1.has_value()) {
-            mLineDrawingAnchor2 = position;
+        if (mLineDrawingStartPosition.has_value()) {
+            mLineDrawingEndPosition = position;
         } else {
             mAutomationManager.addRecordingPoint(position);
         }
@@ -426,6 +444,19 @@ void PositionFieldComponent::mouseUp(const MouseEvent & event)
             mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
             repaint();
         }
+    }
+}
+
+void PositionFieldComponent::mouseMove(MouseEvent const & event)
+{
+    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
+        && mLineDrawingStartPosition.has_value()) {
+        auto const mousePosition{ event.getPosition() };
+        mDrawingHandleComponent.setCentrePosition(mousePosition.getX(), mousePosition.getY());
+        auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition.toFloat()) };
+        auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
+
+        mLineDrawingEndPosition = position;
     }
 }
 
