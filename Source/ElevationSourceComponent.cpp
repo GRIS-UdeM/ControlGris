@@ -68,6 +68,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
+    mouseDrag(event);
     if (mSource.isPrimarySource()) {
         mAutomationManager.getProcessor().endSourceElevationChangeGesture();
     }

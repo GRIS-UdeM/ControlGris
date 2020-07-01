@@ -439,12 +439,7 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
 
 void PositionFieldComponent::mouseUp(const MouseEvent & event)
 {
-    if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
-        if (!event.mods.isShiftDown()) {
-            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
-            repaint();
-        }
-    }
+    mouseDrag(event);
 }
 
 void PositionFieldComponent::mouseMove(MouseEvent const & event)
@@ -531,18 +526,11 @@ void ElevationFieldComponent::paint(Graphics & g)
     }
 }
 
-void ElevationFieldComponent::mouseDown(const MouseEvent & event)
+void ElevationFieldComponent::mouseDown(MouseEvent const & event)
 {
     mSelectedSource.reset();
-
+    mOldSelectedSource.reset();
     setSelectedSource(std::nullopt);
-
-    if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
-        auto const mousePosition{ event.getPosition().toFloat() };
-        auto const elevation{ componentPositionToSourceElevation(mousePosition) };
-
-        mOldSelectedSource.reset();
-    }
 
     repaint();
 }
@@ -554,73 +542,10 @@ void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sour
 
 void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 {
-    auto const height{ static_cast<float>(getHeight()) };
-
-    // No selection.
-    if (!mSelectedSource.has_value()) {
-        return;
-    }
-    auto const selectedSourceId{ mSelectedSource.value() };
-
-    //    if (mSelectedSource == TRAJECTORY_HANDLE_SOURCE_ID) {
-    //        if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
-    //            mCurrentRecordingPositionX += 1;
-    //            if (mCurrentRecordingPositionX >= height) {
-    //                mCurrentRecordingPositionX = height;
-    //                mAutomationManager.compressTrajectoryXValues(height);
-    //            }
-    //            float y{ event.getPosition().toFloat().y };
-    //            y = std::clamp(y, 15.0f, height - 20.0f);
-    //            mAutomationManager.addRecordingPoint(Point<float>{ static_cast<float>(mCurrentRecordingPositionX), y
-    //            }); y = height - event.getPosition().toFloat().y; y = std::clamp(y, 15.0f, height - 20.0f);
-    //            mAutomationManager.getTrajectoryHandle().setPos(
-    //                componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
-    //        } else if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::realtime) {
-    //            float y{ height - event.y };
-    //            y = std::clamp(y, 15.0f, height - 20.0f);
-    //            mAutomationManager.getTrajectoryHandle().setPos(
-    //                componentPositionToSourcePosition(Point<float>{ 10.0f, y }));
-    //            mAutomationManager.sendTrajectoryPositionChangedEvent();
-    //        }
-    //    } else {
-    //    Degrees const elevation{ (height - event.y - SOURCE_FIELD_COMPONENT_DIAMETER) / (height - 35.0f) * 90.0f };
-    //    mSources[selectedSourceId].setElevation(elevation);
-    //    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(selectedSourceId, 1); });
-    //    }
-
-    //    bool needToAdjustAutomationManager{ false };
-    //    if (static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink()) == ElevationSourceLink::independent
-    //        && mSelectedSource == 0
-    //        && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-    //               == ElevationTrajectoryType::realtime) {
-    //        needToAdjustAutomationManager = true;
-    //    } else if (static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink())
-    //                   >= ElevationSourceLink::fixedElevation
-    //               && static_cast<ElevationSourceLink>(mAutomationManager.getSourceLink()) <
-    //               ElevationSourceLink::deltaLock
-    //               && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
-    //                      == ElevationTrajectoryType::realtime) {
-    //        needToAdjustAutomationManager = true;
-    //    }
-    //
-    //    if (needToAdjustAutomationManager) {
-    //        float const y{ mSources[0].getElevation() / Degrees{ 90.0f } * (height - 15.0f) + 5.0f };
-    //        mAutomationManager.getTrajectoryHandle().setPos(componentPositionToSourcePosition(Point<float>{ 10.0f, y
-    //        })); mAutomationManager.sendTrajectoryPositionChangedEvent();
-    //    }
-
-    repaint();
 }
 
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
-    if (mCurrentlyDrawing) {
-        if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
-            mAutomationManager.addRecordingPoint(mAutomationManager.getLastRecordingPoint());
-            mSelectedSource = mOldSelectedSource;
-        }
-        repaint();
-    }
 }
 
 void ElevationFieldComponent::rebuildSourceComponents(int const numberOfSources)

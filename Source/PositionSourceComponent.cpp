@@ -69,6 +69,7 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
+    mouseDrag(event);
     if (mSource.isPrimarySource()) {
         mAutomationManager.getProcessor().endSourcePositionChangeGesture();
     }
