@@ -458,32 +458,47 @@ void PositionFieldComponent::mouseMove(MouseEvent const & event)
 //==============================================================================
 void ElevationFieldComponent::drawSpans(Graphics & g) const
 {
+    auto drawAnchor = [](Graphics & g,
+                         Point<float> const & position,
+                         Colour const colour,
+                         float const saturation,
+                         float const componentSize) {
+        constexpr auto anchorThickness = 5;
+        Line<float> anchor{ position, position.translated(0, componentSize) };
+        g.setColour(colour.withSaturation(saturation).withAlpha(0.5f));
+        g.drawLine(anchor, anchorThickness);
+    };
+
     jassert(getWidth() == getHeight());
     auto const componentSize{ static_cast<float>(getWidth()) };
     auto const effectiveArea{ getEffectiveArea() };
 
     float sourceIndex{};
     for (auto const & source : mSources) {
-        auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 3 : 1 };
+        auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 2 : 1 };
         auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
-        constexpr auto anchorThickness = 5;
+
         auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveArea.getHeight() };
         auto const spanHeight{ halfSpanHeight * 2.0f };
-        Line<float> anchor{ position, position.translated(0, componentSize) };
+
         Rectangle<float> unclippedSpanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
                                             position.getY() - halfSpanHeight,
                                             SOURCE_FIELD_COMPONENT_DIAMETER,
                                             spanHeight };
         auto const spanArea{ unclippedSpanArea.getIntersection(effectiveArea) };
 
+        drawAnchor(g, position, source.getColour(), saturation, componentSize);
         // draw Spans
-        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.5f));
-        g.drawLine(anchor, anchorThickness);
+        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.3f));
         g.drawRect(spanArea, lineThickness);
-        g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.1f));
         g.fillRect(spanArea);
         sourceIndex += 1.0f;
+    }
+
+    if (mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing) {
+        auto const handlePosition{ mDrawingHandle.getBounds().getCentre().toFloat() };
+        drawAnchor(g, handlePosition, mDrawingHandle.getColour(), 0.75f, componentSize);
     }
 }
 

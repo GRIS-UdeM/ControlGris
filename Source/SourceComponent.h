@@ -34,6 +34,8 @@ public:
     void setSelected(bool selected);
     void paint(Graphics & g) final;
 
+    Colour getColour() const { return mColour; }
+
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent);
 };
