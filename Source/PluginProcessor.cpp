@@ -979,7 +979,6 @@ void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
 {
     if (presetNumber != 0 && presetNumber != mCurrentPositionPreset) {
         mCurrentPositionPreset = presetNumber;
-
         mParameters.getParameter("positionPreset")->beginChangeGesture();
         auto const normalizedPresetNumber{ static_cast<float>(presetNumber)
                                            / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
@@ -988,6 +987,8 @@ void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
         recallFixedPosition(presetNumber);
     } else {
         mCurrentPositionPreset = presetNumber;
+        mParameters.getParameter("positionPreset")
+            ->setValue(static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS));
     }
 }
 
