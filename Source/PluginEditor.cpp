@@ -33,8 +33,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mAudioProcessorValueTreeState(vts)
     , mPositionAutomationManager(positionAutomationManager)
     , mElevationAutomationManager(elevationAutomationManager)
-    , mPositionField(positionAutomationManager)
-    , mElevationField(elevationAutomationManager)
+    , mPositionField(p.getSources(), positionAutomationManager)
+    , mElevationField(p.getSources(), elevationAutomationManager)
 {
     setLookAndFeel(&mGrisLookAndFeel);
 
@@ -106,8 +106,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Add sources to the fields.
     //---------------------------
-    mPositionField.setSources(mProcessor.getSources());
-    mElevationField.setSources(mProcessor.getSources());
+    mPositionField.refreshSources();
+    mElevationField.refreshSources();
 
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mProcessor.setSelectedSource(mSelectedSource);
@@ -279,8 +279,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numO
         mSettingsBox.setNumberOfSources(numOfSources);
         mTrajectoryBox.setNumberOfSources(numOfSources);
         mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-        mPositionField.setSources(mProcessor.getSources());
-        mElevationField.setSources(mProcessor.getSources());
+        mPositionField.refreshSources();
+        mElevationField.refreshSources();
         mSourceBox.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourceBoxPlacementChanged(SourcePlacement::leftAlternate);

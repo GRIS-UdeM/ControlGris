@@ -36,8 +36,8 @@ Path ElevationDrawingTrajectory::getDrawablePath(Rectangle<float> const & drawab
         auto const distanceBetweenPoints{ drawableArea.getWidth() / static_cast<float>(mValues.size() - 1) };
 
         auto getPoint = [&](int const index, Radians const elevation) {
-            auto const x{ distanceBetweenPoints * static_cast<float>(index) };
-            auto const y{ elevation / MAX_ELEVATION * drawableArea.getHeight() };
+            auto const x{ distanceBetweenPoints * static_cast<float>(index) + drawableArea.getX() };
+            auto const y{ elevation / MAX_ELEVATION * drawableArea.getHeight() + drawableArea.getY() };
             return Point<float>{ x, y };
         };
 

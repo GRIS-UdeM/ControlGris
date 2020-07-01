@@ -80,6 +80,10 @@ public:
         }
         return *this;
     }
+    [[nodiscard]] constexpr Radians clamp(Radians const min, Radians const max) const
+    {
+        return Radians{ std::clamp(mValue, min.mValue, max.mValue) };
+    }
     static Radians fromPoint(Point<float> const & point)
     {
         if (point.getX() == 0.0f && point.getY() == 0.0f) {

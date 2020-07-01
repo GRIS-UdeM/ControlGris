@@ -22,14 +22,9 @@
 #include "ControlGrisConstants.h"
 #include "ElevationSourceComponent.h"
 
-FieldComponent::FieldComponent() noexcept
+FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
 {
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
-
-    mTrajectoryHandleComponent = std::make_unique<SourceComponent>(Colour::fromRGB(120, 120, 120), "X");
-    mTrajectoryHandleComponent->setInterceptsMouseClicks(false, false);
-    mTrajectoryHandleComponent->setCentrePosition(getWidth() / 2, getHeight() / 2);
-    addAndMakeVisible(mTrajectoryHandleComponent.get());
 }
 
 void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
@@ -39,13 +34,12 @@ void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selected
     applySourceSelectionToComponents();
 }
 
-void FieldComponent::setSources(Sources & sources)
+void FieldComponent::refreshSources()
 {
-    mSources = &sources;
     mSelectedSource.reset();
     mOldSelectedSource.reset();
 
-    rebuildSourceComponents(sources.size());
+    rebuildSourceComponents(mSources.size());
 }
 
 void FieldComponent::drawBackgroundGrid(Graphics & g) const
@@ -197,15 +191,20 @@ void PositionFieldComponent::notifySourcePositionChanged(SourceIndex const sourc
 void PositionFieldComponent::rebuildSourceComponents(int numberOfSources)
 {
     mSourceComponents.clearQuick(true);
-    for (auto & source : *mSources) {
+    for (auto & source : mSources) {
         mSourceComponents.add(new PositionSourceComponent{ *this, source });
         addAndMakeVisible(mSourceComponents.getLast());
     }
 }
 
-PositionFieldComponent::PositionFieldComponent(PositionAutomationManager & positionAutomationManager) noexcept
-    : mAutomationManager(positionAutomationManager)
+PositionFieldComponent::PositionFieldComponent(Sources & sources,
+                                               PositionAutomationManager & positionAutomationManager) noexcept
+    : FieldComponent(sources)
+    , mAutomationManager(positionAutomationManager)
 {
+    mDrawingHandleComponent.setInterceptsMouseClicks(false, false);
+    mDrawingHandleComponent.setCentrePosition(getWidth() / 2, getHeight() / 2);
+    addAndMakeVisible(mDrawingHandleComponent);
 }
 
 void PositionFieldComponent::setSpatMode(SpatMode const spatMode)
@@ -221,7 +220,7 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
     Point<float> const fieldCenter{ halfWidth, halfWidth };
     auto const magnitude{ (width - SOURCE_FIELD_COMPONENT_DIAMETER) / 2.0f };
 
-    for (auto const & source : *mSources) {
+    for (auto const & source : mSources) {
         auto const azimuth{ source.getAzimuth() };
         auto const elevation{ source.getNormalizedElevation() };
         auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan().toFloat()).getAsRadians() };
@@ -284,7 +283,7 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 
     auto const effectiveWidth{ getEffectiveArea().getWidth() };
 
-    for (auto const & source : *mSources) {
+    for (auto const & source : mSources) {
         float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().toFloat() * MAGIC_MAX_SPAN_RATIO
                                  + MIN_SPAN_WIDTH };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f };
@@ -314,8 +313,8 @@ void PositionFieldComponent::paint(Graphics & g)
 
     drawBackground(g);
 
-    mTrajectoryHandleComponent->setVisible(mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
-                                           && !mIsPlaying);
+    mDrawingHandleComponent.setVisible(mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
+                                       && !mIsPlaying);
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
@@ -372,8 +371,8 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
 
         mOldSelectedSource.reset();
         mAutomationManager.resetRecordingTrajectory(position);
-        mSources->getPrimarySource().setPos(position, SourceLinkNotification::notify);
-        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
+        mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
+        mDrawingHandleComponent.setCentrePosition(sourcePositionToComponentPosition(position).toInt());
 
         if (mLineDrawingAnchor1.has_value()) {
             auto const anchor1{ mLineDrawingAnchor1.value() };
@@ -406,7 +405,7 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
 {
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition() };
-        mTrajectoryHandleComponent->setCentrePosition(mousePosition.getX(), mousePosition.getY());
+        mDrawingHandleComponent.setCentrePosition(mousePosition.getX(), mousePosition.getY());
         auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition.toFloat()) };
         auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
 
@@ -437,7 +436,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
     auto const effectiveArea{ getEffectiveArea() };
 
     float sourceIndex{};
-    for (auto const & source : *mSources) {
+    for (auto const & source : mSources) {
         auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 3 : 1 };
         auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
@@ -461,21 +460,34 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
     }
 }
 
+ElevationFieldComponent::ElevationFieldComponent(Sources & sources,
+                                                 ElevationAutomationManager & automationManager) noexcept
+    : FieldComponent(sources)
+    , mAutomationManager(automationManager)
+{
+    mDrawingHandle.setCentrePosition(sourceElevationToComponentPosition(Radians{ 0.0f }, SourceIndex{ -1 }).toInt());
+    addAndMakeVisible(mDrawingHandle);
+}
+
 void ElevationFieldComponent::paint(Graphics & g)
 {
     drawBackground(g);
     drawSpans(g);
 
-    mTrajectoryHandleComponent->setVisible(mAutomationManager.getTrajectoryType() == ElevationTrajectoryType::drawing
-                                           && !mIsPlaying);
+    auto const trajectoryType{ mAutomationManager.getTrajectoryType() };
+
+    mDrawingHandle.setVisible(trajectoryType == ElevationTrajectoryType::drawing && !mIsPlaying);
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
-    if (mAutomationManager.getTrajectory().has_value()) {
+    if (trajectoryType == ElevationTrajectoryType::drawing) {
+        auto const trajectoryPath{ mAutomationManager.getDrawingTrajectory().getDrawablePath(getEffectiveArea()) };
+        g.strokePath(trajectoryPath, PathStrokeType{ 0.75f });
+    } else if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(
             getEffectiveArea(),
-            mSources->getPrimarySource().getSpatMode()) };
-        g.strokePath(trajectoryPath, PathStrokeType(.75f));
+            mSources.getPrimarySource().getSpatMode()) };
+        g.strokePath(trajectoryPath, PathStrokeType{ .75f });
     }
     if (mIsPlaying && !isMouseButtonDown()
         && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
@@ -607,7 +619,7 @@ void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 void ElevationFieldComponent::rebuildSourceComponents(int numberOfSources)
 {
     mSourceComponents.clearQuick(true);
-    for (auto & source : *mSources) {
+    for (auto & source : mSources) {
         mSourceComponents.add(new ElevationSourceComponent{ *this, source });
         addAndMakeVisible(mSourceComponents.getLast());
     }
@@ -618,11 +630,12 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
 {
     auto const availableWidth{ static_cast<float>(getWidth()) - LEFT_PADDING - RIGHT_PADDING };
     auto const availableHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
-    auto const widthBetweenEachSource{ availableWidth / static_cast<float>(mSources->size() + 1) };
+    auto const widthBetweenEachSource{ availableWidth / static_cast<float>(mSources.size() + 1) };
 
     auto const x{
         LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.toInt() + 1))
     }; // We add +1 to the index for the drawing handle.
+    auto const clippedElevation{ sourceElevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
     auto const y{ sourceElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     Point<float> const result{ x, y };
 
@@ -633,7 +646,9 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float>
 {
     auto const effectiveHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
 
-    Radians const result{ MAX_ELEVATION * ((componentPosition.getY() - TOP_PADDING) / effectiveHeight) };
+    Radians const elevation{ MAX_ELEVATION * ((componentPosition.getY() - TOP_PADDING) / effectiveHeight) };
+    auto const result{ elevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
+
     return result;
 }
 

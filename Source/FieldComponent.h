@@ -24,6 +24,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
+#include "ElevationDrawingHandle.h"
 #include "ElevationSourceComponent.h"
 #include "GrisLookAndFeel.h"
 #include "PositionSourceComponent.h"
@@ -69,8 +70,7 @@ protected:
     //==============================================================================
     static constexpr int TRAJECTORY_MARGINS = 10;
     //==============================================================================
-    Sources * mSources;
-    std::unique_ptr<SourceComponent> mTrajectoryHandleComponent{};
+    Sources & mSources;
 
     bool mIsPlaying{ false };
     std::optional<SourceIndex> mSelectedSource{};
@@ -78,10 +78,10 @@ protected:
 
 public:
     //==============================================================================
-    FieldComponent() noexcept;
+    FieldComponent(Sources & sources) noexcept;
     ~FieldComponent() noexcept override = default;
     //==============================================================================
-    void setSources(Sources & sources);
+    void refreshSources();
 
     void setSelectedSource(std::optional<SourceIndex> selectedSource);
 
@@ -122,10 +122,12 @@ class PositionFieldComponent final : public FieldComponent
     std::optional<Point<float>> mLineDrawingAnchor1{ std::nullopt };
     std::optional<Point<float>> mLineDrawingAnchor2{ std::nullopt };
 
+    SourceComponent mDrawingHandleComponent{ Colour::fromRGB(120, 120, 120), "X" };
+
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 
 public:
-    PositionFieldComponent(PositionAutomationManager & positionAutomationManager) noexcept;
+    PositionFieldComponent(Sources & sources, PositionAutomationManager & positionAutomationManager) noexcept;
     ~PositionFieldComponent() noexcept final = default;
     //==============================================================================
     PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
@@ -178,15 +180,13 @@ class ElevationFieldComponent final : public FieldComponent
     bool mCurrentlyDrawing{ false };
     ElevationAutomationManager & mAutomationManager;
     int mCurrentRecordingPositionX{};
+    ElevationDrawingHandle mDrawingHandle{ *this };
 
     OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
-    ElevationFieldComponent(ElevationAutomationManager & mPositionAutomationManager) noexcept
-        : mAutomationManager(mPositionAutomationManager)
-    {
-    }
+    ElevationFieldComponent(Sources & sources, ElevationAutomationManager & mPositionAutomationManager) noexcept;
     ~ElevationFieldComponent() noexcept final = default;
     //==============================================================================
     ElevationAutomationManager const & getAutomationManager() const { return mAutomationManager; }

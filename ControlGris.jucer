@@ -24,6 +24,10 @@
       <GROUP id="{B6A2D2FE-2A17-10D3-12C3-DF6BC59A017A}" name="UI">
         <GROUP id="{39B2417E-869D-1FFB-73FC-D18B9206CEE3}" name="Fields">
           <GROUP id="{C731EA5D-DB26-8755-FBC1-8D977FCFF2F9}" name="SourceComponents">
+            <FILE id="nALY8g" name="ElevationDrawingHandle.cpp" compile="1" resource="0"
+                  file="Source/ElevationDrawingHandle.cpp"/>
+            <FILE id="XFP6dV" name="ElevationDrawingHandle.h" compile="0" resource="0"
+                  file="Source/ElevationDrawingHandle.h"/>
             <FILE id="y527bY" name="ElevationSourceComponent.cpp" compile="1" resource="0"
                   file="Source/ElevationSourceComponent.cpp"/>
             <FILE id="WYi6nn" name="ElevationSourceComponent.h" compile="0" resource="0"
