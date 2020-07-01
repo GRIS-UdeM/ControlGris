@@ -259,3 +259,16 @@ void Source::setColorFromIndex(int const numTotalSources)
     mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
     mGuiChangeBroadcaster.sendChangeMessage();
 }
+
+void Sources::setSize(int const size)
+{
+    jassert(size >= 1 && size <= MAX_NUMBER_OF_SOURCES);
+    mSize = size;
+    auto const azimuthSpan{ mPrimarySource.getAzimuthSpan() };
+    auto const elevationSpan{ mPrimarySource.getElevationSpan() };
+    for (auto & source : *this) {
+        source.setColorFromIndex(size);
+        source.setAzimuthSpan(azimuthSpan);
+        source.setElevationSpan(elevationSpan);
+    }
+}

@@ -351,10 +351,6 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     mSources.setSize(numOfSources);
     mParameters.state.setProperty("numberOfSources", mSources.size(), nullptr);
 
-    for (auto & source : mSources) {
-        source.setColorFromIndex(numOfSources);
-    }
-
     mPositionSourceLinkEnforcer.numberOfSourcesChanged();
     mElevationSourceLinkEnforcer.numberOfSourcesChanged();
 

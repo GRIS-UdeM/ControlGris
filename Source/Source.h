@@ -182,11 +182,7 @@ public:
     ~Sources() noexcept = default;
 
     int size() const { return mSize; }
-    void setSize(int const size)
-    {
-        jassert(size >= 1 && size <= MAX_NUMBER_OF_SOURCES);
-        mSize = size;
-    }
+    void setSize(int const size);
 
     Source & get(int const index)
     {
