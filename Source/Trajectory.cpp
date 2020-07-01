@@ -33,18 +33,18 @@ Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float>
         break;
     case PositionTrajectoryType::spiralClockwiseInOut:
         mPoints = getBasicSpiralPoints();
+        flipOnHorizontalAxis();
         break;
     case PositionTrajectoryType::spiralCounterClockwiseInOut:
         mPoints = getBasicSpiralPoints();
-        flipOnHorizontalAxis();
         break;
     case PositionTrajectoryType::spiralClockwiseOutIn:
         mPoints = getBasicSpiralPoints();
+        flipOnHorizontalAxis();
         invertDirection();
         break;
     case PositionTrajectoryType::spiralCounterClockwiseOutIn:
         mPoints = getBasicSpiralPoints();
-        flipOnHorizontalAxis();
         invertDirection();
         break;
     case PositionTrajectoryType::squareClockwise:
