@@ -24,22 +24,17 @@ void SourceComponent::setSelected(bool const selected)
 
 void SourceComponent::paint(Graphics & g)
 {
-    int const lineThickness{ (mSelected) ? MAX_LINE_THICKNESS : 1 };
-    float const saturation{ (mSelected) ? 1.0f : 0.75f };
-    Rectangle<float> area{ MAX_LINE_THICKNESS,
-                           MAX_LINE_THICKNESS,
-                           SOURCE_FIELD_COMPONENT_DIAMETER,
-                           SOURCE_FIELD_COMPONENT_DIAMETER };
-    area.expand(lineThickness, lineThickness);
-    g.setColour(Colour(.2f, .2f, .2f, 1.0f));
-    g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-    g.setGradientFill(ColourGradient(mColour.withSaturation(saturation).darker(1.0f),
-                                     MAX_LINE_THICKNESS + SOURCE_FIELD_COMPONENT_RADIUS,
-                                     MAX_LINE_THICKNESS + SOURCE_FIELD_COMPONENT_RADIUS,
-                                     mColour.withSaturation(saturation),
-                                     MAX_LINE_THICKNESS,
-                                     MAX_LINE_THICKNESS,
-                                     true));
+    auto const lineThickness{ static_cast<float>(mSelected ? MAX_LINE_THICKNESS : 1) };
+    auto const saturation{ (mSelected) ? 1.0f : 0.75f };
+    auto const colour{ mColour.withSaturation(saturation) };
+    auto const center{ getLocalBounds().getCentre().toFloat() };
+    auto const area{ Rectangle<float>{ SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER }.withCentre(
+        center) };
+
+    //    g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+    g.setColour(colour);
+    g.drawEllipse(area, lineThickness);
+    g.setGradientFill(ColourGradient(colour.darker(0.8f), center, colour, center / 5.0f, true));
     g.fillEllipse(area);
     g.setColour(Colours::white);
     g.drawFittedText(mIcon, area.getSmallestIntegerContainer(), Justification::centred, 1);
