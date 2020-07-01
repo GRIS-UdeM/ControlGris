@@ -476,14 +476,14 @@ void ElevationFieldComponent::paint(Graphics & g)
     drawSpans(g);
 
     auto const trajectoryType{ mAutomationManager.getTrajectoryType() };
-
+    auto const effectiveArea{ getEffectiveArea() };
     mDrawingHandle.setVisible(trajectoryType == ElevationTrajectoryType::drawing && !mIsPlaying);
 
     // Draw recording trajectory path and current position dot.
     g.setColour(Colour::fromRGB(176, 176, 228));
     if (mAutomationManager.getTrajectory().has_value()) {
         auto const trajectoryPath{ mAutomationManager.getTrajectory()->getDrawablePath(
-            getEffectiveArea(),
+            effectiveArea,
             mSources.getPrimarySource().getSpatMode()) };
         g.strokePath(trajectoryPath, PathStrokeType{ .75f });
     }
@@ -491,8 +491,12 @@ void ElevationFieldComponent::paint(Graphics & g)
         && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                != ElevationTrajectoryType::realtime
         && mAutomationManager.getPositionActivateState()) {
-        Point<float> const dpos{ mAutomationManager.getCurrentTrajectoryPoint() };
-        g.fillEllipse(dpos.x - 4, dpos.y - 4, 8, 8);
+        auto const currentTrajectoryPosition{ mAutomationManager.getCurrentTrajectoryPoint() };
+        auto const normalizedCurrentTrajectoryPosition{ (currentTrajectoryPosition + Point<float>{ 1.0f, 1.0f })
+                                                        / 2.0f };
+        auto const positionDot{ normalizedCurrentTrajectoryPosition * effectiveArea.getWidth()
+                                + effectiveArea.getPosition() };
+        g.fillEllipse(positionDot.getX() - 4, positionDot.getY() - 4, 8, 8);
     }
 }
 
@@ -507,32 +511,6 @@ void ElevationFieldComponent::mouseDown(const MouseEvent & event)
         auto const elevation{ componentPositionToSourceElevation(mousePosition) };
 
         mOldSelectedSource.reset();
-        //        mAutomationManager.resetRecordingTrajectory(position);
-        //        mTrajectoryHandleComponent->setCentrePosition(sourcePositionToComponentPosition(position).toInt());
-        //
-        //        if (mLineDrawingAnchor1.has_value()) {
-        //            auto const anchor1{ mLineDrawingAnchor1.value() };
-        //            auto const anchor2{ position };
-        //            auto const numSteps{ static_cast<int>(
-        //                jmax(std::abs(anchor2.x - anchor1.x), std::abs(anchor2.y - anchor1.y))) };
-        //            auto const xInc{ (anchor2.x - anchor1.x) / numSteps };
-        //            auto const yInc{ (anchor2.y - anchor1.y) / numSteps };
-        //            for (int i{ 1 }; i <= numSteps; ++i) {
-        //                mAutomationManager.addRecordingPoint(Point<float>{ anchor1.x + xInc * i, anchor1.y + yInc * i
-        //                });
-        //            }
-        //            if (isShiftDown) {
-        //                mLineDrawingAnchor1 = anchor2;
-        //                mLineDrawingAnchor2.reset();
-        //            } else {
-        //                mLineDrawingAnchor1.reset();
-        //                mLineDrawingAnchor2.reset();
-        //            }
-        //        } else {
-        //            if (isShiftDown) {
-        //                mLineDrawingAnchor1 = position;
-        //            }
-        //        }
     }
 
     repaint();
