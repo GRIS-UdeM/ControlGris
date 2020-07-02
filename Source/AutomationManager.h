@@ -22,6 +22,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
+#include "DumbOptional.h"
 #include "Source.h"
 #include "Trajectory.h"
 
@@ -29,8 +30,8 @@ class ControlGrisAudioProcessor;
 
 //==============================================================================
 struct PlaybackPosition {
-    std::optional<float> x{};
-    std::optional<float> y{};
+    optional<float> x{};
+    optional<float> y{};
 
     void reset()
     {
@@ -100,7 +101,7 @@ protected:
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
-    std::optional<Trajectory> mTrajectory{};
+    optional<Trajectory> mTrajectory{};
     Point<float> mCurrentTrajectoryPoint{};
     Point<float> mLastRecordingPoint{};
 
@@ -144,7 +145,7 @@ public:
 
     Point<float> const & getTrajectoryHandlePosition() const { return mTrajectoryHandlePosition; }
 
-    std::optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
+    optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
     void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }

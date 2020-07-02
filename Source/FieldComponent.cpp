@@ -38,7 +38,7 @@ FieldComponent::~FieldComponent() noexcept
 }
 
 //==============================================================================
-void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
+void FieldComponent::setSelectedSource(optional<SourceIndex> const selectedSource)
 {
     mOldSelectedSource = mSelectedSource;
     mSelectedSource = selectedSource;
@@ -340,7 +340,7 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
         float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().toFloat() * MAGIC_MAX_SPAN_RATIO
                                  + MIN_SPAN_WIDTH };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f };
-        float const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.5f };
+        float const saturation{ (mSelectedSource == source.getIndex()) ? 1.0f : 0.5f };
         Point<float> const center{ sourcePositionToComponentPosition(source.getPos()) };
         Rectangle<float> const area{ center.getX() - halfAzimuthSpan,
                                      center.getY() - halfAzimuthSpan,
@@ -416,7 +416,7 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
 //==============================================================================
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
-    setSelectedSource(std::nullopt);
+    setSelectedSource(nullopt);
 
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition().toFloat() };
@@ -520,8 +520,8 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 
     float sourceIndex{};
     for (auto const & source : mSources) {
-        auto const lineThickness{ (source.getIndex() == mSelectedSource) ? 2 : 1 };
-        auto const saturation{ (source.getIndex() == mSelectedSource) ? 1.0f : 0.75f };
+        auto const lineThickness{ (mSelectedSource == source.getIndex()) ? 2 : 1 };
+        auto const saturation{ (mSelectedSource == source.getIndex()) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
 
         auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveArea.getHeight() };
@@ -594,7 +594,7 @@ void ElevationFieldComponent::mouseDown(MouseEvent const & event)
 {
     mSelectedSource.reset();
     mOldSelectedSource.reset();
-    setSelectedSource(std::nullopt);
+    setSelectedSource(nullopt);
 
     repaint();
 }

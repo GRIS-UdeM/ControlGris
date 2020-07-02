@@ -25,6 +25,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
+#include "DumbOptional.h"
 #include "ElevationDrawingHandle.h"
 #include "ElevationSourceComponent.h"
 #include "GrisLookAndFeel.h"
@@ -75,8 +76,8 @@ protected:
     Sources & mSources;
 
     bool mIsPlaying{ false };
-    std::optional<SourceIndex> mSelectedSource{};
-    std::optional<SourceIndex> mOldSelectedSource{};
+    optional<SourceIndex> mSelectedSource{};
+    optional<SourceIndex> mOldSelectedSource{};
 
 public:
     //==============================================================================
@@ -85,7 +86,7 @@ public:
     //==============================================================================
     void refreshSources();
 
-    void setSelectedSource(std::optional<SourceIndex> selectedSource);
+    void setSelectedSource(optional<SourceIndex> selectedSource);
 
     auto const & getSelectedSourceIndex() const { return mSelectedSource; }
 
@@ -123,8 +124,8 @@ class PositionFieldComponent final : public FieldComponent
 
     bool mShowCircularSourceSelectionWarning{ false };
 
-    std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
-    std::optional<Point<float>> mLineDrawingEndPosition{ std::nullopt };
+    optional<Point<float>> mLineDrawingStartPosition{ nullopt };
+    optional<Point<float>> mLineDrawingEndPosition{ nullopt };
 
     SourceComponent mDrawingHandleComponent{ Colour::fromRGB(120, 120, 120), "X" };
 

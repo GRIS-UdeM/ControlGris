@@ -200,14 +200,14 @@ private:
         mRadiusRatio = std::max(primarySource.getPos().getDistanceFromOrigin() / initialRadius, notQuiteZero);
 
         auto const sourcePosition{ primarySource.getPos() };
-        mPrimarySourceAngle = Radians{std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
+        mPrimarySourceAngle = Radians{ std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
         mDeviationPerSource = Degrees{ 360 } / numberOfSources;
     }
     //==============================================================================
     void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex() };
-        auto const newAngle{mPrimarySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
+        auto const newAngle{ mPrimarySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
         auto const initialRadius{ snapshot.position.getDistanceFromOrigin() };
         auto const newRadius{ initialRadius * mRadiusRatio };
         Point<float> const newPosition{ std::cos(newAngle.getAsRadians()) * newRadius,
@@ -243,14 +243,14 @@ class CircularFullyFixedStrategy : public LinkStrategy
     {
         mDeviationPerSource = Degrees{ 360.0f } / numberOfSources;
         auto const primarySourcePosition{ primarySource.getPos() };
-        mPrimarySourceAngle = Radians{std::atan2(primarySourcePosition.getY(), primarySourcePosition.getX()) };
+        mPrimarySourceAngle = Radians{ std::atan2(primarySourcePosition.getY(), primarySourcePosition.getX()) };
         mRadius = primarySourcePosition.getDistanceFromOrigin();
     }
     //==============================================================================
     void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const secondaryIndex{ source.getIndex() };
-        auto const angle{mPrimarySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
+        auto const angle{ mPrimarySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
         Point<float> newPosition{ std::cos(angle.getAsRadians()) * mRadius, std::sin(angle.getAsRadians()) * mRadius };
 
         source.setPos(newPosition, SourceLinkNotification::silent);
