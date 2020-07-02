@@ -188,7 +188,7 @@ class CircularFixedAngleStrategy : public LinkStrategy
 {
 private:
     Radians mDeviationPerSource{};
-    Radians mPrimaySourceAngle{};
+    Radians mPrimarySourceAngle{};
     float mRadiusRatio{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
@@ -200,14 +200,14 @@ private:
         mRadiusRatio = std::max(primarySource.getPos().getDistanceFromOrigin() / initialRadius, notQuiteZero);
 
         auto const sourcePosition{ primarySource.getPos() };
-        mPrimaySourceAngle = Radians{ std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
+        mPrimarySourceAngle = Radians{std::atan2(sourcePosition.getY(), sourcePosition.getX()) };
         mDeviationPerSource = Degrees{ 360 } / numberOfSources;
     }
     //==============================================================================
     void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex() };
-        auto const newAngle{ mPrimaySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
+        auto const newAngle{mPrimarySourceAngle + mDeviationPerSource * sourceIndex.toInt() };
         auto const initialRadius{ snapshot.position.getDistanceFromOrigin() };
         auto const newRadius{ initialRadius * mRadiusRatio };
         Point<float> const newPosition{ std::cos(newAngle.getAsRadians()) * newRadius,
@@ -234,7 +234,7 @@ private:
 class CircularFullyFixedStrategy : public LinkStrategy
 {
     Radians mDeviationPerSource{};
-    Radians mPrimaySourceAngle{};
+    Radians mPrimarySourceAngle{};
     float mRadius{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
@@ -243,14 +243,14 @@ class CircularFullyFixedStrategy : public LinkStrategy
     {
         mDeviationPerSource = Degrees{ 360.0f } / numberOfSources;
         auto const primarySourcePosition{ primarySource.getPos() };
-        mPrimaySourceAngle = Radians{ std::atan2(primarySourcePosition.getY(), primarySourcePosition.getX()) };
+        mPrimarySourceAngle = Radians{std::atan2(primarySourcePosition.getY(), primarySourcePosition.getX()) };
         mRadius = primarySourcePosition.getDistanceFromOrigin();
     }
     //==============================================================================
     void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
     {
         auto const secondaryIndex{ source.getIndex() };
-        auto const angle{ mPrimaySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
+        auto const angle{mPrimarySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
         Point<float> newPosition{ std::cos(angle.getAsRadians()) * mRadius, std::sin(angle.getAsRadians()) * mRadius };
 
         source.setPos(newPosition, SourceLinkNotification::silent);
@@ -583,6 +583,19 @@ void SourceLinkEnforcer::numberOfSourcesChanged()
 void SourceLinkEnforcer::primarySourceMoved()
 {
     enforceSourceLink();
+
+    // We need to force an update in independent mode.
+    auto isIndependent = [](AnySourceLink const sourceLink) {
+        if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
+            return std::get<PositionSourceLink>(sourceLink) == PositionSourceLink::independent;
+        }
+        jassert(std::holds_alternative<ElevationSourceLink>(sourceLink));
+        return std::get<ElevationSourceLink>(sourceLink) == ElevationSourceLink::independent;
+    };
+
+    if (isIndependent(mSourceLink)) {
+        mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
+    }
 }
 
 //==============================================================================
