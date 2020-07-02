@@ -25,7 +25,7 @@
 
 //==============================================================================
 Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float> const & startingPoint) noexcept
-    : mTrajectoryType(trajectoryType)
+    : mIsElevationDrawing(false)
 {
     switch (trajectoryType) {
     case PositionTrajectoryType::circleClockwise:
@@ -87,7 +87,8 @@ Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float>
 }
 
 //==============================================================================
-Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept : mTrajectoryType(trajectoryType)
+Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept
+    : mIsElevationDrawing(trajectoryType == ElevationTrajectoryType::drawing)
 {
     switch (trajectoryType) {
     case ElevationTrajectoryType::downUp:
@@ -151,9 +152,7 @@ void Trajectory::addPoint(Point<float> const & point)
     mPoints.add(point);
 
     // elevation drawing works differently. We need to space the points evenly on the x axis.
-    if (std::holds_alternative<ElevationTrajectoryType>(mTrajectoryType)
-        && std::get<ElevationTrajectoryType>(mTrajectoryType) == ElevationTrajectoryType::drawing
-        && mPoints.size() > 1) {
+    if (mIsElevationDrawing && mPoints.size() > 1) {
         constexpr auto FIELD_WIDTH{ 2.0f }; // space between [ -1, 1 ]
         auto const distanceBetweenPoints{ FIELD_WIDTH / (static_cast<float>(mPoints.size() - 1)) };
         constexpr auto FIELD_X_START{ -1.0f };

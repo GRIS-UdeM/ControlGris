@@ -484,56 +484,67 @@ class DeltaLockElevationStrategy : public LinkStrategy
 };
 
 //==============================================================================
-std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
+std::unique_ptr<LinkStrategy> getLinkStrategy(PositionSourceLink const sourceLink)
 {
-    if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
-        switch (std::get<PositionSourceLink>(sourceLink)) {
-        case PositionSourceLink::independent:
-            return std::make_unique<IndependentStrategy>();
-        case PositionSourceLink::circular:
-            return std::make_unique<CircularStrategy>();
-        case PositionSourceLink::circularFixedRadius:
-            return std::make_unique<CircularFixedRadiusStrategy>();
-        case PositionSourceLink::circularFixedAngle:
-            return std::make_unique<CircularFixedAngleStrategy>();
-        case PositionSourceLink::circularFullyFixed:
-            return std::make_unique<CircularFullyFixedStrategy>();
-        case PositionSourceLink::linkSymmetricX:
-            return std::make_unique<LinkSymmetricXStrategy>();
-        case PositionSourceLink::linkSymmetricY:
-            return std::make_unique<LinkSymmetricYStrategy>();
-        case PositionSourceLink::deltaLock:
-            return std::make_unique<DeltaLockStrategy>();
-        case PositionSourceLink::undefined:
-        default:
-            jassertfalse;
-        }
-    } else {
-        jassert(std::holds_alternative<ElevationSourceLink>(sourceLink));
-        switch (std::get<ElevationSourceLink>(sourceLink)) {
-        case ElevationSourceLink::independent:
-            return std::make_unique<IndependentElevationStrategy>();
-        case ElevationSourceLink::fixedElevation:
-            return std::make_unique<FixedElevationStrategy>();
-        case ElevationSourceLink::linearMin:
-            return std::make_unique<LinearMinElevationStrategy>();
-        case ElevationSourceLink::linearMax:
-            return std::make_unique<LinearMaxElevationStrategy>();
-        case ElevationSourceLink::deltaLock:
-            return std::make_unique<DeltaLockElevationStrategy>();
-        case ElevationSourceLink::undefined:
-        default:
-            jassertfalse;
-        }
+    switch (sourceLink) {
+    case PositionSourceLink::independent:
+        return std::make_unique<IndependentStrategy>();
+    case PositionSourceLink::circular:
+        return std::make_unique<CircularStrategy>();
+    case PositionSourceLink::circularFixedRadius:
+        return std::make_unique<CircularFixedRadiusStrategy>();
+    case PositionSourceLink::circularFixedAngle:
+        return std::make_unique<CircularFixedAngleStrategy>();
+    case PositionSourceLink::circularFullyFixed:
+        return std::make_unique<CircularFullyFixedStrategy>();
+    case PositionSourceLink::linkSymmetricX:
+        return std::make_unique<LinkSymmetricXStrategy>();
+    case PositionSourceLink::linkSymmetricY:
+        return std::make_unique<LinkSymmetricYStrategy>();
+    case PositionSourceLink::deltaLock:
+        return std::make_unique<DeltaLockStrategy>();
+    case PositionSourceLink::undefined:
+    default:
+        jassertfalse;
     }
     jassertfalse;
     return nullptr;
 }
 
 //==============================================================================
-SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, AnySourceLink const sourceLink) noexcept
+std::unique_ptr<LinkStrategy> getLinkStrategy(ElevationSourceLink const sourceLink)
+{
+    switch (sourceLink) {
+    case ElevationSourceLink::independent:
+        return std::make_unique<IndependentElevationStrategy>();
+    case ElevationSourceLink::fixedElevation:
+        return std::make_unique<FixedElevationStrategy>();
+    case ElevationSourceLink::linearMin:
+        return std::make_unique<LinearMinElevationStrategy>();
+    case ElevationSourceLink::linearMax:
+        return std::make_unique<LinearMaxElevationStrategy>();
+    case ElevationSourceLink::deltaLock:
+        return std::make_unique<DeltaLockElevationStrategy>();
+    case ElevationSourceLink::undefined:
+    default:
+        jassertfalse;
+    }
+    jassertfalse;
+    return nullptr;
+}
+
+//==============================================================================
+SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink const sourceLink) noexcept
     : mSources(sources)
-    , mSourceLink(sourceLink)
+    , mPositionSourceLink(sourceLink)
+{
+    reset();
+}
+
+//==============================================================================
+SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, ElevationSourceLink const sourceLink) noexcept
+    : mSources(sources)
+    , mElevationSourceLink(sourceLink)
 {
     reset();
 }
@@ -547,10 +558,21 @@ SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
 }
 
 //==============================================================================
-void SourceLinkEnforcer::setSourceLink(AnySourceLink const sourceLink)
+void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
 {
-    if (sourceLink != mSourceLink) {
-        mSourceLink = sourceLink;
+    if (sourceLink != mPositionSourceLink) {
+        mPositionSourceLink = sourceLink;
+        mElevationSourceLink = ElevationSourceLink::undefined;
+        snapAll();
+    }
+}
+
+//==============================================================================
+void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
+{
+    if (sourceLink != mElevationSourceLink) {
+        mElevationSourceLink = sourceLink;
+        mPositionSourceLink = PositionSourceLink::undefined;
         snapAll();
     }
 }
@@ -558,7 +580,15 @@ void SourceLinkEnforcer::setSourceLink(AnySourceLink const sourceLink)
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
-    auto strategy{ getLinkStrategy(mSourceLink) };
+    std::unique_ptr<LinkStrategy> strategy{};
+
+    if (mPositionSourceLink != PositionSourceLink::undefined) {
+        jassert(mElevationSourceLink == ElevationSourceLink::undefined);
+        strategy = getLinkStrategy(mPositionSourceLink);
+    } else {
+        jassert(mElevationSourceLink != ElevationSourceLink::undefined);
+        strategy = getLinkStrategy(mElevationSourceLink);
+    }
 
     if (strategy != nullptr) {
         strategy->calculateParams(mSources.getPrimarySource(), mSnapshots.primary, mSources.size());
@@ -585,15 +615,9 @@ void SourceLinkEnforcer::primarySourceMoved()
     enforceSourceLink();
 
     // We need to force an update in independent mode.
-    auto isIndependent = [](AnySourceLink const sourceLink) {
-        if (std::holds_alternative<PositionSourceLink>(sourceLink)) {
-            return std::get<PositionSourceLink>(sourceLink) == PositionSourceLink::independent;
-        }
-        jassert(std::holds_alternative<ElevationSourceLink>(sourceLink));
-        return std::get<ElevationSourceLink>(sourceLink) == ElevationSourceLink::independent;
-    };
-
-    if (isIndependent(mSourceLink)) {
+    bool isIndependent{ mElevationSourceLink == ElevationSourceLink::independent
+                        || mPositionSourceLink == PositionSourceLink::independent };
+    if (isIndependent) {
         mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
     }
 }
@@ -605,7 +629,14 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     auto & source{ mSources[sourceIndex] };
     auto const secondaryIndex{ sourceIndex.toInt() - 1 };
     auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
-    auto strategy{ getLinkStrategy(mSourceLink) };
+    std::unique_ptr<LinkStrategy> strategy{};
+    if (mElevationSourceLink != ElevationSourceLink::undefined) {
+        jassert(mPositionSourceLink == PositionSourceLink::undefined);
+        strategy = getLinkStrategy(mElevationSourceLink);
+    } else {
+        jassert(mPositionSourceLink != PositionSourceLink::undefined);
+        strategy = getLinkStrategy(mPositionSourceLink);
+    }
 
     if (strategy != nullptr) {
         strategy->calculateParams(mSources.getPrimarySource(), mSnapshots.primary, mSources.size());

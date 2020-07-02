@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <optional>
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ConstrainedStrongTypes.h"

@@ -20,14 +20,10 @@
 
 #pragma once
 
-#include <variant>
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
 #include "Source.h"
-
-using AnySourceLink = std::variant<PositionSourceLink, ElevationSourceLink>;
 
 struct SourceSnapshot {
     SourceSnapshot() noexcept = default;
@@ -65,13 +61,16 @@ class SourceLinkEnforcer : juce::ChangeListener
 private:
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
-    AnySourceLink mSourceLink{};
+    PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
+    ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
 
 public:
-    SourceLinkEnforcer(Sources & sources, AnySourceLink const sourceLink = PositionSourceLink::independent) noexcept;
+    SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink = PositionSourceLink::independent) noexcept;
+    SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink) noexcept;
     ~SourceLinkEnforcer() noexcept;
 
-    void setSourceLink(AnySourceLink sourceLink);
+    void setSourceLink(ElevationSourceLink sourceLink);
+    void setSourceLink(PositionSourceLink sourceLink);
     void numberOfSourcesChanged();
     void enforceSourceLink();
 

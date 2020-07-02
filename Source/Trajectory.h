@@ -20,14 +20,10 @@
 
 #pragma once
 
-#include <variant>
-
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ConstrainedStrongTypes.h"
 #include "ControlGrisConstants.h"
-
-using AnyTrajectoryType = std::variant<PositionTrajectoryType, ElevationTrajectoryType>;
 
 //=========
 class Trajectory
@@ -35,7 +31,7 @@ class Trajectory
 protected:
     //=========
     Array<Point<float>> mPoints{};
-    AnyTrajectoryType mTrajectoryType{ PositionTrajectoryType::realtime };
+    bool mIsElevationDrawing{ false };
 
 public:
     //=========
