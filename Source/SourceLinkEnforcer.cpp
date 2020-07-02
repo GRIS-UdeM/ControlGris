@@ -278,7 +278,7 @@ class LinkSymmetricXStrategy : public LinkStrategy
     //==============================================================================
     void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
-        Point<float> const newPosition{ -mPrimaryPosition.getX(), mPrimaryPosition.getY() };
+        Point<float> const newPosition{ mPrimaryPosition.getX(), -mPrimaryPosition.getY() };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
@@ -304,7 +304,7 @@ class LinkSymmetricYStrategy : public LinkStrategy
     //==============================================================================
     void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
-        Point<float> const newPosition{ mPrimaryPosition.getX(), -mPrimaryPosition.getY() };
+        Point<float> const newPosition{ -mPrimaryPosition.getX(), mPrimaryPosition.getY() };
         source.setPos(newPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
@@ -513,7 +513,6 @@ std::unique_ptr<LinkStrategy> getLinkStrategy(AnySourceLink const sourceLink)
         switch (std::get<ElevationSourceLink>(sourceLink)) {
         case ElevationSourceLink::independent:
             return std::make_unique<IndependentElevationStrategy>();
-            ;
         case ElevationSourceLink::fixedElevation:
             return std::make_unique<FixedElevationStrategy>();
         case ElevationSourceLink::linearMin:
