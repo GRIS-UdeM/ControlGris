@@ -17,8 +17,10 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "InterfaceBoxComponent.h"
 
+//==============================================================================
 InterfaceBoxComponent::InterfaceBoxComponent()
 {
     mOscOutputPluginIdLabel.setText("OSC output plugin ID:", NotificationType::dontSendNotification);
@@ -134,40 +136,47 @@ InterfaceBoxComponent::InterfaceBoxComponent()
     addAndMakeVisible(&mOscSendPortEditor);
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscReceiveInputPort(int const port)
 {
     mLastOscReceivePort = port;
     mOscReceivePortEditor.setText(String(port));
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscSendOutputPort(int const port)
 {
     mLastOscSendPort = port;
     mOscSendPortEditor.setText(String{ port });
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscReceiveToggleState(bool const state)
 {
     mOscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscSendToggleState(bool const state)
 {
     mOscSendToggle.setToggleState(state, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void InterfaceBoxComponent::setOscSendOutputAddress(String const & address)
 {
     mLastOscSendAddress = address;
     mOscSendIpEditor.setText(address);
 }
 
+//==============================================================================
 void InterfaceBoxComponent::paint(Graphics & g)
 {
     auto * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 }
 
+//==============================================================================
 void InterfaceBoxComponent::resized()
 {
     mOscOutputPluginIdLabel.setBounds(5, 10, 135, 20);

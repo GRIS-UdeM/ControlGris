@@ -1,18 +1,29 @@
-/*
-  ==============================================================================
-
-    Trajectory.cpp
-    Created: 7 Jun 2020 4:18:45pm
-    Author:  samuel
-
-  ==============================================================================
-*/
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #include "Trajectory.h"
 #include "Source.h"
 
 #include <cmath>
 
+//==============================================================================
 Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float> const & startingPoint) noexcept
     : mTrajectoryType(trajectoryType)
 {
@@ -75,6 +86,7 @@ Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float>
     scale(radius);
 }
 
+//==============================================================================
 Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept : mTrajectoryType(trajectoryType)
 {
     switch (trajectoryType) {
@@ -95,6 +107,7 @@ Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept : 
     }
 }
 
+//==============================================================================
 Path Trajectory::getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const
 {
     auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
@@ -115,6 +128,7 @@ Path Trajectory::getDrawablePath(Rectangle<float> const & drawArea, SpatMode spa
     return result;
 }
 
+//==============================================================================
 Point<float> Trajectory::getPosition(Normalized const normalized) const
 {
     auto const nbPoints{ static_cast<float>(mPoints.size()) };
@@ -131,6 +145,7 @@ Point<float> Trajectory::getPosition(Normalized const normalized) const
     return result;
 }
 
+//==============================================================================
 void Trajectory::addPoint(Point<float> const & point)
 {
     mPoints.add(point);
@@ -150,6 +165,7 @@ void Trajectory::addPoint(Point<float> const & point)
     }
 }
 
+//==============================================================================
 void Trajectory::invertDirection()
 {
     for (int front{}, back{ mPoints.size() - 1 }; front < back; ++front, --back) {
@@ -157,6 +173,7 @@ void Trajectory::invertDirection()
     }
 }
 
+//==============================================================================
 void Trajectory::flipOnHorizontalAxis()
 {
     for (auto & point : mPoints) {
@@ -164,6 +181,7 @@ void Trajectory::flipOnHorizontalAxis()
     }
 }
 
+//==============================================================================
 void Trajectory::rotate(Radians const angle)
 {
     for (auto & point : mPoints) {
@@ -171,6 +189,7 @@ void Trajectory::rotate(Radians const angle)
     }
 }
 
+//==============================================================================
 void Trajectory::scale(float magnitude)
 {
     for (auto & point : mPoints) {
@@ -178,6 +197,7 @@ void Trajectory::scale(float magnitude)
     }
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicCirclePoints()
 {
     constexpr int NB_POINTS = 300;
@@ -192,6 +212,7 @@ Array<Point<float>> Trajectory::getBasicCirclePoints()
     return result;
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicEllipsePoints()
 {
     // just squish a circle!
@@ -203,6 +224,7 @@ Array<Point<float>> Trajectory::getBasicEllipsePoints()
     return result;
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicSpiralPoints()
 {
     constexpr int NB_ROTATIONS = 3;
@@ -227,6 +249,7 @@ Array<Point<float>> Trajectory::getBasicSpiralPoints()
     return result;
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicSquarePoints()
 {
     constexpr int NB_POINTS_PER_SIDE = 75;
@@ -265,6 +288,7 @@ Array<Point<float>> Trajectory::getBasicSquarePoints()
     return result;
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicTrianglePoints()
 {
     constexpr int NB_POINTS_PER_SIDE = 100;
@@ -302,6 +326,7 @@ Array<Point<float>> Trajectory::getBasicTrianglePoints()
     return result;
 }
 
+//==============================================================================
 Array<Point<float>> Trajectory::getBasicDownUpPoints()
 {
     constexpr int NB_POINTS = 200;

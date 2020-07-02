@@ -1,12 +1,22 @@
-/*
-  ==============================================================================
-
-    SourceComponent.cpp
-    Created: 30 May 2020 11:52:24pm
-    Author:  samuel
-
-  ==============================================================================
-*/
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #include "PositionSourceComponent.h"
 
@@ -14,6 +24,7 @@
 #include "PluginProcessor.h"
 #include "Source.h"
 
+//==============================================================================
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : SourceComponent(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
@@ -24,17 +35,20 @@ PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldC
     this->updatePositionInParent();
 }
 
+//==============================================================================
 PositionSourceComponent::~PositionSourceComponent()
 {
     mSource.removeGuiChangeListener(this);
 }
 
+//==============================================================================
 void PositionSourceComponent::updatePositionInParent()
 {
     auto const newCenter{ mFieldComponent.sourcePositionToComponentPosition(mSource.getPos()) };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
+//==============================================================================
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     if (mSource.isPrimarySource()) {
@@ -45,6 +59,7 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
     mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
+//==============================================================================
 void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
 {
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
@@ -60,6 +75,7 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
+//==============================================================================
 void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 {
     if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
@@ -68,6 +84,7 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
     }
 }
 
+//==============================================================================
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
@@ -77,11 +94,13 @@ void PositionSourceComponent::mouseUp(MouseEvent const & event)
     }
 }
 
+//==============================================================================
 SourceIndex PositionSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
 
+//==============================================================================
 void PositionSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
 {
     this->updatePositionInParent();

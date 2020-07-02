@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -146,7 +147,7 @@ public:
     void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
     auto getFirstSourceId() const { return mFirstSourceId; }
 
-    void setSelectedSource(SourceIndex index);
+    void setSelectedSource(SourceIndex index) { mSelectedSource = index; }
 
     void setNumberOfSources(int numOfSources, bool propagate = true);
 
@@ -167,7 +168,7 @@ public:
     void oscBundleReceived(const OSCBundle & bundle) final;
 
     bool createOscOutputConnection(String const & oscAddress, int oscPort);
-    bool disconnectOSCOutput(String oscAddress, int oscPort);
+    bool disconnectOSCOutput(String const & oscAddress, int oscPort);
     bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);

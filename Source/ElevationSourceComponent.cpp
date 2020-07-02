@@ -1,12 +1,22 @@
-/*
-  ==============================================================================
-
-    ElevationSourceComponent.cpp
-    Created: 9 Jun 2020 2:40:05pm
-    Author:  samuel
-
-  ==============================================================================
-*/
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #include "ElevationSourceComponent.h"
 
@@ -14,6 +24,7 @@
 #include "PluginProcessor.h"
 #include "Source.h"
 
+//==============================================================================
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : SourceComponent(source.getColour(), source.getId().toString())
     , mAutomationManager(fieldComponent.getAutomationManager())
@@ -24,11 +35,13 @@ ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fie
     this->updatePositionInParent();
 }
 
+//==============================================================================
 ElevationSourceComponent::~ElevationSourceComponent() noexcept
 {
     mSource.removeGuiChangeListener(this);
 }
 
+//==============================================================================
 void ElevationSourceComponent::updatePositionInParent()
 {
     auto const newCenter{ mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(),
@@ -36,6 +49,7 @@ void ElevationSourceComponent::updatePositionInParent()
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
+//==============================================================================
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
     if (mSource.isPrimarySource()) {
@@ -45,6 +59,7 @@ void ElevationSourceComponent::mouseDown(MouseEvent const & event)
     mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
+//==============================================================================
 void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
 {
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
@@ -58,6 +73,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
+//==============================================================================
 void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 {
     if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
@@ -66,6 +82,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
     }
 }
 
+//==============================================================================
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
@@ -74,11 +91,13 @@ void ElevationSourceComponent::mouseUp(MouseEvent const & event)
     }
 }
 
+//==============================================================================
 SourceIndex ElevationSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
 
+//==============================================================================
 void ElevationSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
 {
     this->updatePositionInParent();

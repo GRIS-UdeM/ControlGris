@@ -17,16 +17,19 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "FieldComponent.h"
 
 #include "ControlGrisConstants.h"
 #include "ElevationSourceComponent.h"
 
+//==============================================================================
 FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
 {
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
 }
 
+//==============================================================================
 FieldComponent::~FieldComponent() noexcept
 {
     for (SourceIndex i{}; i < SourceIndex{ MAX_NUMBER_OF_SOURCES - 1 }; ++i) {
@@ -34,6 +37,7 @@ FieldComponent::~FieldComponent() noexcept
     }
 }
 
+//==============================================================================
 void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
 {
     mOldSelectedSource = mSelectedSource;
@@ -42,6 +46,7 @@ void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selected
     applySourceSelectionToComponents();
 }
 
+//==============================================================================
 void FieldComponent::refreshSources()
 {
     mSelectedSource.reset();
@@ -54,6 +59,7 @@ void FieldComponent::refreshSources()
     rebuildSourceComponents(mSources.size());
 }
 
+//==============================================================================
 void FieldComponent::drawBackgroundGrid(Graphics & g) const
 {
     auto const fieldComponentSize{ getWidth() };
@@ -79,11 +85,13 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
     g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
 }
 
+//==============================================================================
 void FieldComponent::changeListenerCallback(ChangeBroadcaster * broadcaster)
 {
     repaint();
 }
 
+//==============================================================================
 void PositionFieldComponent::applySourceSelectionToComponents()
 {
     if (mSelectedSource.has_value()) {
@@ -98,6 +106,7 @@ void PositionFieldComponent::applySourceSelectionToComponents()
     }
 }
 
+//==============================================================================
 void ElevationFieldComponent::applySourceSelectionToComponents()
 {
     // TODO: this is a dupe of PositionFieldComponent::applySourceSelectionToComponents()
@@ -113,6 +122,7 @@ void ElevationFieldComponent::applySourceSelectionToComponents()
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::drawBackground(Graphics & g) const
 {
     auto const fieldComponentSize{ getWidth() };
@@ -155,6 +165,7 @@ void PositionFieldComponent::drawBackground(Graphics & g) const
                fieldComponentSize_f / 2.0f);
 }
 
+//==============================================================================
 void ElevationFieldComponent::drawBackground(Graphics & g) const
 {
     auto const fieldComponentSize{ getWidth() };
@@ -178,6 +189,7 @@ Point<float> PositionFieldComponent::sourcePositionToComponentPosition(Point<flo
     return result;
 }
 
+//==============================================================================
 Line<float> PositionFieldComponent::sourcePositionToComponentPosition(Line<float> const & sourcePosition) const
 {
     Line<float> result{ sourcePositionToComponentPosition(sourcePosition.getStart()),
@@ -185,6 +197,7 @@ Line<float> PositionFieldComponent::sourcePositionToComponentPosition(Line<float
     return result;
 }
 
+//==============================================================================
 Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<float> const & componentPosition) const
 {
     auto const effectiveArea{ getEffectiveArea() };
@@ -193,6 +206,7 @@ Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<flo
     return result;
 }
 
+//==============================================================================
 Line<float> PositionFieldComponent::componentPositionToSourcePosition(Line<float> const & componentPosition) const
 {
     Line<float> const result{ componentPositionToSourcePosition(componentPosition.getStart()),
@@ -200,6 +214,7 @@ Line<float> PositionFieldComponent::componentPositionToSourcePosition(Line<float
     return result;
 }
 
+//==============================================================================
 Rectangle<float> PositionFieldComponent::getEffectiveArea() const
 {
     jassert(getWidth() == getHeight());
@@ -214,11 +229,13 @@ Rectangle<float> PositionFieldComponent::getEffectiveArea() const
     return result;
 }
 
+//==============================================================================
 void PositionFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
     mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 0); });
 }
 
+//==============================================================================
 void PositionFieldComponent::rebuildSourceComponents(int const numberOfSources)
 {
     mSourceComponents.clearQuick(true);
@@ -229,6 +246,7 @@ void PositionFieldComponent::rebuildSourceComponents(int const numberOfSources)
     }
 }
 
+//==============================================================================
 PositionFieldComponent::PositionFieldComponent(Sources & sources,
                                                PositionAutomationManager & positionAutomationManager) noexcept
     : FieldComponent(sources)
@@ -239,12 +257,14 @@ PositionFieldComponent::PositionFieldComponent(Sources & sources,
     addAndMakeVisible(mDrawingHandleComponent);
 }
 
+//==============================================================================
 void PositionFieldComponent::setSpatMode(SpatMode const spatMode)
 {
     mSpatMode = spatMode;
     repaint();
 }
 
+//==============================================================================
 void PositionFieldComponent::drawDomeSpans(Graphics & g) const
 {
     auto const width{ getWidth() };
@@ -307,6 +327,7 @@ void PositionFieldComponent::drawDomeSpans(Graphics & g) const
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 {
     constexpr float MIN_SPAN_WIDTH = SOURCE_FIELD_COMPONENT_DIAMETER;
@@ -333,12 +354,14 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::setCircularSourceSelectionWarning(bool const showCircularSourceSelectionWarning)
 {
     mShowCircularSourceSelectionWarning = showCircularSourceSelectionWarning;
     repaint();
 }
 
+//==============================================================================
 void PositionFieldComponent::paint(Graphics & g)
 {
     int const componentSize{ getWidth() };
@@ -380,6 +403,7 @@ void PositionFieldComponent::paint(Graphics & g)
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::drawSpans(Graphics & g) const
 {
     if (mSpatMode == SpatMode::dome) {
@@ -389,6 +413,7 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
     setSelectedSource(std::nullopt);
@@ -437,6 +462,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
     repaint();
 }
 
+//==============================================================================
 void PositionFieldComponent::mouseDrag(const MouseEvent & event)
 {
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
@@ -454,11 +480,13 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
     }
 }
 
+//==============================================================================
 void PositionFieldComponent::mouseUp(const MouseEvent & event)
 {
     mouseDrag(event);
 }
 
+//==============================================================================
 void PositionFieldComponent::mouseMove(MouseEvent const & event)
 {
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
@@ -520,6 +548,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
     }
 }
 
+//==============================================================================
 ElevationFieldComponent::ElevationFieldComponent(Sources & sources,
                                                  ElevationAutomationManager & automationManager) noexcept
     : FieldComponent(sources)
@@ -529,6 +558,7 @@ ElevationFieldComponent::ElevationFieldComponent(Sources & sources,
     addAndMakeVisible(mDrawingHandle);
 }
 
+//==============================================================================
 void ElevationFieldComponent::paint(Graphics & g)
 {
     drawBackground(g);
@@ -559,6 +589,7 @@ void ElevationFieldComponent::paint(Graphics & g)
     }
 }
 
+//==============================================================================
 void ElevationFieldComponent::mouseDown(MouseEvent const & event)
 {
     mSelectedSource.reset();
@@ -568,19 +599,23 @@ void ElevationFieldComponent::mouseDown(MouseEvent const & event)
     repaint();
 }
 
+//==============================================================================
 void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
     mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
 }
 
+//==============================================================================
 void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
 {
 }
 
+//==============================================================================
 void ElevationFieldComponent::mouseUp(const MouseEvent & event)
 {
 }
 
+//==============================================================================
 void ElevationFieldComponent::rebuildSourceComponents(int const numberOfSources)
 {
     mSourceComponents.clearQuick(true);
@@ -590,6 +625,7 @@ void ElevationFieldComponent::rebuildSourceComponents(int const numberOfSources)
     }
 }
 
+//==============================================================================
 Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians const sourceElevation,
                                                                          SourceIndex const index) const
 {
@@ -607,6 +643,7 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
     return result;
 }
 
+//==============================================================================
 Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float> const & componentPosition) const
 {
     auto const effectiveHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
@@ -617,6 +654,7 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(Point<float>
     return result;
 }
 
+//==============================================================================
 Rectangle<float> ElevationFieldComponent::getEffectiveArea() const
 {
     jassert(getWidth() == getHeight());

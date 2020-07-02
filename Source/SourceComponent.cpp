@@ -1,27 +1,40 @@
-/*
-  ==============================================================================
-
-    FieldComponentClickableItem.cpp
-    Created: 8 Jun 2020 10:11:39pm
-    Author:  samuel
-
-  ==============================================================================
-*/
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #include "SourceComponent.h"
 
+//==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
     this->setSize(dimension, dimension);
 }
 
+//==============================================================================
 void SourceComponent::setSelected(bool const selected)
 {
     mSelected = selected;
     repaint();
 }
 
+//==============================================================================
 void SourceComponent::paint(Graphics & g)
 {
     auto const lineThickness{ static_cast<float>(mSelected ? MAX_LINE_THICKNESS : 1) };

@@ -17,10 +17,12 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "SourceBoxComponent.h"
 
 #include "ControlGrisConstants.h"
 
+//==============================================================================
 SourceBoxComponent::SourceBoxComponent()
 {
     mSelectedSource = SourceIndex{};
@@ -83,11 +85,13 @@ SourceBoxComponent::SourceBoxComponent()
     };
 }
 
+//==============================================================================
 SourceBoxComponent::~SourceBoxComponent()
 {
     setLookAndFeel(nullptr);
 }
 
+//==============================================================================
 void SourceBoxComponent::paint(Graphics & g)
 {
     GrisLookAndFeel * lookAndFeel;
@@ -95,6 +99,7 @@ void SourceBoxComponent::paint(Graphics & g)
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 }
 
+//==============================================================================
 void SourceBoxComponent::resized()
 {
     mSourcePlacementLabel.setBounds(5, 10, 150, 15);
@@ -110,6 +115,7 @@ void SourceBoxComponent::resized()
     mAngleSlider.setBounds(380, 70, 200, 20);
 }
 
+//==============================================================================
 void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
 {
     mSourceNumberCombo.clear();
@@ -121,6 +127,7 @@ void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId con
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
 }
 
+//==============================================================================
 void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode spatMode)
 {
     mSelectedSource = sourceIndex;

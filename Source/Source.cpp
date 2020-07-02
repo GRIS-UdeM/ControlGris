@@ -17,10 +17,12 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "Source.h"
 
 #include <algorithm>
 
+//==============================================================================
 void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sourceLinkNotification)
 {
     auto const balancedAzimuth{ azimuth.simplified() };
@@ -31,16 +33,19 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sour
     }
 }
 
+//==============================================================================
 void Source::setAzimuth(Normalized const normalizedAzimuth, SourceLinkNotification const sourceLinkNotification)
 {
     this->setAzimuth(twoPi * normalizedAzimuth.toFloat() - pi, sourceLinkNotification);
 }
 
+//==============================================================================
 Normalized Source::getNormalizedAzimuth() const
 {
     return Normalized{ (mAzimuth + pi) / twoPi };
 }
 
+//==============================================================================
 void Source::setElevation(Radians const elevation, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedElevation{ clipElevation(elevation) };
@@ -51,12 +56,14 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
     }
 }
 
+//==============================================================================
 void Source::setElevation(Normalized const normalizedElevation, SourceLinkNotification const sourceLinkNotification)
 {
     auto const newValue{ halfPi * normalizedElevation.toFloat() };
     setElevation(newValue, sourceLinkNotification);
 }
 
+//==============================================================================
 void Source::setDistance(float const distance, SourceLinkNotification const sourceLinkNotification)
 {
     jassert(distance >= 0.0f);
@@ -68,6 +75,7 @@ void Source::setDistance(float const distance, SourceLinkNotification const sour
     }
 }
 
+//==============================================================================
 void Source::setCoordinates(Radians const azimuth,
                             Radians const elevation,
                             float const distance,
@@ -86,6 +94,7 @@ void Source::setCoordinates(Radians const azimuth,
     }
 }
 
+//==============================================================================
 void Source::setAzimuthSpan(Normalized const azimuthSpan)
 {
     if (mAzimuthSpan != azimuthSpan) {
@@ -94,6 +103,7 @@ void Source::setAzimuthSpan(Normalized const azimuthSpan)
     }
 }
 
+//==============================================================================
 void Source::setElevationSpan(Normalized const elevationSpan)
 {
     if (mElevationSpan != elevationSpan) {
@@ -102,6 +112,7 @@ void Source::setElevationSpan(Normalized const elevationSpan)
     }
 }
 
+//==============================================================================
 void Source::setX(float const x, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedX{ clipCoordinate(x) };
@@ -112,16 +123,19 @@ void Source::setX(float const x, SourceLinkNotification const sourceLinkNotifica
     }
 }
 
+//==============================================================================
 void Source::setX(Normalized const x, SourceLinkNotification const sourceLinkNotification)
 {
     setX(x.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
+//==============================================================================
 void Source::setY(Normalized const y, SourceLinkNotification const sourceLinkNotification)
 {
     setY(y.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
+//==============================================================================
 void Source::setY(float const y, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedY{ clipCoordinate(y) };
@@ -132,6 +146,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
     }
 }
 
+//==============================================================================
 void Source::setPos(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
@@ -142,6 +157,7 @@ void Source::setPos(Point<float> const & position, SourceLinkNotification const 
     }
 }
 
+//==============================================================================
 void Source::computeXY()
 {
     float const radius{ ([&] {
@@ -156,6 +172,7 @@ void Source::computeXY()
     mPosition = getPositionFromAngle(mAzimuth, radius);
 }
 
+//==============================================================================
 void Source::computeAzimuthElevation()
 {
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
@@ -175,11 +192,13 @@ void Source::computeAzimuthElevation()
     }
 }
 
+//==============================================================================
 Normalized Source::getNormalizedElevation() const
 {
     return Normalized{ mElevation / halfPi };
 }
 
+//==============================================================================
 Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
 {
     auto const rotatedAngle{ angle - halfPi };
@@ -188,6 +207,7 @@ Point<float> Source::getPositionFromAngle(Radians const angle, float const radiu
     return result;
 }
 
+//==============================================================================
 Radians Source::getAngleFromPosition(Point<float> const & position)
 {
     auto const getAngle = [](Point<float> const & position) {
@@ -201,6 +221,7 @@ Radians Source::getAngleFromPosition(Point<float> const & position)
     return rotatedAngle;
 }
 
+//==============================================================================
 Point<float> Source::clipDomePosition(Point<float> const & position)
 {
     Point<float> result{};
@@ -214,12 +235,14 @@ Point<float> Source::clipDomePosition(Point<float> const & position)
     return result;
 }
 
+//==============================================================================
 Point<float> Source::clipCubePosition(Point<float> const & position)
 {
     Point<float> const result{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
     return result;
 }
 
+//==============================================================================
 Point<float> Source::clipPosition(Point<float> const & position, SpatMode const spatMode)
 {
     Point<float> result{};
@@ -232,6 +255,7 @@ Point<float> Source::clipPosition(Point<float> const & position, SpatMode const 
     return result;
 }
 
+//==============================================================================
 void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
 {
     mGuiChangeBroadcaster.sendChangeMessage();
@@ -240,16 +264,19 @@ void Source::sendNotifications(SourceLinkNotification const sourceLinkNotificati
     }
 }
 
+//==============================================================================
 Radians Source::clipElevation(Radians const elevation)
 {
     return Radians{ std::clamp(elevation, Radians{ 0.0f }, halfPi) };
 }
 
+//==============================================================================
 float Source::clipCoordinate(float const coord)
 {
     return std::clamp(coord, -1.0f, 1.0f);
 }
 
+//==============================================================================
 void Source::setColorFromIndex(int const numTotalSources)
 {
     auto hue{ static_cast<float>(mIndex.toInt()) / static_cast<float>(numTotalSources) + 0.577251f };
@@ -260,6 +287,7 @@ void Source::setColorFromIndex(int const numTotalSources)
     mGuiChangeBroadcaster.sendChangeMessage();
 }
 
+//==============================================================================
 void Sources::setSize(int const size)
 {
     jassert(size >= 1 && size <= MAX_NUMBER_OF_SOURCES);

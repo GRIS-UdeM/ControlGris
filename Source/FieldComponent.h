@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include <type_traits>
@@ -60,7 +61,6 @@ public:
         virtual ~Listener() noexcept = default;
 
         virtual void fieldSourcePositionChanged(SourceIndex sourceId, int whichField) = 0;
-        virtual void fieldTrajectoryHandleClicked(int whichField) = 0;
 
     private:
         JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);

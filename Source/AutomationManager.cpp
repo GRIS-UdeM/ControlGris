@@ -1,7 +1,7 @@
 /**************************************************************************
  * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
  *                                                                        *
- * This file is part of ControlGris, a multi-mSource spatialization plugin *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
  * ControlGris is free software: you can redistribute it and/or modify    *
  * it under the terms of the GNU Lesser General Public License as         *
@@ -22,17 +22,20 @@
 
 #include <algorithm>
 
+//==============================================================================
 AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
     : mProcessor(processor)
     , mPrincipalSource(principalSource)
 {
 }
 
+//==============================================================================
 void AutomationManager::setFieldWidth(float const newFieldWidth)
 {
     mFieldWidth = newFieldWidth;
 }
 
+//==============================================================================
 void AutomationManager::setPositionActivateState(bool const newState)
 {
     mActivateState = newState;
@@ -50,15 +53,19 @@ void AutomationManager::setPositionActivateState(bool const newState)
     }
 }
 
+//==============================================================================
 void AutomationManager::setPlaybackPositionX(float const value)
 {
     mPlaybackPosition.x = value;
 }
+
+//==============================================================================
 void AutomationManager::setPlaybackPositionY(float const value)
 {
     mPlaybackPosition.y = value;
 }
 
+//==============================================================================
 void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosition)
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
@@ -72,6 +79,7 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
     mTrajectoryHandlePosition = currentPosition;
 }
 
+//==============================================================================
 Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
 {
     constexpr auto smoothingFactor = 0.8f;
@@ -80,6 +88,7 @@ Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos
     return mLastRecordingPoint;
 }
 
+//==============================================================================
 void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
@@ -88,6 +97,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
     applyCurrentTrajectoryPointToPrimarySource();
 }
 
+//==============================================================================
 void AutomationManager::computeCurrentTrajectoryPoint()
 {
     if (!mTrajectory.has_value()) {
@@ -178,24 +188,28 @@ void AutomationManager::computeCurrentTrajectoryPoint()
     }
 }
 
+//==============================================================================
 int AutomationManager::getRecordingTrajectorySize() const
 {
     jassert(mTrajectory.has_value());
     return mTrajectory->size();
 }
 
+//==============================================================================
 Point<float> AutomationManager::getFirstRecordingPoint() const
 {
     jassert(mTrajectory.has_value());
     return mTrajectory->getStartPosition();
 }
 
+//==============================================================================
 Point<float> AutomationManager::getLastRecordingPoint() const
 {
     jassert(mTrajectory.has_value());
     return mTrajectory->getEndPosition();
 }
 
+//==============================================================================
 Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
@@ -205,12 +219,14 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
     }
 }
 
+//==============================================================================
 void AutomationManager::setPrincipalSourceAndPlaybackPosition(Point<float> const & pos)
 {
     mPrincipalSource.setPos(pos, SourceLinkNotification::notify);
     setPlaybackPosition(pos);
 }
 
+//==============================================================================
 void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
@@ -218,6 +234,7 @@ void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
     });
 }
 
+//==============================================================================
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
@@ -225,6 +242,7 @@ void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
     });
 }
 
+//==============================================================================
 void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
 {
     mTrajectoryType = type;
@@ -236,12 +254,14 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     mPrincipalSource.setPos(startPosition, SourceLinkNotification::notify);
 }
 
+//==============================================================================
 void AutomationManager::addRecordingPoint(Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));
 }
 
+//==============================================================================
 void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
 {
     mTrajectoryType = type;
@@ -253,6 +273,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
     }
 }
 
+//==============================================================================
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
@@ -261,6 +282,7 @@ void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
     }
 }
 
+//==============================================================================
 void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {

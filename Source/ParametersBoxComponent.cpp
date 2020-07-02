@@ -17,8 +17,10 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "ParametersBoxComponent.h"
 
+//==============================================================================
 ParametersBoxComponent::ParametersBoxComponent()
 {
     mAzimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
@@ -45,6 +47,7 @@ ParametersBoxComponent::ParametersBoxComponent()
     addAndMakeVisible(&mElevationSpan);
 }
 
+//==============================================================================
 void ParametersBoxComponent::setSelectedSource(Source * source)
 {
     if (mSelectedSource != source || source->getAzimuthSpan().toFloat() != mAzimuthSpan.getValue()
@@ -56,18 +59,21 @@ void ParametersBoxComponent::setSelectedSource(Source * source)
     }
 }
 
+//==============================================================================
 void ParametersBoxComponent::setDistanceEnabled(bool const distanceEnabled)
 {
     mDistanceEnabled = distanceEnabled;
     resized();
 }
 
+//==============================================================================
 void ParametersBoxComponent::setSpanLinkState(bool const spanLinkState)
 {
     mSpanLinked = spanLinkState;
     repaint();
 }
 
+//==============================================================================
 void ParametersBoxComponent::mouseDown(MouseEvent const & event)
 {
     float const x{ getWidth() - 35.0f };
@@ -87,6 +93,7 @@ void ParametersBoxComponent::mouseDown(MouseEvent const & event)
     }
 }
 
+//==============================================================================
 void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 {
     auto const value{ slider->getValue() };
@@ -107,6 +114,7 @@ void ParametersBoxComponent::sliderValueChanged(Slider * slider)
     }
 }
 
+//==============================================================================
 void ParametersBoxComponent::paint(Graphics & g)
 {
     float const x{ getWidth() - 35.0f };
@@ -142,6 +150,7 @@ void ParametersBoxComponent::paint(Graphics & g)
                      1);
 }
 
+//==============================================================================
 void ParametersBoxComponent::resized()
 {
     mAzimuthLabel.setBounds(5, 3, 225, 20);

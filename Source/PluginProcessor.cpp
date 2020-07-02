@@ -24,6 +24,7 @@
 
 enum FixedPositionType { terminal, initial };
 
+//==============================================================================
 String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
 {
     String const type{ fixedPositionType == FixedPositionType::terminal ? "_terminal" : "" };
@@ -44,6 +45,7 @@ String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIn
     return result;
 }
 
+//==============================================================================
 // The parameter Layout creates the automatable mParameters.
 AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
@@ -214,13 +216,14 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     startTimerHz(50);
 }
 
+//==============================================================================
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
     disconnectOSC();
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float newValue)
+void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float const newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
@@ -296,6 +299,7 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const n
     }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSourceLink)
 {
     if (newSourceLink != mElevationAutomationManager.getSourceLink()) {
@@ -333,13 +337,15 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
     }
 }
 
-void ControlGrisAudioProcessor::setOscPortNumber(int oscPortNumber)
+//==============================================================================
+void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
     mCurrentOSCPort = oscPortNumber;
     mParameters.state.setProperty("oscPortNumber", mCurrentOSCPort, nullptr);
 }
 
-void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, bool propagate)
+//==============================================================================
+void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, bool const propagate)
 {
     mFirstSourceId = firstSourceId;
     mParameters.state.setProperty("firstSourceId", mFirstSourceId.toInt(), nullptr);
@@ -347,10 +353,12 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
         mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
     }
 
-    if (propagate)
+    if (propagate) {
         sendOscMessage();
+    }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
 {
     mSources.setSize(numOfSources);
@@ -362,11 +370,6 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     if (propagate) {
         sendOscMessage();
     }
-}
-
-void ControlGrisAudioProcessor::setSelectedSource(SourceIndex const index)
-{
-    mSelectedSource = index;
 }
 
 //==============================================================================
@@ -383,6 +386,7 @@ bool ControlGrisAudioProcessor::createOscConnection(int oscPort)
     return mOscConnected;
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::disconnectOSC()
 {
     if (mOscConnected) {
@@ -394,7 +398,8 @@ bool ControlGrisAudioProcessor::disconnectOSC()
     return !mOscConnected;
 }
 
-void ControlGrisAudioProcessor::handleOscConnection(bool state)
+//==============================================================================
+void ControlGrisAudioProcessor::handleOscConnection(bool const state)
 {
     if (state) {
         if (mLastConnectedOSCPort != mCurrentOSCPort) {
@@ -406,6 +411,7 @@ void ControlGrisAudioProcessor::handleOscConnection(bool state)
     mParameters.state.setProperty("oscConnected", getOscConnected(), nullptr);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::sendOscMessage()
 {
     if (!mOscConnected)
@@ -420,10 +426,6 @@ void ControlGrisAudioProcessor::sendOscMessage()
         float const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
         float const elevationSpan{ source.getElevationSpan() * 0.5f };
         float const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
-
-        // std::cout << "Sending osc for source #" << i << ":\n\tazimuth: " << azimuth << "\n\televation: " << elevation
-        //           << "\n\tazimuthSpan: " << azimuthSpan << "\n\televationSpan" << elevationSpan
-        //           << "\n\tdistance: " << distance << "\n\n";
 
         message.clear();
         message.addInt32(source.getId().toInt() - 1); // osc id starts at 0
@@ -440,7 +442,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort)
+bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
 {
     disconnectOSCInput(oscPort);
 
@@ -458,7 +460,8 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int oscPort)
     return mOscInputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort)
+//==============================================================================
+bool ControlGrisAudioProcessor::disconnectOSCInput(int const oscPort)
 {
     if (mOscInputConnected) {
         if (mOscInputReceiver.disconnect()) {
@@ -472,7 +475,8 @@ bool ControlGrisAudioProcessor::disconnectOSCInput(int oscPort)
     return !mOscInputConnected;
 }
 
-void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle & bundle)
+//==============================================================================
+void ControlGrisAudioProcessor::oscBundleReceived(OSCBundle const & bundle)
 {
     for (auto const & element : bundle) {
         if (element.isMessage())
@@ -482,7 +486,8 @@ void ControlGrisAudioProcessor::oscBundleReceived(const OSCBundle & bundle)
     }
 }
 
-void ControlGrisAudioProcessor::oscMessageReceived(const OSCMessage & message)
+//==============================================================================
+void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 {
     PositionSourceLink positionSourceLinkToProcess{ PositionSourceLink::undefined };
     ElevationSourceLink elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
@@ -620,7 +625,7 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddr
     return mOscOutputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPort)
+bool ControlGrisAudioProcessor::disconnectOSCOutput(String const & oscAddress, int const oscPort)
 {
     if (mOscOutputConnected) {
         if (mOscOutputSender.disconnect()) {
@@ -635,20 +640,24 @@ bool ControlGrisAudioProcessor::disconnectOSCOutput(String oscAddress, int oscPo
     return !mOscOutputConnected;
 }
 
-void ControlGrisAudioProcessor::setOscOutputPluginId(int pluginId)
+//==============================================================================
+void ControlGrisAudioProcessor::setOscOutputPluginId(int const pluginId)
 {
     mParameters.state.setProperty("oscOutputPluginId", pluginId, nullptr);
 }
 
+//==============================================================================
 int ControlGrisAudioProcessor::getOscOutputPluginId() const
 {
     return mParameters.state.getProperty("oscOutputPluginId", 1);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
-    if (!mOscOutputConnected)
+    if (!mOscOutputConnected) {
         return;
+    }
 
     OSCMessage message(OSCAddressPattern("/tmp"));
 
@@ -865,9 +874,6 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
                                                         SourceParameter const parameterId,
                                                         float const value)
 {
-    //    if (sourceIndex != SourceIndex{ 0 }) {
-    //        return; // TODO : why do we have to do this?
-    //    }
     Normalized const normalized{ static_cast<float>(value) };
     auto const param_id{ sourceIndex.toString() };
     auto & source{ mSources[sourceIndex] };
@@ -891,30 +897,33 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
         source.setY(value, SourceLinkNotification::notify);
         break;
     case SourceParameter::azimuthSpan:
-        for (auto & source : mSources) {
-            source.setAzimuthSpan(normalized);
+        for (auto & sourceRef : mSources) {
+            sourceRef.setAzimuthSpan(normalized);
         }
         mParameters.getParameter(ParameterNames::azimuthSpan)->setValueNotifyingHost(value);
         break;
     case SourceParameter::elevationSpan:
-        for (auto & source : mSources) {
-            source.setElevationSpan(normalized);
+        for (auto & sourceRef : mSources) {
+            sourceRef.setElevationSpan(normalized);
         }
         mParameters.getParameter(ParameterNames::elevationSpan)->setValueNotifyingHost(value);
         break;
     }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::beginChangeGesture(String const & parameterName)
 {
     mChangeGesturesManager.beginGesture(parameterName);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::endChangeGesture(String const & parameterName)
 {
     mChangeGesturesManager.endGesture(parameterName);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager,
                                                           Point<float> const position,
                                                           Radians const elevation)
@@ -1013,7 +1022,8 @@ void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
     mFixPositionData.sortChildElements(sorter);
 }
 
-bool ControlGrisAudioProcessor::recallFixedPosition(int id)
+//==============================================================================
+bool ControlGrisAudioProcessor::recallFixedPosition(int const id)
 {
     // TODO : this is a mess
     bool found = false;
@@ -1092,6 +1102,7 @@ bool ControlGrisAudioProcessor::recallFixedPosition(int id)
     return true;
 }
 
+//==============================================================================
 void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest)
 {
     if (dest == nullptr)
@@ -1123,7 +1134,8 @@ void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement * src, Xm
     }
 }
 
-void ControlGrisAudioProcessor::deleteFixedPosition(int id)
+//==============================================================================
+void ControlGrisAudioProcessor::deleteFixedPosition(int const id)
 {
     bool found = false;
     XmlElement * fpos = mFixPositionData.getFirstChildElement();
@@ -1157,6 +1169,7 @@ bool ControlGrisAudioProcessor::acceptsMidi() const
 #endif
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::producesMidi() const
 {
 #if JucePlugin_ProducesMidiOutput
@@ -1166,6 +1179,7 @@ bool ControlGrisAudioProcessor::producesMidi() const
 #endif
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::isMidiEffect() const
 {
 #if JucePlugin_IsMidiEffect
@@ -1196,12 +1210,14 @@ void ControlGrisAudioProcessor::initialize()
     //    }
 }
 
-void ControlGrisAudioProcessor::prepareToPlay(double sampleRate, int samplesPerBlock)
+//==============================================================================
+void ControlGrisAudioProcessor::prepareToPlay(double const sampleRate, int const samplesPerBlock)
 {
     if (mIsPlaying == 0)
         initialize();
 }
 
+//==============================================================================
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layouts) const
 {
@@ -1226,6 +1242,7 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 }
 #endif
 
+//==============================================================================
 void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBuffer & midiMessages)
 {
     bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
@@ -1315,7 +1332,8 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
     }
 }
 
-void ControlGrisAudioProcessor::setStateInformation(const void * data, int sizeInBytes)
+//==============================================================================
+void ControlGrisAudioProcessor::setStateInformation(void const * data, int const sizeInBytes)
 {
     MessageManagerLock mmLock{};
 

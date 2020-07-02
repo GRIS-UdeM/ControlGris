@@ -20,12 +20,14 @@
 
 #include "PositionPresetComponent.h"
 
+//==============================================================================
 void PresetButton::setSavedState(bool const savedState)
 {
     mSaved = savedState;
     refresh();
 }
 
+//==============================================================================
 void PresetButton::setLoadedState(bool const loadedState)
 {
     mLoaded = loadedState;
@@ -33,6 +35,7 @@ void PresetButton::setLoadedState(bool const loadedState)
     refresh();
 }
 
+//==============================================================================
 void PresetButton::refresh()
 {
     if (mLoaded) {
@@ -46,6 +49,7 @@ void PresetButton::refresh()
     }
 }
 
+//==============================================================================
 void PresetButton::clicked(ModifierKeys const & mods)
 {
     mListeners.call([&](Listener & l) { l.buttonClicked(this); });
@@ -55,6 +59,7 @@ void PresetButton::clicked(ModifierKeys const & mods)
     refresh();
 };
 
+//==============================================================================
 void PresetButton::internalClickCallback(ModifierKeys const & mods)
 {
     if (mods.isShiftDown()) {
@@ -97,6 +102,7 @@ PositionPresetComponent::PositionPresetComponent()
     addAndMakeVisible(&mAppVersionLabel);
 }
 
+//==============================================================================
 void PositionPresetComponent::setPreset(int const value, bool const notify)
 {
     if (mCurrentSelection >= 0) {
@@ -116,6 +122,7 @@ void PositionPresetComponent::setPreset(int const value, bool const notify)
     }
 }
 
+//==============================================================================
 void PositionPresetComponent::presetSaved(int const presetNumber, bool const isSaved)
 {
     if (mPresets[presetNumber - 1] != nullptr) {
@@ -123,6 +130,7 @@ void PositionPresetComponent::presetSaved(int const presetNumber, bool const isS
     }
 }
 
+//==============================================================================
 void PositionPresetComponent::buttonClicked(PresetButton * button)
 {
     if (button->getToggleState()) {
@@ -132,18 +140,21 @@ void PositionPresetComponent::buttonClicked(PresetButton * button)
     }
 }
 
+//==============================================================================
 void PositionPresetComponent::savingPresetClicked(PresetButton * button)
 {
     mActionLog.setText(String("Save ") + button->getButtonText(), NotificationType::dontSendNotification);
     mListeners.call([&](Listener & l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
 }
 
+//==============================================================================
 void PositionPresetComponent::deletingPresetClicked(PresetButton * button)
 {
     mActionLog.setText(String("Del ") + button->getButtonText(), NotificationType::dontSendNotification);
     mListeners.call([&](Listener & l) { l.positionPresetDeleted(button->getButtonText().getIntValue()); });
 }
 
+//==============================================================================
 void PositionPresetComponent::resized()
 {
     auto const width{ getWidth() };

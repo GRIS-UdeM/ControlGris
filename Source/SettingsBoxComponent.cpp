@@ -17,8 +17,10 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "SettingsBoxComponent.h"
 
+//==============================================================================
 SettingsBoxComponent::SettingsBoxComponent()
 {
     mOscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
@@ -104,36 +106,43 @@ SettingsBoxComponent::SettingsBoxComponent()
     addAndMakeVisible(&mPositionActivateButton);
 }
 
+//==============================================================================
 SettingsBoxComponent::~SettingsBoxComponent()
 {
     setLookAndFeel(nullptr);
 }
 
+//==============================================================================
 void SettingsBoxComponent::setOscFormat(SpatMode mode)
 {
     mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void SettingsBoxComponent::setOscPortNumber(int oscPortNumber)
 {
     mOscPortEditor.setText(String(oscPortNumber));
 }
 
+//==============================================================================
 void SettingsBoxComponent::setNumberOfSources(int numOfSources)
 {
     mNumOfSourcesEditor.setText(String(numOfSources));
 }
 
+//==============================================================================
 void SettingsBoxComponent::setFirstSourceId(SourceId const firstSourceId)
 {
     mFirstSourceIdEditor.setText(firstSourceId.toString());
 }
 
+//==============================================================================
 void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
 {
     mPositionActivateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void SettingsBoxComponent::paint(Graphics & g)
 {
     GrisLookAndFeel * lookAndFeel;
@@ -141,6 +150,7 @@ void SettingsBoxComponent::paint(Graphics & g)
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 }
 
+//==============================================================================
 void SettingsBoxComponent::resized()
 {
     mOscFormatLabel.setBounds(5, 10, 90, 15);

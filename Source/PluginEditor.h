@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -98,7 +99,6 @@ public:
 
     // FieldComponent::Listeners
     void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) final;
-    void fieldTrajectoryHandleClicked(int whichField) final;
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() final;

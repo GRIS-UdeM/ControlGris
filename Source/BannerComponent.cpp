@@ -17,12 +17,14 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "BannerComponent.h"
 
 Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
 Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
 Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
 
+//==============================================================================
 BannerComponent::BannerComponent() noexcept
 {
     setEditable(false, false, false);

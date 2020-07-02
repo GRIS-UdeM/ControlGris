@@ -17,9 +17,11 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "TrajectoryBoxComponent.h"
 #include "ControlGrisConstants.h"
 
+//==============================================================================
 TrajectoryBoxComponent::TrajectoryBoxComponent()
 {
     mSpatMode = SpatMode::dome;
@@ -188,17 +190,20 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
     };
 }
 
+//==============================================================================
 TrajectoryBoxComponent::~TrajectoryBoxComponent()
 {
     setLookAndFeel(nullptr);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setSpatMode(SpatMode spatMode)
 {
     mSpatMode = spatMode;
     resized();
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setNumberOfSources(int numOfSources)
 {
     if (numOfSources == 1) {
@@ -220,28 +225,33 @@ void TrajectoryBoxComponent::setNumberOfSources(int numOfSources)
     }
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setTrajectoryType(int type)
 {
     mPositionTrajectoryTypeCombo.setSelectedId(type);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
 {
     mElevationTracjectoryTypeCombo.setSelectedId(type);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setPositionBackAndForth(bool state)
 {
     mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationBackAndForth(bool state)
 {
     mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setPositionDampeningEnabled(bool state)
 {
     mPositionDampeningEditor.setEnabled(state);
@@ -254,6 +264,7 @@ void TrajectoryBoxComponent::setPositionDampeningEnabled(bool state)
     mPositionDampeningEditor.setText(text);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationDampeningEnabled(bool state)
 {
     mElevationDampeningEditor.setEnabled(state);
@@ -266,41 +277,49 @@ void TrajectoryBoxComponent::setElevationDampeningEnabled(bool state)
     mElevationDampeningEditor.setText(text);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setPositionDampeningCycles(int value)
 {
     mPositionDampeningEditor.setText(String(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationDampeningCycles(int value)
 {
     mElevationDampeningEditor.setText(String(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setDeviationPerCycle(float value)
 {
     mDeviationEditor.setText(String(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink value)
 {
     mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink value)
 {
     mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setPositionActivateState(bool state)
 {
     mPositionActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationActivateState(bool state)
 {
     mElevationActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setCycleDuration(double value)
 {
     mDurationEditor.setText(String(value));
@@ -310,6 +329,7 @@ void TrajectoryBoxComponent::setCycleDuration(double value)
     });
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setDurationUnit(int value)
 {
     mDurationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
@@ -319,6 +339,7 @@ void TrajectoryBoxComponent::setDurationUnit(int value)
     });
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::paint(Graphics & g)
 {
     GrisLookAndFeel * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
@@ -329,6 +350,7 @@ void TrajectoryBoxComponent::paint(Graphics & g)
     }
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::resized()
 {
     mSourceLinkLabel.setBounds(5, 10, 150, 20);
@@ -370,5 +392,4 @@ void TrajectoryBoxComponent::resized()
     mCycleSpeedSlider.setBounds(115, 100, 165, 20);
     mCycleSpeedLabel.setVisible(false);
     mCycleSpeedSlider.setVisible(false);
-    //------------------------------------------------------------------
 }
