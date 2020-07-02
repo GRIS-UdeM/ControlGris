@@ -11,6 +11,8 @@
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
         <FILE id="V2Cfm0" name="ConstrainedStrongTypes.h" compile="0" resource="0"
               file="Source/ConstrainedStrongTypes.h"/>
+        <FILE id="oW9vrz" name="ControlGrisConstants.cpp" compile="1" resource="0"
+              file="Source/ControlGrisConstants.cpp"/>
         <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
               file="Source/ControlGrisConstants.h"/>
         <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
@@ -84,6 +86,10 @@
             file="Source/AutomationManager.cpp"/>
       <FILE id="TpHVRw" name="AutomationManager.h" compile="0" resource="0"
             file="Source/AutomationManager.h"/>
+      <FILE id="xmyiNi" name="ChangeGesturesManager.cpp" compile="1" resource="0"
+            file="Source/ChangeGesturesManager.cpp"/>
+      <FILE id="izOcbP" name="ChangeGesturesManager.h" compile="0" resource="0"
+            file="Source/ChangeGesturesManager.h"/>
       <FILE id="VBL5zh" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="NLKhOQ" name="PluginProcessor.h" compile="0" resource="0"

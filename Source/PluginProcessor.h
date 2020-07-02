@@ -22,6 +22,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
+#include "ChangeGesturesManager.h"
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
 #include "Source.h"
@@ -83,9 +84,13 @@ private:
     SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
 
 public:
-    //==============================================================================
     AudioProcessorValueTreeState mParameters;
 
+private:
+    ChangeGesturesManager mChangeGesturesManager{ mParameters };
+
+public:
+    //==============================================================================
     PositionAutomationManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
     ElevationAutomationManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
     //==============================================================================
@@ -184,14 +189,8 @@ public:
     bool isPlaying() const { return mIsPlaying; }
     double getBPM() const { return mBpm; }
 
-    void beginSourcePositionChangeGesture() const;
-    void endSourcePositionChangeGesture() const;
-    void beginSourceElevationChangeGesture() const;
-    void endSourceElevationChangeGesture() const;
-    void beginAzimuthSpanChangeGesture() const;
-    void endAzimuthSpanChangeGesture() const;
-    void beginElevationSpanChangeGesture() const;
-    void endElevationSpanChangeGesture() const;
+    void beginChangeGesture(String const & parameterName);
+    void endChangeGesture(String const & parameterName);
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation) final;
 

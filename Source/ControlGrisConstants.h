@@ -133,3 +133,30 @@ StringArray const FIXED_POSITION_DATA_HEADERS{
 };
 
 String const FIXED_POSITION_DATA_TAG("Fix_Position_Data");
+
+namespace PluginParameter
+{
+enum class Automatable {
+
+};
+enum class Global {
+
+};
+
+String const & nameOf(Automatable const id);
+String const & nameOf(Global const id);
+}; // namespace PluginParameter
+
+struct ParameterNames {
+    static String const x;
+    static String const y;
+    static String const z;
+    static String const positionSourceLink;
+    static String const elevationSourceLink;
+    static String const azimuthSpan;
+    static String const elevationSpan;
+    static String const positionPreset;
+
+private:
+    ParameterNames() = default;
+};

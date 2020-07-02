@@ -199,7 +199,8 @@ void ControlGrisAudioProcessorEditor::setPluginState()
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
 
-    int preset = (int)((float)mAudioProcessorValueTreeState.getParameterAsValue("positionPreset").getValue());
+    int preset
+        = (int)((float)mAudioProcessorValueTreeState.getParameterAsValue(ParameterNames::positionPreset).getValue());
     mPositionPresetBox.setPreset(preset, true);
 
     mIsInsideSetPluginState = false;
@@ -486,22 +487,22 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
 {
-    mProcessor.beginAzimuthSpanChangeGesture();
+    mProcessor.beginChangeGesture(ParameterNames::azimuthSpan);
 }
 
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
 {
-    mProcessor.endAzimuthSpanChangeGesture();
+    mProcessor.endChangeGesture(ParameterNames::azimuthSpan);
 }
 
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
 {
-    mProcessor.beginElevationSpanChangeGesture();
+    mProcessor.beginChangeGesture(ParameterNames::elevationSpan);
 }
 
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 {
-    mProcessor.endElevationSpanChangeGesture();
+    mProcessor.endChangeGesture(ParameterNames::elevationSpan);
 }
 
 // TrajectoryBoxComponent::Listener callbacks.

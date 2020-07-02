@@ -507,7 +507,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
         drawAnchor(g, position, source.getColour(), saturation, componentSize);
         // draw Spans
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.3f));
-        auto const oldBounds{ g.getClipBounds() };
+        Graphics::ScopedSaveState graphicsState{ g };
         g.reduceClipRegion(effectiveArea.toNearestInt()); // TODO: this clips everything after!
         g.drawEllipse(spanArea, lineThickness);
         g.fillEllipse(spanArea);

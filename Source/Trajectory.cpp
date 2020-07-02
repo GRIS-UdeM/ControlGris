@@ -83,7 +83,7 @@ Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept : 
         break;
     case ElevationTrajectoryType::upDown:
         mPoints = getBasicDownUpPoints();
-        invertDirection();
+        flipOnHorizontalAxis();
         break;
     case ElevationTrajectoryType::drawing:
         mPoints.clear();
