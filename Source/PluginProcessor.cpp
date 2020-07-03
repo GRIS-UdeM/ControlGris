@@ -140,8 +140,9 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                        )
     ,
 #endif // JucePlugin_PreferredChannelConfigurations
-    mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
-    , mFixPositionData(FIXED_POSITION_DATA_TAG)
+    mFixPositionData(FIXED_POSITION_DATA_TAG)
+    , mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
+
 {
     // Size of the plugin window.
     mParameters.state.addChild({ "uiState", { { "width", 650 }, { "height", 700 } }, {} }, -1, nullptr);

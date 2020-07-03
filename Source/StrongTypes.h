@@ -1,6 +1,22 @@
-//
-// Created by samuel on 2020-06-01.
-//
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #ifndef STRONGTYPESTEST_TYPES_H
 #define STRONGTYPESTEST_TYPES_H
@@ -17,12 +33,7 @@ class Radians
 
 public:
     constexpr Radians() noexcept = default;
-    constexpr explicit Radians(float value) noexcept : mValue(value)
-    {
-        if (std::isnan(value)) {
-            jassertfalse;
-        }
-    }
+    constexpr explicit Radians(float value) noexcept : mValue(value) {}
     ~Radians() noexcept = default;
 
     constexpr Radians(Radians const & other) = default;
@@ -103,12 +114,7 @@ class Degrees
 
 public:
     constexpr Degrees() noexcept = default;
-    constexpr explicit Degrees(float const value) noexcept : mValue(value)
-    {
-        if (std::isnan(value)) {
-            jassertfalse;
-        }
-    }
+    constexpr explicit Degrees(float const value) noexcept : mValue(value) {}
     constexpr Degrees(Radians const radians) noexcept : Degrees(radians.getAsDegrees()) {}
     ~Degrees() noexcept = default;
 

@@ -27,8 +27,8 @@
 //==============================================================================
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : SourceComponent(source.getColour(), source.getId().toString())
-    , mAutomationManager(fieldComponent.getAutomationManager())
     , mFieldComponent(fieldComponent)
+    , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
     source.addGuiChangeListener(this);

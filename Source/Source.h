@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <array>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ConstrainedStrongTypes.h"
@@ -70,7 +72,7 @@ private:
 
 public:
     //==============================================================================
-    Source() noexcept = default;
+    Source() = default;
     ~Source() noexcept = default;
     //==============================================================================
     void setIndex(SourceIndex const index) { mIndex = index; }
