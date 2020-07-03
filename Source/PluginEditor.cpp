@@ -182,14 +182,10 @@ void ControlGrisAudioProcessorEditor::setPluginState()
 
     // Update the position preset box.
     //--------------------------------
-    for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
-        mPositionPresetBox.presetSaved(i + 1, false);
-    }
-    XmlElement * positionData = mProcessor.getFixedPositionData();
-    XmlElement * fpos = positionData->getFirstChildElement();
-    while (fpos) {
-        mPositionPresetBox.presetSaved(fpos->getIntAttribute("ID"), true);
-        fpos = fpos->getNextElement();
+    auto const savedPresets{ mProcessor.getPresetsManager().getSavedPresets() };
+    int index{ 1 };
+    for (auto const saved : savedPresets) {
+        mPositionPresetBox.presetSaved(index++, saved);
     }
 
     // Update the interface.
@@ -658,28 +654,26 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
     mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
-
-    mProcessor.setPositionPreset(0);
-    mPositionPresetBox.setPreset(0);
 }
 
 //==============================================================================
 // PositionPresetComponent::Listener callback.
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber)
 {
-    mProcessor.setPositionPreset(presetNumber);
+    mProcessor.getPresetsManager().forceLoad(presetNumber);
+    mProcessor.positionPresetComponentClicked(presetNumber);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber)
 {
-    mProcessor.addNewFixedPosition(presetNumber);
+    mProcessor.getPresetsManager().save(presetNumber);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
 {
-    mProcessor.deleteFixedPosition(presetNumber);
+    mProcessor.getPresetsManager().deletePreset(presetNumber);
 }
 
 //==============================================================================

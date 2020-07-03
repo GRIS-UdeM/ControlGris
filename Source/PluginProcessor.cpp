@@ -22,28 +22,7 @@
 
 #include "PluginEditor.h"
 
-enum FixedPositionType { terminal, initial };
-
-//==============================================================================
-String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
-{
-    String const type{ fixedPositionType == FixedPositionType::terminal ? "_terminal" : "" };
-    String result{};
-    switch (dimension) {
-    case 0:
-        result = String("S") + String(index.toInt() + 1) + type + String("_X");
-        break;
-    case 1:
-        result = String("S") + String(index.toInt() + 1) + type + String("_Y");
-        break;
-    case 2:
-        result = String("S") + String(index.toInt() + 1) + type + String("_Z");
-        break;
-    default:
-        jassertfalse; // how did you get there?
-    }
-    return result;
-}
+enum class FixedPositionType { terminal, initial };
 
 //==============================================================================
 // The parameter Layout creates the automatable mParameters.
@@ -140,8 +119,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                        )
     ,
 #endif // JucePlugin_PreferredChannelConfigurations
-    mFixPositionData(FIXED_POSITION_DATA_TAG)
-    , mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
+    mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 
 {
     // Size of the plugin window.
@@ -187,7 +165,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
-        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkNotification::notify);
+        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkNotification::silent);
     }
 
     auto * paramX{ mParameters.getParameter(ParameterNames::x) };
@@ -265,7 +243,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
 
     if (parameterID.compare(ParameterNames::positionPreset) == 0) {
         auto const value{ static_cast<int>(newValue) };
-        setPositionPreset(value);
+        mPresetManager.loadIfPresetChanged(value);
     }
 
     if (parameterID.startsWith(ParameterNames::azimuthSpan)) {
@@ -318,6 +296,15 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
         mElevationSourceLinkEnforcer.setSourceLink(newSourceLink);
         mElevationSourceLinkEnforcer.enforceSourceLink();
     }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::positionPresetComponentClicked(int const presetNumber)
+{
+    auto parameter{ mParameters.getParameter(ParameterNames::positionPreset) };
+    parameter->beginChangeGesture();
+    parameter->setValue(static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS));
+    parameter->endChangeGesture();
 }
 
 //==============================================================================
@@ -569,7 +556,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
-        setPositionPreset(newPreset);
+        mPresetManager.loadIfPresetChanged(newPreset);
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
             ed->updatePositionPreset(newPreset);
@@ -579,21 +566,21 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     if (x != -1.0f && y != -1.0f) {
         mSources.getPrimarySource().setPos(Point<float>{ x, y }, SourceLinkNotification::notify);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
-        setPositionPreset(0);
+        mPresetManager.loadIfPresetChanged(0);
     } else if (y != -1.0f) {
         mSources.getPrimarySource().setY(y, SourceLinkNotification::notify);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
-        setPositionPreset(0);
+        mPresetManager.loadIfPresetChanged(0);
     } else if (x != -1.0f) {
         mSources.getPrimarySource().setX(x, SourceLinkNotification::notify);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
-        setPositionPreset(0);
+        mPresetManager.loadIfPresetChanged(0);
     }
 
     if (z != -1.0f) {
         mSources.getPrimarySource().setY(z, SourceLinkNotification::notify);
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
-        setPositionPreset(0);
+        mPresetManager.loadIfPresetChanged(0);
     }
 
     if (static_cast<bool>(positionSourceLinkToProcess)) {
@@ -656,6 +643,17 @@ int ControlGrisAudioProcessor::getOscOutputPluginId() const
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
+    constexpr auto impossibleNumber{ std::numeric_limits<float>::min() };
+
+    static float lastTrajectoryX{ impossibleNumber };
+    static float lastTrajectoryY{ impossibleNumber };
+    static float lastTrajectoryZ{ impossibleNumber };
+    static Normalized lastAzimuthSpan{ impossibleNumber };
+    static Normalized lastElevationSpan{ impossibleNumber };
+    static PositionSourceLink lastPositionLink{ PositionSourceLink::undefined };
+    static ElevationSourceLink lastElevationLink{ ElevationSourceLink::undefined };
+    static int lastPresetNumber{ std::numeric_limits<int>::min() };
+
     if (!mOscOutputConnected) {
         return;
     }
@@ -669,7 +667,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     float trajectory1y = trajectoryHandlePosition.getY();
     float trajectory1z = trajectoryHandlePosition.getY();
 
-    if (mLastTrajectory1x != trajectory1x) {
+    if (lastTrajectoryX != trajectory1x) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/x"));
         message.addFloat32(trajectory1x);
         mOscOutputSender.send(message);
@@ -681,7 +679,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (mLastTrajectory1y != trajectory1y) {
+    if (lastTrajectoryY != trajectory1y) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/y"));
         message.addFloat32(trajectory1y);
         mOscOutputSender.send(message);
@@ -693,7 +691,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (mLastTrajectory1z != trajectory1z) {
+    if (lastTrajectoryZ != trajectory1z) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/z"));
         message.addFloat32(trajectory1z);
         mOscOutputSender.send(message);
@@ -705,7 +703,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (mLastTrajectory1x != trajectory1x || mLastTrajectory1y != trajectory1y || mLastTrajectory1z != trajectory1z) {
+    if (lastTrajectoryX != trajectory1x || lastTrajectoryY != trajectory1y || lastTrajectoryZ != trajectory1z) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xy"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
@@ -720,27 +718,27 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    mLastTrajectory1x = trajectory1x;
-    mLastTrajectory1y = trajectory1y;
-    mLastTrajectory1z = trajectory1z;
+    lastTrajectoryX = trajectory1x;
+    lastTrajectoryY = trajectory1y;
+    lastTrajectoryZ = trajectory1z;
 
-    if (mLastAzispan != mSources.getPrimarySource().getAzimuthSpan()) {
+    if (lastAzimuthSpan != mSources.getPrimarySource().getAzimuthSpan()) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/azispan"));
         message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
-        mLastAzispan = mSources.getPrimarySource().getAzimuthSpan();
+        lastAzimuthSpan = mSources.getPrimarySource().getAzimuthSpan();
     }
 
-    if (mLastElespan != mSources.getPrimarySource().getElevationSpan()) {
+    if (lastElevationSpan != mSources.getPrimarySource().getElevationSpan()) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/elespan"));
         message.addFloat32(mSources.getPrimarySource().getElevationSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
-        mLastElespan = mSources.getPrimarySource().getElevationSpan();
+        lastElevationSpan = mSources.getPrimarySource().getElevationSpan();
     }
 
-    if (mPositionAutomationManager.getSourceLink() != mLastSourceLink) {
+    if (mPositionAutomationManager.getSourceLink() != lastPositionLink) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelink"));
         message.addInt32(static_cast<int32>(mPositionAutomationManager.getSourceLink()));
         mOscOutputSender.send(message);
@@ -753,10 +751,10 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         mOscOutputSender.send(message);
         message.clear();
 
-        mLastSourceLink = mPositionAutomationManager.getSourceLink();
+        lastPositionLink = mPositionAutomationManager.getSourceLink();
     }
 
-    if (static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()) != mLastElevationSourceLink) {
+    if (static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()) != lastElevationLink) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
         message.addInt32(static_cast<int32>(mElevationAutomationManager.getSourceLink()));
         mOscOutputSender.send(message);
@@ -769,16 +767,17 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         mOscOutputSender.send(message);
         message.clear();
 
-        mLastElevationSourceLink = static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink());
+        lastElevationLink = static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink());
     }
 
-    if (mCurrentPositionPreset != mLastPositionPreset) {
+    auto const currentPreset{ mPresetManager.getCurrentPreset() };
+    if (currentPreset != lastPresetNumber) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/presets"));
-        message.addInt32(mCurrentPositionPreset);
+        message.addInt32(currentPreset);
         mOscOutputSender.send(message);
         message.clear();
 
-        mLastPositionPreset = mCurrentPositionPreset;
+        lastPresetNumber = currentPreset;
     }
 }
 
@@ -824,7 +823,7 @@ void ControlGrisAudioProcessor::timerCallback()
 void ControlGrisAudioProcessor::setPluginState()
 {
     // If no preset is loaded, try to restore the last saved positions.
-    if (mCurrentPositionPreset == 0) {
+    if (mPresetManager.getCurrentPreset() == 0) {
         for (auto & source : mSources) {
             auto const index{ source.getIndex().toString() };
             source.setAzimuth(Normalized{ mParameters.state.getProperty(String("p_azimuth_") + index) },
@@ -952,210 +951,6 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setPositionPreset(int const presetNumber)
-{
-    if (presetNumber != 0 && presetNumber != mCurrentPositionPreset) {
-        mCurrentPositionPreset = presetNumber;
-        mParameters.getParameter(ParameterNames::positionPreset)->beginChangeGesture();
-        auto const normalizedPresetNumber{ static_cast<float>(presetNumber)
-                                           / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
-        mParameters.getParameter(ParameterNames::positionPreset)->setValueNotifyingHost(normalizedPresetNumber);
-        mParameters.getParameter(ParameterNames::positionPreset)->endChangeGesture();
-        recallFixedPosition(presetNumber);
-    } else {
-        mCurrentPositionPreset = presetNumber;
-        mParameters.getParameter(ParameterNames::positionPreset)
-            ->setValue(static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS));
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessor::addNewFixedPosition(int const id)
-{
-    // Build a new fixed position element.
-    auto * newData = new XmlElement("ITEM");
-    newData->setAttribute("ID", id);
-    auto const positionSnapshots{ mPositionSourceLinkEnforcer.getSnapshots() };
-    auto const elevationSnapshots{ mElevationSourceLinkEnforcer.getSnapshots() };
-    SourceIndex const numberOfSources{ positionSnapshots.size() };
-    for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
-        auto const xName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 0) };
-        auto const yName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 1) };
-        auto const zName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 2) };
-
-        auto const position{ positionSnapshots[sourceIndex].position };
-        auto const zValue{ elevationSnapshots[sourceIndex].z / MAX_ELEVATION };
-
-        newData->setAttribute(xName, position.getX());
-        newData->setAttribute(yName, position.getY());
-        newData->setAttribute(zName, zValue);
-    }
-
-    auto const xName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
-    auto const yName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
-    auto const zName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
-
-    auto const position{ mSources.getPrimarySource().getPos() };
-    auto const zValue{ mSources.getPrimarySource().getElevation() / MAX_ELEVATION };
-
-    newData->setAttribute(xName, position.getX());
-    newData->setAttribute(yName, position.getY());
-    newData->setAttribute(zName, zValue);
-
-    // Replace an element if the new one has the same ID as one already saved.
-    bool found{ false };
-    XmlElement * fpos = mFixPositionData.getFirstChildElement();
-    while (fpos) {
-        if (fpos->getIntAttribute("ID") == id) {
-            found = true;
-            break;
-        }
-        fpos = fpos->getNextElement();
-    }
-
-    if (found) {
-        mFixPositionData.replaceChildElement(fpos, newData);
-    } else {
-        mFixPositionData.addChildElement(newData);
-    }
-
-    XmlElementDataSorter sorter("ID", true);
-    mFixPositionData.sortChildElements(sorter);
-}
-
-//==============================================================================
-bool ControlGrisAudioProcessor::recallFixedPosition(int const id)
-{
-    // TODO : this is a mess
-    bool found = false;
-    XmlElement * fpos = mFixPositionData.getFirstChildElement();
-    while (fpos) {
-        if (fpos->getIntAttribute("ID") == id) {
-            found = true;
-            break;
-        }
-        fpos = fpos->getNextElement();
-    }
-
-    if (!found) {
-        return false;
-    }
-
-    mCurrentFixPosition = fpos;
-    SourcesSnapshots snapshots{};
-    for (auto & source : mSources) {
-        SourceSnapshot snapshot{};
-        auto const index{ source.getIndex() };
-        auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
-        auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
-        if (mCurrentFixPosition->hasAttribute(xPosId) && mCurrentFixPosition->hasAttribute(yPosId)) {
-            Point<float> const position{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xPosId)),
-                                         static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yPosId)) };
-            snapshot.position = position;
-            auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
-            if (mCurrentFixPosition->hasAttribute(zPosId)) {
-                auto const normalizedElevation{ static_cast<float>(mCurrentFixPosition->getDoubleAttribute(
-                    getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
-                snapshot.z = MAX_ELEVATION * normalizedElevation;
-            }
-        }
-        if (source.isPrimarySource()) {
-            snapshots.primary = snapshot;
-        } else {
-            snapshots.secondaries.add(snapshot);
-        }
-    }
-
-    mPositionSourceLinkEnforcer.loadSnapshots(snapshots);
-    if (mSpatMode == SpatMode::cube) {
-        mElevationSourceLinkEnforcer.loadSnapshots(snapshots);
-    }
-
-    auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
-    auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
-    auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
-
-    Point<float> terminalPosition{};
-    if (mCurrentFixPosition->hasAttribute(xTerminalPositionId)
-        && mCurrentFixPosition->hasAttribute(yTerminalPositionId)) {
-        terminalPosition.setXY(static_cast<float>(mCurrentFixPosition->getDoubleAttribute(xTerminalPositionId)),
-                               static_cast<float>(mCurrentFixPosition->getDoubleAttribute(yTerminalPositionId)));
-    } else {
-        terminalPosition = snapshots.primary.position;
-    }
-    mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
-
-    if (mSpatMode == SpatMode::cube) {
-        Radians elevation{};
-        if (mCurrentFixPosition->hasAttribute(zTerminalPositionId)) {
-            elevation
-                = MAX_ELEVATION * static_cast<float>(mCurrentFixPosition->getDoubleAttribute(zTerminalPositionId));
-        } else {
-            elevation = snapshots.primary.z;
-        };
-        mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
-    }
-
-    // refresh trajectory
-    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-                                                 mSources.getPrimarySource().getPos());
-
-    return true;
-}
-
-//==============================================================================
-void ControlGrisAudioProcessor::copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest)
-{
-    if (dest == nullptr)
-        dest = new XmlElement(FIXED_POSITION_DATA_TAG);
-
-    forEachXmlChildElement(*src, element)
-    {
-        auto * newData = new XmlElement("ITEM");
-        newData->setAttribute("ID", element->getIntAttribute("ID"));
-        for (SourceIndex i{}; i < SourceIndex{ MAX_NUMBER_OF_SOURCES }; ++i) {
-            newData->setAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 0),
-                                  element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 0)));
-            newData->setAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 1),
-                                  element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 1)));
-            newData->setAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 2),
-                                  element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, i, 2)));
-        }
-        newData->setAttribute(
-            getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0),
-            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0)));
-        newData->setAttribute(
-            getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1),
-            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1)));
-        newData->setAttribute(
-            getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2),
-            element->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2)));
-
-        dest->addChildElement(newData);
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessor::deleteFixedPosition(int const id)
-{
-    bool found = false;
-    XmlElement * fpos = mFixPositionData.getFirstChildElement();
-    while (fpos) {
-        if (fpos->getIntAttribute("ID") == id) {
-            found = true;
-            break;
-        }
-        fpos = fpos->getNextElement();
-    }
-
-    if (found) {
-        mFixPositionData.removeChildElement(fpos, true);
-        XmlElementDataSorter sorter("ID", true);
-        mFixPositionData.sortChildElements(sorter);
-    }
-}
-
-//==============================================================================
 String const ControlGrisAudioProcessor::getName() const
 {
     return JucePlugin_Name;
@@ -1276,20 +1071,20 @@ void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBu
     static bool elevationGestureStarted{ false };
     if (isPositionTrajectoryActive && mIsPlaying && !positionGestureStarted) {
         positionGestureStarted = true;
-        beginChangeGesture(ParameterNames::x);
-        beginChangeGesture(ParameterNames::y);
+        mChangeGesturesManager.beginGesture(ParameterNames::x);
+        mChangeGesturesManager.beginGesture(ParameterNames::y);
     } else if ((!isPositionTrajectoryActive || !mIsPlaying) && positionGestureStarted) {
         positionGestureStarted = false;
-        endChangeGesture(ParameterNames::x);
-        endChangeGesture(ParameterNames::y);
+        mChangeGesturesManager.endGesture(ParameterNames::x);
+        mChangeGesturesManager.endGesture(ParameterNames::y);
     }
     if (mSpatMode == SpatMode::cube) {
         if (isElevationTrajectoryActive && mIsPlaying && !elevationGestureStarted) {
             elevationGestureStarted = true;
-            beginChangeGesture(ParameterNames::z);
+            mChangeGesturesManager.beginGesture(ParameterNames::z);
         } else if ((!isElevationTrajectoryActive || !mIsPlaying) && elevationGestureStarted) {
             elevationGestureStarted = false;
-            endChangeGesture(ParameterNames::z);
+            mChangeGesturesManager.endGesture(ParameterNames::z);
         }
     }
     mLastTime = mCurrentTime;
@@ -1326,8 +1121,8 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
             xmlState->removeChildElement(childExist, true);
         }
         if (mFixPositionData.getNumChildElements() > 0) {
-            auto * positionData = xmlState->createNewChildElement(FIXED_POSITION_DATA_TAG);
-            copyFixedPositionXmlElement(&mFixPositionData, positionData);
+            auto * positionData{ new XmlElement{ mFixPositionData } };
+            xmlState->addChildElement(positionData);
         }
         copyXmlToBinary(*xmlState, destData);
     }
@@ -1338,7 +1133,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 {
     MessageManagerLock mmLock{};
 
-    std::unique_ptr<XmlElement> xmlState(getXmlFromBinary(data, sizeInBytes));
+    std::unique_ptr<XmlElement> xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
     if (xmlState != nullptr) {
         // Set global settings values.
@@ -1365,7 +1160,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         XmlElement * positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
         if (positionData) {
             mFixPositionData.deleteAllChildElements();
-            copyFixedPositionXmlElement(positionData, &mFixPositionData);
+            mFixPositionData = *positionData;
         }
         // Replace the state and call automated parameter current values.
         //---------------------------------------------------------------

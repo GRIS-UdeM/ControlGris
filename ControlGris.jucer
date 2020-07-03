@@ -95,6 +95,10 @@
             file="Source/PluginProcessor.cpp"/>
       <FILE id="NLKhOQ" name="PluginProcessor.h" compile="0" resource="0"
             file="Source/PluginProcessor.h"/>
+      <FILE id="uTBx2J" name="PresetsManager.cpp" compile="1" resource="0"
+            file="Source/PresetsManager.cpp"/>
+      <FILE id="hQP6b3" name="PresetsManager.h" compile="0" resource="0"
+            file="Source/PresetsManager.h"/>
       <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
       <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
       <FILE id="aKLewA" name="SourceLinkEnforcer.cpp" compile="1" resource="0"

@@ -26,6 +26,7 @@
 #include "ChangeGesturesManager.h"
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
+#include "PresetsManager.h"
 #include "Source.h"
 #include "SourceLinkEnforcer.h"
 
@@ -61,24 +62,11 @@ private:
     bool mCanStopActivate{ false };
     double mBpm{ 120 };
 
-    int mCurrentPositionPreset{ 0 };
-
-    // Filtering variables for OSC controller output.
-    int mLastPositionPreset{ 0 };
-    float mLastTrajectory1x{ -1 };
-    float mLastTrajectory1y{ -1 };
-    float mLastTrajectory1z{ -1 };
-    Normalized mLastAzispan{ -1 };
-    Normalized mLastElespan{ -1 };
-    PositionSourceLink mLastSourceLink{ PositionSourceLink::undefined };
-    ElevationSourceLink mLastElevationSourceLink{ ElevationSourceLink::undefined };
-
     OSCSender mOscSender;
     OSCSender mOscOutputSender;
     OSCReceiver mOscInputReceiver;
 
-    XmlElement mFixPositionData;
-    XmlElement * mCurrentFixPosition{ nullptr };
+    XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
 
     Sources mSources{};
     SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources };
@@ -89,6 +77,10 @@ public:
 
 private:
     ChangeGesturesManager mChangeGesturesManager{ mParameters };
+    PresetsManager mPresetManager{ mFixPositionData,
+                                   mSources,
+                                   mPositionSourceLinkEnforcer,
+                                   mElevationSourceLinkEnforcer };
 
 public:
     //==============================================================================
@@ -198,14 +190,10 @@ public:
     void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
 
-    void setPositionPreset(int presetNumber);
+    PresetsManager & getPresetsManager() { return mPresetManager; }
+    PresetsManager const & getPresetsManager() const { return mPresetManager; }
 
-    void addNewFixedPosition(int id);
-    bool recallFixedPosition(int id);
-    static void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
-    XmlElement * getFixedPositionData() { return &mFixPositionData; } // retrieve all data.
-    XmlElement const * getFixedPositionData() const { return &mFixPositionData; }
-    void deleteFixedPosition(int id);
+    void positionPresetComponentClicked(int presetNumber);
 
 private:
     //==============================================================================
