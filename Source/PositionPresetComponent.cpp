@@ -20,6 +20,8 @@
 
 #include "PositionPresetComponent.h"
 
+#include "PresetsManager.h"
+
 //==============================================================================
 void PresetButton::setSavedState(bool const savedState)
 {
@@ -76,7 +78,7 @@ void PresetButton::internalClickCallback(ModifierKeys const & mods)
 };
 
 //===============================================================================
-PositionPresetComponent::PositionPresetComponent()
+PositionPresetComponent::PositionPresetComponent(PresetsManager & presetsManager) : mPresetsManager(presetsManager)
 {
     constexpr int groupId = 1;
 
@@ -100,6 +102,14 @@ PositionPresetComponent::PositionPresetComponent()
 
     mAppVersionLabel.setText(String("v. ") + JucePlugin_VersionString, NotificationType::dontSendNotification);
     addAndMakeVisible(&mAppVersionLabel);
+
+    mPresetsManager.addChangeListener(this);
+}
+
+//==============================================================================
+PositionPresetComponent::~PositionPresetComponent()
+{
+    mPresetsManager.removeChangeListener(this);
 }
 
 //==============================================================================
@@ -128,6 +138,13 @@ void PositionPresetComponent::presetSaved(int const presetNumber, bool const isS
     if (mPresets[presetNumber - 1] != nullptr) {
         mPresets[presetNumber - 1]->setSavedState(isSaved);
     }
+}
+
+//==============================================================================
+void PositionPresetComponent::changeListenerCallback(ChangeBroadcaster * changeBroadcaster)
+{
+    auto const currentPreset{ mPresetsManager.getCurrentPreset() };
+    setPreset(currentPreset, false);
 }
 
 //==============================================================================

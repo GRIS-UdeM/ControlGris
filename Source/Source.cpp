@@ -258,7 +258,7 @@ Point<float> Source::clipPosition(Point<float> const & position, SpatMode const 
 //==============================================================================
 void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
 {
-    //    mGuiChangeBroadcaster.sendChangeMessage();
+    mGuiChangeBroadcaster.sendChangeMessage();
     if (sourceLinkNotification == SourceLinkNotification::notify) {
         mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
     }

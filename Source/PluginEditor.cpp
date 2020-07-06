@@ -36,6 +36,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mElevationAutomationManager(elevationAutomationManager)
     , mPositionField(p.getSources(), positionAutomationManager)
     , mElevationField(p.getSources(), elevationAutomationManager)
+    , mPositionPresetBox(p.getPresetsManager())
 {
     setLookAndFeel(&mGrisLookAndFeel);
 

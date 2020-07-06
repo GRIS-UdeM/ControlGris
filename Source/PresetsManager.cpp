@@ -52,6 +52,15 @@ PresetsManager::~PresetsManager() noexcept
     unsubscribeToSources();
 }
 
+int PresetsManager::getCurrentPreset() const
+{
+    if (mSourceMovedSinceLastRecall) {
+        return 0;
+    }
+
+    return mLastLoadedPreset;
+}
+
 bool PresetsManager::loadIfPresetChanged(int const presetNumber)
 {
     if (presetNumber == mLastLoadedPreset) {
@@ -142,9 +151,11 @@ bool PresetsManager::load(int const presetNumber)
         //    // refresh trajectory
         //    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
         //                                                 mSources.getPrimarySource().getPos());
-    }
 
-    mLastLoadedPreset = presetNumber;
+        mLastLoadedPreset = presetNumber;
+        mSourceMovedSinceLastRecall = false;
+        sendChangeMessage();
+    }
 
     return true;
 }
@@ -230,6 +241,8 @@ bool PresetsManager::deletePreset(int presetNumber)
     mData.removeChildElement(maybe_data.value(), true);
     XmlElementDataSorter sorter("ID", true);
     mData.sortChildElements(sorter);
+
+    return true;
 }
 
 std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() const
@@ -249,7 +262,10 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
 
 void PresetsManager::changeListenerCallback(ChangeBroadcaster * broadcaster)
 {
-    mSourceMovedSinceLastRecall = true;
+    if (!mSourceMovedSinceLastRecall) {
+        mSourceMovedSinceLastRecall = true;
+        sendChangeMessage();
+    }
 }
 
 void PresetsManager::subscribeToSources()

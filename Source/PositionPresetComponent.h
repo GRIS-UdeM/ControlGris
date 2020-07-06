@@ -25,6 +25,8 @@
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
 
+class PresetsManager;
+
 //==============================================================================
 class PresetButton final : public TextButton
 {
@@ -70,6 +72,7 @@ private:
 //================================================================================
 class PositionPresetComponent final
     : public Component
+    , public ChangeListener
     , private PresetButton::Listener
 {
 public:
@@ -92,10 +95,12 @@ private:
     Label mActionLog{};
     Label mAppVersionLabel{};
 
+    PresetsManager & mPresetsManager;
+
 public:
     //==============================================================================
-    PositionPresetComponent();
-    ~PositionPresetComponent() final { this->setLookAndFeel(nullptr); }
+    PositionPresetComponent(PresetsManager & presetsManager);
+    ~PositionPresetComponent() final;
     //==============================================================================
     void paint(Graphics & g) final { g.fillAll(Colour::fromRGB(64, 64, 64)); }
     void resized() final;
@@ -111,6 +116,7 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
+    void changeListenerCallback(ChangeBroadcaster * changeBroadcaster) final;
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionPresetComponent);
 };

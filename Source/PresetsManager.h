@@ -47,7 +47,7 @@ public:
                    SourceLinkEnforcer & elevationLinkEnforcer);
     ~PresetsManager() noexcept final;
 
-    int getCurrentPreset() const { return mLastLoadedPreset; }
+    int getCurrentPreset() const;
 
     bool loadIfPresetChanged(int presetNumber);
     bool forceLoad(int presetNumber);
