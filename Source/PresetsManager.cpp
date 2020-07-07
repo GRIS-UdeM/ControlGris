@@ -93,14 +93,18 @@ bool PresetsManager::load(int const presetNumber)
             auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
             auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
             if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
-                Point<float> const position{ static_cast<float>(presetData->getDoubleAttribute(xPosId)),
-                                             static_cast<float>(presetData->getDoubleAttribute(yPosId)) };
+                Point<float> const normalizedInversedPosition{
+                    static_cast<float>(presetData->getDoubleAttribute(xPosId)),
+                    static_cast<float>(presetData->getDoubleAttribute(yPosId))
+                };
+                auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+                Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
                 snapshot.position = position;
                 auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
                 if (presetData->hasAttribute(zPosId)) {
-                    auto const normalizedElevation{ static_cast<float>(
+                    auto const inversedNormalizedElevation{ static_cast<float>(
                         presetData->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
-                    snapshot.z = MAX_ELEVATION * normalizedElevation;
+                    snapshot.z = MAX_ELEVATION * (1.0f - inversedNormalizedElevation);
                 }
             }
             if (source.isPrimarySource()) {
@@ -123,8 +127,13 @@ bool PresetsManager::load(int const presetNumber)
 
         Point<float> terminalPosition{};
         if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
-            terminalPosition.setXY(static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
-                                   static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId)));
+            Point<float> const inversedNormalizedTerminalPosition{
+                static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
+                static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
+            };
+            auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f
+                                                 - Point<float>{ 1.0f, 1.0f } };
+            terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
         } else {
             terminalPosition = snapshots.primary.position;
         }
@@ -132,7 +141,9 @@ bool PresetsManager::load(int const presetNumber)
 
         Radians elevation{};
         if (presetData->hasAttribute(zTerminalPositionId)) {
-            elevation = MAX_ELEVATION * static_cast<float>(presetData->getDoubleAttribute(zTerminalPositionId));
+            auto const inversedNormalizedTerminalElevation{ static_cast<float>(
+                presetData->getDoubleAttribute(zTerminalPositionId)) };
+            elevation = MAX_ELEVATION * (1.0f - inversedNormalizedTerminalElevation);
         } else {
             elevation = snapshots.primary.z;
         };
@@ -193,11 +204,17 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
         auto const zName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 2) };
 
         auto const position{ snapshots[sourceIndex].position };
-        auto const zValue{ snapshots[sourceIndex].z / MAX_ELEVATION };
+        auto const elevation{ snapshots[sourceIndex].z };
 
-        result->setAttribute(xName, position.getX());
-        result->setAttribute(yName, position.getY());
-        result->setAttribute(zName, zValue);
+        Point<float> const mirroredPosition{ position.getX(), position.getY() * -1.0f };
+        auto const normalizedElevation{ elevation / MAX_ELEVATION };
+
+        auto const mirroredNormalizedPosition{ (mirroredPosition + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+        auto const inversedNormalizedElevation{ 1.0f - normalizedElevation };
+
+        result->setAttribute(xName, mirroredNormalizedPosition.getX());
+        result->setAttribute(yName, mirroredNormalizedPosition.getY());
+        result->setAttribute(zName, inversedNormalizedElevation);
     }
 
     auto const xName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
@@ -205,11 +222,18 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
     auto const zName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
 
     auto const position{ mSources.getPrimarySource().getPos() };
-    auto const zValue{ mSources.getPrimarySource().getElevation() / MAX_ELEVATION };
+    Point<float> const mirroredPosition{
+        position.getX(),
+        position.getY() * -1.0f
+    }; // For some legacy reason, we store a normalized value with inversed Y.
+    auto const inversedNormalizedPosition{ (mirroredPosition + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+    auto const inversedNormalizedElevation{
+        1.0f - mSources.getPrimarySource().getNormalizedElevation().toFloat()
+    }; // Same this happens with elevation.
 
-    result->setAttribute(xName, position.getX());
-    result->setAttribute(yName, position.getY());
-    result->setAttribute(zName, zValue);
+    result->setAttribute(xName, inversedNormalizedPosition.getX());
+    result->setAttribute(yName, inversedNormalizedPosition.getY());
+    result->setAttribute(zName, inversedNormalizedElevation);
 
     return result;
 }
