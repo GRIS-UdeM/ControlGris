@@ -207,10 +207,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
-    MessageManagerLock const
-        messageManagerLock{}; /* Somehow, this callback is not happening on the message thread. This will make some
-                               * broadcaster callbacks fail in the Source class. Source-modifiying and painting
-                               * functions must be asynchronously forwarded to the message thread. */
+
     Normalized const normalized{ newValue };
     Normalized const invNormalized{ 1.0f - newValue };
     if (parameterID.compare(ParameterNames::x) == 0) {
@@ -991,19 +988,6 @@ void ControlGrisAudioProcessor::initialize()
     mNeedsInitialization = true;
     mLastTime = mLastTimerTime = 10000000.0;
     mCanStopActivate = true;
-
-    // TODO : is this necessary?
-    // If a preset is actually selected, we always recall it on initialize because
-    // the automation won't trigger parameterChanged if it stays on the same value.
-    //    if (mCurrentPositionPreset != 0) {
-    //        MessageManagerLock const messageManagerLock{};
-    //        if (recallFixedPosition(mCurrentPositionPreset)) {
-    //            auto * ed = dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor());
-    //            if (ed != nullptr) {
-    //                ed->updatePositionPreset(mCurrentPositionPreset);
-    //            }
-    //        }
-    //    }
 }
 
 //==============================================================================

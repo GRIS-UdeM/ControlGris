@@ -260,7 +260,14 @@ void Source::sendNotifications(SourceLinkNotification const sourceLinkNotificati
 {
     mGuiChangeBroadcaster.sendChangeMessage();
     if (sourceLinkNotification == SourceLinkNotification::notify) {
-        mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
+        auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
+        /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
+         * trigger a very bad priority inversion because of how frequent this method gets called */
+        if (isMessageThread) {
+            mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
+        } else {
+            mSourceLinkChangeBroadcaster.sendChangeMessage();
+        }
     }
 }
 
