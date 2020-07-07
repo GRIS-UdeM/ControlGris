@@ -30,30 +30,34 @@ class PositionFieldComponent;
 class PositionAutomationManager;
 class Source;
 
+//==============================================================================
 class PositionSourceComponent final
     : public SourceComponent
     , public juce::ChangeListener
 {
 private:
+    //==============================================================================
     PositionFieldComponent & mFieldComponent;
     PositionAutomationManager & mAutomationManager;
     Source & mSource;
 
 public:
+    //==============================================================================
     PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
     ~PositionSourceComponent() final;
+    //==============================================================================
+    SourceIndex getSourceIndex() const;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
 
-    SourceIndex getSourceIndex() const;
-
 private:
+    //==============================================================================
     void updatePositionInParent();
     void setSourcePosition(MouseEvent const & event);
 
     void changeListenerCallback(ChangeBroadcaster * source) final;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionSourceComponent);
 };

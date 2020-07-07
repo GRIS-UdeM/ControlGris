@@ -1,12 +1,22 @@
-/*
-  ==============================================================================
-
-    PresetsManager.cpp
-    Created: 3 Jul 2020 2:51:56pm
-    Author:  samuel
-
-  ==============================================================================
-*/
+/**************************************************************************
+ * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
 
 #include "PresetsManager.h"
 
@@ -35,6 +45,7 @@ String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIn
     return result;
 }
 
+//==============================================================================
 PresetsManager::PresetsManager(XmlElement & data,
                                Sources & sources,
                                SourceLinkEnforcer & positionLinkEnforcer,
@@ -47,11 +58,13 @@ PresetsManager::PresetsManager(XmlElement & data,
     subscribeToSources();
 }
 
+//==============================================================================
 PresetsManager::~PresetsManager() noexcept
 {
     unsubscribeToSources();
 }
 
+//==============================================================================
 int PresetsManager::getCurrentPreset() const
 {
     if (mSourceMovedSinceLastRecall) {
@@ -61,6 +74,7 @@ int PresetsManager::getCurrentPreset() const
     return mLastLoadedPreset;
 }
 
+//==============================================================================
 bool PresetsManager::loadIfPresetChanged(int const presetNumber)
 {
     if (presetNumber == mLastLoadedPreset) {
@@ -70,11 +84,13 @@ bool PresetsManager::loadIfPresetChanged(int const presetNumber)
     return load(presetNumber);
 }
 
+//==============================================================================
 bool PresetsManager::forceLoad(int const presetNumber)
 {
     return load(presetNumber);
 }
 
+//==============================================================================
 bool PresetsManager::load(int const presetNumber)
 {
     if (presetNumber != 0) {
@@ -117,9 +133,6 @@ bool PresetsManager::load(int const presetNumber)
         mPositionLinkEnforcer.loadSnapshots(snapshots);
 
         mElevationLinkEnforcer.loadSnapshots(snapshots);
-        //    if (mSpatMode == SpatMode::cube) {
-        //        mElevationLinkEnforcer.loadSnapshots(snapshots);
-        //    }
 
         auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
         auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
@@ -148,20 +161,6 @@ bool PresetsManager::load(int const presetNumber)
             elevation = snapshots.primary.z;
         };
         mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
-        //    if (mSpatMode == SpatMode::cube) {
-        //        Radians elevation{};
-        //        if (presetData->hasAttribute(zTerminalPositionId)) {
-        //            elevation
-        //                    = MAX_ELEVATION * static_cast<float>(presetData->getDoubleAttribute(zTerminalPositionId));
-        //        } else {
-        //            elevation = snapshots.primary.z;
-        //        };
-        //        mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
-        //    }
-
-        //    // refresh trajectory
-        //    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
-        //                                                 mSources.getPrimarySource().getPos());
 
         mLastLoadedPreset = presetNumber;
         mSourceMovedSinceLastRecall = false;
@@ -171,12 +170,14 @@ bool PresetsManager::load(int const presetNumber)
     return true;
 }
 
+//==============================================================================
 bool PresetsManager::contains(int const presetNumber) const
 {
     auto const presetData{ getPresetData(presetNumber) };
     return presetData.has_value();
 }
 
+//==============================================================================
 optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
 {
     forEachXmlChildElement(mData, element)
@@ -189,6 +190,7 @@ optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) con
     return nullopt;
 }
 
+//==============================================================================
 std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNumber) const
 {
     // Build a new fixed position element.
@@ -238,6 +240,7 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
     return result;
 }
 
+//==============================================================================
 void PresetsManager::save(int const presetNumber)
 {
     auto newData{ createPresetData(presetNumber) };
@@ -254,6 +257,7 @@ void PresetsManager::save(int const presetNumber)
     mData.sortChildElements(sorter);
 }
 
+//==============================================================================
 bool PresetsManager::deletePreset(int presetNumber)
 {
     auto maybe_data{ getPresetData(presetNumber) };
@@ -269,6 +273,7 @@ bool PresetsManager::deletePreset(int presetNumber)
     return true;
 }
 
+//==============================================================================
 std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() const
 {
     std::array<bool, NUMBER_OF_POSITION_PRESETS> result{};
@@ -284,6 +289,7 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
     return result;
 }
 
+//==============================================================================
 void PresetsManager::changeListenerCallback(ChangeBroadcaster * broadcaster)
 {
     if (!mSourceMovedSinceLastRecall) {
@@ -292,6 +298,7 @@ void PresetsManager::changeListenerCallback(ChangeBroadcaster * broadcaster)
     }
 }
 
+//==============================================================================
 void PresetsManager::subscribeToSources()
 {
     for (auto & source : mSources) {
@@ -299,6 +306,7 @@ void PresetsManager::subscribeToSources()
     }
 }
 
+//==============================================================================
 void PresetsManager::unsubscribeToSources()
 {
     for (auto & source : mSources) {
