@@ -19,7 +19,6 @@
  *************************************************************************/
 #pragma once
 
-#include <cmath>
 #include <type_traits>
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -31,36 +30,36 @@ constexpr Float getFloatPrecision(Float const value, size_t const precision)
     return std::floor((value * std::pow(10, precision) + static_cast<Float>(0.5))) / std::pow(10, precision);
 }
 
-template<typename Float>
-constexpr Float degreeToRadian(Float const degree)
-{
-    static_assert(std::is_floating_point_v<Float>);
-    return (degree / static_cast<Float>(360.0) * MathConstants<Float>::twoPi);
-}
-
+//==============================================================================
 class XmlElementDataSorter
 {
+private:
+    //==============================================================================
+    String mAttributeToSort{};
+    int mDirection{};
+
 public:
-    XmlElementDataSorter(const String & attributeToSortBy, bool forwards)
-        : attributeToSort(attributeToSortBy)
-        , direction(forwards ? 1 : -1)
+    //==============================================================================
+    XmlElementDataSorter(String const & attributeToSortBy, bool forwards) noexcept
+        : mAttributeToSort(attributeToSortBy)
+        , mDirection(forwards ? 1 : -1)
     {
     }
-
+    ~XmlElementDataSorter() noexcept = default;
+    //==============================================================================
     int compareElements(XmlElement * first, XmlElement * second) const
     {
         int result;
-        if (first->getDoubleAttribute(attributeToSort) < second->getDoubleAttribute(attributeToSort))
+        if (first->getDoubleAttribute(mAttributeToSort) < second->getDoubleAttribute(mAttributeToSort))
             result = -1;
-        else if (first->getDoubleAttribute(attributeToSort) > second->getDoubleAttribute(attributeToSort))
+        else if (first->getDoubleAttribute(mAttributeToSort) > second->getDoubleAttribute(mAttributeToSort))
             result = 1;
         else
             result = 0;
 
-        return direction * result;
+        return mDirection * result;
     }
 
 private:
-    String attributeToSort;
-    int direction;
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XmlElementDataSorter);
 };

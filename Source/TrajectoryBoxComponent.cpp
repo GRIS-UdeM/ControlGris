@@ -17,347 +17,379 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "TrajectoryBoxComponent.h"
 #include "ControlGrisConstants.h"
 
+//==============================================================================
 TrajectoryBoxComponent::TrajectoryBoxComponent()
 {
-    m_spatMode = SpatMode::VBAP;
+    mSpatMode = SpatMode::dome;
 
-    sourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&sourceLinkLabel);
+    mSourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mSourceLinkLabel);
 
-    sourceLinkCombo.addItemList(SOURCE_LINK_TYPES, 1);
-    sourceLinkCombo.setSelectedId(1);
-    addAndMakeVisible(&sourceLinkCombo);
-    sourceLinkCombo.onChange = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxSourceLinkChanged(static_cast<SourceLink>(sourceLinkCombo.getSelectedId()));
+    mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
+    mPositionSourceLinkCombo.setSelectedId(1);
+    addAndMakeVisible(&mPositionSourceLinkCombo);
+    mPositionSourceLinkCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxPositionSourceLinkChanged(
+                static_cast<PositionSourceLink>(mPositionSourceLinkCombo.getSelectedId()));
         });
     };
 
-    sourceLinkAltCombo.addItemList(SOURCE_LINK_ALT_TYPES, 1);
-    sourceLinkAltCombo.setSelectedId(1);
-    addChildComponent(&sourceLinkAltCombo);
-    sourceLinkAltCombo.onChange = [this] {
-        listeners.call([&](Listener & l) {
+    mElevationSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
+    mElevationSourceLinkCombo.setSelectedId(1);
+    addChildComponent(&mElevationSourceLinkCombo);
+    mElevationSourceLinkCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
             l.trajectoryBoxElevationSourceLinkChanged(
-                static_cast<ElevationSourceLink>(sourceLinkAltCombo.getSelectedId()));
+                static_cast<ElevationSourceLink>(mElevationSourceLinkCombo.getSelectedId()));
         });
     };
 
-    trajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&trajectoryTypeLabel);
+    mTrajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mTrajectoryTypeLabel);
 
-    trajectoryTypeCombo.addItemList(TRAJECTORY_TYPE_TYPES, 1);
-    trajectoryTypeCombo.setSelectedId(1);
-    addAndMakeVisible(&trajectoryTypeCombo);
-    trajectoryTypeCombo.onChange = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxTrajectoryTypeChanged(static_cast<TrajectoryType>(trajectoryTypeCombo.getSelectedId()));
+    mPositionTrajectoryTypeCombo.addItemList(POSITION_TRAJECTORY_TYPE_TYPES, 1);
+    mPositionTrajectoryTypeCombo.setSelectedId(1);
+    addAndMakeVisible(&mPositionTrajectoryTypeCombo);
+    mPositionTrajectoryTypeCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxPositionTrajectoryTypeChanged(
+                static_cast<PositionTrajectoryType>(mPositionTrajectoryTypeCombo.getSelectedId()));
         });
     };
 
-    trajectoryTypeAltCombo.addItemList(TRAJECTORY_TYPE_ALT_TYPES, 1);
-    trajectoryTypeAltCombo.setSelectedId(1);
-    addChildComponent(&trajectoryTypeAltCombo);
-    trajectoryTypeAltCombo.onChange = [this] {
-        listeners.call([&](Listener & l) {
+    mElevationTracjectoryTypeCombo.addItemList(ELEVATION_TRAJECTORY_TYPE_TYPES, 1);
+    mElevationTracjectoryTypeCombo.setSelectedId(1);
+    addChildComponent(&mElevationTracjectoryTypeCombo);
+    mElevationTracjectoryTypeCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
             l.trajectoryBoxElevationTrajectoryTypeChanged(
-                static_cast<ElevationTrajectoryType>(trajectoryTypeAltCombo.getSelectedId()));
+                static_cast<ElevationTrajectoryType>(mElevationTracjectoryTypeCombo.getSelectedId()));
         });
     };
 
-    durationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&durationLabel);
+    mDurationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mDurationLabel);
 
-    addAndMakeVisible(&durationEditor);
-    durationEditor.setTextToShowWhenEmpty("1", Colours::white);
-    durationEditor.setText("5", false);
-    durationEditor.setInputRestrictions(10, "0123456789.");
-    durationEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
-    durationEditor.onFocusLost = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxCycleDurationChanged(durationEditor.getText().getDoubleValue(),
-                                                durationUnitCombo.getSelectedId());
+    addAndMakeVisible(&mDurationEditor);
+    mDurationEditor.setTextToShowWhenEmpty("1", Colours::white);
+    mDurationEditor.setText("5", false);
+    mDurationEditor.setInputRestrictions(10, "0123456789.");
+    mDurationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
+    mDurationEditor.onFocusLost = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxCycleDurationChanged(mDurationEditor.getText().getDoubleValue(),
+                                                mDurationUnitCombo.getSelectedId());
         });
-        durationUnitCombo.grabKeyboardFocus();
+        mDurationUnitCombo.grabKeyboardFocus();
     };
 
-    addAndMakeVisible(&durationUnitCombo);
-    durationUnitCombo.addItem("Sec(s)", 1);
-    durationUnitCombo.addItem("Beat(s)", 2);
-    durationUnitCombo.setSelectedId(1);
-    durationUnitCombo.onChange = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxDurationUnitChanged(durationEditor.getText().getDoubleValue(),
-                                               durationUnitCombo.getSelectedId());
+    addAndMakeVisible(&mDurationUnitCombo);
+    mDurationUnitCombo.addItem("Sec(s)", 1);
+    mDurationUnitCombo.addItem("Beat(s)", 2);
+    mDurationUnitCombo.setSelectedId(1);
+    mDurationUnitCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxDurationUnitChanged(mDurationEditor.getText().getDoubleValue(),
+                                               mDurationUnitCombo.getSelectedId());
         });
     };
 
-    cycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&cycleSpeedLabel);
+    mCycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mCycleSpeedLabel);
 
-    cycleSpeedSlider.setNormalisableRange(NormalisableRange<double>(-2.0f, 2.0f, 0.01f));
-    cycleSpeedSlider.setValue(1.0, NotificationType::sendNotificationAsync);
-    cycleSpeedSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    cycleSpeedSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-    addAndMakeVisible(&cycleSpeedSlider);
+    mCycleSpeedSlider.setNormalisableRange(NormalisableRange<double>(-2.0f, 2.0f, 0.01f));
+    mCycleSpeedSlider.setValue(1.0, NotificationType::sendNotificationAsync);
+    mCycleSpeedSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
+    mCycleSpeedSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    addAndMakeVisible(&mCycleSpeedSlider);
 
-    activateButton.addShortcut(KeyPress('a', 0, 0));
-    addAndMakeVisible(&activateButton);
-    activateButton.setButtonText("Activate");
-    activateButton.setClickingTogglesState(true);
-    activateButton.onClick = [this] {
-        listeners.call([&](Listener & l) { l.trajectoryBoxActivateChanged(activateButton.getToggleState()); });
-        durationUnitCombo.grabKeyboardFocus();
+    mPositionActivateButton.addShortcut(KeyPress('a', 0, 0));
+    addAndMakeVisible(&mPositionActivateButton);
+    mPositionActivateButton.setButtonText("Activate");
+    mPositionActivateButton.setClickingTogglesState(true);
+    mPositionActivateButton.onClick = [this] {
+        mListeners.call(
+            [&](Listener & l) { l.trajectoryBoxPositionActivateChanged(mPositionActivateButton.getToggleState()); });
+        mDurationUnitCombo.grabKeyboardFocus();
     };
 
-    backAndForthToggle.setButtonText("Back & Forth");
-    backAndForthToggle.onClick = [this] {
-        listeners.call([&](Listener & l) { l.trajectoryBoxBackAndForthChanged(backAndForthToggle.getToggleState()); });
-        setDampeningEditorEnabled(backAndForthToggle.getToggleState());
-    };
-    addAndMakeVisible(&backAndForthToggle);
-
-    dampeningLabel.setText("Number of cycles \ndampening:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&dampeningLabel);
-
-    addAndMakeVisible(&dampeningEditor);
-    dampeningEditor.setTextToShowWhenEmpty("0", Colours::white);
-    dampeningEditor.setText("0", false);
-    dampeningEditor.setInputRestrictions(10, "0123456789");
-    dampeningEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
-    dampeningEditor.onFocusLost = [this] {
-        listeners.call(
-            [&](Listener & l) { l.trajectoryBoxDampeningCyclesChanged(dampeningEditor.getText().getIntValue()); });
-        durationUnitCombo.grabKeyboardFocus();
-    };
-
-    deviationLabel.setText("Deviation degrees\nper cycle:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&deviationLabel);
-
-    addAndMakeVisible(&deviationEditor);
-    deviationEditor.setTextToShowWhenEmpty("0", Colours::white);
-    deviationEditor.setText("0", false);
-    deviationEditor.setInputRestrictions(10, "-0123456789.");
-    deviationEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
-    deviationEditor.onFocusLost = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxDeviationPerCycleChanged(std::fmod(deviationEditor.getText().getFloatValue(), 360.0));
+    mPositionBackAndForthToggle.setButtonText("Back & Forth");
+    mPositionBackAndForthToggle.onClick = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxPositionBackAndForthChanged(mPositionBackAndForthToggle.getToggleState());
         });
-        deviationEditor.setText(String(std::fmod(deviationEditor.getText().getFloatValue(), 360.0)));
-        durationUnitCombo.grabKeyboardFocus();
+        setPositionDampeningEnabled(mPositionBackAndForthToggle.getToggleState());
     };
+    addAndMakeVisible(&mPositionBackAndForthToggle);
 
-    activateAltButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
-    addChildComponent(&activateAltButton);
-    activateAltButton.setButtonText("Activate");
-    activateAltButton.setClickingTogglesState(true);
-    activateAltButton.onClick = [this] {
-        listeners.call([&](Listener & l) { l.trajectoryBoxActivateAltChanged(activateAltButton.getToggleState()); });
-        durationUnitCombo.grabKeyboardFocus();
-    };
+    mDampeningLabel.setText("Number of cycles \ndampening:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mDampeningLabel);
 
-    backAndForthAltToggle.setButtonText("Back & Forth");
-    backAndForthAltToggle.onClick = [this] {
-        listeners.call(
-            [&](Listener & l) { l.trajectoryBoxBackAndForthAltChanged(backAndForthAltToggle.getToggleState()); });
-        setDampeningAltEditorEnabled(backAndForthAltToggle.getToggleState());
-    };
-    addAndMakeVisible(&backAndForthAltToggle);
-
-    addAndMakeVisible(&dampeningAltEditor);
-    dampeningAltEditor.setTextToShowWhenEmpty("0", Colours::white);
-    dampeningAltEditor.setText("0", false);
-    dampeningAltEditor.setInputRestrictions(10, "0123456789");
-    dampeningAltEditor.onReturnKey = [this] { durationUnitCombo.grabKeyboardFocus(); };
-    dampeningAltEditor.onFocusLost = [this] {
-        listeners.call([&](Listener & l) {
-            l.trajectoryBoxDampeningCyclesAltChanged(dampeningAltEditor.getText().getIntValue());
+    addAndMakeVisible(&mPositionDampeningEditor);
+    mPositionDampeningEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mPositionDampeningEditor.setText("0", false);
+    mPositionDampeningEditor.setInputRestrictions(10, "0123456789");
+    mPositionDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
+    mPositionDampeningEditor.onFocusLost = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxPositionDampeningCyclesChanged(mPositionDampeningEditor.getText().getIntValue());
         });
-        durationUnitCombo.grabKeyboardFocus();
+        mDurationUnitCombo.grabKeyboardFocus();
+    };
+
+    mDeviationLabel.setText("Deviation degrees\nper cycle:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mDeviationLabel);
+
+    addAndMakeVisible(&mDeviationEditor);
+    mDeviationEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mDeviationEditor.setText("0", false);
+    mDeviationEditor.setInputRestrictions(10, "-0123456789.");
+    mDeviationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
+    mDeviationEditor.onFocusLost = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxDeviationPerCycleChanged(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0));
+        });
+        mDeviationEditor.setText(String(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0)));
+        mDurationUnitCombo.grabKeyboardFocus();
+    };
+
+    mElevationActivateButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
+    addChildComponent(&mElevationActivateButton);
+    mElevationActivateButton.setButtonText("Activate");
+    mElevationActivateButton.setClickingTogglesState(true);
+    mElevationActivateButton.onClick = [this] {
+        mListeners.call(
+            [&](Listener & l) { l.trajectoryBoxElevationActivateChanged(mElevationActivateButton.getToggleState()); });
+        mDurationUnitCombo.grabKeyboardFocus();
+    };
+
+    mElevationBackAndForthToggle.setButtonText("Back & Forth");
+    mElevationBackAndForthToggle.onClick = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxElevationBackAndForthChanged(mElevationBackAndForthToggle.getToggleState());
+        });
+        setElevationDampeningEnabled(mElevationBackAndForthToggle.getToggleState());
+    };
+    addAndMakeVisible(&mElevationBackAndForthToggle);
+
+    addAndMakeVisible(&mElevationDampeningEditor);
+    mElevationDampeningEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mElevationDampeningEditor.setText("0", false);
+    mElevationDampeningEditor.setInputRestrictions(10, "0123456789");
+    mElevationDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
+    mElevationDampeningEditor.onFocusLost = [this] {
+        mListeners.call([&](Listener & l) {
+            l.trajectoryBoxElevationDampeningCyclesChanged(mElevationDampeningEditor.getText().getIntValue());
+        });
+        mDurationUnitCombo.grabKeyboardFocus();
     };
 }
 
+//==============================================================================
 TrajectoryBoxComponent::~TrajectoryBoxComponent()
 {
     setLookAndFeel(nullptr);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setSpatMode(SpatMode spatMode)
 {
-    m_spatMode = spatMode;
+    mSpatMode = spatMode;
     resized();
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setNumberOfSources(int numOfSources)
 {
     if (numOfSources == 1) {
-        sourceLinkCombo.setSelectedId(1);
-        sourceLinkCombo.setEnabled(false);
-        sourceLinkAltCombo.setSelectedId(1);
-        sourceLinkAltCombo.setEnabled(false);
+        mPositionSourceLinkCombo.setSelectedId(1);
+        mPositionSourceLinkCombo.setEnabled(false);
+        mElevationSourceLinkCombo.setSelectedId(1);
+        mElevationSourceLinkCombo.setEnabled(false);
     } else {
-        sourceLinkCombo.setEnabled(true);
-        sourceLinkAltCombo.setEnabled(true);
+        mPositionSourceLinkCombo.setEnabled(true);
+        mElevationSourceLinkCombo.setEnabled(true);
     }
 
     if (numOfSources == 2) {
-        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricX), true);
-        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricY), true);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), true);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), true);
     } else {
-        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricX), false);
-        sourceLinkCombo.setItemEnabled(static_cast<int>(SourceLink::linkSymmetricY), false);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), false);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), false);
     }
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setTrajectoryType(int type)
 {
-    trajectoryTypeCombo.setSelectedId(type);
+    mPositionTrajectoryTypeCombo.setSelectedId(type);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
 {
-    trajectoryTypeAltCombo.setSelectedId(type);
+    mElevationTracjectoryTypeCombo.setSelectedId(type);
 }
 
-void TrajectoryBoxComponent::setBackAndForth(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setPositionBackAndForth(bool state)
 {
-    backAndForthToggle.setToggleState(state, NotificationType::sendNotificationAsync);
-    setDampeningEditorEnabled(state);
+    mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
+    setPositionDampeningEnabled(state);
 }
 
-void TrajectoryBoxComponent::setBackAndForthAlt(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setElevationBackAndForth(bool state)
 {
-    backAndForthAltToggle.setToggleState(state, NotificationType::sendNotificationAsync);
-    setDampeningAltEditorEnabled(state);
+    mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
+    setElevationDampeningEnabled(state);
 }
 
-void TrajectoryBoxComponent::setDampeningEditorEnabled(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setPositionDampeningEnabled(bool state)
 {
-    dampeningEditor.setEnabled(state);
-    String text = dampeningEditor.getText();
-    dampeningEditor.clear();
+    mPositionDampeningEditor.setEnabled(state);
+    String text = mPositionDampeningEditor.getText();
+    mPositionDampeningEditor.clear();
     if (state)
-        dampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+        mPositionDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
     else
-        dampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
-    dampeningEditor.setText(text);
+        mPositionDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+    mPositionDampeningEditor.setText(text);
 }
 
-void TrajectoryBoxComponent::setDampeningAltEditorEnabled(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setElevationDampeningEnabled(bool state)
 {
-    dampeningAltEditor.setEnabled(state);
-    String text = dampeningAltEditor.getText();
-    dampeningAltEditor.clear();
+    mElevationDampeningEditor.setEnabled(state);
+    String text = mElevationDampeningEditor.getText();
+    mElevationDampeningEditor.clear();
     if (state)
-        dampeningAltEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+        mElevationDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
     else
-        dampeningAltEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
-    dampeningAltEditor.setText(text);
+        mElevationDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+    mElevationDampeningEditor.setText(text);
 }
 
-void TrajectoryBoxComponent::setDampeningCycles(int value)
+//==============================================================================
+void TrajectoryBoxComponent::setPositionDampeningCycles(int value)
 {
-    dampeningEditor.setText(String(value));
+    mPositionDampeningEditor.setText(String(value));
 }
 
-void TrajectoryBoxComponent::setDampeningCyclesAlt(int value)
+//==============================================================================
+void TrajectoryBoxComponent::setElevationDampeningCycles(int value)
 {
-    dampeningAltEditor.setText(String(value));
+    mElevationDampeningEditor.setText(String(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setDeviationPerCycle(float value)
 {
-    deviationEditor.setText(String(value));
+    mDeviationEditor.setText(String(value));
 }
 
-void TrajectoryBoxComponent::setSourceLink(SourceLink value)
+//==============================================================================
+void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink value)
 {
-    sourceLinkCombo.setSelectedId(static_cast<int>(value));
+    mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink value)
 {
-    sourceLinkAltCombo.setSelectedId(static_cast<int>(value));
+    mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
-void TrajectoryBoxComponent::setActivateState(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setPositionActivateState(bool state)
 {
-    activateButton.setToggleState(state, NotificationType::dontSendNotification);
+    mPositionActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
-void TrajectoryBoxComponent::setActivateAltState(bool state)
+//==============================================================================
+void TrajectoryBoxComponent::setElevationActivateState(bool state)
 {
-    activateAltButton.setToggleState(state, NotificationType::dontSendNotification);
+    mElevationActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setCycleDuration(double value)
 {
-    durationEditor.setText(String(value));
-    listeners.call([&](Listener & l) {
-        l.trajectoryBoxCycleDurationChanged(durationEditor.getText().getDoubleValue(),
-                                            durationUnitCombo.getSelectedId());
+    mDurationEditor.setText(String(value));
+    mListeners.call([&](Listener & l) {
+        l.trajectoryBoxCycleDurationChanged(mDurationEditor.getText().getDoubleValue(),
+                                            mDurationUnitCombo.getSelectedId());
     });
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::setDurationUnit(int value)
 {
-    durationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
-    listeners.call([&](Listener & l) {
-        l.trajectoryBoxDurationUnitChanged(durationEditor.getText().getDoubleValue(),
-                                           durationUnitCombo.getSelectedId());
+    mDurationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
+    mListeners.call([&](Listener & l) {
+        l.trajectoryBoxDurationUnitChanged(mDurationEditor.getText().getDoubleValue(),
+                                           mDurationUnitCombo.getSelectedId());
     });
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    GrisLookAndFeel * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    if (lookAndFeel != nullptr) {
+        g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    } else {
+        jassertfalse;
+    }
 }
 
+//==============================================================================
 void TrajectoryBoxComponent::resized()
 {
-    sourceLinkLabel.setBounds(5, 10, 150, 20);
-    sourceLinkCombo.setBounds(115, 10, 175, 20);
-    trajectoryTypeLabel.setBounds(5, 40, 150, 20);
-    trajectoryTypeCombo.setBounds(115, 40, 175, 20);
-    backAndForthToggle.setBounds(196, 70, 94, 20);
-    dampeningLabel.setBounds(5, 70, 150, 20);
-    dampeningEditor.setBounds(115, 70, 75, 20);
-    deviationLabel.setBounds(5, 100, 150, 20);
-    deviationEditor.setBounds(115, 100, 75, 20);
-    activateButton.setBounds(114, 130, 176, 20);
+    mSourceLinkLabel.setBounds(5, 10, 150, 20);
+    mPositionSourceLinkCombo.setBounds(115, 10, 175, 20);
+    mTrajectoryTypeLabel.setBounds(5, 40, 150, 20);
+    mPositionTrajectoryTypeCombo.setBounds(115, 40, 175, 20);
+    mPositionBackAndForthToggle.setBounds(196, 70, 94, 20);
+    mDampeningLabel.setBounds(5, 70, 150, 20);
+    mPositionDampeningEditor.setBounds(115, 70, 75, 20);
+    mDeviationLabel.setBounds(5, 100, 150, 20);
+    mDeviationEditor.setBounds(115, 100, 75, 20);
+    mPositionActivateButton.setBounds(114, 130, 176, 20);
 
-    if (m_spatMode == SpatMode::LBAP) {
-        sourceLinkAltCombo.setVisible(true);
-        trajectoryTypeAltCombo.setVisible(true);
-        activateAltButton.setVisible(true);
-        backAndForthAltToggle.setVisible(true);
-        dampeningAltEditor.setVisible(true);
-        sourceLinkAltCombo.setBounds(305, 10, 175, 20);
-        trajectoryTypeAltCombo.setBounds(305, 40, 175, 20);
-        backAndForthAltToggle.setBounds(386, 70, 94, 20);
-        dampeningAltEditor.setBounds(305, 70, 75, 20);
-        activateAltButton.setBounds(304, 130, 176, 20);
+    if (mSpatMode == SpatMode::cube) {
+        mElevationSourceLinkCombo.setVisible(true);
+        mElevationTracjectoryTypeCombo.setVisible(true);
+        mElevationActivateButton.setVisible(true);
+        mElevationBackAndForthToggle.setVisible(true);
+        mElevationDampeningEditor.setVisible(true);
+        mElevationSourceLinkCombo.setBounds(305, 10, 175, 20);
+        mElevationTracjectoryTypeCombo.setBounds(305, 40, 175, 20);
+        mElevationBackAndForthToggle.setBounds(386, 70, 94, 20);
+        mElevationDampeningEditor.setBounds(305, 70, 75, 20);
+        mElevationActivateButton.setBounds(304, 130, 176, 20);
     } else {
-        sourceLinkAltCombo.setVisible(false);
-        trajectoryTypeAltCombo.setVisible(false);
-        activateAltButton.setVisible(false);
-        backAndForthAltToggle.setVisible(false);
-        dampeningAltEditor.setVisible(false);
+        mElevationSourceLinkCombo.setVisible(false);
+        mElevationTracjectoryTypeCombo.setVisible(false);
+        mElevationActivateButton.setVisible(false);
+        mElevationBackAndForthToggle.setVisible(false);
+        mElevationDampeningEditor.setVisible(false);
     }
 
-    durationLabel.setBounds(490, 15, 90, 20);
-    durationEditor.setBounds(495, 40, 90, 20);
-    durationUnitCombo.setBounds(495, 70, 90, 20);
+    mDurationLabel.setBounds(490, 15, 90, 20);
+    mDurationEditor.setBounds(495, 40, 90, 20);
+    mDurationUnitCombo.setBounds(495, 70, 90, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
-    cycleSpeedLabel.setBounds(5, 100, 150, 20);
-    cycleSpeedSlider.setBounds(115, 100, 165, 20);
-    cycleSpeedLabel.setVisible(false);
-    cycleSpeedSlider.setVisible(false);
-    //------------------------------------------------------------------
+    mCycleSpeedLabel.setBounds(5, 100, 150, 20);
+    mCycleSpeedSlider.setBounds(115, 100, 165, 20);
+    mCycleSpeedLabel.setVisible(false);
+    mCycleSpeedSlider.setVisible(false);
 }

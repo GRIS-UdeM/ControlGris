@@ -18,17 +18,46 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "BannerComponent.h"
+#pragma once
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+#include "../JuceLibraryCode/JuceHeader.h"
+
+#include "ControlGrisConstants.h"
+#include "SourceComponent.h"
+#include "StrongTypes.h"
+
+class PositionFieldComponent;
+class PositionAutomationManager;
+class Source;
 
 //==============================================================================
-BannerComponent::BannerComponent() noexcept
+class PositionSourceComponent final
+    : public SourceComponent
+    , public juce::ChangeListener
 {
-    setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
-}
+private:
+    //==============================================================================
+    PositionFieldComponent & mFieldComponent;
+    PositionAutomationManager & mAutomationManager;
+    Source & mSource;
+
+public:
+    //==============================================================================
+    PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
+    ~PositionSourceComponent() final;
+    //==============================================================================
+    SourceIndex getSourceIndex() const;
+
+    void mouseDown(MouseEvent const & event) final;
+    void mouseDrag(MouseEvent const & event) final;
+    void mouseUp(MouseEvent const & event) final;
+
+private:
+    //==============================================================================
+    void updatePositionInParent();
+    void setSourcePosition(MouseEvent const & event);
+
+    void changeListenerCallback(ChangeBroadcaster * source) final;
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionSourceComponent);
+};

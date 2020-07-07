@@ -18,17 +18,43 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "BannerComponent.h"
+#pragma once
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+#include "../JuceLibraryCode/JuceHeader.h"
 
-//==============================================================================
-BannerComponent::BannerComponent() noexcept
+class ChangeGesturesManager
 {
-    setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
-}
+public:
+    class ScopedLock
+    {
+    private:
+        friend ChangeGesturesManager;
+
+        ChangeGesturesManager & mManager;
+        String mParameterName;
+
+    public:
+        ScopedLock(ChangeGesturesManager & manager, String const & parameterName);
+        ~ScopedLock();
+
+    private:
+        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedLock);
+    };
+
+private:
+    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
+    HashMap<String, bool> mGestureStates{};
+
+public:
+    ChangeGesturesManager(AudioProcessorValueTreeState & audioProcessorValueTreeState)
+        : mAudioProcessorValueTreeState(audioProcessorValueTreeState)
+    {
+    }
+    ~ChangeGesturesManager() noexcept = default;
+
+    void beginGesture(String const & parameterName);
+    void endGesture(String const & parameterName);
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChangeGesturesManager);
+};

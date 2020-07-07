@@ -18,17 +18,13 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "BannerComponent.h"
+#include "ControlGrisConstants.h"
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
-
-//==============================================================================
-BannerComponent::BannerComponent() noexcept
-{
-    setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
-}
+String const ParameterNames::x{ "recordingTrajectory_x" };
+String const ParameterNames::y{ "recordingTrajectory_y" };
+String const ParameterNames::z{ "recordingTrajectory_z" };
+String const ParameterNames::positionSourceLink{ "sourceLink" };
+String const ParameterNames::elevationSourceLink{ "sourceLinkAlt" };
+String const ParameterNames::azimuthSpan{ "azimuthSpan" };
+String const ParameterNames::elevationSpan{ "elevationSpan" };
+String const ParameterNames::positionPreset{ "positionPreset" };

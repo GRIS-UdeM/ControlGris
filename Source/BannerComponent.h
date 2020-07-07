@@ -21,15 +21,21 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//==============================================================================
 // BannerComponent is a Label-derived class used to identify the different
 // UI sections of the plugin.
-
 class BannerComponent final : public Label
 {
+private:
+    static Colour const backgroundColour;
+    static Colour const outlineColour;
+    static Colour const textColour;
+
 public:
-    BannerComponent();
-    ~BannerComponent() final;
+    BannerComponent() noexcept;
+    ~BannerComponent() noexcept final = default;
 
 private:
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BannerComponent)
 };

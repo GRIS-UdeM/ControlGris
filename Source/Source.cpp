@@ -17,225 +17,293 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "Source.h"
-#include "ControlGrisUtilities.h"
 
 #include <algorithm>
 
-void Source::setAzimuth(float const azimuth)
+//==============================================================================
+void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sourceLinkNotification)
 {
-    mAzimuth = azimuth;
-    computeXY();
-}
-
-void Source::setNormalizedAzimuth(float const value)
-{
-    if (value <= 0.5f) {
-        mAzimuth = value * 360.f;
-    } else {
-        mAzimuth = (value - 1.f) * 360.f;
+    auto const balancedAzimuth{ azimuth.simplified() };
+    if (balancedAzimuth != mAzimuth) {
+        mAzimuth = balancedAzimuth;
+        computeXY();
+        sendNotifications(sourceLinkNotification);
     }
-    computeXY();
 }
 
-float Source::getNormalizedAzimuth() const
+//==============================================================================
+void Source::setAzimuth(Normalized const normalizedAzimuth, SourceLinkNotification const sourceLinkNotification)
 {
-    auto const azimuth{ mAzimuth / 360.f };
-    return azimuth >= 0.f ? azimuth : azimuth + 1.f;
+    this->setAzimuth(twoPi * normalizedAzimuth.toFloat() - pi, sourceLinkNotification);
 }
 
-void Source::setElevationNoClip(float elevation)
+//==============================================================================
+Normalized Source::getNormalizedAzimuth() const
 {
-    mElevationNoClip = elevation;
-    setElevation(mElevationNoClip);
+    return Normalized{ (mAzimuth + pi) / twoPi };
 }
 
-void Source::setElevation(float const elevation)
+//==============================================================================
+void Source::setElevation(Radians const elevation, SourceLinkNotification const sourceLinkNotification)
 {
-    if (elevation < 0.f) {
-        mElevation = 0.f;
-    } else if (elevation > 90.f) {
-        mElevation = 90.f;
-    } else {
+    auto const clippedElevation{ clipElevation(elevation) };
+    if (clippedElevation != mElevation) {
+        mElevation = clippedElevation;
+        computeXY();
+        sendNotifications(sourceLinkNotification);
+    }
+}
+
+//==============================================================================
+void Source::setElevation(Normalized const normalizedElevation, SourceLinkNotification const sourceLinkNotification)
+{
+    auto const newValue{ halfPi * normalizedElevation.toFloat() };
+    setElevation(newValue, sourceLinkNotification);
+}
+
+//==============================================================================
+void Source::setDistance(float const distance, SourceLinkNotification const sourceLinkNotification)
+{
+    jassert(distance >= 0.0f);
+
+    if (distance != mDistance) {
+        mDistance = distance;
+        computeXY();
+        sendNotifications(sourceLinkNotification);
+    }
+}
+
+//==============================================================================
+void Source::setCoordinates(Radians const azimuth,
+                            Radians const elevation,
+                            float const distance,
+                            SourceLinkNotification const sourceLinkNotification)
+{
+    auto const balancedAzimuth{ azimuth.simplified() };
+    auto const clippedElevation{ clipElevation(elevation) };
+    jassert(distance >= 0.0f);
+
+    if (balancedAzimuth != mAzimuth || clippedElevation != mElevation || distance != mDistance) {
+        mAzimuth = azimuth;
         mElevation = elevation;
-        mElevationNoClip = elevation;
+        mDistance = distance;
+        computeXY();
+        sendNotifications(sourceLinkNotification);
     }
-    computeXY();
 }
 
-void Source::setDistanceNoClip(float const distance)
+//==============================================================================
+void Source::setAzimuthSpan(Normalized const azimuthSpan)
 {
-    mDistanceNoClip = distance;
-    setDistance(mDistanceNoClip);
-}
-
-void Source::setDistance(float const distance)
-{
-    if (distance < 0.f) {
-        mDistance = 0.f;
-    } else {
-        mDistanceNoClip = mDistance = distance;
+    if (mAzimuthSpan != azimuthSpan) {
+        mAzimuthSpan = azimuthSpan;
+        mGuiChangeBroadcaster.sendChangeMessage();
     }
-    computeXY();
 }
 
-void Source::setCoordinates(float const azimuth, float const elevation, float const distance)
+//==============================================================================
+void Source::setElevationSpan(Normalized const elevationSpan)
 {
-    mAzimuth = azimuth;
-    mElevation = elevation;
-    mDistance = distance;
-    computeXY();
-    computeAzimuthElevation();
+    if (mElevationSpan != elevationSpan) {
+        mElevationSpan = elevationSpan;
+        mGuiChangeBroadcaster.sendChangeMessage();
+    }
 }
 
-void Source::setAzimuthSpan(float const azimuthSpan)
+//==============================================================================
+void Source::setX(float const x, SourceLinkNotification const sourceLinkNotification)
 {
-    mAzimuthSpan = azimuthSpan;
-    mChanged = true;
+    auto const clippedX{ clipCoordinate(x) };
+    if (clippedX != mPosition.getX()) {
+        mPosition.setX(clippedX);
+        computeAzimuthElevation();
+        sendNotifications(sourceLinkNotification);
+    }
 }
 
-void Source::setElevationSpan(float const elevationSpan)
+//==============================================================================
+void Source::setX(Normalized const x, SourceLinkNotification const sourceLinkNotification)
 {
-    mElevationSpan = elevationSpan;
-    mChanged = true;
+    setX(x.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
-void Source::setX(float const x)
+//==============================================================================
+void Source::setY(Normalized const y, SourceLinkNotification const sourceLinkNotification)
 {
-    mX = x;
-    computeAzimuthElevation();
+    setY(y.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
-void Source::setY(float const y)
+//==============================================================================
+void Source::setY(float const y, SourceLinkNotification const sourceLinkNotification)
 {
-    mY = y;
-    computeAzimuthElevation();
+    auto const clippedY{ clipCoordinate(y) };
+    if (y != mPosition.getY()) {
+        mPosition.setY(clippedY);
+        computeAzimuthElevation();
+        sendNotifications(sourceLinkNotification);
+    }
 }
 
-void Source::setPos(Point<float> const & pos)
+//==============================================================================
+void Source::setPos(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
 {
-    mX = pos.x;
-    mY = pos.y;
-    computeAzimuthElevation();
+    auto const clippedPosition{ clipPosition(position, mSpatMode) };
+    if (mPosition != clippedPosition) {
+        mPosition = clippedPosition;
+        computeAzimuthElevation();
+        sendNotifications(sourceLinkNotification);
+    }
 }
 
+//==============================================================================
 void Source::computeXY()
 {
-    float radius;
-    if (mRadiusIsElevation) { // azimuth - elevation
-        radius = (90.f - mElevation) / 90.f;
-    } else { // azimuth - distance
-        radius = mDistance;
-    }
-    mX = radius * sinf(degreeToRadian(mAzimuth));
-    mX = -mX * 0.5f + 0.5f;
-    mX = std::clamp(mX, 0.f, 1.f);
-    mY = radius * cosf(degreeToRadian(mAzimuth));
-    mY = mY * 0.5f + 0.5f;
-    mY = std::clamp(mY, 0.f, 1.f);
-    mChanged = true;
+    float const radius{ ([&] {
+        if (mSpatMode == SpatMode::dome) { // azimuth - elevation
+            auto const result{ mElevation / MAX_ELEVATION };
+            jassert(result >= 0.0f && result <= 1.0f);
+            return result;
+        }
+        return mDistance;
+    }()) };
+
+    mPosition = getPositionFromAngle(mAzimuth, radius);
 }
 
+//==============================================================================
 void Source::computeAzimuthElevation()
 {
-    auto const x{ mX * 2.f - 1.f };
-    auto const y{ mY * 2.f - 1.f };
-    if (x != 0.0 || y != 0.0) {
-        auto ang{ atan2f(x, y) / MathConstants<float>::pi * 180.f };
-        if (ang <= -180.f) {
-            ang += 360.f;
+    if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
+        mAzimuth = getAngleFromPosition(mPosition).simplified();
+    }
+
+    auto const radius{ mPosition.getDistanceFromOrigin() };
+    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
+        auto const clippedRadius{ std::min(radius, 1.0f) };
+        if (clippedRadius < radius) {
+            mPosition = getPositionFromAngle(mAzimuth, clippedRadius);
         }
-        mAzimuth = -ang;
-    }
-    float rad{ sqrtf(x * x + y * y) };
-    if (mRadiusIsElevation) { // azimuth - elevation
-        rad = rad < 0.f ? 0.f : rad > 1.f ? 1.f : rad;
-        mElevationNoClip = mElevation = 90.f - rad * 90.f;
+        auto const elevation{ halfPi * clippedRadius };
+        mElevation = elevation;
     } else { // azimuth - distance
-        rad = rad < 0.f ? 0.f : rad;
-        mDistanceNoClip = mDistance = rad;
+        mDistance = radius;
     }
-    mChanged = true;
 }
 
-void Source::fixSourcePosition(bool const shouldBeFixed)
+//==============================================================================
+Normalized Source::getNormalizedElevation() const
 {
-    if (shouldBeFixed) {
-        mFixedAzimuth = mAzimuth;
-        mFixedElevation = mElevationNoClip;
-        mFixedDistance = mDistanceNoClip;
-        mFixedX = mX;
-        mFixedY = mY;
+    return Normalized{ mElevation / halfPi };
+}
+
+//==============================================================================
+Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
+{
+    auto const rotatedAngle{ angle - halfPi };
+    Point<float> const result{ std::cos(rotatedAngle.getAsRadians()) * radius,
+                               std::sin(rotatedAngle.getAsRadians()) * radius };
+    return result;
+}
+
+//==============================================================================
+Radians Source::getAngleFromPosition(Point<float> const & position)
+{
+    auto const getAngle = [](Point<float> const & position) {
+        if (position.getX() == 0.0f && position.getY() == 0.0f) {
+            return 0.0f;
+        }
+        return std::atan2(position.getY(), position.getX());
+    };
+    Radians const angle{ getAngle(position) };
+    auto const rotatedAngle{ angle + halfPi };
+    return rotatedAngle;
+}
+
+//==============================================================================
+Point<float> Source::clipDomePosition(Point<float> const & position)
+{
+    Point<float> result{};
+    auto const radius{ position.getDistanceFromOrigin() };
+    if (radius > 1.0f) {
+        auto const angle{ std::atan2(position.getY(), position.getX()) };
+        result = Point<float>{ std::cos(angle), std::sin(angle) };
     } else {
-        mFixedAzimuth = -1.f;
-        mFixedElevation = -1.f;
-        mFixedDistance = -1.f;
-        mFixedX = -1.f;
-        mFixedY = -1.f;
+        result = position;
     }
+    return result;
 }
 
-void Source::fixSourcePositionElevation(bool const shouldBeFixed)
+//==============================================================================
+Point<float> Source::clipCubePosition(Point<float> const & position)
 {
-    if (shouldBeFixed) {
-        mFixedElevation = mElevation;
+    Point<float> const result{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
+    return result;
+}
+
+//==============================================================================
+Point<float> Source::clipPosition(Point<float> const & position, SpatMode const spatMode)
+{
+    Point<float> result{};
+    if (spatMode == SpatMode::dome) {
+        result = clipDomePosition(position);
     } else {
-        mFixedElevation = -1.f;
+        jassert(spatMode == SpatMode::cube);
+        result = clipCubePosition(position);
+    }
+    return result;
+}
+
+//==============================================================================
+void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
+{
+    mGuiChangeBroadcaster.sendChangeMessage();
+    if (sourceLinkNotification == SourceLinkNotification::notify) {
+        auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
+        /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
+         * trigger a very bad priority inversion because of how frequent this method gets called */
+        if (isMessageThread) {
+            mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
+        } else {
+            mSourceLinkChangeBroadcaster.sendChangeMessage();
+        }
     }
 }
 
-void Source::setFixedPosition(float const x, float const y)
+//==============================================================================
+Radians Source::clipElevation(Radians const elevation)
 {
-    mFixedX = x;
-    mFixedY = y;
-    auto const fx{ mFixedX * 2.f - 1.f };
-    auto const fy{ mFixedY * 2.f - 1.f };
-    auto ang{ atan2f(fx, fy) / MathConstants<float>::pi * 180.f };
-    if (ang <= -180.f) {
-        ang += 360.f;
+    return Radians{ std::clamp(elevation, Radians{ 0.0f }, halfPi) };
+}
+
+//==============================================================================
+float Source::clipCoordinate(float const coord)
+{
+    return std::clamp(coord, -1.0f, 1.0f);
+}
+
+//==============================================================================
+void Source::setColorFromIndex(int const numTotalSources)
+{
+    auto hue{ static_cast<float>(mIndex.toInt()) / static_cast<float>(numTotalSources) + 0.577251f };
+    if (hue > 1.0f) {
+        hue -= 1.0f;
     }
-    mFixedAzimuth = -ang;
-    auto rad{ sqrtf(fx * fx + fy * fy) };
-    if (mRadiusIsElevation) { // azimuth - elevation
-        rad = std::clamp(rad, 0.f, 1.f);
-        mFixedElevation = 90.f - rad * 90.f;
-    } else { // azimuth - distance
-        rad = rad < 0.f ? 0.f : rad;
-        mFixedDistance = rad;
+    mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
+    mGuiChangeBroadcaster.sendChangeMessage();
+}
+
+//==============================================================================
+void Sources::setSize(int const size)
+{
+    jassert(size >= 1 && size <= MAX_NUMBER_OF_SOURCES);
+    mSize = size;
+    auto const azimuthSpan{ mPrimarySource.getAzimuthSpan() };
+    auto const elevationSpan{ mPrimarySource.getElevationSpan() };
+    for (auto & source : *this) {
+        source.setColorFromIndex(size);
+        source.setAzimuthSpan(azimuthSpan);
+        source.setElevationSpan(elevationSpan);
     }
-}
-
-void Source::setCoordinatesFromFixedSource(float const deltaAzimuth,
-                                           float const deltaElevation,
-                                           float const deltaDistance)
-{
-    if (mRadiusIsElevation) { // azimuth - elevation
-        setAzimuth(mFixedAzimuth + deltaAzimuth);
-        setElevationNoClip(mFixedElevation + deltaElevation * 90.f);
-    } else { // azimuth - distance
-        setAzimuth(mFixedAzimuth + deltaAzimuth);
-        setDistanceNoClip(mFixedDistance + deltaDistance);
-    }
-    computeXY();
-}
-
-void Source::setSymmetricX(float const x, float const y)
-{
-    setX(x);
-    setY(1.f - y);
-}
-
-void Source::setSymmetricY(float const x, float const y)
-{
-    setX(1.f - x);
-    setY(y);
-}
-
-void Source::setXYCoordinatesFromFixedSource(float const deltaX, float const deltaY)
-{
-    auto const x{ std::clamp(mFixedX + deltaX, 0.f, 1.f) };
-    auto const y{ std::clamp(mFixedY + deltaY, 0.f, 1.f) };
-    setX(x);
-    setY(y);
-    computeAzimuthElevation();
 }

@@ -17,4 +17,43 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
-#include "ControlGrisUtilities.h"
+
+#pragma once
+
+#include "../JuceLibraryCode/JuceHeader.h"
+
+#include "ControlGrisConstants.h"
+#include "SourceComponent.h"
+#include "StrongTypes.h"
+
+class ElevationFieldComponent;
+class ElevationAutomationManager;
+class Source;
+
+class ElevationSourceComponent final
+    : public SourceComponent
+    , public juce::ChangeListener
+{
+private:
+    ElevationFieldComponent & mFieldComponent;
+    ElevationAutomationManager & mAutomationManager;
+    Source & mSource;
+
+public:
+    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
+    ~ElevationSourceComponent() noexcept final;
+
+    void mouseDown(MouseEvent const & event) final;
+    void mouseDrag(MouseEvent const & event) final;
+    void mouseUp(MouseEvent const & event) final;
+
+    SourceIndex getSourceIndex() const;
+
+private:
+    void updatePositionInParent();
+    void setSourcePosition(MouseEvent const & event);
+
+    void changeListenerCallback(ChangeBroadcaster * source) final;
+
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationSourceComponent);
+};

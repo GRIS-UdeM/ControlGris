@@ -17,637 +17,690 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #include "PluginEditor.h"
+
 #include "ControlGrisConstants.h"
 #include "PluginProcessor.h"
 
-ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & p,
-                                                                 AudioProcessorValueTreeState & vts,
-                                                                 AutomationManager & automan,
-                                                                 AutomationManager & automanAlt)
+//==============================================================================
+ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
+    ControlGrisAudioProcessor & p,
+    AudioProcessorValueTreeState & vts,
+    PositionAutomationManager & positionAutomationManager,
+    ElevationAutomationManager & elevationAutomationManager)
     : AudioProcessorEditor(&p)
-    , processor(p)
-    , valueTreeState(vts)
-    , automationManager(automan)
-    , automationManagerAlt(automanAlt)
-    , mainField(automan)
-    , elevationField(automanAlt)
+    , mProcessor(p)
+    , mAudioProcessorValueTreeState(vts)
+    , mPositionAutomationManager(positionAutomationManager)
+    , mElevationAutomationManager(elevationAutomationManager)
+    , mPositionField(p.getSources(), positionAutomationManager)
+    , mElevationField(p.getSources(), elevationAutomationManager)
+    , mPositionPresetBox(p.getPresetsManager())
 {
-    setLookAndFeel(&grisLookAndFeel);
+    setLookAndFeel(&mGrisLookAndFeel);
 
-    m_isInsideSetPluginState = false;
-    m_selectedSource = 0;
+    mIsInsideSetPluginState = false;
+    mSelectedSource = {};
 
     // Set up the interface.
     //----------------------
-    mainBanner.setLookAndFeel(&grisLookAndFeel);
-    mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-    addAndMakeVisible(&mainBanner);
+    mMainBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mMainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mMainBanner);
 
-    elevationBanner.setLookAndFeel(&grisLookAndFeel);
-    elevationBanner.setText("Elevation", NotificationType::dontSendNotification);
-    addAndMakeVisible(&elevationBanner);
+    mElevationBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mElevationBanner.setText("Elevation", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mElevationBanner);
 
-    trajectoryBanner.setLookAndFeel(&grisLookAndFeel);
-    trajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
-    addAndMakeVisible(&trajectoryBanner);
+    mTrajectoryBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mTrajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mTrajectoryBanner);
 
-    settingsBanner.setLookAndFeel(&grisLookAndFeel);
-    settingsBanner.setText("Configuration", NotificationType::dontSendNotification);
-    addAndMakeVisible(&settingsBanner);
+    mSettingsBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mSettingsBanner.setText("Configuration", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mSettingsBanner);
 
-    positionPresetBanner.setLookAndFeel(&grisLookAndFeel);
-    positionPresetBanner.setText("Preset", NotificationType::dontSendNotification);
-    addAndMakeVisible(&positionPresetBanner);
+    mPositionPresetBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mPositionPresetBanner.setText("Preset", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mPositionPresetBanner);
 
-    mainField.setLookAndFeel(&grisLookAndFeel);
-    mainField.addListener(this);
-    addAndMakeVisible(&mainField);
+    mPositionField.setLookAndFeel(&mGrisLookAndFeel);
+    mPositionField.addListener(this);
+    addAndMakeVisible(&mPositionField);
 
-    elevationField.setLookAndFeel(&grisLookAndFeel);
-    elevationField.addListener(this);
-    addAndMakeVisible(&elevationField);
+    mElevationField.setLookAndFeel(&mGrisLookAndFeel);
+    mElevationField.addListener(this);
+    addAndMakeVisible(&mElevationField);
 
-    parametersBox.setLookAndFeel(&grisLookAndFeel);
-    parametersBox.addListener(this);
-    addAndMakeVisible(&parametersBox);
+    mParametersBox.setLookAndFeel(&mGrisLookAndFeel);
+    mParametersBox.addListener(this);
+    addAndMakeVisible(&mParametersBox);
 
-    trajectoryBox.setLookAndFeel(&grisLookAndFeel);
-    trajectoryBox.addListener(this);
-    addAndMakeVisible(trajectoryBox);
-    trajectoryBox.setSourceLink(automationManager.getSourceLink());
-    trajectoryBox.setElevationSourceLink(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
+    mTrajectoryBox.setLookAndFeel(&mGrisLookAndFeel);
+    mTrajectoryBox.addListener(this);
+    addAndMakeVisible(mTrajectoryBox);
+    mTrajectoryBox.setPositionSourceLink(mPositionAutomationManager.getSourceLink());
+    mTrajectoryBox.setElevationSourceLink(
+        static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
 
-    settingsBox.setLookAndFeel(&grisLookAndFeel);
-    settingsBox.addListener(this);
+    mSettingsBox.setLookAndFeel(&mGrisLookAndFeel);
+    mSettingsBox.addListener(this);
 
-    sourceBox.setLookAndFeel(&grisLookAndFeel);
-    sourceBox.addListener(this);
+    mSourceBox.setLookAndFeel(&mGrisLookAndFeel);
+    mSourceBox.addListener(this);
 
-    interfaceBox.setLookAndFeel(&grisLookAndFeel);
-    interfaceBox.addListener(this);
+    mInterfaceBox.setLookAndFeel(&mGrisLookAndFeel);
+    mInterfaceBox.addListener(this);
 
-    Colour bg = grisLookAndFeel.findColour(ResizableWindow::backgroundColourId);
+    Colour bg = mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId);
 
-    configurationComponent.setLookAndFeel(&grisLookAndFeel);
-    configurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
-    configurationComponent.addTab("Settings", bg, &settingsBox, false);
-    configurationComponent.addTab("Source", bg, &sourceBox, false);
-    configurationComponent.addTab("Controllers", bg, &interfaceBox, false);
-    addAndMakeVisible(configurationComponent);
+    mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
+    mConfigurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
+    mConfigurationComponent.addTab("Settings", bg, &mSettingsBox, false);
+    mConfigurationComponent.addTab("Source", bg, &mSourceBox, false);
+    mConfigurationComponent.addTab("Controllers", bg, &mInterfaceBox, false);
+    addAndMakeVisible(mConfigurationComponent);
 
-    positionPresetBox.setLookAndFeel(&grisLookAndFeel);
-    positionPresetBox.addListener(this);
-    addAndMakeVisible(&positionPresetBox);
+    mPositionPresetBox.setLookAndFeel(&mGrisLookAndFeel);
+    mPositionPresetBox.addListener(this);
+    addAndMakeVisible(&mPositionPresetBox);
 
     // Add sources to the fields.
     //---------------------------
-    mainField.setSources(processor.getSources(), processor.getNumberOfSources());
-    elevationField.setSources(processor.getSources(), processor.getNumberOfSources());
+    mPositionField.refreshSources();
+    mElevationField.refreshSources();
 
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    processor.setSelectedSourceId(m_selectedSource);
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mProcessor.setSelectedSource(mSelectedSource);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
-    lastUIWidth.referTo(processor.parameters.state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
-    lastUIHeight.referTo(processor.parameters.state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
+    mLastUIWidth.referTo(mProcessor.mParameters.state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
+    mLastUIHeight.referTo(
+        mProcessor.mParameters.state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
 
     // set our component's initial size to be the last one that was stored in the filter's settings
-    setSize(lastUIWidth.getValue(), lastUIHeight.getValue());
+    setSize(mLastUIWidth.getValue(), mLastUIHeight.getValue());
 
-    lastUIWidth.addListener(this);
-    lastUIHeight.addListener(this);
+    mLastUIWidth.addListener(this);
+    mLastUIHeight.addListener(this);
 
     // Load the last saved state of the plugin.
     //-----------------------------------------
     setPluginState();
 }
 
+//==============================================================================
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor()
 {
-    configurationComponent.setLookAndFeel(nullptr);
+    mConfigurationComponent.setLookAndFeel(nullptr);
     setLookAndFeel(nullptr);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::setPluginState()
 {
-    m_isInsideSetPluginState = true;
+    mIsInsideSetPluginState = true;
 
     // Set global settings values.
     //----------------------------
-    settingsBoxOscFormatChanged(processor.getOscFormat());
-    settingsBoxOscPortNumberChanged(processor.getOscPortNumber());
-    settingsBoxOscActivated(processor.getOscConnected());
-    settingsBoxFirstSourceIdChanged(processor.getFirstSourceId());
-    settingsBoxNumberOfSourcesChanged(processor.getNumberOfSources());
+    settingsBoxOscFormatChanged(mProcessor.getSpatMode());
+    settingsBoxOscPortNumberChanged(mProcessor.getOscPortNumber());
+    settingsBoxOscActivated(mProcessor.getOscConnected());
+    settingsBoxFirstSourceIdChanged(mProcessor.getFirstSourceId());
+    settingsBoxNumberOfSourcesChanged(mProcessor.getSources().size());
 
-    interfaceBox.setOscOutputPluginId(valueTreeState.state.getProperty("oscOutputPluginId", 1));
-    interfaceBox.setOscReceiveToggleState(valueTreeState.state.getProperty("oscInputConnected", false));
-    interfaceBox.setOscReceiveInputPort(valueTreeState.state.getProperty("oscInputPortNumber", 9000));
+    mInterfaceBox.setOscOutputPluginId(mAudioProcessorValueTreeState.state.getProperty("oscOutputPluginId", 1));
+    mInterfaceBox.setOscReceiveToggleState(mAudioProcessorValueTreeState.state.getProperty("oscInputConnected", false));
+    mInterfaceBox.setOscReceiveInputPort(mAudioProcessorValueTreeState.state.getProperty("oscInputPortNumber", 9000));
 
-    interfaceBox.setOscSendToggleState(valueTreeState.state.getProperty("oscOutputConnected", false));
-    interfaceBox.setOscSendOutputAddress(valueTreeState.state.getProperty("oscOutputAddress", "192.168.1.100"));
-    interfaceBox.setOscSendOutputPort(valueTreeState.state.getProperty("oscOutputPortNumber", 8000));
+    mInterfaceBox.setOscSendToggleState(mAudioProcessorValueTreeState.state.getProperty("oscOutputConnected", false));
+    mInterfaceBox.setOscSendOutputAddress(
+        mAudioProcessorValueTreeState.state.getProperty("oscOutputAddress", "192.168.1.100"));
+    mInterfaceBox.setOscSendOutputPort(mAudioProcessorValueTreeState.state.getProperty("oscOutputPortNumber", 8000));
 
     // Set state for trajectory box persistent values.
     //------------------------------------------------
-    trajectoryBox.setTrajectoryType(valueTreeState.state.getProperty("trajectoryType", 1));
-    trajectoryBox.setElevationTrajectoryType(valueTreeState.state.getProperty("trajectoryTypeAlt", 1));
-    trajectoryBox.setBackAndForth(valueTreeState.state.getProperty("backAndForth", false));
-    trajectoryBox.setBackAndForthAlt(valueTreeState.state.getProperty("backAndForthAlt", false));
-    trajectoryBox.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
-    automationManager.setDampeningCycles(valueTreeState.state.getProperty("dampeningCycles", 0));
-    trajectoryBox.setDampeningCyclesAlt(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
-    automationManagerAlt.setDampeningCycles(valueTreeState.state.getProperty("dampeningCyclesAlt", 0));
-    trajectoryBox.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
-    automationManager.setDeviationPerCycle(valueTreeState.state.getProperty("deviationPerCycle", 0));
-    trajectoryBox.setCycleDuration(valueTreeState.state.getProperty("cycleDuration", 5.0));
-    trajectoryBox.setDurationUnit(valueTreeState.state.getProperty("durationUnit", 1));
+    mTrajectoryBox.setTrajectoryType(mAudioProcessorValueTreeState.state.getProperty("trajectoryType", 1));
+    mTrajectoryBox.setElevationTrajectoryType(mAudioProcessorValueTreeState.state.getProperty("trajectoryTypeAlt", 1));
+    mTrajectoryBox.setPositionBackAndForth(mAudioProcessorValueTreeState.state.getProperty("backAndForth", false));
+    mTrajectoryBox.setElevationBackAndForth(mAudioProcessorValueTreeState.state.getProperty("backAndForthAlt", false));
+    mTrajectoryBox.setPositionDampeningCycles(mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
+    mPositionAutomationManager.setPositionDampeningCycles(
+        mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
+    mTrajectoryBox.setElevationDampeningCycles(
+        mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    mElevationAutomationManager.setPositionDampeningCycles(
+        mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+    mTrajectoryBox.setDeviationPerCycle(mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0));
+    mPositionAutomationManager.setDeviationPerCycle(
+        Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
+    mTrajectoryBox.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
+    mTrajectoryBox.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
 
     // Update the position preset box.
     //--------------------------------
-    for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
-        positionPresetBox.presetSaved(i + 1, false);
-    }
-    XmlElement * positionData = processor.getFixedPositionData();
-    XmlElement * fpos = positionData->getFirstChildElement();
-    while (fpos) {
-        positionPresetBox.presetSaved(fpos->getIntAttribute("ID"), true);
-        fpos = fpos->getNextElement();
+    auto const savedPresets{ mProcessor.getPresetsManager().getSavedPresets() };
+    int index{ 1 };
+    for (auto const saved : savedPresets) {
+        mPositionPresetBox.presetSaved(index++, saved);
     }
 
     // Update the interface.
     //----------------------
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
-    processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mPositionField.setSelectedSource(mSelectedSource);
+    mElevationField.setSelectedSource(mSelectedSource);
+    mProcessor.setSelectedSource(mSelectedSource);
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 
-    int preset = (int)((float)valueTreeState.getParameterAsValue("positionPreset").getValue());
-    positionPresetBox.setPreset(preset, true);
+    int preset
+        = (int)((float)mAudioProcessorValueTreeState.getParameterAsValue(ParameterNames::positionPreset).getValue());
+    mPositionPresetBox.setPreset(preset, true);
 
-    m_isInsideSetPluginState = false;
+    mIsInsideSetPluginState = false;
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 {
-    parametersBox.setSpanLinkState(state);
+    mParametersBox.setSpanLinkState(state);
 }
 
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(SourceLink value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
-    trajectoryBox.sourceLinkCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
+    mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
+                                                          NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    trajectoryBox.sourceLinkAltCombo.setSelectedId(static_cast<int>(value), NotificationType::dontSendNotification);
+    mTrajectoryBox.mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value),
+                                                           NotificationType::dontSendNotification);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber)
 {
-    positionPresetBox.setPreset(presetNumber, true);
+    mPositionPresetBox.setPreset(presetNumber, true);
 }
 
+//==============================================================================
 // Value::Listener callback. Called when the stored window size changes.
-//----------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::valueChanged(Value &)
 {
-    setSize(lastUIWidth.getValue(), lastUIHeight.getValue());
+    setSize(mLastUIWidth.getValue(), mLastUIHeight.getValue());
 }
 
+//==============================================================================
 // SettingsBoxComponent::Listener callbacks.
-//------------------------------------------
 void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
 {
-    settingsBox.setOscFormat(mode);
-    processor.setOscFormat(mode);
-    bool selectionIsLBAP = mode == SpatMode::LBAP;
-    parametersBox.setDistanceEnabled(selectionIsLBAP);
-    mainField.setSpatMode(mode);
-    trajectoryBox.setSpatMode(mode);
+    mSettingsBox.setOscFormat(mode);
+    mProcessor.setSpatMode(mode);
+    bool selectionIsLBAP = mode == SpatMode::cube;
+    mParametersBox.setDistanceEnabled(selectionIsLBAP);
+    mPositionField.setSpatMode(mode);
+    mTrajectoryBox.setSpatMode(mode);
     repaint();
     resized();
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::settingsBoxOscPortNumberChanged(int oscPort)
 {
-    processor.setOscPortNumber(oscPort);
-    settingsBox.setOscPortNumber(oscPort);
+    mProcessor.setOscPortNumber(oscPort);
+    mSettingsBox.setOscPortNumber(oscPort);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state)
 {
-    processor.handleOscConnection(state);
-    settingsBox.setActivateButtonState(processor.getOscConnected());
+    mProcessor.handleOscConnection(state);
+    mSettingsBox.setActivateButtonState(mProcessor.getOscConnected());
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources)
 {
     bool initSourcePlacement = false;
-    if (processor.getNumberOfSources() != numOfSources || m_isInsideSetPluginState) {
-        if (processor.getNumberOfSources() != numOfSources) {
+    if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
+        if (mProcessor.getSources().size() != numOfSources) {
             initSourcePlacement = true;
         }
         if (numOfSources != 2
-            && (automationManager.getSourceLink() == SourceLink::linkSymmetricX
-                || automationManager.getSourceLink() == SourceLink::linkSymmetricY)) {
-            automationManager.setSourceLink(SourceLink::independent);
-            updateSourceLinkCombo(SourceLink::independent);
+            && (mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
+                || mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
+            mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
+            updateSourceLinkCombo(PositionSourceLink::independent);
         }
-        m_selectedSource = 0;
-        processor.setNumberOfSources(numOfSources);
-        processor.setSelectedSourceId(m_selectedSource);
-        settingsBox.setNumberOfSources(numOfSources);
-        trajectoryBox.setNumberOfSources(numOfSources);
-        parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-        mainField.setSources(processor.getSources(), numOfSources);
-        elevationField.setSources(processor.getSources(), numOfSources);
-        sourceBox.setNumberOfSources(numOfSources, processor.getFirstSourceId());
+        mSelectedSource = {};
+        mProcessor.setNumberOfSources(numOfSources);
+        mProcessor.setSelectedSource(mSelectedSource);
+        mSettingsBox.setNumberOfSources(numOfSources);
+        mTrajectoryBox.setNumberOfSources(numOfSources);
+        mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+        mPositionField.refreshSources();
+        mElevationField.refreshSources();
+        mSourceBox.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
         }
     }
 }
 
-void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(int firstSourceId)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(SourceId const firstSourceId)
 {
-    processor.setFirstSourceId(firstSourceId);
-    settingsBox.setFirstSourceId(firstSourceId);
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    sourceBox.setNumberOfSources(processor.getNumberOfSources(), firstSourceId);
+    mProcessor.setFirstSourceId(firstSourceId);
+    mSettingsBox.setFirstSourceId(firstSourceId);
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSourceBox.setNumberOfSources(mProcessor.getSources().size(), firstSourceId);
 
-    mainField.repaint();
-    if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
+    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
+    if (mProcessor.getSpatMode() == SpatMode::cube)
+        mElevationField.repaint();
 }
 
+//==============================================================================
 // SourceBoxComponent::Listener callbacks.
-//----------------------------------------
-void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(int sourceNum)
+void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex const sourceIndex)
 {
-    m_selectedSource = sourceNum;
+    mSelectedSource = sourceIndex;
 
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
-    processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mPositionField.setSelectedSource(mSelectedSource);
+    mElevationField.setSelectedSource(mSelectedSource);
+    mProcessor.setSelectedSource(mSelectedSource);
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
 {
-    int numOfSources = processor.getNumberOfSources();
-    const float azims2[2] = { -90.0f, 90.0f };
-    const float azims4[4] = { -45.0f, 45.0f, -135.0f, 135.0f };
-    const float azims6[6] = { -30.0f, 30.0f, -90.0f, 90.0f, -150.0f, 150.0f };
-    const float azims8[8] = { -22.5f, 22.5f, -67.5f, 67.5f, -112.5f, 112.5f, -157.5f, 157.5f };
+    auto numOfSources = mProcessor.getSources().size();
+    constexpr Degrees azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
+    constexpr Degrees azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
+    constexpr Degrees azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
+                                    Degrees{ 90.0f },  Degrees{ -150.0f }, Degrees{ 150.0f } };
+    constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
+                                    Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
-    bool isLBAP = processor.getOscFormat() == SpatMode::LBAP;
+    bool isLBAP = mProcessor.getSpatMode() == SpatMode::cube;
 
-    float offset = 360.0f / numOfSources / 2.0f;
-    float distance = isLBAP ? 0.7f : 1.0f;
+    auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
+    auto const distance{ isLBAP ? 0.7f : 1.0f };
 
-    switch (value) {
-    case SourcePlacement::leftAlternate:
+    switch (sourcePlacement) {
+    case SourcePlacement::leftAlternate: {
         for (int i{}; i < numOfSources; ++i) {
-            if (numOfSources <= 2)
-                processor.getSources()[i].setCoordinates(-azims2[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else if (numOfSources <= 4)
-                processor.getSources()[i].setCoordinates(-azims4[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else if (numOfSources <= 6)
-                processor.getSources()[i].setCoordinates(-azims6[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else
-                processor.getSources()[i].setCoordinates(-azims8[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            if (numOfSources <= 2) {
+                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
+
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
         }
         break;
-    case SourcePlacement::rightAlternate:
+    }
+    case SourcePlacement::rightAlternate: {
         for (int i{}; i < numOfSources; ++i) {
-            if (numOfSources <= 2)
-                processor.getSources()[i].setCoordinates(azims2[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else if (numOfSources <= 4)
-                processor.getSources()[i].setCoordinates(azims4[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else if (numOfSources <= 6)
-                processor.getSources()[i].setCoordinates(azims6[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
-            else
-                processor.getSources()[i].setCoordinates(azims8[i],
-                                                         isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                         distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            if (numOfSources <= 2) {
+                source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
         }
         break;
-    case SourcePlacement::leftClockwise:
+    }
+    case SourcePlacement::leftClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i + offset,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::leftCounterClockwise:
+    }
+    case SourcePlacement::leftCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i + offset,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::rightClockwise:
+    }
+    case SourcePlacement::rightClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i - offset,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::rightCounterClockwise:
+    }
+    case SourcePlacement::rightCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i - offset,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::topClockwise:
+    }
+    case SourcePlacement::topClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * -i,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
-    case SourcePlacement::topCounterClockwise:
+    }
+    case SourcePlacement::topCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
-            processor.getSources()[i].setCoordinates(360.0f / numOfSources * i,
-                                                     isLBAP ? processor.getSources()[i].getElevation() : 0.0f,
-                                                     distance);
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
+    }
     case SourcePlacement::undefined:
         jassertfalse;
     }
 
-    for (int i{}; i < numOfSources; ++i) {
-        processor.setSourceParameterValue(i,
-                                          SourceParameter::azimuth,
-                                          processor.getSources()[i].getNormalizedAzimuth());
-        processor.setSourceParameterValue(i,
-                                          SourceParameter::elevation,
-                                          processor.getSources()[i].getNormalizedElevation());
-        processor.setSourceParameterValue(i, SourceParameter::distance, processor.getSources()[i].getDistance());
+    for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
+        mProcessor.setSourceParameterValue(i,
+                                           SourceParameter::azimuth,
+                                           mProcessor.getSources()[i].getNormalizedAzimuth().toFloat());
+        mProcessor.setSourceParameterValue(i,
+                                           SourceParameter::elevation,
+                                           mProcessor.getSources()[i].getNormalizedElevation().toFloat());
+        mProcessor.setSourceParameterValue(i, SourceParameter::distance, mProcessor.getSources()[i].getDistance());
     }
 
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 
-    for (int i{}; i < numOfSources; ++i) {
-        processor.getSources()[i].fixSourcePosition(true);
-    }
-
-    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
+    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+                                                 mProcessor.getSources().getPrimarySource().getPos());
 
     repaint();
 }
 
-void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(int sourceNum, float angle, float rayLen)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const sourceIndex,
+                                                               Radians angle,
+                                                               float rayLen)
 {
-    if (processor.getOscFormat() == SpatMode::LBAP) {
-        float currentElevation = processor.getSources()[sourceNum].getElevation();
-        processor.getSources()[sourceNum].setCoordinates(angle, currentElevation, rayLen);
+    auto & source{ mProcessor.getSources()[sourceIndex] };
+    if (mProcessor.getSpatMode() == SpatMode::dome) {
+        auto const elevation{ MAX_ELEVATION * rayLen };
+        source.setCoordinates(angle, elevation, 1.0f, SourceLinkNotification::notify);
     } else {
-        processor.getSources()[sourceNum].setCoordinates(angle, 90.0f - (rayLen * 90.0f), 1.0f);
+        auto const currentElevation{ source.getElevation() };
+        source.setCoordinates(angle, currentElevation, rayLen, SourceLinkNotification::notify);
     }
-
-    processor.getSources()[sourceNum].fixSourcePosition(true);
-
-    automationManager.setDrawingType(automationManager.getDrawingType(), processor.getSources()[0].getPos());
-
-    repaint();
 }
 
+//==============================================================================
 // ParametersBoxComponent::Listener callbacks.
-//--------------------------------------------
 void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParameter const sourceParameter,
                                                                     double const value)
 {
-    processor.setSourceParameterValue(m_selectedSource, sourceParameter, value);
+    mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, static_cast<float>(value));
 
-    mainField.repaint();
-    if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
+    mPositionField.repaint();
+    if (mProcessor.getSpatMode() == SpatMode::cube) {
+        mElevationField.repaint();
+    }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 {
-    m_selectedSource = (m_selectedSource + 1) % processor.getNumberOfSources();
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
-    processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
+    // increment source index
+    mSelectedSource = SourceIndex{ (mSelectedSource.toInt() + 1) % mProcessor.getSources().size() };
+
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mPositionField.setSelectedSource(mSelectedSource);
+    mElevationField.setSelectedSource(mSelectedSource);
+    mProcessor.setSelectedSource(mSelectedSource);
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 }
 
-// TrajectoryBoxComponent::Listener callbacks.
-//--------------------------------------------
-void ControlGrisAudioProcessorEditor::trajectoryBoxSourceLinkChanged(SourceLink value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
 {
-    processor.setSourceLink(value);
-    mainField.repaint();
+    mProcessor.beginChangeGesture(ParameterNames::azimuthSpan);
 }
 
+//==============================================================================
+void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
+{
+    mProcessor.endChangeGesture(ParameterNames::azimuthSpan);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
+{
+    mProcessor.beginChangeGesture(ParameterNames::elevationSpan);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
+{
+    mProcessor.endChangeGesture(ParameterNames::elevationSpan);
+}
+
+//==============================================================================
+// TrajectoryBoxComponent::Listener callbacks.
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value)
+{
+    mProcessor.setPositionSourceLink(value);
+    mPositionField.repaint();
+}
+
+//==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value)
 {
-    processor.setElevationSourceLink(value);
-    elevationField.repaint();
+    mProcessor.setElevationSourceLink(value);
+    mElevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxTrajectoryTypeChanged(TrajectoryType value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value)
 {
-    valueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    automationManager.setDrawingType(value, processor.getSources()[0].getPos());
-    mainField.repaint();
+    mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
+    mPositionAutomationManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
+    mPositionField.repaint();
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
-    valueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    automationManagerAlt.setDrawingTypeAlt(value);
-    elevationField.repaint();
+    mAudioProcessorValueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
+    mElevationAutomationManager.setTrajectoryType(value);
+    mElevationField.repaint();
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthChanged(bool value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionBackAndForthChanged(bool value)
 {
-    valueTreeState.state.setProperty("backAndForth", value, nullptr);
-    automationManager.setBackAndForth(value);
+    mAudioProcessorValueTreeState.state.setProperty("backAndForth", value, nullptr);
+    mPositionAutomationManager.setPositionBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxBackAndForthAltChanged(bool value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationBackAndForthChanged(bool value)
 {
-    valueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
-    automationManagerAlt.setBackAndForth(value);
+    mAudioProcessorValueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
+    mElevationAutomationManager.setPositionBackAndForth(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesChanged(int value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionDampeningCyclesChanged(int value)
 {
-    valueTreeState.state.setProperty("dampeningCycles", value, nullptr);
-    automationManager.setDampeningCycles(value);
+    mAudioProcessorValueTreeState.state.setProperty("dampeningCycles", value, nullptr);
+    mPositionAutomationManager.setPositionDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDampeningCyclesAltChanged(int value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationDampeningCyclesChanged(int value)
 {
-    valueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
-    automationManagerAlt.setDampeningCycles(value);
+    mAudioProcessorValueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
+    mElevationAutomationManager.setPositionDampeningCycles(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float degrees)
 {
-    valueTreeState.state.setProperty("deviationPerCycle", value, nullptr);
-    automationManager.setDeviationPerCycle(value);
+    mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
+    mPositionAutomationManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode)
 {
-    valueTreeState.state.setProperty("cycleDuration", duration, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / processor.getBPM();
+        dur = duration * 60.0 / mProcessor.getBPM();
     }
-    automationManager.setPlaybackDuration(dur);
-    automationManagerAlt.setPlaybackDuration(dur);
+    mPositionAutomationManager.setPlaybackDuration(dur);
+    mElevationAutomationManager.setPlaybackDuration(dur);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode)
 {
-    valueTreeState.state.setProperty("durationUnit", mode, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / processor.getBPM();
+        dur = duration * 60.0 / mProcessor.getBPM();
     }
-    automationManager.setPlaybackDuration(dur);
-    automationManagerAlt.setPlaybackDuration(dur);
+    mPositionAutomationManager.setPlaybackDuration(dur);
+    mElevationAutomationManager.setPlaybackDuration(dur);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateChanged(bool value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionActivateChanged(bool value)
 {
-    automationManager.setActivateState(value);
+    mPositionAutomationManager.setPositionActivateState(value);
 }
 
-void ControlGrisAudioProcessorEditor::trajectoryBoxActivateAltChanged(bool value)
+//==============================================================================
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationActivateChanged(bool value)
 {
-    automationManagerAlt.setActivateState(value);
+    mElevationAutomationManager.setPositionActivateState(value);
 }
 
+//==============================================================================
 // Update the interface if anything has changed (mostly automations).
-//-------------------------------------------------------------------
 void ControlGrisAudioProcessorEditor::refresh()
 {
-    parametersBox.setSelectedSource(&processor.getSources()[m_selectedSource]);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 
-    mainField.setIsPlaying(processor.getIsPlaying());
-    elevationField.setIsPlaying(processor.getIsPlaying());
+    mPositionField.setIsPlaying(mProcessor.isPlaying());
+    mElevationField.setIsPlaying(mProcessor.isPlaying());
 
-    mainField.repaint();
-    if (processor.getOscFormat() == SpatMode::LBAP)
-        elevationField.repaint();
-
-    if (trajectoryBox.getActivateState() != automationManager.getActivateState()) {
-        trajectoryBox.setActivateState(automationManager.getActivateState());
+    if (mTrajectoryBox.getPositionActivateState() != mPositionAutomationManager.getPositionActivateState()) {
+        mTrajectoryBox.setPositionActivateState(mPositionAutomationManager.getPositionActivateState());
     }
-    if (trajectoryBox.getActivateAltState() != automationManagerAlt.getActivateState()) {
-        trajectoryBox.setActivateAltState(automationManagerAlt.getActivateState());
+    if (mTrajectoryBox.getElevationActivateState() != mElevationAutomationManager.getPositionActivateState()) {
+        mTrajectoryBox.setElevationActivateState(mElevationAutomationManager.getPositionActivateState());
     }
 }
 
+//==============================================================================
 // FieldComponent::Listener callback.
-//-----------------------------------
-void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(int sourceId, int whichField)
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex const sourceIndex, int whichField)
 {
-    processor.sourcePositionChanged(sourceId, whichField);
-    m_selectedSource = sourceId;
-    parametersBox.setSelectedSource(&processor.getSources()[sourceId]);
-    mainField.setSelectedSource(m_selectedSource);
-    elevationField.setSelectedSource(m_selectedSource);
-    processor.setSelectedSourceId(m_selectedSource);
-    sourceBox.updateSelectedSource(&processor.getSources()[m_selectedSource],
-                                   m_selectedSource,
-                                   processor.getOscFormat());
-
-    processor.setPositionPreset(0);
-    positionPresetBox.setPreset(0);
+    mProcessor.sourcePositionChanged(sourceIndex, whichField);
+    mSelectedSource = sourceIndex;
+    mParametersBox.setSelectedSource(&mProcessor.getSources()[sourceIndex]);
+    mPositionField.setSelectedSource(mSelectedSource);
+    mElevationField.setSelectedSource(mSelectedSource);
+    mProcessor.setSelectedSource(mSelectedSource);
+    mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+                                    mSelectedSource,
+                                    mProcessor.getSpatMode());
 }
 
-void ControlGrisAudioProcessorEditor::fieldTrajectoryHandleClicked(int whichField)
-{
-    if (whichField == 0) {
-        automationManager.fixSourcePosition();
-        processor.onSourceLinkChanged(automationManager.getSourceLink());
-    } else {
-        automationManagerAlt.fixSourcePosition();
-        processor.onElevationSourceLinkChanged(static_cast<ElevationSourceLink>(automationManagerAlt.getSourceLink()));
-    }
-}
-
+//==============================================================================
 // PositionPresetComponent::Listener callback.
-//--------------------------------------------
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber)
 {
-    processor.setPositionPreset(presetNumber);
+    mProcessor.getPresetsManager().forceLoad(presetNumber);
+    mProcessor.positionPresetComponentClicked(presetNumber);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber)
 {
-    processor.addNewFixedPosition(presetNumber);
+    mProcessor.getPresetsManager().save(presetNumber);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
 {
-    processor.deleteFixedPosition(presetNumber);
+    mProcessor.getPresetsManager().deletePreset(presetNumber);
 }
 
+//==============================================================================
 // InterfaceBoxComponent::Listener callback.
-//------------------------------------------
 void ControlGrisAudioProcessorEditor::oscOutputPluginIdChanged(int value)
 {
-    processor.setOscOutputPluginId(value);
+    mProcessor.setOscOutputPluginId(value);
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int oscPort)
 {
     if (state) {
-        processor.createOscInputConnection(oscPort);
+        mProcessor.createOscInputConnection(oscPort);
     } else {
-        processor.disconnectOSCInput(oscPort);
+        mProcessor.disconnectOSCInput(oscPort);
     }
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, String oscAddress, int oscPort)
 {
     if (state) {
-        processor.createOscOutputConnection(oscAddress, oscPort);
+        mProcessor.createOscOutputConnection(oscAddress, oscPort);
     } else {
-        processor.disconnectOSCOutput(oscAddress, oscPort);
+        mProcessor.disconnectOSCOutput(oscAddress, oscPort);
     }
 }
 
@@ -659,45 +712,43 @@ void ControlGrisAudioProcessorEditor::paint(Graphics & g)
     g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::resized()
 {
-    double width = getWidth() - 50; // Remove position preset space.
-    double height = getHeight();
+    auto const width{ getWidth() - 50 }; // Remove position preset space.
+    auto const height{ getHeight() };
 
-    double fieldSize = width / 2;
-    if (fieldSize < MIN_FIELD_WIDTH) {
-        fieldSize = MIN_FIELD_WIDTH;
-    }
+    auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
 
-    automationManager.setFieldWidth(fieldSize);
-    automationManagerAlt.setFieldWidth(fieldSize);
+    mPositionAutomationManager.setFieldWidth(fieldSize);
+    mElevationAutomationManager.setFieldWidth(fieldSize);
 
-    mainBanner.setBounds(0, 0, fieldSize, 20);
-    mainField.setBounds(0, 20, fieldSize, fieldSize);
+    mMainBanner.setBounds(0, 0, fieldSize, 20);
+    mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (processor.getOscFormat() == SpatMode::LBAP) {
-        mainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
-        elevationBanner.setVisible(true);
-        elevationField.setVisible(true);
-        elevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
-        elevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+    if (mProcessor.getSpatMode() == SpatMode::cube) {
+        mMainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
+        mElevationBanner.setVisible(true);
+        mElevationField.setVisible(true);
+        mElevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
+        mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
     } else {
-        mainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
-        elevationBanner.setVisible(false);
-        elevationField.setVisible(false);
+        mMainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
+        mElevationBanner.setVisible(false);
+        mElevationField.setVisible(false);
     }
 
-    parametersBox.setBounds(0, fieldSize + 20, width, 50);
+    mParametersBox.setBounds(0, fieldSize + 20, width, 50);
 
-    trajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
-    trajectoryBox.setBounds(0, fieldSize + 90, width, 160);
+    mTrajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
+    mTrajectoryBox.setBounds(0, fieldSize + 90, width, 160);
 
-    settingsBanner.setBounds(0, fieldSize + 250, width, 20);
-    configurationComponent.setBounds(0, fieldSize + 270, width, 130);
+    mSettingsBanner.setBounds(0, fieldSize + 250, width, 20);
+    mConfigurationComponent.setBounds(0, fieldSize + 270, width, 130);
 
-    lastUIWidth = getWidth();
-    lastUIHeight = getHeight();
+    mLastUIWidth = getWidth();
+    mLastUIHeight = getHeight();
 
-    positionPresetBanner.setBounds(width, 0, 50, 20);
-    positionPresetBox.setBounds(width, 20, 50, height - 20);
+    mPositionPresetBanner.setBounds(width, 0, 50, 20);
+    mPositionPresetBox.setBounds(width, 20, 50, height - 20);
 }

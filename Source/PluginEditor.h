@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -34,6 +35,7 @@
 #include "SourceBoxComponent.h"
 #include "TrajectoryBoxComponent.h"
 
+//==============================================================================
 class ControlGrisAudioProcessorEditor final
     : public AudioProcessorEditor
     , private Value::Listener
@@ -45,51 +47,93 @@ class ControlGrisAudioProcessorEditor final
     , public InterfaceBoxComponent::Listener
     , public PositionPresetComponent::Listener
 {
-public:
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor &,
-                                    AudioProcessorValueTreeState & vts,
-                                    AutomationManager & automan,
-                                    AutomationManager & automanAlt);
-    ~ControlGrisAudioProcessorEditor() final;
+private:
+    //==============================================================================
+    ControlGrisAudioProcessor & mProcessor;
 
+    GrisLookAndFeel mGrisLookAndFeel;
+
+    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
+
+    PositionAutomationManager & mPositionAutomationManager;
+    ElevationAutomationManager & mElevationAutomationManager;
+
+    BannerComponent mMainBanner;
+    BannerComponent mElevationBanner;
+    BannerComponent mTrajectoryBanner;
+    BannerComponent mSettingsBanner;
+    BannerComponent mPositionPresetBanner;
+
+    PositionFieldComponent mPositionField;
+    ElevationFieldComponent mElevationField;
+
+    ParametersBoxComponent mParametersBox;
+
+    TrajectoryBoxComponent mTrajectoryBox;
+
+    TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
+
+    SettingsBoxComponent mSettingsBox;
+    SourceBoxComponent mSourceBox;
+    InterfaceBoxComponent mInterfaceBox;
+
+    PositionPresetComponent mPositionPresetBox;
+
+    bool mIsInsideSetPluginState;
+    SourceIndex mSelectedSource;
+
+    Value mLastUIWidth;
+    Value mLastUIHeight;
+
+public:
+    //==============================================================================
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
+                                    AudioProcessorValueTreeState & vts,
+                                    PositionAutomationManager & positionAutomationManager,
+                                    ElevationAutomationManager & elevationAutomationManager);
+    ~ControlGrisAudioProcessorEditor() final;
+    //==============================================================================
     void paint(Graphics &) final;
     void resized() final;
     void valueChanged(Value &) final;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(int sourceId, int whichField) final;
-    void fieldTrajectoryHandleClicked(int whichField) final;
+    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) final;
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() final;
     void parametersBoxParameterChanged(SourceParameter sourceId, double value) final;
+    void parametersBoxAzimuthSpanDragStarted() final;
+    void parametersBoxAzimuthSpanDragEnded() final;
+    void parametersBoxElevationSpanDragStarted() final;
+    void parametersBoxElevationSpanDragEnded() final;
 
     // SettingsBoxComponent::Listeners
     void settingsBoxOscFormatChanged(SpatMode mode) final;
     void settingsBoxOscPortNumberChanged(int oscPort) final;
     void settingsBoxOscActivated(bool state) final;
     void settingsBoxNumberOfSourcesChanged(int numOfSources) final;
-    void settingsBoxFirstSourceIdChanged(int firstSourceId) final;
+    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) final;
 
     // SourceBoxComponent::Listeners
-    void sourceBoxSelectionChanged(int sourceNum) final;
+    void sourceBoxSelectionChanged(SourceIndex sourceIndex) final;
     void sourceBoxPlacementChanged(SourcePlacement value) final;
-    void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) final;
+    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxSourceLinkChanged(SourceLink value) final;
+    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) final;
     void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) final;
-    void trajectoryBoxTrajectoryTypeChanged(TrajectoryType value) final;
+    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) final;
     void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) final;
-    void trajectoryBoxBackAndForthChanged(bool value) final;
-    void trajectoryBoxBackAndForthAltChanged(bool value) final;
-    void trajectoryBoxDampeningCyclesChanged(int value) final;
-    void trajectoryBoxDampeningCyclesAltChanged(int value) final;
+    void trajectoryBoxPositionBackAndForthChanged(bool value) final;
+    void trajectoryBoxElevationBackAndForthChanged(bool value) final;
+    void trajectoryBoxPositionDampeningCyclesChanged(int value) final;
+    void trajectoryBoxElevationDampeningCyclesChanged(int value) final;
     void trajectoryBoxDeviationPerCycleChanged(float value) final;
     void trajectoryBoxCycleDurationChanged(double duration, int mode) final;
     void trajectoryBoxDurationUnitChanged(double duration, int mode) final;
-    void trajectoryBoxActivateChanged(bool value) final;
-    void trajectoryBoxActivateAltChanged(bool value) final;
+    void trajectoryBoxPositionActivateChanged(bool value) final;
+    void trajectoryBoxElevationActivateChanged(bool value) final;
 
     // PositionPresetComponent::Listeners
     void positionPresetChanged(int presetNumber) final;
@@ -103,47 +147,13 @@ public:
 
     void setPluginState();
     void updateSpanLinkButton(bool state);
-    void updateSourceLinkCombo(SourceLink value);
+    void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);
 
     void refresh();
 
 private:
-    ControlGrisAudioProcessor & processor;
-
-    GrisLookAndFeel grisLookAndFeel;
-
-    AudioProcessorValueTreeState & valueTreeState;
-
-    AutomationManager & automationManager;
-    AutomationManager & automationManagerAlt;
-
-    BannerComponent mainBanner;
-    BannerComponent elevationBanner;
-    BannerComponent trajectoryBanner;
-    BannerComponent settingsBanner;
-    BannerComponent positionPresetBanner;
-
-    MainFieldComponent mainField;
-    ElevationFieldComponent elevationField;
-
-    ParametersBoxComponent parametersBox;
-
-    TrajectoryBoxComponent trajectoryBox;
-
-    TabbedComponent configurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
-
-    SettingsBoxComponent settingsBox;
-    SourceBoxComponent sourceBox;
-    InterfaceBoxComponent interfaceBox;
-
-    PositionPresetComponent positionPresetBox;
-
-    bool m_isInsideSetPluginState;
-    int m_selectedSource;
-
-    Value lastUIWidth, lastUIHeight;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
 };

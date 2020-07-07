@@ -17,15 +17,50 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "ControlGrisConstants.h"
 #include "GrisLookAndFeel.h"
+#include "StrongTypes.h"
 
+//==============================================================================
 class SettingsBoxComponent final : public Component
 {
 public:
+    //==============================================================================
+    struct Listener {
+        virtual ~Listener() {}
+
+        virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
+        virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
+        virtual void settingsBoxOscActivated(bool state) = 0;
+        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
+        virtual void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) = 0;
+    };
+
+private:
+    //==============================================================================
+    ListenerList<Listener> mListeners;
+
+    Label mOscFormatLabel;
+    ComboBox mOscFormatCombo;
+
+    Label mOscPortLabel;
+    TextEditor mOscPortEditor;
+
+    Label mNumOfSourcesLabel;
+    TextEditor mNumOfSourcesEditor;
+
+    Label mFirstSourceIdLabel;
+    TextEditor mFirstSourceIdEditor;
+
+    ToggleButton mPositionActivateButton;
+
+public:
+    //==============================================================================
     SettingsBoxComponent();
     ~SettingsBoxComponent() final;
 
@@ -35,40 +70,15 @@ public:
     // These are only setters, they dont send notification.
     //-----------------------------------------------------
     void setNumberOfSources(int numOfSources);
-    void setFirstSourceId(int firstSourceId);
+    void setFirstSourceId(SourceId firstSourceId);
     void setOscFormat(SpatMode mode);
     void setOscPortNumber(int oscPortNumber);
     void setActivateButtonState(bool shouldBeOn);
 
-    struct Listener {
-        virtual ~Listener() {}
-
-        virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
-        virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
-        virtual void settingsBoxOscActivated(bool state) = 0;
-        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
-        virtual void settingsBoxFirstSourceIdChanged(int firstSourceId) = 0;
-    };
-
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
-
-    Label oscFormatLabel;
-    ComboBox oscFormatCombo;
-
-    Label oscPortLabel;
-    TextEditor oscPortEditor;
-
-    Label numOfSourcesLabel;
-    TextEditor numOfSourcesEditor;
-
-    Label firstSourceIdLabel;
-    TextEditor firstSourceIdEditor;
-
-    ToggleButton activateButton;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsBoxComponent)
 };

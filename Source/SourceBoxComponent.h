@@ -17,6 +17,7 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
@@ -25,47 +26,54 @@
 #include "GrisLookAndFeel.h"
 #include "Source.h"
 
-class SourceBoxComponent final : public Component
+//==============================================================================
+class SourceBoxComponent final : public juce::Component
 {
 public:
-    SourceBoxComponent();
-    ~SourceBoxComponent() final;
-
-    void paint(Graphics &) final;
-    void resized() final;
-
-    void setNumberOfSources(int numOfSources, int firstSourceId);
-    void updateSelectedSource(Source * source, int sourceIndex, SpatMode spatMode);
-
+    //==============================================================================
     struct Listener {
         virtual ~Listener() {}
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
-        virtual void sourceBoxSelectionChanged(int sourceNum) = 0;
-        virtual void sourceBoxPositionChanged(int sourceNum, float angle, float rayLen) = 0;
+        virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
+        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) = 0;
     };
 
-    void addListener(Listener * l) { listeners.add(l); }
-    void removeListener(Listener * l) { listeners.remove(l); }
+private:
+    //==============================================================================
+    ListenerList<Listener> mListeners;
+
+    SourceIndex mSelectedSource;
+    Degrees mCurrentAngle;
+    float mCurrentRayLength;
+
+    Label mSourcePlacementLabel;
+    ComboBox mSourcePlacementCombo;
+
+    Label mSourceNumberLabel;
+    ComboBox mSourceNumberCombo;
+
+    Label mRayLengthLabel;
+    Slider mRayLengthSlider;
+
+    Label mAngleLabel;
+    Slider mAngleSlider;
+
+public:
+    //==============================================================================
+    SourceBoxComponent();
+    ~SourceBoxComponent() final;
+    //==============================================================================
+    void paint(Graphics &) final;
+    void resized() final;
+
+    void setNumberOfSources(int numOfSources, SourceId firstSourceId);
+    void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
+
+    void addListener(Listener * l) { mListeners.add(l); }
+    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
-    ListenerList<Listener> listeners;
-
-    int selectedSourceNumber;
-    float currentAngle;
-    float currentRayLength;
-
-    Label sourcePlacementLabel;
-    ComboBox sourcePlacementCombo;
-
-    Label sourceNumberLabel;
-    ComboBox sourceNumberCombo;
-
-    Label rayLengthLabel;
-    Slider rayLengthSlider;
-
-    Label angleLabel;
-    Slider angleSlider;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent)
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent);
 };

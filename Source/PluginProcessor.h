@@ -17,14 +17,20 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
 #include "AutomationManager.h"
+#include "ChangeGesturesManager.h"
 #include "ControlGrisConstants.h"
 #include "ControlGrisUtilities.h"
+#include "PresetsManager.h"
 #include "Source.h"
+#include "SourceLinkEnforcer.h"
 
+//==============================================================================
 class ControlGrisAudioProcessor final
     : public AudioProcessor
     , public AudioProcessorValueTreeState::Listener
@@ -32,14 +38,60 @@ class ControlGrisAudioProcessor final
     , public Timer
     , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
+private:
+    //==============================================================================
+    SpatMode mSpatMode{ SpatMode::dome };
+    bool mOscConnected{ true };
+    bool mOscInputConnected{ false };
+    bool mOscOutputConnected{ false };
+    SourceId mFirstSourceId{ 1 };
+    SourceIndex mSelectedSource{};
+    int mCurrentOSCPort{ 18032 };
+    int mLastConnectedOSCPort{ -1 };
+    int mCurrentOSCInputPort{ 8000 };
+    int mCurrentOSCOutputPort{ 9000 };
+    String mCurrentOSCOutputAddress{ "192.168.1.100" };
+    bool mNeedsInitialization{ true };
+
+    double mInitTimeOnPlay{ 0.0 };
+    double mCurrentTime{ 0.0 };
+    double mLastTime{ 10000000.0 };
+    double mLastTimerTime{ 10000000.0 };
+
+    bool mIsPlaying{ false };
+    bool mCanStopActivate{ false };
+    double mBpm{ 120 };
+
+    OSCSender mOscSender;
+    OSCSender mOscOutputSender;
+    OSCReceiver mOscInputReceiver;
+
+    XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
+
+    Sources mSources{};
+    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources };
+    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
+
 public:
+    AudioProcessorValueTreeState mParameters;
+
+private:
+    ChangeGesturesManager mChangeGesturesManager{ mParameters };
+    PresetsManager mPresetManager{ mFixPositionData,
+                                   mSources,
+                                   mPositionSourceLinkEnforcer,
+                                   mElevationSourceLinkEnforcer };
+
+public:
+    //==============================================================================
+    PositionAutomationManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
+    ElevationAutomationManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
     //==============================================================================
     ControlGrisAudioProcessor();
     ~ControlGrisAudioProcessor() final;
-
     //==============================================================================
     void prepareToPlay(double sampleRate, int samplesPerBlock) final;
-    void releaseResources() final;
+    void releaseResources() final {}
 
 #ifndef JucePlugin_PreferredChannelConfigurations
     bool isBusesLayoutSupported(const BusesLayout & layouts) const final;
@@ -52,7 +104,7 @@ public:
     bool hasEditor() const final { return true; } // (change this to false if you choose to not supply an editor)
 
     //==============================================================================
-    const String getName() const final;
+    String const getName() const final;
 
     bool acceptsMidi() const final;
     bool producesMidi() const final;
@@ -67,50 +119,49 @@ public:
       // so this should be at least 1, even if you're not really implementing programs.
     int getCurrentProgram() final { return 0; }
     void setCurrentProgram(int index) final {}
-    const String getProgramName(int index) final { return {}; }
-    void changeProgramName(int index, const String & newName) final {}
+    String const getProgramName(int index) final { return {}; }
+    void changeProgramName(int index, String const & newName) final {}
 
     //==============================================================================
     void getStateInformation(MemoryBlock & destData) final;
     void setStateInformation(const void * data, int sizeInBytes) final;
 
     //==============================================================================
-    void parameterChanged(const String & parameterID, float newValue) final;
+    void parameterChanged(String const & parameterID, float newValue) final;
 
     //==============================================================================
-    void setOscFormat(SpatMode oscFormat);
-    SpatMode getOscFormat() const { return m_selectedOscFormat; }
+    void setSpatMode(SpatMode spatMode);
+    SpatMode getSpatMode() const { return mSpatMode; }
 
     void setOscPortNumber(int oscPortNumber);
-    int getOscPortNumber() const { return m_currentOSCPort; }
+    int getOscPortNumber() const { return mCurrentOSCPort; }
 
-    void setFirstSourceId(int firstSourceId, bool propagate = true);
-    int getFirstSourceId() const { return m_firstSourceId; }
+    void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
+    auto getFirstSourceId() const { return mFirstSourceId; }
 
-    void setSelectedSourceId(int id);
+    void setSelectedSource(SourceIndex index) { mSelectedSource = index; }
 
     void setNumberOfSources(int numOfSources, bool propagate = true);
-    int getNumberOfSources() const { return m_numOfSources; }
 
-    Source * getSources() { return sources; }
-    Source const * getSources() const { return sources; }
+    auto & getSources() { return mSources; }
+    auto const & getSources() const { return mSources; }
 
     //==============================================================================
     bool createOscConnection(int oscPort);
     bool disconnectOSC();
-    bool getOscConnected() const { return m_oscConnected; }
+    bool getOscConnected() const { return mOscConnected; }
     void handleOscConnection(bool state);
     void sendOscMessage();
 
     bool createOscInputConnection(int oscPort);
     bool disconnectOSCInput(int oscPort);
-    bool getOscInputConnected() const { return m_oscInputConnected; }
+    bool getOscInputConnected() const { return mOscInputConnected; }
     void oscMessageReceived(const OSCMessage & message) final;
     void oscBundleReceived(const OSCBundle & bundle) final;
 
-    bool createOscOutputConnection(String oscAddress, int oscPort);
-    bool disconnectOSCOutput(String oscAddress, int oscPort);
-    bool getOscOutputConnected() const { return m_oscOutputConnected; }
+    bool createOscOutputConnection(String const & oscAddress, int oscPort);
+    bool disconnectOSCOutput(String const & oscAddress, int oscPort);
+    bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);
     int getOscOutputPluginId() const;
@@ -120,91 +171,31 @@ public:
     //==============================================================================
     void setPluginState();
 
-    void sourcePositionChanged(int sourceId, int whichField);
-    void setSourceParameterValue(int sourceId, SourceParameter sourceParameter, double value);
+    void sourcePositionChanged(SourceIndex sourceIndex, int whichField);
+    void setSourceParameterValue(SourceIndex sourceIndex, SourceParameter sourceParameter, float value);
 
     void initialize();
 
-    double getInitTimeOnPlay() const { return m_initTimeOnPlay >= 0.0 ? m_initTimeOnPlay : 0.0; }
-    double getCurrentTime() const { return m_currentTime >= 0.0 ? m_currentTime : 0.0; }
+    double getInitTimeOnPlay() const { return std::max(mInitTimeOnPlay, 0.0); }
+    double getCurrentTime() const { return std::max(mCurrentTime, 0.0); }
 
-    bool getIsPlaying() const { return m_isPlaying; }
-    double getBPM() const { return m_bpm; }
+    bool isPlaying() const { return mIsPlaying; }
+    double getBPM() const { return mBpm; }
 
-    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position) final;
+    void beginChangeGesture(String const & parameterName);
+    void endChangeGesture(String const & parameterName);
 
-    void setSourceLink(SourceLink value);
+    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation) final;
+
+    void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
-    void onSourceLinkChanged(SourceLink value);
-    void onElevationSourceLinkChanged(ElevationSourceLink value);
 
-    void linkSourcePositions();
-    void linkSourcePositionsAlt();
+    PresetsManager & getPresetsManager() { return mPresetManager; }
+    PresetsManager const & getPresetsManager() const { return mPresetManager; }
 
-    // These are called after a source has changed from mouse movement in a field (or from an OSC message).
-    void validateSourcePositions();
-    void validateSourcePositionsAlt();
-
-    void setPositionPreset(int presetNumber);
-
-    void addNewFixedPosition(int id);
-    bool recallFixedPosition(int id);
-    void copyFixedPositionXmlElement(XmlElement * src, XmlElement * dest);
-    XmlElement * getFixedPositionData() { return &fixPositionData; } // retrieve all data.
-    XmlElement const * getFixedPositionData() const { return &fixPositionData; }
-    void deleteFixedPosition(int id);
-
-    //==============================================================================
-    AudioProcessorValueTreeState parameters;
-
-    AutomationManager automationManager;
-    AutomationManager automationManagerAlt;
+    void positionPresetComponentClicked(int presetNumber);
 
 private:
-    SpatMode m_selectedOscFormat;
-    bool m_oscConnected;
-    bool m_oscInputConnected;
-    bool m_oscOutputConnected;
-    int m_firstSourceId;
-    int m_numOfSources;
-    int m_selectedSourceId;
-    int m_currentOSCPort;
-    int m_lastConnectedOSCPort;
-    int m_currentOSCInputPort;
-    int m_currentOSCOutputPort;
-    String m_currentOSCOutputAddress;
-    bool m_needInitialization;
-
-    double m_initTimeOnPlay;
-    double m_currentTime;
-    double m_lastTime;
-    double m_lastTimerTime;
-
-    bool m_isPlaying;
-    bool m_canStopActivate;
-    double m_bpm;
-
-    int m_currentPositionPreset;
-    int m_newPositionPreset;
-
-    // Filtering variables for OSC controller output.
-    int m_lastPositionPreset;
-    float m_lastTrajectory1x;
-    float m_lastTrajectory1y;
-    float m_lastTrajectory1z;
-    float m_lastAzispan;
-    float m_lastElespan;
-    SourceLink m_lastSourceLink;
-    ElevationSourceLink m_lastElevationSourceLink;
-
-    Source sources[MAX_NUMBER_OF_SOURCES];
-
-    OSCSender oscSender;
-    OSCSender oscOutputSender;
-    OSCReceiver oscInputReceiver;
-
-    XmlElement fixPositionData;
-    XmlElement * currentFixPosition = nullptr;
-
+    //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessor)
 };

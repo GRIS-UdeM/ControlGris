@@ -18,17 +18,34 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "BannerComponent.h"
+#pragma once
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+#include "../JuceLibraryCode/JuceHeader.h"
 
-//==============================================================================
-BannerComponent::BannerComponent() noexcept
+#include "ControlGrisConstants.h"
+
+class Source;
+class FieldComponent;
+
+class SourceComponent : public juce::Component
 {
-    setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
-}
+private:
+    Colour mColour;
+    String mIcon;
+    bool mSelected{ false };
+
+protected:
+    static constexpr int MAX_LINE_THICKNESS = 3;
+
+public:
+    SourceComponent(Colour colour, String const & icon);
+    virtual ~SourceComponent() = default;
+
+    void setSelected(bool selected);
+    void paint(Graphics & g) final;
+
+    Colour getColour() const { return mColour; }
+
+private:
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent);
+};

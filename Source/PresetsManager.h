@@ -20,62 +20,55 @@
 
 #pragma once
 
+#include <array>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "GrisLookAndFeel.h"
-#include "Source.h"
+#include "ControlGrisConstants.h"
+#include "DumbOptional.h"
+#include "SourceLinkEnforcer.h"
 
 //==============================================================================
-class ParametersBoxComponent final
-    : public Component
-    , public Slider::Listener
+class PresetsManager final
+    : public ChangeListener
+    , public ChangeBroadcaster
 {
-public:
-    //==============================================================================
-    struct Listener {
-        virtual ~Listener() {}
-
-        virtual void parametersBoxAzimuthSpanDragStarted() = 0;
-        virtual void parametersBoxAzimuthSpanDragEnded() = 0;
-        virtual void parametersBoxElevationSpanDragStarted() = 0;
-        virtual void parametersBoxElevationSpanDragEnded() = 0;
-        virtual void parametersBoxSelectedSourceClicked() = 0;
-        virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
-    };
-
 private:
     //==============================================================================
-    ListenerList<Listener> mListeners;
-
-    bool mDistanceEnabled{ false };
-    bool mSpanLinked{ false };
-
-    Source * mSelectedSource{};
-
-    Label mAzimuthLabel{};
-    Label mElevationLabel{};
-    Slider mAzimuthSpan{};
-    Slider mElevationSpan{};
+    int mLastLoadedPreset{ 0 };
+    bool mSourceMovedSinceLastRecall{ false };
+    XmlElement & mData;
+    Sources & mSources;
+    SourceLinkEnforcer & mPositionLinkEnforcer;
+    SourceLinkEnforcer & mElevationLinkEnforcer;
 
 public:
     //==============================================================================
-    ParametersBoxComponent();
-    ~ParametersBoxComponent() final = default;
+    PresetsManager(XmlElement & data,
+                   Sources & sources,
+                   SourceLinkEnforcer & positionLinkEnforcer,
+                   SourceLinkEnforcer & elevationLinkEnforcer);
+    ~PresetsManager() noexcept final;
     //==============================================================================
-    void mouseDown(MouseEvent const & event) final;
-    void sliderValueChanged(Slider * slider) final;
-    void paint(Graphics &) final;
-    void resized() final;
+    int getCurrentPreset() const;
+    std::array<bool, NUMBER_OF_POSITION_PRESETS> getSavedPresets() const;
 
-    void setSelectedSource(Source * source);
-    void setDistanceEnabled(bool distanceEnabled);
-    void setSpanLinkState(bool spanLinkState);
-    bool getSpanLinkState() const { return mSpanLinked; }
-
-    void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
+    bool loadIfPresetChanged(int presetNumber);
+    bool forceLoad(int presetNumber);
+    void save(int presetNumber);
+    bool deletePreset(int presetNumber);
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
+    [[nodiscard]] bool contains(int presetNumber) const;
+    [[nodiscard]] std::unique_ptr<XmlElement> createPresetData(int presetNumber) const;
+    [[nodiscard]] optional<XmlElement *> getPresetData(int presetNumber) const;
+
+    [[nodiscard]] bool load(int presetNumber);
+    void subscribeToSources();
+    void unsubscribeToSources();
+
+    void changeListenerCallback(ChangeBroadcaster * broadcaster) final;
+    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetsManager);
 };
