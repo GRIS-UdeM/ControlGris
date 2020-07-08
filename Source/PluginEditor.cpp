@@ -347,24 +347,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
-                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
-
-            } else if (numOfSources <= 4) {
-                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
-            } else if (numOfSources <= 6) {
-                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
-            } else {
-                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
-            }
-        }
-        break;
-    }
-    case SourcePlacement::rightAlternate: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
-            if (numOfSources <= 2) {
                 source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
+
             } else if (numOfSources <= 4) {
                 source.setCoordinates(azims4[i], elevation, distance, SourceLinkNotification::notify);
             } else if (numOfSources <= 6) {
@@ -375,34 +359,23 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         }
         break;
     }
+    case SourcePlacement::rightAlternate: {
+        for (int i{}; i < numOfSources; ++i) {
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            if (numOfSources <= 2) {
+                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
+        }
+        break;
+    }
     case SourcePlacement::leftClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
-        }
-        break;
-    }
-    case SourcePlacement::leftCounterClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
-            mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
-        }
-        break;
-    }
-    case SourcePlacement::rightClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
-        }
-        break;
-    }
-    case SourcePlacement::rightCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
@@ -411,10 +384,37 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         }
         break;
     }
+    case SourcePlacement::leftCounterClockwise: {
+        for (int i{}; i < numOfSources; ++i) {
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
+        }
+        break;
+    }
+    case SourcePlacement::rightClockwise: {
+        for (int i{}; i < numOfSources; ++i) {
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
+        }
+        break;
+    }
+    case SourcePlacement::rightCounterClockwise: {
+        for (int i{}; i < numOfSources; ++i) {
+            auto & source{ mProcessor.getSources()[i] };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
+            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
+        }
+        break;
+    }
     case SourcePlacement::topClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
             auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
@@ -423,7 +423,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::topCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
             auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
