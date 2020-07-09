@@ -68,25 +68,33 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
     auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     jassert(lookAndFeel != nullptr);
 
-    // Draw the background.
-    g.setColour(lookAndFeel->getFieldColour());
-    g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
-    g.setColour(Colours::black);
-    g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
+    if (lookAndFeel != nullptr) {
+        // Draw the background.
+        g.setColour(lookAndFeel->getFieldColour());
+        g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
+        g.setColour(Colours::black);
+        g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
 
-    // Draw the grid.
-    g.setColour(Colour::fromRGB(55, 56, 57));
-    constexpr int gridCount = 8;
-    for (int i{ 1 }; i < gridCount; ++i) {
-        g.drawLine(fieldComponentSize_f * i / gridCount, 0, fieldComponentSize_f * i / gridCount, fieldComponentSize);
-        g.drawLine(0, fieldComponentSize_f * i / gridCount, fieldComponentSize, fieldComponentSize_f * i / gridCount);
+        // Draw the grid.
+        g.setColour(Colour::fromRGB(55, 56, 57));
+        constexpr int gridCount = 8;
+        for (int i{ 1 }; i < gridCount; ++i) {
+            g.drawLine(fieldComponentSize_f * i / gridCount,
+                       0,
+                       fieldComponentSize_f * i / gridCount,
+                       fieldComponentSize_f);
+            g.drawLine(0,
+                       fieldComponentSize_f * i / gridCount,
+                       fieldComponentSize_f,
+                       fieldComponentSize_f * i / gridCount);
+        }
+        g.drawLine(0, 0, fieldComponentSize_f, fieldComponentSize_f);
+        g.drawLine(0, fieldComponentSize_f, fieldComponentSize_f, 0);
     }
-    g.drawLine(0, 0, fieldComponentSize, fieldComponentSize);
-    g.drawLine(0, fieldComponentSize, fieldComponentSize, 0);
 }
 
 //==============================================================================
-void FieldComponent::changeListenerCallback(ChangeBroadcaster * broadcaster)
+void FieldComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * broadcaster)
 {
     repaint();
 }
@@ -173,11 +181,13 @@ void ElevationFieldComponent::drawBackground(Graphics & g) const
     auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
     jassert(lookAndFeel != nullptr);
 
-    drawBackgroundGrid(g);
+    if (lookAndFeel != nullptr) {
+        drawBackgroundGrid(g);
 
-    g.setColour(lookAndFeel->getLightColour());
-    g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
-    g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
+        g.setColour(lookAndFeel->getLightColour());
+        g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
+        g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
+    }
 }
 
 //==============================================================================
@@ -537,7 +547,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
         g.setColour(source.getColour().withSaturation(saturation).withAlpha(0.3f));
         Graphics::ScopedSaveState graphicsState{ g };
         g.reduceClipRegion(effectiveArea.toNearestInt()); // TODO: this clips everything after!
-        g.drawEllipse(spanArea, lineThickness);
+        g.drawEllipse(spanArea, static_cast<float>(lineThickness));
         g.fillEllipse(spanArea);
         sourceIndex += 1.0f;
     }
@@ -590,7 +600,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 }
 
 //==============================================================================
-void ElevationFieldComponent::mouseDown(MouseEvent const & event)
+void ElevationFieldComponent::mouseDown([[maybe_unused]] MouseEvent const & event)
 {
     mSelectedSource.reset();
     mOldSelectedSource.reset();
@@ -606,17 +616,17 @@ void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sour
 }
 
 //==============================================================================
-void ElevationFieldComponent::mouseDrag(const MouseEvent & event)
+void ElevationFieldComponent::mouseDrag([[maybe_unused]] const MouseEvent & event)
 {
 }
 
 //==============================================================================
-void ElevationFieldComponent::mouseUp(const MouseEvent & event)
+void ElevationFieldComponent::mouseUp([[maybe_unused]] const MouseEvent & event)
 {
 }
 
 //==============================================================================
-void ElevationFieldComponent::rebuildSourceComponents(int const numberOfSources)
+void ElevationFieldComponent::rebuildSourceComponents([[maybe_unused]] int const numberOfSources)
 {
     mSourceComponents.clearQuick(true);
     for (auto & source : mSources) {

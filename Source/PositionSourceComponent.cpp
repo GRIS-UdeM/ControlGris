@@ -44,7 +44,7 @@ PositionSourceComponent::~PositionSourceComponent()
 //==============================================================================
 void PositionSourceComponent::updatePositionInParent()
 {
-    auto const newCenter{ mFieldComponent.sourcePositionToComponentPosition(mSource.getPos()) };
+    auto const newCenter{ mFieldComponent.sourcePositionToComponentPosition(mSource.getPos()).roundToInt() };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
@@ -101,7 +101,7 @@ SourceIndex PositionSourceComponent::getSourceIndex() const
 }
 
 //==============================================================================
-void PositionSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
+void PositionSourceComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * source)
 {
     this->updatePositionInParent();
 }

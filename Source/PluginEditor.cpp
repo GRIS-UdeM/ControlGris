@@ -719,9 +719,10 @@ void ControlGrisAudioProcessorEditor::resized()
     auto const height{ getHeight() };
 
     auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
+    auto const fieldSize_f{ static_cast<float>(fieldSize) };
 
-    mPositionAutomationManager.setFieldWidth(fieldSize);
-    mElevationAutomationManager.setFieldWidth(fieldSize);
+    mPositionAutomationManager.setFieldWidth(fieldSize_f);
+    mElevationAutomationManager.setFieldWidth(fieldSize_f);
 
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);

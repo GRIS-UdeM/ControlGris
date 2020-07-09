@@ -97,7 +97,7 @@ private:
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
-                                                          SourceSnapshot const & snapshot) const final
+                                                          [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         SourceSnapshot const result{ source };
         return result;
@@ -238,7 +238,7 @@ class CircularFullyFixedStrategy : public LinkStrategy
     float mRadius{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               int const numberOfSources) final
     {
         mDeviationPerSource = Degrees{ 360.0f } / numberOfSources;
@@ -247,7 +247,7 @@ class CircularFullyFixedStrategy : public LinkStrategy
         mRadius = primarySourcePosition.getDistanceFromOrigin();
     }
     //==============================================================================
-    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         auto const secondaryIndex{ source.getIndex() };
         auto const angle{ mPrimarySourceAngle + mDeviationPerSource * secondaryIndex.toInt() };
@@ -270,7 +270,7 @@ class LinkSymmetricXStrategy : public LinkStrategy
     Point<float> mPrimaryPosition;
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mPrimaryPosition = primarySource.getPos();
@@ -296,7 +296,7 @@ class LinkSymmetricYStrategy : public LinkStrategy
     Point<float> mPrimaryPosition;
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mPrimaryPosition = primarySource.getPos();
@@ -377,18 +377,18 @@ class FixedElevationStrategy : public LinkStrategy
     Radians mElevation{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mElevation = primarySource.getElevation();
     }
     //==============================================================================
-    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         source.setElevation(mElevation, SourceLinkNotification::silent);
     }
     //==============================================================================
-    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
                                                           SourceSnapshot const & snapshot) const final
     {
         return snapshot;
@@ -403,21 +403,21 @@ class LinearMinElevationStrategy : public LinkStrategy
     Radians mElevationPerSource{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mBaseElevation = primarySource.getElevation();
         mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
     }
     //==============================================================================
-    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
         source.setElevation(newElevation, SourceLinkNotification::silent);
     }
     //==============================================================================
-    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
                                                           SourceSnapshot const & snapshot) const final
     {
         return snapshot;
@@ -432,21 +432,21 @@ class LinearMaxElevationStrategy : public LinkStrategy
     Radians mElevationPerSource{};
     //==============================================================================
     void calculateParams_impl(Source const & primarySource,
-                              SourceSnapshot const & primarySourceSnapshot,
+                              [[maybe_unused]] SourceSnapshot const & primarySourceSnapshot,
                               [[maybe_unused]] int const numberOfSources) final
     {
         mBaseElevation = primarySource.getElevation();
         mElevationPerSource = ELEVATION_DIFF / (numberOfSources - 1);
     }
     //==============================================================================
-    void apply_impl(Source & source, SourceSnapshot const & snapshot) const final
+    void apply_impl(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const final
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
         source.setElevation(newElevation, SourceLinkNotification::silent);
     }
     //==============================================================================
-    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl(Source const & source,
+    [[nodiscard]] SourceSnapshot getInversedSnapshot_impl([[maybe_unused]] Source const & source,
                                                           SourceSnapshot const & snapshot) const final
     {
         return snapshot;

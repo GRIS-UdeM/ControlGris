@@ -191,7 +191,7 @@ public:
         if (index == 0) {
             return mPrimarySource;
         }
-        return mSecondarySources[index - 1];
+        return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
     Source const & get(int const index) const
     {
@@ -199,7 +199,7 @@ public:
         if (index == 0) {
             return mPrimarySource;
         }
-        return mSecondarySources[index - 1];
+        return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
     Source & get(SourceIndex const index) { return get(index.toInt()); }
     Source const & get(SourceIndex const index) const { return get(index.toInt()); }
@@ -209,7 +209,7 @@ public:
         if (index == 0) {
             return mPrimarySource;
         }
-        return mSecondarySources[index - 1];
+        return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
     Source const & operator[](int const index) const
     {
@@ -217,7 +217,7 @@ public:
         if (index == 0) {
             return mPrimarySource;
         }
-        return mSecondarySources[index - 1];
+        return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
     Source & operator[](SourceIndex const index) { return (*this)[index.toInt()]; }
     Source const & operator[](SourceIndex const index) const { return (*this)[index.toInt()]; }

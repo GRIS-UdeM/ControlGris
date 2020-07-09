@@ -23,8 +23,9 @@
 //==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
-    constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2;
-    this->setSize(dimension, dimension);
+    constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2.0f;
+    constexpr auto rounded{ static_cast<int>(dimension + 0.5f) };
+    this->setSize(rounded, rounded);
 }
 
 //==============================================================================
