@@ -215,6 +215,7 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
+    MessageManagerLock mmLock{}; // TODO : code smell?
     mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
                                                           NotificationType::dontSendNotification);
 }
