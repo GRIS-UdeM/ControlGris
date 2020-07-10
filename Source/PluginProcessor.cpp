@@ -240,7 +240,11 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
 
     if (parameterID.compare(ParameterNames::positionPreset) == 0) {
         auto const value{ static_cast<int>(newValue) };
-        mPresetManager.loadIfPresetChanged(value);
+        auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
+        if (loaded) {
+            mPositionAutomationManager.recomputeTrajectory();
+            mElevationAutomationManager.recomputeTrajectory();
+        }
     }
 
     if (parameterID.startsWith(ParameterNames::azimuthSpan)) {
@@ -553,7 +557,11 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
-        mPresetManager.loadIfPresetChanged(newPreset);
+        auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
+        if (loaded) {
+            mPositionAutomationManager.recomputeTrajectory();
+            mElevationAutomationManager.recomputeTrajectory();
+        }
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
             ed->updatePositionPreset(newPreset);

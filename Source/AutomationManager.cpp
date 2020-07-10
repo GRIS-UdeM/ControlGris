@@ -235,6 +235,12 @@ void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 }
 
 //==============================================================================
+void PositionAutomationManager::recomputeTrajectory()
+{
+    this->setTrajectoryType(mTrajectoryType, mPrincipalSource.getPos());
+}
+
+//==============================================================================
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
@@ -290,4 +296,10 @@ void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
         mPrincipalSource.setElevation(currentElevation, SourceLinkNotification::notify);
         sendTrajectoryPositionChangedEvent();
     }
+}
+
+//==============================================================================
+void ElevationAutomationManager::recomputeTrajectory()
+{
+    this->setTrajectoryType(mTrajectoryType);
 }

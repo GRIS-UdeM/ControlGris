@@ -135,6 +135,7 @@ public:
     void resetPlaybackPosition() { mPlaybackPosition.reset(); }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
+    virtual void recomputeTrajectory() = 0;
     void addRecordingPoint(Point<float> const & pos);
     int getRecordingTrajectorySize() const;
     Point<float> getFirstRecordingPoint() const;
@@ -197,6 +198,8 @@ public:
 
     void sendTrajectoryPositionChangedEvent() final;
 
+    void recomputeTrajectory() final;
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionAutomationManager);
@@ -225,6 +228,7 @@ public:
 
     void sendTrajectoryPositionChangedEvent() final;
     void applyCurrentTrajectoryPointToPrimarySource() final;
+    void recomputeTrajectory() final;
 
 private:
     //==============================================================================

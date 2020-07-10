@@ -663,6 +663,8 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber)
 {
     mProcessor.getPresetsManager().forceLoad(presetNumber);
+    mPositionAutomationManager.recomputeTrajectory();
+    mElevationAutomationManager.recomputeTrajectory();
     mProcessor.positionPresetComponentClicked(presetNumber);
 }
 
