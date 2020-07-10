@@ -39,13 +39,12 @@ void SourceComponent::setSelected(bool const selected)
 void SourceComponent::paint(Graphics & g)
 {
     auto const lineThickness{ static_cast<float>(mSelected ? MAX_LINE_THICKNESS : 1) };
-    auto const saturation{ (mSelected) ? 1.0f : 0.75f };
-    auto const colour{ mColour.withSaturation(saturation) };
+    auto const saturation{ (mSelected) ? 1.0f : 0.8f };
+    auto const colour{ mColour.withMultipliedSaturation(saturation) };
     auto const center{ getLocalBounds().getCentre().toFloat() };
     auto const area{ Rectangle<float>{ SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER }.withCentre(
         center) };
 
-    //    g.setColour(Colour(.2f, .2f, .2f, 1.0f));
     g.setColour(colour);
     g.drawEllipse(area, lineThickness);
     g.setGradientFill(ColourGradient(colour.darker(0.8f), center, colour, center / 5.0f, true));
