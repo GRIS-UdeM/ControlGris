@@ -152,7 +152,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
     mDeviationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
     mDeviationEditor.onFocusLost = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxDeviationPerCycleChanged(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0));
+            l.trajectoryBoxDeviationPerCycleChanged(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0f));
         });
         mDeviationEditor.setText(String(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0)));
         mDurationUnitCombo.grabKeyboardFocus();

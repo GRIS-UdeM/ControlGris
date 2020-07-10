@@ -44,8 +44,9 @@ ElevationSourceComponent::~ElevationSourceComponent() noexcept
 //==============================================================================
 void ElevationSourceComponent::updatePositionInParent()
 {
-    auto const newCenter{ mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(),
-                                                                             mSource.getIndex()) };
+    auto const newCenter{
+        mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(), mSource.getIndex()).roundToInt()
+    };
     this->setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
@@ -98,7 +99,7 @@ SourceIndex ElevationSourceComponent::getSourceIndex() const
 }
 
 //==============================================================================
-void ElevationSourceComponent::changeListenerCallback(ChangeBroadcaster * source)
+void ElevationSourceComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * source)
 {
     this->updatePositionInParent();
 }

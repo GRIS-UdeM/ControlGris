@@ -118,9 +118,9 @@ public:
     } // NB: some hosts don't cope very well if you tell them there are 0 programs,
       // so this should be at least 1, even if you're not really implementing programs.
     int getCurrentProgram() final { return 0; }
-    void setCurrentProgram(int index) final {}
-    String const getProgramName(int index) final { return {}; }
-    void changeProgramName(int index, String const & newName) final {}
+    void setCurrentProgram([[maybe_unused]] int index) final {}
+    String const getProgramName([[maybe_unused]] int index) final { return {}; }
+    void changeProgramName([[maybe_unused]] int index, [[maybe_unused]] String const & newName) final {}
 
     //==============================================================================
     void getStateInformation(MemoryBlock & destData) final;

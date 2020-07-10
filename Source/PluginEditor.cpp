@@ -215,6 +215,7 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
+    MessageManagerLock mmLock{}; // TODO : code smell?
     mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
                                                           NotificationType::dontSendNotification);
 }
@@ -336,33 +337,16 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
                                     Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
-    bool isLBAP = mProcessor.getSpatMode() == SpatMode::cube;
+    bool isCubeMode = mProcessor.getSpatMode() == SpatMode::cube;
 
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
-    auto const distance{ isLBAP ? 0.7f : 1.0f };
+    auto const distance{ isCubeMode ? 0.7f : 1.0f };
 
     switch (sourcePlacement) {
     case SourcePlacement::leftAlternate: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
-            if (numOfSources <= 2) {
-                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
-
-            } else if (numOfSources <= 4) {
-                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
-            } else if (numOfSources <= 6) {
-                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
-            } else {
-                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
-            }
-        }
-        break;
-    }
-    case SourcePlacement::rightAlternate: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
                 source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
             } else if (numOfSources <= 4) {
@@ -375,11 +359,27 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         }
         break;
     }
+    case SourcePlacement::rightAlternate: {
+        for (int i{}; i < numOfSources; ++i) {
+            auto & source{ mProcessor.getSources()[i] };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
+            if (numOfSources <= 2) {
+                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 4) {
+                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkNotification::notify);
+            } else if (numOfSources <= 6) {
+                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkNotification::notify);
+            } else {
+                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkNotification::notify);
+            }
+        }
+        break;
+    }
     case SourcePlacement::leftClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -387,8 +387,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::leftCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -396,8 +396,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::rightClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -405,8 +405,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::rightCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -414,8 +414,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::topClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -423,8 +423,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::topCounterClockwise: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -432,6 +432,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::undefined:
         jassertfalse;
     }
+    //    mProcessor.enforceSourceLinks();
 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
@@ -719,9 +720,10 @@ void ControlGrisAudioProcessorEditor::resized()
     auto const height{ getHeight() };
 
     auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
+    auto const fieldSize_f{ static_cast<float>(fieldSize) };
 
-    mPositionAutomationManager.setFieldWidth(fieldSize);
-    mElevationAutomationManager.setFieldWidth(fieldSize);
+    mPositionAutomationManager.setFieldWidth(fieldSize_f);
+    mElevationAutomationManager.setFieldWidth(fieldSize_f);
 
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);

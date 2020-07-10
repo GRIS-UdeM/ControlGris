@@ -141,7 +141,7 @@ void PositionPresetComponent::presetSaved(int const presetNumber, bool const isS
 }
 
 //==============================================================================
-void PositionPresetComponent::changeListenerCallback(ChangeBroadcaster * changeBroadcaster)
+void PositionPresetComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * changeBroadcaster)
 {
     auto const currentPreset{ mPresetsManager.getCurrentPreset() };
     setPreset(currentPreset, false);

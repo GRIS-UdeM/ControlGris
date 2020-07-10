@@ -991,7 +991,8 @@ void ControlGrisAudioProcessor::initialize()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::prepareToPlay(double const sampleRate, int const samplesPerBlock)
+void ControlGrisAudioProcessor::prepareToPlay([[maybe_unused]] double const sampleRate,
+                                              [[maybe_unused]] int const samplesPerBlock)
 {
     if (mIsPlaying == 0)
         initialize();
@@ -1023,7 +1024,8 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 #endif
 
 //==============================================================================
-void ControlGrisAudioProcessor::processBlock(AudioBuffer<float> & buffer, MidiBuffer & midiMessages)
+void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float> & buffer,
+                                             [[maybe_unused]] MidiBuffer & midiMessages)
 {
     bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
     bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };

@@ -79,8 +79,8 @@ public:
         setColour(Slider::textBoxBackgroundColourId, this->editBgcolor);
         setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
 
-        setColour(TooltipWindow::ColourIds::backgroundColourId, this->backGroundAndFieldColour.withBrightness(0.8));
-        setColour(TooltipWindow::ColourIds::outlineColourId, this->backGroundAndFieldColour.withBrightness(0.8));
+        setColour(TooltipWindow::ColourIds::backgroundColourId, this->backGroundAndFieldColour.withBrightness(0.8f));
+        setColour(TooltipWindow::ColourIds::outlineColourId, this->backGroundAndFieldColour.withBrightness(0.8f));
 
         setColour(AlertWindow::backgroundColourId, this->winBackGroundAndFieldColour);
         setColour(AlertWindow::outlineColourId, this->onColor);
@@ -100,10 +100,15 @@ public:
     }
 
     Font getFont() const { return this->font; }
-    Font getLabelFont(Label & label) final { return this->font; }
-    Font getComboBoxFont(ComboBox & comboBox) final { return this->font; }
-    Font getTextButtonFont(TextButton &, int buttonHeight) final { return this->font; }
-    Font getMenuBarFont(MenuBarComponent &, int itemIndex, String const & itemText) final { return this->font; }
+    Font getLabelFont([[maybe_unused]] Label & label) final { return this->font; }
+    Font getComboBoxFont([[maybe_unused]] ComboBox & comboBox) final { return this->font; }
+    Font getTextButtonFont(TextButton &, [[maybe_unused]] int buttonHeight) final { return this->font; }
+    Font getMenuBarFont(MenuBarComponent &,
+                        [[maybe_unused]] int itemIndex,
+                        [[maybe_unused]] String const & itemText) final
+    {
+        return this->font;
+    }
 
     Colour getWinBackgroundColour() const { return this->winBackGroundAndFieldColour; }
 
@@ -130,9 +135,9 @@ public:
     // https://github.com/audioplastic/Juce-look-and-feel-examples/blob/master/JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp
 
     void drawComboBox(Graphics & g,
-                      int width,
-                      int height,
-                      bool isButtonDown,
+                      [[maybe_unused]] int width,
+                      [[maybe_unused]] int height,
+                      [[maybe_unused]] bool isButtonDown,
                       int buttonX,
                       int buttonY,
                       int buttonW,
@@ -277,7 +282,7 @@ public:
 
     void drawButtonBackground(Graphics & g,
                               Button & button,
-                              const Colour & backgroundColour,
+                              [[maybe_unused]] Colour const & backgroundColour,
                               bool isMouseOverButton,
                               bool isButtonDown) final
     {
@@ -313,9 +318,9 @@ public:
                      float w,
                      float h,
                      bool ticked,
-                     bool isEnabled,
-                     bool isMouseOverButton,
-                     bool isButtonDown) final
+                     [[maybe_unused]] bool isEnabled,
+                     [[maybe_unused]] bool isMouseOverButton,
+                     [[maybe_unused]] bool isButtonDown) final
     {
         float const boxSize = w * 0.8f;
         const Rectangle<float> r(x, y + (h - boxSize) * 0.5f, boxSize, boxSize);
@@ -354,8 +359,8 @@ public:
                                int width,
                                int height,
                                float sliderPos,
-                               float minSliderPos,
-                               float maxSliderPos,
+                               [[maybe_unused]] float minSliderPos,
+                               [[maybe_unused]] float maxSliderPos,
                                const Slider::SliderStyle style,
                                Slider & slider) final
     {
@@ -443,7 +448,10 @@ public:
         }
     }
 
-    void fillTextEditorBackground(Graphics & g, int width, int height, TextEditor & t) final
+    void fillTextEditorBackground(Graphics & g,
+                                  [[maybe_unused]] int width,
+                                  [[maybe_unused]] int height,
+                                  TextEditor & t) final
     {
         if (t.isEnabled())
             g.setColour(this->editBgcolor);
@@ -472,8 +480,8 @@ public:
                         button,
                         0,
                         0,
-                        button.getWidth(),
-                        button.getHeight(),
+                        static_cast<float>(button.getWidth()),
+                        static_cast<float>(button.getHeight()),
                         button.getToggleState(),
                         button.isEnabled(),
                         isMouseOverButton,

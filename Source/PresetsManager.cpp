@@ -283,14 +283,14 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
     forEachXmlChildElement(mData, presetData)
     {
         auto const presetNumber{ presetData->getIntAttribute("ID") };
-        result[presetNumber - 1] = true;
+        result[static_cast<size_t>(presetNumber) - 1u] = true;
     }
 
     return result;
 }
 
 //==============================================================================
-void PresetsManager::changeListenerCallback(ChangeBroadcaster * broadcaster)
+void PresetsManager::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * broadcaster)
 {
     if (!mSourceMovedSinceLastRecall) {
         mSourceMovedSinceLastRecall = true;
