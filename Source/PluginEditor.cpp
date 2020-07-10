@@ -337,19 +337,18 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
                                     Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
-    bool isLBAP = mProcessor.getSpatMode() == SpatMode::cube;
+    bool isCubeMode = mProcessor.getSpatMode() == SpatMode::cube;
 
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
-    auto const distance{ isLBAP ? 0.7f : 1.0f };
+    auto const distance{ isCubeMode ? 0.7f : 1.0f };
 
     switch (sourcePlacement) {
     case SourcePlacement::leftAlternate: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
                 source.setCoordinates(azims2[i], elevation, distance, SourceLinkNotification::notify);
-
             } else if (numOfSources <= 4) {
                 source.setCoordinates(azims4[i], elevation, distance, SourceLinkNotification::notify);
             } else if (numOfSources <= 6) {
@@ -363,7 +362,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::rightAlternate: {
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
                 source.setCoordinates(-azims2[i], elevation, distance, SourceLinkNotification::notify);
             } else if (numOfSources <= 4) {
@@ -380,7 +379,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -389,7 +388,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             mProcessor.getSources()[i].setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -398,7 +397,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -407,7 +406,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -416,7 +415,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -425,7 +424,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
         for (int i{}; i < numOfSources; ++i) {
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
-            auto const elevation{ isLBAP ? source.getElevation() : MAX_ELEVATION };
+            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             source.setCoordinates(azimuth, elevation, distance, SourceLinkNotification::notify);
         }
         break;
@@ -433,6 +432,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::undefined:
         jassertfalse;
     }
+    //    mProcessor.enforceSourceLinks();
 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
