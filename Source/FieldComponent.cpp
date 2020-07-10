@@ -264,6 +264,7 @@ PositionFieldComponent::PositionFieldComponent(Sources & sources,
 {
     mDrawingHandleComponent.setInterceptsMouseClicks(false, false);
     mDrawingHandleComponent.setCentrePosition(getWidth() / 2, getHeight() / 2);
+    mDrawingHandleComponent.setSelected(true);
     addAndMakeVisible(mDrawingHandleComponent);
 }
 
@@ -477,14 +478,15 @@ void PositionFieldComponent::mouseDrag(const MouseEvent & event)
 {
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition() };
-        mDrawingHandleComponent.setCentrePosition(mousePosition.getX(), mousePosition.getY());
-        auto const unclippedPosition{ componentPositionToSourcePosition(mousePosition.toFloat()) };
-        auto const position{ Source::clipPosition(unclippedPosition, mSpatMode) };
+        auto const positionAsSource_unclipped{ componentPositionToSourcePosition(mousePosition.toFloat()) };
+        auto const positionAsSource{ Source::clipPosition(positionAsSource_unclipped, mSpatMode) };
+        auto const positionAsComponent{ sourcePositionToComponentPosition(positionAsSource) };
+        mDrawingHandleComponent.setCentrePosition(positionAsComponent.getX(), positionAsComponent.getY());
 
         if (mLineDrawingStartPosition.has_value()) {
-            mLineDrawingEndPosition = position;
+            mLineDrawingEndPosition = positionAsSource;
         } else {
-            mAutomationManager.addRecordingPoint(position);
+            mAutomationManager.addRecordingPoint(positionAsSource);
         }
         repaint();
     }

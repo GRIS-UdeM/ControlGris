@@ -33,9 +33,10 @@ private:
 
 public:
     ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
-        : SourceComponent(Colour::fromRGB(120u, 120u, 120u), "X")
+        : SourceComponent(Colour::fromRGB(176, 176, 228), "X")
         , mFieldComponent(fieldComponent)
     {
+        setSelected(true);
     }
     ~ElevationDrawingHandle() noexcept = default;
 

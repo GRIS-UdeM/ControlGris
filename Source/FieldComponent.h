@@ -127,7 +127,7 @@ class PositionFieldComponent final : public FieldComponent
     optional<Point<float>> mLineDrawingStartPosition{ nullopt };
     optional<Point<float>> mLineDrawingEndPosition{ nullopt };
 
-    SourceComponent mDrawingHandleComponent{ Colour::fromRGB(120, 120, 120), "X" };
+    SourceComponent mDrawingHandleComponent{ Colour::fromRGB(176, 176, 228), "X" };
 
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 
