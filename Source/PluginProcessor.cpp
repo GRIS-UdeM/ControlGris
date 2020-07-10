@@ -1002,8 +1002,9 @@ void ControlGrisAudioProcessor::initialize()
 void ControlGrisAudioProcessor::prepareToPlay([[maybe_unused]] double const sampleRate,
                                               [[maybe_unused]] int const samplesPerBlock)
 {
-    if (mIsPlaying == 0)
+    if (!mIsPlaying) {
         initialize();
+    }
 }
 
 //==============================================================================
@@ -1035,9 +1036,6 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float> & buffer,
                                              [[maybe_unused]] MidiBuffer & midiMessages)
 {
-    bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
-    bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };
-
     auto const wasPlaying{ mIsPlaying };
     AudioPlayHead * audioPlayHead = getPlayHead();
     if (audioPlayHead != nullptr) {
@@ -1061,8 +1059,12 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
+    bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
+    bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };
+
     static bool positionGestureStarted{ false };
     static bool elevationGestureStarted{ false };
+
     if (isPositionTrajectoryActive && mIsPlaying && !positionGestureStarted) {
         positionGestureStarted = true;
         mChangeGesturesManager.beginGesture(ParameterNames::x);

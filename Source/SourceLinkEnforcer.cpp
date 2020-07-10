@@ -471,7 +471,7 @@ private:
         computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & finalState,
                                                          SourceSnapshot const & initialState) const final
     {
-        return finalState;
+        return initialState;
     }
 };
 
@@ -495,7 +495,7 @@ class FixedElevationStrategy : public LinkStrategy
         computeInitialStateFromFinalState_implementation(Source const & finalState,
                                                          SourceSnapshot const & initialState) const final
     {
-        return finalState;
+        return initialState;
     }
 };
 
@@ -523,7 +523,7 @@ class LinearMinElevationStrategy : public LinkStrategy
         computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & source,
                                                          SourceSnapshot const & snapshot) const final
     {
-        return source;
+        return snapshot;
     }
 };
 
@@ -551,7 +551,7 @@ class LinearMaxElevationStrategy : public LinkStrategy
         computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & source,
                                                          SourceSnapshot const & snapshot) const final
     {
-        return source;
+        return snapshot;
     }
 };
 
@@ -662,9 +662,10 @@ SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
 void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
 {
     if (sourceLink != mPositionSourceLink) {
+        //        saveCurrentPositionsToInitialStates();
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
-        snapAll();
+        saveCurrentPositionsToInitialStates();
     }
 }
 
@@ -672,9 +673,10 @@ void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
 void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
 {
     if (sourceLink != mElevationSourceLink) {
+        //        saveCurrentPositionsToInitialStates();
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
-        snapAll();
+        saveCurrentPositionsToInitialStates();
     }
 }
 
@@ -698,7 +700,7 @@ void SourceLinkEnforcer::enforceSourceLink()
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
             // relative ordering with the mouse won't make any sense.
-            snapAll();
+            saveCurrentPositionsToInitialStates();
         }
     }
 }
@@ -753,7 +755,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 }
 
 //==============================================================================
-void SourceLinkEnforcer::snapAll()
+void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
 {
     mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
     mSnapshots.secondaries.clearQuick();
@@ -768,7 +770,7 @@ void SourceLinkEnforcer::reset()
     for (auto & source : mSources) {
         source.removeSourceLinkListener(this);
     }
-    snapAll();
+    saveCurrentPositionsToInitialStates();
     for (auto & source : mSources) {
         source.addSourceLinkListener(this);
     }

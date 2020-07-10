@@ -80,7 +80,7 @@ public:
 private:
     void primarySourceMoved();
     void secondarySourceMoved(SourceIndex sourceIndex);
-    void snapAll();
+    void saveCurrentPositionsToInitialStates();
     void reset();
 
     void changeListenerCallback(ChangeBroadcaster * source) final;
