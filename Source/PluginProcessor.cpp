@@ -122,6 +122,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mParameters(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
 
 {
+    setLatencySamples(0);
+
     // Size of the plugin window.
     mParameters.state.addChild({ "uiState", { { "width", 650 }, { "height", 700 } }, {} }, -1, nullptr);
 
@@ -1059,6 +1061,7 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
+    // deal with trajectory recording gestures
     bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
     bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };
 
@@ -1083,6 +1086,19 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
             mChangeGesturesManager.endGesture(ParameterNames::z);
         }
     }
+
+    // Some manipulations might not end gestures properly and hang automation readings altogether.
+    if (!mIsPlaying && wasPlaying) {
+        mChangeGesturesManager.endGesture(ParameterNames::positionPreset);
+        mChangeGesturesManager.endGesture(ParameterNames::positionSourceLink);
+        mChangeGesturesManager.endGesture(ParameterNames::elevationSourceLink);
+        mChangeGesturesManager.endGesture(ParameterNames::elevationSpan);
+        mChangeGesturesManager.endGesture(ParameterNames::azimuthSpan);
+        mChangeGesturesManager.endGesture(ParameterNames::x);
+        mChangeGesturesManager.endGesture(ParameterNames::y);
+        mChangeGesturesManager.endGesture(ParameterNames::z);
+    }
+
     mLastTime = mCurrentTime;
 }
 
