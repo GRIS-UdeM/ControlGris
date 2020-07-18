@@ -160,16 +160,17 @@ void Source::setPos(Point<float> const & position, SourceLinkNotification const 
 //==============================================================================
 void Source::computeXY()
 {
-    float const radius{ ([&] {
+    float const radius{ [&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
             auto const result{ mElevation / MAX_ELEVATION };
             jassert(result >= 0.0f && result <= 1.0f);
             return result;
         }
         return mDistance;
-    }()) };
+    }() };
 
-    mPosition = getPositionFromAngle(mAzimuth, radius);
+    auto const newPosition{ getPositionFromAngle(mAzimuth, radius) };
+    mPosition = newPosition;
 }
 
 //==============================================================================
@@ -180,14 +181,15 @@ void Source::computeAzimuthElevation()
     }
 
     auto const radius{ mPosition.getDistanceFromOrigin() };
-    if (mSpatMode == SpatMode::dome) { // azimuth - elevation
+    if (mSpatMode == SpatMode::dome) {
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
             mPosition = getPositionFromAngle(mAzimuth, clippedRadius);
         }
         auto const elevation{ halfPi * clippedRadius };
         mElevation = elevation;
-    } else { // azimuth - distance
+        mDistance = clippedRadius;
+    } else {
         mDistance = radius;
     }
 }

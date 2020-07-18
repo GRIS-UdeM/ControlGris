@@ -471,7 +471,7 @@ private:
         computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & finalState,
                                                          SourceSnapshot const & initialState) const final
     {
-        return initialState;
+        return SourceSnapshot{ finalState };
     }
 };
 
