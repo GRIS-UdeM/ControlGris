@@ -309,6 +309,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(SourceId c
     mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
     if (mProcessor.getSpatMode() == SpatMode::cube)
         mElevationField.repaint();
+
+    mParametersBox.repaint();
 }
 
 //==============================================================================
