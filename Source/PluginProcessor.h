@@ -193,7 +193,7 @@ public:
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
 
-    void positionPresetComponentClicked(int presetNumber);
+    void positionPresetComponentClicked(int presetNumber) const;
 
 private:
     //==============================================================================

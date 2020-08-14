@@ -22,7 +22,7 @@
 #include "ControlGrisConstants.h"
 
 //==============================================================================
-TrajectoryBoxComponent::TrajectoryBoxComponent()
+TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mSpatMode = SpatMode::dome;
 
@@ -191,12 +191,6 @@ TrajectoryBoxComponent::TrajectoryBoxComponent()
 }
 
 //==============================================================================
-TrajectoryBoxComponent::~TrajectoryBoxComponent()
-{
-    setLookAndFeel(nullptr);
-}
-
-//==============================================================================
 void TrajectoryBoxComponent::setSpatMode(SpatMode spatMode)
 {
     mSpatMode = spatMode;
@@ -342,12 +336,7 @@ void TrajectoryBoxComponent::setDurationUnit(int value)
 //==============================================================================
 void TrajectoryBoxComponent::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    if (lookAndFeel != nullptr) {
-        g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
-    } else {
-        jassertfalse;
-    }
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

@@ -40,6 +40,8 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+
     ListenerList<Listener> mListeners{};
 
     ToggleButton mOscReceiveToggle{};
@@ -59,7 +61,7 @@ private:
 
 public:
     //==============================================================================
-    InterfaceBoxComponent();
+    InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
     //==============================================================================
     void textEditorReturnKeyPressed([[maybe_unused]] TextEditor & editor) final { unfocusAllComponents(); }

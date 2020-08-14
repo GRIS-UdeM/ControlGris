@@ -21,7 +21,7 @@
 #include "ParametersBoxComponent.h"
 
 //==============================================================================
-ParametersBoxComponent::ParametersBoxComponent()
+ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mAzimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
@@ -117,11 +117,10 @@ void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 //==============================================================================
 void ParametersBoxComponent::paint(Graphics & g)
 {
-    float const x{ getWidth() - 35.0f };
-    float constexpr y = 15.0f;
+    auto constexpr y = 15.0f;
+    auto const x{ getWidth() - 35.0f };
 
-    auto const * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 
     if (mSpanLinked)
         g.setColour(Colours::orange);

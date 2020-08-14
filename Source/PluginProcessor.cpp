@@ -30,31 +30,31 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     using Parameter = AudioProcessorValueTreeState::Parameter;
 
-    std::vector<std::unique_ptr<Parameter>> mParameters;
+    std::vector<std::unique_ptr<Parameter>> parameters;
 
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::x,
-                                                      String("Recording Trajectory X"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr));
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::y,
-                                                      String("Recording Trajectory Y"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr));
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::z,
-                                                      String("Recording Trajectory Z"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::x,
+                                                     String("Recording Trajectory X"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::y,
+                                                     String("Recording Trajectory Y"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::z,
+                                                     String("Recording Trajectory Z"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
 
-    mParameters.push_back(std::make_unique<Parameter>(
+    parameters.push_back(std::make_unique<Parameter>(
         ParameterNames::positionSourceLink,
         String("Source Link"),
         String(),
@@ -65,44 +65,44 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         false,
         true,
         true));
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::elevationSourceLink,
-                                                      String("Source Link Alt"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 4.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr,
-                                                      false,
-                                                      true,
-                                                      true));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::elevationSourceLink,
+                                                     String("Source Link Alt"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 4.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr,
+                                                     false,
+                                                     true,
+                                                     true));
 
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::positionPreset,
-                                                      String("Position Preset"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 50.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr,
-                                                      false,
-                                                      true,
-                                                      true));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::positionPreset,
+                                                     String("Position Preset"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 50.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr,
+                                                     false,
+                                                     true,
+                                                     true));
 
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::azimuthSpan,
-                                                      String("Azimuth Span"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr));
-    mParameters.push_back(std::make_unique<Parameter>(ParameterNames::elevationSpan,
-                                                      String("Elevation Span"),
-                                                      String(),
-                                                      NormalisableRange<float>(0.0f, 1.0f),
-                                                      0.0f,
-                                                      nullptr,
-                                                      nullptr));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::azimuthSpan,
+                                                     String("Azimuth Span"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
+    parameters.push_back(std::make_unique<Parameter>(ParameterNames::elevationSpan,
+                                                     String("Elevation Span"),
+                                                     String(),
+                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     0.0f,
+                                                     nullptr,
+                                                     nullptr));
 
-    return { mParameters.begin(), mParameters.end() };
+    return { parameters.begin(), parameters.end() };
 }
 
 //==============================================================================
@@ -302,9 +302,9 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::positionPresetComponentClicked(int const presetNumber)
+void ControlGrisAudioProcessor::positionPresetComponentClicked(int const presetNumber) const
 {
-    auto parameter{ mParameters.getParameter(ParameterNames::positionPreset) };
+    auto * parameter{ mParameters.getParameter(ParameterNames::positionPreset) };
     parameter->beginChangeGesture();
     parameter->setValue(static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS));
     parameter->endChangeGesture();
@@ -408,15 +408,15 @@ void ControlGrisAudioProcessor::sendOscMessage()
     if (!mOscConnected)
         return;
 
-    OSCAddressPattern oscPattern("/spat/serv");
+    OSCAddressPattern const oscPattern("/spat/serv");
     OSCMessage message(oscPattern);
 
     for (auto const & source : mSources) {
-        float const azimuth{ source.getAzimuth().getAsRadians() };
-        float const elevation{ source.getElevation().getAsRadians() };
-        float const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
-        float const elevationSpan{ source.getElevationSpan() * 0.5f };
-        float const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
+        auto const azimuth{ source.getAzimuth().getAsRadians() };
+        auto const elevation{ source.getElevation().getAsRadians() };
+        auto const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
+        auto const elevationSpan{ source.getElevationSpan() * 0.5f };
+        auto const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
 
         message.clear();
         message.addInt32(source.getId().toInt() - 1); // osc id starts at 0
@@ -480,13 +480,13 @@ void ControlGrisAudioProcessor::oscBundleReceived(OSCBundle const & bundle)
 //==============================================================================
 void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 {
-    PositionSourceLink positionSourceLinkToProcess{ PositionSourceLink::undefined };
-    ElevationSourceLink elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
-    float x{ -1.0f };
-    float y{ -1.0f };
-    float z{ -1.0f };
-    String const address{ message.getAddressPattern().toString() };
-    String const pluginInstance{ String("/controlgris/") + String(getOscOutputPluginId()) };
+    auto positionSourceLinkToProcess{ PositionSourceLink::undefined };
+    auto elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
+    auto x{ -1.0f };
+    auto y{ -1.0f };
+    auto z{ -1.0f };
+    auto const address{ message.getAddressPattern().toString() };
+    auto const pluginInstance{ juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() } };
     if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
         && mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
@@ -652,14 +652,14 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
     constexpr auto impossibleNumber{ std::numeric_limits<float>::min() };
 
-    static float lastTrajectoryX{ impossibleNumber };
-    static float lastTrajectoryY{ impossibleNumber };
-    static float lastTrajectoryZ{ impossibleNumber };
+    static auto lastTrajectoryX{ impossibleNumber };
+    static auto lastTrajectoryY{ impossibleNumber };
+    static auto lastTrajectoryZ{ impossibleNumber };
     static Normalized lastAzimuthSpan{ impossibleNumber };
     static Normalized lastElevationSpan{ impossibleNumber };
-    static PositionSourceLink lastPositionLink{ PositionSourceLink::undefined };
-    static ElevationSourceLink lastElevationLink{ ElevationSourceLink::undefined };
-    static int lastPresetNumber{ std::numeric_limits<int>::min() };
+    static auto lastPositionLink{ PositionSourceLink::undefined };
+    static auto lastElevationLink{ ElevationSourceLink::undefined };
+    static auto lastPresetNumber{ std::numeric_limits<int>::min() };
 
     if (!mOscOutputConnected) {
         return;
@@ -667,12 +667,12 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     OSCMessage message(OSCAddressPattern("/tmp"));
 
-    String pluginInstance = String("/controlgris/") + String(getOscOutputPluginId());
+    auto const pluginInstance = juce::String{ "/controlgris/" } + String{ getOscOutputPluginId() };
 
     auto const trajectoryHandlePosition{ mSources.getPrimarySource().getPos() };
-    float trajectory1x = trajectoryHandlePosition.getX();
-    float trajectory1y = trajectoryHandlePosition.getY();
-    float trajectory1z = trajectoryHandlePosition.getY();
+    auto const trajectory1x = trajectoryHandlePosition.getX();
+    auto const trajectory1y = trajectoryHandlePosition.getY();
+    auto const trajectory1z = trajectoryHandlePosition.getY();
 
     if (lastTrajectoryX != trajectory1x) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/x"));

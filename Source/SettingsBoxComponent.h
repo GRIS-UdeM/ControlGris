@@ -43,6 +43,8 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+
     ListenerList<Listener> mListeners;
 
     Label mOscFormatLabel;
@@ -61,8 +63,8 @@ private:
 
 public:
     //==============================================================================
-    SettingsBoxComponent();
-    ~SettingsBoxComponent() final;
+    explicit SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel);
+    ~SettingsBoxComponent() final = default;
 
     void paint(Graphics &) override;
     void resized() override;

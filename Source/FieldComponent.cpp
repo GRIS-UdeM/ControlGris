@@ -70,7 +70,7 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
 
     if (lookAndFeel != nullptr) {
         // Draw the background.
-        g.setColour(lookAndFeel->getFieldColour());
+        g.setColour(lookAndFeel->getFieldColor());
         g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
         g.setColour(Colours::black);
         g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
@@ -141,7 +141,7 @@ void PositionFieldComponent::drawBackground(Graphics & g) const
 
     drawBackgroundGrid(g);
 
-    g.setColour(lookAndFeel->getLightColour());
+    g.setColour(lookAndFeel->getLightColor());
     if (mSpatMode == SpatMode::dome) {
         // Draw big background circles.
         for (int i{ 1 }; i < 3; ++i) {
@@ -184,7 +184,7 @@ void ElevationFieldComponent::drawBackground(Graphics & g) const
     if (lookAndFeel != nullptr) {
         drawBackgroundGrid(g);
 
-        g.setColour(lookAndFeel->getLightColour());
+        g.setColour(lookAndFeel->getLightColor());
         g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
         g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
     }

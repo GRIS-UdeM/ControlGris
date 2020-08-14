@@ -23,7 +23,7 @@
 #include "ControlGrisConstants.h"
 
 //==============================================================================
-SourceBoxComponent::SourceBoxComponent()
+SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mSelectedSource = SourceIndex{};
     mCurrentAngle = {};
@@ -47,8 +47,8 @@ SourceBoxComponent::SourceBoxComponent()
 
     addAndMakeVisible(&mSourceNumberCombo);
     mSourceNumberCombo.setTextWhenNothingSelected("Choose a source...");
-    for (int i{ 1 }; i <= 8; ++i) {
-        mSourceNumberCombo.addItem(String(i), i);
+    for (auto i{ 1 }; i <= 8; ++i) {
+        mSourceNumberCombo.addItem(juce::String{ i }, i);
     }
     mSourceNumberCombo.setSelectedId(mSelectedSource.toInt());
     mSourceNumberCombo.onChange = [this] {
@@ -65,7 +65,7 @@ SourceBoxComponent::SourceBoxComponent()
     mRayLengthSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&mRayLengthSlider);
     mRayLengthSlider.onValueChange = [this] {
-        mCurrentRayLength = (float)mRayLengthSlider.getValue();
+        mCurrentRayLength = static_cast<float>(mRayLengthSlider.getValue());
         mListeners.call(
             [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAngle, mCurrentRayLength); });
     };
@@ -86,17 +86,9 @@ SourceBoxComponent::SourceBoxComponent()
 }
 
 //==============================================================================
-SourceBoxComponent::~SourceBoxComponent()
-{
-    setLookAndFeel(nullptr);
-}
-
-//==============================================================================
 void SourceBoxComponent::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

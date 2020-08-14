@@ -21,7 +21,7 @@
 #include "InterfaceBoxComponent.h"
 
 //==============================================================================
-InterfaceBoxComponent::InterfaceBoxComponent()
+InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscOutputPluginIdLabel.setText("OSC output plugin ID:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscOutputPluginIdLabel);
@@ -172,8 +172,7 @@ void InterfaceBoxComponent::setOscSendOutputAddress(String const & address)
 //==============================================================================
 void InterfaceBoxComponent::paint(Graphics & g)
 {
-    auto * lookAndFeel{ static_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

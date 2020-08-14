@@ -25,18 +25,23 @@
 
 //==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
-    ControlGrisAudioProcessor & p,
+    ControlGrisAudioProcessor & controlGrisAudioProcessor,
     AudioProcessorValueTreeState & vts,
     PositionAutomationManager & positionAutomationManager,
     ElevationAutomationManager & elevationAutomationManager)
-    : AudioProcessorEditor(&p)
-    , mProcessor(p)
+    : AudioProcessorEditor(&controlGrisAudioProcessor)
+    , mProcessor(controlGrisAudioProcessor)
     , mAudioProcessorValueTreeState(vts)
     , mPositionAutomationManager(positionAutomationManager)
     , mElevationAutomationManager(elevationAutomationManager)
-    , mPositionField(p.getSources(), positionAutomationManager)
-    , mElevationField(p.getSources(), elevationAutomationManager)
-    , mPositionPresetBox(p.getPresetsManager())
+    , mPositionField(controlGrisAudioProcessor.getSources(), positionAutomationManager)
+    , mElevationField(controlGrisAudioProcessor.getSources(), elevationAutomationManager)
+    , mParametersBox(mGrisLookAndFeel)
+    , mTrajectoryBox(mGrisLookAndFeel)
+    , mSettingsBox(mGrisLookAndFeel)
+    , mSourceBox(mGrisLookAndFeel)
+    , mInterfaceBox(mGrisLookAndFeel)
+    , mPositionPresetBox(controlGrisAudioProcessor.getPresetsManager())
 {
     setLookAndFeel(&mGrisLookAndFeel);
 
@@ -93,7 +98,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mInterfaceBox.setLookAndFeel(&mGrisLookAndFeel);
     mInterfaceBox.addListener(this);
 
-    Colour bg = mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId);
+    auto const bg{ mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId) };
 
     mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
     mConfigurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
@@ -199,8 +204,8 @@ void ControlGrisAudioProcessorEditor::setPluginState()
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
 
-    int preset
-        = (int)((float)mAudioProcessorValueTreeState.getParameterAsValue(ParameterNames::positionPreset).getValue());
+    auto const preset{ static_cast<int>(static_cast<float>(
+        mAudioProcessorValueTreeState.getParameterAsValue(ParameterNames::positionPreset).getValue())) };
     mPositionPresetBox.setPreset(preset, true);
 
     mIsInsideSetPluginState = false;
@@ -246,7 +251,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
 {
     mSettingsBox.setOscFormat(mode);
     mProcessor.setSpatMode(mode);
-    bool selectionIsLBAP = mode == SpatMode::cube;
+    auto const selectionIsLBAP{ mode == SpatMode::cube };
     mParametersBox.setDistanceEnabled(selectionIsLBAP);
     mPositionField.setSpatMode(mode);
     mTrajectoryBox.setSpatMode(mode);
@@ -331,7 +336,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
 //==============================================================================
 void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
 {
-    auto numOfSources = mProcessor.getSources().size();
+    auto const numOfSources = mProcessor.getSources().size();
     constexpr Degrees azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
     constexpr Degrees azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
     constexpr Degrees azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
@@ -339,7 +344,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
                                     Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
-    bool isCubeMode = mProcessor.getSpatMode() == SpatMode::cube;
+    auto const isCubeMode{ mProcessor.getSpatMode() == SpatMode::cube };
 
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
     auto const distance{ isCubeMode ? 0.7f : 1.0f };
@@ -712,9 +717,7 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, Str
 //==============================================================================
 void ControlGrisAudioProcessorEditor::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
