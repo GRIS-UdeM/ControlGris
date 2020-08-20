@@ -415,6 +415,15 @@ void PositionFieldComponent::paint(Graphics & g)
 }
 
 //==============================================================================
+void PositionFieldComponent::resized()
+{
+    for (auto * sourceComponent : mSourceComponents) {
+        sourceComponent->updatePositionInParent();
+    }
+    mDrawingHandleComponent.updatePositionInParent();
+}
+
+//==============================================================================
 void PositionFieldComponent::drawSpans(Graphics & g) const
 {
     if (mSpatMode == SpatMode::dome) {
@@ -602,6 +611,15 @@ void ElevationFieldComponent::paint(Graphics & g)
 }
 
 //==============================================================================
+void ElevationFieldComponent::resized()
+{
+    for (auto * sourceComponent : mSourceComponents) {
+        sourceComponent->updatePositionInParent();
+    }
+    mDrawingHandle.updatePositionInParent();
+}
+
+//==============================================================================
 void ElevationFieldComponent::mouseDown([[maybe_unused]] MouseEvent const & event)
 {
     mSelectedSource.reset();
@@ -651,6 +669,9 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
     auto const clippedElevation{ sourceElevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
     auto const y{ clippedElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     Point<float> const result{ x, y };
+
+    jassert(x > 0 && x < getWidth());
+    jassert(y > 0 && y < getHeight());
 
     return result;
 }

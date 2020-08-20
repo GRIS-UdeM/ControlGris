@@ -145,6 +145,7 @@ public:
     void drawCubeSpans(Graphics & g) const;
 
     void paint(Graphics & g) final;
+    void resized() final;
 
     bool isTrajectoryHandleClicked(MouseEvent const & event); // TODO: this should be const
 
@@ -198,6 +199,7 @@ public:
     ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }
 
     void paint(Graphics & g) final;
+    void resized() final;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;

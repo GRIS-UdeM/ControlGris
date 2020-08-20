@@ -30,6 +30,7 @@ class ElevationDrawingHandle final : public SourceComponent
 {
 private:
     ElevationFieldComponent & mFieldComponent;
+    Radians mCurrentElevation;
 
 public:
     ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
@@ -42,6 +43,7 @@ public:
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
+    void updatePositionInParent() final;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationDrawingHandle);

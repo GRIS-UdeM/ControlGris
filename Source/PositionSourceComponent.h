@@ -22,7 +22,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "ControlGrisConstants.h"
 #include "SourceComponent.h"
 #include "StrongTypes.h"
 
@@ -51,10 +50,10 @@ public:
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
+    void updatePositionInParent() final;
 
 private:
     //==============================================================================
-    void updatePositionInParent();
     void setSourcePosition(MouseEvent const & event);
 
     void changeListenerCallback(ChangeBroadcaster * source) final;

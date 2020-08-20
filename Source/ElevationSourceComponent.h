@@ -48,9 +48,9 @@ public:
     void mouseUp(MouseEvent const & event) final;
 
     SourceIndex getSourceIndex() const;
+    void updatePositionInParent() final;
 
 private:
-    void updatePositionInParent();
     void setSourcePosition(MouseEvent const & event);
 
     void changeListenerCallback(ChangeBroadcaster * source) final;
