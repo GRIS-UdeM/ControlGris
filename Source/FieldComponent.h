@@ -61,49 +61,56 @@ public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
 
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = delete;
+
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = delete;
+        //==============================================================================
         virtual void fieldSourcePositionChanged(SourceIndex sourceId, int whichField) = 0;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);
-    };
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener);
+
+    }; // class FieldComponent::Listener
+
     //==============================================================================
     ListenerList<Listener> mListeners{};
 
 protected:
     //==============================================================================
-    static constexpr int TRAJECTORY_MARGINS = 10;
-    //==============================================================================
     Sources & mSources;
-
     bool mIsPlaying{ false };
     optional<SourceIndex> mSelectedSource{};
     optional<SourceIndex> mOldSelectedSource{};
 
 public:
     //==============================================================================
-    FieldComponent(Sources & sources) noexcept;
+    FieldComponent() = delete;
+    explicit FieldComponent(Sources & sources) noexcept;
     ~FieldComponent() noexcept override;
+
+    FieldComponent(FieldComponent const &) = delete;
+    FieldComponent(FieldComponent &&) = delete;
+
+    FieldComponent & operator=(FieldComponent const &) = delete;
+    FieldComponent & operator=(FieldComponent &&) = delete;
     //==============================================================================
     void refreshSources();
-
     void setSelectedSource(optional<SourceIndex> selectedSource);
-
-    auto const & getSelectedSourceIndex() const { return mSelectedSource; }
-
+    [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
-
     void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
-
-    virtual Rectangle<float> getEffectiveArea() const = 0;
+    //==============================================================================
+    [[nodiscard]] virtual Rectangle<float> getEffectiveArea() const = 0;
 
 protected:
     //==============================================================================
     void drawBackgroundGrid(Graphics & g) const;
-
+    //==============================================================================
     virtual void drawBackground(Graphics & g) const = 0;
     virtual void applySourceSelectionToComponents() = 0;
-    //==============================================================================
     virtual void notifySourcePositionChanged(SourceIndex sourceIndex) = 0;
     virtual void rebuildSourceComponents(int numberOfSources) = 0;
     virtual void drawSpans(Graphics & g) const = 0;
@@ -112,55 +119,52 @@ private:
     //==============================================================================
     void changeListenerCallback(ChangeBroadcaster * broadcaster) final;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FieldComponent)
-};
+    JUCE_LEAK_DETECTOR(FieldComponent)
+
+}; // class FieldComponent
 
 //==============================================================================
 class PositionFieldComponent final : public FieldComponent
 {
     PositionAutomationManager & mAutomationManager;
-
     SpatMode mSpatMode{ SpatMode::dome };
-
     bool mShowCircularSourceSelectionWarning{ false };
-
     optional<Point<float>> mLineDrawingStartPosition{ nullopt };
     optional<Point<float>> mLineDrawingEndPosition{ nullopt };
-
     SourceComponent mDrawingHandleComponent{ Colour::fromRGB(176, 176, 228), "X" };
-
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 
 public:
+    //==============================================================================
+    PositionFieldComponent() = delete;
     PositionFieldComponent(Sources & sources, PositionAutomationManager & positionAutomationManager) noexcept;
     ~PositionFieldComponent() noexcept final = default;
+
+    PositionFieldComponent(PositionFieldComponent const &) = delete;
+    PositionFieldComponent(PositionFieldComponent &&) = delete;
+
+    PositionFieldComponent & operator=(PositionFieldComponent const &) = delete;
+    PositionFieldComponent & operator=(PositionFieldComponent &&) = delete;
     //==============================================================================
-    PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
+    [[nodiscard]] PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
     PositionAutomationManager & getAutomationManager() { return mAutomationManager; }
 
-    void rebuildSourceComponents(int numberOfSources) final;
-
-    void drawSpans(Graphics & g) const final;
     void drawDomeSpans(Graphics & g) const;
     void drawCubeSpans(Graphics & g) const;
-
-    void paint(Graphics & g) final;
-    void resized() final;
-
-    bool isTrajectoryHandleClicked(MouseEvent const & event); // TODO: this should be const
-
-    void setCircularSourceSelectionWarning(bool showCircularSourceSelectionWarning);
-
     void setSpatMode(SpatMode spatMode);
 
+    void drawSpans(Graphics & g) const final;
+    void paint(Graphics & g) final;
+    void resized() final;
+    void rebuildSourceComponents(int numberOfSources) final;
+    [[nodiscard]] Rectangle<float> getEffectiveArea() const final;
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
 
-    Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
-    Line<float> sourcePositionToComponentPosition(Line<float> const & sourcePosition) const;
-    Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
-    Line<float> componentPositionToSourcePosition(Line<float> const & componentPosition) const;
+    [[maybe_unused]] void setCircularSourceSelectionWarning(bool showCircularSourceSelectionWarning);
 
-    Rectangle<float> getEffectiveArea() const final;
+    [[nodiscard]] Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
+    [[nodiscard]] Line<float> sourcePositionToComponentPosition(Line<float> const & sourcePosition) const;
+    [[nodiscard]] Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
 
 private:
     //==============================================================================
@@ -169,11 +173,11 @@ private:
     void mouseUp(MouseEvent const & event) final;
     void mouseMove(MouseEvent const & event) final;
     void applySourceSelectionToComponents() final;
-
     void drawBackground(Graphics & g) const final;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionFieldComponent)
-};
+    JUCE_LEAK_DETECTOR(PositionFieldComponent)
+
+}; // class PositionFieldComponent
 
 //==============================================================================
 class ElevationFieldComponent final : public FieldComponent
@@ -183,35 +187,35 @@ class ElevationFieldComponent final : public FieldComponent
     static constexpr auto LEFT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
     static constexpr auto RIGHT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    bool mCurrentlyDrawing{ false };
     ElevationAutomationManager & mAutomationManager;
-    int mCurrentRecordingPositionX{};
     ElevationDrawingHandle mDrawingHandle{ *this };
-
     OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
+    ElevationFieldComponent() = delete;
     ElevationFieldComponent(Sources & sources, ElevationAutomationManager & mPositionAutomationManager) noexcept;
     ~ElevationFieldComponent() noexcept final = default;
-    //==============================================================================
-    ElevationAutomationManager const & getAutomationManager() const { return mAutomationManager; }
-    ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }
 
+    ElevationFieldComponent(ElevationFieldComponent const &) = delete;
+    ElevationFieldComponent(ElevationFieldComponent &&) = delete;
+
+    ElevationFieldComponent & operator=(ElevationFieldComponent const &) = delete;
+    ElevationFieldComponent & operator=(ElevationFieldComponent &&) = delete;
+    //==============================================================================
+    [[nodiscard]] ElevationAutomationManager const & getAutomationManager() const { return mAutomationManager; }
+    ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }
+    [[nodiscard]] Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
+    [[nodiscard]] Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
+    //==============================================================================
     void paint(Graphics & g) final;
     void resized() final;
-
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
-
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
     void rebuildSourceComponents(int numberOfSources) final;
-
-    Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
-    Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
-
-    Rectangle<float> getEffectiveArea() const final;
+    [[nodiscard]] Rectangle<float> getEffectiveArea() const final;
 
 private:
     //==============================================================================
@@ -219,5 +223,6 @@ private:
     void drawBackground(Graphics & g) const final;
     void applySourceSelectionToComponents() final;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationFieldComponent)
-};
+    JUCE_LEAK_DETECTOR(ElevationFieldComponent)
+
+}; // class ElevationFieldComponent

@@ -47,12 +47,8 @@ class ControlGrisAudioProcessorEditor final
     , public InterfaceBoxComponent::Listener
     , public PositionPresetComponent::Listener
 {
-private:
-    //==============================================================================
     ControlGrisAudioProcessor & mProcessor;
-
     GrisLookAndFeel mGrisLookAndFeel;
-
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
     PositionAutomationManager & mPositionAutomationManager;
@@ -68,7 +64,6 @@ private:
     ElevationFieldComponent mElevationField;
 
     ParametersBoxComponent mParametersBox;
-
     TrajectoryBoxComponent mTrajectoryBox;
 
     TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
@@ -87,6 +82,7 @@ private:
 
 public:
     //==============================================================================
+    ControlGrisAudioProcessorEditor() = delete;
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     AudioProcessorValueTreeState & vts,
                                     PositionAutomationManager & positionAutomationManager,
@@ -151,7 +147,7 @@ public:
     void oscInputConnectionChanged(bool state, int oscPort) final;
     void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) final;
 
-    void setPluginState();
+    void reloadUiState();
     void updateSpanLinkButton(bool state);
     void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);

@@ -23,13 +23,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-template<typename Float>
-constexpr Float getFloatPrecision(Float const value, size_t const precision)
-{
-    static_assert(std::is_floating_point_v<Float>);
-    return std::floor((value * std::pow(10, precision) + static_cast<Float>(0.5))) / std::pow(10, precision);
-}
-
 //==============================================================================
 class XmlElementDataSorter
 {
@@ -40,12 +33,20 @@ private:
 
 public:
     //==============================================================================
+    XmlElementDataSorter() = delete;
+    ~XmlElementDataSorter() noexcept = default;
+
+    XmlElementDataSorter(XmlElementDataSorter const &) = delete;
+    XmlElementDataSorter(XmlElementDataSorter &&) = delete;
+
+    XmlElementDataSorter & operator=(XmlElementDataSorter const &) = delete;
+    XmlElementDataSorter & operator=(XmlElementDataSorter &&) = delete;
+    //==============================================================================
     XmlElementDataSorter(String const & attributeToSortBy, bool forwards) noexcept
         : mAttributeToSort(attributeToSortBy)
         , mDirection(forwards ? 1 : -1)
     {
     }
-    ~XmlElementDataSorter() noexcept = default;
     //==============================================================================
     int compareElements(XmlElement * first, XmlElement * second) const
     {
@@ -61,5 +62,6 @@ public:
     }
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(XmlElementDataSorter);
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(XmlElementDataSorter);
 };

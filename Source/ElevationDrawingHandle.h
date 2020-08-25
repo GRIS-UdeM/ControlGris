@@ -26,25 +26,31 @@
 
 class ElevationFieldComponent;
 
+//==============================================================================
 class ElevationDrawingHandle final : public SourceComponent
 {
-private:
     ElevationFieldComponent & mFieldComponent;
     Radians mCurrentElevation;
 
 public:
-    ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
-        : SourceComponent(Colour::fromRGB(176, 176, 228), "X")
-        , mFieldComponent(fieldComponent)
-    {
-        setSelected(true);
-    }
-    ~ElevationDrawingHandle() noexcept = default;
+    //==============================================================================
+    ElevationDrawingHandle() = delete;
+    ~ElevationDrawingHandle() noexcept final = default;
 
+    ElevationDrawingHandle(ElevationDrawingHandle const &) = delete;
+    ElevationDrawingHandle(ElevationDrawingHandle &&) = delete;
+
+    ElevationDrawingHandle & operator=(ElevationDrawingHandle const &) = delete;
+    ElevationDrawingHandle & operator=(ElevationDrawingHandle &&) = delete;
+    //==============================================================================
+    explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
+    //==============================================================================
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void updatePositionInParent() final;
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationDrawingHandle);
-};
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(ElevationDrawingHandle);
+
+}; // class ElevationDrawingHandle

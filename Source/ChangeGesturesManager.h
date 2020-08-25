@@ -22,39 +22,65 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+//==============================================================================
 class ChangeGesturesManager
 {
 public:
+    //==============================================================================
     class ScopedLock
     {
-    private:
         friend ChangeGesturesManager;
-
+        //==============================================================================
         ChangeGesturesManager & mManager;
         String mParameterName;
 
     public:
-        ScopedLock(ChangeGesturesManager & manager, String const & parameterName);
+        //==============================================================================
+        ScopedLock() = delete;
         ~ScopedLock();
 
+        ScopedLock(ScopedLock const &) = delete;
+        ScopedLock(ScopedLock && other) noexcept;
+
+        ScopedLock & operator=(ScopedLock const &) = delete;
+        ScopedLock & operator=(ScopedLock &&) = delete;
+        //==============================================================================
+        ScopedLock(ChangeGesturesManager & manager, String const & parameterName);
+
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ScopedLock);
-    };
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(ScopedLock);
+
+    }; // class ScopedLock
 
 private:
+    //==============================================================================
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
     HashMap<String, bool> mGestureStates{};
 
 public:
-    ChangeGesturesManager(AudioProcessorValueTreeState & audioProcessorValueTreeState)
+    //==============================================================================
+    ChangeGesturesManager() = delete;
+    ~ChangeGesturesManager() noexcept = default;
+
+    ChangeGesturesManager(ChangeGesturesManager const &) = delete;
+    ChangeGesturesManager(ChangeGesturesManager &&) = delete;
+
+    ChangeGesturesManager & operator=(ChangeGesturesManager const &) = delete;
+    ChangeGesturesManager & operator=(ChangeGesturesManager &&) = delete;
+    //==============================================================================
+    explicit ChangeGesturesManager(AudioProcessorValueTreeState & audioProcessorValueTreeState)
         : mAudioProcessorValueTreeState(audioProcessorValueTreeState)
     {
     }
-    ~ChangeGesturesManager() noexcept = default;
+    //==============================================================================
 
     void beginGesture(String const & parameterName);
     void endGesture(String const & parameterName);
+    ScopedLock getScopedLock(String const & parameterName);
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ChangeGesturesManager);
-};
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(ChangeGesturesManager);
+
+}; // class ChangeGesturesManager

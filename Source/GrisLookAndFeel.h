@@ -588,7 +588,7 @@ public:
         font.setHeight(depth * 0.60f);
 #else
 
-        mFont.setHeight(depth * 0.35f);
+        font.setHeight(depth * 0.35f);
 #endif
         font.setUnderline(button.hasKeyboardFocus(false));
 

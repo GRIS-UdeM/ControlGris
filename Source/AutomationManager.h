@@ -29,51 +29,31 @@
 class ControlGrisAudioProcessor;
 
 //==============================================================================
-struct PlaybackPosition {
-    optional<float> x{};
-    optional<float> y{};
-
-    void reset()
-    {
-        x.reset();
-        y.reset();
-    }
-
-    bool operator!=(Point<float> const & point) const
-    {
-        if (!isValid()) {
-            return true;
-        }
-        return x.value() != point.getX() || y.value() != point.getY();
-    }
-
-    bool isValid() const { return x.has_value() && y.has_value(); }
-
-    PlaybackPosition & operator=(Point<float> const & point)
-    {
-        x = point.getX();
-        y = point.getY();
-        return *this;
-    }
-
-    Point<float> value() const { return Point<float>{ x.value(), y.value() }; }
-};
-
 class AutomationManager
 {
 public:
+    //==============================================================================
     class Listener
     {
     public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
 
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = delete;
+
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = delete;
+        //==============================================================================
         virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation)
             = 0;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(Listener);
-    };
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener);
+
+    }; // class AutomationManager::Listener
+
     //==============================================================================
     enum class Direction { forward, backward };
 
@@ -82,8 +62,6 @@ protected:
     ControlGrisAudioProcessor & mProcessor;
 
     ListenerList<Listener> mListeners;
-
-    float mFieldWidth{ MIN_FIELD_WIDTH };
 
     bool mIsBackAndForth{ false };
     Direction mBackAndForthDirection{ Direction::forward };
@@ -95,9 +73,6 @@ protected:
     bool mActivateState{ false };
     double mPlaybackDuration{ 5.0 };
     double mCurrentPlaybackDuration{ 5.0 };
-    PlaybackPosition mPlaybackPosition{};
-
-    Point<float> mTrajectoryHandlePosition{};
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
@@ -109,70 +84,53 @@ protected:
     Degrees mCurrentDegreeOfDeviation{};
     int mDeviationCycleCount{};
 
-    Source & mPrincipalSource;
+    Source & mPrimarySource;
 
 public:
     //==============================================================================
     AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
     virtual ~AutomationManager() noexcept = default;
+
+    AutomationManager(AutomationManager const &) = delete;
+    AutomationManager(AutomationManager &&) = delete;
+
+    AutomationManager & operator=(AutomationManager const &) = delete;
+    AutomationManager & operator=(AutomationManager &&) = delete;
     //==============================================================================
     ControlGrisAudioProcessor & getProcessor() { return mProcessor; }
 
-    float getFieldWidth() const { return mFieldWidth; }
-    void setFieldWidth(float newFieldWidth);
-
     void setPositionActivateState(bool state);
-    bool getPositionActivateState() const { return mActivateState; }
+    [[nodiscard]] bool getPositionActivateState() const { return mActivateState; }
 
     void setPlaybackDuration(double value) { mPlaybackDuration = value; }
-    double getPlaybackDuration() const { return mPlaybackDuration; }
-
-    void setPlaybackPosition(Point<float> const & value) { mPlaybackPosition = value; }
-    void setPlaybackPositionX(float const value);
-    void setPlaybackPositionY(float const value);
-    PlaybackPosition const & getPlaybackPosition() const { return mPlaybackPosition; }
-    PlaybackPosition & getPlaybackPosition() { return mPlaybackPosition; }
-    void resetPlaybackPosition() { mPlaybackPosition.reset(); }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
-    virtual void recomputeTrajectory() = 0;
     void addRecordingPoint(Point<float> const & pos);
-    int getRecordingTrajectorySize() const;
-    Point<float> getFirstRecordingPoint() const;
-    Point<float> getLastRecordingPoint() const;
-    Point<float> getCurrentTrajectoryPoint() const;
+    [[nodiscard]] Point<float> getCurrentTrajectoryPoint() const;
+
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
-    void compressTrajectoryXValues(int maxValue);
-
-    Point<float> const & getTrajectoryHandlePosition() const { return mTrajectoryHandlePosition; }
-
-    optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
+    [[nodiscard]] optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
+
     void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }
-
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
-
-    void setPrincipalSourceAndPlaybackPosition(Point<float> const & pos);
-
+    void setPrimarySourcePosition(Point<float> const & pos);
     void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
-
+    //==============================================================================
     virtual void sendTrajectoryPositionChangedEvent() = 0;
+    virtual void recomputeTrajectory() = 0;
     virtual void applyCurrentTrajectoryPointToPrimarySource() = 0;
 
 private:
     //==============================================================================
-    void invertBackAndForthDirection()
-    {
-        mBackAndForthDirection
-            = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
-    }
+    void invertBackAndForthDirection();
     void computeCurrentTrajectoryPoint();
-    Point<float> smoothRecordingPosition(Point<float> const & pos);
+    [[nodiscard]] Point<float> smoothRecordingPosition(Point<float> const & pos);
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(AutomationManager);
-};
+    JUCE_LEAK_DETECTOR(AutomationManager);
+
+}; // AutomationManager
 
 //==============================================================================
 class PositionAutomationManager final : public AutomationManager
@@ -182,28 +140,35 @@ class PositionAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
+    PositionAutomationManager() = delete;
+    ~PositionAutomationManager() noexcept final = default;
+
+    PositionAutomationManager(PositionAutomationManager const &) = delete;
+    PositionAutomationManager(PositionAutomationManager &&) = delete;
+
+    PositionAutomationManager & operator=(PositionAutomationManager const &) = delete;
+    PositionAutomationManager & operator=(PositionAutomationManager &&) = delete;
+    //==============================================================================
     PositionAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
         : AutomationManager(processor, principalSource)
     {
     }
-    ~PositionAutomationManager() noexcept final = default;
     //==============================================================================
-    void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startpos);
-    PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+    [[nodiscard]] PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
+    void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startPos);
 
     void setSourceLink(PositionSourceLink const sourceLink) { mSourceLink = sourceLink; }
-    PositionSourceLink getSourceLink() const { return mSourceLink; }
-
+    [[nodiscard]] PositionSourceLink getSourceLink() const { return mSourceLink; }
+    //==============================================================================
     void applyCurrentTrajectoryPointToPrimarySource() final;
-
     void sendTrajectoryPositionChangedEvent() final;
-
     void recomputeTrajectory() final;
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionAutomationManager);
-};
+    JUCE_LEAK_DETECTOR(PositionAutomationManager);
+
+}; // PositionAutomationManager
 
 //==============================================================================
 class ElevationAutomationManager final : public AutomationManager
@@ -213,18 +178,25 @@ class ElevationAutomationManager final : public AutomationManager
 
 public:
     //==============================================================================
+    ElevationAutomationManager() = delete;
+    ~ElevationAutomationManager() noexcept final = default;
+
+    ElevationAutomationManager(ElevationAutomationManager const &) = delete;
+    ElevationAutomationManager(ElevationAutomationManager &&) = delete;
+
+    ElevationAutomationManager & operator=(ElevationAutomationManager const &) = delete;
+    ElevationAutomationManager & operator=(ElevationAutomationManager &&) = delete;
+    //==============================================================================
     ElevationAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
         : AutomationManager(processor, principalSource)
     {
     }
-    ~ElevationAutomationManager() noexcept final = default;
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
-    ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
-    void setPrincipalSourceAndPlaybackElevation(Radians elevation);
+    [[nodiscard]] ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
     void setSourceLink(ElevationSourceLink sourceLink) { mSourceLink = sourceLink; }
-    ElevationSourceLink getSourceLink() const { return mSourceLink; }
+    [[nodiscard]] ElevationSourceLink getSourceLink() const { return mSourceLink; }
 
     void sendTrajectoryPositionChangedEvent() final;
     void applyCurrentTrajectoryPointToPrimarySource() final;
@@ -232,5 +204,6 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationAutomationManager);
-};
+    JUCE_LEAK_DETECTOR(ElevationAutomationManager);
+
+}; // ElevationAutomationManager

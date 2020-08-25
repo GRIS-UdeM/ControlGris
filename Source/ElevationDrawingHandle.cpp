@@ -64,3 +64,11 @@ void ElevationDrawingHandle::updatePositionInParent()
     };
     setCentrePosition(newSourcePosition);
 }
+
+//==============================================================================
+ElevationDrawingHandle::ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
+    : SourceComponent(Colour::fromRGB(176, 176, 228), "X")
+    , mFieldComponent(fieldComponent)
+{
+    setSelected(true);
+}

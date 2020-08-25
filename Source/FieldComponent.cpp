@@ -104,7 +104,7 @@ void PositionFieldComponent::applySourceSelectionToComponents()
 {
     if (mSelectedSource.has_value()) {
         for (auto component : mSourceComponents) {
-            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            bool const selected{ *mSelectedSource == component->getSourceIndex() };
             component->setSelected(selected);
         }
     } else {
@@ -120,7 +120,7 @@ void ElevationFieldComponent::applySourceSelectionToComponents()
     // TODO: this is a dupe of PositionFieldComponent::applySourceSelectionToComponents()
     if (mSelectedSource.has_value()) {
         for (auto component : mSourceComponents) {
-            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            bool const selected{ mSelectedSource == component->getSourceIndex() };
             component->setSelected(selected);
         }
     } else {
@@ -213,14 +213,6 @@ Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<flo
     auto const effectiveArea{ getEffectiveArea() };
     auto const normalizedPosition{ (componentPosition - effectiveArea.getPosition()) / effectiveArea.getWidth() };
     auto const result{ normalizedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-    return result;
-}
-
-//==============================================================================
-Line<float> PositionFieldComponent::componentPositionToSourcePosition(Line<float> const & componentPosition) const
-{
-    Line<float> const result{ componentPositionToSourcePosition(componentPosition.getStart()),
-                              componentPositionToSourcePosition(componentPosition.getEnd()) };
     return result;
 }
 

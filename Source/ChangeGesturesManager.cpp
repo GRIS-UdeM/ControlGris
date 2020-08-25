@@ -31,12 +31,23 @@ ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager & manager, S
 //==============================================================================
 ChangeGesturesManager::ScopedLock::~ScopedLock()
 {
-    mManager.endGesture(mParameterName);
+    if (!mParameterName.isEmpty()) { // might have been moved
+        mManager.endGesture(mParameterName);
+    }
+}
+
+//==============================================================================
+ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager::ScopedLock && other) noexcept
+    : mManager(other.mManager)
+    , mParameterName(std::move(other.mParameterName))
+{
+    other.mParameterName.clear();
 }
 
 //==============================================================================
 void ChangeGesturesManager::beginGesture(String const & parameterName)
 {
+    //    MessageManagerLock mml{}; // this hangs the system. Why?
     bool shouldBeginGesture{ false };
 
     if (!mGestureStates.contains(parameterName)) {
@@ -57,6 +68,7 @@ void ChangeGesturesManager::beginGesture(String const & parameterName)
 //==============================================================================
 void ChangeGesturesManager::endGesture(String const & parameterName)
 {
+    //    MessageManagerLock mml{};
     bool shouldEndGesture{ false };
 
     if (mGestureStates.contains(parameterName)) {
@@ -72,4 +84,9 @@ void ChangeGesturesManager::endGesture(String const & parameterName)
             mGestureStates.set(parameterName, false);
         }
     }
+}
+
+ChangeGesturesManager::ScopedLock ChangeGesturesManager::getScopedLock(const String & parameterName)
+{
+    return ChangeGesturesManager::ScopedLock{ *this, parameterName };
 }

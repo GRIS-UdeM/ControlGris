@@ -61,7 +61,7 @@ private:
 
 public:
     //==============================================================================
-    InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
+    explicit InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
     //==============================================================================
     void textEditorReturnKeyPressed([[maybe_unused]] TextEditor & editor) final { unfocusAllComponents(); }
@@ -70,15 +70,15 @@ public:
 
     void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(String(id)); }
 
-    void setOscReceiveToggleState(bool const state);
+    void setOscReceiveToggleState(bool state);
     void setOscReceiveInputPort(int port);
 
-    void setOscSendToggleState(bool const state);
+    void setOscSendToggleState(bool state);
     void setOscSendOutputAddress(String const & address);
     void setOscSendOutputPort(int port);
 
     void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
+    [[maybe_unused]] void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

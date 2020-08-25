@@ -117,15 +117,17 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mElevationField.refreshSources();
 
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-    mProcessor.setSelectedSource(mSelectedSource);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
-    mLastUIWidth.referTo(mProcessor.mParameters.state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
+    mLastUIWidth.referTo(
+        mProcessor.mAudioProcessorValueTreeState.state.getChildWithName("uiState").getPropertyAsValue("width",
+                                                                                                      nullptr));
     mLastUIHeight.referTo(
-        mProcessor.mParameters.state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
+        mProcessor.mAudioProcessorValueTreeState.state.getChildWithName("uiState").getPropertyAsValue("height",
+                                                                                                      nullptr));
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize(mLastUIWidth.getValue(), mLastUIHeight.getValue());
@@ -135,7 +137,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Load the last saved state of the plugin.
     //-----------------------------------------
-    setPluginState();
+    reloadUiState();
 }
 
 //==============================================================================
@@ -146,7 +148,7 @@ ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::setPluginState()
+void ControlGrisAudioProcessorEditor::reloadUiState()
 {
     mIsInsideSetPluginState = true;
 
@@ -199,14 +201,13 @@ void ControlGrisAudioProcessorEditor::setPluginState()
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mProcessor.setSelectedSource(mSelectedSource);
     mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
 
     auto const preset{ static_cast<int>(static_cast<float>(
-        mAudioProcessorValueTreeState.getParameterAsValue(ParameterNames::positionPreset).getValue())) };
-    mPositionPresetBox.setPreset(preset, true);
+        mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::positionPreset).getValue())) };
+    mPositionPresetBox.setPreset(preset, false);
 
     mIsInsideSetPluginState = false;
 }
@@ -220,9 +221,16 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
-    MessageManagerLock mmLock{}; // TODO : code smell?
-    mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
-                                                          NotificationType::dontSendNotification);
+    auto action = [=]() {
+        mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
+                                                              NotificationType::dontSendNotification);
+    };
+    auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
+    if (isMessageThread) {
+        action();
+    } else {
+        MessageManager::callAsync(action);
+    }
 }
 
 //==============================================================================
@@ -274,22 +282,20 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state)
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int numOfSources)
+void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int const numOfSources)
 {
-    bool initSourcePlacement = false;
     if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
-        if (mProcessor.getSources().size() != numOfSources) {
-            initSourcePlacement = true;
-        }
-        if (numOfSources != 2
-            && (mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricX
-                || mPositionAutomationManager.getSourceLink() == PositionSourceLink::linkSymmetricY)) {
+        auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
+        auto const currentPositionSourceLink{ mPositionAutomationManager.getSourceLink() };
+        auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::linkSymmetricX
+                                                         || currentPositionSourceLink
+                                                                == PositionSourceLink::linkSymmetricY };
+        if (numOfSources != 2 && isCurrentPositionSourceLinkSymmetric) {
             mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
             updateSourceLinkCombo(PositionSourceLink::independent);
         }
         mSelectedSource = {};
         mProcessor.setNumberOfSources(numOfSources);
-        mProcessor.setSelectedSource(mSelectedSource);
         mSettingsBox.setNumberOfSources(numOfSources);
         mTrajectoryBox.setNumberOfSources(numOfSources);
         mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
@@ -327,7 +333,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mProcessor.setSelectedSource(mSelectedSource);
     mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
@@ -439,7 +444,6 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
     case SourcePlacement::undefined:
         jassertfalse;
     }
-    //    mProcessor.enforceSourceLinks();
 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
@@ -498,7 +502,6 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
     mParametersBox.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mProcessor.setSelectedSource(mSelectedSource);
     mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
@@ -507,40 +510,46 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
 {
-    mProcessor.beginChangeGesture(ParameterNames::azimuthSpan);
+    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::azimuthSpan);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
 {
-    mProcessor.endChangeGesture(ParameterNames::azimuthSpan);
+    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::azimuthSpan);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
 {
-    mProcessor.beginChangeGesture(ParameterNames::elevationSpan);
+    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::elevationSpan);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 {
-    mProcessor.endChangeGesture(ParameterNames::elevationSpan);
+    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::elevationSpan);
 }
 
 //==============================================================================
 // TrajectoryBoxComponent::Listener callbacks.
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink newSourceLink)
 {
-    mProcessor.setPositionSourceLink(value);
-    mPositionField.repaint();
+    auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
+    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionSourceLink) };
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionSourceLink) };
+    parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink newSourceLink)
 {
-    mProcessor.setElevationSourceLink(value);
-    mElevationField.repaint();
+    auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
+    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSourceLink) };
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::elevationSourceLink) };
+    parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================
@@ -659,7 +668,6 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
     mParametersBox.setSelectedSource(&mProcessor.getSources()[sourceIndex]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mProcessor.setSelectedSource(mSelectedSource);
     mSourceBox.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
@@ -667,12 +675,17 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 
 //==============================================================================
 // PositionPresetComponent::Listener callback.
-void ControlGrisAudioProcessorEditor::positionPresetChanged(int presetNumber)
+void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumber)
 {
+    //    MessageManagerLock mml{};
+
     mProcessor.getPresetsManager().forceLoad(presetNumber);
-    mPositionAutomationManager.recomputeTrajectory();
-    mElevationAutomationManager.recomputeTrajectory();
-    mProcessor.positionPresetComponentClicked(presetNumber);
+
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionPreset) };
+    auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
+
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionPreset) };
+    parameter->setValueNotifyingHost(newValue);
 }
 
 //==============================================================================
@@ -727,10 +740,6 @@ void ControlGrisAudioProcessorEditor::resized()
     auto const height{ getHeight() };
 
     auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
-    auto const fieldSize_f{ static_cast<float>(fieldSize) };
-
-    mPositionAutomationManager.setFieldWidth(fieldSize_f);
-    mElevationAutomationManager.setFieldWidth(fieldSize_f);
 
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);

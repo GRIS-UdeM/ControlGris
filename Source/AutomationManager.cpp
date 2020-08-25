@@ -25,14 +25,8 @@
 //==============================================================================
 AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
     : mProcessor(processor)
-    , mPrincipalSource(principalSource)
+    , mPrimarySource(principalSource)
 {
-}
-
-//==============================================================================
-void AutomationManager::setFieldWidth(float const newFieldWidth)
-{
-    mFieldWidth = newFieldWidth;
 }
 
 //==============================================================================
@@ -48,21 +42,7 @@ void AutomationManager::setPositionActivateState(bool const newState)
         mCurrentPlaybackDuration = mPlaybackDuration;
         mCurrentDegreeOfDeviation = Degrees{ 0.0f };
         mDeviationCycleCount = 0;
-    } else {
-        mPlaybackPosition.reset();
     }
-}
-
-//==============================================================================
-void AutomationManager::setPlaybackPositionX(float const value)
-{
-    mPlaybackPosition.x = value;
-}
-
-//==============================================================================
-void AutomationManager::setPlaybackPositionY(float const value)
-{
-    mPlaybackPosition.y = value;
 }
 
 //==============================================================================
@@ -72,11 +52,9 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
             && currentPosition.getY() <= 1.0f);
     jassert(mTrajectory.has_value());
 
-    mPlaybackPosition.reset();
     mTrajectory->clear();
     mTrajectory->addPoint(currentPosition);
     mLastRecordingPoint = currentPosition;
-    mTrajectoryHandlePosition = currentPosition;
 }
 
 //==============================================================================
@@ -101,7 +79,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 void AutomationManager::computeCurrentTrajectoryPoint()
 {
     if (!mTrajectory.has_value()) {
-        mCurrentTrajectoryPoint = mPrincipalSource.getPos();
+        mCurrentTrajectoryPoint = mPrimarySource.getPos();
         return;
     }
 
@@ -189,75 +167,53 @@ void AutomationManager::computeCurrentTrajectoryPoint()
 }
 
 //==============================================================================
-int AutomationManager::getRecordingTrajectorySize() const
-{
-    jassert(mTrajectory.has_value());
-    return mTrajectory->size();
-}
-
-//==============================================================================
-Point<float> AutomationManager::getFirstRecordingPoint() const
-{
-    jassert(mTrajectory.has_value());
-    return mTrajectory->getStartPosition();
-}
-
-//==============================================================================
-Point<float> AutomationManager::getLastRecordingPoint() const
-{
-    jassert(mTrajectory.has_value());
-    return mTrajectory->getEndPosition();
-}
-
-//==============================================================================
 Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
     } else {
-        return mPrincipalSource.getPos();
+        return mPrimarySource.getPos();
     }
 }
 
 //==============================================================================
-void AutomationManager::setPrincipalSourceAndPlaybackPosition(Point<float> const & pos)
+void AutomationManager::setPrimarySourcePosition(Point<float> const & pos)
 {
-    mPrincipalSource.setPos(pos, SourceLinkNotification::notify);
-    setPlaybackPosition(pos);
+    mPrimarySource.setPos(pos, SourceLinkNotification::notify);
 }
 
 //==============================================================================
 void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
-        l.trajectoryPositionChanged(this, mPrincipalSource.getPos(), mPrincipalSource.getElevation());
+        l.trajectoryPositionChanged(this, mPrimarySource.getPos(), mPrimarySource.getElevation());
     });
 }
 
 //==============================================================================
 void PositionAutomationManager::recomputeTrajectory()
 {
-    this->setTrajectoryType(mTrajectoryType, mPrincipalSource.getPos());
+    this->setTrajectoryType(mTrajectoryType, mPrimarySource.getPos());
 }
 
 //==============================================================================
 void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
-        l.trajectoryPositionChanged(this, mPrincipalSource.getPos(), mPrincipalSource.getElevation());
+        l.trajectoryPositionChanged(this, mPrimarySource.getPos(), mPrimarySource.getElevation());
     });
 }
 
 //==============================================================================
-void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPosition)
+void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
 {
     mTrajectoryType = type;
     if (type == PositionTrajectoryType::realtime) {
         mTrajectory.reset();
     } else {
-        mTrajectory = Trajectory{ type, startPosition };
+        mTrajectory = Trajectory{ type, startPos };
     }
-    mPrincipalSource.setPos(startPosition, SourceLinkNotification::notify);
+    mPrimarySource.setPos(startPos, SourceLinkNotification::notify);
 }
 
 //==============================================================================
@@ -265,6 +221,12 @@ void AutomationManager::addRecordingPoint(Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));
+}
+
+//==============================================================================
+void AutomationManager::invertBackAndForthDirection()
+{
+    mBackAndForthDirection = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
 }
 
 //==============================================================================
@@ -283,7 +245,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
-        mPrincipalSource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
+        mPrimarySource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -293,7 +255,7 @@ void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
         auto const currentElevation{ MAX_ELEVATION * (mCurrentTrajectoryPoint.getY() + 1.0f) / 2.0f };
-        mPrincipalSource.setElevation(currentElevation, SourceLinkNotification::notify);
+        mPrimarySource.setElevation(currentElevation, SourceLinkNotification::notify);
         sendTrajectoryPositionChangedEvent();
     }
 }

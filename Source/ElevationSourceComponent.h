@@ -30,30 +30,41 @@ class ElevationFieldComponent;
 class ElevationAutomationManager;
 class Source;
 
+//==============================================================================
 class ElevationSourceComponent final
     : public SourceComponent
     , public juce::ChangeListener
 {
-private:
     ElevationFieldComponent & mFieldComponent;
     ElevationAutomationManager & mAutomationManager;
     Source & mSource;
 
 public:
-    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
+    //==============================================================================
+    ElevationSourceComponent() = delete;
     ~ElevationSourceComponent() noexcept final;
+
+    ElevationSourceComponent(ElevationSourceComponent const &) = delete;
+    ElevationSourceComponent(ElevationSourceComponent &&) = delete;
+
+    ElevationSourceComponent & operator=(ElevationSourceComponent const &) = delete;
+    ElevationSourceComponent & operator=(ElevationSourceComponent &&) = delete;
+    //==============================================================================
+    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
+    //==============================================================================
+    [[nodiscard]] SourceIndex getSourceIndex() const;
 
     void mouseDown(MouseEvent const & event) final;
     void mouseDrag(MouseEvent const & event) final;
     void mouseUp(MouseEvent const & event) final;
-
-    SourceIndex getSourceIndex() const;
     void updatePositionInParent() final;
 
 private:
+    //==============================================================================
     void setSourcePosition(MouseEvent const & event);
-
+    //==============================================================================
     void changeListenerCallback(ChangeBroadcaster * source) final;
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(ElevationSourceComponent);
 
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ElevationSourceComponent);
-};
+}; // Class ElevationSourceComponent
