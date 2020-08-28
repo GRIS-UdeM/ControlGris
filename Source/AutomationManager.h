@@ -22,7 +22,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"
-#include "DumbOptional.h"
 #include "Source.h"
 #include "Trajectory.h"
 
@@ -76,7 +75,7 @@ protected:
 
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
-    optional<Trajectory> mTrajectory{};
+    std::optional<Trajectory> mTrajectory{};
     Point<float> mCurrentTrajectoryPoint{};
     Point<float> mLastRecordingPoint{};
 
@@ -109,7 +108,7 @@ public:
     [[nodiscard]] Point<float> getCurrentTrajectoryPoint() const;
 
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
-    [[nodiscard]] optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
+    [[nodiscard]] std::optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
 

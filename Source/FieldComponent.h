@@ -25,7 +25,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "AutomationManager.h"
-#include "DumbOptional.h"
 #include "ElevationDrawingHandle.h"
 #include "ElevationSourceComponent.h"
 #include "GrisLookAndFeel.h"
@@ -82,8 +81,8 @@ protected:
     //==============================================================================
     Sources & mSources;
     bool mIsPlaying{ false };
-    optional<SourceIndex> mSelectedSource{};
-    optional<SourceIndex> mOldSelectedSource{};
+    std::optional<SourceIndex> mSelectedSource{};
+    std::optional<SourceIndex> mOldSelectedSource{};
 
 public:
     //==============================================================================
@@ -98,7 +97,7 @@ public:
     FieldComponent & operator=(FieldComponent &&) = delete;
     //==============================================================================
     void refreshSources();
-    void setSelectedSource(optional<SourceIndex> selectedSource);
+    void setSelectedSource(std::optional<SourceIndex> selectedSource);
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
     void addListener(Listener * l) { mListeners.add(l); }
@@ -129,8 +128,8 @@ class PositionFieldComponent final : public FieldComponent
     PositionAutomationManager & mAutomationManager;
     SpatMode mSpatMode{ SpatMode::dome };
     bool mShowCircularSourceSelectionWarning{ false };
-    optional<Point<float>> mLineDrawingStartPosition{ nullopt };
-    optional<Point<float>> mLineDrawingEndPosition{ nullopt };
+    std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
+    std::optional<Point<float>> mLineDrawingEndPosition{ std::nullopt };
     SourceComponent mDrawingHandleComponent{ Colour::fromRGB(176, 176, 228), "X" };
     OwnedArray<PositionSourceComponent> mSourceComponents{};
 

@@ -176,7 +176,7 @@ bool PresetsManager::contains(int const presetNumber) const
 }
 
 //==============================================================================
-optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
+std::optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
 {
     forEachXmlChildElement(mData, element)
     {
@@ -185,7 +185,7 @@ optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) con
         }
     }
 
-    return nullopt;
+    return std::nullopt;
 }
 
 //==============================================================================

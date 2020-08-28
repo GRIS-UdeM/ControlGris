@@ -38,7 +38,7 @@ FieldComponent::~FieldComponent() noexcept
 }
 
 //==============================================================================
-void FieldComponent::setSelectedSource(optional<SourceIndex> const selectedSource)
+void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
 {
     mOldSelectedSource = mSelectedSource;
     mSelectedSource = selectedSource;
@@ -428,7 +428,7 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
 //==============================================================================
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
-    setSelectedSource(nullopt);
+    setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition().toFloat() };
@@ -616,7 +616,7 @@ void ElevationFieldComponent::mouseDown([[maybe_unused]] MouseEvent const & even
 {
     mSelectedSource.reset();
     mOldSelectedSource.reset();
-    setSelectedSource(nullopt);
+    setSelectedSource(std::nullopt);
 
     repaint();
 }

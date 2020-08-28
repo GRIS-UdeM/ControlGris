@@ -18,7 +18,6 @@
               file="Source/ControlGrisConstants.h"/>
         <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
               file="Source/ControlGrisUtilities.h"/>
-        <FILE id="bQd5Qh" name="DumbOptional.h" compile="0" resource="0" file="Source/DumbOptional.h"/>
         <FILE id="qFdGxF" name="StrongTypes.h" compile="0" resource="0" file="Source/StrongTypes.h"/>
       </GROUP>
       <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">
