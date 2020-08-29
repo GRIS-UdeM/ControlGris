@@ -22,8 +22,6 @@
 
 #include "StrongTypes.h"
 
-class Azimuth;
-
 class Normalized
 {
 private:

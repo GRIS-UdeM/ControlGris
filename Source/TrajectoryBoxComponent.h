@@ -50,6 +50,8 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+
     ListenerList<Listener> mListeners;
 
     SpatMode mSpatMode;
@@ -85,8 +87,8 @@ public:
     ComboBox mPositionSourceLinkCombo;
     ComboBox mElevationSourceLinkCombo;
     //==============================================================================
-    TrajectoryBoxComponent();
-    ~TrajectoryBoxComponent() final;
+    explicit TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel);
+    ~TrajectoryBoxComponent() final = default;
     //==============================================================================
     void paint(Graphics &) final;
     void resized() final;

@@ -26,16 +26,22 @@
 // UI sections of the plugin.
 class BannerComponent final : public Label
 {
-private:
     static Colour const backgroundColour;
     static Colour const outlineColour;
     static Colour const textColour;
 
 public:
+    //==============================================================================
     BannerComponent() noexcept;
-    ~BannerComponent() noexcept final = default;
+    ~BannerComponent() final = default;
+
+    BannerComponent(BannerComponent const &) = delete;
+    BannerComponent(BannerComponent &&) = delete;
+
+    BannerComponent & operator=(BannerComponent const &) = delete;
+    BannerComponent & operator=(BannerComponent &&) = delete;
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BannerComponent)
+    JUCE_LEAK_DETECTOR(BannerComponent)
 };

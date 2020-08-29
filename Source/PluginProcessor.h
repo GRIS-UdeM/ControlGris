@@ -41,11 +41,10 @@ class ControlGrisAudioProcessor final
 private:
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
-    bool mOscConnected{ true };
+    bool mOscConnected{ false };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
-    SourceIndex mSelectedSource{};
     int mCurrentOSCPort{ 18032 };
     int mLastConnectedOSCPort{ -1 };
     int mCurrentOSCInputPort{ 8000 };
@@ -73,10 +72,10 @@ private:
     SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
 
 public:
-    AudioProcessorValueTreeState mParameters;
+    AudioProcessorValueTreeState mAudioProcessorValueTreeState;
 
 private:
-    ChangeGesturesManager mChangeGesturesManager{ mParameters };
+    ChangeGesturesManager mChangeGesturesManager{ mAudioProcessorValueTreeState };
     PresetsManager mPresetManager{ mFixPositionData,
                                    mSources,
                                    mPositionSourceLinkEnforcer,
@@ -139,8 +138,6 @@ public:
     void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
     auto getFirstSourceId() const { return mFirstSourceId; }
 
-    void setSelectedSource(SourceIndex index) { mSelectedSource = index; }
-
     void setNumberOfSources(int numOfSources, bool propagate = true);
 
     auto & getSources() { return mSources; }
@@ -182,8 +179,7 @@ public:
     bool isPlaying() const { return mIsPlaying; }
     double getBPM() const { return mBpm; }
 
-    void beginChangeGesture(String const & parameterName);
-    void endChangeGesture(String const & parameterName);
+    ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
     void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation) final;
 
@@ -192,8 +188,6 @@ public:
 
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
-
-    void positionPresetComponentClicked(int presetNumber);
 
 private:
     //==============================================================================

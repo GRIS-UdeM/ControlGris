@@ -20,11 +20,42 @@
 
 #include "ControlGrisConstants.h"
 
-String const ParameterNames::x{ "recordingTrajectory_x" };
-String const ParameterNames::y{ "recordingTrajectory_y" };
-String const ParameterNames::z{ "recordingTrajectory_z" };
-String const ParameterNames::positionSourceLink{ "sourceLink" };
-String const ParameterNames::elevationSourceLink{ "sourceLinkAlt" };
-String const ParameterNames::azimuthSpan{ "azimuthSpan" };
-String const ParameterNames::elevationSpan{ "elevationSpan" };
-String const ParameterNames::positionPreset{ "positionPreset" };
+String const Automation::Ids::x{ "recordingTrajectory_x" };
+String const Automation::Ids::y{ "recordingTrajectory_y" };
+String const Automation::Ids::z{ "recordingTrajectory_z" };
+String const Automation::Ids::positionSourceLink{ "sourceLink" };
+String const Automation::Ids::elevationSourceLink{ "sourceLinkAlt" };
+String const Automation::Ids::azimuthSpan{ "azimuthSpan" };
+String const Automation::Ids::elevationSpan{ "elevationSpan" };
+String const Automation::Ids::positionPreset{ "positionPreset" };
+
+Automation::Enum Automation::idToEnum(const String & name)
+{
+    if (name.compare(Ids::x) == 0) {
+        return Enum::x;
+    }
+    if (name.compare(Ids::y) == 0) {
+        return Enum::y;
+    }
+    if (name.compare(Ids::z) == 0) {
+        return Enum::z;
+    }
+    if (name.compare(Ids::positionSourceLink) == 0) {
+        return Enum::positionSourceLink;
+    }
+    if (name.compare(Ids::elevationSourceLink) == 0) {
+        return Enum::elevationSourceLink;
+    }
+    if (name.compare(Ids::azimuthSpan) == 0) {
+        return Enum::azimuthSpan;
+    }
+    if (name.compare(Ids::elevationSpan) == 0) {
+        return Enum::elevationSpan;
+    }
+    if (name.compare(Ids::positionPreset) == 0) {
+        return Enum::positionPreset;
+    }
+
+    jassertfalse;
+    return {};
+}

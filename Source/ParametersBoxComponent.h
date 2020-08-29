@@ -45,6 +45,8 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+
     ListenerList<Listener> mListeners;
 
     bool mDistanceEnabled{ false };
@@ -59,7 +61,7 @@ private:
 
 public:
     //==============================================================================
-    ParametersBoxComponent();
+    ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~ParametersBoxComponent() final = default;
     //==============================================================================
     void mouseDown(MouseEvent const & event) final;

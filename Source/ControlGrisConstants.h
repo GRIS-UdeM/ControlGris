@@ -124,7 +124,7 @@ StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES{ String("Realtime"),
 //==============================================================================
 // Fix position data headers.
 StringArray const FIXED_POSITION_DATA_HEADERS{
-    // TODO: is this usefull?
+    // TODO: is this useful?
     String("ID"),   String("S1_X"), String("S1_Y"), String("S1_Z"), String("S2_X"), String("S2_Y"), String("S2_Z"),
     String("S3_X"), String("S3_Y"), String("S3_Z"), String("S4_X"), String("S4_Y"), String("S4_Z"), String("S5_X"),
     String("S5_Y"), String("S5_Z"), String("S6_X"), String("S6_Y"), String("S6_Z"), String("S7_X"), String("S7_Y"),
@@ -134,29 +134,22 @@ StringArray const FIXED_POSITION_DATA_HEADERS{
 
 String const FIXED_POSITION_DATA_TAG("Fix_Position_Data");
 
-namespace PluginParameter
+namespace Automation
 {
-enum class Automatable {
+namespace Ids
+{
+String extern const x;
+String extern const y;
+String extern const z;
+String extern const positionSourceLink;
+String extern const elevationSourceLink;
+String extern const azimuthSpan;
+String extern const elevationSpan;
+String extern const positionPreset;
+} // namespace Ids
 
-};
-enum class Global {
+enum class Enum { x, y, z, positionSourceLink, elevationSourceLink, azimuthSpan, elevationSpan, positionPreset };
 
-};
+Enum idToEnum(juce::String const & name);
 
-String const & nameOf(Automatable const id);
-String const & nameOf(Global const id);
-}; // namespace PluginParameter
-
-struct ParameterNames {
-    static String const x;
-    static String const y;
-    static String const z;
-    static String const positionSourceLink;
-    static String const elevationSourceLink;
-    static String const azimuthSpan;
-    static String const elevationSpan;
-    static String const positionPreset;
-
-private:
-    ParameterNames() = default;
-};
+} // namespace Automation

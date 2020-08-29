@@ -38,7 +38,7 @@ FieldComponent::~FieldComponent() noexcept
 }
 
 //==============================================================================
-void FieldComponent::setSelectedSource(optional<SourceIndex> const selectedSource)
+void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selectedSource)
 {
     mOldSelectedSource = mSelectedSource;
     mSelectedSource = selectedSource;
@@ -70,7 +70,7 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
 
     if (lookAndFeel != nullptr) {
         // Draw the background.
-        g.setColour(lookAndFeel->getFieldColour());
+        g.setColour(lookAndFeel->getFieldColor());
         g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
         g.setColour(Colours::black);
         g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
@@ -104,7 +104,7 @@ void PositionFieldComponent::applySourceSelectionToComponents()
 {
     if (mSelectedSource.has_value()) {
         for (auto component : mSourceComponents) {
-            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            bool const selected{ *mSelectedSource == component->getSourceIndex() };
             component->setSelected(selected);
         }
     } else {
@@ -120,7 +120,7 @@ void ElevationFieldComponent::applySourceSelectionToComponents()
     // TODO: this is a dupe of PositionFieldComponent::applySourceSelectionToComponents()
     if (mSelectedSource.has_value()) {
         for (auto component : mSourceComponents) {
-            bool const selected{ mSelectedSource.value() == component->getSourceIndex() };
+            bool const selected{ mSelectedSource == component->getSourceIndex() };
             component->setSelected(selected);
         }
     } else {
@@ -141,7 +141,7 @@ void PositionFieldComponent::drawBackground(Graphics & g) const
 
     drawBackgroundGrid(g);
 
-    g.setColour(lookAndFeel->getLightColour());
+    g.setColour(lookAndFeel->getLightColor());
     if (mSpatMode == SpatMode::dome) {
         // Draw big background circles.
         for (int i{ 1 }; i < 3; ++i) {
@@ -184,7 +184,7 @@ void ElevationFieldComponent::drawBackground(Graphics & g) const
     if (lookAndFeel != nullptr) {
         drawBackgroundGrid(g);
 
-        g.setColour(lookAndFeel->getLightColour());
+        g.setColour(lookAndFeel->getLightColor());
         g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
         g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
     }
@@ -213,14 +213,6 @@ Point<float> PositionFieldComponent::componentPositionToSourcePosition(Point<flo
     auto const effectiveArea{ getEffectiveArea() };
     auto const normalizedPosition{ (componentPosition - effectiveArea.getPosition()) / effectiveArea.getWidth() };
     auto const result{ normalizedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-    return result;
-}
-
-//==============================================================================
-Line<float> PositionFieldComponent::componentPositionToSourcePosition(Line<float> const & componentPosition) const
-{
-    Line<float> const result{ componentPositionToSourcePosition(componentPosition.getStart()),
-                              componentPositionToSourcePosition(componentPosition.getEnd()) };
     return result;
 }
 
@@ -415,6 +407,15 @@ void PositionFieldComponent::paint(Graphics & g)
 }
 
 //==============================================================================
+void PositionFieldComponent::resized()
+{
+    for (auto * sourceComponent : mSourceComponents) {
+        sourceComponent->updatePositionInParent();
+    }
+    mDrawingHandleComponent.updatePositionInParent();
+}
+
+//==============================================================================
 void PositionFieldComponent::drawSpans(Graphics & g) const
 {
     if (mSpatMode == SpatMode::dome) {
@@ -427,7 +428,7 @@ void PositionFieldComponent::drawSpans(Graphics & g) const
 //==============================================================================
 void PositionFieldComponent::mouseDown(MouseEvent const & event)
 {
-    setSelectedSource(nullopt);
+    setSelectedSource(std::nullopt);
 
     if (mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing) {
         auto const mousePosition{ event.getPosition().toFloat() };
@@ -602,11 +603,20 @@ void ElevationFieldComponent::paint(Graphics & g)
 }
 
 //==============================================================================
+void ElevationFieldComponent::resized()
+{
+    for (auto * sourceComponent : mSourceComponents) {
+        sourceComponent->updatePositionInParent();
+    }
+    mDrawingHandle.updatePositionInParent();
+}
+
+//==============================================================================
 void ElevationFieldComponent::mouseDown([[maybe_unused]] MouseEvent const & event)
 {
     mSelectedSource.reset();
     mOldSelectedSource.reset();
-    setSelectedSource(nullopt);
+    setSelectedSource(std::nullopt);
 
     repaint();
 }
@@ -651,6 +661,9 @@ Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(Radians
     auto const clippedElevation{ sourceElevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
     auto const y{ clippedElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     Point<float> const result{ x, y };
+
+    jassert(x > 0 && x < getWidth());
+    jassert(y > 0 && y < getHeight());
 
     return result;
 }

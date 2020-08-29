@@ -25,131 +25,126 @@
 class GrisLookAndFeel final : public LookAndFeel_V3
 {
 private:
-    float fontSize;
+    float mFontSize;
 
-    Font font = Font(juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
-                                                                   (size_t)BinaryData::SinkinSans400Regular_otfSize));
-    Font bigFont
-        = Font(juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
-                                                             (size_t)BinaryData::SinkinSans400Regular_otfSize));
-    Font biggerFont
-        = Font(juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
-                                                             (size_t)BinaryData::SinkinSans400Regular_otfSize));
+    Font mFont = Font(
+        juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
+                                                      static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)));
+    Font mBigFont = Font(
+        juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
+                                                      static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)));
+    Font mBiggerFont = Font(
+        juce::CustomTypeface::createSystemTypefaceFor(BinaryData::SinkinSans400Regular_otf,
+                                                      static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)));
 
-    Colour backGroundAndFieldColour, winBackGroundAndFieldColour;
-    Colour lightColour, darkColour, greyColour, editBgcolor, disableBgcolor, hlBgcolor;
-    Colour onColor, onColorOver, onColorDown, offColor, greenColor, redColor;
+    Colour mBackgroundAndFieldColor;
+    Colour mWinBackgroundAndFieldColor;
+    Colour mLightColor;
+    Colour mDarkColor;
+    Colour mGreyColor;
+    Colour mEditBackgroundColor;
+    Colour mDisableBackgroundColor;
+    Colour mHlBackgroundColor;
+    Colour mOnColor;
+    Colour mOnColorOver;
+    Colour mOnColorDown;
+    Colour mOffColor;
+    Colour mGreenColor;
+    Colour mRedColor;
 
 public:
     //==============================================================================
     GrisLookAndFeel()
     {
-        this->backGroundAndFieldColour = Colour::fromRGB(75, 75, 75); // Colours::darkgrey;
-        this->winBackGroundAndFieldColour = Colour::fromRGB(46, 46, 46);
+        mBackgroundAndFieldColor = Colour::fromRGB(75, 75, 75); // Colours::darkgrey;
+        mWinBackgroundAndFieldColor = Colour::fromRGB(46, 46, 46);
+        mLightColor = Colour::fromRGB(235, 245, 250); // Colours::whitesmoke;
+        mDarkColor = Colour::fromRGB(15, 10, 5);      // Colours::black;
+        mGreyColor = Colour::fromRGB(120, 120, 120);  // Colours::grey;
+        mDisableBackgroundColor = Colour::fromRGB(150, 150, 150);
+        mEditBackgroundColor = Colour::fromRGB(172, 172, 172);
+        mHlBackgroundColor = Colour::fromRGB(190, 125, 18);
+        mOnColor = Colour::fromRGB(255, 165, 25);
+        mOnColorOver = Colour::fromRGB(255, 184, 75);
+        mOnColorDown = Colour::fromRGB(222, 144, 22);
+        mOffColor = Colour::fromRGB(56, 56, 56);
+        mGreenColor = Colour::fromRGB(56, 156, 56);
+        mRedColor = Colour::fromRGB(220, 48, 35);
 
-        this->lightColour = Colour::fromRGB(235, 245, 250); // Colours::whitesmoke;
-        this->darkColour = Colour::fromRGB(15, 10, 5);      // Colours::black;
-        this->greyColour = Colour::fromRGB(120, 120, 120);  // Colours::grey;
-        this->disableBgcolor = Colour::fromRGB(150, 150, 150);
-        this->editBgcolor = Colour::fromRGB(172, 172, 172);
-        this->hlBgcolor = Colour::fromRGB(190, 125, 18);
-
-        this->onColor = Colour::fromRGB(255, 165, 25);
-        this->onColorOver = Colour::fromRGB(255, 184, 75);
-        this->onColorDown = Colour::fromRGB(222, 144, 22);
-        this->offColor = Colour::fromRGB(56, 56, 56);
-
-        this->greenColor = Colour::fromRGB(56, 156, 56);
-        this->redColor = Colour::fromRGB(220, 48, 35);
-
-        setColour(PopupMenu::highlightedBackgroundColourId, this->onColor);
-        setColour(TextEditor::textColourId, this->lightColour);
-        setColour(TextEditor::backgroundColourId, this->editBgcolor);
-        setColour(TextEditor::highlightColourId, this->hlBgcolor);
-        setColour(TextEditor::shadowColourId, this->editBgcolor);
-
-        setColour(TextButton::buttonColourId, this->editBgcolor);
-
-        setColour(ComboBox::backgroundColourId, this->editBgcolor);
-        setColour(ComboBox::outlineColourId, this->editBgcolor);
-
-        setColour(Slider::thumbColourId, this->lightColour);
-        setColour(Slider::rotarySliderFillColourId, this->onColor);
-        setColour(Slider::trackColourId, this->darkColour);
-        setColour(Slider::textBoxBackgroundColourId, this->editBgcolor);
+        setColour(PopupMenu::highlightedBackgroundColourId, this->mOnColor);
+        setColour(TextEditor::textColourId, this->mLightColor);
+        setColour(TextEditor::backgroundColourId, this->mEditBackgroundColor);
+        setColour(TextEditor::highlightColourId, this->mHlBackgroundColor);
+        setColour(TextEditor::shadowColourId, this->mEditBackgroundColor);
+        setColour(TextButton::buttonColourId, this->mEditBackgroundColor);
+        setColour(ComboBox::backgroundColourId, this->mEditBackgroundColor);
+        setColour(ComboBox::outlineColourId, this->mEditBackgroundColor);
+        setColour(Slider::thumbColourId, this->mLightColor);
+        setColour(Slider::rotarySliderFillColourId, this->mOnColor);
+        setColour(Slider::trackColourId, this->mDarkColor);
+        setColour(Slider::textBoxBackgroundColourId, this->mEditBackgroundColor);
         setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-
-        setColour(TooltipWindow::ColourIds::backgroundColourId, this->backGroundAndFieldColour.withBrightness(0.8f));
-        setColour(TooltipWindow::ColourIds::outlineColourId, this->backGroundAndFieldColour.withBrightness(0.8f));
-
-        setColour(AlertWindow::backgroundColourId, this->winBackGroundAndFieldColour);
-        setColour(AlertWindow::outlineColourId, this->onColor);
-        setColour(AlertWindow::textColourId, this->lightColour);
-
-        setColour(ToggleButton::textColourId, this->lightColour);
-        setColour(Label::textColourId, this->lightColour);
+        setColour(TooltipWindow::ColourIds::backgroundColourId, this->mBackgroundAndFieldColor.withBrightness(0.8f));
+        setColour(TooltipWindow::ColourIds::outlineColourId, this->mBackgroundAndFieldColor.withBrightness(0.8f));
+        setColour(AlertWindow::backgroundColourId, this->mWinBackgroundAndFieldColor);
+        setColour(AlertWindow::outlineColourId, this->mOnColor);
+        setColour(AlertWindow::textColourId, this->mLightColor);
+        setColour(ToggleButton::textColourId, this->mLightColor);
+        setColour(Label::textColourId, this->mLightColor);
 
 #if WIN32
-        this->fontSize = 18.0f;
+        mFontSize = 13.0f;
 #else
-        this->fontSize = 10.0f;
+        mFontSize = 10.0f;
 #endif
-        this->font.setHeight(this->fontSize);
-        this->bigFont.setHeight(this->fontSize + 3);
-        this->biggerFont.setHeight(this->fontSize + 6);
+        mFont.setHeight(mFontSize);
+        mBigFont.setHeight(mFontSize + 3.0f);
+        mBiggerFont.setHeight(mFontSize + 6.0f);
     }
 
-    Font getFont() const { return this->font; }
-    Font getLabelFont([[maybe_unused]] Label & label) final { return this->font; }
-    Font getComboBoxFont([[maybe_unused]] ComboBox & comboBox) final { return this->font; }
-    Font getTextButtonFont(TextButton &, [[maybe_unused]] int buttonHeight) final { return this->font; }
+    [[nodiscard]] Font getFont() const { return this->mFont; }
+    Font getLabelFont([[maybe_unused]] Label & label) final { return this->mFont; }
+    Font getComboBoxFont([[maybe_unused]] ComboBox & comboBox) final { return this->mFont; }
+    Font getTextButtonFont(TextButton &, [[maybe_unused]] int buttonHeight) final { return this->mFont; }
     Font getMenuBarFont(MenuBarComponent &,
                         [[maybe_unused]] int itemIndex,
                         [[maybe_unused]] String const & itemText) final
     {
-        return this->font;
+        return this->mFont;
     }
 
-    Colour getWinBackgroundColour() const { return this->winBackGroundAndFieldColour; }
-
-    Colour getBackgroundColour() const { return this->backGroundAndFieldColour; }
-
-    Colour getFieldColour() const { return this->backGroundAndFieldColour; }
-
-    Colour getFontColour() const { return this->lightColour; }
-
-    Colour getScrollBarColour() const { return this->greyColour; }
-
-    Colour getDarkColour() const { return this->darkColour; }
-
-    Colour getLightColour() const { return this->lightColour; }
-
-    Colour getEditBackgroundColour() const { return this->editBgcolor; }
-
-    Colour getHighlightColour() const { return this->hlBgcolor; }
-    Colour getOnColour() const { return this->onColor; }
-    Colour getOffColour() const { return this->offColor; }
-    Colour getGreenColour() const { return this->greenColor; }
-    Colour getRedColour() const { return this->redColor; }
+    [[nodiscard]] Colour getWinBackgroundColor() const { return this->mWinBackgroundAndFieldColor; }
+    [[nodiscard]] Colour getBackgroundColor() const { return this->mBackgroundAndFieldColor; }
+    [[nodiscard]] Colour getFieldColor() const { return this->mBackgroundAndFieldColor; }
+    [[nodiscard]] Colour getFontColor() const { return this->mLightColor; }
+    [[nodiscard]] Colour getScrollBarColor() const { return this->mGreyColor; }
+    [[nodiscard]] Colour getDarkColor() const { return this->mDarkColor; }
+    [[nodiscard]] Colour getLightColor() const { return this->mLightColor; }
+    [[nodiscard]] Colour getEditBackgroundColor() const { return this->mEditBackgroundColor; }
+    [[nodiscard]] Colour getHighlightColor() const { return this->mHlBackgroundColor; }
+    [[nodiscard]] Colour getOnColor() const { return this->mOnColor; }
+    [[nodiscard]] Colour getOffColor() const { return this->mOffColor; }
+    [[nodiscard]] Colour getGreenColor() const { return this->mGreenColor; }
+    [[nodiscard]] Colour getRedColor() const { return this->mRedColor; }
 
     // https://github.com/audioplastic/Juce-look-and-feel-examples/blob/master/JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp
 
     void drawComboBox(Graphics & g,
-                      [[maybe_unused]] int width,
-                      [[maybe_unused]] int height,
-                      [[maybe_unused]] bool isButtonDown,
+                      int /*width*/,
+                      int /*height*/,
+                      const bool /*isMouseButtonDown*/,
                       int buttonX,
                       int buttonY,
                       int buttonW,
                       int buttonH,
                       ComboBox & box) final
     {
-        box.setColour(ColourSelector::backgroundColourId, this->onColor);
+        box.setColour(ColourSelector::backgroundColourId, mOnColor);
 
-        g.fillAll(this->editBgcolor); // box.findColour (ComboBox::backgroundColourId))
+        g.fillAll(this->mEditBackgroundColor); // box.findColour (ComboBox::backgroundColourId))
 
-        float const arrowX = 0.3f;
-        float const arrowH = 0.2f;
+        auto const arrowX{ 0.3f };
+        auto const arrowH{ 0.2f };
 
         Path p;
         p.addTriangle(buttonX + buttonW * 0.5f,
@@ -166,7 +161,7 @@ public:
                       buttonX + buttonW * arrowX,
                       buttonY + buttonH * 0.55f);
 
-        g.setColour(this->darkColour.withMultipliedAlpha(
+        g.setColour(this->mDarkColor.withMultipliedAlpha(
             box.isEnabled() ? 1.0f : 0.3f)); // box.findColour (ComboBox::arrowColourId)
         g.fillPath(p);
     }
@@ -175,34 +170,34 @@ public:
                         float const x,
                         float const y,
                         float const diameter,
-                        const Colour & colour,
-                        float outlineThickness) const
+                        const Colour & color,
+                        float const outlineThickness) const
     {
         const juce::Rectangle<float> a(x, y, diameter, diameter);
-        float const halfThickness = outlineThickness * 0.5f;
+        auto const halfThickness{ outlineThickness * 0.5f };
 
         Path p;
         p.addEllipse(x + halfThickness, y + halfThickness, diameter - outlineThickness, diameter - outlineThickness);
 
-        const DropShadow ds(this->darkColour, 1, Point<int>(0, 0));
+        const DropShadow ds(this->mDarkColor, 1, Point<int>(0, 0));
         ds.drawForPath(g, p);
 
-        g.setColour(colour);
+        g.setColour(color);
         g.fillPath(p);
 
-        g.setColour(colour.brighter());
+        g.setColour(color.brighter());
         g.strokePath(p, PathStrokeType(outlineThickness));
     }
 
     void drawPopupMenuItem(Graphics & g,
                            const Rectangle<int> & area,
-                           bool const isSeparator,
-                           bool const isActive,
-                           bool const isHighlighted,
-                           bool const isTicked,
-                           bool const hasSubMenu,
-                           String const & text,
-                           String const & shortcutKeyText,
+                           const bool isSeparator,
+                           const bool isActive,
+                           const bool isHighlighted,
+                           const bool isTicked,
+                           const bool hasSubMenu,
+                           const String & text,
+                           const String & shortcutKeyText,
                            const Drawable * icon,
                            const Colour * const textColourToUse) final
     {
@@ -216,10 +211,10 @@ public:
             g.setColour(Colour(0x66ffffff));
             g.fillRect(r.removeFromTop(1));
         } else {
-            auto textColour = findColour(PopupMenu::textColourId);
+            auto textColor = findColour(PopupMenu::textColourId);
 
             if (textColourToUse != nullptr)
-                textColour = *textColourToUse;
+                textColor = *textColourToUse;
 
             auto r = area.reduced(1);
 
@@ -229,22 +224,22 @@ public:
 
                 g.setColour(findColour(PopupMenu::highlightedTextColourId));
             } else {
-                g.setColour(textColour);
+                g.setColour(textColor);
             }
 
             if (!isActive)
                 g.setOpacity(0.3f);
 
-            Font font(getPopupMenuFont());
+            auto font{ getPopupMenuFont() };
 
-            auto maxFontHeight = area.getHeight() / 1.3f;
+            auto const maxFontHeight{ area.getHeight() / 1.3f };
 
             if (font.getHeight() > maxFontHeight)
                 font.setHeight(maxFontHeight);
 
             g.setFont(font);
 
-            auto iconArea = r.removeFromLeft((r.getHeight() * 5) / 4).reduced(3).toFloat();
+            auto const iconArea{ r.removeFromLeft((r.getHeight() * 5) / 4).reduced(3).toFloat() };
 
             if (icon != nullptr) {
                 icon->drawWithin(g, iconArea, RectanglePlacement::centred | RectanglePlacement::onlyReduceInSize, 1.0f);
@@ -255,14 +250,13 @@ public:
             }
 
             if (hasSubMenu) {
-                auto arrowH = 0.6f * getPopupMenuFont().getAscent();
+                auto const arrowH{ 0.6f * getPopupMenuFont().getAscent() };
 
-                auto x = (float)r.removeFromRight((int)arrowH).getX();
-                auto halfH = (float)r.getCentreY();
+                auto const x{ static_cast<float>(r.removeFromRight((int)arrowH).getX()) };
+                auto const halfH{ static_cast<float>(r.getCentreY()) };
 
                 Path p;
                 p.addTriangle(x, halfH - arrowH * 0.5f, x, halfH + arrowH * 0.5f, x + arrowH * 0.6f, halfH);
-
                 g.fillPath(p);
             }
 
@@ -270,7 +264,7 @@ public:
             g.drawFittedText(text, r, Justification::centredLeft, 1);
 
             if (shortcutKeyText.isNotEmpty()) {
-                Font f2(font);
+                auto f2{ font };
                 f2.setHeight(f2.getHeight() * 0.75f);
                 f2.setHorizontalScale(0.95f);
                 g.setFont(f2);
@@ -282,126 +276,128 @@ public:
 
     void drawButtonBackground(Graphics & g,
                               Button & button,
-                              [[maybe_unused]] Colour const & backgroundColour,
-                              bool isMouseOverButton,
-                              bool isButtonDown) final
+                              [[maybe_unused]] Colour const & backgroundColor,
+                              bool const isMouseOverButton,
+                              bool const isButtonDown) final
     {
-        float const width = button.getWidth() - 1.0f;
-        float const height = button.getHeight() - 1.0f;
-        float const cornerSize = jmin(15.0f, jmin(width, height) * 0.45f);
-        float const lineThickness = cornerSize * 0.1f;
-        float const halfThickness = lineThickness * 0.5f;
+        auto const width{ button.getWidth() - 1.0f };
+        auto const height{ button.getHeight() - 1.0f };
+        auto const cornerSize{ jmin(15.0f, jmin(width, height) * 0.45f) };
+        auto const lineThickness{ cornerSize * 0.1f };
+        auto const halfThickness{ lineThickness * 0.5f };
+
         Path outline;
-        Colour colour;
+        Colour color;
 
         outline.addRectangle(0.5f + halfThickness, 0.5f + halfThickness, width - lineThickness, height - lineThickness);
 
         if (isButtonDown) {
-            colour = this->onColorDown;
+            color = this->mOnColorDown;
         } else if (button.getToggleState()) {
-            colour = this->onColor;
+            color = this->mOnColor;
         } else {
-            colour = button.findColour(TextButton::buttonColourId);
+            color = button.findColour(TextButton::buttonColourId);
         }
 
         if (isMouseOverButton) {
-            colour = colour.withAlpha(0.8f);
+            color = color.withAlpha(0.8f);
         }
-        g.setColour(colour);
+        g.setColour(color);
         g.fillPath(outline);
     }
 
     void drawTickBox(Graphics & g,
                      Component & component,
-                     float x,
-                     float y,
-                     float w,
-                     float h,
-                     bool ticked,
+                     float const x,
+                     float const y,
+                     float const w,
+                     float const h,
+                     bool const ticked,
                      [[maybe_unused]] bool isEnabled,
                      [[maybe_unused]] bool isMouseOverButton,
                      [[maybe_unused]] bool isButtonDown) final
     {
-        float const boxSize = w * 0.8f;
-        const Rectangle<float> r(x, y + (h - boxSize) * 0.5f, boxSize, boxSize);
+        auto const boxSize{ w * 0.8f };
+        Rectangle<float> const r{ x, y + (h - boxSize) * 0.5f, boxSize, boxSize };
 
         if (ticked) {
-            Colour colour = this->onColor;
+            auto color{ mOnColor };
 
             if (component.isMouseOver()) {
-                colour = this->onColorOver;
+                color = mOnColorOver;
             }
 
             if (!component.isEnabled()) {
-                colour = this->onColor.withBrightness(0.3f);
+                color = mOnColor.withBrightness(0.3f);
             }
-            g.setColour(colour);
+            g.setColour(color);
             g.fillRect(r);
 
         } else {
-            Colour colour = this->offColor;
+            auto color{ mOffColor };
             if (!component.isEnabled()) {
-                colour = this->offColor.withBrightness(0.3f);
+                color = mOffColor.withBrightness(0.3f);
             }
-            g.setColour(colour);
+            g.setColour(color);
             g.fillRect(r);
         }
 
         if (component.isEnabled() && component.isMouseButtonDown()) {
-            g.setColour(this->onColorDown);
+            g.setColour(this->mOnColorDown);
             g.fillRect(r);
         }
     }
 
     void drawLinearSliderThumb(Graphics & g,
-                               int x,
-                               int y,
-                               int width,
-                               int height,
-                               float sliderPos,
+                               int const x,
+                               int const y,
+                               int const width,
+                               int const height,
+                               float const sliderPos,
                                [[maybe_unused]] float minSliderPos,
                                [[maybe_unused]] float maxSliderPos,
-                               const Slider::SliderStyle style,
+                               Slider::SliderStyle const style,
                                Slider & slider) final
     {
-        float const sliderRadius = (float)(getSliderThumbRadius(slider) - 1);
-        float kx, ky;
+        auto const sliderRadius{ static_cast<float>(getSliderThumbRadius(slider) - 1) };
+        float kx;
+        float ky;
 
         if (style == Slider::LinearVertical) {
-            kx = x + width * 0.5f;
+            kx = static_cast<float>(x) + static_cast<float>(width) * 0.5f;
             ky = sliderPos;
         } else {
             kx = sliderPos;
-            ky = y + height * 0.5f;
+            ky = static_cast<float>(y) + static_cast<float>(height) * 0.5f;
         }
-        const Rectangle<float> r(kx - (sliderRadius / 2.0f), ky - sliderRadius, 6, height * 2.0f);
+        const Rectangle<float> r(kx - (sliderRadius / 2.0f), ky - sliderRadius, 6, static_cast<float>(height) * 2.0f);
 
         if (slider.isEnabled()) {
-            Colour colour = this->onColor;
+            auto color{ mOnColor };
 
             if (slider.isMouseOver()) {
-                colour = this->onColorOver;
+                color = mOnColorOver;
             }
             if (slider.isMouseButtonDown()) {
-                colour = this->onColorDown;
+                color = mOnColorDown;
             }
-            g.setColour(colour);
+            g.setColour(color);
             g.fillRect(r);
         } else {
-            g.setColour(this->offColor);
+            g.setColour(mOffColor);
             g.fillRect(r);
         }
     }
 
     void drawLinearSlider(Graphics & g,
-                          int x,
-                          int y,
-                          int width,
-                          int height,
-                          float sliderPos,
-                          float minSliderPos,
-                          float maxSliderPos,
-                          const Slider::SliderStyle style,
+                          int const x,
+                          int const y,
+                          int const width,
+                          int const height,
+                          float const sliderPos,
+                          float const minSliderPos,
+                          float const maxSliderPos,
+                          Slider::SliderStyle const style,
                           Slider & slider) final
     {
         drawLinearSliderBackground(g, x, y, width, height + 2, sliderPos, minSliderPos, maxSliderPos, style, slider);
@@ -409,29 +405,35 @@ public:
     }
 
     void drawLinearSliderBackground(Graphics & g,
-                                    int x,
-                                    int y,
-                                    int width,
-                                    int height,
+                                    int const x,
+                                    int const y,
+                                    int const width,
+                                    int const height,
                                     float /*sliderPos*/,
                                     float /*minSliderPos*/,
                                     float /*maxSliderPos*/,
                                     const Slider::SliderStyle /*style*/,
                                     Slider & slider) final
     {
-        float const sliderRadius = getSliderThumbRadius(slider) - 5.0f;
-        Path on, off;
+        auto const xFloat{ static_cast<float>(x) };
+        auto const yFloat{ static_cast<float>(y) };
+        auto const widthFloat{ static_cast<float>(width) };
+        auto const heightFloat{ static_cast<float>(height) };
+
+        auto const sliderRadius{ getSliderThumbRadius(slider) - 5.0f };
+        Path on;
+        Path off;
 
         if (slider.isHorizontal()) {
-            float const iy = y + height * 0.5f - sliderRadius * 0.5f;
-            juce::Rectangle<float> r(x - sliderRadius * 0.5f, iy, width + sliderRadius, sliderRadius);
-            float const onW = r.getWidth() * ((float)slider.valueToProportionOfLength(slider.getValue()));
+            auto const iy{ yFloat + heightFloat * 0.5f - sliderRadius * 0.5f };
+            juce::Rectangle<float> r{ xFloat - sliderRadius * 0.5f, iy, widthFloat + sliderRadius, sliderRadius };
+            auto const onW{ r.getWidth() * static_cast<float>(slider.valueToProportionOfLength(slider.getValue())) };
             on.addRectangle(r.removeFromLeft(onW));
             off.addRectangle(r);
         } else {
-            float const ix = x + width * 0.5f - sliderRadius * 0.5f;
+            auto const ix{ xFloat + widthFloat * 0.5f - sliderRadius * 0.5f };
             juce::Rectangle<float> r(ix, y - sliderRadius * 0.5f, sliderRadius, height + sliderRadius);
-            float const onH = r.getHeight() * ((float)slider.valueToProportionOfLength(slider.getValue()));
+            auto const onH{ r.getHeight() * static_cast<float>(slider.valueToProportionOfLength(slider.getValue())) };
             on.addRectangle(r.removeFromBottom(onH));
             off.addRectangle(r);
         }
@@ -442,7 +444,7 @@ public:
             g.setColour(slider.findColour(Slider::trackColourId));
             g.fillPath(off);
         } else {
-            g.setColour(this->offColor);
+            g.setColour(mOffColor);
             g.fillPath(on);
             g.fillPath(off);
         }
@@ -454,25 +456,27 @@ public:
                                   TextEditor & t) final
     {
         if (t.isEnabled())
-            g.setColour(this->editBgcolor);
+            g.setColour(this->mEditBackgroundColor);
         else
-            g.setColour(this->disableBgcolor);
+            g.setColour(this->mDisableBackgroundColor);
         g.fillAll();
     }
 
-    void drawTextEditorOutline(Graphics & g, int width, int height, TextEditor & t) final
+    void drawTextEditorOutline(Graphics & g, int const width, int const height, TextEditor & t) final
     {
         if (t.hasKeyboardFocus(true)) {
-            g.setColour(this->onColor);
+            g.setColour(this->mOnColor);
             g.drawRect(0, 0, width, height);
         }
     }
 
-    void drawToggleButton(Graphics & g, ToggleButton & button, bool isMouseOverButton, bool isButtonDown) final
+    void drawToggleButton(Graphics & g,
+                          ToggleButton & button,
+                          bool const isMouseOverButton,
+                          bool const isButtonDown) final
     {
         if (button.hasKeyboardFocus(true)) {
             g.setColour(button.findColour(TextEditor::focusedOutlineColourId));
-            // g.drawRect (0, 0, button.getWidth(), button.getHeight());
         }
 
         if (button.getButtonText().length() == 1) {
@@ -487,7 +491,7 @@ public:
                         isMouseOverButton,
                         isButtonDown);
             g.setColour(button.findColour(ToggleButton::textColourId));
-            g.setFont(this->font);
+            g.setFont(mFont);
 
             if (!button.isEnabled())
                 g.setOpacity(0.5f);
@@ -501,8 +505,8 @@ public:
                              10);
 
         } else {
-            float fontSize = jmin(15.0f, button.getHeight() * 0.75f);
-            float const tickWidth = fontSize * 1.1f;
+            auto const fontSize{ jmin(15.0f, button.getHeight() * 0.75f) };
+            auto const tickWidth{ fontSize * 1.1f };
 
             drawTickBox(g,
                         button,
@@ -516,12 +520,12 @@ public:
                         isButtonDown);
 
             g.setColour(button.findColour(ToggleButton::textColourId));
-            g.setFont(this->font);
+            g.setFont(this->mFont);
 
             if (!button.isEnabled())
                 g.setOpacity(0.5f);
 
-            int const textX = (int)tickWidth + 5;
+            auto const textX{ static_cast<int>(tickWidth + 5) };
 
             g.drawFittedText(button.getButtonText(),
                              textX,
@@ -533,12 +537,12 @@ public:
         }
     }
 
-    void drawTabButton(TabBarButton & button, Graphics & g, bool isMouseOver, bool isMouseDown) final
+    void drawTabButton(TabBarButton & button, Graphics & g, bool const isMouseOver, bool const isMouseDown) final
     {
-        const Rectangle<int> activeArea(button.getActiveArea());
+        auto const activeArea{ button.getActiveArea() };
         activeArea.withHeight(18);
-        const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
-        const Colour bkg(button.getTabBackgroundColour());
+        auto const o{ button.getTabbedButtonBar().getOrientation() };
+        auto const bkg{ button.getTabBackgroundColour() };
 
         if (button.getToggleState()) {
             g.setColour(bkg);
@@ -548,9 +552,9 @@ public:
 
         g.fillRect(activeArea);
 
-        g.setColour(this->winBackGroundAndFieldColour);
+        g.setColour(this->mWinBackgroundAndFieldColor);
 
-        Rectangle<int> r(activeArea);
+        auto r{ activeArea };
         if (o != TabbedButtonBar::TabsAtTop)
             g.fillRect(r.removeFromBottom(1));
         if (o != TabbedButtonBar::TabsAtRight)
@@ -558,12 +562,12 @@ public:
         if (o != TabbedButtonBar::TabsAtLeft)
             g.fillRect(r.removeFromRight(1));
 
-        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-        Colour col = (bkg.contrasting().withMultipliedAlpha(alpha));
-        const Rectangle<float> area(button.getTextArea().toFloat());
+        auto const alpha{ button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f };
+        auto const col{ bkg.contrasting().withMultipliedAlpha(alpha) };
+        auto const area{ button.getTextArea().toFloat() };
 
-        float length = area.getWidth();
-        float depth = area.getHeight();
+        auto length{ area.getWidth() };
+        auto depth{ area.getHeight() };
 
         if (button.getTabbedButtonBar().isVertical())
             std::swap(length, depth);
@@ -571,52 +575,15 @@ public:
         TextLayout textLayout;
         createTabTextLayout(button, length, depth, col, textLayout);
         textLayout.draw(g, Rectangle<float>(length, depth));
-        /*
-        Rectangle<int> activeArea (button.getActiveArea());
-
-        //const TabbedButtonBar::Orientation o = button.getTabbedButtonBar().getOrientation();
-        const Colour bkg (button.getTabBackgroundColour());
-
-        if (button.getToggleState())
-        {
-            g.setColour (bkg);
-        }
-        else
-        {
-            g.setColour (bkg.brighter (0.1f));
-        }
-
-        g.fillRect (activeArea);
-        g.setColour (this->winBackGroundAndFieldColour);
-
-        Rectangle<int> r (activeArea);
-        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-        Colour col = (bkg.contrasting().withMultipliedAlpha (alpha));
-
-
-        const Rectangle<float> area (button.getTextArea().toFloat());
-
-        float length = area.getWidth();
-        float depth  = area.getHeight();
-
-        if (button.getTabbedButtonBar().isVertical())
-            std::swap (length, depth);
-
-        TextLayout textLayout;
-        createTabTextLayout (button, length, depth, col, textLayout);
-
-        AffineTransform t;
-        g.addTransform (t);
-        textLayout.draw (g, Rectangle<float> (length, depth));*/
     }
 
     void createTabTextLayout(const TabBarButton & button,
-                             float length,
-                             float depth,
-                             Colour colour,
+                             float const length,
+                             float const depth,
+                             Colour const color,
                              TextLayout & textLayout) const
     {
-        Font font(this->font);
+        auto font{ this->mFont };
 #if WIN32
         font.setHeight(depth * 0.60f);
 #else
@@ -627,93 +594,49 @@ public:
 
         AttributedString s;
         s.setJustification(Justification::centred);
-        s.append(button.getButtonText().trim(), font, colour);
+        s.append(button.getButtonText().trim(), font, color);
 
         textLayout.createLayout(s, length);
     }
 
-    //    void drawTabButtonText (TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown) final
-    //    {
-    //        const Rectangle<float> area (button.getTextArea().toFloat());
-    //
-    //        float length = area.getWidth();
-    //        float depth  = area.getHeight();
-    //
-    //        if (button.getTabbedButtonBar().isVertical())
-    //            std::swap (length, depth);
-    //
-    //        Font font (this->font);
-    //        font.setHeight(depth * 0.35f);
-    //        font.setUnderline (button.hasKeyboardFocus (false));
-    //
-    //        AffineTransform t;
-    //
-    //        switch (button.getTabbedButtonBar().getOrientation())
-    //        {
-    //            case TabbedButtonBar::TabsAtLeft:   t = t.rotated (float_Pi * -0.5f).translated (area.getX(),
-    //            area.getBottom()); break; case TabbedButtonBar::TabsAtRight:  t = t.rotated (float_Pi *
-    //            0.5f).translated (area.getRight(), area.getY()); break; case TabbedButtonBar::TabsAtTop: case
-    //            TabbedButtonBar::TabsAtBottom: t = t.translated (area.getX(), area.getY()); break; default:
-    //            jassertfalse; break;
-    //        }
-    //
-    //        Colour col;
-    //
-    //        if (button.isFrontTab() && (button.isColourSpecified (TabbedButtonBar::frontTextColourId)
-    //                                    || isColourSpecified (TabbedButtonBar::frontTextColourId)))
-    //            col = findColour (TabbedButtonBar::frontTextColourId);
-    //        else if (button.isColourSpecified (TabbedButtonBar::tabTextColourId)
-    //                 || isColourSpecified (TabbedButtonBar::tabTextColourId))
-    //            col = findColour (TabbedButtonBar::tabTextColourId);
-    //        else
-    //            col = button.getTabBackgroundColour().contrasting();
-    //
-    //        float const alpha = button.isEnabled() ? ((isMouseOver || isMouseDown) ? 1.0f : 0.8f) : 0.3f;
-    //
-    //        g.setColour (col.withMultipliedAlpha (alpha));
-    //        g.setFont (font);
-    //        g.addTransform (t);
-    //
-    //        g.drawFittedText (button.getButtonText().trim(),
-    //                          0, 0, (int) length, (int) depth,
-    //                          Justification::centred,
-    //                          jmax (1, ((int) depth) / 12));
-    //    }
-
-    //    //we don't use those, so far
+    // we don't use those, so far
     void drawRotarySlider(Graphics & g,
-                          int x,
-                          int y,
-                          int width,
-                          int height,
-                          float sliderPos,
-                          float rotaryStartAngle,
-                          float rotaryEndAngle,
+                          int const x,
+                          int const y,
+                          int const width,
+                          int const height,
+                          float const sliderPos,
+                          float const rotaryStartAngle,
+                          float const rotaryEndAngle,
                           Slider & slider) final
     {
-        float const radius = jmin(width / 2, height / 2) - 2.0f;
-        float const centreX = x + width * 0.5f;
-        float const centreY = (y + height * 0.5f) + 6.0f;
-        float const rx = centreX - radius;
-        float const ry = centreY - radius;
-        float const rw = radius * 2.0f;
-        float const angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-        bool const isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+        auto const xFloat{ static_cast<float>(x) };
+        auto const yFloat{ static_cast<float>(y) };
+        auto const widthFloat{ static_cast<float>(width) };
+        auto const heightFloat{ static_cast<float>(height) };
+
+        auto const radius = jmin(widthFloat / 2.0f, heightFloat / 2.0f) - 2.0f;
+        auto const centreX = xFloat + widthFloat * 0.5f;
+        auto const centreY = (yFloat + heightFloat * 0.5f) + 6.0f;
+        auto const rx = centreX - radius;
+        auto const ry = centreY - radius;
+        auto const rw = radius * 2.0f;
+        auto const angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+        auto const isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
 
         if (slider.isEnabled()) {
-            // slider.findColour (Slider::rotarySliderFillColourId).withAlpha (isMouseOver ? 0.7f : 1.0f)
             if (isMouseOver) {
-                g.setColour(this->onColorOver);
+                g.setColour(this->mOnColorOver);
             } else {
-                g.setColour(this->onColor);
+                g.setColour(this->mOnColor);
             }
         } else {
-            g.setColour(this->offColor);
+            g.setColour(this->mOffColor);
         }
         Path filledArc;
         filledArc.addPieSegment(rx, ry, rw, rw, rotaryStartAngle, angle, 0.0);
         g.fillPath(filledArc);
-        float const lineThickness = jmin(15.0f, jmin(width, height) * 0.45f) * 0.1f;
+        auto const lineThickness = jmin(15.0f, jmin(widthFloat, heightFloat) * 0.45f) * 0.1f;
         Path outlineArc;
         outlineArc.addPieSegment(rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, 0.0);
         g.strokePath(outlineArc, PathStrokeType(lineThickness));

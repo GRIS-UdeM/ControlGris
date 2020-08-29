@@ -41,6 +41,8 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+
     ListenerList<Listener> mListeners;
 
     SourceIndex mSelectedSource;
@@ -61,8 +63,8 @@ private:
 
 public:
     //==============================================================================
-    SourceBoxComponent();
-    ~SourceBoxComponent() final;
+    SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
+    ~SourceBoxComponent() final = default;
     //==============================================================================
     void paint(Graphics &) final;
     void resized() final;

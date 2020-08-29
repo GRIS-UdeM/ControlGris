@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" pluginFormats="buildAU,buildVST,buildVST3"
-              version="1.1.4" bundleIdentifier="com.gris.umontreal.controlgris"
+<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" pluginFormats="buildAU,buildVST3"
+              version="1.1.5" bundleIdentifier="com.gris.umontreal.controlgris"
               companyName="UdeM" aaxIdentifier="com.udem.GRIS.ControlGris"
               pluginManufacturer="UdeM" pluginManufacturerCode="UdeM" pluginCode="Xzz1"
               pluginChannelConfigs="{1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}"
@@ -18,7 +18,6 @@
               file="Source/ControlGrisConstants.h"/>
         <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
               file="Source/ControlGrisUtilities.h"/>
-        <FILE id="bQd5Qh" name="DumbOptional.h" compile="0" resource="0" file="Source/DumbOptional.h"/>
         <FILE id="qFdGxF" name="StrongTypes.h" compile="0" resource="0" file="Source/StrongTypes.h"/>
       </GROUP>
       <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">

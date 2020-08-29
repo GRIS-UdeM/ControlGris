@@ -29,6 +29,7 @@ void ElevationDrawingHandle::mouseDown(MouseEvent const & event)
 
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
     auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
+    mCurrentElevation = elevation;
     Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
     auto & automationManager{ mFieldComponent.getAutomationManager() };
@@ -45,6 +46,7 @@ void ElevationDrawingHandle::mouseDrag(MouseEvent const & event)
     auto & automationManager{ mFieldComponent.getAutomationManager() };
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
     auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
+    mCurrentElevation = elevation;
     constexpr auto DUMMY{ 0.0f };
     Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
@@ -52,4 +54,21 @@ void ElevationDrawingHandle::mouseDrag(MouseEvent const & event)
 
     setCentrePosition(mFieldComponent.sourceElevationToComponentPosition(elevation, SourceIndex{ -1 }).toInt());
     mFieldComponent.repaint();
+}
+
+//==============================================================================
+void ElevationDrawingHandle::updatePositionInParent()
+{
+    auto const newSourcePosition{
+        mFieldComponent.sourceElevationToComponentPosition(mCurrentElevation, SourceIndex{ -1 }).toInt()
+    };
+    setCentrePosition(newSourcePosition);
+}
+
+//==============================================================================
+ElevationDrawingHandle::ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
+    : SourceComponent(Colour::fromRGB(176, 176, 228), "X")
+    , mFieldComponent(fieldComponent)
+{
+    setSelected(true);
 }

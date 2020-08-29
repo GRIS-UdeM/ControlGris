@@ -78,7 +78,7 @@ int PresetsManager::getCurrentPreset() const
 bool PresetsManager::loadIfPresetChanged(int const presetNumber)
 {
     if (presetNumber == mLastLoadedPreset) {
-        return true;
+        return false;
     }
 
     return load(presetNumber);
@@ -93,79 +93,77 @@ bool PresetsManager::forceLoad(int const presetNumber)
 //==============================================================================
 bool PresetsManager::load(int const presetNumber)
 {
-    if (presetNumber != 0) {
-        auto const maybe_presetData{ getPresetData(presetNumber) };
-
-        if (!maybe_presetData.has_value()) {
-            return false;
-        }
-
-        auto const * presetData{ maybe_presetData.value() };
-
-        SourcesSnapshots snapshots{};
-        for (auto & source : mSources) {
-            SourceSnapshot snapshot{};
-            auto const index{ source.getIndex() };
-            auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
-            auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
-            if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
-                Point<float> const normalizedInversedPosition{
-                    static_cast<float>(presetData->getDoubleAttribute(xPosId)),
-                    static_cast<float>(presetData->getDoubleAttribute(yPosId))
-                };
-                auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-                Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
-                snapshot.position = position;
-                auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
-                if (presetData->hasAttribute(zPosId)) {
-                    auto const inversedNormalizedElevation{ static_cast<float>(
-                        presetData->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
-                    snapshot.z = MAX_ELEVATION * (1.0f - inversedNormalizedElevation);
-                }
-            }
-            if (source.isPrimarySource()) {
-                snapshots.primary = snapshot;
-            } else {
-                snapshots.secondaries.add(snapshot);
-            }
-        }
-
-        mPositionLinkEnforcer.loadSnapshots(snapshots);
-
-        mElevationLinkEnforcer.loadSnapshots(snapshots);
-
-        auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
-        auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
-        auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
-
-        Point<float> terminalPosition{};
-        if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
-            Point<float> const inversedNormalizedTerminalPosition{
-                static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
-                static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
-            };
-            auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f
-                                                 - Point<float>{ 1.0f, 1.0f } };
-            terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
-        } else {
-            terminalPosition = snapshots.primary.position;
-        }
-        mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
-
-        Radians elevation{};
-        if (presetData->hasAttribute(zTerminalPositionId)) {
-            auto const inversedNormalizedTerminalElevation{ static_cast<float>(
-                presetData->getDoubleAttribute(zTerminalPositionId)) };
-            elevation = MAX_ELEVATION * (1.0f - inversedNormalizedTerminalElevation);
-        } else {
-            elevation = snapshots.primary.z;
-        };
-        mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
-
-        mLastLoadedPreset = presetNumber;
-        mSourceMovedSinceLastRecall = false;
-        sendChangeMessage();
+    if (presetNumber == 0) {
+        return false;
     }
+
+    auto const maybe_presetData{ getPresetData(presetNumber) };
+    if (!maybe_presetData.has_value()) {
+        return false;
+    }
+
+    auto const * presetData{ *maybe_presetData };
+
+    SourcesSnapshots snapshots{};
+    for (auto & source : mSources) {
+        SourceSnapshot snapshot{};
+        auto const index{ source.getIndex() };
+        auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
+        auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
+        if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
+            Point<float> const normalizedInversedPosition{ static_cast<float>(presetData->getDoubleAttribute(xPosId)),
+                                                           static_cast<float>(presetData->getDoubleAttribute(yPosId)) };
+            auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+            Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
+            snapshot.position = position;
+            auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
+            if (presetData->hasAttribute(zPosId)) {
+                auto const inversedNormalizedElevation{ static_cast<float>(
+                    presetData->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
+                snapshot.z = MAX_ELEVATION * (1.0f - inversedNormalizedElevation);
+            }
+        }
+        if (source.isPrimarySource()) {
+            snapshots.primary = snapshot;
+        } else {
+            snapshots.secondaries.add(snapshot);
+        }
+    }
+
+    mPositionLinkEnforcer.loadSnapshots(snapshots);
+
+    mElevationLinkEnforcer.loadSnapshots(snapshots);
+
+    auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
+    auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
+    auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
+
+    Point<float> terminalPosition{};
+    if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
+        Point<float> const inversedNormalizedTerminalPosition{
+            static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
+            static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
+        };
+        auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+        terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
+    } else {
+        terminalPosition = snapshots.primary.position;
+    }
+    mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
+
+    Radians elevation{};
+    if (presetData->hasAttribute(zTerminalPositionId)) {
+        auto const inversedNormalizedTerminalElevation{ static_cast<float>(
+            presetData->getDoubleAttribute(zTerminalPositionId)) };
+        elevation = MAX_ELEVATION * (1.0f - inversedNormalizedTerminalElevation);
+    } else {
+        elevation = snapshots.primary.z;
+    };
+    mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
+
+    mLastLoadedPreset = presetNumber;
+    mSourceMovedSinceLastRecall = false;
+    sendChangeMessage();
 
     return true;
 }
@@ -178,7 +176,7 @@ bool PresetsManager::contains(int const presetNumber) const
 }
 
 //==============================================================================
-optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
+std::optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
 {
     forEachXmlChildElement(mData, element)
     {
@@ -187,7 +185,7 @@ optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) con
         }
     }
 
-    return nullopt;
+    return std::nullopt;
 }
 
 //==============================================================================
@@ -248,7 +246,7 @@ void PresetsManager::save(int const presetNumber)
     // Replace an element if the new one has the same ID as one already saved.
     auto maybe_oldData{ getPresetData(presetNumber) };
     if (maybe_oldData.has_value()) {
-        mData.replaceChildElement(maybe_oldData.value(), newData.release());
+        mData.replaceChildElement(*maybe_oldData, newData.release());
     } else {
         mData.addChildElement(newData.release());
     }
@@ -266,7 +264,7 @@ bool PresetsManager::deletePreset(int presetNumber)
         return false;
     }
 
-    mData.removeChildElement(maybe_data.value(), true);
+    mData.removeChildElement(*maybe_data, true);
     XmlElementDataSorter sorter("ID", true);
     mData.sortChildElements(sorter);
 

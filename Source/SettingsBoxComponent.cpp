@@ -21,7 +21,7 @@
 #include "SettingsBoxComponent.h"
 
 //==============================================================================
-SettingsBoxComponent::SettingsBoxComponent()
+SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscFormatLabel);
@@ -107,12 +107,6 @@ SettingsBoxComponent::SettingsBoxComponent()
 }
 
 //==============================================================================
-SettingsBoxComponent::~SettingsBoxComponent()
-{
-    setLookAndFeel(nullptr);
-}
-
-//==============================================================================
 void SettingsBoxComponent::setOscFormat(SpatMode mode)
 {
     mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
@@ -145,9 +139,7 @@ void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
 //==============================================================================
 void SettingsBoxComponent::paint(Graphics & g)
 {
-    GrisLookAndFeel * lookAndFeel;
-    lookAndFeel = static_cast<GrisLookAndFeel *>(&getLookAndFeel());
-    g.fillAll(lookAndFeel->findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

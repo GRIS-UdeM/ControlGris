@@ -47,12 +47,8 @@ class ControlGrisAudioProcessorEditor final
     , public InterfaceBoxComponent::Listener
     , public PositionPresetComponent::Listener
 {
-private:
-    //==============================================================================
     ControlGrisAudioProcessor & mProcessor;
-
     GrisLookAndFeel mGrisLookAndFeel;
-
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
     PositionAutomationManager & mPositionAutomationManager;
@@ -68,7 +64,6 @@ private:
     ElevationFieldComponent mElevationField;
 
     ParametersBoxComponent mParametersBox;
-
     TrajectoryBoxComponent mTrajectoryBox;
 
     TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
@@ -87,11 +82,18 @@ private:
 
 public:
     //==============================================================================
+    ControlGrisAudioProcessorEditor() = delete;
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     AudioProcessorValueTreeState & vts,
                                     PositionAutomationManager & positionAutomationManager,
                                     ElevationAutomationManager & elevationAutomationManager);
     ~ControlGrisAudioProcessorEditor() final;
+
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor const &) = delete;
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor &&) = delete;
+
+    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
+    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
     void paint(Graphics &) final;
     void resized() final;
@@ -102,7 +104,7 @@ public:
 
     // ParametersBoxComponent::Listeners
     void parametersBoxSelectedSourceClicked() final;
-    void parametersBoxParameterChanged(SourceParameter sourceId, double value) final;
+    void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) final;
     void parametersBoxAzimuthSpanDragStarted() final;
     void parametersBoxAzimuthSpanDragEnded() final;
     void parametersBoxElevationSpanDragStarted() final;
@@ -117,7 +119,7 @@ public:
 
     // SourceBoxComponent::Listeners
     void sourceBoxSelectionChanged(SourceIndex sourceIndex) final;
-    void sourceBoxPlacementChanged(SourcePlacement value) final;
+    void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) final;
     void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) final;
 
     // TrajectoryBoxComponent::Listeners
@@ -129,7 +131,7 @@ public:
     void trajectoryBoxElevationBackAndForthChanged(bool value) final;
     void trajectoryBoxPositionDampeningCyclesChanged(int value) final;
     void trajectoryBoxElevationDampeningCyclesChanged(int value) final;
-    void trajectoryBoxDeviationPerCycleChanged(float value) final;
+    void trajectoryBoxDeviationPerCycleChanged(float degrees) final;
     void trajectoryBoxCycleDurationChanged(double duration, int mode) final;
     void trajectoryBoxDurationUnitChanged(double duration, int mode) final;
     void trajectoryBoxPositionActivateChanged(bool value) final;
@@ -145,7 +147,7 @@ public:
     void oscInputConnectionChanged(bool state, int oscPort) final;
     void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) final;
 
-    void setPluginState();
+    void reloadUiState();
     void updateSpanLinkButton(bool state);
     void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);
@@ -155,5 +157,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
+    JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor);
 };
