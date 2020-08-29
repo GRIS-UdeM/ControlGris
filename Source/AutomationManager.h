@@ -19,6 +19,8 @@
  *************************************************************************/
 #pragma once
 
+#include <optional>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "ControlGrisConstants.h"

@@ -21,6 +21,7 @@
 #pragma once
 
 #include <array>
+#include <optional>
 
 #include "../JuceLibraryCode/JuceHeader.h"
 

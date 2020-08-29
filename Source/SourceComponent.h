@@ -22,8 +22,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "ControlGrisConstants.h"
-
 class Source;
 class FieldComponent;
 

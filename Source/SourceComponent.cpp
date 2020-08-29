@@ -20,6 +20,8 @@
 
 #include "SourceComponent.h"
 
+#include "ControlGrisConstants.h"
+
 //==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
