@@ -123,11 +123,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
     mLastUIWidth.referTo(
-        mProcessor.mAudioProcessorValueTreeState.state.getChildWithName("uiState").getPropertyAsValue("width",
-                                                                                                      nullptr));
+        mProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
     mLastUIHeight.referTo(
-        mProcessor.mAudioProcessorValueTreeState.state.getChildWithName("uiState").getPropertyAsValue("height",
-                                                                                                      nullptr));
+        mProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize(mLastUIWidth.getValue(), mLastUIHeight.getValue());
@@ -609,7 +607,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double d
     mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / mProcessor.getBPM();
+        dur = duration * 60.0 / mProcessor.getBpm();
     }
     mPositionAutomationManager.setPlaybackDuration(dur);
     mElevationAutomationManager.setPlaybackDuration(dur);
@@ -621,7 +619,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double du
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / mProcessor.getBPM();
+        dur = duration * 60.0 / mProcessor.getBpm();
     }
     mPositionAutomationManager.setPlaybackDuration(dur);
     mElevationAutomationManager.setPlaybackDuration(dur);
@@ -713,7 +711,7 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
     if (state) {
         mProcessor.createOscInputConnection(oscPort);
     } else {
-        mProcessor.disconnectOSCInput(oscPort);
+        mProcessor.disconnectOscInput(oscPort);
     }
 }
 
@@ -723,7 +721,7 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, Str
     if (state) {
         mProcessor.createOscOutputConnection(oscAddress, oscPort);
     } else {
-        mProcessor.disconnectOSCOutput(oscAddress, oscPort);
+        mProcessor.disconnectOscOutput(oscAddress, oscPort);
     }
 }
 
