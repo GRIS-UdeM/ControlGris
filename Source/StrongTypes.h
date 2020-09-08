@@ -21,7 +21,7 @@
 #ifndef STRONGTYPESTEST_TYPES_H
 #define STRONGTYPESTEST_TYPES_H
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include <algorithm>
 

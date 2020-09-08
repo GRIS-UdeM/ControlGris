@@ -21,7 +21,7 @@
 
 #include <type_traits>
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 //==============================================================================
 class XmlElementDataSorter

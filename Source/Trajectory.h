@@ -20,7 +20,7 @@
 
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "ConstrainedStrongTypes.h"
 #include "ControlGrisConstants.h"
