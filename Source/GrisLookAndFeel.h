@@ -19,7 +19,7 @@
  *************************************************************************/
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 //==============================================================================
 class GrisLookAndFeel final : public LookAndFeel_V3

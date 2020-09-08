@@ -200,6 +200,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mPositionAutomationManager.addListener(this);
     mElevationAutomationManager.addListener(this);
 
+    handleOscConnection(true);
+
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(50);
@@ -208,33 +210,33 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 //==============================================================================
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
-    disconnectOSC();
+    disconnectOsc();
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, float const newValue)
+void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, float const newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         return;
     }
 
     Normalized const normalized{ newValue };
-    if (parameterID.compare(Automation::Ids::x) == 0) {
+    if (parameterId.compare(Automation::Ids::x) == 0) {
         mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify);
-    } else if (parameterID.compare(Automation::Ids::y) == 0) {
+    } else if (parameterId.compare(Automation::Ids::y) == 0) {
         Normalized const invNormalized{ 1.0f - newValue };
         mSources.getPrimarySource().setY(invNormalized, SourceLinkNotification::notify);
-    } else if (parameterID.compare(Automation::Ids::z) == 0 && mSpatMode == SpatMode::cube) {
+    } else if (parameterId.compare(Automation::Ids::z) == 0 && mSpatMode == SpatMode::cube) {
         auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
         mSources.getPrimarySource().setElevation(newElevation, SourceLinkNotification::notify);
     }
 
-    if (parameterID.compare(Automation::Ids::positionSourceLink) == 0) {
+    if (parameterId.compare(Automation::Ids::positionSourceLink) == 0) {
         auto const val{ static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1) };
         setPositionSourceLink(val);
     }
 
-    if (parameterID.compare(Automation::Ids::elevationSourceLink) == 0) {
+    if (parameterId.compare(Automation::Ids::elevationSourceLink) == 0) {
         auto const val{ static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1) };
         if (val != mElevationAutomationManager.getSourceLink()) {
             setElevationSourceLink(val);
@@ -245,7 +247,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
         }
     }
 
-    if (parameterID.compare(Automation::Ids::positionPreset) == 0) {
+    if (parameterId.compare(Automation::Ids::positionPreset) == 0) {
         auto const value{ static_cast<int>(newValue) };
         auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
         if (loaded) {
@@ -254,11 +256,11 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterID, flo
         }
     }
 
-    if (parameterID.startsWith(Automation::Ids::azimuthSpan)) {
+    if (parameterId.startsWith(Automation::Ids::azimuthSpan)) {
         for (auto & source : mSources) {
             source.setAzimuthSpan(normalized);
         }
-    } else if (parameterID.startsWith(Automation::Ids::elevationSpan)) {
+    } else if (parameterId.startsWith(Automation::Ids::elevationSpan)) {
         for (auto & source : mSources) {
             source.setElevationSpan(normalized);
         }
@@ -318,8 +320,8 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 //==============================================================================
 void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
-    mCurrentOSCPort = oscPortNumber;
-    mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", mCurrentOSCPort, nullptr);
+    mCurrentOscPort = oscPortNumber;
+    mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", mCurrentOscPort, nullptr);
 }
 
 //==============================================================================
@@ -351,26 +353,26 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscConnection(int oscPort)
+bool ControlGrisAudioProcessor::createOscConnection(int const oscPort)
 {
-    disconnectOSC();
+    disconnectOsc();
 
     mOscConnected = mOscSender.connect("127.0.0.1", oscPort);
     if (!mOscConnected)
         std::cout << "Error: could not connect to UDP port " << oscPort << "." << std::endl;
     else
-        mLastConnectedOSCPort = oscPort;
+        mLastConnectedOscPort = oscPort;
 
     return mOscConnected;
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::disconnectOSC()
+bool ControlGrisAudioProcessor::disconnectOsc()
 {
     if (mOscConnected) {
         if (mOscSender.disconnect()) {
             mOscConnected = false;
-            mLastConnectedOSCPort = -1;
+            mLastConnectedOscPort = -1;
         }
     }
     return !mOscConnected;
@@ -380,13 +382,13 @@ bool ControlGrisAudioProcessor::disconnectOSC()
 void ControlGrisAudioProcessor::handleOscConnection(bool const state)
 {
     if (state) {
-        if (mLastConnectedOSCPort != mCurrentOSCPort) {
-            createOscConnection(mCurrentOSCPort);
+        if (mLastConnectedOscPort != mCurrentOscPort) {
+            createOscConnection(mCurrentOscPort);
         }
     } else {
-        disconnectOSC();
+        disconnectOsc();
     }
-    mAudioProcessorValueTreeState.state.setProperty("oscConnected", getOscConnected(), nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("oscConnected", isOscConnected(), nullptr);
 }
 
 //==============================================================================
@@ -422,14 +424,14 @@ void ControlGrisAudioProcessor::sendOscMessage()
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
 {
-    disconnectOSCInput(oscPort);
+    disconnectOscInput(oscPort);
 
     mOscInputConnected = mOscInputReceiver.connect(oscPort);
     if (!mOscInputConnected) {
         std::cout << "Error: could not connect to UDP input port " << oscPort << "." << std::endl;
     } else {
         mOscInputReceiver.addListener(this);
-        mCurrentOSCInputPort = oscPort;
+        mCurrentOscInputPort = oscPort;
         mAudioProcessorValueTreeState.state.setProperty("oscInputPortNumber", oscPort, nullptr);
     }
 
@@ -439,7 +441,7 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::disconnectOSCInput(int const oscPort)
+bool ControlGrisAudioProcessor::disconnectOscInput(int const oscPort)
 {
     if (mOscInputConnected) {
         if (mOscInputReceiver.disconnect()) {
@@ -592,15 +594,15 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddress, int const oscPort)
 {
-    disconnectOSCOutput(oscAddress, oscPort);
+    disconnectOscOutput(oscAddress, oscPort);
 
     mOscOutputConnected = mOscOutputSender.connect(oscAddress, oscPort);
     if (!mOscOutputConnected)
         std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << "."
                   << std::endl;
     else {
-        mCurrentOSCOutputPort = oscPort;
-        mCurrentOSCOutputAddress = oscAddress;
+        mCurrentOscOutputPort = oscPort;
+        mCurrentOscOutputAddress = oscAddress;
         mAudioProcessorValueTreeState.state.setProperty("oscOutputPortNumber", oscPort, nullptr);
         mAudioProcessorValueTreeState.state.setProperty("oscOutputAddress", oscAddress, nullptr);
     }
@@ -610,7 +612,7 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddr
     return mOscOutputConnected;
 }
 
-bool ControlGrisAudioProcessor::disconnectOSCOutput(String const & oscAddress, int const oscPort)
+bool ControlGrisAudioProcessor::disconnectOscOutput(String const & oscAddress, int const oscPort)
 {
     if (mOscOutputConnected) {
         if (mOscOutputSender.disconnect()) {
@@ -640,13 +642,13 @@ int ControlGrisAudioProcessor::getOscOutputPluginId() const
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
-    constexpr auto impossibleNumber{ std::numeric_limits<float>::min() };
+    static constexpr auto IMPOSSIBLE_NUMBER{ std::numeric_limits<float>::min() };
 
-    static auto lastTrajectoryX{ impossibleNumber };
-    static auto lastTrajectoryY{ impossibleNumber };
-    static auto lastTrajectoryZ{ impossibleNumber };
-    static Normalized lastAzimuthSpan{ impossibleNumber };
-    static Normalized lastElevationSpan{ impossibleNumber };
+    static auto lastTrajectoryX{ IMPOSSIBLE_NUMBER };
+    static auto lastTrajectoryY{ IMPOSSIBLE_NUMBER };
+    static auto lastTrajectoryZ{ IMPOSSIBLE_NUMBER };
+    static Normalized lastAzimuthSpan{ IMPOSSIBLE_NUMBER };
+    static Normalized lastElevationSpan{ IMPOSSIBLE_NUMBER };
     static auto lastPositionLink{ PositionSourceLink::undefined };
     static auto lastElevationLink{ ElevationSourceLink::undefined };
     static auto lastPresetNumber{ std::numeric_limits<int>::min() };
@@ -1036,8 +1038,8 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
-    if (!wasPlaying && mIsPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
-        PluginHostType hostType;     // calling prepareToPlay every time the sequence starts.
+    if (!wasPlaying && mIsPlaying) {   // Initialization here only for Logic (also Reaper and Live), which are not
+        PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
         }
@@ -1069,18 +1071,6 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
-    // Some manipulations might not end gestures properly and hang automation readings altogether.
-    //    if (!mIsPlaying && wasPlaying) {
-    //        mChangeGesturesManager.endGesture(Automation::Ids::positionPreset);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::positionSourceLink);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::elevationSourceLink);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::elevationSpan);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::azimuthSpan);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::x);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::y);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::z);
-    //    }
-
     mLastTime = mCurrentTime;
 }
 
@@ -1110,7 +1100,7 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
         mAudioProcessorValueTreeState.state.setProperty(distanceId + id, distance, nullptr);
     }
 
-    auto state{ mAudioProcessorValueTreeState.copyState() };
+    auto const state{ mAudioProcessorValueTreeState.copyState() };
 
     auto xmlState{ state.createXml() };
 
@@ -1132,13 +1122,14 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 {
     MessageManagerLock mmLock{};
 
-    auto xmlState{ getXmlFromBinary(data, sizeInBytes) };
+    auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
     if (xmlState != nullptr) {
         // Set global settings values.
         //----------------------------
-        ValueTree valueTree = ValueTree::fromXml(*xmlState);
-        setSpatMode((SpatMode)(int)valueTree.getProperty("oscFormat", 0));
+        auto const valueTree{ ValueTree::fromXml(*xmlState) };
+        auto const spatMode{ static_cast<SpatMode>(static_cast<int>(valueTree.getProperty("oscFormat", 0))) };
+        setSpatMode(spatMode);
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
@@ -1156,7 +1147,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 
         // Load saved fixed positions.
         //----------------------------
-        XmlElement * positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
+        auto * positionData{ xmlState->getChildByName(FIXED_POSITION_DATA_TAG) };
         if (positionData) {
             mFixPositionData.deleteAllChildElements();
             mFixPositionData = *positionData;

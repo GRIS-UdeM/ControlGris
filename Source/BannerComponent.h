@@ -19,7 +19,7 @@
  *************************************************************************/
 #pragma once
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 //==============================================================================
 // BannerComponent is a Label-derived class used to identify the different

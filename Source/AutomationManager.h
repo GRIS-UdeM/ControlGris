@@ -21,7 +21,7 @@
 
 #include <optional>
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "ControlGrisConstants.h"
 #include "Source.h"

@@ -22,7 +22,7 @@
 
 #include <type_traits>
 
-#include "../JuceLibraryCode/JuceHeader.h"
+#include <JuceHeader.h>
 
 #include "AutomationManager.h"
 #include "ElevationDrawingHandle.h"
