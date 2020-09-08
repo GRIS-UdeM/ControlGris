@@ -37,7 +37,6 @@ class ControlGrisAudioProcessor final
     , public Timer
     , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
-private:
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
     bool mOscConnected{ false };
@@ -152,7 +151,7 @@ public:
     //==============================================================================
     bool createOscConnection(int oscPort);
     bool disconnectOsc();
-    bool getOscConnected() const { return mOscConnected; }
+    bool isOscConnected() const { return mOscConnected; }
     void handleOscConnection(bool state);
     void sendOscMessage();
 

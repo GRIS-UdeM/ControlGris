@@ -154,7 +154,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     //----------------------------
     settingsBoxOscFormatChanged(mProcessor.getSpatMode());
     settingsBoxOscPortNumberChanged(mProcessor.getOscPortNumber());
-    settingsBoxOscActivated(mProcessor.getOscConnected());
+    settingsBoxOscActivated(mProcessor.isOscConnected());
     settingsBoxFirstSourceIdChanged(mProcessor.getFirstSourceId());
     settingsBoxNumberOfSourcesChanged(mProcessor.getSources().size());
 
@@ -276,7 +276,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxOscPortNumberChanged(int oscPor
 void ControlGrisAudioProcessorEditor::settingsBoxOscActivated(bool state)
 {
     mProcessor.handleOscConnection(state);
-    mSettingsBox.setActivateButtonState(mProcessor.getOscConnected());
+    mSettingsBox.setActivateButtonState(mProcessor.isOscConnected());
 }
 
 //==============================================================================

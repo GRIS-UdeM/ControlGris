@@ -200,6 +200,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mPositionAutomationManager.addListener(this);
     mElevationAutomationManager.addListener(this);
 
+    handleOscConnection(true);
+
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(50);
@@ -351,7 +353,7 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscConnection(int oscPort)
+bool ControlGrisAudioProcessor::createOscConnection(int const oscPort)
 {
     disconnectOsc();
 
@@ -386,7 +388,7 @@ void ControlGrisAudioProcessor::handleOscConnection(bool const state)
     } else {
         disconnectOsc();
     }
-    mAudioProcessorValueTreeState.state.setProperty("oscConnected", getOscConnected(), nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("oscConnected", isOscConnected(), nullptr);
 }
 
 //==============================================================================
@@ -640,13 +642,13 @@ int ControlGrisAudioProcessor::getOscOutputPluginId() const
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
-    constexpr auto impossibleNumber{ std::numeric_limits<float>::min() };
+    static constexpr auto IMPOSSIBLE_NUMBER{ std::numeric_limits<float>::min() };
 
-    static auto lastTrajectoryX{ impossibleNumber };
-    static auto lastTrajectoryY{ impossibleNumber };
-    static auto lastTrajectoryZ{ impossibleNumber };
-    static Normalized lastAzimuthSpan{ impossibleNumber };
-    static Normalized lastElevationSpan{ impossibleNumber };
+    static auto lastTrajectoryX{ IMPOSSIBLE_NUMBER };
+    static auto lastTrajectoryY{ IMPOSSIBLE_NUMBER };
+    static auto lastTrajectoryZ{ IMPOSSIBLE_NUMBER };
+    static Normalized lastAzimuthSpan{ IMPOSSIBLE_NUMBER };
+    static Normalized lastElevationSpan{ IMPOSSIBLE_NUMBER };
     static auto lastPositionLink{ PositionSourceLink::undefined };
     static auto lastElevationLink{ ElevationSourceLink::undefined };
     static auto lastPresetNumber{ std::numeric_limits<int>::min() };
@@ -1036,8 +1038,8 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
-    if (!wasPlaying && mIsPlaying) { // Initialization here only for Logic (also Reaper and Live), which are not
-        PluginHostType hostType;     // calling prepareToPlay every time the sequence starts.
+    if (!wasPlaying && mIsPlaying) {   // Initialization here only for Logic (also Reaper and Live), which are not
+        PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
         }
@@ -1069,18 +1071,6 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
-    // Some manipulations might not end gestures properly and hang automation readings altogether.
-    //    if (!mIsPlaying && wasPlaying) {
-    //        mChangeGesturesManager.endGesture(Automation::Ids::positionPreset);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::positionSourceLink);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::elevationSourceLink);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::elevationSpan);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::azimuthSpan);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::x);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::y);
-    //        mChangeGesturesManager.endGesture(Automation::Ids::z);
-    //    }
-
     mLastTime = mCurrentTime;
 }
 
@@ -1110,7 +1100,7 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
         mAudioProcessorValueTreeState.state.setProperty(distanceId + id, distance, nullptr);
     }
 
-    auto state{ mAudioProcessorValueTreeState.copyState() };
+    auto const state{ mAudioProcessorValueTreeState.copyState() };
 
     auto xmlState{ state.createXml() };
 
@@ -1132,13 +1122,14 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 {
     MessageManagerLock mmLock{};
 
-    auto xmlState{ getXmlFromBinary(data, sizeInBytes) };
+    auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
     if (xmlState != nullptr) {
         // Set global settings values.
         //----------------------------
-        ValueTree valueTree = ValueTree::fromXml(*xmlState);
-        setSpatMode((SpatMode)(int)valueTree.getProperty("oscFormat", 0));
+        auto const valueTree{ ValueTree::fromXml(*xmlState) };
+        auto const spatMode{ static_cast<SpatMode>(static_cast<int>(valueTree.getProperty("oscFormat", 0))) };
+        setSpatMode(spatMode);
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
@@ -1156,7 +1147,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 
         // Load saved fixed positions.
         //----------------------------
-        XmlElement * positionData = xmlState->getChildByName(FIXED_POSITION_DATA_TAG);
+        auto * positionData{ xmlState->getChildByName(FIXED_POSITION_DATA_TAG) };
         if (positionData) {
             mFixPositionData.deleteAllChildElements();
             mFixPositionData = *positionData;
