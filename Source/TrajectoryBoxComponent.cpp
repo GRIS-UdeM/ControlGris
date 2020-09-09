@@ -62,13 +62,13 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         });
     };
 
-    mElevationTracjectoryTypeCombo.addItemList(ELEVATION_TRAJECTORY_TYPE_TYPES, 1);
-    mElevationTracjectoryTypeCombo.setSelectedId(1);
-    addChildComponent(&mElevationTracjectoryTypeCombo);
-    mElevationTracjectoryTypeCombo.onChange = [this] {
+    mElevationTrajectoryTypeCombo.addItemList(ELEVATION_TRAJECTORY_TYPE_TYPES, 1);
+    mElevationTrajectoryTypeCombo.setSelectedId(1);
+    addChildComponent(&mElevationTrajectoryTypeCombo);
+    mElevationTrajectoryTypeCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
             l.trajectoryBoxElevationTrajectoryTypeChanged(
-                static_cast<ElevationTrajectoryType>(mElevationTracjectoryTypeCombo.getSelectedId()));
+                static_cast<ElevationTrajectoryType>(mElevationTrajectoryTypeCombo.getSelectedId()));
         });
     };
 
@@ -228,7 +228,7 @@ void TrajectoryBoxComponent::setTrajectoryType(int type)
 //==============================================================================
 void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
 {
-    mElevationTracjectoryTypeCombo.setSelectedId(type);
+    mElevationTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
@@ -355,18 +355,18 @@ void TrajectoryBoxComponent::resized()
 
     if (mSpatMode == SpatMode::cube) {
         mElevationSourceLinkCombo.setVisible(true);
-        mElevationTracjectoryTypeCombo.setVisible(true);
+        mElevationTrajectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);
         mElevationBackAndForthToggle.setVisible(true);
         mElevationDampeningEditor.setVisible(true);
         mElevationSourceLinkCombo.setBounds(305, 10, 175, 20);
-        mElevationTracjectoryTypeCombo.setBounds(305, 40, 175, 20);
+        mElevationTrajectoryTypeCombo.setBounds(305, 40, 175, 20);
         mElevationBackAndForthToggle.setBounds(386, 70, 94, 20);
         mElevationDampeningEditor.setBounds(305, 70, 75, 20);
         mElevationActivateButton.setBounds(304, 130, 176, 20);
     } else {
         mElevationSourceLinkCombo.setVisible(false);
-        mElevationTracjectoryTypeCombo.setVisible(false);
+        mElevationTrajectoryTypeCombo.setVisible(false);
         mElevationActivateButton.setVisible(false);
         mElevationBackAndForthToggle.setVisible(false);
         mElevationDampeningEditor.setVisible(false);

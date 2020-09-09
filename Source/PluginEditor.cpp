@@ -220,8 +220,8 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
     auto action = [=]() {
-        mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
-                                                              NotificationType::dontSendNotification);
+        mTrajectoryBox.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
+                                                                  NotificationType::dontSendNotification);
     };
     auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
     if (isMessageThread) {
@@ -234,8 +234,8 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    mTrajectoryBox.mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value),
-                                                           NotificationType::dontSendNotification);
+    mTrajectoryBox.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
+                                                               NotificationType::dontSendNotification);
 }
 
 //==============================================================================

@@ -63,11 +63,19 @@ private:
 
 public:
     //==============================================================================
-    SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~SourceBoxComponent() final = default;
+    explicit SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void paint(Graphics &) final;
-    void resized() final;
+    SourceBoxComponent() = delete;
+    ~SourceBoxComponent() override = default;
+
+    SourceBoxComponent(SourceBoxComponent const &) = delete;
+    SourceBoxComponent(SourceBoxComponent &&) = delete;
+
+    SourceBoxComponent & operator=(SourceBoxComponent const &) = delete;
+    SourceBoxComponent & operator=(SourceBoxComponent &&) = delete;
+    //==============================================================================
+    void paint(Graphics &) override;
+    void resized() override;
 
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
@@ -77,5 +85,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceBoxComponent);
+    JUCE_LEAK_DETECTOR(SourceBoxComponent)
 };
