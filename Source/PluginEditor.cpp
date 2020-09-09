@@ -531,20 +531,20 @@ void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 
 //==============================================================================
 // TrajectoryBoxComponent::Listener callbacks.
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink newSourceLink)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink const sourceLink)
 {
     auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionSourceLink) };
     auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionSourceLink) };
     parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink newSourceLink)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink const sourceLink)
 {
     auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSourceLink) };
     auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::elevationSourceLink) };
     parameter->setValueNotifyingHost(value);

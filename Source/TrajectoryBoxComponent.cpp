@@ -191,14 +191,14 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setSpatMode(SpatMode spatMode)
+void TrajectoryBoxComponent::setSpatMode(SpatMode const spatMode)
 {
     mSpatMode = spatMode;
     resized();
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setNumberOfSources(int numOfSources)
+void TrajectoryBoxComponent::setNumberOfSources(int const numOfSources)
 {
     if (numOfSources == 1) {
         mPositionSourceLinkCombo.setSelectedId(1);
@@ -220,33 +220,33 @@ void TrajectoryBoxComponent::setNumberOfSources(int numOfSources)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setTrajectoryType(int type)
+void TrajectoryBoxComponent::setTrajectoryType(int const type)
 {
     mPositionTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationTrajectoryType(int type)
+void TrajectoryBoxComponent::setElevationTrajectoryType(int const type)
 {
     mElevationTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionBackAndForth(bool state)
+void TrajectoryBoxComponent::setPositionBackAndForth(bool const state)
 {
     mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationBackAndForth(bool state)
+void TrajectoryBoxComponent::setElevationBackAndForth(bool const state)
 {
     mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionDampeningEnabled(bool state)
+void TrajectoryBoxComponent::setPositionDampeningEnabled(bool const state)
 {
     mPositionDampeningEditor.setEnabled(state);
     String text = mPositionDampeningEditor.getText();
@@ -259,7 +259,7 @@ void TrajectoryBoxComponent::setPositionDampeningEnabled(bool state)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationDampeningEnabled(bool state)
+void TrajectoryBoxComponent::setElevationDampeningEnabled(bool const state)
 {
     mElevationDampeningEditor.setEnabled(state);
     String text = mElevationDampeningEditor.getText();
@@ -272,49 +272,49 @@ void TrajectoryBoxComponent::setElevationDampeningEnabled(bool state)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionDampeningCycles(int value)
+void TrajectoryBoxComponent::setPositionDampeningCycles(int const value)
 {
     mPositionDampeningEditor.setText(String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationDampeningCycles(int value)
+void TrajectoryBoxComponent::setElevationDampeningCycles(int const value)
 {
     mElevationDampeningEditor.setText(String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setDeviationPerCycle(float value)
+void TrajectoryBoxComponent::setDeviationPerCycle(float const value)
 {
     mDeviationEditor.setText(String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink value)
+void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink const value)
 {
     mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink value)
+void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink const value)
 {
     mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionActivateState(bool state)
+void TrajectoryBoxComponent::setPositionActivateState(bool const state)
 {
     mPositionActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationActivateState(bool state)
+void TrajectoryBoxComponent::setElevationActivateState(bool const state)
 {
     mElevationActivateButton.setToggleState(state, NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setCycleDuration(double value)
+void TrajectoryBoxComponent::setCycleDuration(double const value)
 {
     mDurationEditor.setText(String(value));
     mListeners.call([&](Listener & l) {
@@ -324,7 +324,7 @@ void TrajectoryBoxComponent::setCycleDuration(double value)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setDurationUnit(int value)
+void TrajectoryBoxComponent::setDurationUnit(int const value)
 {
     mDurationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
     mListeners.call([&](Listener & l) {

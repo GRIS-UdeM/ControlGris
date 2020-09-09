@@ -43,10 +43,10 @@ public:
         Listener & operator=(Listener &&) = default;
         //==============================================================================
 
-        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) = 0;
-        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) = 0;
-        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) = 0;
-        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) = 0;
+        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) = 0;
+        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) = 0;
+        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType trajectoryType) = 0;
+        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType trajectoryType) = 0;
         virtual void trajectoryBoxPositionBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxElevationBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxPositionDampeningCyclesChanged(int value) = 0;
