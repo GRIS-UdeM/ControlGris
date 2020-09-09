@@ -314,6 +314,13 @@ void TrajectoryBoxComponent::setElevationActivateState(bool const state)
 }
 
 //==============================================================================
+void TrajectoryBoxComponent::setSymmetricLinkComboState(bool const allowed)
+{
+    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), allowed);
+    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), allowed);
+}
+
+//==============================================================================
 void TrajectoryBoxComponent::setCycleDuration(double const value)
 {
     mDurationEditor.setText(String(value));

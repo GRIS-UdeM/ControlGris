@@ -98,12 +98,12 @@ public:
     AutomationManager & operator=(AutomationManager const &) = delete;
     AutomationManager & operator=(AutomationManager &&) = delete;
     //==============================================================================
-    ControlGrisAudioProcessor & getProcessor() { return mProcessor; }
+    [[nodiscard]] ControlGrisAudioProcessor & getProcessor() const { return mProcessor; }
 
     void setPositionActivateState(bool state);
     [[nodiscard]] bool getPositionActivateState() const { return mActivateState; }
 
-    void setPlaybackDuration(double value) { mPlaybackDuration = value; }
+    void setPlaybackDuration(double const value) { mPlaybackDuration = value; }
 
     void resetRecordingTrajectory(Point<float> currentPosition);
     void addRecordingPoint(Point<float> const & pos);
@@ -114,7 +114,7 @@ public:
 
     void setPositionBackAndForth(bool const newState) { mIsBackAndForth = newState; }
 
-    void setPositionDampeningCycles(int value) { this->mDampeningCycles = value; }
+    void setPositionDampeningCycles(int const value) { this->mDampeningCycles = value; }
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
     void setPrimarySourcePosition(Point<float> const & pos);
     void addListener(Listener * l) { mListeners.add(l); }
@@ -129,7 +129,7 @@ private:
     void computeCurrentTrajectoryPoint();
     [[nodiscard]] Point<float> smoothRecordingPosition(Point<float> const & pos);
     //==============================================================================
-    JUCE_LEAK_DETECTOR(AutomationManager);
+    JUCE_LEAK_DETECTOR(AutomationManager)
 
 }; // AutomationManager
 
@@ -142,7 +142,7 @@ class PositionAutomationManager final : public AutomationManager
 public:
     //==============================================================================
     PositionAutomationManager() = delete;
-    ~PositionAutomationManager() noexcept final = default;
+    ~PositionAutomationManager() noexcept override = default;
 
     PositionAutomationManager(PositionAutomationManager const &) = delete;
     PositionAutomationManager(PositionAutomationManager &&) = delete;
@@ -161,13 +161,13 @@ public:
     void setSourceLink(PositionSourceLink const sourceLink) { mSourceLink = sourceLink; }
     [[nodiscard]] PositionSourceLink getSourceLink() const { return mSourceLink; }
     //==============================================================================
-    void applyCurrentTrajectoryPointToPrimarySource() final;
-    void sendTrajectoryPositionChangedEvent() final;
-    void recomputeTrajectory() final;
+    void applyCurrentTrajectoryPointToPrimarySource() override;
+    void sendTrajectoryPositionChangedEvent() override;
+    void recomputeTrajectory() override;
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(PositionAutomationManager);
+    JUCE_LEAK_DETECTOR(PositionAutomationManager)
 
 }; // PositionAutomationManager
 
@@ -180,7 +180,7 @@ class ElevationAutomationManager final : public AutomationManager
 public:
     //==============================================================================
     ElevationAutomationManager() = delete;
-    ~ElevationAutomationManager() noexcept final = default;
+    ~ElevationAutomationManager() noexcept override = default;
 
     ElevationAutomationManager(ElevationAutomationManager const &) = delete;
     ElevationAutomationManager(ElevationAutomationManager &&) = delete;
@@ -196,15 +196,15 @@ public:
     void setTrajectoryType(ElevationTrajectoryType type);
     [[nodiscard]] ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
 
-    void setSourceLink(ElevationSourceLink sourceLink) { mSourceLink = sourceLink; }
+    void setSourceLink(ElevationSourceLink const sourceLink) { mSourceLink = sourceLink; }
     [[nodiscard]] ElevationSourceLink getSourceLink() const { return mSourceLink; }
 
-    void sendTrajectoryPositionChangedEvent() final;
-    void applyCurrentTrajectoryPointToPrimarySource() final;
-    void recomputeTrajectory() final;
+    void sendTrajectoryPositionChangedEvent() override;
+    void applyCurrentTrajectoryPointToPrimarySource() override;
+    void recomputeTrajectory() override;
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ElevationAutomationManager);
+    JUCE_LEAK_DETECTOR(ElevationAutomationManager)
 
 }; // ElevationAutomationManager

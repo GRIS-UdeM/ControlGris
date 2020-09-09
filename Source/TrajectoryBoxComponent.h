@@ -42,7 +42,6 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-
         virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) = 0;
         virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) = 0;
         virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType trajectoryType) = 0;
@@ -126,6 +125,9 @@ public:
     ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
     ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
     ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
+
+    enum class SymmetricLinkComboState { enabled, disabled };
+    void setSymmetricLinkComboState(bool const allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

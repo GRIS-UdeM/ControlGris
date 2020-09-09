@@ -285,13 +285,20 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
     if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
         auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionAutomationManager.getSourceLink() };
-        auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::linkSymmetricX
-                                                         || currentPositionSourceLink
-                                                                == PositionSourceLink::linkSymmetricY };
-        if (numOfSources != 2 && isCurrentPositionSourceLinkSymmetric) {
-            mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
-            updateSourceLinkCombo(PositionSourceLink::independent);
+        auto const symmetricLinkAllowed{ numOfSources != 2 };
+        mTrajectoryBox.setSymmetricLinkComboState(symmetricLinkAllowed);
+        if (symmetricLinkAllowed) {
+            auto const isCurrentPositionSourceLinkSymmetric{
+                currentPositionSourceLink == PositionSourceLink::linkSymmetricX
+                || currentPositionSourceLink == PositionSourceLink::linkSymmetricY
+            };
+            if (isCurrentPositionSourceLinkSymmetric) {
+                mProcessor.setPositionSourceLink(PositionSourceLink::independent);
+                /*mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
+                updateSourceLinkCombo(PositionSourceLink::independent);*/
+            }
         }
+
         mSelectedSource = {};
         mProcessor.setNumberOfSources(numOfSources);
         mSettingsBox.setNumberOfSources(numOfSources);
