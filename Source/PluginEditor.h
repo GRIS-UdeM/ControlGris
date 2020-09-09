@@ -87,7 +87,7 @@ public:
                                     AudioProcessorValueTreeState & vts,
                                     PositionAutomationManager & positionAutomationManager,
                                     ElevationAutomationManager & elevationAutomationManager);
-    ~ControlGrisAudioProcessorEditor() final;
+    ~ControlGrisAudioProcessorEditor() override;
 
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor const &) = delete;
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor &&) = delete;
@@ -95,57 +95,57 @@ public:
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
-    void paint(Graphics &) final;
-    void resized() final;
-    void valueChanged(Value &) final;
+    void paint(Graphics &) override;
+    void resized() override;
+    void valueChanged(Value &) override;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) final;
+    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) override;
 
     // ParametersBoxComponent::Listeners
-    void parametersBoxSelectedSourceClicked() final;
-    void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) final;
-    void parametersBoxAzimuthSpanDragStarted() final;
-    void parametersBoxAzimuthSpanDragEnded() final;
-    void parametersBoxElevationSpanDragStarted() final;
-    void parametersBoxElevationSpanDragEnded() final;
+    void parametersBoxSelectedSourceClicked() override;
+    void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) override;
+    void parametersBoxAzimuthSpanDragStarted() override;
+    void parametersBoxAzimuthSpanDragEnded() override;
+    void parametersBoxElevationSpanDragStarted() override;
+    void parametersBoxElevationSpanDragEnded() override;
 
     // SettingsBoxComponent::Listeners
-    void settingsBoxOscFormatChanged(SpatMode mode) final;
-    void settingsBoxOscPortNumberChanged(int oscPort) final;
-    void settingsBoxOscActivated(bool state) final;
-    void settingsBoxNumberOfSourcesChanged(int numOfSources) final;
-    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) final;
+    void settingsBoxOscFormatChanged(SpatMode mode) override;
+    void settingsBoxOscPortNumberChanged(int oscPort) override;
+    void settingsBoxOscActivated(bool state) override;
+    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
+    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) override;
 
     // SourceBoxComponent::Listeners
-    void sourceBoxSelectionChanged(SourceIndex sourceIndex) final;
-    void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) final;
-    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) final;
+    void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
+    void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
+    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) override;
 
     // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) final;
-    void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) final;
-    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) final;
-    void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) final;
-    void trajectoryBoxPositionBackAndForthChanged(bool value) final;
-    void trajectoryBoxElevationBackAndForthChanged(bool value) final;
-    void trajectoryBoxPositionDampeningCyclesChanged(int value) final;
-    void trajectoryBoxElevationDampeningCyclesChanged(int value) final;
-    void trajectoryBoxDeviationPerCycleChanged(float degrees) final;
-    void trajectoryBoxCycleDurationChanged(double duration, int mode) final;
-    void trajectoryBoxDurationUnitChanged(double duration, int mode) final;
-    void trajectoryBoxPositionActivateChanged(bool value) final;
-    void trajectoryBoxElevationActivateChanged(bool value) final;
+    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
+    void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) override;
+    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) override;
+    void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) override;
+    void trajectoryBoxPositionBackAndForthChanged(bool value) override;
+    void trajectoryBoxElevationBackAndForthChanged(bool value) override;
+    void trajectoryBoxPositionDampeningCyclesChanged(int value) override;
+    void trajectoryBoxElevationDampeningCyclesChanged(int value) override;
+    void trajectoryBoxDeviationPerCycleChanged(float degrees) override;
+    void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
+    void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
+    void trajectoryBoxPositionActivateChanged(bool value) override;
+    void trajectoryBoxElevationActivateChanged(bool value) override;
 
     // PositionPresetComponent::Listeners
-    void positionPresetChanged(int presetNumber) final;
-    void positionPresetSaved(int presetNumber) final;
-    void positionPresetDeleted(int presetNumber) final;
+    void positionPresetChanged(int presetNumber) override;
+    void positionPresetSaved(int presetNumber) override;
+    void positionPresetDeleted(int presetNumber) override;
 
     // InterfaceBoxComponent::Listeners
-    void oscOutputPluginIdChanged(int value) final;
-    void oscInputConnectionChanged(bool state, int oscPort) final;
-    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) final;
+    void oscOutputPluginIdChanged(int value) override;
+    void oscInputConnectionChanged(bool state, int oscPort) override;
+    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
 
     void reloadUiState();
     void updateSpanLinkButton(bool state);

@@ -220,8 +220,8 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
     auto action = [=]() {
-        mTrajectoryBox.mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value),
-                                                              NotificationType::dontSendNotification);
+        mTrajectoryBox.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
+                                                                  NotificationType::dontSendNotification);
     };
     auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
     if (isMessageThread) {
@@ -234,8 +234,8 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    mTrajectoryBox.mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value),
-                                                           NotificationType::dontSendNotification);
+    mTrajectoryBox.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
+                                                               NotificationType::dontSendNotification);
 }
 
 //==============================================================================
@@ -285,13 +285,20 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
     if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
         auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionAutomationManager.getSourceLink() };
-        auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::linkSymmetricX
-                                                         || currentPositionSourceLink
-                                                                == PositionSourceLink::linkSymmetricY };
-        if (numOfSources != 2 && isCurrentPositionSourceLinkSymmetric) {
-            mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
-            updateSourceLinkCombo(PositionSourceLink::independent);
+        auto const symmetricLinkAllowed{ numOfSources != 2 };
+        mTrajectoryBox.setSymmetricLinkComboState(symmetricLinkAllowed);
+        if (symmetricLinkAllowed) {
+            auto const isCurrentPositionSourceLinkSymmetric{
+                currentPositionSourceLink == PositionSourceLink::linkSymmetricX
+                || currentPositionSourceLink == PositionSourceLink::linkSymmetricY
+            };
+            if (isCurrentPositionSourceLinkSymmetric) {
+                mProcessor.setPositionSourceLink(PositionSourceLink::independent);
+                /*mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
+                updateSourceLinkCombo(PositionSourceLink::independent);*/
+            }
         }
+
         mSelectedSource = {};
         mProcessor.setNumberOfSources(numOfSources);
         mSettingsBox.setNumberOfSources(numOfSources);
@@ -531,20 +538,20 @@ void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 
 //==============================================================================
 // TrajectoryBoxComponent::Listener callbacks.
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink newSourceLink)
+void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink const sourceLink)
 {
     auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionSourceLink) };
     auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionSourceLink) };
     parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink newSourceLink)
+void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink const sourceLink)
 {
     auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(newSourceLink) - 1.0f) / howMany };
+    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSourceLink) };
     auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::elevationSourceLink) };
     parameter->setValueNotifyingHost(value);

@@ -30,13 +30,22 @@ class TrajectoryBoxComponent final : public Component
 {
 public:
     //==============================================================================
-    struct Listener {
-        virtual ~Listener() {}
+    class Listener
+    {
+    public:
+        Listener() = default;
+        virtual ~Listener() = default;
 
-        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink value) = 0;
-        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink value) = 0;
-        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) = 0;
-        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) = 0;
+        Listener(Listener const &) = default;
+        Listener(Listener &&) = default;
+
+        Listener & operator=(Listener const &) = default;
+        Listener & operator=(Listener &&) = default;
+        //==============================================================================
+        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) = 0;
+        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) = 0;
+        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType trajectoryType) = 0;
+        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType trajectoryType) = 0;
         virtual void trajectoryBoxPositionBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxElevationBackAndForthChanged(bool value) = 0;
         virtual void trajectoryBoxPositionDampeningCyclesChanged(int value) = 0;
@@ -51,16 +60,14 @@ public:
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
-
     ListenerList<Listener> mListeners;
-
     SpatMode mSpatMode;
 
     Label mSourceLinkLabel;
-
     Label mTrajectoryTypeLabel;
+
     ComboBox mPositionTrajectoryTypeCombo;
-    ComboBox mElevationTracjectoryTypeCombo;
+    ComboBox mElevationTrajectoryTypeCombo;
 
     ToggleButton mPositionBackAndForthToggle;
     ToggleButton mElevationBackAndForthToggle;
@@ -82,10 +89,10 @@ private:
     TextButton mPositionActivateButton;
     TextButton mElevationActivateButton;
 
-public:
-    //==============================================================================
     ComboBox mPositionSourceLinkCombo;
     ComboBox mElevationSourceLinkCombo;
+
+public:
     //==============================================================================
     explicit TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~TrajectoryBoxComponent() final = default;
@@ -113,6 +120,14 @@ public:
     bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
+
+    ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
+    ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
+    ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
+    ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
+
+    enum class SymmetricLinkComboState { enabled, disabled };
+    void setSymmetricLinkComboState(bool const allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
