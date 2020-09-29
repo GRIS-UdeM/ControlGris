@@ -179,7 +179,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 //==============================================================================
 void AutomationManager::setPrimarySourcePosition(Point<float> const & pos)
 {
-    mPrimarySource.setPosition(pos, SourceLinkNotification::notify);
+    mPrimarySource.setPosition(pos, SourceLinkBehavior::moveSourceAnchor);
 }
 
 //==============================================================================
@@ -213,7 +213,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory = Trajectory{ type, startPos };
     }
-    mPrimarySource.setPosition(startPos, SourceLinkNotification::notify);
+    mPrimarySource.setPosition(startPos, SourceLinkBehavior::moveSourceAnchor);
 }
 
 //==============================================================================
@@ -245,7 +245,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
-        mPrimarySource.setPosition(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
+        mPrimarySource.setPosition(mCurrentTrajectoryPoint, SourceLinkBehavior::moveSourceAnchor);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -255,7 +255,7 @@ void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
         auto const currentElevation{ MAX_ELEVATION * (mCurrentTrajectoryPoint.getY() + 1.0f) / 2.0f };
-        mPrimarySource.setElevation(currentElevation, SourceLinkNotification::notify);
+        mPrimarySource.setElevation(currentElevation, SourceLinkBehavior::moveSourceAnchor);
         sendTrajectoryPositionChangedEvent();
     }
 }

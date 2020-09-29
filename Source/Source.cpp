@@ -23,7 +23,7 @@
 #include <algorithm>
 
 //==============================================================================
-void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sourceLinkNotification)
+void Source::setAzimuth(Radians const azimuth, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const balancedAzimuth{ azimuth.simplified() };
     if (balancedAzimuth != mAzimuth) {
@@ -34,7 +34,7 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkNotification const sour
 }
 
 //==============================================================================
-void Source::setAzimuth(Normalized const normalizedAzimuth, SourceLinkNotification const sourceLinkNotification)
+void Source::setAzimuth(Normalized const normalizedAzimuth, SourceLinkBehavior const sourceLinkNotification)
 {
     this->setAzimuth(twoPi * normalizedAzimuth.toFloat() - pi, sourceLinkNotification);
 }
@@ -46,7 +46,7 @@ Normalized Source::getNormalizedAzimuth() const
 }
 
 //==============================================================================
-void Source::setElevation(Radians const elevation, SourceLinkNotification const sourceLinkNotification)
+void Source::setElevation(Radians const elevation, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const clippedElevation{ clipElevation(elevation) };
     if (clippedElevation != mElevation) {
@@ -57,14 +57,14 @@ void Source::setElevation(Radians const elevation, SourceLinkNotification const 
 }
 
 //==============================================================================
-void Source::setElevation(Normalized const normalizedElevation, SourceLinkNotification const sourceLinkNotification)
+void Source::setElevation(Normalized const normalizedElevation, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const newValue{ halfPi * normalizedElevation.toFloat() };
     setElevation(newValue, sourceLinkNotification);
 }
 
 //==============================================================================
-void Source::setDistance(float const distance, SourceLinkNotification const sourceLinkNotification)
+void Source::setDistance(float const distance, SourceLinkBehavior const sourceLinkNotification)
 {
     jassert(distance >= 0.0f);
 
@@ -79,7 +79,7 @@ void Source::setDistance(float const distance, SourceLinkNotification const sour
 void Source::setCoordinates(Radians const azimuth,
                             Radians const elevation,
                             float const distance,
-                            SourceLinkNotification const sourceLinkNotification)
+                            SourceLinkBehavior const sourceLinkNotification)
 {
     auto const balancedAzimuth{ azimuth.simplified() };
     auto const clippedElevation{ clipElevation(elevation) };
@@ -113,7 +113,7 @@ void Source::setElevationSpan(Normalized const elevationSpan)
 }
 
 //==============================================================================
-void Source::setX(float const x, SourceLinkNotification const sourceLinkNotification)
+void Source::setX(float const x, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const clippedX{ clipCoordinate(x) };
     if (clippedX != mPosition.getX()) {
@@ -124,19 +124,19 @@ void Source::setX(float const x, SourceLinkNotification const sourceLinkNotifica
 }
 
 //==============================================================================
-void Source::setX(Normalized const x, SourceLinkNotification const sourceLinkNotification)
+void Source::setX(Normalized const x, SourceLinkBehavior const sourceLinkNotification)
 {
     setX(x.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
 //==============================================================================
-void Source::setY(Normalized const y, SourceLinkNotification const sourceLinkNotification)
+void Source::setY(Normalized const y, SourceLinkBehavior const sourceLinkNotification)
 {
     setY(y.toFloat() * 2.0f - 1.0f, sourceLinkNotification);
 }
 
 //==============================================================================
-void Source::setY(float const y, SourceLinkNotification const sourceLinkNotification)
+void Source::setY(float const y, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const clippedY{ clipCoordinate(y) };
     if (y != mPosition.getY()) {
@@ -147,7 +147,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
 }
 
 //==============================================================================
-void Source::setPosition(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
+void Source::setPosition(Point<float> const & position, SourceLinkBehavior const sourceLinkNotification)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
     if (mPosition != clippedPosition) {
@@ -258,10 +258,10 @@ Point<float> Source::clipPosition(Point<float> const & position, SpatMode const 
 }
 
 //==============================================================================
-void Source::sendNotifications(SourceLinkNotification const sourceLinkNotification)
+void Source::sendNotifications(SourceLinkBehavior const sourceLinkNotification)
 {
     mGuiChangeBroadcaster.sendChangeMessage();
-    if (sourceLinkNotification == SourceLinkNotification::notify) {
+    if (sourceLinkNotification == SourceLinkBehavior::moveSourceAnchor) {
         auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
         /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
          * trigger a very bad priority inversion because of how frequent this method gets called */

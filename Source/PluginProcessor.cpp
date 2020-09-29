@@ -175,7 +175,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
-        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkNotification::silent);
+        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkBehavior::doNothing);
     }
 
     auto * paramX{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
@@ -222,13 +222,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     Normalized const normalized{ newValue };
     if (parameterId.compare(Automation::Ids::X) == 0) {
-        mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setX(normalized, SourceLinkBehavior::moveSourceAnchor);
     } else if (parameterId.compare(Automation::Ids::Y) == 0) {
         Normalized const invNormalized{ 1.0f - newValue };
-        mSources.getPrimarySource().setY(invNormalized, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setY(invNormalized, SourceLinkBehavior::moveSourceAnchor);
     } else if (parameterId.compare(Automation::Ids::Z) == 0 && mSpatMode == SpatMode::cube) {
         auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
-        mSources.getPrimarySource().setElevation(newElevation, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setElevation(newElevation, SourceLinkBehavior::moveSourceAnchor);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
@@ -563,21 +563,21 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     }
 
     if (x != -1.0f && y != -1.0f) {
-        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, SourceLinkBehavior::moveSourceAnchor);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     } else if (y != -1.0f) {
-        mSources.getPrimarySource().setY(y, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setY(y, SourceLinkBehavior::moveSourceAnchor);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     } else if (x != -1.0f) {
-        mSources.getPrimarySource().setX(x, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setX(x, SourceLinkBehavior::moveSourceAnchor);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     }
 
     if (z != -1.0f) {
-        mSources.getPrimarySource().setY(z, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setY(z, SourceLinkBehavior::moveSourceAnchor);
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
         mPresetManager.loadIfPresetChanged(0);
     }
@@ -827,12 +827,12 @@ void ControlGrisAudioProcessor::setPluginState()
             auto const index{ source.getIndex().toString() };
             source.setAzimuth(
                 Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_azimuth_") + index) },
-                SourceLinkNotification::notify);
+                SourceLinkBehavior::moveSourceAnchor);
             source.setElevation(
                 Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_elevation_") + index) },
-                SourceLinkNotification::notify);
+                SourceLinkBehavior::moveSourceAnchor);
             source.setDistance(mAudioProcessorValueTreeState.state.getProperty(String("p_distance_") + index),
-                               SourceLinkNotification::notify);
+                               SourceLinkBehavior::moveSourceAnchor);
         }
     }
 
@@ -880,22 +880,22 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
     auto & source{ mSources[sourceIndex] };
     switch (parameterId) {
     case SourceParameter::azimuth:
-        source.setAzimuth(normalized, SourceLinkNotification::notify);
+        source.setAzimuth(normalized, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty("p_azimuth_" + param_id, value, nullptr);
         break;
     case SourceParameter::elevation:
-        source.setElevation(normalized, SourceLinkNotification::notify);
+        source.setElevation(normalized, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty(String("p_elevation_") + param_id, value, nullptr);
         break;
     case SourceParameter::distance:
-        source.setDistance(value, SourceLinkNotification::notify);
+        source.setDistance(value, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty(String("p_distance_") + param_id, value, nullptr);
         break;
     case SourceParameter::x:
-        source.setX(value, SourceLinkNotification::notify);
+        source.setX(value, SourceLinkBehavior::moveSourceAnchor);
         break;
     case SourceParameter::y:
-        source.setY(value, SourceLinkNotification::notify);
+        source.setY(value, SourceLinkBehavior::moveSourceAnchor);
         break;
     case SourceParameter::azimuthSpan:
         for (auto & sourceRef : mSources) {

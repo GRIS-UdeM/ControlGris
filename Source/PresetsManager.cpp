@@ -149,7 +149,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         terminalPosition = snapshots.primary.position;
     }
-    mSources.getPrimarySource().setPosition(terminalPosition, SourceLinkNotification::notify);
+    mSources.getPrimarySource().setPosition(terminalPosition, SourceLinkBehavior::moveSourceAnchor);
 
     Radians elevation{};
     if (presetData->hasAttribute(zTerminalPositionId)) {
@@ -159,7 +159,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         elevation = snapshots.primary.z;
     };
-    mSources.getPrimarySource().setElevation(elevation, SourceLinkNotification::notify);
+    mSources.getPrimarySource().setElevation(elevation, SourceLinkBehavior::moveSourceAnchor);
 
     mLastLoadedPreset = presetNumber;
     mSourceMovedSinceLastRecall = false;

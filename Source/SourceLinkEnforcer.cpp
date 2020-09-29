@@ -89,7 +89,7 @@ class IndependentStrategy final : public LinkStrategy
     //==============================================================================
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
-        finalState.setPosition(initialState.position, SourceLinkNotification::silent);
+        finalState.setPosition(initialState.position, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState_implementation(
@@ -130,7 +130,7 @@ class CircularStrategy final : public LinkStrategy
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
         auto const finalPosition{ initialState.position.rotatedAboutOrigin(mRotation.getAsRadians()) * mRadiusRatio };
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -169,7 +169,7 @@ private:
         auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
         Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -261,7 +261,7 @@ private:
         Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
                                           std::sin(finalAngle.getAsRadians()) * finalRadius };
 
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -354,7 +354,7 @@ private:
         Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
                                           std::sin(finalAngle.getAsRadians()) * mRadius };
 
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -390,7 +390,7 @@ class LinkSymmetricXStrategy final : public LinkStrategy
                                 [[maybe_unused]] SourceSnapshot const & initialState) const override
     {
         Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -417,7 +417,7 @@ class LinkSymmetricYStrategy final : public LinkStrategy
                                 [[maybe_unused]] SourceSnapshot const & initialState) const override
     {
         Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -442,7 +442,7 @@ class DeltaLockStrategy final : public LinkStrategy
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
         auto const finalPosition{ initialState.position + mDelta };
-        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -466,7 +466,7 @@ class IndependentElevationStrategy final : public LinkStrategy
     //==============================================================================
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
-        finalState.setElevation(initialState.z, SourceLinkNotification::silent);
+        finalState.setElevation(initialState.z, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -491,7 +491,7 @@ class FixedElevationStrategy final : public LinkStrategy
     void enforce_implementation(Source & finalState,
                                 [[maybe_unused]] SourceSnapshot const & initialState) const override
     {
-        finalState.setElevation(mElevation, SourceLinkNotification::silent);
+        finalState.setElevation(mElevation, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -519,7 +519,7 @@ class LinearMinElevationStrategy final : public LinkStrategy
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
-        source.setElevation(newElevation, SourceLinkNotification::silent);
+        source.setElevation(newElevation, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -547,7 +547,7 @@ class LinearMaxElevationStrategy final : public LinkStrategy
     {
         auto const sourceIndex{ source.getIndex().toInt() };
         auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
-        source.setElevation(newElevation, SourceLinkNotification::silent);
+        source.setElevation(newElevation, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -571,7 +571,7 @@ class DeltaLockElevationStrategy final : public LinkStrategy
     void enforce_implementation(Source & source, SourceSnapshot const & snapshot) const override
     {
         auto const newElevation{ snapshot.z + mDelta };
-        source.setElevation(newElevation, SourceLinkNotification::silent);
+        source.setElevation(newElevation, SourceLinkBehavior::doNothing);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot

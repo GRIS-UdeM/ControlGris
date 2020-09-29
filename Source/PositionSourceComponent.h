@@ -38,8 +38,6 @@ class PositionSourceComponent final
     PositionAutomationManager & mAutomationManager;
     Source & mSource;
     DisplacementMode mDisplacementMode{};
-    juce::Point<float> mPrimarySourceComponentPositionOrigin{};
-    juce::Point<float> mMouseDragOrigin{};
 
 public:
     //==============================================================================
@@ -64,6 +62,7 @@ public:
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event) const;
+    void setDisplacementMode(MouseEvent const & event);
 
     void changeListenerCallback(ChangeBroadcaster * source) override;
     //==============================================================================

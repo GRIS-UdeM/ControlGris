@@ -66,7 +66,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-    mSource.setElevation(newElevation, SourceLinkNotification::notify);
+    mSource.setElevation(newElevation, SourceLinkBehavior::moveSourceAnchor);
 
     if (mSource.isPrimarySource()) {
         mAutomationManager.sendTrajectoryPositionChangedEvent();

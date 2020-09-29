@@ -29,7 +29,7 @@
 
 //==============================================================================
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
-enum class SourceLinkNotification { notify, silent };
+enum class SourceLinkBehavior { moveSourceAnchor, doNothing, moveAllSources };
 //==============================================================================
 class Source
 {
@@ -84,37 +84,34 @@ public:
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     SpatMode getSpatMode() const { return mSpatMode; }
 
-    void setAzimuth(Radians azimuth, SourceLinkNotification sourceLinkNotification);
-    void setAzimuth(Normalized azimuth, SourceLinkNotification sourceLinkNotification);
+    void setAzimuth(Radians azimuth, SourceLinkBehavior sourceLinkNotification);
+    void setAzimuth(Normalized azimuth, SourceLinkBehavior sourceLinkNotification);
     Radians getAzimuth() const { return mAzimuth; }
     Normalized getNormalizedAzimuth() const;
 
-    void setElevation(Radians elevation, SourceLinkNotification sourceLinkNotification);
-    void setElevation(Normalized elevation, SourceLinkNotification sourceLinkNotification);
+    void setElevation(Radians elevation, SourceLinkBehavior sourceLinkNotification);
+    void setElevation(Normalized elevation, SourceLinkBehavior sourceLinkNotification);
     Radians getElevation() const { return mElevation; }
     Normalized getNormalizedElevation() const;
 
-    void setDistance(float distance, SourceLinkNotification sourceLinkNotification);
+    void setDistance(float distance, SourceLinkBehavior sourceLinkNotification);
     float getDistance() const { return mDistance; }
     void setAzimuthSpan(Normalized azimuthSpan);
     Normalized getAzimuthSpan() const { return mAzimuthSpan; }
     void setElevationSpan(Normalized elevationSpan);
     Normalized getElevationSpan() const { return mElevationSpan; }
 
-    void setCoordinates(Radians azimuth,
-                        Radians elevation,
-                        float distance,
-                        SourceLinkNotification sourceLinkNotification);
+    void setCoordinates(Radians azimuth, Radians elevation, float distance, SourceLinkBehavior sourceLinkNotification);
     bool isPrimarySource() const { return mIndex == SourceIndex{ 0 }; }
 
-    void setX(float x, SourceLinkNotification sourceLinkNotification);
-    void setX(Normalized x, SourceLinkNotification sourceLinkNotification);
-    void setY(Normalized y, SourceLinkNotification sourceLinkNotification);
+    void setX(float x, SourceLinkBehavior sourceLinkNotification);
+    void setX(Normalized x, SourceLinkBehavior sourceLinkNotification);
+    void setY(Normalized y, SourceLinkBehavior sourceLinkNotification);
     float getX() const { return mPosition.getX(); }
-    void setY(float y, SourceLinkNotification sourceLinkNotification);
+    void setY(float y, SourceLinkBehavior sourceLinkNotification);
     float getY() const { return mPosition.getY(); }
     Point<float> const & getPos() const { return mPosition; }
-    void setPosition(Point<float> const & pos, SourceLinkNotification sourceLinkNotification);
+    void setPosition(Point<float> const & pos, SourceLinkBehavior sourceLinkNotification);
 
     void computeXY();
     void computeAzimuthElevation();
@@ -138,7 +135,7 @@ public:
     static Point<float> clipCubePosition(Point<float> const & position);
 
 private:
-    void sendNotifications(SourceLinkNotification sourceLinkNotification);
+    void sendNotifications(SourceLinkBehavior sourceLinkNotification);
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
     //==============================================================================
