@@ -22,17 +22,17 @@
 
 #include <JuceHeader.h>
 
+#include "Source.h"
 #include "SourceComponent.h"
 #include "StrongTypes.h"
 
 class ElevationFieldComponent;
 class ElevationAutomationManager;
-class Source;
 
 //==============================================================================
 class ElevationSourceComponent final
     : public SourceComponent
-    , public juce::ChangeListener
+    , public Source::Listener
 {
     ElevationFieldComponent & mFieldComponent;
     ElevationAutomationManager & mAutomationManager;
@@ -58,11 +58,13 @@ public:
     void mouseUp(MouseEvent const & event) override;
     void updatePositionInParent() override;
 
+protected:
+    //==============================================================================
+    void sourceMoved(Source & source, SourceLinkBehavior const sourceLinkBehavior) override;
+
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event);
-    //==============================================================================
-    void changeListenerCallback(ChangeBroadcaster * source) override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationSourceComponent)
 

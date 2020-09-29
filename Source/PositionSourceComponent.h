@@ -22,17 +22,17 @@
 
 #include <JuceHeader.h>
 
+#include "Source.h"
 #include "SourceComponent.h"
 #include "StrongTypes.h"
 
 class PositionFieldComponent;
 class PositionAutomationManager;
-class Source;
 
 //==============================================================================
 class PositionSourceComponent final
     : public SourceComponent
-    , public juce::ChangeListener
+    , public Source::Listener
 {
     PositionFieldComponent & mFieldComponent;
     PositionAutomationManager & mAutomationManager;
@@ -59,12 +59,15 @@ public:
     void mouseUp(MouseEvent const & event) override;
     void updatePositionInParent() override;
 
+protected:
+    //==============================================================================
+    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event) const;
     void setDisplacementMode(MouseEvent const & event);
-
-    void changeListenerCallback(ChangeBroadcaster * source) override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
+
 }; // class PositionSourceComponent

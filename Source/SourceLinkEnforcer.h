@@ -74,7 +74,7 @@ private:
 }; // class SourcesSnapshots
 
 //==============================================================================
-class SourceLinkEnforcer final : juce::ChangeListener
+class SourceLinkEnforcer final : Source::Listener
 {
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
@@ -104,15 +104,19 @@ public:
     [[nodiscard]] auto const & getSnapshots() const { return mSnapshots; }
     void loadSnapshots(SourcesSnapshots const & snapshots);
 
+    //==============================================================================
+    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+
 private:
     //==============================================================================
     void primarySourceMoved();
     void secondarySourceMoved(SourceIndex sourceIndex);
+    void primarySourceAnchorMoved();
+    void secondarySourceAnchorMoved(SourceIndex sourceIndex);
     void saveCurrentPositionsToInitialStates();
     void reset();
     //==============================================================================
-    void changeListenerCallback(ChangeBroadcaster * source) override;
-    //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 
+public:
 }; // class SourceLinkEnforcer

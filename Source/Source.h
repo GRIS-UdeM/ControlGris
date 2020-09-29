@@ -35,26 +35,31 @@ class Source
 {
 public:
     //==============================================================================
-    class SourceChangeBroadcaster : public juce::ChangeBroadcaster
+    class Listener
     {
-    private:
-        Source & mSource;
-
     public:
-        SourceChangeBroadcaster(Source & source) noexcept : mSource(source) {}
-        ~SourceChangeBroadcaster() noexcept = default;
+        //==============================================================================
+        Listener() noexcept = default;
+        virtual ~Listener() noexcept = default;
 
-        Source & getSource() { return mSource; }
-        Source const & getSource() const { return mSource; }
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = delete;
+
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = delete;
+        //==============================================================================
+        virtual void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) = 0;
 
     private:
-        JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceChangeBroadcaster);
-    };
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener)
+
+    }; // class Source::Listener
 
 private:
     //==============================================================================
-    SourceChangeBroadcaster mGuiChangeBroadcaster{ *this };
-    SourceChangeBroadcaster mSourceLinkChangeBroadcaster{ *this };
+    juce::ListenerList<Listener> mGuiChangeBroadcaster;
+    juce::ListenerList<Listener> mSourceLinkChangeBroadcaster;
     SourceIndex mIndex{};
     SourceId mId{ 1 };
     SpatMode mSpatMode{ SpatMode::cube };
@@ -119,13 +124,10 @@ public:
     void setColorFromIndex(int numTotalSources);
     Colour getColour() const { return mColour; }
 
-    void addGuiChangeListener(ChangeListener * listener) { mGuiChangeBroadcaster.addChangeListener(listener); }
-    void removeGuiChangeListener(ChangeListener * listener) { mGuiChangeBroadcaster.removeChangeListener(listener); }
-    void addSourceLinkListener(ChangeListener * listener) { mSourceLinkChangeBroadcaster.addChangeListener(listener); }
-    void removeSourceLinkListener(ChangeListener * listener)
-    {
-        mSourceLinkChangeBroadcaster.removeChangeListener(listener);
-    }
+    void addGuiChangeListener(Listener * listener) { mGuiChangeBroadcaster.add(listener); }
+    void removeGuiChangeListener(Listener * listener) { mGuiChangeBroadcaster.remove(listener); }
+    void addSourceLinkListener(Listener * listener) { mSourceLinkChangeBroadcaster.add(listener); }
+    void removeSourceLinkListener(Listener * listener) { mSourceLinkChangeBroadcaster.remove(listener); }
 
     static Point<float> getPositionFromAngle(Radians const angle, float radius);
     static Radians getAngleFromPosition(Point<float> const & position);
@@ -135,7 +137,9 @@ public:
     static Point<float> clipCubePosition(Point<float> const & position);
 
 private:
-    void sendNotifications(SourceLinkBehavior sourceLinkNotification);
+    //==============================================================================
+    void notifyGuiListeners();
+    void notifySourceLinkListeners(SourceLinkBehavior sourceLinkNotification);
     static Radians clipElevation(Radians elevation);
     static float clipCoordinate(float coord);
     //==============================================================================

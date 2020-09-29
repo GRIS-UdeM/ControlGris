@@ -30,10 +30,9 @@
 
 //==============================================================================
 class PresetsManager final
-    : public ChangeListener
+    : public Source::Listener
     , public ChangeBroadcaster
 {
-private:
     //==============================================================================
     int mLastLoadedPreset{ 0 };
     bool mSourceMovedSinceLastRecall{ false };
@@ -44,19 +43,31 @@ private:
 
 public:
     //==============================================================================
+    PresetsManager() = delete;
+    ~PresetsManager() noexcept override;
+
+    PresetsManager(PresetsManager const &) = delete;
+    PresetsManager(PresetsManager &&) = delete;
+
+    PresetsManager & operator=(PresetsManager const &) = delete;
+    PresetsManager & operator=(PresetsManager &&) = delete;
+    //==============================================================================
     PresetsManager(XmlElement & data,
                    Sources & sources,
                    SourceLinkEnforcer & positionLinkEnforcer,
                    SourceLinkEnforcer & elevationLinkEnforcer);
-    ~PresetsManager() noexcept final;
     //==============================================================================
     [[nodiscard]] int getCurrentPreset() const;
     [[nodiscard]] std::array<bool, NUMBER_OF_POSITION_PRESETS> getSavedPresets() const;
 
     bool loadIfPresetChanged(int presetNumber);
     bool forceLoad(int presetNumber);
-    void save(int presetNumber);
-    bool deletePreset(int presetNumber);
+    void save(int presetNumber) const;
+    bool deletePreset(int presetNumber) const;
+
+protected:
+    //==============================================================================
+    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
 
 private:
     //==============================================================================
@@ -68,7 +79,6 @@ private:
     void subscribeToSources();
     void unsubscribeToSources();
 
-    void changeListenerCallback(ChangeBroadcaster * broadcaster) final;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PresetsManager);
+    JUCE_LEAK_DETECTOR(PresetsManager)
 };

@@ -29,7 +29,7 @@ void Source::setAzimuth(Radians const azimuth, SourceLinkBehavior const sourceLi
     if (balancedAzimuth != mAzimuth) {
         mAzimuth = balancedAzimuth;
         computeXY();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -52,7 +52,7 @@ void Source::setElevation(Radians const elevation, SourceLinkBehavior const sour
     if (clippedElevation != mElevation) {
         mElevation = clippedElevation;
         computeXY();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -71,7 +71,7 @@ void Source::setDistance(float const distance, SourceLinkBehavior const sourceLi
     if (distance != mDistance) {
         mDistance = distance;
         computeXY();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -90,7 +90,7 @@ void Source::setCoordinates(Radians const azimuth,
         mElevation = elevation;
         mDistance = distance;
         computeXY();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -99,7 +99,7 @@ void Source::setAzimuthSpan(Normalized const azimuthSpan)
 {
     if (mAzimuthSpan != azimuthSpan) {
         mAzimuthSpan = azimuthSpan;
-        mGuiChangeBroadcaster.sendChangeMessage();
+        notifyGuiListeners();
     }
 }
 
@@ -108,7 +108,7 @@ void Source::setElevationSpan(Normalized const elevationSpan)
 {
     if (mElevationSpan != elevationSpan) {
         mElevationSpan = elevationSpan;
-        mGuiChangeBroadcaster.sendChangeMessage();
+        notifyGuiListeners();
     }
 }
 
@@ -119,7 +119,7 @@ void Source::setX(float const x, SourceLinkBehavior const sourceLinkNotification
     if (clippedX != mPosition.getX()) {
         mPosition.setX(clippedX);
         computeAzimuthElevation();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -142,7 +142,7 @@ void Source::setY(float const y, SourceLinkBehavior const sourceLinkNotification
     if (y != mPosition.getY()) {
         mPosition.setY(clippedY);
         computeAzimuthElevation();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -153,7 +153,7 @@ void Source::setPosition(Point<float> const & position, SourceLinkBehavior const
     if (mPosition != clippedPosition) {
         mPosition = clippedPosition;
         computeAzimuthElevation();
-        sendNotifications(sourceLinkNotification);
+        notifySourceLinkListeners(sourceLinkNotification);
     }
 }
 
@@ -245,6 +245,37 @@ Point<float> Source::clipCubePosition(Point<float> const & position)
 }
 
 //==============================================================================
+void Source::notifyGuiListeners()
+{
+    auto callback = [=](Source::Listener & listener) { listener.sourceMoved(*this, SourceLinkBehavior::doNothing); };
+    auto action = [=] { mGuiChangeBroadcaster.call(callback); };
+    auto const isMessageThread{ juce::MessageManager::getInstance()->isThisTheMessageThread() };
+    if (isMessageThread) {
+        action();
+    } else {
+        juce::MessageManager::callAsync(action);
+    }
+}
+
+//==============================================================================
+void Source::notifySourceLinkListeners(SourceLinkBehavior const sourceLinkNotification)
+{
+    notifyGuiListeners();
+    if (sourceLinkNotification != SourceLinkBehavior::doNothing) {
+        auto callback = [=](Source::Listener & listener) { listener.sourceMoved(*this, sourceLinkNotification); };
+        auto action = [=] { mSourceLinkChangeBroadcaster.call(callback); };
+        auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
+        /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
+         * trigger a very bad priority inversion because of how frequent this method gets called */
+        if (isMessageThread) {
+            action();
+        } else {
+            juce::MessageManager::callAsync(action);
+        }
+    }
+}
+
+//==============================================================================
 Point<float> Source::clipPosition(Point<float> const & position, SpatMode const spatMode)
 {
     Point<float> result{};
@@ -255,22 +286,6 @@ Point<float> Source::clipPosition(Point<float> const & position, SpatMode const 
         result = clipCubePosition(position);
     }
     return result;
-}
-
-//==============================================================================
-void Source::sendNotifications(SourceLinkBehavior const sourceLinkNotification)
-{
-    mGuiChangeBroadcaster.sendChangeMessage();
-    if (sourceLinkNotification == SourceLinkBehavior::moveSourceAnchor) {
-        auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
-        /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
-         * trigger a very bad priority inversion because of how frequent this method gets called */
-        if (isMessageThread) {
-            mSourceLinkChangeBroadcaster.sendSynchronousChangeMessage();
-        } else {
-            mSourceLinkChangeBroadcaster.sendChangeMessage();
-        }
-    }
 }
 
 //==============================================================================
@@ -293,7 +308,7 @@ void Source::setColorFromIndex(int const numTotalSources)
         hue -= 1.0f;
     }
     mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
-    mGuiChangeBroadcaster.sendChangeMessage();
+    notifyGuiListeners();
 }
 
 //==============================================================================

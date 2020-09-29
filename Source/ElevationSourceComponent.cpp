@@ -32,7 +32,7 @@ ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fie
     , mSource(source)
 {
     source.addGuiChangeListener(this);
-    this->updatePositionInParent();
+    updatePositionInParent();
 }
 
 //==============================================================================
@@ -47,7 +47,16 @@ void ElevationSourceComponent::updatePositionInParent()
     auto const newCenter{
         mFieldComponent.sourceElevationToComponentPosition(mSource.getElevation(), mSource.getIndex()).roundToInt()
     };
-    this->setCentrePosition(newCenter.getX(), newCenter.getY());
+    setCentrePosition(newCenter.getX(), newCenter.getY());
+}
+
+//==============================================================================
+void ElevationSourceComponent::sourceMoved([[maybe_unused]] Source & source,
+                                           [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+{
+    jassert(&source == &mSource);
+    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
+    updatePositionInParent();
 }
 
 //==============================================================================
@@ -56,7 +65,7 @@ void ElevationSourceComponent::mouseDown(MouseEvent const & event)
     if (mSource.isPrimarySource()) {
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
     }
-    this->setSourcePosition(event);
+    setSourcePosition(event);
     mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
@@ -96,10 +105,4 @@ void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 SourceIndex ElevationSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
-}
-
-//==============================================================================
-void ElevationSourceComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * source)
-{
-    this->updatePositionInParent();
 }

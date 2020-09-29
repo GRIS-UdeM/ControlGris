@@ -239,7 +239,7 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
 }
 
 //==============================================================================
-void PresetsManager::save(int const presetNumber)
+void PresetsManager::save(int const presetNumber) const
 {
     auto newData{ createPresetData(presetNumber) };
 
@@ -256,7 +256,7 @@ void PresetsManager::save(int const presetNumber)
 }
 
 //==============================================================================
-bool PresetsManager::deletePreset(int presetNumber)
+bool PresetsManager::deletePreset(int const presetNumber) const
 {
     auto maybe_data{ getPresetData(presetNumber) };
 
@@ -269,6 +269,17 @@ bool PresetsManager::deletePreset(int presetNumber)
     mData.sortChildElements(sorter);
 
     return true;
+}
+
+//==============================================================================
+void PresetsManager::sourceMoved([[maybe_unused]] Source & source,
+                                 [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+{
+    jassert(sourceLinkBehavior != SourceLinkBehavior::doNothing);
+    if (!mSourceMovedSinceLastRecall) {
+        mSourceMovedSinceLastRecall = true;
+        sendChangeMessage();
+    }
 }
 
 //==============================================================================
@@ -285,15 +296,6 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
     }
 
     return result;
-}
-
-//==============================================================================
-void PresetsManager::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * broadcaster)
-{
-    if (!mSourceMovedSinceLastRecall) {
-        mSourceMovedSinceLastRecall = true;
-        sendChangeMessage();
-    }
 }
 
 //==============================================================================

@@ -715,6 +715,30 @@ void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
 }
 
 //==============================================================================
+void SourceLinkEnforcer::sourceMoved(Source & source, SourceLinkBehavior const sourceLinkBehavior)
+{
+    switch (sourceLinkBehavior) {
+    case SourceLinkBehavior::doNothing:
+        jassertfalse;
+        break;
+    case SourceLinkBehavior::moveSourceAnchor:
+        if (source.isPrimarySource()) {
+            primarySourceAnchorMoved();
+        } else {
+            secondarySourceAnchorMoved(source.getIndex());
+        }
+        break;
+    case SourceLinkBehavior::moveAllSources:
+        if (source.isPrimarySource()) {
+            primarySourceMoved();
+        } else {
+            secondarySourceMoved(source.getIndex());
+        }
+        break;
+    }
+}
+
+//==============================================================================
 void SourceLinkEnforcer::numberOfSourcesChanged()
 {
     reset();
@@ -735,6 +759,17 @@ void SourceLinkEnforcer::primarySourceMoved()
 
 //==============================================================================
 void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
+{
+}
+
+//==============================================================================
+void SourceLinkEnforcer::primarySourceAnchorMoved()
+{
+    saveCurrentPositionsToInitialStates();
+}
+
+//==============================================================================
+void SourceLinkEnforcer::secondarySourceAnchorMoved(SourceIndex const sourceIndex)
 {
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
     auto & source{ mSources[sourceIndex] };
@@ -775,20 +810,5 @@ void SourceLinkEnforcer::reset()
     saveCurrentPositionsToInitialStates();
     for (auto & source : mSources) {
         source.addSourceLinkListener(this);
-    }
-}
-
-//==============================================================================
-void SourceLinkEnforcer::changeListenerCallback(ChangeBroadcaster * broadcaster)
-{
-    auto sourceChangeBroadcaster{ dynamic_cast<Source::SourceChangeBroadcaster *>(broadcaster) };
-    jassert(sourceChangeBroadcaster != nullptr);
-    if (sourceChangeBroadcaster != nullptr) {
-        auto & source{ sourceChangeBroadcaster->getSource() };
-        if (source.isPrimarySource()) {
-            primarySourceMoved();
-        } else {
-            secondarySourceMoved(source.getIndex());
-        }
     }
 }

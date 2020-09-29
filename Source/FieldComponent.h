@@ -49,7 +49,7 @@
 //==============================================================================
 class FieldComponent
     : public Component
-    , public ChangeListener
+    , public Source::Listener
 {
 public:
     //==============================================================================
@@ -110,6 +110,8 @@ protected:
     //==============================================================================
     void drawBackgroundGrid(Graphics & g) const;
     //==============================================================================
+    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+    //==============================================================================
     virtual void drawBackground(Graphics & g) const = 0;
     virtual void applySourceSelectionToComponents() = 0;
     virtual void notifySourcePositionChanged(SourceIndex sourceIndex) = 0;
@@ -117,8 +119,6 @@ protected:
     virtual void drawSpans(Graphics & g) const = 0;
 
 private:
-    //==============================================================================
-    void changeListenerCallback(ChangeBroadcaster * broadcaster) final;
     //==============================================================================
     JUCE_LEAK_DETECTOR(FieldComponent)
 

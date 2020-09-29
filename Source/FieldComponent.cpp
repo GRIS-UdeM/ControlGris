@@ -94,8 +94,10 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
 }
 
 //==============================================================================
-void FieldComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * broadcaster)
+void FieldComponent::sourceMoved([[maybe_unused]] Source & source,
+                                 [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
 {
+    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
     repaint();
 }
 

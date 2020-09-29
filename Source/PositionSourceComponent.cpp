@@ -49,6 +49,15 @@ void PositionSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
+void PositionSourceComponent::sourceMoved([[maybe_unused]] Source & source,
+                                          [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+{
+    jassert(&source == &mSource);
+    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
+    updatePositionInParent();
+}
+
+//==============================================================================
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     setDisplacementMode(event);
@@ -109,10 +118,4 @@ void PositionSourceComponent::mouseUp(MouseEvent const & event)
 SourceIndex PositionSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
-}
-
-//==============================================================================
-void PositionSourceComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * source)
-{
-    updatePositionInParent();
 }
