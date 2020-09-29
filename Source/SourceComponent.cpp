@@ -56,3 +56,10 @@ void SourceComponent::paint(Graphics & g)
     g.setColour(Colours::white);
     g.drawFittedText(mIcon, area.getSmallestIntegerContainer(), Justification::centred, 1);
 }
+
+//==============================================================================
+SourceComponent::DisplacementMode SourceComponent::getDisplacementMode(MouseEvent const & event)
+{
+    auto const pressedModifierKey{ event.mods.getRawFlags() & DISPLACEMENT_MODIFIER };
+    return pressedModifierKey ? DisplacementMode::selectedSourceOnly : DisplacementMode::all;
+}

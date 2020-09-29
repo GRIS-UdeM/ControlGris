@@ -72,6 +72,4 @@ private:
     void reset();
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
-
-public:
 }; // class SourceLinkEnforcer

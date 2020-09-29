@@ -10,30 +10,29 @@ void LinkStrategy::computeParameters(Sources const & finalStates, SourcesSnapsho
 }
 
 //==============================================================================
-void LinkStrategy::enforce(std::array<Source, MAX_NUMBER_OF_SOURCES - 1> & finalSecondaryStates,
-                           Array<SourceSnapshot> const & initialSecondaryStates) const
+void LinkStrategy::enforce(Sources & finalStates,
+                           SourcesSnapshots const & initialState,
+                           SourceIndex const sourceIndex) const
 {
-    for (size_t i{}; i < initialSecondaryStates.size(); ++i) {
-        // TODO: this is applied to more sources than it should
-        auto & finalState{ finalSecondaryStates[i] };
-        auto const & initialState{ initialSecondaryStates.getReference(i) };
-        enforce(finalState, initialState);
+    jassert(mInitialized);
+    enforce_implementation(finalStates, initialState, sourceIndex);
+}
+
+//==============================================================================
+void LinkStrategy::enforce(Sources & finalStates, SourcesSnapshots const & initialState) const
+{
+    for (auto & source : finalStates) {
+        enforce(finalStates, initialState, source.getIndex());
     }
 }
 
 //==============================================================================
-void LinkStrategy::enforce(Source & finalState, SourceSnapshot const & initialState) const
+SourceSnapshot LinkStrategy::computeInitialStateFromFinalState(Sources const & finalStates,
+                                                               SourcesSnapshots const & initialStates,
+                                                               SourceIndex const sourceIndex) const
 {
     jassert(mInitialized);
-    enforce_implementation(finalState, initialState);
-}
-
-//==============================================================================
-SourceSnapshot LinkStrategy::computeInitialStateFromFinalState(Source const & finalState,
-                                                               SourceSnapshot const & initialState) const
-{
-    jassert(mInitialized);
-    return computeInitialStateFromFinalState_implementation(finalState, initialState);
+    return computeInitialStateFromFinalState_implementation(finalStates, initialStates, sourceIndex);
 }
 
 //==============================================================================
@@ -86,18 +85,20 @@ std::unique_ptr<LinkStrategy> LinkStrategy::make(ElevationSourceLink const sourc
 }
 
 //==============================================================================
-void IndependentStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void IndependentStrategy::enforce_implementation(Sources & finalStates,
+                                                 SourcesSnapshots const & initialStates,
+                                                 SourceIndex const sourceIndex) const
 {
-    finalState.setPosition(initialState.position, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(initialStates[sourceIndex].position, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    IndependentStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                          SourceSnapshot const & initialState) const
+    IndependentStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                          SourcesSnapshots const & initialStates,
+                                                                          SourceIndex const sourceIndex) const
 {
-    SourceSnapshot const result{ finalState };
-    return result;
+    return SourceSnapshot{ finalStates[sourceIndex] };
 }
 
 //==============================================================================
@@ -120,19 +121,25 @@ void CircularStrategy::computeParameters_implementation(Sources const & finalSta
 }
 
 //==============================================================================
-void CircularStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void CircularStrategy::enforce_implementation(Sources & finalStates,
+                                              SourcesSnapshots const & initialStates,
+                                              SourceIndex const sourceIndex) const
 {
-    auto const finalPosition{ initialState.position.rotatedAboutOrigin(mRotation.getAsRadians()) * mRadiusRatio };
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    auto const finalPosition{ initialStates[sourceIndex].position.rotatedAboutOrigin(mRotation.getAsRadians())
+                              * mRadiusRatio };
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    CircularStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                       SourceSnapshot const & initialState) const
+    CircularStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                       SourcesSnapshots const & initialStates,
+                                                                       SourceIndex const sourceIndex) const
 {
-    SourceSnapshot newInitialState{ initialState };
-    auto const newInitialPosition{ (finalState.getPos() / mRadiusRatio).rotatedAboutOrigin(-mRotation.getAsRadians()) };
+    SourceSnapshot newInitialState{ initialStates[sourceIndex] };
+    auto const newInitialPosition{
+        (finalStates[sourceIndex].getPos() / mRadiusRatio).rotatedAboutOrigin(-mRotation.getAsRadians())
+    };
     newInitialState.position = newInitialPosition;
     return newInitialState;
 }
@@ -150,27 +157,30 @@ void CircularFixedRadiusStrategy::computeParameters_implementation(Sources const
 }
 
 //==============================================================================
-void CircularFixedRadiusStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void CircularFixedRadiusStrategy::enforce_implementation(Sources & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const
 {
-    auto const initialAngle{ Radians::fromPoint(initialState.position) };
+    auto const initialAngle{ Radians::fromPoint(initialStates[sourceIndex].position) };
     auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
     Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot CircularFixedRadiusStrategy::computeInitialStateFromFinalState_implementation(
-    Source const & finalState,
-    SourceSnapshot const & intialState) const
+    Sources const & finalStates,
+    SourcesSnapshots const & initialStates,
+    SourceIndex const sourceIndex) const
 {
-    auto const finalPosition{ finalState.getPos() };
-    SourceSnapshot newInitialState{ intialState };
+    auto const finalPosition{ finalStates[sourceIndex].getPos() };
+    auto newInitialState{ initialStates[sourceIndex] };
 
     auto const finalAngle{ Radians::fromPoint(finalPosition) };
-    auto const inversedFinalAngle{ (finalAngle - mRotation).getAsRadians() };
-    Point<float> const newInitialPosition{ std::cos(inversedFinalAngle) * mRadius,
-                                           std::sin(inversedFinalAngle) * mRadius };
+    auto const inverseFinalAngle{ (finalAngle - mRotation).getAsRadians() };
+    Point<float> const newInitialPosition{ std::cos(inverseFinalAngle) * mRadius,
+                                           std::sin(inverseFinalAngle) * mRadius };
 
     newInitialState.position = newInitialPosition;
     return newInitialState;
@@ -230,29 +240,31 @@ void CircularFixedAngleStrategy::computeParameters_implementation(Sources const 
 }
 
 //==============================================================================
-void CircularFixedAngleStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void CircularFixedAngleStrategy::enforce_implementation(Sources & finalStates,
+                                                        SourcesSnapshots const & initialStates,
+                                                        SourceIndex const sourceIndex) const
 {
-    auto const sourceIndex{ finalState.getIndex() };
     auto const ordering{ mOrdering[sourceIndex.toInt()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
-    auto const initialRadius{ initialState.position.getDistanceFromOrigin() };
+    auto const initialRadius{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
     auto const finalRadius{ initialRadius * mRadiusRatio };
     Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
                                       std::sin(finalAngle.getAsRadians()) * finalRadius };
 
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
-SourceSnapshot CircularFixedAngleStrategy::computeInitialStateFromFinalState_implementation(
-    Source const & finalState,
-    SourceSnapshot const & initialState) const
+SourceSnapshot
+    CircularFixedAngleStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                                 SourcesSnapshots const & initialStates,
+                                                                                 SourceIndex const sourceIndex) const
 {
-    SourceSnapshot newInitialState{ initialState };
+    SourceSnapshot newInitialState{ initialStates[sourceIndex] };
 
-    auto const newInitialRadius{ finalState.getPos().getDistanceFromOrigin() / mRadiusRatio };
+    auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / mRadiusRatio };
 
-    Radians const finalAngle{ std::atan2(finalState.getY(), finalState.getX()) };
+    Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
     auto const newInitialAngle{ finalAngle - mRotation };
 
     Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * newInitialRadius,
@@ -316,26 +328,28 @@ void CircularFullyFixedStrategy::computeParameters_implementation(Sources const 
 }
 
 //==============================================================================
-void CircularFullyFixedStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void CircularFullyFixedStrategy::enforce_implementation(Sources & finalStates,
+                                                        SourcesSnapshots const & initialStates,
+                                                        SourceIndex const sourceIndex) const
 {
-    auto const sourceIndex{ finalState.getIndex() };
     auto const ordering{ mOrdering[sourceIndex.toInt()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
     Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
                                       std::sin(finalAngle.getAsRadians()) * mRadius };
 
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
-SourceSnapshot CircularFullyFixedStrategy::computeInitialStateFromFinalState_implementation(
-    Source const & finalState,
-    SourceSnapshot const & initialState) const
+SourceSnapshot
+    CircularFullyFixedStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                                 SourcesSnapshots const & initialStates,
+                                                                                 SourceIndex const sourceIndex) const
 {
-    SourceSnapshot newInitialState{ initialState };
+    SourceSnapshot newInitialState{ initialStates[sourceIndex] };
 
-    Radians const finalAngle{ std::atan2(finalState.getY(), finalState.getX()) };
+    Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
     auto const newInitialAngle{ finalAngle - mRotation };
 
     Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * mRadius,
@@ -354,19 +368,22 @@ void LinkSymmetricXStrategy::computeParameters_implementation(Sources const & fi
 }
 
 //==============================================================================
-void LinkSymmetricXStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void LinkSymmetricXStrategy::enforce_implementation(Sources & finalStates,
+                                                    SourcesSnapshots const & initialStates,
+                                                    SourceIndex const sourceIndex) const
 {
     Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    LinkSymmetricXStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                             SourceSnapshot const & initialState) const
+    LinkSymmetricXStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                             SourcesSnapshots const & initialStates,
+                                                                             SourceIndex const sourceIndex) const
 {
     // nothing to do here!
-    return SourceSnapshot{ finalState };
+    return SourceSnapshot{ finalStates[sourceIndex] };
 }
 
 //==============================================================================
@@ -377,19 +394,22 @@ void LinkSymmetricYStrategy::computeParameters_implementation(Sources const & fi
 }
 
 //==============================================================================
-void LinkSymmetricYStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void LinkSymmetricYStrategy::enforce_implementation(Sources & finalStates,
+                                                    SourcesSnapshots const & initialStates,
+                                                    SourceIndex const sourceIndex) const
 {
     Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    LinkSymmetricYStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                             SourceSnapshot const & intialState) const
+    LinkSymmetricYStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                             SourcesSnapshots const & initialStates,
+                                                                             SourceIndex const sourceIndex) const
 {
     // nothing to do here!
-    return SourceSnapshot{ finalState };
+    return SourceSnapshot{ finalStates[sourceIndex] };
 }
 
 //==============================================================================
@@ -400,38 +420,43 @@ void DeltaLockStrategy::computeParameters_implementation(Sources const & finalSt
 }
 
 //==============================================================================
-void DeltaLockStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void DeltaLockStrategy::enforce_implementation(Sources & finalStates,
+                                               SourcesSnapshots const & initialStates,
+                                               SourceIndex const sourceIndex) const
 {
-    auto const finalPosition{ initialState.position + mDelta };
-    finalState.setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    auto const finalPosition{ initialStates[sourceIndex].position + mDelta };
+    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    DeltaLockStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                        SourceSnapshot const & intialState) const
+    DeltaLockStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                        SourcesSnapshots const & initialStates,
+                                                                        SourceIndex const sourceIndex) const
 {
-    SourceSnapshot newInitialState{ intialState };
+    SourceSnapshot newInitialState{ initialStates[sourceIndex] };
 
-    auto const newInitialPosition{ finalState.getPos() - mDelta };
+    auto const newInitialPosition{ finalStates[sourceIndex].getPos() - mDelta };
     newInitialState.position = newInitialPosition;
 
     return newInitialState;
 }
 
 //==============================================================================
-void IndependentElevationStrategy::enforce_implementation(Source & finalState,
-                                                          SourceSnapshot const & initialState) const
+void IndependentElevationStrategy::enforce_implementation(Sources & finalStates,
+                                                          SourcesSnapshots const & initialStates,
+                                                          SourceIndex const sourceIndex) const
 {
-    finalState.setElevation(initialState.z, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(initialStates[sourceIndex].z, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot IndependentElevationStrategy::computeInitialStateFromFinalState_implementation(
-    Source const & finalState,
-    SourceSnapshot const & initialState) const
+    Sources const & finalStates,
+    SourcesSnapshots const & initialStates,
+    SourceIndex const sourceIndex) const
 {
-    return SourceSnapshot{ finalState };
+    return SourceSnapshot{ finalStates[sourceIndex] };
 }
 
 //==============================================================================
@@ -442,17 +467,20 @@ void FixedElevationStrategy::computeParameters_implementation(Sources const & fi
 }
 
 //==============================================================================
-void FixedElevationStrategy::enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const
+void FixedElevationStrategy::enforce_implementation(Sources & finalStates,
+                                                    SourcesSnapshots const & initialStates,
+                                                    SourceIndex const sourceIndex) const
 {
-    finalState.setElevation(mElevation, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(mElevation, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    FixedElevationStrategy::computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                                             SourceSnapshot const & initialState) const
+    FixedElevationStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                             SourcesSnapshots const & initialStates,
+                                                                             SourceIndex const sourceIndex) const
 {
-    return initialState;
+    return initialStates[sourceIndex];
 }
 
 //==============================================================================
@@ -464,19 +492,23 @@ void LinearMinElevationStrategy::computeParameters_implementation(Sources const 
 }
 
 //==============================================================================
-void LinearMinElevationStrategy::enforce_implementation(Source & source, SourceSnapshot const & snapshot) const
+void LinearMinElevationStrategy::enforce_implementation(Sources & finalStates,
+                                                        SourcesSnapshots const & initialStates,
+                                                        SourceIndex const sourceIndex) const
 {
-    auto const sourceIndex{ source.getIndex().toInt() };
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
-    source.setElevation(newElevation, SourceLinkBehavior::doNothing);
+    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
+    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
-SourceSnapshot
-    LinearMinElevationStrategy::computeInitialStateFromFinalState_implementation(Source const & source,
-                                                                                 SourceSnapshot const & snapshot) const
+SourceSnapshot LinearMinElevationStrategy::computeInitialStateFromFinalState_implementation(
+    [[maybe_unused]] Sources const & finalStates,
+    SourcesSnapshots const & initialStates,
+    SourceIndex const sourceIndex) const
 {
-    return snapshot;
+    SourceSnapshot result{};
+    result.z = finalStates[sourceIndex].getElevation() - mBaseElevation * sourceIndex.toInt();
+    return result;
 }
 
 //==============================================================================
@@ -488,19 +520,21 @@ void LinearMaxElevationStrategy::computeParameters_implementation(Sources const 
 }
 
 //==============================================================================
-void LinearMaxElevationStrategy::enforce_implementation(Source & source, SourceSnapshot const & snapshot) const
+void LinearMaxElevationStrategy::enforce_implementation(Sources & finalStates,
+                                                        SourcesSnapshots const & initialStates,
+                                                        SourceIndex const sourceIndex) const
 {
-    auto const sourceIndex{ source.getIndex().toInt() };
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex };
-    source.setElevation(newElevation, SourceLinkBehavior::doNothing);
+    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
+    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    LinearMaxElevationStrategy::computeInitialStateFromFinalState_implementation(Source const & source,
-                                                                                 SourceSnapshot const & snapshot) const
+    LinearMaxElevationStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                                 SourcesSnapshots const & initialStates,
+                                                                                 SourceIndex const sourceIndex) const
 {
-    return snapshot;
+    return initialStates[sourceIndex];
 }
 
 //==============================================================================
@@ -511,20 +545,23 @@ void DeltaLockElevationStrategy::computeParameters_implementation(Sources const 
 }
 
 //==============================================================================
-void DeltaLockElevationStrategy::enforce_implementation(Source & source, SourceSnapshot const & snapshot) const
+void DeltaLockElevationStrategy::enforce_implementation(Sources & finalStates,
+                                                        SourcesSnapshots const & initialStates,
+                                                        SourceIndex const sourceIndex) const
 {
-    auto const newElevation{ snapshot.z + mDelta };
-    source.setElevation(newElevation, SourceLinkBehavior::doNothing);
+    auto const newElevation{ initialStates[sourceIndex].z + mDelta };
+    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
 }
 
 //==============================================================================
 SourceSnapshot
-    DeltaLockElevationStrategy::computeInitialStateFromFinalState_implementation(Source const & source,
-                                                                                 SourceSnapshot const & snapshot) const
+    DeltaLockElevationStrategy::computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                                                 SourcesSnapshots const & initialStates,
+                                                                                 SourceIndex const sourceIndex) const
 {
-    SourceSnapshot result{ snapshot };
+    SourceSnapshot result{ initialStates[sourceIndex] };
 
-    auto const initialElevation{ source.getElevation() - mDelta };
+    auto const initialElevation{ finalStates[sourceIndex].getElevation() - mDelta };
     result.z = initialElevation;
 
     return result;

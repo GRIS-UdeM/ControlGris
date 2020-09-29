@@ -60,7 +60,7 @@ void PositionSourceComponent::sourceMoved([[maybe_unused]] Source & source,
 //==============================================================================
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
-    setDisplacementMode(event);
+    mDisplacementMode = getDisplacementMode(event);
     if (mSource.isPrimarySource()) {
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
@@ -82,17 +82,13 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
         eventRelativeToFieldComponent.getPosition().toFloat()) };
     mSource.setPosition(newPosition, sourceLinkBehavior);
 
-    if (mSource.isPrimarySource()) {
+    if (mSource.isPrimarySource() || sourceLinkBehavior == SourceLinkBehavior::moveAllSources) {
         mAutomationManager.sendTrajectoryPositionChangedEvent();
     }
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
-}
-
-//==============================================================================
-void PositionSourceComponent::setDisplacementMode(MouseEvent const & event)
-{
-    auto const pressedModifierKey{ event.mods.getRawFlags() & DISPLACEMENT_MODIFIER };
-    mDisplacementMode = pressedModifierKey ? DisplacementMode::selectedSourceOnly : DisplacementMode::all;
+    if (sourceLinkBehavior == SourceLinkBehavior::moveAllSources) {
+        mAutomationManager.recomputeTrajectory();
+    }
 }
 
 //==============================================================================

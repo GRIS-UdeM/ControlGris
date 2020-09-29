@@ -62,6 +62,7 @@ void ElevationSourceComponent::sourceMoved([[maybe_unused]] Source & source,
 //==============================================================================
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
+    mDisplacementMode = getDisplacementMode(event);
     if (mSource.isPrimarySource()) {
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
     }
@@ -70,12 +71,15 @@ void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationSourceComponent::setSourcePosition(MouseEvent const & event)
+void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
 {
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-    mSource.setElevation(newElevation, SourceLinkBehavior::moveSourceAnchor);
+    auto const sourceLinkBehavior{ mDisplacementMode == DisplacementMode::selectedSourceOnly
+                                       ? SourceLinkBehavior::moveSourceAnchor
+                                       : SourceLinkBehavior::moveAllSources };
+    mSource.setElevation(newElevation, sourceLinkBehavior);
 
     if (mSource.isPrimarySource()) {
         mAutomationManager.sendTrajectoryPositionChangedEvent();
@@ -88,7 +92,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 {
     if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
-        this->setSourcePosition(event);
+        setSourcePosition(event);
     }
 }
 

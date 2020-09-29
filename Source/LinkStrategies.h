@@ -9,10 +9,12 @@
 class Source;
 class Sources;
 class SourcesSnapshots;
+class SourceLinkEnforcer;
 
 //==============================================================================
 class LinkStrategy
 {
+    friend SourceLinkEnforcer;
     bool mInitialized{ false };
 
 public:
@@ -27,11 +29,12 @@ public:
     LinkStrategy & operator=(LinkStrategy &&) = default;
     //==============================================================================
     void computeParameters(Sources const & finalStates, SourcesSnapshots const & initialStates);
-    void enforce(std::array<Source, MAX_NUMBER_OF_SOURCES - 1> & finalSecondaryStates,
-                 Array<SourceSnapshot> const & initialSecondaryStates) const;
-    void enforce(Source & finalState, SourceSnapshot const & initialState) const;
-    [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState(Source const & finalState,
-                                                                   SourceSnapshot const & initialState) const;
+    void enforce(Sources & finalStates, SourcesSnapshots const & initialState, SourceIndex const sourceIndex) const;
+    void enforce(Sources & finalStates, SourcesSnapshots const & initialState) const;
+    [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState(Sources const & finalStates,
+                                                                   SourcesSnapshots const & initialStates,
+                                                                   SourceIndex const sourceIndex) const;
+    bool isInitialized() const { return mInitialized; }
     //==============================================================================
     static std::unique_ptr<LinkStrategy> make(PositionSourceLink sourceLink);
     static std::unique_ptr<LinkStrategy> make(ElevationSourceLink sourceLink);
@@ -40,10 +43,13 @@ private:
     //==============================================================================
     virtual void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates)
         = 0;
-    virtual void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const = 0;
+    virtual void enforce_implementation(Sources & finalStates,
+                                        SourcesSnapshots const & initialStates,
+                                        SourceIndex const sourceIndex) const = 0;
     [[nodiscard]] virtual SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & initialState) const = 0;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const = 0;
     //==============================================================================
     JUCE_LEAK_DETECTOR(LinkStrategy)
 
@@ -54,10 +60,13 @@ private:
 class IndependentStrategy final : public LinkStrategy
 {
     void computeParameters_implementation(Sources const &, SourcesSnapshots const &) override {}
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
-    [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState_implementation(
-        Source const & finalState,
-        [[maybe_unused]] SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
+    [[nodiscard]] SourceSnapshot
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(IndependentStrategy)
 };
@@ -69,10 +78,13 @@ class CircularStrategy final : public LinkStrategy
     float mRadiusRatio{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalState, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularStrategy)
 };
@@ -84,10 +96,13 @@ class CircularFixedRadiusStrategy final : public LinkStrategy
     float mRadius{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & intialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularFixedRadiusStrategy)
 };
@@ -102,10 +117,13 @@ class CircularFixedAngleStrategy final : public LinkStrategy
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularFixedAngleStrategy)
 };
@@ -121,10 +139,13 @@ class CircularFullyFixedStrategy final : public LinkStrategy
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularFullyFixedStrategy)
 };
@@ -136,11 +157,13 @@ class LinkSymmetricXStrategy final : public LinkStrategy
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates,
                                           [[maybe_unused]] SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState,
-                                [[maybe_unused]] SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation([[maybe_unused]] Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(LinkSymmetricXStrategy)
 };
@@ -152,11 +175,13 @@ class LinkSymmetricYStrategy final : public LinkStrategy
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates,
                                           [[maybe_unused]] SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState,
-                                [[maybe_unused]] SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & finalState,
-                                                         SourceSnapshot const & intialState) const override;
+        computeInitialStateFromFinalState_implementation([[maybe_unused]] Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(LinkSymmetricYStrategy)
 };
@@ -167,10 +192,13 @@ class DeltaLockStrategy final : public LinkStrategy
     Point<float> mDelta;
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & intialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(DeltaLockStrategy)
 };
@@ -180,10 +208,13 @@ class DeltaLockStrategy final : public LinkStrategy
 class IndependentElevationStrategy final : public LinkStrategy
 {
     void computeParameters_implementation(Sources const &, SourcesSnapshots const &) override {}
-    void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation([[maybe_unused]] Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(IndependentElevationStrategy)
 };
@@ -195,11 +226,13 @@ class FixedElevationStrategy final : public LinkStrategy
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates,
                                           [[maybe_unused]] SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Source & finalState,
-                                [[maybe_unused]] SourceSnapshot const & initialState) const override;
+    void enforce_implementation(Sources & finalStates,
+                                [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & finalState,
-                                                         SourceSnapshot const & initialState) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(FixedElevationStrategy)
 };
@@ -212,10 +245,13 @@ class LinearMinElevationStrategy final : public LinkStrategy
     Radians mElevationPerSource{};
     //==============================================================================
     void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const override;
+    void enforce_implementation(Sources & finalStates,
+                                [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & source,
-                                                         SourceSnapshot const & snapshot) const override;
+        computeInitialStateFromFinalState_implementation([[maybe_unused]] Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(LinearMinElevationStrategy)
 };
@@ -228,10 +264,13 @@ class LinearMaxElevationStrategy final : public LinkStrategy
     Radians mElevationPerSource{};
     //==============================================================================
     void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Source & source, [[maybe_unused]] SourceSnapshot const & snapshot) const override;
+    void enforce_implementation(Sources & finalStates,
+                                [[maybe_unused]] SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation([[maybe_unused]] Source const & source,
-                                                         SourceSnapshot const & snapshot) const override;
+        computeInitialStateFromFinalState_implementation([[maybe_unused]] Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(LinearMaxElevationStrategy)
 };
@@ -242,10 +281,13 @@ class DeltaLockElevationStrategy final : public LinkStrategy
     Radians mDelta;
     //==============================================================================
     void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Source & source, SourceSnapshot const & snapshot) const override;
+    void enforce_implementation(Sources & finalStates,
+                                SourcesSnapshots const & initialStates,
+                                SourceIndex const sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Source const & source,
-                                                         SourceSnapshot const & snapshot) const override;
+        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+                                                         SourcesSnapshots const & initialStates,
+                                                         SourceIndex const sourceIndex) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(DeltaLockElevationStrategy)
 };

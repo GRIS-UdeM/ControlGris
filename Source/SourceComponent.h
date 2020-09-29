@@ -57,6 +57,9 @@ public:
 
     Colour getColour() const { return mColour; }
     virtual void updatePositionInParent(){}; // TEMP
+protected:
+    //==============================================================================
+    static DisplacementMode getDisplacementMode(MouseEvent const & event);
 
 private:
     //==============================================================================

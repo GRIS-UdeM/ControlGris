@@ -37,6 +37,7 @@ class ElevationSourceComponent final
     ElevationFieldComponent & mFieldComponent;
     ElevationAutomationManager & mAutomationManager;
     Source & mSource;
+    DisplacementMode mDisplacementMode;
 
 public:
     //==============================================================================
@@ -64,7 +65,7 @@ protected:
 
 private:
     //==============================================================================
-    void setSourcePosition(MouseEvent const & event);
+    void setSourcePosition(MouseEvent const & event) const;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationSourceComponent)
 

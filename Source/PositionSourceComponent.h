@@ -66,7 +66,6 @@ protected:
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event) const;
-    void setDisplacementMode(MouseEvent const & event);
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
 
