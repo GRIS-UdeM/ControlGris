@@ -93,6 +93,10 @@
             file="Source/ChangeGesturesManager.cpp"/>
       <FILE id="izOcbP" name="ChangeGesturesManager.h" compile="0" resource="0"
             file="Source/ChangeGesturesManager.h"/>
+      <FILE id="FHSJcz" name="LinkStrategies.cpp" compile="1" resource="0"
+            file="Source/LinkStrategies.cpp"/>
+      <FILE id="AEvwp0" name="LinkStrategies.h" compile="0" resource="0"
+            file="Source/LinkStrategies.h"/>
       <FILE id="VBL5zh" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="NLKhOQ" name="PluginProcessor.h" compile="0" resource="0"
@@ -107,6 +111,10 @@
             file="Source/SourceLinkEnforcer.cpp"/>
       <FILE id="oI6Fsq" name="SourceLinkEnforcer.h" compile="0" resource="0"
             file="Source/SourceLinkEnforcer.h"/>
+      <FILE id="R7fA0n" name="SourceSnapshot.h" compile="0" resource="0"
+            file="Source/SourceSnapshot.h"/>
+      <FILE id="fssYVg" name="SourceSnapshot.cpp" compile="1" resource="0"
+            file="Source/SourceSnapshot.cpp"/>
       <FILE id="F8muZf" name="Trajectory.cpp" compile="1" resource="0" file="Source/Trajectory.cpp"/>
       <FILE id="lKokDW" name="Trajectory.h" compile="0" resource="0" file="Source/Trajectory.h"/>
     </GROUP>

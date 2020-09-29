@@ -23,55 +23,9 @@
 #include <JuceHeader.h>
 
 #include "ControlGrisConstants.h"
+#include "LinkStrategies.h"
 #include "Source.h"
-
-//==============================================================================
-struct SourceSnapshot {
-    Point<float> position;
-    Radians z; // height in CUBE mode, elevation in DOME mode
-    //==============================================================================
-    SourceSnapshot() noexcept = default;
-    ~SourceSnapshot() = default;
-
-    SourceSnapshot(SourceSnapshot const &) = default;
-    SourceSnapshot(SourceSnapshot &&) = default;
-
-    SourceSnapshot & operator=(SourceSnapshot const &) = default;
-    SourceSnapshot & operator=(SourceSnapshot &&) = default;
-    //==============================================================================
-    explicit SourceSnapshot(Source const & source) noexcept : position(source.getPos()), z(source.getElevation()) {}
-
-private:
-    JUCE_LEAK_DETECTOR(SourceSnapshot)
-}; // class SourceSnapshot
-
-//==============================================================================
-struct SourcesSnapshots {
-    SourceSnapshot primary{};
-    Array<SourceSnapshot> secondaries{};
-    //==============================================================================
-    SourceSnapshot const & operator[](SourceIndex const index) const
-    {
-        jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
-        if (index.toInt() == 0) {
-            return primary;
-        }
-        return secondaries.getReference(index.toInt() - 1);
-    }
-    //==============================================================================
-    SourceSnapshot & operator[](SourceIndex const index)
-    {
-        jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
-        if (index.toInt() == 0) {
-            return primary;
-        }
-        return secondaries.getReference(index.toInt() - 1);
-    }
-    int size() const { return secondaries.size() + 1; }
-
-private:
-    JUCE_LEAK_DETECTOR(SourceSnapshot)
-}; // class SourcesSnapshots
+#include "SourceSnapshot.h"
 
 //==============================================================================
 class SourceLinkEnforcer final : Source::Listener
@@ -80,6 +34,7 @@ class SourceLinkEnforcer final : Source::Listener
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
+    std::unique_ptr<LinkStrategy> mLinkStrategy{};
 
 public:
     //==============================================================================
