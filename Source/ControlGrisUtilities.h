@@ -19,8 +19,6 @@
  *************************************************************************/
 #pragma once
 
-#include <type_traits>
-
 #include <JuceHeader.h>
 
 //==============================================================================
@@ -63,5 +61,5 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(XmlElementDataSorter);
+    JUCE_LEAK_DETECTOR(XmlElementDataSorter)
 };

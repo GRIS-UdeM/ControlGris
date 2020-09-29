@@ -204,7 +204,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
                                     mProcessor.getSpatMode());
 
     auto const preset{ static_cast<int>(static_cast<float>(
-        mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::positionPreset).getValue())) };
+        mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::POSITION_PRESET).getValue())) };
     mPositionPresetBox.setPreset(preset, false);
 
     mIsInsideSetPluginState = false;
@@ -515,25 +515,25 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
 {
-    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::azimuthSpan);
+    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::AZIMUTH_SPAN);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
 {
-    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::azimuthSpan);
+    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::AZIMUTH_SPAN);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
 {
-    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::elevationSpan);
+    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::ELEVATION_SPAN);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 {
-    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::elevationSpan);
+    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::ELEVATION_SPAN);
 }
 
 //==============================================================================
@@ -542,8 +542,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(Pos
 {
     auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionSourceLink) };
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionSourceLink) };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK) };
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_SOURCE_LINK) };
     parameter->setValueNotifyingHost(value);
 }
 
@@ -552,8 +552,9 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(El
 {
     auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSourceLink) };
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::elevationSourceLink) };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK) };
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(
+        Automation::Ids::ELEVATION_SOURCE_LINK) };
     parameter->setValueNotifyingHost(value);
 }
 
@@ -686,10 +687,10 @@ void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumb
 
     mProcessor.getPresetsManager().forceLoad(presetNumber);
 
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::positionPreset) };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };
     auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
 
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::positionPreset) };
+    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_PRESET) };
     parameter->setValueNotifyingHost(newValue);
 }
 

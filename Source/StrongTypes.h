@@ -18,8 +18,7 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#ifndef STRONGTYPESTEST_TYPES_H
-#define STRONGTYPESTEST_TYPES_H
+#pragma once
 
 #include <JuceHeader.h>
 
@@ -102,7 +101,7 @@ public:
         }
         return Radians{ std::atan2(point.getY(), point.getX()) };
     }
-};
+}; // class Radians
 
 constexpr Radians pi{ MathConstants<float>::pi };
 constexpr Radians twoPi{ MathConstants<float>::twoPi };
@@ -176,7 +175,7 @@ public:
         }
         return *this;
     }
-};
+}; // class Degrees
 
 class SourceIndex
 {
@@ -216,7 +215,7 @@ public:
     }
 
     constexpr bool isValid() const { return mValue >= 0 && mValue < 8; } // TODO: remove magic number
-};
+};                                                                       // class SourceIndex
 
 class SourceId
 {
@@ -259,6 +258,4 @@ public:
     }
 
     constexpr bool isValid() const { return mValue > 0 && mValue <= 128; } // TODO: remove magic number
-};
-
-#endif // STRONGTYPESTEST_TYPES_H
+};                                                                         // class SourceId

@@ -32,21 +32,21 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 
     std::vector<std::unique_ptr<Parameter>> parameters;
 
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::x,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::X,
                                                      String("Recording Trajectory X"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::y,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Y,
                                                      String("Recording Trajectory Y"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::z,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Z,
                                                      String("Recording Trajectory Z"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 1.0f),
@@ -55,7 +55,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(
-        Automation::Ids::positionSourceLink,
+        Automation::Ids::POSITION_SOURCE_LINK,
         String("Source Link"),
         String(),
         NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
@@ -65,7 +65,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         false,
         true,
         true));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::elevationSourceLink,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SOURCE_LINK,
                                                      String("Source Link Alt"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 4.0f, 1.0f),
@@ -76,7 +76,7 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      true,
                                                      true));
 
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::positionPreset,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::POSITION_PRESET,
                                                      String("Position Preset"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 50.0f, 1.0f),
@@ -87,14 +87,14 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      true,
                                                      true));
 
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::azimuthSpan,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::AZIMUTH_SPAN,
                                                      String("Azimuth Span"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::elevationSpan,
+    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SPAN,
                                                      String("Elevation Span"),
                                                      String(),
                                                      NormalisableRange<float>(0.0f, 1.0f),
@@ -178,24 +178,24 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkNotification::silent);
     }
 
-    auto * paramX{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::x) };
+    auto * paramX{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
     if (paramX != nullptr) {
         paramX->setValue(mSources.getPrimarySource().getPos().getX());
     }
-    auto * paramY{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::y) };
+    auto * paramY{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y) };
     if (paramY != nullptr) {
         paramY->setValue(mSources.getPrimarySource().getPos().y);
     }
 
     // Automation values for the recording trajectory.
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::x, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::y, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::z, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::positionSourceLink, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::elevationSourceLink, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::positionPreset, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::azimuthSpan, this);
-    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::elevationSpan, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::X, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::Y, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::Z, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::POSITION_SOURCE_LINK, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SOURCE_LINK, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::POSITION_PRESET, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
     mPositionAutomationManager.addListener(this);
     mElevationAutomationManager.addListener(this);
@@ -221,22 +221,22 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     }
 
     Normalized const normalized{ newValue };
-    if (parameterId.compare(Automation::Ids::x) == 0) {
+    if (parameterId.compare(Automation::Ids::X) == 0) {
         mSources.getPrimarySource().setX(normalized, SourceLinkNotification::notify);
-    } else if (parameterId.compare(Automation::Ids::y) == 0) {
+    } else if (parameterId.compare(Automation::Ids::Y) == 0) {
         Normalized const invNormalized{ 1.0f - newValue };
         mSources.getPrimarySource().setY(invNormalized, SourceLinkNotification::notify);
-    } else if (parameterId.compare(Automation::Ids::z) == 0 && mSpatMode == SpatMode::cube) {
+    } else if (parameterId.compare(Automation::Ids::Z) == 0 && mSpatMode == SpatMode::cube) {
         auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
         mSources.getPrimarySource().setElevation(newElevation, SourceLinkNotification::notify);
     }
 
-    if (parameterId.compare(Automation::Ids::positionSourceLink) == 0) {
+    if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1) };
         setPositionSourceLink(val);
     }
 
-    if (parameterId.compare(Automation::Ids::elevationSourceLink) == 0) {
+    if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1) };
         if (val != mElevationAutomationManager.getSourceLink()) {
             setElevationSourceLink(val);
@@ -247,7 +247,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
         }
     }
 
-    if (parameterId.compare(Automation::Ids::positionPreset) == 0) {
+    if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
         auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
         if (loaded) {
@@ -256,11 +256,11 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
         }
     }
 
-    if (parameterId.startsWith(Automation::Ids::azimuthSpan)) {
+    if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {
         for (auto & source : mSources) {
             source.setAzimuthSpan(normalized);
         }
-    } else if (parameterId.startsWith(Automation::Ids::elevationSpan)) {
+    } else if (parameterId.startsWith(Automation::Ids::ELEVATION_SPAN)) {
         for (auto & source : mSources) {
             source.setElevationSpan(normalized);
         }
@@ -503,14 +503,14 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         for (auto & source : mSources) {
             source.setAzimuthSpan(Normalized{ message[0].getFloat32() });
         }
-        auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::azimuthSpan) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::azimuthSpan)
+        auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
     } else if (address == String(pluginInstance + "/elespan")) {
         for (auto & source : mSources)
             source.setElevationSpan(Normalized{ message[0].getFloat32() });
-        auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::elevationSpan) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSpan)
+        auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
     } else if (address == String(pluginInstance + "/sourcelink/1/1")) {
         if (message[0].getFloat32() == 1)
@@ -901,13 +901,13 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
         for (auto & sourceRef : mSources) {
             sourceRef.setAzimuthSpan(normalized);
         }
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::azimuthSpan)->setValueNotifyingHost(value);
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(value);
         break;
     case SourceParameter::elevationSpan:
         for (auto & sourceRef : mSources) {
             sourceRef.setElevationSpan(normalized);
         }
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::elevationSpan)->setValueNotifyingHost(value);
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(value);
         break;
     }
 }
@@ -922,22 +922,22 @@ void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * ma
     if (manager == &mPositionAutomationManager) {
         if (!isPlaying()) {
             mPositionAutomationManager.setPrimarySourcePosition(position);
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::x)->setValue(normalizedPosition.getX());
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::y)->setValue(1.0f - normalizedPosition.getY());
+            mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)->setValue(normalizedPosition.getX());
+            mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)->setValue(1.0f - normalizedPosition.getY());
         }
 
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::x)
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)
             ->setValueNotifyingHost(normalizedPosition.getX());
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::y)
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)
             ->setValueNotifyingHost(1.0f - normalizedPosition.getY());
 
     } else if (manager == &mElevationAutomationManager) {
         auto const normalizedElevation{ 1.0f - elevation / MAX_ELEVATION };
         if (!isPlaying()) {
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::z)->setValue(normalizedElevation);
+            mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValue(normalizedElevation);
         }
 
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::z)->setValueNotifyingHost(normalizedElevation);
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValueNotifyingHost(normalizedElevation);
     }
 }
 
@@ -1054,20 +1054,20 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
 
     if (isPositionTrajectoryActive && mIsPlaying && !positionGestureStarted) {
         positionGestureStarted = true;
-        mChangeGesturesManager.beginGesture(Automation::Ids::x);
-        mChangeGesturesManager.beginGesture(Automation::Ids::y);
+        mChangeGesturesManager.beginGesture(Automation::Ids::X);
+        mChangeGesturesManager.beginGesture(Automation::Ids::Y);
     } else if ((!isPositionTrajectoryActive || !mIsPlaying) && positionGestureStarted) {
         positionGestureStarted = false;
-        mChangeGesturesManager.endGesture(Automation::Ids::x);
-        mChangeGesturesManager.endGesture(Automation::Ids::y);
+        mChangeGesturesManager.endGesture(Automation::Ids::X);
+        mChangeGesturesManager.endGesture(Automation::Ids::Y);
     }
     if (mSpatMode == SpatMode::cube) {
         if (isElevationTrajectoryActive && mIsPlaying && !elevationGestureStarted) {
             elevationGestureStarted = true;
-            mChangeGesturesManager.beginGesture(Automation::Ids::z);
+            mChangeGesturesManager.beginGesture(Automation::Ids::Z);
         } else if ((!isElevationTrajectoryActive || !mIsPlaying) && elevationGestureStarted) {
             elevationGestureStarted = false;
-            mChangeGesturesManager.endGesture(Automation::Ids::z);
+            mChangeGesturesManager.endGesture(Automation::Ids::Z);
         }
     }
 

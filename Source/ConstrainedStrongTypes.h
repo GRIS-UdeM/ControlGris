@@ -20,11 +20,8 @@
 
 #pragma once
 
-#include "StrongTypes.h"
-
 class Normalized
 {
-private:
     float mValue{};
 
 public:

@@ -25,18 +25,31 @@
 #include "ControlGrisConstants.h"
 #include "Source.h"
 
+//==============================================================================
 struct SourceSnapshot {
-    SourceSnapshot() noexcept = default;
-    SourceSnapshot(Source const & source) noexcept : position(source.getPos()), z(source.getElevation()) {}
-
     Point<float> position;
     Radians z; // height in CUBE mode, elevation in DOME mode
-};
+    //==============================================================================
+    SourceSnapshot() noexcept = default;
+    ~SourceSnapshot() = default;
 
+    SourceSnapshot(SourceSnapshot const &) = default;
+    SourceSnapshot(SourceSnapshot &&) = default;
+
+    SourceSnapshot & operator=(SourceSnapshot const &) = default;
+    SourceSnapshot & operator=(SourceSnapshot &&) = default;
+    //==============================================================================
+    explicit SourceSnapshot(Source const & source) noexcept : position(source.getPos()), z(source.getElevation()) {}
+
+private:
+    JUCE_LEAK_DETECTOR(SourceSnapshot)
+}; // class SourceSnapshot
+
+//==============================================================================
 struct SourcesSnapshots {
     SourceSnapshot primary{};
     Array<SourceSnapshot> secondaries{};
-
+    //==============================================================================
     SourceSnapshot const & operator[](SourceIndex const index) const
     {
         jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
@@ -45,6 +58,7 @@ struct SourcesSnapshots {
         }
         return secondaries.getReference(index.toInt() - 1);
     }
+    //==============================================================================
     SourceSnapshot & operator[](SourceIndex const index)
     {
         jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
@@ -54,36 +68,51 @@ struct SourcesSnapshots {
         return secondaries.getReference(index.toInt() - 1);
     }
     int size() const { return secondaries.size() + 1; }
-};
 
-class SourceLinkEnforcer : juce::ChangeListener
-{
 private:
+    JUCE_LEAK_DETECTOR(SourceSnapshot)
+}; // class SourcesSnapshots
+
+//==============================================================================
+class SourceLinkEnforcer final : juce::ChangeListener
+{
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
 
 public:
-    SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink = PositionSourceLink::independent) noexcept;
-    SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink) noexcept;
+    //==============================================================================
+    SourceLinkEnforcer() = delete;
     ~SourceLinkEnforcer() noexcept;
 
+    SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
+
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
+    //==============================================================================
+    explicit SourceLinkEnforcer(Sources & sources,
+                                PositionSourceLink sourceLink = PositionSourceLink::independent) noexcept;
+    SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink) noexcept;
+    //==============================================================================
     void setSourceLink(ElevationSourceLink sourceLink);
     void setSourceLink(PositionSourceLink sourceLink);
     void numberOfSourcesChanged();
     void enforceSourceLink();
 
-    auto const & getSnapshots() const { return mSnapshots; }
+    [[nodiscard]] auto const & getSnapshots() const { return mSnapshots; }
     void loadSnapshots(SourcesSnapshots const & snapshots);
 
 private:
+    //==============================================================================
     void primarySourceMoved();
     void secondarySourceMoved(SourceIndex sourceIndex);
     void saveCurrentPositionsToInitialStates();
     void reset();
+    //==============================================================================
+    void changeListenerCallback(ChangeBroadcaster * source) override;
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 
-    void changeListenerCallback(ChangeBroadcaster * source) final;
-
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceLinkEnforcer);
-};
+}; // class SourceLinkEnforcer

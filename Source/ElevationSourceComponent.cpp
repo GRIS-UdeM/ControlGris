@@ -54,7 +54,7 @@ void ElevationSourceComponent::updatePositionInParent()
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
     if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::z);
+        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
     }
     this->setSourcePosition(event);
     mFieldComponent.setSelectedSource(mSource.getIndex());
@@ -88,7 +88,7 @@ void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
     if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::z);
+        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Z);
     }
 }
 

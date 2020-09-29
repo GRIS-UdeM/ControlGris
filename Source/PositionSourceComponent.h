@@ -34,29 +34,35 @@ class PositionSourceComponent final
     : public SourceComponent
     , public juce::ChangeListener
 {
-private:
-    //==============================================================================
     PositionFieldComponent & mFieldComponent;
     PositionAutomationManager & mAutomationManager;
     Source & mSource;
 
 public:
     //==============================================================================
+    PositionSourceComponent() = delete;
+    ~PositionSourceComponent() override;
+
+    PositionSourceComponent(PositionSourceComponent const &) = delete;
+    PositionSourceComponent(PositionSourceComponent &&) = delete;
+
+    PositionSourceComponent & operator=(PositionSourceComponent const &) = delete;
+    PositionSourceComponent & operator=(PositionSourceComponent &&) = delete;
+    //==============================================================================
     PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
-    ~PositionSourceComponent() final;
     //==============================================================================
     SourceIndex getSourceIndex() const;
 
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void mouseUp(MouseEvent const & event) final;
-    void updatePositionInParent() final;
+    void mouseDown(MouseEvent const & event) override;
+    void mouseDrag(MouseEvent const & event) override;
+    void mouseUp(MouseEvent const & event) override;
+    void updatePositionInParent() override;
 
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event);
 
-    void changeListenerCallback(ChangeBroadcaster * source) final;
+    void changeListenerCallback(ChangeBroadcaster * source) override;
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PositionSourceComponent);
-};
+    JUCE_LEAK_DETECTOR(PositionSourceComponent)
+}; // class PositionSourceComponent

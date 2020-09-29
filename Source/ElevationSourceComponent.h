@@ -22,7 +22,6 @@
 
 #include <JuceHeader.h>
 
-#include "ControlGrisConstants.h"
 #include "SourceComponent.h"
 #include "StrongTypes.h"
 
@@ -42,7 +41,7 @@ class ElevationSourceComponent final
 public:
     //==============================================================================
     ElevationSourceComponent() = delete;
-    ~ElevationSourceComponent() noexcept final;
+    ~ElevationSourceComponent() noexcept override;
 
     ElevationSourceComponent(ElevationSourceComponent const &) = delete;
     ElevationSourceComponent(ElevationSourceComponent &&) = delete;
@@ -54,17 +53,17 @@ public:
     //==============================================================================
     [[nodiscard]] SourceIndex getSourceIndex() const;
 
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void mouseUp(MouseEvent const & event) final;
-    void updatePositionInParent() final;
+    void mouseDown(MouseEvent const & event) override;
+    void mouseDrag(MouseEvent const & event) override;
+    void mouseUp(MouseEvent const & event) override;
+    void updatePositionInParent() override;
 
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event);
     //==============================================================================
-    void changeListenerCallback(ChangeBroadcaster * source) final;
+    void changeListenerCallback(ChangeBroadcaster * source) override;
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ElevationSourceComponent);
+    JUCE_LEAK_DETECTOR(ElevationSourceComponent)
 
 }; // Class ElevationSourceComponent

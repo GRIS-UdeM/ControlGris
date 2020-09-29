@@ -20,39 +20,39 @@
 
 #include "ControlGrisConstants.h"
 
-String const Automation::Ids::x{ "recordingTrajectory_x" };
-String const Automation::Ids::y{ "recordingTrajectory_y" };
-String const Automation::Ids::z{ "recordingTrajectory_z" };
-String const Automation::Ids::positionSourceLink{ "sourceLink" };
-String const Automation::Ids::elevationSourceLink{ "sourceLinkAlt" };
-String const Automation::Ids::azimuthSpan{ "azimuthSpan" };
-String const Automation::Ids::elevationSpan{ "elevationSpan" };
-String const Automation::Ids::positionPreset{ "positionPreset" };
+String const Automation::Ids::X{ "recordingTrajectory_x" };
+String const Automation::Ids::Y{ "recordingTrajectory_y" };
+String const Automation::Ids::Z{ "recordingTrajectory_z" };
+String const Automation::Ids::POSITION_SOURCE_LINK{ "sourceLink" };
+String const Automation::Ids::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
+String const Automation::Ids::AZIMUTH_SPAN{ "azimuthSpan" };
+String const Automation::Ids::ELEVATION_SPAN{ "elevationSpan" };
+String const Automation::Ids::POSITION_PRESET{ "positionPreset" };
 
 Automation::Enum Automation::idToEnum(const String & name)
 {
-    if (name.compare(Ids::x) == 0) {
+    if (name.compare(Ids::X) == 0) {
         return Enum::x;
     }
-    if (name.compare(Ids::y) == 0) {
+    if (name.compare(Ids::Y) == 0) {
         return Enum::y;
     }
-    if (name.compare(Ids::z) == 0) {
+    if (name.compare(Ids::Z) == 0) {
         return Enum::z;
     }
-    if (name.compare(Ids::positionSourceLink) == 0) {
+    if (name.compare(Ids::POSITION_SOURCE_LINK) == 0) {
         return Enum::positionSourceLink;
     }
-    if (name.compare(Ids::elevationSourceLink) == 0) {
+    if (name.compare(Ids::ELEVATION_SOURCE_LINK) == 0) {
         return Enum::elevationSourceLink;
     }
-    if (name.compare(Ids::azimuthSpan) == 0) {
+    if (name.compare(Ids::AZIMUTH_SPAN) == 0) {
         return Enum::azimuthSpan;
     }
-    if (name.compare(Ids::elevationSpan) == 0) {
+    if (name.compare(Ids::ELEVATION_SPAN) == 0) {
         return Enum::elevationSpan;
     }
-    if (name.compare(Ids::positionPreset) == 0) {
+    if (name.compare(Ids::POSITION_PRESET) == 0) {
         return Enum::positionPreset;
     }
 

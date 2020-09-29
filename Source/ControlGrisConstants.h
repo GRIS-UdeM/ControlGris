@@ -138,14 +138,14 @@ namespace Automation
 {
 namespace Ids
 {
-String extern const x;
-String extern const y;
-String extern const z;
-String extern const positionSourceLink;
-String extern const elevationSourceLink;
-String extern const azimuthSpan;
-String extern const elevationSpan;
-String extern const positionPreset;
+String extern const X;
+String extern const Y;
+String extern const Z;
+String extern const POSITION_SOURCE_LINK;
+String extern const ELEVATION_SOURCE_LINK;
+String extern const AZIMUTH_SPAN;
+String extern const ELEVATION_SPAN;
+String extern const POSITION_PRESET;
 } // namespace Ids
 
 enum class Enum { x, y, z, positionSourceLink, elevationSourceLink, azimuthSpan, elevationSpan, positionPreset };

@@ -36,7 +36,7 @@ class ElevationDrawingHandle final : public SourceComponent
 public:
     //==============================================================================
     ElevationDrawingHandle() = delete;
-    ~ElevationDrawingHandle() noexcept final = default;
+    ~ElevationDrawingHandle() noexcept override = default;
 
     ElevationDrawingHandle(ElevationDrawingHandle const &) = delete;
     ElevationDrawingHandle(ElevationDrawingHandle &&) = delete;
@@ -46,9 +46,9 @@ public:
     //==============================================================================
     explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
     //==============================================================================
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void updatePositionInParent() final;
+    void mouseDown(MouseEvent const & event) override;
+    void mouseDrag(MouseEvent const & event) override;
+    void updatePositionInParent() override;
 
 private:
     //==============================================================================

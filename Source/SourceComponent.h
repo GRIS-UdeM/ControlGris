@@ -25,20 +25,30 @@
 class Source;
 class FieldComponent;
 
+//==============================================================================
 class SourceComponent : public juce::Component
 {
-private:
     Colour mColour;
     String mIcon;
     bool mSelected{ false };
 
 protected:
+    //==============================================================================
     static constexpr int MAX_LINE_THICKNESS = 3;
 
 public:
-    SourceComponent(Colour colour, String const & icon);
+    //==============================================================================
+    SourceComponent() = delete;
     virtual ~SourceComponent() = default;
 
+    SourceComponent(SourceComponent const &) = delete;
+    SourceComponent(SourceComponent &&) = delete;
+
+    SourceComponent & operator=(SourceComponent const &) = delete;
+    SourceComponent & operator=(SourceComponent &&) = delete;
+    //==============================================================================
+    SourceComponent(Colour colour, String const & icon);
+    //==============================================================================
     void setSelected(bool selected);
     void paint(Graphics & g) final;
 
@@ -46,5 +56,7 @@ public:
     virtual void updatePositionInParent(){}; // TEMP
 
 private:
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SourceComponent);
-};
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourceComponent)
+
+}; // class SourceComponent

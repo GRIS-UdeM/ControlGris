@@ -27,7 +27,6 @@
 #include "AutomationManager.h"
 #include "ElevationDrawingHandle.h"
 #include "ElevationSourceComponent.h"
-#include "GrisLookAndFeel.h"
 #include "PositionSourceComponent.h"
 #include "SettingsBoxComponent.h"
 #include "Source.h"

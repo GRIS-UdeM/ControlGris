@@ -52,8 +52,8 @@ void PositionSourceComponent::updatePositionInParent()
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::x);
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::y);
+        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
+        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
     }
     this->setSourcePosition(event);
     mFieldComponent.setSelectedSource(mSource.getIndex());
@@ -89,8 +89,8 @@ void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
     if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::x);
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::y);
+        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::X);
+        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Y);
     }
 }
 

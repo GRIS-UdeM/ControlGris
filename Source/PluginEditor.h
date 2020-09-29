@@ -22,16 +22,11 @@
 
 #include <JuceHeader.h>
 
-#include "AutomationManager.h"
 #include "BannerComponent.h"
 #include "FieldComponent.h"
-#include "GrisLookAndFeel.h"
 #include "InterfaceBoxComponent.h"
 #include "ParametersBoxComponent.h"
-#include "PluginProcessor.h"
 #include "PositionPresetComponent.h"
-#include "SettingsBoxComponent.h"
-#include "Source.h"
 #include "SourceBoxComponent.h"
 #include "TrajectoryBoxComponent.h"
 
@@ -83,10 +78,6 @@ class ControlGrisAudioProcessorEditor final
 public:
     //==============================================================================
     ControlGrisAudioProcessorEditor() = delete;
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
-                                    AudioProcessorValueTreeState & vts,
-                                    PositionAutomationManager & positionAutomationManager,
-                                    ElevationAutomationManager & elevationAutomationManager);
     ~ControlGrisAudioProcessorEditor() override;
 
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor const &) = delete;
@@ -94,6 +85,11 @@ public:
 
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
+    //==============================================================================
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
+                                    AudioProcessorValueTreeState & vts,
+                                    PositionAutomationManager & positionAutomationManager,
+                                    ElevationAutomationManager & elevationAutomationManager);
     //==============================================================================
     void paint(Graphics &) override;
     void resized() override;
