@@ -563,7 +563,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     }
 
     if (x != -1.0f && y != -1.0f) {
-        mSources.getPrimarySource().setPos(Point<float>{ x, y }, SourceLinkNotification::notify);
+        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, SourceLinkNotification::notify);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     } else if (y != -1.0f) {

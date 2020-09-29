@@ -51,7 +51,7 @@ public:
 
     private:
         //==============================================================================
-        JUCE_LEAK_DETECTOR(Listener);
+        JUCE_LEAK_DETECTOR(Listener)
 
     }; // class AutomationManager::Listener
 

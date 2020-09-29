@@ -32,7 +32,7 @@ PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldC
     , mSource(source)
 {
     source.addGuiChangeListener(this);
-    this->updatePositionInParent();
+    updatePositionInParent();
 }
 
 //==============================================================================
@@ -45,29 +45,38 @@ PositionSourceComponent::~PositionSourceComponent()
 void PositionSourceComponent::updatePositionInParent()
 {
     auto const newCenter{ mFieldComponent.sourcePositionToComponentPosition(mSource.getPos()).roundToInt() };
-    this->setCentrePosition(newCenter.getX(), newCenter.getY());
+    setCentrePosition(newCenter.getX(), newCenter.getY());
 }
 
 //==============================================================================
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
-    if (mSource.isPrimarySource()) {
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
+    if (event.mods.getRawFlags() & DISPLACEMENT_MODIFIER) {
+        mDisplacementMode = DisplacementMode::selectedSourceOnly;
+        if (mSource.isPrimarySource()) {
+            mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
+            mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
+        }
+        setSourcePosition(event);
+        mFieldComponent.setSelectedSource(mSource.getIndex());
+    } else {
+        mDisplacementMode = DisplacementMode::all;
+        mMouseDragOrigin = event.getEventRelativeTo(&mFieldComponent).getPosition().toFloat();
+        auto const primarySourcePosition{ mFieldComponent.getSources().getPrimarySource().getPos() };
+        mPrimarySourceComponentPositionOrigin
+            = mFieldComponent.sourcePositionToComponentPosition(primarySourcePosition);
     }
-    this->setSourcePosition(event);
-    mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
 //==============================================================================
-void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
+void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
 {
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-    mSource.setPos(newPosition, SourceLinkNotification::notify);
+    mSource.setPosition(newPosition, SourceLinkNotification::notify);
 
     if (mSource.isPrimarySource()) {
         mAutomationManager.sendTrajectoryPositionChangedEvent();
@@ -78,9 +87,25 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event)
 //==============================================================================
 void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 {
-    if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
-        jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
-        this->setSourcePosition(event);
+    switch (mDisplacementMode) {
+    case DisplacementMode::selectedSourceOnly: {
+        if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
+            jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
+            setSourcePosition(event);
+        }
+    } break;
+    case DisplacementMode::all: {
+        auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent).getPosition().toFloat() };
+        auto const componentPositionDisplacement{ eventRelativeToFieldComponent - mMouseDragOrigin };
+        auto const newPrimarySourceComponentPosition{ componentPositionDisplacement
+                                                      + mPrimarySourceComponentPositionOrigin };
+        auto const newPrimarySourcePosition{ mFieldComponent.componentPositionToSourcePosition(
+            newPrimarySourceComponentPosition) };
+        auto & primarySource{ mFieldComponent.getSources().getPrimarySource() };
+        primarySource.setPosition(newPrimarySourcePosition, SourceLinkNotification::notify);
+    } break;
+    default:
+        jassertfalse;
     }
 }
 
@@ -103,5 +128,5 @@ SourceIndex PositionSourceComponent::getSourceIndex() const
 //==============================================================================
 void PositionSourceComponent::changeListenerCallback([[maybe_unused]] ChangeBroadcaster * source)
 {
-    this->updatePositionInParent();
+    updatePositionInParent();
 }

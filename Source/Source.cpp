@@ -147,7 +147,7 @@ void Source::setY(float const y, SourceLinkNotification const sourceLinkNotifica
 }
 
 //==============================================================================
-void Source::setPos(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
+void Source::setPosition(Point<float> const & position, SourceLinkNotification const sourceLinkNotification)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
     if (mPosition != clippedPosition) {

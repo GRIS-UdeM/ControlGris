@@ -179,7 +179,7 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 //==============================================================================
 void AutomationManager::setPrimarySourcePosition(Point<float> const & pos)
 {
-    mPrimarySource.setPos(pos, SourceLinkNotification::notify);
+    mPrimarySource.setPosition(pos, SourceLinkNotification::notify);
 }
 
 //==============================================================================
@@ -213,7 +213,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory = Trajectory{ type, startPos };
     }
-    mPrimarySource.setPos(startPos, SourceLinkNotification::notify);
+    mPrimarySource.setPosition(startPos, SourceLinkNotification::notify);
 }
 
 //==============================================================================
@@ -245,7 +245,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
-        mPrimarySource.setPos(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
+        mPrimarySource.setPosition(mCurrentTrajectoryPoint, SourceLinkNotification::notify);
         sendTrajectoryPositionChangedEvent();
     }
 }

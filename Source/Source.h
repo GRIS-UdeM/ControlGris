@@ -114,7 +114,7 @@ public:
     void setY(float y, SourceLinkNotification sourceLinkNotification);
     float getY() const { return mPosition.getY(); }
     Point<float> const & getPos() const { return mPosition; }
-    void setPos(Point<float> const & pos, SourceLinkNotification sourceLinkNotification);
+    void setPosition(Point<float> const & pos, SourceLinkNotification sourceLinkNotification);
 
     void computeXY();
     void computeAzimuthElevation();

@@ -21,13 +21,15 @@
 #include "SourceComponent.h"
 
 #include "ControlGrisConstants.h"
+#include "FieldComponent.h"
+#include "Source.h"
 
 //==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2.0f;
     constexpr auto rounded{ static_cast<int>(dimension + 0.5f) };
-    this->setSize(rounded, rounded);
+    setSize(rounded, rounded);
 }
 
 //==============================================================================

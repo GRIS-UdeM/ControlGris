@@ -34,7 +34,10 @@ class SourceComponent : public juce::Component
 
 protected:
     //==============================================================================
+    enum class DisplacementMode { all, selectedSourceOnly };
+    //==============================================================================
     static constexpr int MAX_LINE_THICKNESS = 3;
+    static constexpr int DISPLACEMENT_MODIFIER{ juce::ModifierKeys::Flags::ctrlModifier };
 
 public:
     //==============================================================================

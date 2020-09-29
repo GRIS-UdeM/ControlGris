@@ -89,7 +89,7 @@ class IndependentStrategy final : public LinkStrategy
     //==============================================================================
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
-        finalState.setPos(initialState.position, SourceLinkNotification::silent);
+        finalState.setPosition(initialState.position, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState_implementation(
@@ -130,7 +130,7 @@ class CircularStrategy final : public LinkStrategy
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
         auto const finalPosition{ initialState.position.rotatedAboutOrigin(mRotation.getAsRadians()) * mRadiusRatio };
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -169,7 +169,7 @@ private:
         auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
         Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -261,7 +261,7 @@ private:
         Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
                                           std::sin(finalAngle.getAsRadians()) * finalRadius };
 
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -354,7 +354,7 @@ private:
         Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
                                           std::sin(finalAngle.getAsRadians()) * mRadius };
 
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -390,7 +390,7 @@ class LinkSymmetricXStrategy final : public LinkStrategy
                                 [[maybe_unused]] SourceSnapshot const & initialState) const override
     {
         Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -417,7 +417,7 @@ class LinkSymmetricYStrategy final : public LinkStrategy
                                 [[maybe_unused]] SourceSnapshot const & initialState) const override
     {
         Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot
@@ -442,7 +442,7 @@ class DeltaLockStrategy final : public LinkStrategy
     void enforce_implementation(Source & finalState, SourceSnapshot const & initialState) const override
     {
         auto const finalPosition{ initialState.position + mDelta };
-        finalState.setPos(finalPosition, SourceLinkNotification::silent);
+        finalState.setPosition(finalPosition, SourceLinkNotification::silent);
     }
     //==============================================================================
     [[nodiscard]] SourceSnapshot

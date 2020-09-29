@@ -52,6 +52,6 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ElevationDrawingHandle);
+    JUCE_LEAK_DETECTOR(ElevationDrawingHandle)
 
 }; // class ElevationDrawingHandle

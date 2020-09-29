@@ -463,7 +463,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
         } else {
             // not currently drawing a straight line
             mAutomationManager.resetRecordingTrajectory(position);
-            mSources.getPrimarySource().setPos(position, SourceLinkNotification::notify);
+            mSources.getPrimarySource().setPosition(position, SourceLinkNotification::notify);
             if (isShiftDown) {
                 // start a new Line
                 mLineDrawingStartPosition = position;

@@ -100,6 +100,9 @@ public:
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
     void addListener(Listener * l) { mListeners.add(l); }
+
+    Sources & getSources() { return mSources; }
+    Sources const & getSources() const { return mSources; }
     //==============================================================================
     [[nodiscard]] virtual Rectangle<float> getEffectiveArea() const = 0;
 

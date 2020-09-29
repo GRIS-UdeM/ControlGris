@@ -149,7 +149,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         terminalPosition = snapshots.primary.position;
     }
-    mSources.getPrimarySource().setPos(terminalPosition, SourceLinkNotification::notify);
+    mSources.getPrimarySource().setPosition(terminalPosition, SourceLinkNotification::notify);
 
     Radians elevation{};
     if (presetData->hasAttribute(zTerminalPositionId)) {
