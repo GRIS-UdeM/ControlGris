@@ -27,13 +27,13 @@ AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Sour
     : mProcessor(processor)
     , mPrimarySource(principalSource)
 {
-    principalSource.addSourceLinkListener(this);
+    principalSource.addGuiChangeListener(this);
 }
 
 //==============================================================================
 AutomationManager::~AutomationManager()
 {
-    mPrimarySource.removeSourceLinkListener(this);
+    mPrimarySource.removeGuiChangeListener(this);
 }
 
 //==============================================================================

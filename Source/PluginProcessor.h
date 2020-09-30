@@ -194,6 +194,8 @@ public:
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
 
+    void setSourcePosition(Point<float> const & position, SourceIndex sourceIndex);
+
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessor)
