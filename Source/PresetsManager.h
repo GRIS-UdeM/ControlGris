@@ -64,6 +64,7 @@ public:
     bool forceLoad(int presetNumber);
     void save(int presetNumber) const;
     bool deletePreset(int presetNumber) const;
+    void numberOfSourcesChanged();
 
 protected:
     //==============================================================================

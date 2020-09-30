@@ -347,6 +347,8 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     mPositionSourceLinkEnforcer.numberOfSourcesChanged();
     mElevationSourceLinkEnforcer.numberOfSourcesChanged();
 
+    mPresetManager.numberOfSourcesChanged();
+
     if (propagate) {
         sendOscMessage();
     }

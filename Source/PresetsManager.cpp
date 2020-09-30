@@ -272,6 +272,13 @@ bool PresetsManager::deletePreset(int const presetNumber) const
 }
 
 //==============================================================================
+void PresetsManager::numberOfSourcesChanged()
+{
+    unsubscribeToSources();
+    subscribeToSources();
+}
+
+//==============================================================================
 void PresetsManager::sourceMoved([[maybe_unused]] Source & source,
                                  [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
 {

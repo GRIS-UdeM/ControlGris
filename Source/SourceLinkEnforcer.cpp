@@ -123,13 +123,13 @@ void SourceLinkEnforcer::numberOfSourcesChanged()
 //==============================================================================
 void SourceLinkEnforcer::primarySourceMoved()
 {
-    enforceSourceLink();
-
     // We need to force an update in independent mode.
     auto const isIndependent{ mElevationSourceLink == ElevationSourceLink::independent
                               || mPositionSourceLink == PositionSourceLink::independent };
     if (isIndependent) {
         mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
+    } else {
+        enforceSourceLink();
     }
 }
 
@@ -145,6 +145,12 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     auto const spatMode{ mSources.getPrimarySource().getSpatMode() };
     auto const isElevationSourceLink{ mElevationSourceLink != ElevationSourceLink::undefined };
     if (spatMode == SpatMode::dome && isElevationSourceLink) {
+        return;
+    }
+
+    if (mElevationSourceLink == ElevationSourceLink::independent
+        || mPositionSourceLink == PositionSourceLink::independent) {
+        secondarySourceAnchorMoved(sourceIndex);
         return;
     }
 
@@ -207,7 +213,6 @@ void SourceLinkEnforcer::secondarySourceAnchorMoved(SourceIndex const sourceInde
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
 
     if (mLinkStrategy) {
-        auto & source{ mSources[sourceIndex] };
         auto const secondaryIndex{ sourceIndex.toInt() - 1 };
         auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
         mLinkStrategy->computeParameters(mSources, mSnapshots);
@@ -221,7 +226,7 @@ void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
 {
     mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
     mSnapshots.secondaries.clearQuick();
-    for (int i{}; i < mSources.getSecondarySources().size(); ++i) {
+    for (unsigned i{}; i < mSources.getSecondarySources().size(); ++i) {
         mSnapshots.secondaries.add(SourceSnapshot{ mSources.getSecondarySources()[i] });
     }
 }
