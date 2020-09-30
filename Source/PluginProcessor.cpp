@@ -222,13 +222,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     Normalized const normalized{ newValue };
     if (parameterId.compare(Automation::Ids::X) == 0) {
-        mSources.getPrimarySource().setX(normalized, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setX(normalized, SourceLinkBehavior::doNothing);
     } else if (parameterId.compare(Automation::Ids::Y) == 0) {
         Normalized const invNormalized{ 1.0f - newValue };
-        mSources.getPrimarySource().setY(invNormalized, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setY(invNormalized, SourceLinkBehavior::doNothing);
     } else if (parameterId.compare(Automation::Ids::Z) == 0 && mSpatMode == SpatMode::cube) {
         auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
-        mSources.getPrimarySource().setElevation(newElevation, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setElevation(newElevation, SourceLinkBehavior::doNothing);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
@@ -250,10 +250,6 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
         auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
-        // if (loaded) {
-        //    mPositionAutomationManager.recomputeTrajectory();
-        //    mElevationAutomationManager.recomputeTrajectory();
-        //}
     }
 
     if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {

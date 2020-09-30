@@ -196,8 +196,7 @@ void CircularFixedAngleStrategy::computeParameters_implementation(Sources const 
     auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) }; // dont divide by zero!
     auto const primarySourceInitialRadius{ std::max(primarySourceInitialState.position.getDistanceFromOrigin(),
                                                     notQuiteZero) };
-    mRadiusRatio
-        = std::max(primarySourceFinalState.getPos().getDistanceFromOrigin() / primarySourceInitialRadius, notQuiteZero);
+    mRadiusRatio = primarySourceFinalState.getPos().getDistanceFromOrigin() / primarySourceInitialRadius;
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
     mPrimarySourceFinalAngle = Radians::fromPoint(primarySourceFinalPosition);
@@ -221,7 +220,7 @@ void CircularFixedAngleStrategy::computeParameters_implementation(Sources const 
     std::for_each(std::begin(initialAngles),
                   std::begin(initialAngles) + finalStates.size(),
                   [&](std::pair<Degrees, SourceIndex> & data) {
-                      if (data.first < minAngle) {
+                      while (data.first < minAngle) {
                           data.first += twoPi;
                       }
                       jassert(data.first >= minAngle);
@@ -262,9 +261,13 @@ SourceSnapshot
 {
     SourceSnapshot newInitialState{ initialStates[sourceIndex] };
 
-    auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / mRadiusRatio };
+    static const float notQuiteZero{ std::nextafter(0.0f, 1.0f) };
+    auto const divisor{ std::max(notQuiteZero, mRadiusRatio) };
+    auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / divisor };
 
     Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
+    auto const ordering{ mOrdering[sourceIndex.toInt()] };
+
     auto const newInitialAngle{ finalAngle - mRotation };
 
     Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * newInitialRadius,

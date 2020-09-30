@@ -198,7 +198,7 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
     auto const & positionSnapshots{ mPositionLinkEnforcer.getSnapshots() };
     auto const & elevationsSnapshots{ mElevationLinkEnforcer.getSnapshots() };
 
-    SourceIndex const numberOfSources{ positionSnapshots.size() };
+    SourceIndex const numberOfSources{ mSources.size() };
     for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
         auto const xName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 0) };
         auto const yName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 1) };

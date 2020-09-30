@@ -87,6 +87,7 @@ void SourceLinkEnforcer::enforceSourceLink()
         // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
         // relative ordering with the mouse won't make any sense.
         saveCurrentPositionsToInitialStates();
+        mLinkStrategy->computeParameters(mSources, mSnapshots);
     }
 }
 
@@ -100,6 +101,17 @@ void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
 //==============================================================================
 void SourceLinkEnforcer::sourceMoved(Source & source, SourceLinkBehavior const sourceLinkBehavior)
 {
+    if (!mLinkStrategy) {
+        if (mPositionSourceLink != PositionSourceLink::undefined) {
+            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+        } else {
+            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+        }
+    }
+    if (!mLinkStrategy->isInitialized()) {
+        mLinkStrategy->computeParameters(mSources, mSnapshots);
+    }
+
     switch (sourceLinkBehavior) {
     case SourceLinkBehavior::doNothing:
         jassertfalse;
@@ -179,6 +191,12 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         auto const secondaryStart{ mSnapshots[sourceIndex] };
         SourceSnapshot const secondaryEnd{ mSources[sourceIndex] };
 
+        if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
+            || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
+            mLinkStrategy = LinkStrategy::make(PositionSourceLink::circular);
+            mLinkStrategy->computeParameters(mSources, mSnapshots);
+        }
+
         // get motion start and end
         mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
         SourceSnapshot const motionStart{ mSources[sourceIndex] };
@@ -197,6 +215,11 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         // enforce link
         mSnapshots.primary = primaryStart;
         mSources.getPrimarySource().setPosition(target.position, SourceLinkBehavior::doNothing);
+
+        if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
+            || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
+            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+        }
     }
     enforceSourceLink();
 }
