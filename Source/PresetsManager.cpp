@@ -138,7 +138,7 @@ bool PresetsManager::load(int const presetNumber)
     auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
     auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
 
-    Point<float> terminalPosition{};
+    Point<float> terminalPosition;
     if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
         Point<float> const inversedNormalizedTerminalPosition{
             static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
@@ -151,7 +151,7 @@ bool PresetsManager::load(int const presetNumber)
     }
     mSources.getPrimarySource().setPosition(terminalPosition, SourceLinkBehavior::moveAllSources);
 
-    Radians elevation{};
+    Radians elevation;
     if (presetData->hasAttribute(zTerminalPositionId)) {
         auto const inversedNormalizedTerminalElevation{ static_cast<float>(
             presetData->getDoubleAttribute(zTerminalPositionId)) };
@@ -195,16 +195,17 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
     auto result{ std::make_unique<XmlElement>("ITEM") };
     result->setAttribute("ID", presetNumber);
 
-    auto const & snapshots{ mPositionLinkEnforcer.getSnapshots() };
+    auto const & positionSnapshots{ mPositionLinkEnforcer.getSnapshots() };
+    auto const & elevationsSnapshots{ mElevationLinkEnforcer.getSnapshots() };
 
-    SourceIndex const numberOfSources{ snapshots.size() };
+    SourceIndex const numberOfSources{ positionSnapshots.size() };
     for (SourceIndex sourceIndex{}; sourceIndex < numberOfSources; ++sourceIndex) {
         auto const xName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 0) };
         auto const yName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 1) };
         auto const zName{ getFixedPosSourceName(FixedPositionType::initial, sourceIndex, 2) };
 
-        auto const position{ snapshots[sourceIndex].position };
-        auto const elevation{ snapshots[sourceIndex].z };
+        auto const position{ positionSnapshots[sourceIndex].position };
+        auto const elevation{ elevationsSnapshots[sourceIndex].z };
 
         Point<float> const mirroredPosition{ position.getX(), position.getY() * -1.0f };
         auto const normalizedElevation{ elevation / MAX_ELEVATION };
