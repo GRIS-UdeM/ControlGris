@@ -250,10 +250,10 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
         auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
-        if (loaded) {
-            mPositionAutomationManager.recomputeTrajectory();
-            mElevationAutomationManager.recomputeTrajectory();
-        }
+        // if (loaded) {
+        //    mPositionAutomationManager.recomputeTrajectory();
+        //    mElevationAutomationManager.recomputeTrajectory();
+        //}
     }
 
     if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {

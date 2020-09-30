@@ -86,9 +86,6 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
         mAutomationManager.sendTrajectoryPositionChangedEvent();
     }
     mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
-    if (sourceLinkBehavior == SourceLinkBehavior::moveAllSources) {
-        mAutomationManager.recomputeTrajectory();
-    }
 }
 
 //==============================================================================

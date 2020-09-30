@@ -27,6 +27,13 @@ AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Sour
     : mProcessor(processor)
     , mPrimarySource(principalSource)
 {
+    principalSource.addSourceLinkListener(this);
+}
+
+//==============================================================================
+AutomationManager::~AutomationManager()
+{
+    mPrimarySource.removeSourceLinkListener(this);
 }
 
 //==============================================================================
@@ -177,9 +184,16 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 }
 
 //==============================================================================
-void AutomationManager::setPrimarySourcePosition(Point<float> const & pos)
+void AutomationManager::setPrimarySourcePosition(Point<float> const & pos) const
 {
     mPrimarySource.setPosition(pos, SourceLinkBehavior::moveSourceAnchor);
+}
+
+//==============================================================================
+void AutomationManager::sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior)
+{
+    jassert(source.isPrimarySource());
+    recomputeTrajectory();
 }
 
 //==============================================================================

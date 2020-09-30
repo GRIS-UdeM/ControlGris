@@ -71,15 +71,22 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
-    if (mLinkStrategy) {
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
-        mLinkStrategy->enforce(mSources, mSnapshots);
-        if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
-            || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
-            // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
-            // relative ordering with the mouse won't make any sense.
-            saveCurrentPositionsToInitialStates();
+    if (!mLinkStrategy) {
+        if (mElevationSourceLink != ElevationSourceLink::undefined) {
+            jassert(mPositionSourceLink == PositionSourceLink::undefined);
+            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+        } else {
+            jassert(mPositionSourceLink != PositionSourceLink::undefined);
+            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
         }
+    }
+    mLinkStrategy->computeParameters(mSources, mSnapshots);
+    mLinkStrategy->enforce(mSources, mSnapshots);
+    if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
+        || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
+        // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
+        // relative ordering with the mouse won't make any sense.
+        saveCurrentPositionsToInitialStates();
     }
 }
 
