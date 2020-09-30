@@ -148,39 +148,43 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         return;
     }
 
-    auto const primaryStart{ mSnapshots.primary };
-    SourceSnapshot const primaryEnd{ mSources.getPrimarySource() };
-    auto const secondaryStart{ mSnapshots[sourceIndex] };
-    SourceSnapshot const secondaryEnd{ mSources[sourceIndex] };
+    if (isElevationSourceLink) {
+        // get expected elevation
+        auto const currentElevation{ mSources[sourceIndex].getElevation() };
+        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        auto const expectedElevation{ mSources[sourceIndex].getElevation() };
 
-    // get motion start and end
-    mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
-    SourceSnapshot const motionStart{ mSources[sourceIndex] };
-    auto const motionEnd{ secondaryEnd };
+        // get motion
+        auto const motion{ currentElevation - expectedElevation };
 
-    // train motion
-    mSnapshots.primary = motionStart;
-    if (spatMode == SpatMode::dome || !isElevationSourceLink) {
+        // apply motion to primary source
+        mSources.getPrimarySource().setElevation(mSources.getPrimarySource().getElevation() + motion,
+                                                 SourceLinkBehavior::doNothing);
+    } else {
+        auto const primaryStart{ mSnapshots.primary };
+        SourceSnapshot const primaryEnd{ mSources.getPrimarySource() };
+        auto const secondaryStart{ mSnapshots[sourceIndex] };
+        SourceSnapshot const secondaryEnd{ mSources[sourceIndex] };
+
+        // get motion start and end
+        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        SourceSnapshot const motionStart{ mSources[sourceIndex] };
+        auto const motionEnd{ secondaryEnd };
+
+        // train motion
+        mSnapshots.primary = motionStart;
         mSources.getPrimarySource().setPosition(motionEnd.position, SourceLinkBehavior::doNothing);
-    } else {
-        mSources.getPrimarySource().setElevation(motionEnd.z, SourceLinkBehavior::doNothing);
-    }
-    // mSources.getPrimarySource().setElevation(motionEnd.z, SourceLinkBehavior::doNothing);
-    mLinkStrategy->computeParameters(mSources, mSnapshots);
+        mLinkStrategy->computeParameters(mSources, mSnapshots);
 
-    // apply motion to primary position
-    mSnapshots.primary = primaryEnd;
-    mLinkStrategy->enforce_implementation(mSources, mSnapshots, mSources.getPrimarySource().getIndex());
-    SourceSnapshot const target{ mSources.getPrimarySource() };
+        // apply motion to primary position
+        mSnapshots.primary = primaryEnd;
+        mLinkStrategy->enforce_implementation(mSources, mSnapshots, mSources.getPrimarySource().getIndex());
+        SourceSnapshot const target{ mSources.getPrimarySource() };
 
-    // enforce link
-    mSnapshots.primary = primaryStart;
-    if (spatMode == SpatMode::dome || !isElevationSourceLink) {
+        // enforce link
+        mSnapshots.primary = primaryStart;
         mSources.getPrimarySource().setPosition(target.position, SourceLinkBehavior::doNothing);
-    } else {
-        mSources.getPrimarySource().setElevation(target.z, SourceLinkBehavior::doNothing);
     }
-
     enforceSourceLink();
 }
 

@@ -507,7 +507,7 @@ SourceSnapshot LinearMinElevationStrategy::computeInitialStateFromFinalState_imp
     SourceIndex const sourceIndex) const
 {
     SourceSnapshot result{};
-    result.z = finalStates[sourceIndex].getElevation() - mBaseElevation * sourceIndex.toInt();
+    result.z = mBaseElevation - mElevationPerSource * sourceIndex.toInt();
     return result;
 }
 
