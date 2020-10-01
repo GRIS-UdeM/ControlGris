@@ -28,7 +28,7 @@
 #include "SourceSnapshot.h"
 
 //==============================================================================
-class SourceLinkEnforcer final : Source::Listener
+class SourceLinkEnforcer
 {
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
@@ -39,7 +39,7 @@ class SourceLinkEnforcer final : Source::Listener
 public:
     //==============================================================================
     SourceLinkEnforcer() = delete;
-    ~SourceLinkEnforcer() noexcept;
+    ~SourceLinkEnforcer() noexcept = default;
 
     SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
     SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
@@ -60,7 +60,7 @@ public:
     void loadSnapshots(SourcesSnapshots const & snapshots);
 
     //==============================================================================
-    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+    void sourceMoved(Source & source, Source::OriginOfChange change);
 
 private:
     //==============================================================================
@@ -69,7 +69,6 @@ private:
     void primarySourceAnchorMoved();
     void secondarySourceAnchorMoved(SourceIndex sourceIndex);
     void saveCurrentPositionsToInitialStates();
-    void reset();
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 }; // class SourceLinkEnforcer

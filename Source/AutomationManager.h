@@ -30,7 +30,7 @@
 class ControlGrisAudioProcessor;
 
 //==============================================================================
-class AutomationManager : Source::Listener
+class AutomationManager
 {
 public:
     //==============================================================================
@@ -90,7 +90,7 @@ protected:
 public:
     //==============================================================================
     AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
-    virtual ~AutomationManager();
+    virtual ~AutomationManager() = default;
 
     AutomationManager(AutomationManager const &) = delete;
     AutomationManager(AutomationManager &&) = delete;
@@ -119,7 +119,7 @@ public:
     void setPrimarySourcePosition(Point<float> const & pos) const;
     void addListener(Listener * l) { mListeners.add(l); }
     //==============================================================================
-    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+    void sourceMoved(Source & source);
     //==============================================================================
     virtual void sendTrajectoryPositionChangedEvent() = 0;
     virtual void recomputeTrajectory() = 0;

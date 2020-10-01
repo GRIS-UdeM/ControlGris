@@ -27,7 +27,6 @@ SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink con
     : mSources(sources)
     , mPositionSourceLink(sourceLink)
 {
-    reset();
 }
 
 //==============================================================================
@@ -35,15 +34,6 @@ SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, ElevationSourceLink co
     : mSources(sources)
     , mElevationSourceLink(sourceLink)
 {
-    reset();
-}
-
-//==============================================================================
-SourceLinkEnforcer::~SourceLinkEnforcer() noexcept
-{
-    for (auto & source : mSources) {
-        source.removeSourceLinkListener(this);
-    }
 }
 
 //==============================================================================
@@ -99,7 +89,7 @@ void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
 }
 
 //==============================================================================
-void SourceLinkEnforcer::sourceMoved(Source & source, SourceLinkBehavior const sourceLinkBehavior)
+void SourceLinkEnforcer::sourceMoved(Source & source, Source::OriginOfChange const origin)
 {
     if (!mLinkStrategy) {
         if (mPositionSourceLink != PositionSourceLink::undefined) {
@@ -112,24 +102,23 @@ void SourceLinkEnforcer::sourceMoved(Source & source, SourceLinkBehavior const s
         mLinkStrategy->computeParameters(mSources, mSnapshots);
     }
 
-    switch (sourceLinkBehavior) {
-    case SourceLinkBehavior::doNothing:
-        jassertfalse;
-        break;
-    case SourceLinkBehavior::moveSourceAnchor:
+    switch (origin) {
+    case Source::OriginOfChange::userAnchorMove:
         if (source.isPrimarySource()) {
             primarySourceAnchorMoved();
         } else {
             secondarySourceAnchorMoved(source.getIndex());
         }
         break;
-    case SourceLinkBehavior::moveAllSources:
+    case Source::OriginOfChange::userMove:
         if (source.isPrimarySource()) {
             primarySourceMoved();
         } else {
             secondarySourceMoved(source.getIndex());
         }
         break;
+    default:
+        jassertfalse;
     }
 }
 
@@ -184,7 +173,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         // apply motion to primary source
         mSources.getPrimarySource().setElevation(mSources.getPrimarySource().getElevation() + motion,
-                                                 SourceLinkBehavior::doNothing);
+                                                 Source::OriginOfChange::link);
     } else {
         auto const primaryStart{ mSnapshots.primary };
         SourceSnapshot const primaryEnd{ mSources.getPrimarySource() };
@@ -204,7 +193,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         // train motion
         mSnapshots.primary = motionStart;
-        mSources.getPrimarySource().setPosition(motionEnd.position, SourceLinkBehavior::doNothing);
+        mSources.getPrimarySource().setPosition(motionEnd.position, Source::OriginOfChange::none);
         mLinkStrategy->computeParameters(mSources, mSnapshots);
 
         // apply motion to primary position
@@ -214,14 +203,13 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         // enforce link
         mSnapshots.primary = primaryStart;
-        mSources.getPrimarySource().setPosition(target.position, SourceLinkBehavior::doNothing);
 
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
         }
+        mSources.getPrimarySource().setPosition(target.position, Source::OriginOfChange::link);
     }
-    enforceSourceLink();
 }
 
 //==============================================================================
@@ -258,17 +246,5 @@ void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
     mSnapshots.secondaries.clearQuick();
     for (unsigned i{}; i < mSources.getSecondarySources().size(); ++i) {
         mSnapshots.secondaries.add(SourceSnapshot{ mSources.getSecondarySources()[i] });
-    }
-}
-
-//==============================================================================
-void SourceLinkEnforcer::reset()
-{
-    for (auto & source : mSources) {
-        source.removeSourceLinkListener(this);
-    }
-    saveCurrentPositionsToInitialStates();
-    for (auto & source : mSources) {
-        source.addSourceLinkListener(this);
     }
 }

@@ -1159,6 +1159,83 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 }
 
 //==============================================================================
+void ControlGrisAudioProcessor::sourceChanged(Source & source,
+                                              Source::ChangeType changeType,
+                                              Source::OriginOfChange origin)
+{
+    auto const isPositionChange{ changeType == Source::ChangeType::position };
+    jassert(isPositionChange ? true : changeType == Source::ChangeType::elevation);
+    auto const isPrimary{ source.isPrimarySource() };
+    SourceLinkEnforcer & sourceLinkEnforcer{ isPositionChange ? mPositionSourceLinkEnforcer
+                                                              : mElevationSourceLinkEnforcer };
+    AutomationManager & automationManager{ isPositionChange ? mPositionAutomationManager
+                                                            : mElevationAutomationManager };
+    switch (origin) {
+    case Source::OriginOfChange::none:
+        return;
+    case Source::OriginOfChange::userMove:
+    case Source::OriginOfChange::userAnchorMove:
+    case Source::OriginOfChange::preset:
+        sourceLinkEnforcer.sourceMoved(source, origin);
+        setSelectedSource(source);
+        if (isPrimary) {
+            automationManager.sourceMoved(source);
+            updatePrimarySourceParameters(changeType);
+        }
+        return;
+    case Source::OriginOfChange::link:
+        if (isPrimary) {
+            sourceLinkEnforcer.sourceMoved(source, origin);
+            automationManager.sourceMoved(source);
+            updatePrimarySourceParameters(changeType);
+        }
+        return;
+    case Source::OriginOfChange::trajectory:
+    case Source::OriginOfChange::automation:
+    case Source::OriginOfChange::osc:
+        jassert(isPrimary);
+        sourceLinkEnforcer.sourceMoved(source, origin);
+        automationManager.sourceMoved(source);
+        updatePrimarySourceParameters(changeType);
+        return;
+    }
+    jassertfalse;
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
+{
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor != nullptr) {
+        editor->sourceBoxSelectionChanged(source.getIndex());
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType const changeType)
+{
+    auto const & source{ mSources.getPrimarySource() };
+    switch (changeType) {
+    case Source::ChangeType::position: {
+        auto const x_sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::X) };
+        auto const y_sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::Y) };
+        auto const normalized_x{ (source.getX() + 1.0f) / 2.0f };
+        auto const normalized_y{ (source.getY() + 1.0f) / 2.0f };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)->setValueNotifyingHost(normalized_x);
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)->setValueNotifyingHost(normalized_y);
+    } break;
+    case Source::ChangeType::elevation: {
+        jassert(mSpatMode == SpatMode::cube);
+        auto const sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::Z) };
+        auto const normalized_z{ source.getElevation() / MAX_ELEVATION };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValueNotifyingHost(normalized_z);
+    }
+    default:
+        jassertfalse;
+    }
+}
+
+//==============================================================================
 // This creates new instances of the plugin..
 AudioProcessor * JUCE_CALLTYPE createPluginFilter()
 {

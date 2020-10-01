@@ -196,6 +196,10 @@ public:
 
     void setSourcePosition(Point<float> const & position, SourceIndex sourceIndex);
 
+    void sourceChanged(Source & source, Source::ChangeType changeType, Source::OriginOfChange origin);
+    void setSelectedSource(Source const & source);
+    void updatePrimarySourceParameters(Source::ChangeType const changeType);
+
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessor)
