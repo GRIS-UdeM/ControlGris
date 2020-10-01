@@ -123,9 +123,14 @@ bool PresetsManager::load(int const presetNumber)
         }
     }
 
-    mPositionLinkEnforcer.loadSnapshots(snapshots);
-
-    mElevationLinkEnforcer.loadSnapshots(snapshots);
+    for (auto & source : mSources) {
+        auto const sourceIndex{ source.getIndex() };
+        auto const & snapshot{ snapshots[sourceIndex] };
+        source.setPosition(snapshot.position, Source::OriginOfChange::userAnchorMove);
+        if (source.getSpatMode() == SpatMode::cube) {
+            source.setElevation(snapshot.z, Source::OriginOfChange::userAnchorMove);
+        }
+    }
 
     auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
     auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };

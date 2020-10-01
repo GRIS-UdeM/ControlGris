@@ -62,15 +62,6 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
-    if (!mLinkStrategy) {
-        if (mElevationSourceLink != ElevationSourceLink::undefined) {
-            jassert(mPositionSourceLink == PositionSourceLink::undefined);
-            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
-        } else {
-            jassert(mPositionSourceLink != PositionSourceLink::undefined);
-            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
-        }
-    }
     mLinkStrategy->computeParameters(mSources, mSnapshots);
     mLinkStrategy->enforce(mSources, mSnapshots);
     if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
@@ -86,7 +77,7 @@ void SourceLinkEnforcer::enforceSourceLink()
 void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
 {
     mSnapshots = snapshots;
-    enforceSourceLink();
+    //    enforceSourceLink();
 }
 
 //==============================================================================
