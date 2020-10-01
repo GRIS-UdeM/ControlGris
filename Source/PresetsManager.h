@@ -29,9 +29,7 @@
 #include "SourceLinkEnforcer.h"
 
 //==============================================================================
-class PresetsManager final
-    : public Source::Listener
-    , public ChangeBroadcaster
+class PresetsManager final : public ChangeBroadcaster
 {
     //==============================================================================
     int mLastLoadedPreset{ 0 };
@@ -44,7 +42,7 @@ class PresetsManager final
 public:
     //==============================================================================
     PresetsManager() = delete;
-    ~PresetsManager() noexcept override;
+    ~PresetsManager() noexcept override = default;
 
     PresetsManager(PresetsManager const &) = delete;
     PresetsManager(PresetsManager &&) = delete;
@@ -60,15 +58,11 @@ public:
     [[nodiscard]] int getCurrentPreset() const;
     [[nodiscard]] std::array<bool, NUMBER_OF_POSITION_PRESETS> getSavedPresets() const;
 
-    bool loadIfPresetChanged(int presetNumber);
-    bool forceLoad(int presetNumber);
+    [[nodiscard]] bool loadIfPresetChanged(int presetNumber);
+    [[nodiscard]] bool forceLoad(int presetNumber);
     void save(int presetNumber) const;
-    bool deletePreset(int presetNumber) const;
+    [[nodiscard]] bool deletePreset(int presetNumber) const;
     void numberOfSourcesChanged();
-
-protected:
-    //==============================================================================
-    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
 
 private:
     //==============================================================================
@@ -77,9 +71,6 @@ private:
     [[nodiscard]] std::optional<XmlElement *> getPresetData(int presetNumber) const;
 
     [[nodiscard]] bool load(int presetNumber);
-    void subscribeToSources();
-    void unsubscribeToSources();
-
     //==============================================================================
     JUCE_LEAK_DETECTOR(PresetsManager)
 };

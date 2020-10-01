@@ -66,7 +66,7 @@ private:
 
     SourceIndex mIndex{};
     SourceId mId{ 1 };
-    SpatMode mSpatMode{ SpatMode::cube };
+    SpatMode mSpatMode{ SpatMode::dome };
 
     Radians mAzimuth{};
     Radians mElevation{};

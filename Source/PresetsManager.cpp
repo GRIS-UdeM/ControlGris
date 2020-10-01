@@ -55,13 +55,6 @@ PresetsManager::PresetsManager(XmlElement & data,
     , mPositionLinkEnforcer(positionLinkEnforcer)
     , mElevationLinkEnforcer(elevationLinkEnforcer)
 {
-    subscribeToSources();
-}
-
-//==============================================================================
-PresetsManager::~PresetsManager() noexcept
-{
-    unsubscribeToSources();
 }
 
 //==============================================================================
@@ -149,7 +142,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         terminalPosition = snapshots.primary.position;
     }
-    mSources.getPrimarySource().setPosition(terminalPosition, SourceLinkBehavior::moveAllSources);
+    mSources.getPrimarySource().setPosition(terminalPosition, Source::OriginOfChange::preset);
 
     Radians elevation;
     if (presetData->hasAttribute(zTerminalPositionId)) {
@@ -159,7 +152,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         elevation = snapshots.primary.z;
     };
-    mSources.getPrimarySource().setElevation(elevation, SourceLinkBehavior::moveAllSources);
+    mSources.getPrimarySource().setElevation(elevation, Source::OriginOfChange::preset);
 
     mLastLoadedPreset = presetNumber;
     mSourceMovedSinceLastRecall = false;
@@ -275,19 +268,7 @@ bool PresetsManager::deletePreset(int const presetNumber) const
 //==============================================================================
 void PresetsManager::numberOfSourcesChanged()
 {
-    unsubscribeToSources();
-    subscribeToSources();
-}
-
-//==============================================================================
-void PresetsManager::sourceMoved([[maybe_unused]] Source & source,
-                                 [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
-{
-    jassert(sourceLinkBehavior != SourceLinkBehavior::doNothing);
-    if (!mSourceMovedSinceLastRecall) {
-        mSourceMovedSinceLastRecall = true;
-        sendChangeMessage();
-    }
+    // TODO
 }
 
 //==============================================================================
@@ -304,20 +285,4 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
     }
 
     return result;
-}
-
-//==============================================================================
-void PresetsManager::subscribeToSources()
-{
-    for (auto & source : mSources) {
-        source.addSourceLinkListener(this);
-    }
-}
-
-//==============================================================================
-void PresetsManager::unsubscribeToSources()
-{
-    for (auto & source : mSources) {
-        source.removeSourceLinkListener(this);
-    }
 }

@@ -110,7 +110,7 @@ protected:
     //==============================================================================
     void drawBackgroundGrid(Graphics & g) const;
     //==============================================================================
-    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+    void sourceMoved() override;
     //==============================================================================
     virtual void drawBackground(Graphics & g) const = 0;
     virtual void applySourceSelectionToComponents() = 0;

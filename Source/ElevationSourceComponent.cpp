@@ -31,14 +31,14 @@ ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fie
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
-    source.addGuiChangeListener(this);
+    source.addGuiListener(this);
     updatePositionInParent();
 }
 
 //==============================================================================
 ElevationSourceComponent::~ElevationSourceComponent() noexcept
 {
-    mSource.removeGuiChangeListener(this);
+    mSource.removeGuiListener(this);
 }
 
 //==============================================================================
@@ -51,11 +51,8 @@ void ElevationSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void ElevationSourceComponent::sourceMoved([[maybe_unused]] Source & source,
-                                           [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+void ElevationSourceComponent::sourceMoved()
 {
-    jassert(&source == &mSource);
-    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
     updatePositionInParent();
 }
 
@@ -63,11 +60,10 @@ void ElevationSourceComponent::sourceMoved([[maybe_unused]] Source & source,
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
-    if (mSource.isPrimarySource()) {
+    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
     }
     setSourcePosition(event);
-    mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
 //==============================================================================
@@ -77,14 +73,9 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
     auto const sourceLinkBehavior{ mDisplacementMode == DisplacementMode::selectedSourceOnly
-                                       ? SourceLinkBehavior::moveSourceAnchor
-                                       : SourceLinkBehavior::moveAllSources };
+                                       ? Source::OriginOfChange::userAnchorMove
+                                       : Source::OriginOfChange::userMove };
     mSource.setElevation(newElevation, sourceLinkBehavior);
-
-    if (mSource.isPrimarySource()) {
-        mAutomationManager.sendTrajectoryPositionChangedEvent();
-    }
-    mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
 }
 
 //==============================================================================
@@ -100,7 +91,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
-    if (mSource.isPrimarySource()) {
+    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
         mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Z);
     }
 }

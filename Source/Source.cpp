@@ -93,7 +93,9 @@ void Source::setCoordinates(Radians const azimuth,
         mDistance = distance;
         computeXY();
         notify(ChangeType::position, origin);
-        notify(ChangeType::elevation, origin);
+        if (mSpatMode == SpatMode::cube) {
+            notify(ChangeType::elevation, origin);
+        }
     }
 }
 

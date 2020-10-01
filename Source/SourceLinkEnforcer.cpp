@@ -27,6 +27,7 @@ SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink con
     : mSources(sources)
     , mPositionSourceLink(sourceLink)
 {
+    saveCurrentPositionsToInitialStates();
 }
 
 //==============================================================================
@@ -125,7 +126,7 @@ void SourceLinkEnforcer::sourceMoved(Source & source, Source::OriginOfChange con
 //==============================================================================
 void SourceLinkEnforcer::numberOfSourcesChanged()
 {
-    reset();
+    saveCurrentPositionsToInitialStates();
 }
 
 //==============================================================================
@@ -196,10 +197,14 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         mSources.getPrimarySource().setPosition(motionEnd.position, Source::OriginOfChange::none);
         mLinkStrategy->computeParameters(mSources, mSnapshots);
 
-        // apply motion to primary position
+        // apply motion to secondary source (temp)
         mSnapshots.primary = primaryEnd;
-        mLinkStrategy->enforce_implementation(mSources, mSnapshots, mSources.getPrimarySource().getIndex());
-        SourceSnapshot const target{ mSources.getPrimarySource() };
+        mSnapshots[sourceIndex] = primaryEnd;
+        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        SourceSnapshot const target{ mSources[sourceIndex] };
+
+        // rebuild source snapshot
+        mSnapshots[sourceIndex] = secondaryStart;
 
         // enforce link
         mSnapshots.primary = primaryStart;

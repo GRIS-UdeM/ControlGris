@@ -31,14 +31,14 @@ PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldC
     , mAutomationManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
-    source.addGuiChangeListener(this);
+    source.addGuiListener(this);
     updatePositionInParent();
 }
 
 //==============================================================================
 PositionSourceComponent::~PositionSourceComponent()
 {
-    mSource.removeGuiChangeListener(this);
+    mSource.removeGuiListener(this);
 }
 
 //==============================================================================
@@ -49,11 +49,8 @@ void PositionSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void PositionSourceComponent::sourceMoved([[maybe_unused]] Source & source,
-                                          [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+void PositionSourceComponent::sourceMoved()
 {
-    jassert(&source == &mSource);
-    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
     updatePositionInParent();
 }
 
@@ -61,12 +58,11 @@ void PositionSourceComponent::sourceMoved([[maybe_unused]] Source & source,
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
-    if (mSource.isPrimarySource()) {
+    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
         mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
     }
     setSourcePosition(event);
-    mFieldComponent.setSelectedSource(mSource.getIndex());
 }
 
 //==============================================================================
@@ -74,18 +70,13 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
 {
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
-    auto const sourceLinkBehavior{ mDisplacementMode == DisplacementMode::selectedSourceOnly
-                                       ? SourceLinkBehavior::moveSourceAnchor
-                                       : SourceLinkBehavior::moveAllSources };
+    auto const origin{ mDisplacementMode == DisplacementMode::selectedSourceOnly
+                           ? Source::OriginOfChange::userAnchorMove
+                           : Source::OriginOfChange::userMove };
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newPosition{ mFieldComponent.componentPositionToSourcePosition(
         eventRelativeToFieldComponent.getPosition().toFloat()) };
-    mSource.setPosition(newPosition, sourceLinkBehavior);
-
-    if (mSource.isPrimarySource() || sourceLinkBehavior == SourceLinkBehavior::moveAllSources) {
-        mAutomationManager.sendTrajectoryPositionChangedEvent();
-    }
-    mFieldComponent.notifySourcePositionChanged(mSource.getIndex());
+    mSource.setPosition(newPosition, origin);
 }
 
 //==============================================================================
@@ -101,7 +92,7 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
     mouseDrag(event);
-    if (mSource.isPrimarySource()) {
+    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
         mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::X);
         mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Y);
     }

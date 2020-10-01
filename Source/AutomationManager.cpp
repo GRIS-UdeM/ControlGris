@@ -179,11 +179,11 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 //==============================================================================
 void AutomationManager::setPrimarySourcePosition(Point<float> const & pos) const
 {
-    mPrimarySource.setPosition(pos, SourceLinkBehavior::moveSourceAnchor);
+    mPrimarySource.setPosition(pos, Source::OriginOfChange::trajectory);
 }
 
 //==============================================================================
-void AutomationManager::sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior)
+void AutomationManager::sourceMoved(Source & source)
 {
     jassert(source.isPrimarySource());
     recomputeTrajectory();
@@ -220,7 +220,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory = Trajectory{ type, startPos };
     }
-    mPrimarySource.setPosition(startPos, SourceLinkBehavior::moveSourceAnchor);
+    mPrimarySource.setPosition(startPos, Source::OriginOfChange::trajectory);
 }
 
 //==============================================================================
@@ -252,7 +252,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
-        mPrimarySource.setPosition(mCurrentTrajectoryPoint, SourceLinkBehavior::moveSourceAnchor);
+        mPrimarySource.setPosition(mCurrentTrajectoryPoint, Source::OriginOfChange::trajectory);
         sendTrajectoryPositionChangedEvent();
     }
 }
@@ -262,7 +262,7 @@ void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
         auto const currentElevation{ MAX_ELEVATION * (mCurrentTrajectoryPoint.getY() + 1.0f) / 2.0f };
-        mPrimarySource.setElevation(currentElevation, SourceLinkBehavior::moveSourceAnchor);
+        mPrimarySource.setElevation(currentElevation, Source::OriginOfChange::trajectory);
         sendTrajectoryPositionChangedEvent();
     }
 }

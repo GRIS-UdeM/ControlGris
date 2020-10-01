@@ -20,6 +20,7 @@
 
 #include "PluginProcessor.h"
 
+#include "AutomationManager.h"
 #include "PluginEditor.h"
 
 enum class FixedPositionType { terminal, initial };
@@ -157,6 +158,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("cycleDuration", 5, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", 1, nullptr);
 
+    mSources.init(this);
     // Per source mAudioProcessorValueTreeState. Because there is no attachment to the automatable
     // mAudioProcessorValueTreeState, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
@@ -175,7 +177,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
-        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, SourceLinkBehavior::doNothing);
+        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, Source::OriginOfChange::userAnchorMove);
     }
 
     auto * paramX{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
@@ -197,8 +199,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
-    mPositionAutomationManager.addListener(this);
-    mElevationAutomationManager.addListener(this);
+    //    mPositionAutomationManager.addListener(this);
+    //    mElevationAutomationManager.addListener(this);
 
     handleOscConnection(true);
 
@@ -222,13 +224,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     Normalized const normalized{ newValue };
     if (parameterId.compare(Automation::Ids::X) == 0) {
-        mSources.getPrimarySource().setX(normalized, SourceLinkBehavior::doNothing);
+        mSources.getPrimarySource().setX(normalized, Source::OriginOfChange::automation);
     } else if (parameterId.compare(Automation::Ids::Y) == 0) {
         Normalized const invNormalized{ 1.0f - newValue };
-        mSources.getPrimarySource().setY(invNormalized, SourceLinkBehavior::doNothing);
+        mSources.getPrimarySource().setY(invNormalized, Source::OriginOfChange::automation);
     } else if (parameterId.compare(Automation::Ids::Z) == 0 && mSpatMode == SpatMode::cube) {
         auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
-        mSources.getPrimarySource().setElevation(newElevation, SourceLinkBehavior::doNothing);
+        mSources.getPrimarySource().setElevation(newElevation, Source::OriginOfChange::automation);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
@@ -561,21 +563,21 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     }
 
     if (x != -1.0f && y != -1.0f) {
-        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, Source::OriginOfChange::osc);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     } else if (y != -1.0f) {
-        mSources.getPrimarySource().setY(y, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setY(y, Source::OriginOfChange::osc);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     } else if (x != -1.0f) {
-        mSources.getPrimarySource().setX(x, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setX(x, Source::OriginOfChange::osc);
         sourcePositionChanged(SourceIndex{ 0 }, 0);
         mPresetManager.loadIfPresetChanged(0);
     }
 
     if (z != -1.0f) {
-        mSources.getPrimarySource().setY(z, SourceLinkBehavior::moveSourceAnchor);
+        mSources.getPrimarySource().setY(z, Source::OriginOfChange::osc);
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
         mPresetManager.loadIfPresetChanged(0);
     }
@@ -825,12 +827,12 @@ void ControlGrisAudioProcessor::setPluginState()
             auto const index{ source.getIndex().toString() };
             source.setAzimuth(
                 Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_azimuth_") + index) },
-                SourceLinkBehavior::moveSourceAnchor);
+                Source::OriginOfChange::userAnchorMove);
             source.setElevation(
                 Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_elevation_") + index) },
-                SourceLinkBehavior::moveSourceAnchor);
+                Source::OriginOfChange::userAnchorMove);
             source.setDistance(mAudioProcessorValueTreeState.state.getProperty(String("p_distance_") + index),
-                               SourceLinkBehavior::moveSourceAnchor);
+                               Source::OriginOfChange::userAnchorMove);
         }
     }
 
@@ -862,12 +864,8 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
         setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
         mElevationAutomationManager.setTrajectoryType(mElevationAutomationManager.getTrajectoryType());
     }
-
-    //    // any position change invalidates current preset.
-    //    setPositionPreset(0);
 }
 
-// Called whenever a source has changed.
 //--------------------------------------
 void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const sourceIndex,
                                                         SourceParameter const parameterId,
@@ -878,64 +876,32 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
     auto & source{ mSources[sourceIndex] };
     switch (parameterId) {
     case SourceParameter::azimuth:
-        source.setAzimuth(normalized, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty("p_azimuth_" + param_id, value, nullptr);
         break;
     case SourceParameter::elevation:
-        source.setElevation(normalized, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty(String("p_elevation_") + param_id, value, nullptr);
         break;
     case SourceParameter::distance:
-        source.setDistance(value, SourceLinkBehavior::moveSourceAnchor);
         mAudioProcessorValueTreeState.state.setProperty(String("p_distance_") + param_id, value, nullptr);
         break;
     case SourceParameter::x:
-        source.setX(value, SourceLinkBehavior::moveSourceAnchor);
+        jassertfalse;
         break;
     case SourceParameter::y:
-        source.setY(value, SourceLinkBehavior::moveSourceAnchor);
+        jassertfalse;
         break;
     case SourceParameter::azimuthSpan:
-        for (auto & sourceRef : mSources) {
-            sourceRef.setAzimuthSpan(normalized);
+        for (auto & source : mSources) {
+            source.setAzimuthSpan(normalized);
         }
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(value);
         break;
     case SourceParameter::elevationSpan:
-        for (auto & sourceRef : mSources) {
-            sourceRef.setElevationSpan(normalized);
+        for (auto & source : mSources) {
+            source.setElevationSpan(normalized);
         }
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(value);
         break;
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessor::trajectoryPositionChanged(AutomationManager * manager,
-                                                          Point<float> const position,
-                                                          Radians const elevation)
-{
-    // TODO: change gestures might have to be initiated some other way ? (osc input)
-    auto const normalizedPosition{ (position + Point<float>{ 1.0f, 1.0f }) / 2.0f };
-    if (manager == &mPositionAutomationManager) {
-        if (!isPlaying()) {
-            mPositionAutomationManager.setPrimarySourcePosition(position);
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)->setValue(normalizedPosition.getX());
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)->setValue(1.0f - normalizedPosition.getY());
-        }
-
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)
-            ->setValueNotifyingHost(normalizedPosition.getX());
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)
-            ->setValueNotifyingHost(1.0f - normalizedPosition.getY());
-
-    } else if (manager == &mElevationAutomationManager) {
-        auto const normalizedElevation{ 1.0f - elevation / MAX_ELEVATION };
-        if (!isPlaying()) {
-            mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValue(normalizedElevation);
-        }
-
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValueNotifyingHost(normalizedElevation);
     }
 }
 
@@ -1168,15 +1134,26 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     auto const isPrimary{ source.isPrimarySource() };
     SourceLinkEnforcer & sourceLinkEnforcer{ isPositionChange ? mPositionSourceLinkEnforcer
                                                               : mElevationSourceLinkEnforcer };
-    AutomationManager & automationManager{ isPositionChange ? mPositionAutomationManager
-                                                            : mElevationAutomationManager };
+    // TODO : why can't we just use the ternary operator here?
+    AutomationManager * temp{ &mElevationAutomationManager };
+    if (isPositionChange) {
+        temp = &mPositionAutomationManager;
+    }
+    AutomationManager & automationManager{ *temp };
     switch (origin) {
     case Source::OriginOfChange::none:
         return;
     case Source::OriginOfChange::userMove:
     case Source::OriginOfChange::userAnchorMove:
-    case Source::OriginOfChange::preset:
         sourceLinkEnforcer.sourceMoved(source, origin);
+        setSelectedSource(source);
+        if (isPrimary) {
+            automationManager.sourceMoved(source);
+            updatePrimarySourceParameters(changeType);
+        }
+        return;
+    case Source::OriginOfChange::preset:
+        sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
         setSelectedSource(source);
         if (isPrimary) {
             automationManager.sourceMoved(source);
@@ -1185,7 +1162,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         return;
     case Source::OriginOfChange::link:
         if (isPrimary) {
-            sourceLinkEnforcer.sourceMoved(source, origin);
+            sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
             automationManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
@@ -1194,7 +1171,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::automation:
     case Source::OriginOfChange::osc:
         jassert(isPrimary);
-        sourceLinkEnforcer.sourceMoved(source, origin);
+        sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
         automationManager.sourceMoved(source);
         updatePrimarySourceParameters(changeType);
         return;
@@ -1214,21 +1191,24 @@ void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
 //==============================================================================
 void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType const changeType)
 {
+    // TODO : this might have to check if isPlaying() and setValue without notifying host
     auto const & source{ mSources.getPrimarySource() };
     switch (changeType) {
     case Source::ChangeType::position: {
         auto const x_sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::X) };
         auto const y_sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::Y) };
         auto const normalized_x{ (source.getX() + 1.0f) / 2.0f };
-        auto const normalized_y{ (source.getY() + 1.0f) / 2.0f };
+        auto const normalized_y{ 1.0f - (source.getY() + 1.0f) / 2.0f };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)->setValueNotifyingHost(normalized_x);
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)->setValueNotifyingHost(normalized_y);
-    } break;
+        break;
+    }
     case Source::ChangeType::elevation: {
         jassert(mSpatMode == SpatMode::cube);
         auto const sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::Z) };
-        auto const normalized_z{ source.getElevation() / MAX_ELEVATION };
+        auto const normalized_z{ 1.0f - source.getElevation() / MAX_ELEVATION };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::Z)->setValueNotifyingHost(normalized_z);
+        break;
     }
     default:
         jassertfalse;

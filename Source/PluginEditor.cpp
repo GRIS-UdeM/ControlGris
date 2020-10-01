@@ -365,13 +365,13 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
-                source.setCoordinates(azims2[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(azims2[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else if (numOfSources <= 4) {
-                source.setCoordinates(azims4[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(azims4[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else if (numOfSources <= 6) {
-                source.setCoordinates(azims6[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(azims6[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else {
-                source.setCoordinates(azims8[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(azims8[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             }
         }
         break;
@@ -381,13 +381,13 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
             if (numOfSources <= 2) {
-                source.setCoordinates(-azims2[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(-azims2[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else if (numOfSources <= 4) {
-                source.setCoordinates(-azims4[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(-azims4[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else if (numOfSources <= 6) {
-                source.setCoordinates(-azims6[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(-azims6[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             } else {
-                source.setCoordinates(-azims8[i], elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+                source.setCoordinates(-azims8[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
             }
         }
         break;
@@ -397,7 +397,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -409,7 +409,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             mProcessor.getSources()[i].setCoordinates(azimuth,
                                                       elevation,
                                                       distance,
-                                                      SourceLinkBehavior::moveSourceAnchor);
+                                                      Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -418,7 +418,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -427,7 +427,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -436,7 +436,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -445,7 +445,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
             auto & source{ mProcessor.getSources()[i] };
             auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
             auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, SourceLinkBehavior::moveSourceAnchor);
+            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
         }
         break;
     }
@@ -481,10 +481,10 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
     auto & source{ mProcessor.getSources()[sourceIndex] };
     if (mProcessor.getSpatMode() == SpatMode::dome) {
         auto const elevation{ MAX_ELEVATION * rayLen };
-        source.setCoordinates(angle, elevation, 1.0f, SourceLinkBehavior::moveSourceAnchor);
+        source.setCoordinates(angle, elevation, 1.0f, Source::OriginOfChange::userMove);
     } else {
         auto const currentElevation{ source.getElevation() };
-        source.setCoordinates(angle, currentElevation, rayLen, SourceLinkBehavior::moveSourceAnchor);
+        source.setCoordinates(angle, currentElevation, rayLen, Source::OriginOfChange::userMove);
     }
 }
 

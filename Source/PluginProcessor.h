@@ -33,7 +33,7 @@
 class ControlGrisAudioProcessor final
     : public AudioProcessor
     , public AudioProcessorValueTreeState::Listener
-    , public AutomationManager::Listener
+    //    , public AutomationManager::Listener
     , public Timer
     , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
@@ -186,7 +186,8 @@ public:
 
     ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
-    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation) override;
+    //    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation)
+    //    override;
 
     void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
@@ -194,11 +195,11 @@ public:
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
 
-    void setSourcePosition(Point<float> const & position, SourceIndex sourceIndex);
+    //    void setSourcePosition(Point<float> const & position, SourceIndex sourceIndex);
 
     void sourceChanged(Source & source, Source::ChangeType changeType, Source::OriginOfChange origin);
     void setSelectedSource(Source const & source);
-    void updatePrimarySourceParameters(Source::ChangeType const changeType);
+    void updatePrimarySourceParameters(Source::ChangeType changeType);
 
 private:
     //==============================================================================

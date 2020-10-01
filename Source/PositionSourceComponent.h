@@ -61,7 +61,7 @@ public:
 
 protected:
     //==============================================================================
-    void sourceMoved(Source & source, SourceLinkBehavior sourceLinkBehavior) override;
+    void sourceMoved() override;
 
 private:
     //==============================================================================

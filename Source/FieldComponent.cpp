@@ -33,7 +33,7 @@ FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
 FieldComponent::~FieldComponent() noexcept
 {
     for (SourceIndex i{}; i < SourceIndex{ MAX_NUMBER_OF_SOURCES }; ++i) {
-        mSources[i].removeGuiChangeListener(this);
+        mSources[i].removeGuiListener(this);
     }
 }
 
@@ -53,7 +53,7 @@ void FieldComponent::refreshSources()
     mOldSelectedSource.reset();
 
     for (auto & source : mSources) {
-        source.addGuiChangeListener(this);
+        source.addGuiListener(this);
     }
 
     rebuildSourceComponents(mSources.size());
@@ -94,10 +94,8 @@ void FieldComponent::drawBackgroundGrid(Graphics & g) const
 }
 
 //==============================================================================
-void FieldComponent::sourceMoved([[maybe_unused]] Source & source,
-                                 [[maybe_unused]] SourceLinkBehavior const sourceLinkBehavior)
+void FieldComponent::sourceMoved()
 {
-    jassert(sourceLinkBehavior == SourceLinkBehavior::doNothing);
     repaint();
 }
 
@@ -465,7 +463,7 @@ void PositionFieldComponent::mouseDown(MouseEvent const & event)
         } else {
             // not currently drawing a straight line
             mAutomationManager.resetRecordingTrajectory(position);
-            mSources.getPrimarySource().setPosition(position, SourceLinkBehavior::moveSourceAnchor);
+            mSources.getPrimarySource().setPosition(position, Source::OriginOfChange::userMove);
             if (isShiftDown) {
                 // start a new Line
                 mLineDrawingStartPosition = position;

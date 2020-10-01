@@ -22,6 +22,9 @@ void LinkStrategy::enforce(Sources & finalStates,
 void LinkStrategy::enforce(Sources & finalStates, SourcesSnapshots const & initialState) const
 {
     for (auto & source : finalStates) {
+        if (source.isPrimarySource()) {
+            continue; // do not enforce primary source
+        }
         enforce(finalStates, initialState, source.getIndex());
     }
 }
@@ -89,7 +92,7 @@ void IndependentStrategy::enforce_implementation(Sources & finalStates,
                                                  SourcesSnapshots const & initialStates,
                                                  SourceIndex const sourceIndex) const
 {
-    finalStates[sourceIndex].setPosition(initialStates[sourceIndex].position, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(initialStates[sourceIndex].position, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -127,7 +130,7 @@ void CircularStrategy::enforce_implementation(Sources & finalStates,
 {
     auto const finalPosition{ initialStates[sourceIndex].position.rotatedAboutOrigin(mRotation.getAsRadians())
                               * mRadiusRatio };
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -165,7 +168,7 @@ void CircularFixedRadiusStrategy::enforce_implementation(Sources & finalStates,
     auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
     Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -251,7 +254,7 @@ void CircularFixedAngleStrategy::enforce_implementation(Sources & finalStates,
     Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
                                       std::sin(finalAngle.getAsRadians()) * finalRadius };
 
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 SourceSnapshot
@@ -341,7 +344,7 @@ void CircularFullyFixedStrategy::enforce_implementation(Sources & finalStates,
     Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
                                       std::sin(finalAngle.getAsRadians()) * mRadius };
 
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -376,7 +379,7 @@ void LinkSymmetricXStrategy::enforce_implementation(Sources & finalStates,
                                                     SourceIndex const sourceIndex) const
 {
     Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -402,7 +405,7 @@ void LinkSymmetricYStrategy::enforce_implementation(Sources & finalStates,
                                                     SourceIndex const sourceIndex) const
 {
     Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -428,7 +431,7 @@ void DeltaLockStrategy::enforce_implementation(Sources & finalStates,
                                                SourceIndex const sourceIndex) const
 {
     auto const finalPosition{ initialStates[sourceIndex].position + mDelta };
-    finalStates[sourceIndex].setPosition(finalPosition, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -450,7 +453,7 @@ void IndependentElevationStrategy::enforce_implementation(Sources & finalStates,
                                                           SourcesSnapshots const & initialStates,
                                                           SourceIndex const sourceIndex) const
 {
-    finalStates[sourceIndex].setElevation(initialStates[sourceIndex].z, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(initialStates[sourceIndex].z, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -474,7 +477,7 @@ void FixedElevationStrategy::enforce_implementation(Sources & finalStates,
                                                     SourcesSnapshots const & initialStates,
                                                     SourceIndex const sourceIndex) const
 {
-    finalStates[sourceIndex].setElevation(mElevation, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(mElevation, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -500,7 +503,7 @@ void LinearMinElevationStrategy::enforce_implementation(Sources & finalStates,
                                                         SourceIndex const sourceIndex) const
 {
     auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
-    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -528,7 +531,7 @@ void LinearMaxElevationStrategy::enforce_implementation(Sources & finalStates,
                                                         SourceIndex const sourceIndex) const
 {
     auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
-    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 
 //==============================================================================
@@ -553,7 +556,7 @@ void DeltaLockElevationStrategy::enforce_implementation(Sources & finalStates,
                                                         SourceIndex const sourceIndex) const
 {
     auto const newElevation{ initialStates[sourceIndex].z + mDelta };
-    finalStates[sourceIndex].setElevation(newElevation, SourceLinkBehavior::doNothing);
+    finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 
 //==============================================================================
