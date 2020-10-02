@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" pluginFormats="buildAU,buildStandalone,buildVST,buildVST3"
-              version="1.1.5" bundleIdentifier="com.gris.umontreal.controlgris"
+              version="1.1.6" bundleIdentifier="com.gris.umontreal.controlgris"
               companyName="UdeM" aaxIdentifier="com.udem.GRIS.ControlGris"
               pluginManufacturer="UdeM" pluginManufacturerCode="UdeM" pluginCode="Xzz1"
               pluginChannelConfigs="{1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}"
@@ -10,15 +10,19 @@
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
-        <FILE id="V2Cfm0" name="ConstrainedStrongTypes.h" compile="0" resource="0"
-              file="Source/ConstrainedStrongTypes.h"/>
-        <FILE id="oW9vrz" name="ControlGrisConstants.cpp" compile="1" resource="0"
-              file="Source/ControlGrisConstants.cpp"/>
-        <FILE id="IohZol" name="ControlGrisConstants.h" compile="0" resource="0"
-              file="Source/ControlGrisConstants.h"/>
-        <FILE id="pvfyvE" name="ControlGrisUtilities.h" compile="0" resource="0"
-              file="Source/ControlGrisUtilities.h"/>
-        <FILE id="qFdGxF" name="StrongTypes.h" compile="0" resource="0" file="Source/StrongTypes.h"/>
+        <FILE id="oW9vrz" name="cg_constants.cpp" compile="1" resource="0"
+              file="Source/cg_constants.cpp"/>
+        <FILE id="IohZol" name="cg_constants.hpp" compile="0" resource="0"
+              file="Source/cg_constants.hpp"/>
+        <FILE id="fJ11NL" name="cg_Degrees.hpp" compile="0" resource="0" file="Source/cg_Degrees.hpp"/>
+        <FILE id="cGZkqx" name="cg_Normalized.hpp" compile="0" resource="0"
+              file="Source/cg_Normalized.hpp"/>
+        <FILE id="qFdGxF" name="cg_Radians.hpp" compile="0" resource="0" file="Source/cg_Radians.hpp"/>
+        <FILE id="DN0Tl9" name="cg_SourceId.hpp" compile="0" resource="0" file="Source/cg_SourceId.hpp"/>
+        <FILE id="PdZHgt" name="cg_SourceIndex.hpp" compile="0" resource="0"
+              file="Source/cg_SourceIndex.hpp"/>
+        <FILE id="pvfyvE" name="cg_utilities.hpp" compile="0" resource="0"
+              file="Source/cg_utilities.hpp"/>
       </GROUP>
       <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">
         <FILE id="JVPA2I" name="SinkinSans-400Regular.otf" compile="0" resource="1"
@@ -27,96 +31,99 @@
       <GROUP id="{B6A2D2FE-2A17-10D3-12C3-DF6BC59A017A}" name="UI">
         <GROUP id="{39B2417E-869D-1FFB-73FC-D18B9206CEE3}" name="Fields">
           <GROUP id="{C731EA5D-DB26-8755-FBC1-8D977FCFF2F9}" name="SourceComponents">
-            <FILE id="nALY8g" name="ElevationDrawingHandle.cpp" compile="1" resource="0"
-                  file="Source/ElevationDrawingHandle.cpp"/>
-            <FILE id="XFP6dV" name="ElevationDrawingHandle.h" compile="0" resource="0"
-                  file="Source/ElevationDrawingHandle.h"/>
-            <FILE id="y527bY" name="ElevationSourceComponent.cpp" compile="1" resource="0"
-                  file="Source/ElevationSourceComponent.cpp"/>
-            <FILE id="WYi6nn" name="ElevationSourceComponent.h" compile="0" resource="0"
-                  file="Source/ElevationSourceComponent.h"/>
-            <FILE id="IAXjb2" name="PositionSourceComponent.cpp" compile="1" resource="0"
-                  file="Source/PositionSourceComponent.cpp"/>
-            <FILE id="BtcY2C" name="PositionSourceComponent.h" compile="0" resource="0"
-                  file="Source/PositionSourceComponent.h"/>
-            <FILE id="QKC1GD" name="SourceComponent.cpp" compile="1" resource="0"
-                  file="Source/SourceComponent.cpp"/>
-            <FILE id="dQjtMF" name="SourceComponent.h" compile="0" resource="0"
-                  file="Source/SourceComponent.h"/>
+            <FILE id="nALY8g" name="cg_ElevationDrawingHandle.cpp" compile="1"
+                  resource="0" file="Source/cg_ElevationDrawingHandle.cpp"/>
+            <FILE id="XFP6dV" name="cg_ElevationDrawingHandle.hpp" compile="0"
+                  resource="0" file="Source/cg_ElevationDrawingHandle.hpp"/>
+            <FILE id="y527bY" name="cg_ElevationSourceComponent.cpp" compile="1"
+                  resource="0" file="Source/cg_ElevationSourceComponent.cpp"/>
+            <FILE id="WYi6nn" name="cg_ElevationSourceComponent.hpp" compile="0"
+                  resource="0" file="Source/cg_ElevationSourceComponent.hpp"/>
+            <FILE id="IAXjb2" name="cg_PositionSourceComponent.cpp" compile="1"
+                  resource="0" file="Source/cg_PositionSourceComponent.cpp"/>
+            <FILE id="BtcY2C" name="cg_PositionSourceComponent.hpp" compile="0"
+                  resource="0" file="Source/cg_PositionSourceComponent.hpp"/>
+            <FILE id="QKC1GD" name="cg_SourceComponent.cpp" compile="1" resource="0"
+                  file="Source/cg_SourceComponent.cpp"/>
+            <FILE id="dQjtMF" name="cg_SourceComponent.hpp" compile="0" resource="0"
+                  file="Source/cg_SourceComponent.hpp"/>
           </GROUP>
-          <FILE id="JhThCl" name="FieldComponent.cpp" compile="1" resource="0"
-                file="Source/FieldComponent.cpp"/>
-          <FILE id="akXKBM" name="FieldComponent.h" compile="0" resource="0"
-                file="Source/FieldComponent.h"/>
+          <FILE id="JhThCl" name="cg_FieldComponent.cpp" compile="1" resource="0"
+                file="Source/cg_FieldComponent.cpp"/>
+          <FILE id="akXKBM" name="cg_FieldComponent.hpp" compile="0" resource="0"
+                file="Source/cg_FieldComponent.hpp"/>
         </GROUP>
-        <FILE id="S09fDT" name="BannerComponent.cpp" compile="1" resource="0"
-              file="Source/BannerComponent.cpp"/>
-        <FILE id="L94qFU" name="BannerComponent.h" compile="0" resource="0"
-              file="Source/BannerComponent.h"/>
-        <FILE id="uypsFI" name="GrisLookAndFeel.cpp" compile="1" resource="0"
-              file="Source/GrisLookAndFeel.cpp"/>
-        <FILE id="TZznEU" name="GrisLookAndFeel.h" compile="0" resource="0"
-              file="Source/GrisLookAndFeel.h"/>
-        <FILE id="WJNM89" name="InterfaceBoxComponent.cpp" compile="1" resource="0"
-              file="Source/InterfaceBoxComponent.cpp"/>
-        <FILE id="lmO3cO" name="InterfaceBoxComponent.h" compile="0" resource="0"
-              file="Source/InterfaceBoxComponent.h"/>
-        <FILE id="tMh8VU" name="ParametersBoxComponent.cpp" compile="1" resource="0"
-              file="Source/ParametersBoxComponent.cpp"/>
-        <FILE id="qmk3iz" name="ParametersBoxComponent.h" compile="0" resource="0"
-              file="Source/ParametersBoxComponent.h"/>
-        <FILE id="E0Oz8r" name="PluginEditor.cpp" compile="1" resource="0"
-              file="Source/PluginEditor.cpp"/>
-        <FILE id="Qwbp71" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-        <FILE id="IqJ0vG" name="PositionPresetComponent.cpp" compile="1" resource="0"
-              file="Source/PositionPresetComponent.cpp"/>
-        <FILE id="fzL7XR" name="PositionPresetComponent.h" compile="0" resource="0"
-              file="Source/PositionPresetComponent.h"/>
-        <FILE id="HI1dem" name="SettingsBoxComponent.cpp" compile="1" resource="0"
-              file="Source/SettingsBoxComponent.cpp"/>
-        <FILE id="qBqct9" name="SettingsBoxComponent.h" compile="0" resource="0"
-              file="Source/SettingsBoxComponent.h"/>
-        <FILE id="tr9Qib" name="SourceBoxComponent.cpp" compile="1" resource="0"
-              file="Source/SourceBoxComponent.cpp"/>
-        <FILE id="nU1MFT" name="SourceBoxComponent.h" compile="0" resource="0"
-              file="Source/SourceBoxComponent.h"/>
-        <FILE id="avAyHe" name="TrajectoryBoxComponent.cpp" compile="1" resource="0"
-              file="Source/TrajectoryBoxComponent.cpp"/>
-        <FILE id="PxuaoO" name="TrajectoryBoxComponent.h" compile="0" resource="0"
-              file="Source/TrajectoryBoxComponent.h"/>
+        <FILE id="S09fDT" name="cg_BannerComponent.cpp" compile="1" resource="0"
+              file="Source/cg_BannerComponent.cpp"/>
+        <FILE id="L94qFU" name="cg_BannerComponent.hpp" compile="0" resource="0"
+              file="Source/cg_BannerComponent.hpp"/>
+        <FILE id="uypsFI" name="cg_ControlGrisLookAndFeel.cpp" compile="1"
+              resource="0" file="Source/cg_ControlGrisLookAndFeel.cpp"/>
+        <FILE id="TZznEU" name="cg_ControlGrisLookAndFeel.hpp" compile="0"
+              resource="0" file="Source/cg_ControlGrisLookAndFeel.hpp"/>
+        <FILE id="WJNM89" name="cg_InterfaceBoxComponent.cpp" compile="1" resource="0"
+              file="Source/cg_InterfaceBoxComponent.cpp"/>
+        <FILE id="lmO3cO" name="cg_InterfaceBoxComponent.hpp" compile="0" resource="0"
+              file="Source/cg_InterfaceBoxComponent.hpp"/>
+        <FILE id="tMh8VU" name="cg_ParametersBoxComponent.cpp" compile="1"
+              resource="0" file="Source/cg_ParametersBoxComponent.cpp"/>
+        <FILE id="qmk3iz" name="cg_ParametersBoxComponent.hpp" compile="0"
+              resource="0" file="Source/cg_ParametersBoxComponent.hpp"/>
+        <FILE id="E0Oz8r" name="cg_ControlGrisAudioProcessorEditor.cpp" compile="1"
+              resource="0" file="Source/cg_ControlGrisAudioProcessorEditor.cpp"/>
+        <FILE id="Qwbp71" name="cg_ControlGrisAudioProcessorEditor.hpp" compile="0"
+              resource="0" file="Source/cg_ControlGrisAudioProcessorEditor.hpp"/>
+        <FILE id="IqJ0vG" name="cg_PositionPresetComponent.cpp" compile="1"
+              resource="0" file="Source/cg_PositionPresetComponent.cpp"/>
+        <FILE id="fzL7XR" name="cg_PositionPresetComponent.hpp" compile="0"
+              resource="0" file="Source/cg_PositionPresetComponent.hpp"/>
+        <FILE id="HI1dem" name="cg_SettingsBoxComponent.cpp" compile="1" resource="0"
+              file="Source/cg_SettingsBoxComponent.cpp"/>
+        <FILE id="qBqct9" name="cg_SettingsBoxComponent.hpp" compile="0" resource="0"
+              file="Source/cg_SettingsBoxComponent.hpp"/>
+        <FILE id="tr9Qib" name="cg_SourceBoxComponent.cpp" compile="1" resource="0"
+              file="Source/cg_SourceBoxComponent.cpp"/>
+        <FILE id="nU1MFT" name="cg_SourceBoxComponent.hpp" compile="0" resource="0"
+              file="Source/cg_SourceBoxComponent.hpp"/>
+        <FILE id="avAyHe" name="cg_TrajectoryBoxComponent.cpp" compile="1"
+              resource="0" file="Source/cg_TrajectoryBoxComponent.cpp"/>
+        <FILE id="PxuaoO" name="cg_TrajectoryBoxComponent.hpp" compile="0"
+              resource="0" file="Source/cg_TrajectoryBoxComponent.hpp"/>
       </GROUP>
-      <FILE id="JknLOg" name="AutomationManager.cpp" compile="1" resource="0"
-            file="Source/AutomationManager.cpp"/>
-      <FILE id="TpHVRw" name="AutomationManager.h" compile="0" resource="0"
-            file="Source/AutomationManager.h"/>
-      <FILE id="xmyiNi" name="ChangeGesturesManager.cpp" compile="1" resource="0"
-            file="Source/ChangeGesturesManager.cpp"/>
-      <FILE id="izOcbP" name="ChangeGesturesManager.h" compile="0" resource="0"
-            file="Source/ChangeGesturesManager.h"/>
-      <FILE id="FHSJcz" name="LinkStrategies.cpp" compile="1" resource="0"
-            file="Source/LinkStrategies.cpp"/>
-      <FILE id="AEvwp0" name="LinkStrategies.h" compile="0" resource="0"
-            file="Source/LinkStrategies.h"/>
-      <FILE id="VBL5zh" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="NLKhOQ" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="uTBx2J" name="PresetsManager.cpp" compile="1" resource="0"
-            file="Source/PresetsManager.cpp"/>
-      <FILE id="hQP6b3" name="PresetsManager.h" compile="0" resource="0"
-            file="Source/PresetsManager.h"/>
-      <FILE id="zsUcu0" name="Source.cpp" compile="1" resource="0" file="Source/Source.cpp"/>
-      <FILE id="ebrzbU" name="Source.h" compile="0" resource="0" file="Source/Source.h"/>
-      <FILE id="aKLewA" name="SourceLinkEnforcer.cpp" compile="1" resource="0"
-            file="Source/SourceLinkEnforcer.cpp"/>
-      <FILE id="oI6Fsq" name="SourceLinkEnforcer.h" compile="0" resource="0"
-            file="Source/SourceLinkEnforcer.h"/>
-      <FILE id="R7fA0n" name="SourceSnapshot.h" compile="0" resource="0"
-            file="Source/SourceSnapshot.h"/>
-      <FILE id="fssYVg" name="SourceSnapshot.cpp" compile="1" resource="0"
-            file="Source/SourceSnapshot.cpp"/>
-      <FILE id="F8muZf" name="Trajectory.cpp" compile="1" resource="0" file="Source/Trajectory.cpp"/>
-      <FILE id="lKokDW" name="Trajectory.h" compile="0" resource="0" file="Source/Trajectory.h"/>
+      <FILE id="xmyiNi" name="cg_ChangeGesturesManager.cpp" compile="1" resource="0"
+            file="Source/cg_ChangeGesturesManager.cpp"/>
+      <FILE id="izOcbP" name="cg_ChangeGesturesManager.hpp" compile="0" resource="0"
+            file="Source/cg_ChangeGesturesManager.hpp"/>
+      <FILE id="VBL5zh" name="cg_ControlGrisAudioProcessor.cpp" compile="1"
+            resource="0" file="Source/cg_ControlGrisAudioProcessor.cpp"/>
+      <FILE id="NLKhOQ" name="cg_ControlGrisAudioProcessor.hpp" compile="0"
+            resource="0" file="Source/cg_ControlGrisAudioProcessor.hpp"/>
+      <FILE id="FHSJcz" name="cg_LinkStrategies.cpp" compile="1" resource="0"
+            file="Source/cg_LinkStrategies.cpp"/>
+      <FILE id="AEvwp0" name="cg_LinkStrategies.hpp" compile="0" resource="0"
+            file="Source/cg_LinkStrategies.hpp"/>
+      <FILE id="uTBx2J" name="cg_PresetsManager.cpp" compile="1" resource="0"
+            file="Source/cg_PresetsManager.cpp"/>
+      <FILE id="hQP6b3" name="cg_PresetsManager.hpp" compile="0" resource="0"
+            file="Source/cg_PresetsManager.hpp"/>
+      <FILE id="zsUcu0" name="cg_Source.cpp" compile="1" resource="0" file="Source/cg_Source.cpp"/>
+      <FILE id="ebrzbU" name="cg_Source.hpp" compile="0" resource="0" file="Source/cg_Source.hpp"/>
+      <FILE id="aKLewA" name="cg_SourceLinkEnforcer.cpp" compile="1" resource="0"
+            file="Source/cg_SourceLinkEnforcer.cpp"/>
+      <FILE id="oI6Fsq" name="cg_SourceLinkEnforcer.hpp" compile="0" resource="0"
+            file="Source/cg_SourceLinkEnforcer.hpp"/>
+      <FILE id="fssYVg" name="cg_SourceSnapshot.cpp" compile="1" resource="0"
+            file="Source/cg_SourceSnapshot.cpp"/>
+      <FILE id="R7fA0n" name="cg_SourceSnapshot.hpp" compile="0" resource="0"
+            file="Source/cg_SourceSnapshot.hpp"/>
+      <FILE id="F8muZf" name="cg_Trajectory.cpp" compile="1" resource="0"
+            file="Source/cg_Trajectory.cpp"/>
+      <FILE id="lKokDW" name="cg_Trajectory.hpp" compile="0" resource="0"
+            file="Source/cg_Trajectory.hpp"/>
+      <FILE id="JknLOg" name="cg_TrajectoryManager.cpp" compile="1" resource="0"
+            file="Source/cg_TrajectoryManager.cpp"/>
+      <FILE id="TpHVRw" name="cg_TrajectoryManager.hpp" compile="0" resource="0"
+            file="Source/cg_TrajectoryManager.hpp"/>
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
