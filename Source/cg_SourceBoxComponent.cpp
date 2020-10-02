@@ -111,9 +111,9 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     mYSlider.setValue(0.0, NotificationType::dontSendNotification);
     mZSlider.setValue(0.0, NotificationType::dontSendNotification);
 
-    mXSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mYSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mZSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
+    mXSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+    mYSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+    mZSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
 
     mXSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
     mYSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
@@ -233,8 +233,8 @@ void SourceBoxComponent::resized()
     mSourceNumberLabel.setBounds(305, 10, 150, 15);
     mSourceNumberCombo.setBounds(430, 10, 150, 20);
 
-    mDomeControls.setBounds(305, 40, 275, 50);
-    mCubeControls.setBounds(305, 35, 275, 55);
+    mDomeControls.setBounds(305, 40, 275, 500);
+    mCubeControls.setBounds(305, 35, 275, 550);
 }
 
 //==============================================================================
@@ -258,7 +258,7 @@ void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const
     mCubeControls.updateSliderValues(source);
 }
 
-void SourceBoxComponent::setSpatMode(SpatMode spatMode)
+void SourceBoxComponent::setSpatMode(SpatMode const spatMode)
 {
     switch (spatMode) {
     case SpatMode::dome:

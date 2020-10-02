@@ -45,8 +45,8 @@ public:
     {
     public:
         //==============================================================================
-        Listener() noexcept = default;
-        virtual ~Listener() noexcept = default;
+        Listener() = default;
+        virtual ~Listener() = default;
 
         Listener(Listener const &) = delete;
         Listener(Listener &&) = delete;

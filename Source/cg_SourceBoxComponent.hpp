@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <optional>
+
 #include <JuceHeader.h>
 
 #include "cg_ControlGrisLookAndFeel.hpp"
