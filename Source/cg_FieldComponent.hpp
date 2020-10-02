@@ -195,7 +195,7 @@ class ElevationFieldComponent final : public FieldComponent
 public:
     //==============================================================================
     ElevationFieldComponent() = delete;
-    ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & mPositionAutomationManager) noexcept;
+    ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & mPositionTrajectoryManager) noexcept;
     ~ElevationFieldComponent() noexcept final = default;
 
     ElevationFieldComponent(ElevationFieldComponent const &) = delete;

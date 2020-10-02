@@ -32,8 +32,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     : AudioProcessorEditor(&controlGrisAudioProcessor)
     , mProcessor(controlGrisAudioProcessor)
     , mAudioProcessorValueTreeState(vts)
-    , mPositionAutomationManager(positionAutomationManager)
-    , mElevationAutomationManager(elevationAutomationManager)
+    , mPositionTrajectoryManager(positionAutomationManager)
+    , mElevationTrajectoryManager(elevationAutomationManager)
     , mPositionField(controlGrisAudioProcessor.getSources(), positionAutomationManager)
     , mElevationField(controlGrisAudioProcessor.getSources(), elevationAutomationManager)
     , mParametersBox(mGrisLookAndFeel)
@@ -85,9 +85,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mTrajectoryBox.setLookAndFeel(&mGrisLookAndFeel);
     mTrajectoryBox.addListener(this);
     addAndMakeVisible(mTrajectoryBox);
-    mTrajectoryBox.setPositionSourceLink(mPositionAutomationManager.getSourceLink());
+    mTrajectoryBox.setPositionSourceLink(mPositionTrajectoryManager.getSourceLink());
     mTrajectoryBox.setElevationSourceLink(
-        static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()));
+        static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
     mSettingsBox.setLookAndFeel(&mGrisLookAndFeel);
     mSettingsBox.addListener(this);
@@ -174,14 +174,14 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     mTrajectoryBox.setPositionBackAndForth(mAudioProcessorValueTreeState.state.getProperty("backAndForth", false));
     mTrajectoryBox.setElevationBackAndForth(mAudioProcessorValueTreeState.state.getProperty("backAndForthAlt", false));
     mTrajectoryBox.setPositionDampeningCycles(mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
-    mPositionAutomationManager.setPositionDampeningCycles(
+    mPositionTrajectoryManager.setPositionDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
     mTrajectoryBox.setElevationDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
-    mElevationAutomationManager.setPositionDampeningCycles(
+    mElevationTrajectoryManager.setPositionDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
     mTrajectoryBox.setDeviationPerCycle(mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0));
-    mPositionAutomationManager.setDeviationPerCycle(
+    mPositionTrajectoryManager.setDeviationPerCycle(
         Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
     mTrajectoryBox.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
     mTrajectoryBox.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
@@ -286,7 +286,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
 {
     if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
         auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
-        auto const currentPositionSourceLink{ mPositionAutomationManager.getSourceLink() };
+        auto const currentPositionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
         auto const symmetricLinkAllowed{ numOfSources != 2 };
         mTrajectoryBox.setSymmetricLinkComboState(symmetricLinkAllowed);
         if (symmetricLinkAllowed) {
@@ -296,7 +296,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
             };
             if (isCurrentPositionSourceLinkSymmetric) {
                 mProcessor.setPositionSourceLink(PositionSourceLink::independent);
-                /*mPositionAutomationManager.setSourceLink(PositionSourceLink::independent);
+                /*mPositionTrajectoryManager.setSourceLink(PositionSourceLink::independent);
                 updateSourceLinkCombo(PositionSourceLink::independent);*/
             }
         }
@@ -469,7 +469,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
                                     mSelectedSource,
                                     mProcessor.getSpatMode());
 
-    mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+    mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
                                                  mProcessor.getSources().getPrimarySource().getPos());
 
     repaint();
@@ -567,7 +567,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(El
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    mPositionAutomationManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
+    mPositionTrajectoryManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
     mPositionField.repaint();
 }
 
@@ -575,7 +575,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    mElevationAutomationManager.setTrajectoryType(value);
+    mElevationTrajectoryManager.setTrajectoryType(value);
     mElevationField.repaint();
 }
 
@@ -583,35 +583,35 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChange
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionBackAndForthChanged(bool value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForth", value, nullptr);
-    mPositionAutomationManager.setPositionBackAndForth(value);
+    mPositionTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationBackAndForthChanged(bool value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
-    mElevationAutomationManager.setPositionBackAndForth(value);
+    mElevationTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionDampeningCyclesChanged(int value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCycles", value, nullptr);
-    mPositionAutomationManager.setPositionDampeningCycles(value);
+    mPositionTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationDampeningCyclesChanged(int value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
-    mElevationAutomationManager.setPositionDampeningCycles(value);
+    mElevationTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float degrees)
 {
     mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
-    mPositionAutomationManager.setDeviationPerCycle(Degrees{ degrees });
+    mPositionTrajectoryManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
 //==============================================================================
@@ -622,8 +622,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double d
     if (mode == 2) {
         dur = duration * 60.0 / mProcessor.getBpm();
     }
-    mPositionAutomationManager.setPlaybackDuration(dur);
-    mElevationAutomationManager.setPlaybackDuration(dur);
+    mPositionTrajectoryManager.setPlaybackDuration(dur);
+    mElevationTrajectoryManager.setPlaybackDuration(dur);
 }
 
 //==============================================================================
@@ -634,20 +634,20 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double du
     if (mode == 2) {
         dur = duration * 60.0 / mProcessor.getBpm();
     }
-    mPositionAutomationManager.setPlaybackDuration(dur);
-    mElevationAutomationManager.setPlaybackDuration(dur);
+    mPositionTrajectoryManager.setPlaybackDuration(dur);
+    mElevationTrajectoryManager.setPlaybackDuration(dur);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionActivateChanged(bool value)
 {
-    mPositionAutomationManager.setPositionActivateState(value);
+    mPositionTrajectoryManager.setPositionActivateState(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationActivateChanged(bool value)
 {
-    mElevationAutomationManager.setPositionActivateState(value);
+    mElevationTrajectoryManager.setPositionActivateState(value);
 }
 
 //==============================================================================
@@ -662,11 +662,11 @@ void ControlGrisAudioProcessorEditor::refresh()
     mPositionField.setIsPlaying(mProcessor.isPlaying());
     mElevationField.setIsPlaying(mProcessor.isPlaying());
 
-    if (mTrajectoryBox.getPositionActivateState() != mPositionAutomationManager.getPositionActivateState()) {
-        mTrajectoryBox.setPositionActivateState(mPositionAutomationManager.getPositionActivateState());
+    if (mTrajectoryBox.getPositionActivateState() != mPositionTrajectoryManager.getPositionActivateState()) {
+        mTrajectoryBox.setPositionActivateState(mPositionTrajectoryManager.getPositionActivateState());
     }
-    if (mTrajectoryBox.getElevationActivateState() != mElevationAutomationManager.getPositionActivateState()) {
-        mTrajectoryBox.setElevationActivateState(mElevationAutomationManager.getPositionActivateState());
+    if (mTrajectoryBox.getElevationActivateState() != mElevationTrajectoryManager.getPositionActivateState()) {
+        mTrajectoryBox.setElevationActivateState(mElevationTrajectoryManager.getPositionActivateState());
     }
 }
 

@@ -46,8 +46,8 @@ class ControlGrisAudioProcessorEditor final
     GrisLookAndFeel mGrisLookAndFeel;
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
-    PositionTrajectoryManager & mPositionAutomationManager;
-    ElevationTrajectoryManager & mElevationAutomationManager;
+    PositionTrajectoryManager & mPositionTrajectoryManager;
+    ElevationTrajectoryManager & mElevationTrajectoryManager;
 
     BannerComponent mMainBanner;
     BannerComponent mElevationBanner;

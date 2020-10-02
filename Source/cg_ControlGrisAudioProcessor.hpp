@@ -77,8 +77,8 @@ class ControlGrisAudioProcessor final
                                    mPositionSourceLinkEnforcer,
                                    mElevationSourceLinkEnforcer };
 
-    PositionTrajectoryManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
-    ElevationTrajectoryManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
+    PositionTrajectoryManager mPositionTrajectoryManager{ *this, mSources.getPrimarySource() };
+    ElevationTrajectoryManager mElevationTrajectoryManager{ *this, mSources.getPrimarySource() };
 
 public:
     //==============================================================================

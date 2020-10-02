@@ -199,8 +199,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
-    //    mPositionAutomationManager.addListener(this);
-    //    mElevationAutomationManager.addListener(this);
+    //    mPositionTrajectoryManager.addListener(this);
+    //    mElevationTrajectoryManager.addListener(this);
 
     handleOscConnection(true);
 
@@ -245,7 +245,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1) };
-        if (val != mElevationAutomationManager.getSourceLink()) {
+        if (val != mElevationTrajectoryManager.getSourceLink()) {
             setElevationSourceLink(val);
             auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
             if (ed != nullptr) {
@@ -277,8 +277,8 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 //========================================================
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const newSourceLink)
 {
-    if (newSourceLink != mPositionAutomationManager.getSourceLink()) {
-        mPositionAutomationManager.setSourceLink(newSourceLink);
+    if (newSourceLink != mPositionTrajectoryManager.getSourceLink()) {
+        mPositionTrajectoryManager.setSourceLink(newSourceLink);
 
         auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (editor != nullptr) {
@@ -293,8 +293,8 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const n
 //==============================================================================
 void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSourceLink)
 {
-    if (newSourceLink != mElevationAutomationManager.getSourceLink()) {
-        mElevationAutomationManager.setSourceLink(newSourceLink);
+    if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
+        mElevationTrajectoryManager.setSourceLink(newSourceLink);
 
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
@@ -320,7 +320,7 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
         mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
     } else {
         jassert(spatMode == SpatMode::cube);
-        mElevationSourceLinkEnforcer.setSourceLink(mElevationAutomationManager.getSourceLink());
+        mElevationSourceLinkEnforcer.setSourceLink(mElevationTrajectoryManager.getSourceLink());
     }
 }
 
@@ -486,25 +486,25 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     auto const address{ message.getAddressPattern().toString() };
     auto const pluginInstance{ juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() } };
     if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
-        && mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+        && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
     } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2"))
-               && mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+               && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         y = message[0].getFloat32();
     } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3"))
-               && static_cast<ElevationTrajectoryType>(mElevationAutomationManager.getTrajectoryType())
+               && static_cast<ElevationTrajectoryType>(mElevationTrajectoryManager.getTrajectoryType())
                       == ElevationTrajectoryType::realtime) {
         z = message[0].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xy")
-               && mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+               && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
         y = message[1].getFloat32();
     } else if (address == String(pluginInstance + "/traj/1/xyz")) {
-        if (mPositionAutomationManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+        if (mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
             x = message[0].getFloat32();
             y = message[1].getFloat32();
         }
-        if (static_cast<ElevationTrajectoryType>(mElevationAutomationManager.getTrajectoryType())
+        if (static_cast<ElevationTrajectoryType>(mElevationTrajectoryManager.getTrajectoryType())
             == ElevationTrajectoryType::realtime) {
             z = message[2].getFloat32();
         }
@@ -562,8 +562,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
         auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
         if (loaded) {
-            mPositionAutomationManager.recomputeTrajectory();
-            mElevationAutomationManager.recomputeTrajectory();
+            mPositionTrajectoryManager.recomputeTrajectory();
+            mElevationTrajectoryManager.recomputeTrajectory();
         }
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
@@ -583,7 +583,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 
     if (z != -1.0f) {
         mSources.getPrimarySource().setY(z, Source::OriginOfChange::osc);
-        mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
+        mElevationTrajectoryManager.sendTrajectoryPositionChangedEvent();
     }
 
     mPresetManager.loadIfPresetChanged(0);
@@ -743,36 +743,36 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         lastElevationSpan = mSources.getPrimarySource().getElevationSpan();
     }
 
-    if (mPositionAutomationManager.getSourceLink() != lastPositionLink) {
+    if (mPositionTrajectoryManager.getSourceLink() != lastPositionLink) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelink"));
-        message.addInt32(static_cast<int32>(mPositionAutomationManager.getSourceLink()));
+        message.addInt32(static_cast<int32>(mPositionTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
         message.clear();
 
         String pattern = pluginInstance + String("/sourcelink/")
-                         + String(static_cast<int>(mPositionAutomationManager.getSourceLink())) + String("/1");
+                         + String(static_cast<int>(mPositionTrajectoryManager.getSourceLink())) + String("/1");
         message.setAddressPattern(OSCAddressPattern(pattern));
         message.addInt32(1);
         mOscOutputSender.send(message);
         message.clear();
 
-        lastPositionLink = mPositionAutomationManager.getSourceLink();
+        lastPositionLink = mPositionTrajectoryManager.getSourceLink();
     }
 
-    if (static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink()) != lastElevationLink) {
+    if (static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()) != lastElevationLink) {
         message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
-        message.addInt32(static_cast<int32>(mElevationAutomationManager.getSourceLink()));
+        message.addInt32(static_cast<int32>(mElevationTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
         message.clear();
 
         String patternAlt = pluginInstance + String("/sourcelinkalt/")
-                            + String(static_cast<int>(mElevationAutomationManager.getSourceLink())) + String("/1");
+                            + String(static_cast<int>(mElevationTrajectoryManager.getSourceLink())) + String("/1");
         message.setAddressPattern(OSCAddressPattern(patternAlt));
         message.addInt32(1);
         mOscOutputSender.send(message);
         message.clear();
 
-        lastElevationLink = static_cast<ElevationSourceLink>(mElevationAutomationManager.getSourceLink());
+        lastElevationLink = static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink());
     }
 
     auto const currentPreset{ mPresetManager.getCurrentPreset() };
@@ -794,21 +794,21 @@ void ControlGrisAudioProcessor::timerCallback()
     // automation
     if (mLastTimerTime != getCurrentTime()) {
         auto const deltaTime{ getCurrentTime() - getInitTimeOnPlay() };
-        if (mPositionAutomationManager.getPositionActivateState()) {
-            mPositionAutomationManager.setTrajectoryDeltaTime(deltaTime);
+        if (mPositionTrajectoryManager.getPositionActivateState()) {
+            mPositionTrajectoryManager.setTrajectoryDeltaTime(deltaTime);
         }
-        if (mSpatMode == SpatMode::cube && mElevationAutomationManager.getPositionActivateState()) {
-            mElevationAutomationManager.setTrajectoryDeltaTime(deltaTime);
+        if (mSpatMode == SpatMode::cube && mElevationTrajectoryManager.getPositionActivateState()) {
+            mElevationTrajectoryManager.setTrajectoryDeltaTime(deltaTime);
         }
     }
 
     mLastTimerTime = getCurrentTime();
 
     if (mCanStopActivate && !mIsPlaying) {
-        if (mPositionAutomationManager.getPositionActivateState())
-            mPositionAutomationManager.setPositionActivateState(false);
-        if (mElevationAutomationManager.getPositionActivateState())
-            mElevationAutomationManager.setPositionActivateState(false);
+        if (mPositionTrajectoryManager.getPositionActivateState())
+            mPositionTrajectoryManager.setPositionActivateState(false);
+        if (mElevationTrajectoryManager.getPositionActivateState())
+            mElevationTrajectoryManager.setPositionActivateState(false);
         mCanStopActivate = false;
 
         if (editor != nullptr) {
@@ -863,12 +863,12 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
             setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
         }
         if (source.isPrimarySource()) {
-            mPositionAutomationManager.setTrajectoryType(mPositionAutomationManager.getTrajectoryType(),
+            mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
                                                          mSources.getPrimarySource().getPos());
         }
     } else {
         setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
-        mElevationAutomationManager.setTrajectoryType(mElevationAutomationManager.getTrajectoryType());
+        mElevationTrajectoryManager.setTrajectoryType(mElevationTrajectoryManager.getTrajectoryType());
     }
 }
 
@@ -1016,8 +1016,8 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
     }
 
     // deal with trajectory recording gestures
-    bool const isPositionTrajectoryActive{ mPositionAutomationManager.getPositionActivateState() };
-    bool const isElevationTrajectoryActive{ mElevationAutomationManager.getPositionActivateState() };
+    bool const isPositionTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState() };
+    bool const isElevationTrajectoryActive{ mElevationTrajectoryManager.getPositionActivateState() };
 
     static bool positionGestureStarted{ false };
     static bool elevationGestureStarted{ false };
@@ -1049,8 +1049,8 @@ AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
 {
     return new ControlGrisAudioProcessorEditor(*this,
                                                mAudioProcessorValueTreeState,
-                                               mPositionAutomationManager,
-                                               mElevationAutomationManager);
+                                               mPositionTrajectoryManager,
+                                               mElevationTrajectoryManager);
 }
 
 //==============================================================================
@@ -1141,11 +1141,13 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     SourceLinkEnforcer & sourceLinkEnforcer{ isPositionChange ? mPositionSourceLinkEnforcer
                                                               : mElevationSourceLinkEnforcer };
     // TODO : why can't we just use the ternary operator here?
-    TrajectoryManager * temp{ &mElevationAutomationManager };
+    TrajectoryManager * temp{ &mElevationTrajectoryManager };
     if (isPositionChange) {
-        temp = &mPositionAutomationManager;
+        temp = &mPositionTrajectoryManager;
     }
-    TrajectoryManager & automationManager{ *temp };
+    auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
+                                   || mElevationTrajectoryManager.getPositionActivateState() };
+    TrajectoryManager & trajectoryManager{ *temp };
     switch (origin) {
     case Source::OriginOfChange::none:
         return;
@@ -1153,7 +1155,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         sourceLinkEnforcer.sourceMoved(source);
         setSelectedSource(source);
         if (isPrimary) {
-            automationManager.sourceMoved(source);
+            trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         return;
@@ -1161,7 +1163,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         sourceLinkEnforcer.anchorMoved(source);
         setSelectedSource(source);
         if (isPrimary) {
-            automationManager.sourceMoved(source);
+            trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         {
@@ -1174,7 +1176,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::presetRecall:
         if (isPrimary) {
             sourceLinkEnforcer.sourceMoved(source);
-            automationManager.sourceMoved(source);
+            trajectoryManager.sourceMoved(source);
         } else {
             sourceLinkEnforcer.anchorMoved(source);
         }
@@ -1182,20 +1184,26 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::link:
         if (isPrimary) {
             sourceLinkEnforcer.sourceMoved(source);
-            automationManager.sourceMoved(source);
+            trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         return;
     case Source::OriginOfChange::trajectory:
+        jassert(isPrimary);
+        sourceLinkEnforcer.sourceMoved(source);
+        updatePrimarySourceParameters(changeType);
+        return;
     case Source::OriginOfChange::osc:
         jassert(isPrimary);
         sourceLinkEnforcer.sourceMoved(source);
-        automationManager.sourceMoved(source);
+        trajectoryManager.sourceMoved(source);
         updatePrimarySourceParameters(changeType);
         return;
     case Source::OriginOfChange::automation:
         sourceLinkEnforcer.sourceMoved(source);
-        automationManager.sourceMoved(source);
+        if (!isTrajectoryActive) {
+            trajectoryManager.sourceMoved(source);
+        }
         return;
     }
     jassertfalse;
