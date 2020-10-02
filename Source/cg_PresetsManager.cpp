@@ -123,15 +123,6 @@ bool PresetsManager::load(int const presetNumber)
         }
     }
 
-    //    for (auto & source : mSources) {
-    //        auto const sourceIndex{ source.getIndex() };
-    //        auto const & snapshot{ snapshots[sourceIndex] };
-    //        source.setPosition(snapshot.position, Source::OriginOfChange::presetRecall);
-    //        if (source.getSpatMode() == SpatMode::cube) {
-    //            source.setElevation(snapshot.z, Source::OriginOfChange::presetRecall);
-    //        }
-    //    }
-
     mPositionLinkEnforcer.loadSnapshots(snapshots);
     if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
         mElevationLinkEnforcer.loadSnapshots(snapshots);
@@ -168,7 +159,8 @@ bool PresetsManager::load(int const presetNumber)
 
     mLastLoadedPreset = presetNumber;
     mSourceMovedSinceLastRecall = false;
-    //    sendChangeMessage();
+
+    sendChangeMessage();
 
     return true;
 }

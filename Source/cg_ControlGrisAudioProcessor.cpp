@@ -1164,6 +1164,12 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
             automationManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
+        {
+            auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+            if (editor) {
+                editor->updatePositionPreset(0);
+            }
+        }
         return;
     case Source::OriginOfChange::presetRecall:
         if (isPrimary) {
@@ -1208,7 +1214,6 @@ void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
 //==============================================================================
 void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType const changeType)
 {
-    // TODO : this might have to check if isPlaying() and setValue without notifying host
     auto const & source{ mSources.getPrimarySource() };
     switch (changeType) {
     case Source::ChangeType::position: {
@@ -1218,7 +1223,7 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
         auto const normalized_y{ 1.0f - (source.getY() + 1.0f) / 2.0f };
         auto * x_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
         auto * y_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y) };
-        if (!mIsPlaying) {
+        if (!mIsPlaying) { // TODO : why is this necessary ?
             x_param->setValue(normalized_x);
             y_param->setValue(normalized_y);
         }

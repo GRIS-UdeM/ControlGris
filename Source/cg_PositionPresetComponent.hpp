@@ -82,7 +82,7 @@ public:
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(PresetButton)
-};
+}; // class PresetButton
 
 //================================================================================
 class PositionPresetComponent final
@@ -152,4 +152,4 @@ private:
     void changeListenerCallback(ChangeBroadcaster * changeBroadcaster) override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionPresetComponent)
-};
+}; // class PositionPresetComponent
