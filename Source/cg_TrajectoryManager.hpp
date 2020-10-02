@@ -30,7 +30,7 @@
 class ControlGrisAudioProcessor;
 
 //==============================================================================
-class AutomationManager
+class TrajectoryManager
 {
 public:
     //==============================================================================
@@ -46,7 +46,7 @@ public:
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
-        virtual void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation)
+        virtual void trajectoryPositionChanged(TrajectoryManager * manager, Point<float> position, Radians elevation)
             = 0;
 
     private:
@@ -89,14 +89,14 @@ protected:
 
 public:
     //==============================================================================
-    AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
-    virtual ~AutomationManager() = default;
+    TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
+    virtual ~TrajectoryManager() = default;
 
-    AutomationManager(AutomationManager const &) = delete;
-    AutomationManager(AutomationManager &&) = delete;
+    TrajectoryManager(TrajectoryManager const &) = delete;
+    TrajectoryManager(TrajectoryManager &&) = delete;
 
-    AutomationManager & operator=(AutomationManager const &) = delete;
-    AutomationManager & operator=(AutomationManager &&) = delete;
+    TrajectoryManager & operator=(TrajectoryManager const &) = delete;
+    TrajectoryManager & operator=(TrajectoryManager &&) = delete;
     //==============================================================================
     [[nodiscard]] ControlGrisAudioProcessor & getProcessor() const { return mProcessor; }
 
@@ -131,29 +131,29 @@ private:
     void computeCurrentTrajectoryPoint();
     [[nodiscard]] Point<float> smoothRecordingPosition(Point<float> const & pos);
     //==============================================================================
-    JUCE_LEAK_DETECTOR(AutomationManager)
+    JUCE_LEAK_DETECTOR(TrajectoryManager)
 
-}; // AutomationManager
+}; // TrajectoryManager
 
 //==============================================================================
-class PositionAutomationManager final : public AutomationManager
+class PositionTrajectoryManager final : public TrajectoryManager
 {
     PositionTrajectoryType mTrajectoryType{ PositionTrajectoryType::drawing };
     PositionSourceLink mSourceLink{ PositionSourceLink::independent };
 
 public:
     //==============================================================================
-    PositionAutomationManager() = delete;
-    ~PositionAutomationManager() noexcept override = default;
+    PositionTrajectoryManager() = delete;
+    ~PositionTrajectoryManager() noexcept override = default;
 
-    PositionAutomationManager(PositionAutomationManager const &) = delete;
-    PositionAutomationManager(PositionAutomationManager &&) = delete;
+    PositionTrajectoryManager(PositionTrajectoryManager const &) = delete;
+    PositionTrajectoryManager(PositionTrajectoryManager &&) = delete;
 
-    PositionAutomationManager & operator=(PositionAutomationManager const &) = delete;
-    PositionAutomationManager & operator=(PositionAutomationManager &&) = delete;
+    PositionTrajectoryManager & operator=(PositionTrajectoryManager const &) = delete;
+    PositionTrajectoryManager & operator=(PositionTrajectoryManager &&) = delete;
     //==============================================================================
-    PositionAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : AutomationManager(processor, principalSource)
+    PositionTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+        : TrajectoryManager(processor, principalSource)
     {
     }
     //==============================================================================
@@ -169,29 +169,29 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(PositionAutomationManager)
+    JUCE_LEAK_DETECTOR(PositionTrajectoryManager)
 
-}; // PositionAutomationManager
+}; // PositionTrajectoryManager
 
 //==============================================================================
-class ElevationAutomationManager final : public AutomationManager
+class ElevationTrajectoryManager final : public TrajectoryManager
 {
     ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
     ElevationSourceLink mSourceLink{ ElevationSourceLink::independent };
 
 public:
     //==============================================================================
-    ElevationAutomationManager() = delete;
-    ~ElevationAutomationManager() noexcept override = default;
+    ElevationTrajectoryManager() = delete;
+    ~ElevationTrajectoryManager() noexcept override = default;
 
-    ElevationAutomationManager(ElevationAutomationManager const &) = delete;
-    ElevationAutomationManager(ElevationAutomationManager &&) = delete;
+    ElevationTrajectoryManager(ElevationTrajectoryManager const &) = delete;
+    ElevationTrajectoryManager(ElevationTrajectoryManager &&) = delete;
 
-    ElevationAutomationManager & operator=(ElevationAutomationManager const &) = delete;
-    ElevationAutomationManager & operator=(ElevationAutomationManager &&) = delete;
+    ElevationTrajectoryManager & operator=(ElevationTrajectoryManager const &) = delete;
+    ElevationTrajectoryManager & operator=(ElevationTrajectoryManager &&) = delete;
     //==============================================================================
-    ElevationAutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : AutomationManager(processor, principalSource)
+    ElevationTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+        : TrajectoryManager(processor, principalSource)
     {
     }
     //==============================================================================
@@ -207,6 +207,6 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ElevationAutomationManager)
+    JUCE_LEAK_DETECTOR(ElevationTrajectoryManager)
 
-}; // ElevationAutomationManager
+}; // ElevationTrajectoryManager

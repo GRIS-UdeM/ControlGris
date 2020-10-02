@@ -23,14 +23,14 @@
 #include <algorithm>
 
 //==============================================================================
-AutomationManager::AutomationManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
     : mProcessor(processor)
     , mPrimarySource(principalSource)
 {
 }
 
 //==============================================================================
-void AutomationManager::setPositionActivateState(bool const newState)
+void TrajectoryManager::setPositionActivateState(bool const newState)
 {
     mActivateState = newState;
     if (newState) {
@@ -46,7 +46,7 @@ void AutomationManager::setPositionActivateState(bool const newState)
 }
 
 //==============================================================================
-void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosition)
+void TrajectoryManager::resetRecordingTrajectory(Point<float> const currentPosition)
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
             && currentPosition.getY() <= 1.0f);
@@ -58,7 +58,7 @@ void AutomationManager::resetRecordingTrajectory(Point<float> const currentPosit
 }
 
 //==============================================================================
-Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos)
+Point<float> TrajectoryManager::smoothRecordingPosition(Point<float> const & pos)
 {
     constexpr auto smoothingFactor = 0.8f;
 
@@ -67,7 +67,7 @@ Point<float> AutomationManager::smoothRecordingPosition(Point<float> const & pos
 }
 
 //==============================================================================
-void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
+void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
     mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0f);
@@ -76,7 +76,7 @@ void AutomationManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 }
 
 //==============================================================================
-void AutomationManager::computeCurrentTrajectoryPoint()
+void TrajectoryManager::computeCurrentTrajectoryPoint()
 {
     if (!mTrajectory.has_value()) {
         mCurrentTrajectoryPoint = mPrimarySource.getPos();
@@ -167,7 +167,7 @@ void AutomationManager::computeCurrentTrajectoryPoint()
 }
 
 //==============================================================================
-Point<float> AutomationManager::getCurrentTrajectoryPoint() const
+Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
@@ -177,20 +177,20 @@ Point<float> AutomationManager::getCurrentTrajectoryPoint() const
 }
 
 //==============================================================================
-void AutomationManager::setPrimarySourcePosition(Point<float> const & pos) const
+void TrajectoryManager::setPrimarySourcePosition(Point<float> const & pos) const
 {
     mPrimarySource.setPosition(pos, Source::OriginOfChange::trajectory);
 }
 
 //==============================================================================
-void AutomationManager::sourceMoved(Source & source)
+void TrajectoryManager::sourceMoved(Source & source)
 {
     jassert(source.isPrimarySource());
     recomputeTrajectory();
 }
 
 //==============================================================================
-void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
+void PositionTrajectoryManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
         l.trajectoryPositionChanged(this, mPrimarySource.getPos(), mPrimarySource.getElevation());
@@ -198,13 +198,13 @@ void PositionAutomationManager::sendTrajectoryPositionChangedEvent()
 }
 
 //==============================================================================
-void PositionAutomationManager::recomputeTrajectory()
+void PositionTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType, mPrimarySource.getPos());
 }
 
 //==============================================================================
-void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
+void ElevationTrajectoryManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
         l.trajectoryPositionChanged(this, mPrimarySource.getPos(), mPrimarySource.getElevation());
@@ -212,7 +212,7 @@ void ElevationAutomationManager::sendTrajectoryPositionChangedEvent()
 }
 
 //==============================================================================
-void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
+void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
 {
     mTrajectoryType = type;
     if (type == PositionTrajectoryType::realtime) {
@@ -224,20 +224,20 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
 }
 
 //==============================================================================
-void AutomationManager::addRecordingPoint(Point<float> const & pos)
+void TrajectoryManager::addRecordingPoint(Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));
 }
 
 //==============================================================================
-void AutomationManager::invertBackAndForthDirection()
+void TrajectoryManager::invertBackAndForthDirection()
 {
     mBackAndForthDirection = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
 }
 
 //==============================================================================
-void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const type)
+void ElevationTrajectoryManager::setTrajectoryType(ElevationTrajectoryType const type)
 {
     mTrajectoryType = type;
 
@@ -249,7 +249,7 @@ void ElevationAutomationManager::setTrajectoryType(ElevationTrajectoryType const
 }
 
 //==============================================================================
-void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
+void PositionTrajectoryManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
         mPrimarySource.setPosition(mCurrentTrajectoryPoint, Source::OriginOfChange::trajectory);
@@ -258,7 +258,7 @@ void PositionAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 }
 
 //==============================================================================
-void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
+void ElevationTrajectoryManager::applyCurrentTrajectoryPointToPrimarySource()
 {
     if (mActivateState) {
         auto const currentElevation{ MAX_ELEVATION * (mCurrentTrajectoryPoint.getY() + 1.0f) / 2.0f };
@@ -268,7 +268,7 @@ void ElevationAutomationManager::applyCurrentTrajectoryPointToPrimarySource()
 }
 
 //==============================================================================
-void ElevationAutomationManager::recomputeTrajectory()
+void ElevationTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType);
 }

@@ -27,7 +27,7 @@
 #include "cg_SourceIndex.hpp"
 
 class ElevationFieldComponent;
-class ElevationAutomationManager;
+class ElevationTrajectoryManager;
 
 //==============================================================================
 class ElevationSourceComponent final
@@ -35,7 +35,7 @@ class ElevationSourceComponent final
     , public Source::Listener
 {
     ElevationFieldComponent & mFieldComponent;
-    ElevationAutomationManager & mAutomationManager;
+    ElevationTrajectoryManager & mAutomationManager;
     Source & mSource;
     DisplacementMode mDisplacementMode;
 

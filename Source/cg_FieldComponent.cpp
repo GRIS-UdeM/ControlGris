@@ -250,7 +250,7 @@ void PositionFieldComponent::rebuildSourceComponents(int const numberOfSources)
 
 //==============================================================================
 PositionFieldComponent::PositionFieldComponent(Sources & sources,
-                                               PositionAutomationManager & positionAutomationManager) noexcept
+                                               PositionTrajectoryManager & positionAutomationManager) noexcept
     : FieldComponent(sources)
     , mAutomationManager(positionAutomationManager)
 {
@@ -563,7 +563,7 @@ void ElevationFieldComponent::drawSpans(Graphics & g) const
 
 //==============================================================================
 ElevationFieldComponent::ElevationFieldComponent(Sources & sources,
-                                                 ElevationAutomationManager & automationManager) noexcept
+                                                 ElevationTrajectoryManager & automationManager) noexcept
     : FieldComponent(sources)
     , mAutomationManager(automationManager)
 {

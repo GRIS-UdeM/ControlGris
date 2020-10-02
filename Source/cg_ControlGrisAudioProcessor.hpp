@@ -33,7 +33,7 @@
 class ControlGrisAudioProcessor final
     : public AudioProcessor
     , public AudioProcessorValueTreeState::Listener
-    //    , public AutomationManager::Listener
+    //    , public TrajectoryManager::Listener
     , public Timer
     , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
 {
@@ -77,8 +77,8 @@ class ControlGrisAudioProcessor final
                                    mPositionSourceLinkEnforcer,
                                    mElevationSourceLinkEnforcer };
 
-    PositionAutomationManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
-    ElevationAutomationManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
+    PositionTrajectoryManager mPositionAutomationManager{ *this, mSources.getPrimarySource() };
+    ElevationTrajectoryManager mElevationAutomationManager{ *this, mSources.getPrimarySource() };
 
 public:
     //==============================================================================
@@ -186,7 +186,7 @@ public:
 
     ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
-    //    void trajectoryPositionChanged(AutomationManager * manager, Point<float> position, Radians elevation)
+    //    void trajectoryPositionChanged(TrajectoryManager * manager, Point<float> position, Radians elevation)
     //    override;
 
     void setPositionSourceLink(PositionSourceLink value);

@@ -46,8 +46,8 @@ class ControlGrisAudioProcessorEditor final
     GrisLookAndFeel mGrisLookAndFeel;
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
-    PositionAutomationManager & mPositionAutomationManager;
-    ElevationAutomationManager & mElevationAutomationManager;
+    PositionTrajectoryManager & mPositionAutomationManager;
+    ElevationTrajectoryManager & mElevationAutomationManager;
 
     BannerComponent mMainBanner;
     BannerComponent mElevationBanner;
@@ -88,8 +88,8 @@ public:
     //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     AudioProcessorValueTreeState & vts,
-                                    PositionAutomationManager & positionAutomationManager,
-                                    ElevationAutomationManager & elevationAutomationManager);
+                                    PositionTrajectoryManager & positionAutomationManager,
+                                    ElevationTrajectoryManager & elevationAutomationManager);
     //==============================================================================
     void paint(Graphics &) override;
     void resized() override;

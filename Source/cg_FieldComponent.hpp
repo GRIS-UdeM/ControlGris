@@ -127,7 +127,7 @@ private:
 //==============================================================================
 class PositionFieldComponent final : public FieldComponent
 {
-    PositionAutomationManager & mAutomationManager;
+    PositionTrajectoryManager & mAutomationManager;
     SpatMode mSpatMode{ SpatMode::dome };
     bool mShowCircularSourceSelectionWarning{ false };
     std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
@@ -138,7 +138,7 @@ class PositionFieldComponent final : public FieldComponent
 public:
     //==============================================================================
     PositionFieldComponent() = delete;
-    PositionFieldComponent(Sources & sources, PositionAutomationManager & positionAutomationManager) noexcept;
+    PositionFieldComponent(Sources & sources, PositionTrajectoryManager & positionAutomationManager) noexcept;
     ~PositionFieldComponent() noexcept final = default;
 
     PositionFieldComponent(PositionFieldComponent const &) = delete;
@@ -147,8 +147,8 @@ public:
     PositionFieldComponent & operator=(PositionFieldComponent const &) = delete;
     PositionFieldComponent & operator=(PositionFieldComponent &&) = delete;
     //==============================================================================
-    [[nodiscard]] PositionAutomationManager const & getAutomationManager() const { return mAutomationManager; }
-    PositionAutomationManager & getAutomationManager() { return mAutomationManager; }
+    [[nodiscard]] PositionTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
+    PositionTrajectoryManager & getAutomationManager() { return mAutomationManager; }
 
     void drawDomeSpans(Graphics & g) const;
     void drawCubeSpans(Graphics & g) const;
@@ -188,14 +188,14 @@ class ElevationFieldComponent final : public FieldComponent
     static constexpr auto LEFT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
     static constexpr auto RIGHT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    ElevationAutomationManager & mAutomationManager;
+    ElevationTrajectoryManager & mAutomationManager;
     ElevationDrawingHandle mDrawingHandle{ *this };
     OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
     ElevationFieldComponent() = delete;
-    ElevationFieldComponent(Sources & sources, ElevationAutomationManager & mPositionAutomationManager) noexcept;
+    ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & mPositionAutomationManager) noexcept;
     ~ElevationFieldComponent() noexcept final = default;
 
     ElevationFieldComponent(ElevationFieldComponent const &) = delete;
@@ -204,8 +204,8 @@ public:
     ElevationFieldComponent & operator=(ElevationFieldComponent const &) = delete;
     ElevationFieldComponent & operator=(ElevationFieldComponent &&) = delete;
     //==============================================================================
-    [[nodiscard]] ElevationAutomationManager const & getAutomationManager() const { return mAutomationManager; }
-    ElevationAutomationManager & getAutomationManager() { return mAutomationManager; }
+    [[nodiscard]] ElevationTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
+    ElevationTrajectoryManager & getAutomationManager() { return mAutomationManager; }
     [[nodiscard]] Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
     [[nodiscard]] Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
     //==============================================================================

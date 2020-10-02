@@ -27,7 +27,7 @@
 #include "cg_SourceIndex.hpp"
 
 class PositionFieldComponent;
-class PositionAutomationManager;
+class PositionTrajectoryManager;
 
 //==============================================================================
 class PositionSourceComponent final
@@ -35,7 +35,7 @@ class PositionSourceComponent final
     , public Source::Listener
 {
     PositionFieldComponent & mFieldComponent;
-    PositionAutomationManager & mAutomationManager;
+    PositionTrajectoryManager & mAutomationManager;
     Source & mSource;
     DisplacementMode mDisplacementMode{};
 

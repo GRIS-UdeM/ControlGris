@@ -27,8 +27,8 @@
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     ControlGrisAudioProcessor & controlGrisAudioProcessor,
     AudioProcessorValueTreeState & vts,
-    PositionAutomationManager & positionAutomationManager,
-    ElevationAutomationManager & elevationAutomationManager)
+    PositionTrajectoryManager & positionAutomationManager,
+    ElevationTrajectoryManager & elevationAutomationManager)
     : AudioProcessorEditor(&controlGrisAudioProcessor)
     , mProcessor(controlGrisAudioProcessor)
     , mAudioProcessorValueTreeState(vts)

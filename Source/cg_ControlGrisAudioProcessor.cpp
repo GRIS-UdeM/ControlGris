@@ -1141,11 +1141,11 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     SourceLinkEnforcer & sourceLinkEnforcer{ isPositionChange ? mPositionSourceLinkEnforcer
                                                               : mElevationSourceLinkEnforcer };
     // TODO : why can't we just use the ternary operator here?
-    AutomationManager * temp{ &mElevationAutomationManager };
+    TrajectoryManager * temp{ &mElevationAutomationManager };
     if (isPositionChange) {
         temp = &mPositionAutomationManager;
     }
-    AutomationManager & automationManager{ *temp };
+    TrajectoryManager & automationManager{ *temp };
     switch (origin) {
     case Source::OriginOfChange::none:
         return;
