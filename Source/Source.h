@@ -36,10 +36,20 @@ class Source
 {
 public:
     //==============================================================================
-    enum class OriginOfChange { none, userMove, userAnchorMove, link, trajectory, automation, preset, osc };
+    enum class OriginOfChange {
+        none,
+        userMove,
+        userAnchorMove,
+        link,
+        trajectory,
+        automation,
+        automaticPresetRecall,
+        manualPresetRecall,
+        osc
+    };
     enum class ChangeType { position, elevation };
     //==============================================================================
-    class Listener
+    class Listener : private juce::AsyncUpdater
     {
     public:
         //==============================================================================
@@ -52,9 +62,12 @@ public:
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
-        virtual void sourceMoved() = 0;
+        void update() { triggerAsyncUpdate(); }
 
     private:
+        //==============================================================================
+        void handleAsyncUpdate() override { sourceMoved(); }
+        virtual void sourceMoved() = 0;
         //==============================================================================
         JUCE_LEAK_DETECTOR(Listener)
 

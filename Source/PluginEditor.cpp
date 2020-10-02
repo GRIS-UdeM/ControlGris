@@ -234,8 +234,10 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    mTrajectoryBox.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
-                                                               NotificationType::dontSendNotification);
+    MessageManager::callAsync([=] {
+        mTrajectoryBox.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
+                                                                   NotificationType::dontSendNotification);
+    });
 }
 
 //==============================================================================
@@ -688,7 +690,7 @@ void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumb
 {
     //    MessageManagerLock mml{};
 
-    mProcessor.getPresetsManager().forceLoad(presetNumber);
+    mProcessor.getPresetsManager().forceLoad(presetNumber, Source::OriginOfChange::manualPresetRecall);
 
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };
     auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };

@@ -250,14 +250,14 @@ Point<float> Source::clipCubePosition(Point<float> const & position)
 }
 
 //==============================================================================
-void Source::notify(ChangeType const type, OriginOfChange const origin)
+void Source::notify(ChangeType type, OriginOfChange const origin)
 {
     if (mSpatMode == SpatMode::dome) {
-        mProcessor->sourceChanged(*this, ChangeType::position, origin);
-    } else {
-        jassert(mSpatMode == SpatMode::cube);
-        mProcessor->sourceChanged(*this, type, origin);
+        type = ChangeType::position;
     }
+
+    mProcessor->sourceChanged(*this, type, origin);
+
     notifyGuiListeners();
 }
 
@@ -300,16 +300,8 @@ void Source::setColorFromIndex(int const numTotalSources)
 //==============================================================================
 void Source::notifyGuiListeners()
 {
-    auto callback = [=](Source::Listener & listener) { listener.sourceMoved(); };
-    auto action = [=] { mGuiListeners.call(callback); };
-    auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
-    /* If this is the message thread, it is ok if we send this send this synchronously. If not, it is going to
-     * trigger a very bad priority inversion because of how frequent this method gets called */
-    if (isMessageThread) {
-        action();
-    } else {
-        juce::MessageManager::callAsync(action);
-    }
+    auto callback = [=](Source::Listener & listener) { listener.update(); };
+    mGuiListeners.call(callback);
 }
 
 //==============================================================================

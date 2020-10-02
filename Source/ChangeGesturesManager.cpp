@@ -47,20 +47,16 @@ ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager::ScopedLock 
 //==============================================================================
 void ChangeGesturesManager::beginGesture(String const & parameterName)
 {
-    //    MessageManagerLock mml{}; // this hangs the system. Why?
-    bool shouldBeginGesture{ false };
-
     if (!mGestureStates.contains(parameterName)) {
-        shouldBeginGesture = true;
-    } else if (!mGestureStates[parameterName]) {
-        shouldBeginGesture = true;
+        mGestureStates.set(parameterName, 0);
     }
 
-    if (shouldBeginGesture) {
+    if (mGestureStates.getReference(parameterName)++ == 0) {
         auto * parameter{ mAudioProcessorValueTreeState.getParameter(parameterName) };
         if (parameter != nullptr) {
             parameter->beginChangeGesture();
-            mGestureStates.set(parameterName, true);
+        } else {
+            jassertfalse;
         }
     }
 }
@@ -68,22 +64,18 @@ void ChangeGesturesManager::beginGesture(String const & parameterName)
 //==============================================================================
 void ChangeGesturesManager::endGesture(String const & parameterName)
 {
-    //    MessageManagerLock mml{};
-    bool shouldEndGesture{ false };
+    jassert(mGestureStates.contains(parameterName));
 
-    if (mGestureStates.contains(parameterName)) {
-        if (mGestureStates[parameterName]) {
-            shouldEndGesture = true;
-        }
-    }
-
-    if (shouldEndGesture) {
+    if (--mGestureStates.getReference(parameterName) == 0) {
         auto * parameter{ mAudioProcessorValueTreeState.getParameter(parameterName) };
-        if (parameter != nullptr) {
+        if (parameter) {
             parameter->endChangeGesture();
-            mGestureStates.set(parameterName, false);
+        } else {
+            jassertfalse;
         }
     }
+
+    jassert(mGestureStates[parameterName] >= 0);
 }
 
 ChangeGesturesManager::ScopedLock ChangeGesturesManager::getScopedLock(const String & parameterName)

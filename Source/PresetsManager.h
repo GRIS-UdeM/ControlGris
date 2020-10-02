@@ -58,8 +58,8 @@ public:
     [[nodiscard]] int getCurrentPreset() const;
     [[nodiscard]] std::array<bool, NUMBER_OF_POSITION_PRESETS> getSavedPresets() const;
 
-    [[nodiscard]] bool loadIfPresetChanged(int presetNumber);
-    [[nodiscard]] bool forceLoad(int presetNumber);
+    bool loadIfPresetChanged(int presetNumber, Source::OriginOfChange origin);
+    bool forceLoad(int presetNumber, Source::OriginOfChange origin);
     void save(int presetNumber) const;
     [[nodiscard]] bool deletePreset(int presetNumber) const;
     void numberOfSourcesChanged();
@@ -70,7 +70,7 @@ private:
     [[nodiscard]] std::unique_ptr<XmlElement> createPresetData(int presetNumber) const;
     [[nodiscard]] std::optional<XmlElement *> getPresetData(int presetNumber) const;
 
-    [[nodiscard]] bool load(int presetNumber);
+    [[nodiscard]] bool load(int presetNumber, Source::OriginOfChange origin);
     //==============================================================================
     JUCE_LEAK_DETECTOR(PresetsManager)
 };

@@ -57,10 +57,10 @@ public:
     void enforceSourceLink();
 
     [[nodiscard]] auto const & getSnapshots() const { return mSnapshots; }
-    void loadSnapshots(SourcesSnapshots const & snapshots);
 
     //==============================================================================
-    void sourceMoved(Source & source, Source::OriginOfChange change);
+    void sourceMoved(Source & source);
+    void anchorMoved(Source & source);
 
 private:
     //==============================================================================

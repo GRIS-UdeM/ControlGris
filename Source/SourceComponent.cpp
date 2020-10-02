@@ -21,7 +21,6 @@
 #include "SourceComponent.h"
 
 #include "ControlGrisConstants.h"
-#include "FieldComponent.h"
 
 //==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)

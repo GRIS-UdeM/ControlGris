@@ -56,7 +56,7 @@ public:
 private:
     //==============================================================================
     AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
-    HashMap<String, bool> mGestureStates{};
+    HashMap<String, int> mGestureStates{};
 
 public:
     //==============================================================================

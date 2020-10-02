@@ -68,23 +68,23 @@ int PresetsManager::getCurrentPreset() const
 }
 
 //==============================================================================
-bool PresetsManager::loadIfPresetChanged(int const presetNumber)
+bool PresetsManager::loadIfPresetChanged(int const presetNumber, Source::OriginOfChange const origin)
 {
     if (presetNumber == mLastLoadedPreset) {
         return false;
     }
 
-    return load(presetNumber);
+    return load(presetNumber, origin);
 }
 
 //==============================================================================
-bool PresetsManager::forceLoad(int const presetNumber)
+bool PresetsManager::forceLoad(int const presetNumber, Source::OriginOfChange const origin)
 {
-    return load(presetNumber);
+    return load(presetNumber, origin);
 }
 
 //==============================================================================
-bool PresetsManager::load(int const presetNumber)
+bool PresetsManager::load(int const presetNumber, Source::OriginOfChange const origin)
 {
     if (presetNumber == 0) {
         return false;
@@ -147,7 +147,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         terminalPosition = snapshots.primary.position;
     }
-    mSources.getPrimarySource().setPosition(terminalPosition, Source::OriginOfChange::preset);
+    mSources.getPrimarySource().setPosition(terminalPosition, origin);
 
     Radians elevation;
     if (presetData->hasAttribute(zTerminalPositionId)) {
@@ -157,7 +157,7 @@ bool PresetsManager::load(int const presetNumber)
     } else {
         elevation = snapshots.primary.z;
     };
-    mSources.getPrimarySource().setElevation(elevation, Source::OriginOfChange::preset);
+    mSources.getPrimarySource().setElevation(elevation, origin);
 
     mLastLoadedPreset = presetNumber;
     mSourceMovedSinceLastRecall = false;

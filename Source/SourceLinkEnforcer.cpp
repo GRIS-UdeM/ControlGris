@@ -74,43 +74,33 @@ void SourceLinkEnforcer::enforceSourceLink()
 }
 
 //==============================================================================
-void SourceLinkEnforcer::loadSnapshots(SourcesSnapshots const & snapshots)
+void SourceLinkEnforcer::sourceMoved(Source & source)
 {
-    mSnapshots = snapshots;
-    //    enforceSourceLink();
+    //    if (!mLinkStrategy) {
+    //        if (mPositionSourceLink != PositionSourceLink::undefined) {
+    //            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+    //        } else {
+    //            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+    //        }
+    //    }
+    //    if (!mLinkStrategy->isInitialized()) {
+    //        mLinkStrategy->computeParameters(mSources, mSnapshots);
+    //    }
+
+    if (source.isPrimarySource()) {
+        primarySourceMoved();
+    } else {
+        secondarySourceMoved(source.getIndex());
+    }
 }
 
 //==============================================================================
-void SourceLinkEnforcer::sourceMoved(Source & source, Source::OriginOfChange const origin)
+void SourceLinkEnforcer::anchorMoved(Source & source)
 {
-    if (!mLinkStrategy) {
-        if (mPositionSourceLink != PositionSourceLink::undefined) {
-            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
-        } else {
-            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
-        }
-    }
-    if (!mLinkStrategy->isInitialized()) {
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
-    }
-
-    switch (origin) {
-    case Source::OriginOfChange::userAnchorMove:
-        if (source.isPrimarySource()) {
-            primarySourceAnchorMoved();
-        } else {
-            secondarySourceAnchorMoved(source.getIndex());
-        }
-        break;
-    case Source::OriginOfChange::userMove:
-        if (source.isPrimarySource()) {
-            primarySourceMoved();
-        } else {
-            secondarySourceMoved(source.getIndex());
-        }
-        break;
-    default:
-        jassertfalse;
+    if (source.isPrimarySource()) {
+        primarySourceAnchorMoved();
+    } else {
+        secondarySourceAnchorMoved(source.getIndex());
     }
 }
 

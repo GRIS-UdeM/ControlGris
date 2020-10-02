@@ -219,6 +219,7 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, float const newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
+        jassertfalse;
         return;
     }
 
@@ -251,7 +252,7 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
-        auto const loaded{ mPresetManager.loadIfPresetChanged(value) };
+        auto const loaded{ mPresetManager.loadIfPresetChanged(value, Source::OriginOfChange::automaticPresetRecall) };
     }
 
     if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {
@@ -551,7 +552,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
-        auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
+        auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset, Source::OriginOfChange::manualPresetRecall) };
         if (loaded) {
             mPositionAutomationManager.recomputeTrajectory();
             mElevationAutomationManager.recomputeTrajectory();
@@ -564,23 +565,20 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 
     if (x != -1.0f && y != -1.0f) {
         mSources.getPrimarySource().setPosition(Point<float>{ x, y }, Source::OriginOfChange::osc);
-        sourcePositionChanged(SourceIndex{ 0 }, 0);
-        mPresetManager.loadIfPresetChanged(0);
+
     } else if (y != -1.0f) {
         mSources.getPrimarySource().setY(y, Source::OriginOfChange::osc);
-        sourcePositionChanged(SourceIndex{ 0 }, 0);
-        mPresetManager.loadIfPresetChanged(0);
     } else if (x != -1.0f) {
         mSources.getPrimarySource().setX(x, Source::OriginOfChange::osc);
-        sourcePositionChanged(SourceIndex{ 0 }, 0);
-        mPresetManager.loadIfPresetChanged(0);
     }
+    sourcePositionChanged(SourceIndex{ 0 }, 0);
 
     if (z != -1.0f) {
         mSources.getPrimarySource().setY(z, Source::OriginOfChange::osc);
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
-        mPresetManager.loadIfPresetChanged(0);
     }
+
+    mPresetManager.loadIfPresetChanged(0, Source::OriginOfChange::manualPresetRecall);
 
     if (static_cast<bool>(positionSourceLinkToProcess)) {
         setPositionSourceLink(positionSourceLinkToProcess);
@@ -1144,36 +1142,46 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::none:
         return;
     case Source::OriginOfChange::userMove:
-    case Source::OriginOfChange::userAnchorMove:
-        sourceLinkEnforcer.sourceMoved(source, origin);
+        sourceLinkEnforcer.sourceMoved(source);
         setSelectedSource(source);
         if (isPrimary) {
             automationManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         return;
-    case Source::OriginOfChange::preset:
-        sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
+    case Source::OriginOfChange::userAnchorMove:
+        sourceLinkEnforcer.anchorMoved(source);
         setSelectedSource(source);
         if (isPrimary) {
             automationManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
+        }
+        return;
+    case Source::OriginOfChange::automaticPresetRecall:
+    case Source::OriginOfChange::manualPresetRecall:
+        sourceLinkEnforcer.sourceMoved(source);
+        setSelectedSource(source);
+        if (isPrimary) {
+            automationManager.sourceMoved(source);
         }
         return;
     case Source::OriginOfChange::link:
         if (isPrimary) {
-            sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
+            sourceLinkEnforcer.sourceMoved(source);
             automationManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         return;
     case Source::OriginOfChange::trajectory:
-    case Source::OriginOfChange::automation:
     case Source::OriginOfChange::osc:
         jassert(isPrimary);
-        sourceLinkEnforcer.sourceMoved(source, Source::OriginOfChange::userMove);
+        sourceLinkEnforcer.sourceMoved(source);
         automationManager.sourceMoved(source);
         updatePrimarySourceParameters(changeType);
+        return;
+    case Source::OriginOfChange::automation:
+        sourceLinkEnforcer.sourceMoved(source);
+        automationManager.sourceMoved(source);
         return;
     }
     jassertfalse;
@@ -1184,7 +1192,8 @@ void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
 {
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
-        editor->sourceBoxSelectionChanged(source.getIndex());
+        auto const index{ source.getIndex() };
+        MessageManager::callAsync([=] { editor->sourceBoxSelectionChanged(index); });
     }
 }
 
@@ -1199,8 +1208,14 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
         auto const y_sl{ mChangeGesturesManager.getScopedLock(Automation::Ids::Y) };
         auto const normalized_x{ (source.getX() + 1.0f) / 2.0f };
         auto const normalized_y{ 1.0f - (source.getY() + 1.0f) / 2.0f };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::X)->setValueNotifyingHost(normalized_x);
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y)->setValueNotifyingHost(normalized_y);
+        auto * x_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
+        auto * y_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y) };
+        if (!mIsPlaying) {
+            x_param->setValue(normalized_x);
+            y_param->setValue(normalized_y);
+        }
+        x_param->setValueNotifyingHost(normalized_x);
+        y_param->setValueNotifyingHost(normalized_y);
         break;
     }
     case Source::ChangeType::elevation: {
