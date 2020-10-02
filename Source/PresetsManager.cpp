@@ -68,23 +68,23 @@ int PresetsManager::getCurrentPreset() const
 }
 
 //==============================================================================
-bool PresetsManager::loadIfPresetChanged(int const presetNumber, Source::OriginOfChange const origin)
+bool PresetsManager::loadIfPresetChanged(int const presetNumber)
 {
     if (presetNumber == mLastLoadedPreset) {
         return false;
     }
 
-    return load(presetNumber, origin);
+    return load(presetNumber);
 }
 
 //==============================================================================
-bool PresetsManager::forceLoad(int const presetNumber, Source::OriginOfChange const origin)
+bool PresetsManager::forceLoad(int const presetNumber)
 {
-    return load(presetNumber, origin);
+    return load(presetNumber);
 }
 
 //==============================================================================
-bool PresetsManager::load(int const presetNumber, Source::OriginOfChange const origin)
+bool PresetsManager::load(int const presetNumber)
 {
     if (presetNumber == 0) {
         return false;
@@ -123,13 +123,18 @@ bool PresetsManager::load(int const presetNumber, Source::OriginOfChange const o
         }
     }
 
-    for (auto & source : mSources) {
-        auto const sourceIndex{ source.getIndex() };
-        auto const & snapshot{ snapshots[sourceIndex] };
-        source.setPosition(snapshot.position, Source::OriginOfChange::userAnchorMove);
-        if (source.getSpatMode() == SpatMode::cube) {
-            source.setElevation(snapshot.z, Source::OriginOfChange::userAnchorMove);
-        }
+    //    for (auto & source : mSources) {
+    //        auto const sourceIndex{ source.getIndex() };
+    //        auto const & snapshot{ snapshots[sourceIndex] };
+    //        source.setPosition(snapshot.position, Source::OriginOfChange::presetRecall);
+    //        if (source.getSpatMode() == SpatMode::cube) {
+    //            source.setElevation(snapshot.z, Source::OriginOfChange::presetRecall);
+    //        }
+    //    }
+
+    mPositionLinkEnforcer.loadSnapshots(snapshots);
+    if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
+        mElevationLinkEnforcer.loadSnapshots(snapshots);
     }
 
     auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
@@ -147,7 +152,7 @@ bool PresetsManager::load(int const presetNumber, Source::OriginOfChange const o
     } else {
         terminalPosition = snapshots.primary.position;
     }
-    mSources.getPrimarySource().setPosition(terminalPosition, origin);
+    mSources.getPrimarySource().setPosition(terminalPosition, Source::OriginOfChange::presetRecall);
 
     Radians elevation;
     if (presetData->hasAttribute(zTerminalPositionId)) {
@@ -157,11 +162,13 @@ bool PresetsManager::load(int const presetNumber, Source::OriginOfChange const o
     } else {
         elevation = snapshots.primary.z;
     };
-    mSources.getPrimarySource().setElevation(elevation, origin);
+    if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
+        mSources.getPrimarySource().setElevation(elevation, Source::OriginOfChange::presetRecall);
+    }
 
     mLastLoadedPreset = presetNumber;
     mSourceMovedSinceLastRecall = false;
-    sendChangeMessage();
+    //    sendChangeMessage();
 
     return true;
 }

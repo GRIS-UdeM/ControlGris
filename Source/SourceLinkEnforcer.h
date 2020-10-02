@@ -62,6 +62,8 @@ public:
     void sourceMoved(Source & source);
     void anchorMoved(Source & source);
 
+    void loadSnapshots(SourcesSnapshots const & snapshots) { mSnapshots = snapshots; }
+
 private:
     //==============================================================================
     void primarySourceMoved();

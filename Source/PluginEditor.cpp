@@ -690,7 +690,7 @@ void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumb
 {
     //    MessageManagerLock mml{};
 
-    mProcessor.getPresetsManager().forceLoad(presetNumber, Source::OriginOfChange::manualPresetRecall);
+    mProcessor.getPresetsManager().forceLoad(presetNumber);
 
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };
     auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };

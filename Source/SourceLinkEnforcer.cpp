@@ -44,7 +44,8 @@ void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
-        saveCurrentPositionsToInitialStates();
+        enforceSourceLink();
+        //        saveCurrentPositionsToInitialStates();
     }
 }
 
@@ -55,13 +56,17 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
-        saveCurrentPositionsToInitialStates();
+        enforceSourceLink();
+        //        saveCurrentPositionsToInitialStates();
     }
 }
 
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
+    if (!mLinkStrategy) {
+        return;
+    }
     mLinkStrategy->computeParameters(mSources, mSnapshots);
     mLinkStrategy->enforce(mSources, mSnapshots);
     if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
@@ -76,17 +81,6 @@ void SourceLinkEnforcer::enforceSourceLink()
 //==============================================================================
 void SourceLinkEnforcer::sourceMoved(Source & source)
 {
-    //    if (!mLinkStrategy) {
-    //        if (mPositionSourceLink != PositionSourceLink::undefined) {
-    //            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
-    //        } else {
-    //            mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
-    //        }
-    //    }
-    //    if (!mLinkStrategy->isInitialized()) {
-    //        mLinkStrategy->computeParameters(mSources, mSnapshots);
-    //    }
-
     if (source.isPrimarySource()) {
         primarySourceMoved();
     } else {

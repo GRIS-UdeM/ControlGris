@@ -24,11 +24,29 @@
 
 #include "PluginProcessor.h"
 
+bool forcedModification(Source::OriginOfChange const origin)
+{
+    switch (origin) {
+    case Source::OriginOfChange::none:
+    case Source::OriginOfChange::userMove:
+    case Source::OriginOfChange::userAnchorMove:
+    case Source::OriginOfChange::automation:
+    case Source::OriginOfChange::osc:
+        return false;
+    case Source::OriginOfChange::trajectory:
+    case Source::OriginOfChange::link:
+    case Source::OriginOfChange::presetRecall:
+        return true;
+    }
+    jassertfalse;
+    return false;
+}
+
 //==============================================================================
 void Source::setAzimuth(Radians const azimuth, OriginOfChange const origin)
 {
     auto const balancedAzimuth{ azimuth.simplified() };
-    if (balancedAzimuth != mAzimuth) {
+    if (balancedAzimuth != mAzimuth || forcedModification(origin)) {
         mAzimuth = balancedAzimuth;
         computeXY();
         notify(ChangeType::position, origin);
@@ -51,7 +69,7 @@ Normalized Source::getNormalizedAzimuth() const
 void Source::setElevation(Radians const elevation, OriginOfChange const origin)
 {
     auto const clippedElevation{ clipElevation(elevation) };
-    if (clippedElevation != mElevation) {
+    if (clippedElevation != mElevation || forcedModification(origin)) {
         mElevation = clippedElevation;
         computeXY();
         notify(ChangeType::elevation, origin);
@@ -70,7 +88,7 @@ void Source::setDistance(float const distance, OriginOfChange const origin)
 {
     jassert(distance >= 0.0f);
 
-    if (distance != mDistance) {
+    if (distance != mDistance || forcedModification(origin)) {
         mDistance = distance;
         computeXY();
         notify(ChangeType::position, origin);
@@ -87,7 +105,8 @@ void Source::setCoordinates(Radians const azimuth,
     auto const clippedElevation{ clipElevation(elevation) };
     jassert(distance >= 0.0f);
 
-    if (balancedAzimuth != mAzimuth || clippedElevation != mElevation || distance != mDistance) {
+    if (balancedAzimuth != mAzimuth || clippedElevation != mElevation || distance != mDistance
+        || forcedModification(origin)) {
         mAzimuth = azimuth;
         mElevation = elevation;
         mDistance = distance;
@@ -121,7 +140,7 @@ void Source::setElevationSpan(Normalized const elevationSpan)
 void Source::setX(float const x, OriginOfChange const origin)
 {
     auto const clippedX{ clipCoordinate(x) };
-    if (clippedX != mPosition.getX()) {
+    if (clippedX != mPosition.getX() || forcedModification(origin)) {
         mPosition.setX(clippedX);
         computeAzimuthElevation();
         notify(ChangeType::position, origin);
@@ -144,7 +163,7 @@ void Source::setY(Normalized const y, OriginOfChange const origin)
 void Source::setY(float const y, OriginOfChange const origin)
 {
     auto const clippedY{ clipCoordinate(y) };
-    if (y != mPosition.getY()) {
+    if (y != mPosition.getY() || forcedModification(origin)) {
         mPosition.setY(clippedY);
         computeAzimuthElevation();
         notify(ChangeType::position, origin);
@@ -155,7 +174,7 @@ void Source::setY(float const y, OriginOfChange const origin)
 void Source::setPosition(Point<float> const & position, OriginOfChange const origin)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
-    if (mPosition != clippedPosition) {
+    if (mPosition != clippedPosition || forcedModification(origin)) {
         mPosition = clippedPosition;
         computeAzimuthElevation();
         notify(ChangeType::position, origin);

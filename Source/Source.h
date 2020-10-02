@@ -36,17 +36,7 @@ class Source
 {
 public:
     //==============================================================================
-    enum class OriginOfChange {
-        none,
-        userMove,
-        userAnchorMove,
-        link,
-        trajectory,
-        automation,
-        automaticPresetRecall,
-        manualPresetRecall,
-        osc
-    };
+    enum class OriginOfChange { none, userMove, userAnchorMove, link, trajectory, automation, presetRecall, osc };
     enum class ChangeType { position, elevation };
     //==============================================================================
     class Listener : private juce::AsyncUpdater

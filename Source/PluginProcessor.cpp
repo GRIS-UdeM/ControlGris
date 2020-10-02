@@ -237,6 +237,10 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1) };
         setPositionSourceLink(val);
+        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        if (ed != nullptr) {
+            ed->updateSourceLinkCombo(static_cast<PositionSourceLink>(val));
+        }
     }
 
     if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
@@ -252,7 +256,11 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
-        auto const loaded{ mPresetManager.loadIfPresetChanged(value, Source::OriginOfChange::automaticPresetRecall) };
+        mPresetManager.loadIfPresetChanged(value);
+        mPositionSourceLinkEnforcer.enforceSourceLink();
+        if (mSpatMode == SpatMode::cube) {
+            mElevationSourceLinkEnforcer.enforceSourceLink();
+        }
     }
 
     if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {
@@ -552,7 +560,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
     } else if (address == String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
-        auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset, Source::OriginOfChange::manualPresetRecall) };
+        auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
         if (loaded) {
             mPositionAutomationManager.recomputeTrajectory();
             mElevationAutomationManager.recomputeTrajectory();
@@ -578,7 +586,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
         mElevationAutomationManager.sendTrajectoryPositionChangedEvent();
     }
 
-    mPresetManager.loadIfPresetChanged(0, Source::OriginOfChange::manualPresetRecall);
+    mPresetManager.loadIfPresetChanged(0);
 
     if (static_cast<bool>(positionSourceLinkToProcess)) {
         setPositionSourceLink(positionSourceLinkToProcess);
@@ -1157,12 +1165,12 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
             updatePrimarySourceParameters(changeType);
         }
         return;
-    case Source::OriginOfChange::automaticPresetRecall:
-    case Source::OriginOfChange::manualPresetRecall:
-        sourceLinkEnforcer.sourceMoved(source);
-        setSelectedSource(source);
+    case Source::OriginOfChange::presetRecall:
         if (isPrimary) {
+            sourceLinkEnforcer.sourceMoved(source);
             automationManager.sourceMoved(source);
+        } else {
+            sourceLinkEnforcer.anchorMoved(source);
         }
         return;
     case Source::OriginOfChange::link:

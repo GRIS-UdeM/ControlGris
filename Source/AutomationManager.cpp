@@ -220,7 +220,7 @@ void PositionAutomationManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory = Trajectory{ type, startPos };
     }
-    mPrimarySource.setPosition(startPos, Source::OriginOfChange::trajectory);
+    //    mPrimarySource.setPosition(startPos, Source::OriginOfChange::trajectory);
 }
 
 //==============================================================================
