@@ -322,6 +322,11 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
         jassert(spatMode == SpatMode::cube);
         mElevationSourceLinkEnforcer.setSourceLink(mElevationTrajectoryManager.getSourceLink());
     }
+
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor) {
+        editor->setSpatMode(spatMode);
+    }
 }
 
 //==============================================================================

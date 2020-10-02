@@ -26,17 +26,91 @@
 #include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
+class SourceBoxComponent;
+
+//==============================================================================
+class DomeControls final : public juce::Component
+{
+    SourceBoxComponent & mSourceBoxComponent;
+
+    Degrees mCurrentAzimuth;
+    Radians mCurrentElevation;
+    Label mElevationLabel;
+    Label mAzimuthLabel;
+    Slider mElevationSlider;
+    Slider mAzimuthSlider;
+
+public:
+    //==============================================================================
+    explicit DomeControls(SourceBoxComponent & sourceBoxComponent);
+    ~DomeControls() override = default;
+
+    DomeControls(DomeControls const &) = delete;
+    DomeControls(DomeControls &&) = delete;
+
+    DomeControls & operator=(DomeControls const &) = delete;
+    DomeControls & operator=(DomeControls &&) = delete;
+    //==============================================================================
+    void updateSliderValues(Source * source);
+
+private:
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(DomeControls)
+}; // DomeControls
+
+//==============================================================================
+class CubeControls final : public juce::Component
+{
+    SourceBoxComponent & mSourceBoxComponent;
+
+    float mCurrentX;
+    float mCurrentY;
+    float mCurrentZ;
+    Label mXLabel;
+    Label mYLabel;
+    Label mZLabel;
+    Slider mXSlider;
+    Slider mYSlider;
+    Slider mZSlider;
+
+public:
+    //==============================================================================
+    explicit CubeControls(SourceBoxComponent & sourceBoxComponent);
+    ~CubeControls() override = default;
+
+    CubeControls(CubeControls const &) = delete;
+    CubeControls(CubeControls &&) = delete;
+
+    CubeControls & operator=(CubeControls const &) = delete;
+    CubeControls & operator=(CubeControls &&) = delete;
+    //==============================================================================
+    void updateSliderValues(Source * source);
+
+private:
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(CubeControls)
+}; // CubeControls
+
 //==============================================================================
 class SourceBoxComponent final : public juce::Component
 {
+    friend DomeControls;
+    friend CubeControls;
+
 public:
     //==============================================================================
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
         virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
-        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians azimuth, Radians elevation) = 0;
+        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex,
+                                              std::optional<Radians> azimuth,
+                                              std::optional<Radians> elevation,
+                                              std::optional<float> x,
+                                              std::optional<float> y,
+                                              std::optional<float> z)
+            = 0;
     };
 
 private:
@@ -46,8 +120,6 @@ private:
     ListenerList<Listener> mListeners;
 
     SourceIndex mSelectedSource;
-    Degrees mCurrentAzimuth;
-    Radians mCurrentElevation;
 
     Label mSourcePlacementLabel;
     ComboBox mSourcePlacementCombo;
@@ -55,15 +127,12 @@ private:
     Label mSourceNumberLabel;
     ComboBox mSourceNumberCombo;
 
-    Label mRayLengthLabel;
-    Slider mRayLengthSlider;
-
-    Label mAngleLabel;
-    Slider mAngleSlider;
+    DomeControls mDomeControls;
+    CubeControls mCubeControls;
 
 public:
     //==============================================================================
-    explicit SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
+    explicit SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
     //==============================================================================
     SourceBoxComponent() = delete;
     ~SourceBoxComponent() override = default;
@@ -74,14 +143,16 @@ public:
     SourceBoxComponent & operator=(SourceBoxComponent const &) = delete;
     SourceBoxComponent & operator=(SourceBoxComponent &&) = delete;
     //==============================================================================
-    void paint(Graphics &) override;
-    void resized() override;
-
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+
+    void setSpatMode(SpatMode spatMode);
+    //==============================================================================
+    void paint(Graphics &) override;
+    void resized() override;
 
 private:
     //==============================================================================

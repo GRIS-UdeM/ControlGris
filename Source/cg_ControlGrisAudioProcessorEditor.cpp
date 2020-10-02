@@ -39,7 +39,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mParametersBox(mGrisLookAndFeel)
     , mTrajectoryBox(mGrisLookAndFeel)
     , mSettingsBox(mGrisLookAndFeel)
-    , mSourceBox(mGrisLookAndFeel)
+    , mSourceBox(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode())
     , mInterfaceBox(mGrisLookAndFeel)
     , mPositionPresetBox(controlGrisAudioProcessor.getPresetsManager())
 {
@@ -477,15 +477,24 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const sourceIndex,
-                                                               Radians azimuth,
-                                                               Radians elevation)
+                                                               std::optional<Radians> const azimuth,
+                                                               std::optional<Radians> const elevation,
+                                                               std::optional<float> const x,
+                                                               std::optional<float> const y,
+                                                               std::optional<float> const z)
 {
     auto & source{ mProcessor.getSources()[sourceIndex] };
-    if (mProcessor.getSpatMode() == SpatMode::dome) {
-        source.setCoordinates(azimuth, elevation, 1.0f, Source::OriginOfChange::userMove);
-    } else {
-        auto const currentElevation{ source.getElevation() };
-        source.setCoordinates(azimuth, currentElevation, elevation.getAsRadians(), Source::OriginOfChange::userMove);
+
+    if (azimuth) {
+        source.setAzimuth(*azimuth, Source::OriginOfChange::userMove);
+    } else if (elevation) {
+        source.setElevation(*elevation, Source::OriginOfChange::userMove);
+    } else if (x) {
+        source.setX(*x, Source::OriginOfChange::userMove);
+    } else if (y) {
+        source.setY(*y, Source::OriginOfChange::userMove);
+    } else if (z) {
+        source.setElevation(MAX_ELEVATION * *z, Source::OriginOfChange::userMove);
     }
 }
 
@@ -779,4 +788,10 @@ void ControlGrisAudioProcessorEditor::resized()
 
     mPositionPresetBanner.setBounds(width, 0, 50, 20);
     mPositionPresetBox.setBounds(width, 20, 50, height - 20);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
+{
+    mSourceBox.setSpatMode(spatMode);
 }

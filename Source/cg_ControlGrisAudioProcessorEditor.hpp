@@ -116,7 +116,12 @@ public:
     // SourceBoxComponent::Listeners
     void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
     void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
-    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians azimuth, Radians elevation) override;
+    void sourceBoxPositionChanged(SourceIndex sourceIndex,
+                                  std::optional<Radians> azimuth,
+                                  std::optional<Radians> elevation,
+                                  std::optional<float> x,
+                                  std::optional<float> y,
+                                  std::optional<float> z) override;
 
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
@@ -150,6 +155,8 @@ public:
     void updatePositionPreset(int presetNumber);
 
     void refresh();
+
+    void setSpatMode(SpatMode spatMode);
 
 private:
     //==============================================================================
