@@ -177,12 +177,6 @@ Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 }
 
 //==============================================================================
-void TrajectoryManager::setPrimarySourcePosition(Point<float> const & pos) const
-{
-    mPrimarySource.setPosition(pos, Source::OriginOfChange::trajectory);
-}
-
-//==============================================================================
 void TrajectoryManager::sourceMoved(Source & source)
 {
     jassert(source.isPrimarySource());
@@ -220,7 +214,7 @@ void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const t
     } else {
         mTrajectory = Trajectory{ type, startPos };
     }
-    //    mPrimarySource.setPosition(startPos, Source::OriginOfChange::trajectory);
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================
@@ -246,6 +240,7 @@ void ElevationTrajectoryManager::setTrajectoryType(ElevationTrajectoryType const
     } else {
         mTrajectory.reset();
     }
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================

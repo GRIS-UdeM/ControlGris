@@ -116,7 +116,6 @@ public:
 
     void setPositionDampeningCycles(int const value) { this->mDampeningCycles = value; }
     void setDeviationPerCycle(Degrees const value) { this->mDegreeOfDeviationPerCycle = value; }
-    void setPrimarySourcePosition(Point<float> const & pos) const;
     void addListener(Listener * l) { mListeners.add(l); }
 
     void sourceMoved(Source & source);
