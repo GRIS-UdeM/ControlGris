@@ -26,8 +26,8 @@
 SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mSelectedSource = SourceIndex{};
-    mCurrentAngle = {};
-    mCurrentRayLength = 1.0f;
+    mCurrentAzimuth = {};
+    mCurrentElevation = MAX_ELEVATION;
 
     mSourcePlacementLabel.setText("Source Placement:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourcePlacementLabel);
@@ -56,7 +56,7 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGri
         mListeners.call([&](Listener & l) { l.sourceBoxSelectionChanged(mSelectedSource); });
     };
 
-    mRayLengthLabel.setText("Ray Length:", NotificationType::dontSendNotification);
+    mRayLengthLabel.setText("Elevation:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mRayLengthLabel);
 
     mRayLengthSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
@@ -65,12 +65,12 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGri
     mRayLengthSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&mRayLengthSlider);
     mRayLengthSlider.onValueChange = [this] {
-        mCurrentRayLength = static_cast<float>(mRayLengthSlider.getValue());
+        mCurrentElevation = MAX_ELEVATION * (1.0f - mRayLengthSlider.getValue());
         mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAngle, mCurrentRayLength); });
+            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAzimuth, mCurrentElevation); });
     };
 
-    mAngleLabel.setText("Angle:", NotificationType::dontSendNotification);
+    mAngleLabel.setText("Azimuth:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mAngleLabel);
 
     mAngleSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
@@ -79,9 +79,9 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGri
     mAngleSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
     addAndMakeVisible(&mAngleSlider);
     mAngleSlider.onValueChange = [this] {
-        mCurrentAngle = Degrees{ static_cast<float>(mAngleSlider.getValue()) };
+        mCurrentAzimuth = Degrees{ static_cast<float>(mAngleSlider.getValue()) };
         mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAngle, mCurrentRayLength); });
+            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAzimuth, mCurrentElevation); });
     };
 }
 
@@ -125,15 +125,15 @@ void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const
     mSelectedSource = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
     if (spatMode == SpatMode::dome) {
-        mCurrentAngle = source->getAzimuth();
-        mCurrentRayLength = source->getNormalizedElevation().toFloat();
+        mCurrentAzimuth = source->getAzimuth();
+        mCurrentElevation = MAX_ELEVATION * source->getNormalizedElevation().toFloat();
     } else {
-        mCurrentAngle = source->getAzimuth();
-        mCurrentRayLength = source->getDistance();
+        mCurrentAzimuth = source->getAzimuth();
+        mCurrentElevation = MAX_ELEVATION * source->getDistance();
     }
-    if (mCurrentAngle.getAsDegrees() < 0.0f) {
-        mCurrentAngle += Degrees{ 360.0f };
+    if (mCurrentAzimuth.getAsDegrees() < 0.0f) {
+        mCurrentAzimuth += Degrees{ 360.0f };
     }
-    mAngleSlider.setValue(mCurrentAngle.getAsDegrees(), NotificationType::dontSendNotification);
-    mRayLengthSlider.setValue(mCurrentRayLength, NotificationType::dontSendNotification);
+    mAngleSlider.setValue(mCurrentAzimuth.getAsDegrees(), NotificationType::dontSendNotification);
+    mRayLengthSlider.setValue(1.0f - mCurrentElevation / MAX_ELEVATION, NotificationType::dontSendNotification);
 }

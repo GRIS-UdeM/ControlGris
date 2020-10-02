@@ -36,7 +36,7 @@ public:
 
         virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
         virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
-        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) = 0;
+        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians azimuth, Radians elevation) = 0;
     };
 
 private:
@@ -46,8 +46,8 @@ private:
     ListenerList<Listener> mListeners;
 
     SourceIndex mSelectedSource;
-    Degrees mCurrentAngle;
-    float mCurrentRayLength;
+    Degrees mCurrentAzimuth;
+    Radians mCurrentElevation;
 
     Label mSourcePlacementLabel;
     ComboBox mSourcePlacementCombo;

@@ -28,11 +28,12 @@ class Degrees;
 
 class Radians
 {
-    float mValue{};
+    using Type = float;
+    Type mValue{};
 
 public:
     constexpr Radians() noexcept = default;
-    constexpr explicit Radians(float value) noexcept : mValue(value) {}
+    constexpr explicit Radians(Type value) noexcept : mValue(value) {}
     ~Radians() noexcept = default;
 
     constexpr Radians(Radians const & other) = default;
@@ -52,9 +53,10 @@ public:
     constexpr Radians operator+(Radians const & other) const { return Radians{ mValue + other.mValue }; }
     constexpr Radians operator-(Radians const & other) const { return Radians{ mValue - other.mValue }; }
     constexpr Radians operator*(float const value) const { return Radians{ mValue * value }; }
-    constexpr Radians operator*(int const value) const { return Radians{ mValue * static_cast<float>(value) }; }
-    constexpr Radians operator/(float const value) const { return Radians{ mValue / value }; }
-    constexpr Radians operator/(int const value) const { return Radians{ mValue / static_cast<float>(value) }; }
+    constexpr Radians operator*(double const value) const { return Radians{ mValue * static_cast<Type>(value) }; }
+    constexpr Radians operator*(int const value) const { return Radians{ mValue * static_cast<Type>(value) }; }
+    constexpr Radians operator/(float const value) const { return Radians{ mValue / static_cast<Type>(value) }; }
+    constexpr Radians operator/(int const value) const { return Radians{ mValue / static_cast<Type>(value) }; }
     constexpr float operator/(Radians const other) const { return mValue / other.mValue; }
 
     constexpr Radians & operator+=(Radians const & other)

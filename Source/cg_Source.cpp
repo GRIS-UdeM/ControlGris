@@ -186,13 +186,16 @@ void Source::computeXY()
 {
     float const radius{ [&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
+            jassert(!std::isnan(mElevation.getAsRadians()));
             auto const result{ mElevation / MAX_ELEVATION };
             jassert(result >= 0.0f && result <= 1.0f);
             return result;
         }
+        jassert(!std::isnan(mDistance));
         return mDistance;
     }() };
 
+    jassert(!std::isnan(mAzimuth.getAsRadians()));
     auto const newPosition{ getPositionFromAngle(mAzimuth, radius) };
     mPosition = newPosition;
 }
@@ -200,7 +203,9 @@ void Source::computeXY()
 //==============================================================================
 void Source::computeAzimuthElevation()
 {
+    jassert(!std::isnan(mPosition.getX()) && !std::isnan(mPosition.getY()));
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
+        jassert(!std::isnan(mAzimuth.getAsRadians()));
         mAzimuth = getAngleFromPosition(mPosition).simplified();
     }
 
@@ -208,6 +213,7 @@ void Source::computeAzimuthElevation()
     if (mSpatMode == SpatMode::dome) {
         auto const clippedRadius{ std::min(radius, 1.0f) };
         if (clippedRadius < radius) {
+            jassert(!std::isnan(mAzimuth.getAsRadians()));
             mPosition = getPositionFromAngle(mAzimuth, clippedRadius);
         }
         auto const elevation{ halfPi * clippedRadius };

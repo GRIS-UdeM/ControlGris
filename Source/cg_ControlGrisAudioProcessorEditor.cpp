@@ -477,16 +477,15 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const sourceIndex,
-                                                               Radians angle,
-                                                               float rayLen)
+                                                               Radians azimuth,
+                                                               Radians elevation)
 {
     auto & source{ mProcessor.getSources()[sourceIndex] };
     if (mProcessor.getSpatMode() == SpatMode::dome) {
-        auto const elevation{ MAX_ELEVATION * rayLen };
-        source.setCoordinates(angle, elevation, 1.0f, Source::OriginOfChange::userMove);
+        source.setCoordinates(azimuth, elevation, 1.0f, Source::OriginOfChange::userMove);
     } else {
         auto const currentElevation{ source.getElevation() };
-        source.setCoordinates(angle, currentElevation, rayLen, Source::OriginOfChange::userMove);
+        source.setCoordinates(azimuth, currentElevation, elevation.getAsRadians(), Source::OriginOfChange::userMove);
     }
 }
 

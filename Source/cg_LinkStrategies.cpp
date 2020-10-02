@@ -20,6 +20,8 @@
 
 #include "cg_LinkStrategies.hpp"
 
+#include <cmath> // TEMP
+
 #include "cg_Source.hpp"
 
 //==============================================================================
@@ -220,6 +222,10 @@ void CircularFixedAngleStrategy::computeParameters_implementation(Sources const 
     auto const primarySourceInitialRadius{ std::max(primarySourceInitialState.position.getDistanceFromOrigin(),
                                                     notQuiteZero) };
     mRadiusRatio = primarySourceFinalState.getPos().getDistanceFromOrigin() / primarySourceInitialRadius;
+    if (std::isinf(mRadiusRatio)) {
+        mRadiusRatio = std::numeric_limits<float>::max();
+    }
+    jassert(!std::isnan(mRadiusRatio));
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
     mPrimarySourceFinalAngle = Radians::fromPoint(primarySourceFinalPosition);
@@ -234,6 +240,7 @@ void CircularFixedAngleStrategy::computeParameters_implementation(Sources const 
 
         auto const & initialState{ initialStates[sourceIndex] };
         auto const initialAngle{ Radians::fromPoint(initialState.position) };
+        jassert(!std::isnan(initialAngle.getAsRadians()));
 
         initialAngles[sourceIndex.toInt()] = std::make_pair(initialAngle, sourceIndex);
     }

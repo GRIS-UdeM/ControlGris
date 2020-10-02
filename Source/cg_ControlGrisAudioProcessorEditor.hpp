@@ -116,7 +116,7 @@ public:
     // SourceBoxComponent::Listeners
     void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
     void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
-    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians angle, float rayLen) override;
+    void sourceBoxPositionChanged(SourceIndex sourceIndex, Radians azimuth, Radians elevation) override;
 
     // TrajectoryBoxComponent::Listeners
     void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
