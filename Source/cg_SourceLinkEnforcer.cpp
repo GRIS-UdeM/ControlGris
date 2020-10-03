@@ -23,50 +23,46 @@
 #include "cg_constants.hpp"
 
 //==============================================================================
-SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink const sourceLink) noexcept
-    : mSources(sources)
-    , mPositionSourceLink(sourceLink)
+SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink const sourceLink) : mSources(sources)
 {
-    saveCurrentPositionsToInitialStates();
+    setSourceLink(sourceLink);
 }
 
 //==============================================================================
-SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, ElevationSourceLink const sourceLink) noexcept
-    : mSources(sources)
-    , mElevationSourceLink(sourceLink)
+SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, ElevationSourceLink const sourceLink) : mSources(sources)
 {
+    setSourceLink(sourceLink);
 }
 
 //==============================================================================
 void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
 {
+    jassert(sourceLink != PositionSourceLink::undefined);
     if (sourceLink != mPositionSourceLink) {
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
+        saveCurrentPositionsToInitialStates();
         enforceSourceLink();
-        //        saveCurrentPositionsToInitialStates();
     }
 }
 
 //==============================================================================
 void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
 {
+    jassert(sourceLink != ElevationSourceLink::undefined);
     if (sourceLink != mElevationSourceLink) {
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
+        saveCurrentPositionsToInitialStates();
         enforceSourceLink();
-        //        saveCurrentPositionsToInitialStates();
     }
 }
 
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
-    if (!mLinkStrategy) {
-        return;
-    }
     mLinkStrategy->computeParameters(mSources, mSnapshots);
     mLinkStrategy->enforce(mSources, mSnapshots);
     if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
@@ -74,7 +70,6 @@ void SourceLinkEnforcer::enforceSourceLink()
         // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
         // relative ordering with the mouse won't make any sense.
         saveCurrentPositionsToInitialStates();
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
     }
 }
 
@@ -92,9 +87,9 @@ void SourceLinkEnforcer::sourceMoved(Source & source)
 void SourceLinkEnforcer::anchorMoved(Source & source)
 {
     if (source.isPrimarySource()) {
-        primarySourceAnchorMoved();
+        primaryAnchorMoved();
     } else {
-        secondarySourceAnchorMoved(source.getIndex());
+        secondaryAnchorMoved(source.getIndex());
     }
 }
 
@@ -107,24 +102,13 @@ void SourceLinkEnforcer::numberOfSourcesChanged()
 //==============================================================================
 void SourceLinkEnforcer::primarySourceMoved()
 {
-    // We need to force an update in independent mode.
-    auto const isIndependent{ mElevationSourceLink == ElevationSourceLink::independent
-                              || mPositionSourceLink == PositionSourceLink::independent };
-    if (isIndependent) {
-        mSnapshots.primary = SourceSnapshot{ mSources.getPrimarySource() };
-    } else {
-        enforceSourceLink();
-    }
+    enforceSourceLink();
 }
 
 //==============================================================================
 void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 {
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
-
-    if (!mLinkStrategy) {
-        return;
-    }
 
     auto const spatMode{ mSources.getPrimarySource().getSpatMode() };
     auto const isElevationSourceLink{ mElevationSourceLink != ElevationSourceLink::undefined };
@@ -134,13 +118,14 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
     if (mElevationSourceLink == ElevationSourceLink::independent
         || mPositionSourceLink == PositionSourceLink::independent) {
-        secondarySourceAnchorMoved(sourceIndex);
+        secondaryAnchorMoved(sourceIndex);
         return;
     }
 
     if (isElevationSourceLink) {
         // get expected elevation
         auto const currentElevation{ mSources[sourceIndex].getElevation() };
+        mLinkStrategy->computeParameters(mSources, mSnapshots);
         mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
         auto const expectedElevation{ mSources[sourceIndex].getElevation() };
 
@@ -159,8 +144,8 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             mLinkStrategy = LinkStrategy::make(PositionSourceLink::circular);
-            mLinkStrategy->computeParameters(mSources, mSnapshots);
         }
+        mLinkStrategy->computeParameters(mSources, mSnapshots);
 
         // get motion start and end
         mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
@@ -182,41 +167,43 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         mSnapshots[sourceIndex] = secondaryStart;
 
         // enforce link
-        mSnapshots.primary = primaryStart;
-
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
-            mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+            if (mPositionSourceLink == PositionSourceLink::undefined) {
+                mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+            } else {
+                mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+            }
         }
+        mSnapshots.primary = primaryStart;
         mSources.getPrimarySource().setPosition(target.position, Source::OriginOfChange::link);
     }
 }
 
 //==============================================================================
-void SourceLinkEnforcer::primarySourceAnchorMoved()
+void SourceLinkEnforcer::primaryAnchorMoved()
 {
-    if (mLinkStrategy) {
-        auto const newInitialState{ mLinkStrategy->computeInitialStateFromFinalState(
-            mSources,
-            mSnapshots,
-            mSources.getPrimarySource().getIndex()) };
-        mSnapshots.primary = newInitialState;
-        enforceSourceLink();
-    }
+    // mLinkStrategy->computeParameters(mSources, mSnapshots);
+    auto const newPrimarySnapshot{
+        mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, mSources.getPrimarySource().getIndex())
+    };
+    mSnapshots.primary = newPrimarySnapshot;
+    enforceSourceLink();
 }
 
 //==============================================================================
-void SourceLinkEnforcer::secondarySourceAnchorMoved(SourceIndex const sourceIndex)
+void SourceLinkEnforcer::secondaryAnchorMoved(SourceIndex const sourceIndex)
 {
     jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
 
-    if (mLinkStrategy) {
-        auto const secondaryIndex{ sourceIndex.toInt() - 1 };
-        auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
-        snapshot = mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, sourceIndex);
-        primarySourceMoved(); // some positions are invalid - fix them right away
-    }
+    auto const secondaryIndex{ sourceIndex.toInt() - 1 };
+    auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
+    mLinkStrategy->computeParameters(mSources, mSnapshots);
+    auto const newSecondaryAnchor{
+        mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, sourceIndex)
+    };
+    snapshot = newSecondaryAnchor;
+    primarySourceMoved(); // some positions are invalid - fix them right away
 }
 
 //==============================================================================
@@ -228,3 +215,13 @@ void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
         mSnapshots.secondaries.add(SourceSnapshot{ mSources.getSecondarySources()[i] });
     }
 }
+
+// std::unique_ptr<LinkStrategy> SourceLinkEnforcer::getStrategy() const
+//{
+//    if (mPositionSourceLink != PositionSourceLink::undefined) {
+//        jassert(mElevationSourceLink == ElevationSourceLink::undefined);
+//        return LinkStrategy::make(mPositionSourceLink);
+//    }
+//    jassert(mElevationSourceLink != ElevationSourceLink::undefined);
+//    return LinkStrategy::make(mElevationSourceLink);
+//}

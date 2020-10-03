@@ -34,7 +34,7 @@ class SourceLinkEnforcer
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
-    std::unique_ptr<LinkStrategy> mLinkStrategy{};
+    std::unique_ptr<LinkStrategy> mLinkStrategy;
 
 public:
     //==============================================================================
@@ -47,9 +47,8 @@ public:
     SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
     SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
     //==============================================================================
-    explicit SourceLinkEnforcer(Sources & sources,
-                                PositionSourceLink sourceLink = PositionSourceLink::independent) noexcept;
-    SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink) noexcept;
+    SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink);
+    SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink);
     //==============================================================================
     void setSourceLink(ElevationSourceLink sourceLink);
     void setSourceLink(PositionSourceLink sourceLink);
@@ -68,9 +67,10 @@ private:
     //==============================================================================
     void primarySourceMoved();
     void secondarySourceMoved(SourceIndex sourceIndex);
-    void primarySourceAnchorMoved();
-    void secondarySourceAnchorMoved(SourceIndex sourceIndex);
+    void primaryAnchorMoved();
+    void secondaryAnchorMoved(SourceIndex sourceIndex);
     void saveCurrentPositionsToInitialStates();
+    // std::unique_ptr<LinkStrategy> getStrategy() const;
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 }; // class SourceLinkEnforcer

@@ -27,6 +27,14 @@
 FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
 {
     setSize(MIN_FIELD_WIDTH, MIN_FIELD_WIDTH);
+    addAndMakeVisible(&mInvalidSourceMoveWarning);
+    mInvalidSourceMoveWarning.setFont(Font{ 32.0f, juce::Font::bold });
+    mInvalidSourceMoveWarning.setText(SOURCE_SELECTION_WARNING, NotificationType::dontSendNotification);
+    mInvalidSourceMoveWarning.setColour(juce::Label::textColourId, juce::Colours::antiquewhite);
+    mInvalidSourceMoveWarning.setJustificationType(Justification::centred);
+    /*mInvalidSourceMoveWarning.setBounds(0, 0, 500, 500);
+    mInvalidSourceMoveWarning.setBorderSize(BorderSize<int>{30, 30, 30, 30});
+    mInvalidSourceMoveWarning.setText(Font::getDefaultMonospacedFontName(), NotificationType::sendNotificationAsync);*/
 }
 
 //==============================================================================
@@ -44,6 +52,11 @@ void FieldComponent::setSelectedSource(std::optional<SourceIndex> const selected
     mSelectedSource = selectedSource;
 
     applySourceSelectionToComponents();
+}
+
+void FieldComponent::resized()
+{
+    mInvalidSourceMoveWarning.setBounds(getBounds());
 }
 
 //==============================================================================
@@ -358,13 +371,6 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 }
 
 //==============================================================================
-void PositionFieldComponent::setCircularSourceSelectionWarning(bool const showCircularSourceSelectionWarning)
-{
-    mShowCircularSourceSelectionWarning = showCircularSourceSelectionWarning;
-    repaint();
-}
-
-//==============================================================================
 void PositionFieldComponent::paint(Graphics & g)
 {
     int const componentSize{ getWidth() };
@@ -396,14 +402,6 @@ void PositionFieldComponent::paint(Graphics & g)
     }
 
     this->drawSpans(g);
-
-    if (mShowCircularSourceSelectionWarning) {
-        g.setColour(Colours::white);
-        g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION,
-                         juce::Rectangle<int>(0, 0, componentSize, 50),
-                         Justification(Justification::centred),
-                         1);
-    }
 }
 
 //==============================================================================

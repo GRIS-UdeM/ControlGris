@@ -96,34 +96,34 @@ public:
     void setSpatMode(SpatMode const spatMode) { mSpatMode = spatMode; }
     [[nodiscard]] SpatMode getSpatMode() const { return mSpatMode; }
 
-    void setAzimuth(Radians azimuth, OriginOfChange sourceLinkNotification);
-    void setAzimuth(Normalized azimuth, OriginOfChange sourceLinkNotification);
+    void setAzimuth(Radians azimuth, OriginOfChange origin);
+    void setAzimuth(Normalized azimuth, OriginOfChange origin);
     [[nodiscard]] Radians getAzimuth() const { return mAzimuth; }
     [[nodiscard]] Normalized getNormalizedAzimuth() const;
 
-    void setElevation(Radians elevation, OriginOfChange sourceLinkNotification);
-    void setElevation(Normalized elevation, OriginOfChange sourceLinkNotification);
+    void setElevation(Radians elevation, OriginOfChange origin);
+    void setElevation(Normalized elevation, OriginOfChange origin);
     [[nodiscard]] Radians getElevation() const { return mElevation; }
     [[nodiscard]] Normalized getNormalizedElevation() const;
 
-    void setDistance(float distance, OriginOfChange sourceLinkNotification);
+    void setDistance(float distance, OriginOfChange origin);
     [[nodiscard]] float getDistance() const { return mDistance; }
     void setAzimuthSpan(Normalized azimuthSpan);
     [[nodiscard]] Normalized getAzimuthSpan() const { return mAzimuthSpan; }
     void setElevationSpan(Normalized elevationSpan);
     [[nodiscard]] Normalized getElevationSpan() const { return mElevationSpan; }
 
-    void setCoordinates(Radians azimuth, Radians elevation, float distance, OriginOfChange sourceLinkNotification);
+    void setCoordinates(Radians azimuth, Radians elevation, float distance, OriginOfChange origin);
     [[nodiscard]] bool isPrimarySource() const { return mIndex == SourceIndex{ 0 }; }
 
-    void setX(float x, OriginOfChange sourceLinkNotification);
-    void setX(Normalized x, OriginOfChange sourceLinkNotification);
-    void setY(Normalized y, OriginOfChange sourceLinkNotification);
+    void setX(float x, OriginOfChange origin);
+    void setX(Normalized x, OriginOfChange origin);
+    void setY(Normalized y, OriginOfChange origin);
     [[nodiscard]] float getX() const { return mPosition.getX(); }
-    void setY(float y, OriginOfChange sourceLinkNotification);
+    void setY(float y, OriginOfChange origin);
     [[nodiscard]] float getY() const { return mPosition.getY(); }
     [[nodiscard]] Point<float> const & getPos() const { return mPosition; }
-    void setPosition(Point<float> const & pos, OriginOfChange sourceLinkNotification);
+    void setPosition(Point<float> const & pos, OriginOfChange origin);
 
     void computeXY();
     void computeAzimuthElevation();
@@ -145,6 +145,7 @@ public:
 
 private:
     //==============================================================================
+    bool shouldForceNotifications(OriginOfChange origin) const;
     void notify(ChangeType changeType, OriginOfChange origin);
     void notifyGuiListeners();
     static Radians clipElevation(Radians elevation);

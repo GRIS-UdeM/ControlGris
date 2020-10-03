@@ -66,8 +66,8 @@ class ControlGrisAudioProcessor final
     XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
 
     Sources mSources{};
-    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources };
-    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
+    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources, PositionSourceLink::independent };
+    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources, ElevationSourceLink::independent };
 
     AudioProcessorValueTreeState mAudioProcessorValueTreeState;
 

@@ -36,7 +36,7 @@ constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 // Spatialisation modes.
 enum class SpatMode { dome, cube };
 
-String const WARNING_CIRCULAR_SOURCE_SELECTION("Only source 1 can be selected \nin circular or symmetric links!");
+static String const SOURCE_SELECTION_WARNING{ "This source link does not allow single-source moves." };
 
 //==============================================================================
 // Configuration -> Source tab -> Source Placement popup choices.
