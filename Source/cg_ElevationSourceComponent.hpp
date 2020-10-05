@@ -35,9 +35,10 @@ class ElevationSourceComponent final
     , public Source::Listener
 {
     ElevationFieldComponent & mFieldComponent;
-    ElevationTrajectoryManager & mAutomationManager;
+    ElevationTrajectoryManager & mTrajectoryManager;
     Source & mSource;
     DisplacementMode mDisplacementMode;
+    bool mCanDrag{};
 
 public:
     //==============================================================================

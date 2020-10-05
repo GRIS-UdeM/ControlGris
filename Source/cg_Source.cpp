@@ -24,7 +24,7 @@
 
 #include "cg_ControlGrisAudioProcessor.hpp"
 
-bool forcedModification(Source::OriginOfChange const origin)
+bool Source::shouldForceNotifications(Source::OriginOfChange const origin) const
 {
     switch (origin) {
     case Source::OriginOfChange::none:
@@ -36,7 +36,7 @@ bool forcedModification(Source::OriginOfChange const origin)
     case Source::OriginOfChange::trajectory:
     case Source::OriginOfChange::link:
     case Source::OriginOfChange::presetRecall:
-        return true;
+        return isPrimarySource();
     }
     jassertfalse;
     return false;
@@ -46,7 +46,7 @@ bool forcedModification(Source::OriginOfChange const origin)
 void Source::setAzimuth(Radians const azimuth, OriginOfChange const origin)
 {
     auto const balancedAzimuth{ azimuth.simplified() };
-    if (balancedAzimuth != mAzimuth || forcedModification(origin)) {
+    if (balancedAzimuth != mAzimuth || shouldForceNotifications(origin)) {
         mAzimuth = balancedAzimuth;
         computeXY();
         notify(ChangeType::position, origin);
@@ -69,7 +69,7 @@ Normalized Source::getNormalizedAzimuth() const
 void Source::setElevation(Radians const elevation, OriginOfChange const origin)
 {
     auto const clippedElevation{ clipElevation(elevation) };
-    if (clippedElevation != mElevation || forcedModification(origin)) {
+    if (clippedElevation != mElevation || shouldForceNotifications(origin)) {
         mElevation = clippedElevation;
         computeXY();
         notify(ChangeType::elevation, origin);
@@ -88,7 +88,7 @@ void Source::setDistance(float const distance, OriginOfChange const origin)
 {
     jassert(distance >= 0.0f);
 
-    if (distance != mDistance || forcedModification(origin)) {
+    if (distance != mDistance || shouldForceNotifications(origin)) {
         mDistance = distance;
         computeXY();
         notify(ChangeType::position, origin);
@@ -106,7 +106,7 @@ void Source::setCoordinates(Radians const azimuth,
     jassert(distance >= 0.0f);
 
     if (balancedAzimuth != mAzimuth || clippedElevation != mElevation || distance != mDistance
-        || forcedModification(origin)) {
+        || shouldForceNotifications(origin)) {
         mAzimuth = azimuth;
         mElevation = elevation;
         mDistance = distance;
@@ -140,7 +140,7 @@ void Source::setElevationSpan(Normalized const elevationSpan)
 void Source::setX(float const x, OriginOfChange const origin)
 {
     auto const clippedX{ clipCoordinate(x) };
-    if (clippedX != mPosition.getX() || forcedModification(origin)) {
+    if (clippedX != mPosition.getX() || shouldForceNotifications(origin)) {
         mPosition.setX(clippedX);
         computeAzimuthElevation();
         notify(ChangeType::position, origin);
@@ -163,7 +163,7 @@ void Source::setY(Normalized const y, OriginOfChange const origin)
 void Source::setY(float const y, OriginOfChange const origin)
 {
     auto const clippedY{ clipCoordinate(y) };
-    if (y != mPosition.getY() || forcedModification(origin)) {
+    if (y != mPosition.getY() || shouldForceNotifications(origin)) {
         mPosition.setY(clippedY);
         computeAzimuthElevation();
         notify(ChangeType::position, origin);
@@ -174,7 +174,7 @@ void Source::setY(float const y, OriginOfChange const origin)
 void Source::setPosition(Point<float> const & position, OriginOfChange const origin)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
-    if (mPosition != clippedPosition || forcedModification(origin)) {
+    if (mPosition != clippedPosition || shouldForceNotifications(origin)) {
         mPosition = clippedPosition;
         computeAzimuthElevation();
         notify(ChangeType::position, origin);
@@ -205,7 +205,9 @@ void Source::computeAzimuthElevation()
 {
     jassert(!std::isnan(mPosition.getX()) && !std::isnan(mPosition.getY()));
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
-        jassert(!std::isnan(mAzimuth.getAsRadians()));
+        // TODO : when the position converges to the origin via an automation, one of the dimension is going to get to
+        // zero before the other. This is going to drastically change the angle. We need to insulate the real automation
+        // from a listener callback initiated by some other source.
         mAzimuth = getAngleFromPosition(mPosition).simplified();
     }
 

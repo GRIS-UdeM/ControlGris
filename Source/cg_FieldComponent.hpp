@@ -82,11 +82,11 @@ protected:
     bool mIsPlaying{ false };
     std::optional<SourceIndex> mSelectedSource{};
     std::optional<SourceIndex> mOldSelectedSource{};
+    bool mDisplayInvalidSourceMoveWarning{};
 
 public:
     //==============================================================================
     FieldComponent() = delete;
-    explicit FieldComponent(Sources & sources) noexcept;
     ~FieldComponent() noexcept override;
 
     FieldComponent(FieldComponent const &) = delete;
@@ -95,14 +95,19 @@ public:
     FieldComponent & operator=(FieldComponent const &) = delete;
     FieldComponent & operator=(FieldComponent &&) = delete;
     //==============================================================================
+    explicit FieldComponent(Sources & sources) noexcept;
+    //==============================================================================
     void refreshSources();
     void setSelectedSource(std::optional<SourceIndex> selectedSource);
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
     void addListener(Listener * l) { mListeners.add(l); }
+    void displayInvalidSourceMoveWarning(bool state);
 
-    Sources & getSources() { return mSources; }
-    Sources const & getSources() const { return mSources; }
+    void paint(juce::Graphics & g) override;
+
+    [[nodiscard]] Sources & getSources() { return mSources; }
+    [[nodiscard]] Sources const & getSources() const { return mSources; }
     //==============================================================================
     [[nodiscard]] virtual Rectangle<float> getEffectiveArea() const = 0;
 
@@ -129,7 +134,6 @@ class PositionFieldComponent final : public FieldComponent
 {
     PositionTrajectoryManager & mAutomationManager;
     SpatMode mSpatMode{ SpatMode::dome };
-    bool mShowCircularSourceSelectionWarning{ false };
     std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
     std::optional<Point<float>> mLineDrawingEndPosition{ std::nullopt };
     SourceComponent mDrawingHandleComponent{ Colour::fromRGB(176, 176, 228), "X" };
@@ -160,8 +164,6 @@ public:
     void rebuildSourceComponents(int numberOfSources) final;
     [[nodiscard]] Rectangle<float> getEffectiveArea() const final;
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
-
-    [[maybe_unused]] void setCircularSourceSelectionWarning(bool showCircularSourceSelectionWarning);
 
     [[nodiscard]] Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
     [[nodiscard]] Line<float> sourcePositionToComponentPosition(Line<float> const & sourcePosition) const;

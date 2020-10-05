@@ -100,6 +100,28 @@ void FieldComponent::sourceMoved()
 }
 
 //==============================================================================
+void FieldComponent::paint(Graphics & g)
+{
+    Component::paint(g);
+    drawBackground(g);
+    drawSpans(g);
+    if (mDisplayInvalidSourceMoveWarning) {
+        juce::Rectangle<int> const textArea{ 0, 30, getWidth(), 30 };
+        juce::Font const font{ 20.0f, juce::Font::italic };
+        g.setFont(font);
+        g.setColour(Colours::white);
+        g.drawFittedText(SOURCE_SELECTION_WARNING, textArea, Justification::centredTop, 2);
+    }
+}
+
+//==============================================================================
+void FieldComponent::displayInvalidSourceMoveWarning(bool const state)
+{
+    mDisplayInvalidSourceMoveWarning = state;
+    repaint();
+}
+
+//==============================================================================
 void PositionFieldComponent::applySourceSelectionToComponents()
 {
     if (mSelectedSource.has_value()) {
@@ -358,18 +380,9 @@ void PositionFieldComponent::drawCubeSpans(Graphics & g) const
 }
 
 //==============================================================================
-void PositionFieldComponent::setCircularSourceSelectionWarning(bool const showCircularSourceSelectionWarning)
-{
-    mShowCircularSourceSelectionWarning = showCircularSourceSelectionWarning;
-    repaint();
-}
-
-//==============================================================================
 void PositionFieldComponent::paint(Graphics & g)
 {
-    int const componentSize{ getWidth() };
-
-    drawBackground(g);
+    FieldComponent::paint(g);
 
     mDrawingHandleComponent.setVisible(mAutomationManager.getTrajectoryType() == PositionTrajectoryType::drawing
                                        && !mIsPlaying);
@@ -394,21 +407,12 @@ void PositionFieldComponent::paint(Graphics & g)
             mAutomationManager.getCurrentTrajectoryPoint()) };
         g.fillEllipse(dotCenter.getX() - radius, dotCenter.getY() - radius, diameter, diameter);
     }
-
-    this->drawSpans(g);
-
-    if (mShowCircularSourceSelectionWarning) {
-        g.setColour(Colours::white);
-        g.drawFittedText(WARNING_CIRCULAR_SOURCE_SELECTION,
-                         juce::Rectangle<int>(0, 0, componentSize, 50),
-                         Justification(Justification::centred),
-                         1);
-    }
 }
 
 //==============================================================================
 void PositionFieldComponent::resized()
 {
+    FieldComponent::resized();
     for (auto * sourceComponent : mSourceComponents) {
         sourceComponent->updatePositionInParent();
     }
@@ -574,8 +578,7 @@ ElevationFieldComponent::ElevationFieldComponent(Sources & sources,
 //==============================================================================
 void ElevationFieldComponent::paint(Graphics & g)
 {
-    drawBackground(g);
-    drawSpans(g);
+    FieldComponent::paint(g);
 
     auto const trajectoryType{ mAutomationManager.getTrajectoryType() };
     auto const effectiveArea{ getEffectiveArea() };
@@ -605,6 +608,7 @@ void ElevationFieldComponent::paint(Graphics & g)
 //==============================================================================
 void ElevationFieldComponent::resized()
 {
+    FieldComponent::resized();
     for (auto * sourceComponent : mSourceComponents) {
         sourceComponent->updatePositionInParent();
     }

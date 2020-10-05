@@ -23,11 +23,168 @@
 #include "cg_constants.hpp"
 
 //==============================================================================
-SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
-    mSelectedSource = SourceIndex{};
     mCurrentAzimuth = {};
     mCurrentElevation = MAX_ELEVATION;
+
+    mElevationLabel.setText("Elevation:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mElevationLabel);
+
+    mElevationSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
+    mElevationSlider.setValue(1.0, NotificationType::dontSendNotification);
+    mElevationSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
+    mElevationSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    addAndMakeVisible(&mElevationSlider);
+    mElevationSlider.onValueChange = [this] {
+        mCurrentElevation = MAX_ELEVATION * (1.0f - mElevationSlider.getValue());
+        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
+                                       std::nullopt,
+                                       mCurrentElevation,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt);
+        });
+    };
+
+    mAzimuthLabel.setText("Azimuth:", NotificationType::dontSendNotification);
+    addAndMakeVisible(&mAzimuthLabel);
+
+    mAzimuthSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
+    mAzimuthSlider.setValue(0.0, NotificationType::dontSendNotification);
+    mAzimuthSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
+    mAzimuthSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    addAndMakeVisible(&mAzimuthSlider);
+    mAzimuthSlider.onValueChange = [this] {
+        mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
+        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
+                                       mCurrentAzimuth,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt);
+        });
+    };
+
+    mElevationLabel.setBounds(0, 0, 150, 15);
+    mElevationSlider.setBounds(75, 0, 200, 20);
+
+    mAzimuthLabel.setBounds(0, 30, 150, 15);
+    mAzimuthSlider.setBounds(75, 30, 200, 20);
+}
+
+//==============================================================================
+void DomeControls::updateSliderValues(Source * source)
+{
+    mCurrentAzimuth = source->getAzimuth();
+    mCurrentElevation = MAX_ELEVATION * source->getNormalizedElevation().toFloat();
+
+    if (mCurrentAzimuth.getAsDegrees() < 0.0f) {
+        mCurrentAzimuth += Degrees{ 360.0f };
+    }
+    mAzimuthSlider.setValue(mCurrentAzimuth.getAsDegrees(), NotificationType::dontSendNotification);
+    mElevationSlider.setValue(1.0f - mCurrentElevation / MAX_ELEVATION, NotificationType::dontSendNotification);
+}
+
+//==============================================================================
+CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+{
+    mCurrentX = { 0.0f };
+    mCurrentY = { 0.0f };
+    mCurrentZ = { 0.0f };
+
+    mXLabel.setText("X", NotificationType::dontSendNotification);
+    mYLabel.setText("Y", NotificationType::dontSendNotification);
+    mZLabel.setText("Z", NotificationType::dontSendNotification);
+
+    addAndMakeVisible(&mXLabel);
+    addAndMakeVisible(&mYLabel);
+    addAndMakeVisible(&mZLabel);
+
+    mXSlider.setNormalisableRange(NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
+    mYSlider.setNormalisableRange(NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
+    mZSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
+
+    mXSlider.setValue(0.0, NotificationType::dontSendNotification);
+    mYSlider.setValue(0.0, NotificationType::dontSendNotification);
+    mZSlider.setValue(0.0, NotificationType::dontSendNotification);
+
+    mXSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+    mYSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+    mZSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+
+    mXSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mYSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mZSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+
+    addAndMakeVisible(&mXSlider);
+    addAndMakeVisible(&mYSlider);
+    addAndMakeVisible(&mZSlider);
+
+    mXSlider.onValueChange = [this] {
+        mCurrentX = mXSlider.getValue();
+        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       mCurrentX,
+                                       std::nullopt,
+                                       std::nullopt);
+        });
+    };
+    mYSlider.onValueChange = [this] {
+        mCurrentY = mYSlider.getValue();
+        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       mCurrentY,
+                                       std::nullopt);
+        });
+    };
+    mZSlider.onValueChange = [this] {
+        mCurrentZ = mZSlider.getValue();
+        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       std::nullopt,
+                                       1.0f - mCurrentZ);
+        });
+    };
+
+    mXLabel.setBounds(0, 0, 150, 15);
+    mYLabel.setBounds(0, 20, 150, 15);
+    mZLabel.setBounds(0, 40, 150, 15);
+
+    mXSlider.setBounds(75, 0, 200, 20);
+    mYSlider.setBounds(75, 20, 200, 20);
+    mZSlider.setBounds(75, 40, 200, 20);
+}
+
+//==============================================================================
+void CubeControls::updateSliderValues(Source * source)
+{
+    mCurrentX = source->getX();
+    mCurrentY = source->getY();
+    mCurrentZ = 1.0f - source->getElevation() / MAX_ELEVATION;
+
+    mXSlider.setValue(mCurrentX, NotificationType::dontSendNotification);
+    mYSlider.setValue(mCurrentY, NotificationType::dontSendNotification);
+    mZSlider.setValue(mCurrentZ, NotificationType::dontSendNotification);
+}
+
+//==============================================================================
+SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
+    : mGrisLookAndFeel(grisLookAndFeel)
+    , mDomeControls(*this)
+    , mCubeControls(*this)
+{
+    mSelectedSource = SourceIndex{};
 
     mSourcePlacementLabel.setText("Source Placement:", NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourcePlacementLabel);
@@ -56,33 +213,9 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGri
         mListeners.call([&](Listener & l) { l.sourceBoxSelectionChanged(mSelectedSource); });
     };
 
-    mRayLengthLabel.setText("Elevation:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&mRayLengthLabel);
-
-    mRayLengthSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
-    mRayLengthSlider.setValue(1.0, NotificationType::dontSendNotification);
-    mRayLengthSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mRayLengthSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-    addAndMakeVisible(&mRayLengthSlider);
-    mRayLengthSlider.onValueChange = [this] {
-        mCurrentElevation = MAX_ELEVATION * (1.0f - mRayLengthSlider.getValue());
-        mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAzimuth, mCurrentElevation); });
-    };
-
-    mAngleLabel.setText("Azimuth:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&mAngleLabel);
-
-    mAngleSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
-    mAngleSlider.setValue(0.0, NotificationType::dontSendNotification);
-    mAngleSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mAngleSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-    addAndMakeVisible(&mAngleSlider);
-    mAngleSlider.onValueChange = [this] {
-        mCurrentAzimuth = Degrees{ static_cast<float>(mAngleSlider.getValue()) };
-        mListeners.call(
-            [&](Listener & l) { l.sourceBoxPositionChanged(mSelectedSource, mCurrentAzimuth, mCurrentElevation); });
-    };
+    addAndMakeVisible(&mDomeControls);
+    addAndMakeVisible(&mCubeControls);
+    setSpatMode(spatMode);
 }
 
 //==============================================================================
@@ -100,11 +233,8 @@ void SourceBoxComponent::resized()
     mSourceNumberLabel.setBounds(305, 10, 150, 15);
     mSourceNumberCombo.setBounds(430, 10, 150, 20);
 
-    mRayLengthLabel.setBounds(305, 40, 150, 15);
-    mRayLengthSlider.setBounds(380, 40, 200, 20);
-
-    mAngleLabel.setBounds(305, 70, 150, 15);
-    mAngleSlider.setBounds(380, 70, 200, 20);
+    mDomeControls.setBounds(305, 40, 275, 500);
+    mCubeControls.setBounds(305, 35, 275, 550);
 }
 
 //==============================================================================
@@ -124,16 +254,22 @@ void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const
 {
     mSelectedSource = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
-    if (spatMode == SpatMode::dome) {
-        mCurrentAzimuth = source->getAzimuth();
-        mCurrentElevation = MAX_ELEVATION * source->getNormalizedElevation().toFloat();
-    } else {
-        mCurrentAzimuth = source->getAzimuth();
-        mCurrentElevation = MAX_ELEVATION * source->getDistance();
+    mDomeControls.updateSliderValues(source);
+    mCubeControls.updateSliderValues(source);
+}
+
+void SourceBoxComponent::setSpatMode(SpatMode const spatMode)
+{
+    switch (spatMode) {
+    case SpatMode::dome:
+        mDomeControls.setVisible(true);
+        mCubeControls.setVisible(false);
+        break;
+    case SpatMode::cube:
+        mDomeControls.setVisible(false);
+        mCubeControls.setVisible(true);
+        break;
+    default:
+        jassertfalse;
     }
-    if (mCurrentAzimuth.getAsDegrees() < 0.0f) {
-        mCurrentAzimuth += Degrees{ 360.0f };
-    }
-    mAngleSlider.setValue(mCurrentAzimuth.getAsDegrees(), NotificationType::dontSendNotification);
-    mRayLengthSlider.setValue(1.0f - mCurrentElevation / MAX_ELEVATION, NotificationType::dontSendNotification);
 }

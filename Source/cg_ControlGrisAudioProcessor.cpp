@@ -199,9 +199,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
-    //    mPositionTrajectoryManager.addListener(this);
-    //    mElevationTrajectoryManager.addListener(this);
-
     handleOscConnection(true);
 
     // The timer's callback send OSC messages periodically.
@@ -235,23 +232,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
-        auto const val{ static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1) };
+        auto const val{ static_cast<PositionSourceLink>(newValue + 1.0f) };
         setPositionSourceLink(val);
-        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (ed != nullptr) {
-            ed->updateSourceLinkCombo(static_cast<PositionSourceLink>(val));
-        }
     }
 
     if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
-        auto const val{ static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1) };
-        if (val != mElevationTrajectoryManager.getSourceLink()) {
-            setElevationSourceLink(val);
-            auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-            if (ed != nullptr) {
-                ed->updateElevationSourceLinkCombo(static_cast<ElevationSourceLink>(val));
-            }
-        }
+        auto const val{ static_cast<ElevationSourceLink>(newValue + 1.0f) };
+        setElevationSourceLink(val);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
@@ -260,6 +247,10 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
         mPositionSourceLinkEnforcer.enforceSourceLink();
         if (mSpatMode == SpatMode::cube) {
             mElevationSourceLinkEnforcer.enforceSourceLink();
+        }
+        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        if (editor) {
+            editor->positionPresetChanged(value);
         }
     }
 
@@ -275,19 +266,30 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 }
 
 //========================================================
-void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const newSourceLink)
+void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
-    if (newSourceLink != mPositionTrajectoryManager.getSourceLink()) {
-        mPositionTrajectoryManager.setSourceLink(newSourceLink);
-
-        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (editor != nullptr) {
-            editor->updateSourceLinkCombo(newSourceLink);
-        }
-
-        mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
-        mPositionSourceLinkEnforcer.enforceSourceLink();
+    if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
+        return;
     }
+
+    //    mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK)->setValue(static_cast<float>(newSourceLink)
+    //    - 1.0f);
+
+    auto const isSymmetricLink{ newSourceLink == PositionSourceLink::symmetricX
+                                || newSourceLink == PositionSourceLink::symmetricY };
+    if (mSources.size() != 2 && isSymmetricLink) {
+        newSourceLink = PositionSourceLink::independent;
+    }
+
+    mPositionTrajectoryManager.setSourceLink(newSourceLink);
+
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor != nullptr) {
+        editor->updateSourceLinkCombo(newSourceLink);
+    }
+
+    mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
+    mPositionSourceLinkEnforcer.enforceSourceLink();
 }
 
 //==============================================================================
@@ -295,6 +297,9 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 {
     if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
         mElevationTrajectoryManager.setSourceLink(newSourceLink);
+
+        //        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK)
+        //            ->setValueNotifyingHost(static_cast<float>(newSourceLink) -1.0f);
 
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
@@ -322,6 +327,11 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
         jassert(spatMode == SpatMode::cube);
         mElevationSourceLinkEnforcer.setSourceLink(mElevationTrajectoryManager.getSourceLink());
     }
+
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor) {
+        editor->setSpatMode(spatMode);
+    }
 }
 
 //==============================================================================
@@ -348,6 +358,10 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
 //==============================================================================
 void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
 {
+    if (numOfSources == mSources.size()) {
+        return;
+    }
+
     mSources.setSize(numOfSources);
     mAudioProcessorValueTreeState.state.setProperty("numberOfSources", mSources.size(), nullptr);
 
@@ -355,6 +369,13 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     mElevationSourceLinkEnforcer.numberOfSourcesChanged();
 
     mPresetManager.numberOfSourcesChanged();
+
+    auto const positionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
+    auto const isSymmetricLink{ positionSourceLink == PositionSourceLink::symmetricX
+                                || positionSourceLink == PositionSourceLink::symmetricY };
+    if (isSymmetricLink && numOfSources != 2) {
+        setPositionSourceLink(PositionSourceLink::independent);
+    }
 
     if (propagate) {
         sendOscMessage();
@@ -828,19 +849,32 @@ void ControlGrisAudioProcessor::timerCallback()
 void ControlGrisAudioProcessor::setPluginState()
 {
     // If no preset is loaded, try to restore the last saved positions.
-    if (mPresetManager.getCurrentPreset() == 0) {
-        for (auto & source : mSources) {
-            auto const index{ source.getIndex().toString() };
-            source.setAzimuth(
-                Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_azimuth_") + index) },
-                Source::OriginOfChange::userAnchorMove);
-            source.setElevation(
-                Normalized{ mAudioProcessorValueTreeState.state.getProperty(String("p_elevation_") + index) },
-                Source::OriginOfChange::userAnchorMove);
-            source.setDistance(mAudioProcessorValueTreeState.state.getProperty(String("p_distance_") + index),
-                               Source::OriginOfChange::userAnchorMove);
-        }
+    //    if (mPresetManager.getCurrentPreset() == 0) {
+    auto & state{ mAudioProcessorValueTreeState.state };
+    for (auto & source : mSources) {
+        auto const index{ source.getIndex().toString() };
+
+        Identifier const azimuthPropertyString{ juce::String{ "p_azimuth_" } + index };
+        Identifier const elevationPropertyString{ juce::String{ "p_elevation_" } + index };
+        Identifier const distancePropertyString{ juce::String{ "p_distance_" } + index };
+
+        jassert(state.hasProperty(azimuthPropertyString));
+        jassert(state.hasProperty(elevationPropertyString));
+        jassert(state.hasProperty(distancePropertyString));
+
+        auto const rawAzimuth{ state.getProperty(azimuthPropertyString) };
+        auto const rawElevation{ state.getProperty(elevationPropertyString) };
+        auto const rawDistance{ state.getProperty(distancePropertyString) };
+
+        Normalized const azimuth{ rawAzimuth };
+        Normalized const elevation{ rawElevation };
+        float const distance{ rawDistance };
+
+        source.setAzimuth(azimuth, Source::OriginOfChange::userAnchorMove);
+        source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
+        source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
     }
+    //    }
 
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
@@ -1065,11 +1099,11 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
         auto const normalizedAzimuth{ source.getNormalizedAzimuth().toFloat() };
         auto const normalizedElevation{ source.getNormalizedElevation().toFloat() };
         auto const distance{ source.getDistance() };
-        mAudioProcessorValueTreeState.state.setProperty(azimuthId + id, normalizedAzimuth, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(elevationId + id, normalizedElevation, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(distanceId + id, distance, nullptr);
-    }
 
+        mAudioProcessorValueTreeState.state.setProperty(azimuthId, normalizedAzimuth, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(elevationId, normalizedElevation, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(distanceId, distance, nullptr);
+    }
     auto const state{ mAudioProcessorValueTreeState.copyState() };
 
     auto xmlState{ state.createXml() };
@@ -1121,6 +1155,10 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         if (positionData) {
             mFixPositionData.deleteAllChildElements();
             mFixPositionData = *positionData;
+            mPositionSourceLinkEnforcer.enforceSourceLink();
+            if (mSpatMode == SpatMode::cube) {
+                mElevationSourceLinkEnforcer.enforceSourceLink();
+            }
         }
         // Replace the state and call automated parameter current values.
         //---------------------------------------------------------------
@@ -1157,6 +1195,12 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         if (isPrimary) {
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
+        } else {
+            if (mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
+                || mElevationTrajectoryManager.getSourceLink() == ElevationSourceLink::independent) {
+                mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET)
+                    ->setValueNotifyingHost(0.0f);
+            }
         }
         return;
     case Source::OriginOfChange::userAnchorMove:
@@ -1165,6 +1209,12 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         if (isPrimary) {
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
+        } else {
+            if (mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
+                || mElevationTrajectoryManager.getSourceLink() == ElevationSourceLink::independent) {
+                mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET)
+                    ->setValueNotifyingHost(0.0f);
+            }
         }
         {
             auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };

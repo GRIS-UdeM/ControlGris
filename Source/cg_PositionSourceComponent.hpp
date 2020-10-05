@@ -35,9 +35,10 @@ class PositionSourceComponent final
     , public Source::Listener
 {
     PositionFieldComponent & mFieldComponent;
-    PositionTrajectoryManager & mAutomationManager;
+    PositionTrajectoryManager & mTrajectoryManager;
     Source & mSource;
     DisplacementMode mDisplacementMode{};
+    bool mCanDrag{};
 
 public:
     //==============================================================================
@@ -52,20 +53,18 @@ public:
     //==============================================================================
     PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
     //==============================================================================
-    SourceIndex getSourceIndex() const;
+    [[nodiscard]] SourceIndex getSourceIndex() const;
 
     void mouseDown(MouseEvent const & event) override;
     void mouseDrag(MouseEvent const & event) override;
     void mouseUp(MouseEvent const & event) override;
     void updatePositionInParent() override;
 
-protected:
-    //==============================================================================
-    void sourceMoved() override;
-
 private:
     //==============================================================================
     void setSourcePosition(MouseEvent const & event) const;
+    //==============================================================================
+    void sourceMoved() override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
 

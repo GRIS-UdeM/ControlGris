@@ -211,11 +211,11 @@ void TrajectoryBoxComponent::setNumberOfSources(int const numOfSources)
     }
 
     if (numOfSources == 2) {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), true);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), true);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), true);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), true);
     } else {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), false);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), false);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), false);
+        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), false);
     }
 }
 
@@ -316,8 +316,8 @@ void TrajectoryBoxComponent::setElevationActivateState(bool const state)
 //==============================================================================
 void TrajectoryBoxComponent::setSymmetricLinkComboState(bool const allowed)
 {
-    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricX), allowed);
-    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::linkSymmetricY), allowed);
+    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), allowed);
+    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), allowed);
 }
 
 //==============================================================================

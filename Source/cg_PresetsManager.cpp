@@ -60,10 +60,6 @@ PresetsManager::PresetsManager(XmlElement & data,
 //==============================================================================
 int PresetsManager::getCurrentPreset() const
 {
-    if (mSourceMovedSinceLastRecall) {
-        return 0;
-    }
-
     return mLastLoadedPreset;
 }
 
@@ -158,7 +154,6 @@ bool PresetsManager::load(int const presetNumber)
     }
 
     mLastLoadedPreset = presetNumber;
-    mSourceMovedSinceLastRecall = false;
 
     sendChangeMessage();
 

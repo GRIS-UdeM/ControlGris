@@ -61,3 +61,52 @@ SourceComponent::DisplacementMode SourceComponent::getDisplacementMode(MouseEven
     auto const pressedModifierKey{ event.mods.getRawFlags() & DISPLACEMENT_MODIFIER };
     return pressedModifierKey ? DisplacementMode::selectedSourceOnly : DisplacementMode::all;
 }
+
+//==============================================================================
+bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displacementMode,
+                                    bool isPrimarySource,
+                                    PositionSourceLink sourceLink)
+{
+    if (isPrimarySource || displacementMode == DisplacementMode::all) {
+        return true;
+    }
+    switch (sourceLink) {
+    case PositionSourceLink::independent:
+    case PositionSourceLink::circular:
+    case PositionSourceLink::circularFixedAngle:
+    case PositionSourceLink::circularFixedRadius:
+    case PositionSourceLink::deltaLock:
+    case PositionSourceLink::circularFullyFixed:
+        return true;
+    case PositionSourceLink::symmetricX:
+    case PositionSourceLink::symmetricY:
+        return false;
+    case PositionSourceLink::undefined:
+        break;
+    }
+    jassertfalse;
+    return false;
+}
+
+//==============================================================================
+bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displacementMode,
+                                    bool isPrimarySource,
+                                    ElevationSourceLink sourceLink)
+{
+    if (isPrimarySource || displacementMode == DisplacementMode::all) {
+        return true;
+    }
+    switch (sourceLink) {
+    case ElevationSourceLink::independent:
+    case ElevationSourceLink::deltaLock:
+        return true;
+    case ElevationSourceLink::fixedElevation:
+    case ElevationSourceLink::linearMax:
+    case ElevationSourceLink::linearMin:
+        return false;
+    case ElevationSourceLink::undefined:
+        break;
+    }
+    jassertfalse;
+    return false;
+}

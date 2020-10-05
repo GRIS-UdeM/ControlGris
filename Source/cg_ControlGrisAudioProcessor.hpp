@@ -66,8 +66,8 @@ class ControlGrisAudioProcessor final
     XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
 
     Sources mSources{};
-    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources };
-    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources };
+    SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources, PositionSourceLink::independent };
+    SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources, ElevationSourceLink::independent };
 
     AudioProcessorValueTreeState mAudioProcessorValueTreeState;
 
@@ -186,16 +186,11 @@ public:
 
     ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
-    //    void trajectoryPositionChanged(TrajectoryManager * manager, Point<float> position, Radians elevation)
-    //    override;
-
     void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
 
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
-
-    //    void setSourcePosition(Point<float> const & position, SourceIndex sourceIndex);
 
     void sourceChanged(Source & source, Source::ChangeType changeType, Source::OriginOfChange origin);
     void setSelectedSource(Source const & source);
