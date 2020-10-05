@@ -696,8 +696,6 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 // PositionPresetComponent::Listener callback.
 void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumber)
 {
-    //    MessageManagerLock mml{};
-
     mProcessor.getPresetsManager().forceLoad(presetNumber);
 
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };

@@ -33,7 +33,6 @@ class PresetsManager final : public ChangeBroadcaster
 {
     //==============================================================================
     int mLastLoadedPreset{ 0 };
-    bool mSourceMovedSinceLastRecall{ false };
     XmlElement & mData;
     Sources & mSources;
     SourceLinkEnforcer & mPositionLinkEnforcer;
