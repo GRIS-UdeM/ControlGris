@@ -66,8 +66,8 @@ enum class PositionSourceLink {
     circularFixedAngle,
     circularFullyFixed,
     deltaLock,
-    linkSymmetricX,
-    linkSymmetricY
+    symmetricX,
+    symmetricY
 };
 StringArray const POSITION_SOURCE_LINK_TYPES{ String("Independent"),           String("Circular"),
                                               String("Circular Fixed Radius"), String("Circular Fixed Angle"),

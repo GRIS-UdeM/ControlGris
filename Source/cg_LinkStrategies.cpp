@@ -74,9 +74,9 @@ std::unique_ptr<LinkStrategy> LinkStrategy::make(PositionSourceLink const source
         return std::make_unique<CircularFixedAngleStrategy>();
     case PositionSourceLink::circularFullyFixed:
         return std::make_unique<CircularFullyFixedStrategy>();
-    case PositionSourceLink::linkSymmetricX:
+    case PositionSourceLink::symmetricX:
         return std::make_unique<LinkSymmetricXStrategy>();
-    case PositionSourceLink::linkSymmetricY:
+    case PositionSourceLink::symmetricY:
         return std::make_unique<LinkSymmetricYStrategy>();
     case PositionSourceLink::deltaLock:
         return std::make_unique<DeltaLockStrategy>();

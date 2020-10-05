@@ -232,23 +232,13 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
-        auto const val{ static_cast<PositionSourceLink>(static_cast<int>(newValue) + 1) };
+        auto const val{ static_cast<PositionSourceLink>(newValue + 1.0f) };
         setPositionSourceLink(val);
-        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (ed != nullptr) {
-            ed->updateSourceLinkCombo(static_cast<PositionSourceLink>(val));
-        }
     }
 
     if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
-        auto const val{ static_cast<ElevationSourceLink>(static_cast<int>(newValue) + 1) };
-        if (val != mElevationTrajectoryManager.getSourceLink()) {
-            setElevationSourceLink(val);
-            auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-            if (ed != nullptr) {
-                ed->updateElevationSourceLinkCombo(static_cast<ElevationSourceLink>(val));
-            }
-        }
+        auto const val{ static_cast<ElevationSourceLink>(newValue + 1.0f) };
+        setElevationSourceLink(val);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
@@ -276,19 +266,30 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
 }
 
 //========================================================
-void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink const newSourceLink)
+void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
-    if (newSourceLink != mPositionTrajectoryManager.getSourceLink()) {
-        mPositionTrajectoryManager.setSourceLink(newSourceLink);
-
-        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (editor != nullptr) {
-            editor->updateSourceLinkCombo(newSourceLink);
-        }
-
-        mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
-        mPositionSourceLinkEnforcer.enforceSourceLink();
+    if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
+        return;
     }
+
+    //    mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK)->setValue(static_cast<float>(newSourceLink)
+    //    - 1.0f);
+
+    auto const isSymmetricLink{ newSourceLink == PositionSourceLink::symmetricX
+                                || newSourceLink == PositionSourceLink::symmetricY };
+    if (mSources.size() != 2 && isSymmetricLink) {
+        newSourceLink = PositionSourceLink::independent;
+    }
+
+    mPositionTrajectoryManager.setSourceLink(newSourceLink);
+
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor != nullptr) {
+        editor->updateSourceLinkCombo(newSourceLink);
+    }
+
+    mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
+    mPositionSourceLinkEnforcer.enforceSourceLink();
 }
 
 //==============================================================================
@@ -296,6 +297,9 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 {
     if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
         mElevationTrajectoryManager.setSourceLink(newSourceLink);
+
+        //        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK)
+        //            ->setValueNotifyingHost(static_cast<float>(newSourceLink) -1.0f);
 
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
@@ -354,6 +358,10 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
 //==============================================================================
 void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
 {
+    if (numOfSources == mSources.size()) {
+        return;
+    }
+
     mSources.setSize(numOfSources);
     mAudioProcessorValueTreeState.state.setProperty("numberOfSources", mSources.size(), nullptr);
 
@@ -361,6 +369,13 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     mElevationSourceLinkEnforcer.numberOfSourcesChanged();
 
     mPresetManager.numberOfSourcesChanged();
+
+    auto const positionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
+    auto const isSymmetricLink{ positionSourceLink == PositionSourceLink::symmetricX
+                                || positionSourceLink == PositionSourceLink::symmetricY };
+    if (isSymmetricLink && numOfSources != 2) {
+        setPositionSourceLink(PositionSourceLink::independent);
+    }
 
     if (propagate) {
         sendOscMessage();

@@ -78,8 +78,8 @@ bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displaceme
     case PositionSourceLink::deltaLock:
     case PositionSourceLink::circularFullyFixed:
         return true;
-    case PositionSourceLink::linkSymmetricX:
-    case PositionSourceLink::linkSymmetricY:
+    case PositionSourceLink::symmetricX:
+    case PositionSourceLink::symmetricY:
         return false;
     case PositionSourceLink::undefined:
         break;

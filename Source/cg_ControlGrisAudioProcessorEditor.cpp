@@ -290,10 +290,9 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
         auto const symmetricLinkAllowed{ numOfSources != 2 };
         mTrajectoryBox.setSymmetricLinkComboState(symmetricLinkAllowed);
         if (symmetricLinkAllowed) {
-            auto const isCurrentPositionSourceLinkSymmetric{
-                currentPositionSourceLink == PositionSourceLink::linkSymmetricX
-                || currentPositionSourceLink == PositionSourceLink::linkSymmetricY
-            };
+            auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::symmetricX
+                                                             || currentPositionSourceLink
+                                                                    == PositionSourceLink::symmetricY };
             if (isCurrentPositionSourceLinkSymmetric) {
                 mProcessor.setPositionSourceLink(PositionSourceLink::independent);
                 /*mPositionTrajectoryManager.setSourceLink(PositionSourceLink::independent);
