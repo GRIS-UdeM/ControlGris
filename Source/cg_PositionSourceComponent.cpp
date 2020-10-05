@@ -28,7 +28,7 @@
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : SourceComponent(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
-    , mAutomationManager(fieldComponent.getAutomationManager())
+    , mTrajectoryManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
     source.addGuiListener(this);
@@ -58,11 +58,16 @@ void PositionSourceComponent::sourceMoved()
 void PositionSourceComponent::mouseDown(MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
-    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
+    mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
+    if (mCanDrag) {
+        if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
+        }
+        setSourcePosition(event);
+    } else {
+        mFieldComponent.displayInvalidSourceMoveWarning(true);
     }
-    setSourcePosition(event);
 }
 
 //==============================================================================
@@ -82,7 +87,7 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
 //==============================================================================
 void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 {
-    if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
+    if (mCanDrag && mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
         setSourcePosition(event);
     }
@@ -91,10 +96,14 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 //==============================================================================
 void PositionSourceComponent::mouseUp(MouseEvent const & event)
 {
-    mouseDrag(event);
-    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::X);
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Y);
+    if (mCanDrag) {
+        mouseDrag(event);
+        if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::X);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Y);
+        }
+    } else {
+        mFieldComponent.displayInvalidSourceMoveWarning(false);
     }
 }
 

@@ -28,7 +28,7 @@
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : SourceComponent(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
-    , mAutomationManager(fieldComponent.getAutomationManager())
+    , mTrajectoryManager(fieldComponent.getAutomationManager())
     , mSource(source)
 {
     source.addGuiListener(this);
@@ -60,10 +60,15 @@ void ElevationSourceComponent::sourceMoved()
 void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
-    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-        mAutomationManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
+    mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
+    if (mCanDrag) {
+        if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
+        }
+        setSourcePosition(event);
+    } else {
+        mFieldComponent.displayInvalidSourceMoveWarning(true);
     }
-    setSourcePosition(event);
 }
 
 //==============================================================================
@@ -81,7 +86,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
 //==============================================================================
 void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 {
-    if (mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
+    if (mCanDrag && mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
         setSourcePosition(event);
     }
@@ -90,9 +95,13 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 //==============================================================================
 void ElevationSourceComponent::mouseUp(MouseEvent const & event)
 {
-    mouseDrag(event);
-    if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-        mAutomationManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Z);
+    if (mCanDrag) {
+        mouseDrag(event);
+        if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Z);
+        }
+    } else {
+        mFieldComponent.displayInvalidSourceMoveWarning(false);
     }
 }
 

@@ -82,7 +82,7 @@ protected:
     bool mIsPlaying{ false };
     std::optional<SourceIndex> mSelectedSource{};
     std::optional<SourceIndex> mOldSelectedSource{};
-    juce::Label mInvalidSourceMoveWarning{};
+    bool mDisplayInvalidSourceMoveWarning{};
 
 public:
     //==============================================================================
@@ -102,11 +102,12 @@ public:
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
     void addListener(Listener * l) { mListeners.add(l); }
+    void displayInvalidSourceMoveWarning(bool state);
 
-    void resized() override;
+    void paint(juce::Graphics & g) override;
 
-    Sources & getSources() { return mSources; }
-    Sources const & getSources() const { return mSources; }
+    [[nodiscard]] Sources & getSources() { return mSources; }
+    [[nodiscard]] Sources const & getSources() const { return mSources; }
     //==============================================================================
     [[nodiscard]] virtual Rectangle<float> getEffectiveArea() const = 0;
 

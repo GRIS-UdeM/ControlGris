@@ -205,7 +205,9 @@ void Source::computeAzimuthElevation()
 {
     jassert(!std::isnan(mPosition.getX()) && !std::isnan(mPosition.getY()));
     if (mPosition.getX() != 0.0f || mPosition.getY() != 0.0f) {
-        jassert(!std::isnan(mAzimuth.getAsRadians()));
+        // TODO : when the position converges to the origin via an automation, one of the dimension is going to get to
+        // zero before the other. This is going to drastically change the angle. We need to insulate the real automation
+        // from a listener callback initiated by some other source.
         mAzimuth = getAngleFromPosition(mPosition).simplified();
     }
 

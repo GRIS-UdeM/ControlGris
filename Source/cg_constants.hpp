@@ -36,7 +36,7 @@ constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 // Spatialisation modes.
 enum class SpatMode { dome, cube };
 
-static String const SOURCE_SELECTION_WARNING{ "This source link does not allow single-source moves." };
+static String const SOURCE_SELECTION_WARNING{ "This source link does not allow individual moves." };
 
 //==============================================================================
 // Configuration -> Source tab -> Source Placement popup choices.

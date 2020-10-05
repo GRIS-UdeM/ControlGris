@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+#include "cg_constants.hpp"
+
 class Source;
 class FieldComponent;
 
@@ -60,6 +62,8 @@ public:
 protected:
     //==============================================================================
     static DisplacementMode getDisplacementMode(MouseEvent const & event);
+    static bool isMoveAllowed(DisplacementMode displacementMode, bool isPrimarySource, PositionSourceLink sourceLink);
+    static bool isMoveAllowed(DisplacementMode displatcementMode, bool isPrimarySource, ElevationSourceLink sourceLink);
 
 private:
     //==============================================================================
