@@ -82,79 +82,79 @@ bool PresetsManager::forceLoad(int const presetNumber)
 //==============================================================================
 bool PresetsManager::load(int const presetNumber)
 {
-    if (presetNumber == 0) {
-        return false;
-    }
+    if (presetNumber != 0) {
+        auto const maybe_presetData{ getPresetData(presetNumber) };
+        if (!maybe_presetData.has_value()) {
+            return false;
+        }
 
-    auto const maybe_presetData{ getPresetData(presetNumber) };
-    if (!maybe_presetData.has_value()) {
-        return false;
-    }
+        auto const * presetData{ *maybe_presetData };
 
-    auto const * presetData{ *maybe_presetData };
-
-    SourcesSnapshots snapshots{};
-    for (auto & source : mSources) {
-        SourceSnapshot snapshot{};
-        auto const index{ source.getIndex() };
-        auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
-        auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
-        if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
-            Point<float> const normalizedInversedPosition{ static_cast<float>(presetData->getDoubleAttribute(xPosId)),
-                                                           static_cast<float>(presetData->getDoubleAttribute(yPosId)) };
-            auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-            Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
-            snapshot.position = position;
-            auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
-            if (presetData->hasAttribute(zPosId)) {
-                auto const inversedNormalizedElevation{ static_cast<float>(
-                    presetData->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
-                snapshot.z = MAX_ELEVATION * (1.0f - inversedNormalizedElevation);
+        SourcesSnapshots snapshots{};
+        for (auto & source : mSources) {
+            SourceSnapshot snapshot{};
+            auto const index{ source.getIndex() };
+            auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
+            auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
+            if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
+                Point<float> const normalizedInversedPosition{
+                    static_cast<float>(presetData->getDoubleAttribute(xPosId)),
+                    static_cast<float>(presetData->getDoubleAttribute(yPosId))
+                };
+                auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
+                Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
+                snapshot.position = position;
+                auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
+                if (presetData->hasAttribute(zPosId)) {
+                    auto const inversedNormalizedElevation{ static_cast<float>(
+                        presetData->getDoubleAttribute(getFixedPosSourceName(FixedPositionType::initial, index, 2))) };
+                    snapshot.z = MAX_ELEVATION * (1.0f - inversedNormalizedElevation);
+                }
+            }
+            if (source.isPrimarySource()) {
+                snapshots.primary = snapshot;
+            } else {
+                snapshots.secondaries.add(snapshot);
             }
         }
-        if (source.isPrimarySource()) {
-            snapshots.primary = snapshot;
+
+        mPositionLinkEnforcer.loadSnapshots(snapshots);
+        if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
+            mElevationLinkEnforcer.loadSnapshots(snapshots);
+        }
+
+        auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
+        auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
+        auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
+
+        Point<float> terminalPosition;
+        if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
+            Point<float> const inversedNormalizedTerminalPosition{
+                static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
+                static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
+            };
+            auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f
+                                                 - Point<float>{ 1.0f, 1.0f } };
+            terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
         } else {
-            snapshots.secondaries.add(snapshot);
+            terminalPosition = snapshots.primary.position;
+        }
+        mSources.getPrimarySource().setPosition(terminalPosition, Source::OriginOfChange::presetRecall);
+
+        if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
+            Radians elevation;
+            if (presetData->hasAttribute(zTerminalPositionId)) {
+                auto const inversedNormalizedTerminalElevation{ static_cast<float>(
+                    presetData->getDoubleAttribute(zTerminalPositionId)) };
+                elevation = MAX_ELEVATION * (1.0f - inversedNormalizedTerminalElevation);
+            } else {
+                elevation = snapshots.primary.z;
+            };
+
+            mSources.getPrimarySource().setElevation(elevation, Source::OriginOfChange::presetRecall);
         }
     }
-
-    mPositionLinkEnforcer.loadSnapshots(snapshots);
-    if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
-        mElevationLinkEnforcer.loadSnapshots(snapshots);
-    }
-
-    auto const xTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 0) };
-    auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
-    auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
-
-    Point<float> terminalPosition;
-    if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
-        Point<float> const inversedNormalizedTerminalPosition{
-            static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
-            static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
-        };
-        auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-        terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
-    } else {
-        terminalPosition = snapshots.primary.position;
-    }
-    mSources.getPrimarySource().setPosition(terminalPosition, Source::OriginOfChange::presetRecall);
-
-    Radians elevation;
-    if (presetData->hasAttribute(zTerminalPositionId)) {
-        auto const inversedNormalizedTerminalElevation{ static_cast<float>(
-            presetData->getDoubleAttribute(zTerminalPositionId)) };
-        elevation = MAX_ELEVATION * (1.0f - inversedNormalizedTerminalElevation);
-    } else {
-        elevation = snapshots.primary.z;
-    };
-    if (mSources.getPrimarySource().getSpatMode() == SpatMode::cube) {
-        mSources.getPrimarySource().setElevation(elevation, Source::OriginOfChange::presetRecall);
-    }
-
     mLastLoadedPreset = presetNumber;
-
     sendChangeMessage();
 
     return true;

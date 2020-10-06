@@ -287,16 +287,14 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
     if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
         auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
-        auto const symmetricLinkAllowed{ numOfSources != 2 };
+        auto const symmetricLinkAllowed{ numOfSources == 2 };
         mTrajectoryBox.setSymmetricLinkComboState(symmetricLinkAllowed);
-        if (symmetricLinkAllowed) {
+        if (!symmetricLinkAllowed) {
             auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::symmetricX
                                                              || currentPositionSourceLink
                                                                     == PositionSourceLink::symmetricY };
             if (isCurrentPositionSourceLinkSymmetric) {
                 mProcessor.setPositionSourceLink(PositionSourceLink::independent);
-                /*mPositionTrajectoryManager.setSourceLink(PositionSourceLink::independent);
-                updateSourceLinkCombo(PositionSourceLink::independent);*/
             }
         }
 
@@ -494,6 +492,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
         source.setY(*y, Source::OriginOfChange::userMove);
     } else if (z) {
         source.setElevation(MAX_ELEVATION * *z, Source::OriginOfChange::userMove);
+    } else {
+        jassertfalse;
     }
 }
 

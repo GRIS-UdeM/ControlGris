@@ -159,6 +159,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", 1, nullptr);
 
     mSources.init(this);
+    mPositionSourceLinkEnforcer.numberOfSourcesChanged();
+    mElevationSourceLinkEnforcer.numberOfSourcesChanged();
     // Per source mAudioProcessorValueTreeState. Because there is no attachment to the automatable
     // mAudioProcessorValueTreeState, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
@@ -244,14 +246,6 @@ void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, flo
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
         auto const value{ static_cast<int>(newValue) };
         mPresetManager.loadIfPresetChanged(value);
-        mPositionSourceLinkEnforcer.enforceSourceLink();
-        if (mSpatMode == SpatMode::cube) {
-            mElevationSourceLinkEnforcer.enforceSourceLink();
-        }
-        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (editor) {
-            editor->positionPresetChanged(value);
-        }
     }
 
     if (parameterId.startsWith(Automation::Ids::AZIMUTH_SPAN)) {
@@ -271,9 +265,6 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSour
     if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
         return;
     }
-
-    //    mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK)->setValue(static_cast<float>(newSourceLink)
-    //    - 1.0f);
 
     auto const isSymmetricLink{ newSourceLink == PositionSourceLink::symmetricX
                                 || newSourceLink == PositionSourceLink::symmetricY };
@@ -297,9 +288,6 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
 {
     if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
         mElevationTrajectoryManager.setSourceLink(newSourceLink);
-
-        //        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK)
-        //            ->setValueNotifyingHost(static_cast<float>(newSourceLink) -1.0f);
 
         auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (ed != nullptr) {
@@ -639,6 +627,7 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddr
     return mOscOutputConnected;
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::disconnectOscOutput(String const & oscAddress, int const oscPort)
 {
     if (mOscOutputConnected) {
@@ -1185,6 +1174,9 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     }
     auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
                                    || mElevationTrajectoryManager.getPositionActivateState() };
+    auto const isIndependentSourceLink{ mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
+                                        || mElevationTrajectoryManager.getSourceLink()
+                                               == ElevationSourceLink::independent };
     TrajectoryManager & trajectoryManager{ *temp };
     switch (origin) {
     case Source::OriginOfChange::none:
@@ -1196,11 +1188,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         } else {
-            if (mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
-                || mElevationTrajectoryManager.getSourceLink() == ElevationSourceLink::independent) {
-                mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET)
-                    ->setValueNotifyingHost(0.0f);
-            }
+            getPresetsManager().loadIfPresetChanged(0);
         }
         return;
     case Source::OriginOfChange::userAnchorMove:
@@ -1209,27 +1197,13 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
         if (isPrimary) {
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
-        } else {
-            if (mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
-                || mElevationTrajectoryManager.getSourceLink() == ElevationSourceLink::independent) {
-                mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET)
-                    ->setValueNotifyingHost(0.0f);
-            }
         }
-        {
-            auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-            if (editor) {
-                editor->updatePositionPreset(0);
-            }
-        }
+        mPresetManager.loadIfPresetChanged(0);
         return;
     case Source::OriginOfChange::presetRecall:
-        if (isPrimary) {
-            sourceLinkEnforcer.sourceMoved(source);
-            trajectoryManager.sourceMoved(source);
-        } else {
-            sourceLinkEnforcer.anchorMoved(source);
-        }
+        jassert(isPrimary);
+        sourceLinkEnforcer.sourceMoved(source);
+        trajectoryManager.sourceMoved(source);
         return;
     case Source::OriginOfChange::link:
         if (isPrimary) {
@@ -1281,10 +1255,10 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
         auto const normalized_y{ 1.0f - (source.getY() + 1.0f) / 2.0f };
         auto * x_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
         auto * y_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y) };
-        if (!mIsPlaying) { // TODO : why is this necessary ?
-            x_param->setValue(normalized_x);
-            y_param->setValue(normalized_y);
-        }
+        //        if (!mIsPlaying) { // TODO : why is this necessary ?
+        //            x_param->setValue(normalized_x);
+        //            y_param->setValue(normalized_y);
+        //        }
         x_param->setValueNotifyingHost(normalized_x);
         y_param->setValueNotifyingHost(normalized_y);
         break;

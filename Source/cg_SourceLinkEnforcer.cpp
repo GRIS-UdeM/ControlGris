@@ -42,7 +42,6 @@ void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
-        saveCurrentPositionsToInitialStates();
         enforceSourceLink();
     }
 }
@@ -55,7 +54,6 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
         mLinkStrategy = LinkStrategy::make(sourceLink);
-        saveCurrentPositionsToInitialStates();
         enforceSourceLink();
     }
 }
