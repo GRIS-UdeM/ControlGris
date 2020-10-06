@@ -176,10 +176,13 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         mAudioProcessorValueTreeState.state.setProperty(String("p_y_") + oscId, 0.0, nullptr);
 
         // Gives the source an initial id...
-        mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
+        auto & source{ mSources.get(i) };
+        source.setId(SourceId{ i + mFirstSourceId.toInt() });
+        // .. and colour
+        source.setColorFromIndex(mSources.size());
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
-        mSources.get(i).setCoordinates(azimuth, MAX_ELEVATION, 1.0f, Source::OriginOfChange::userAnchorMove);
+        source.setCoordinates(azimuth, MAX_ELEVATION, 1.0f, Source::OriginOfChange::userAnchorMove);
     }
 
     auto * paramX{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
