@@ -106,10 +106,12 @@ void FieldComponent::paint(Graphics & g)
     drawBackground(g);
     drawSpans(g);
     if (mDisplayInvalidSourceMoveWarning) {
-        juce::Rectangle<int> const textArea{ 0, 30, getWidth(), 30 };
-        juce::Font const font{ 20.0f, juce::Font::italic };
+        static constexpr auto padding{ 25 };
+        static constexpr auto fontSize{ 16 };
+        juce::Rectangle<int> const textArea{ padding, padding, getWidth() - padding * 2, getHeight() - padding * 2 };
+        juce::Font const font{ fontSize, juce::Font::FontStyleFlags::plain };
         g.setFont(font);
-        g.setColour(Colours::white);
+        g.setColour(Colours::antiquewhite);
         g.drawFittedText(SOURCE_SELECTION_WARNING, textArea, Justification::centredTop, 2);
     }
 }

@@ -25,6 +25,9 @@
 //==============================================================================
 SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
 {
+    if (colour == Colours::black) {
+        jassertfalse;
+    }
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2.0f;
     constexpr auto rounded{ static_cast<int>(dimension + 0.5f) };
     setSize(rounded, rounded);
