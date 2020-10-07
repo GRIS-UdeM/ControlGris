@@ -25,6 +25,13 @@
 namespace gris
 {
 //==============================================================================
+/**
+ * A manager for change gestures that enables recursive locking.
+ *
+ * Because some hosts can crash when calling juce::AudioProcessorParameter::beginChangeGesture() or
+ * juce::AudioProcessorParameter::endChangeGesture() twice, this class prevents such problems. A RAII-style scoped lock
+ * is provided by the getScopedLock() method.
+ */
 class ChangeGesturesManager
 {
 public:
@@ -83,7 +90,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ChangeGesturesManager);
+    JUCE_LEAK_DETECTOR(ChangeGesturesManager)
 
 }; // class ChangeGesturesManager
 

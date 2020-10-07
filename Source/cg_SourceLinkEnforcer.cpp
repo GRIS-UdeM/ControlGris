@@ -43,7 +43,7 @@ void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
     if (sourceLink != mPositionSourceLink) {
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
-        mLinkStrategy = LinkStrategy::make(sourceLink);
+        mLinkStrategy = SourceLinkStrategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
@@ -55,7 +55,7 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
     if (sourceLink != mElevationSourceLink) {
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
-        mLinkStrategy = LinkStrategy::make(sourceLink);
+        mLinkStrategy = SourceLinkStrategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
@@ -143,7 +143,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
-            mLinkStrategy = LinkStrategy::make(PositionSourceLink::circular);
+            mLinkStrategy = SourceLinkStrategies::Base::make(PositionSourceLink::circular);
         }
         mLinkStrategy->computeParameters(mSources, mSnapshots);
 
@@ -170,9 +170,9 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             if (mPositionSourceLink == PositionSourceLink::undefined) {
-                mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+                mLinkStrategy = SourceLinkStrategies::Base::make(mElevationSourceLink);
             } else {
-                mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+                mLinkStrategy = SourceLinkStrategies::Base::make(mPositionSourceLink);
             }
         }
         mSnapshots.primary = primaryStart;

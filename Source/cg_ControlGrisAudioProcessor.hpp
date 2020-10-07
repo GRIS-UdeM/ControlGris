@@ -35,7 +35,6 @@ namespace gris
 class ControlGrisAudioProcessor final
     : public juce::AudioProcessor
     , public juce::AudioProcessorValueTreeState::Listener
-    //    , public TrajectoryManager::Listener
     , public juce::Timer
     , private juce::OSCReceiver::Listener<juce::OSCReceiver::RealtimeCallback>
 {

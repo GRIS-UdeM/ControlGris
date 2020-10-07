@@ -264,7 +264,7 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
     }
 }
 
-//========================================================
+//==============================================================================
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
 {
     if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
@@ -905,7 +905,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
     }
 }
 
-//--------------------------------------
+//==============================================================================
 void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const sourceIndex,
                                                         SourceParameter const parameterId,
                                                         float const value)
@@ -950,6 +950,7 @@ juce::String const ControlGrisAudioProcessor::getName() const
     return JucePlugin_Name;
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::acceptsMidi() const
 {
 #if JucePlugin_WantsMidiInput

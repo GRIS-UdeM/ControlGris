@@ -34,7 +34,7 @@ class SourceLinkEnforcer
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
-    std::unique_ptr<LinkStrategy> mLinkStrategy;
+    std::unique_ptr<SourceLinkStrategies::Base> mLinkStrategy;
 
 public:
     //==============================================================================
