@@ -23,10 +23,10 @@
 //==============================================================================
 InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    mOscOutputPluginIdLabel.setText("OSC output plugin ID:", NotificationType::dontSendNotification);
+    mOscOutputPluginIdLabel.setText("OSC output plugin ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscOutputPluginIdLabel);
 
-    mOscOutputPluginIdEditor.setText(String(1));
+    mOscOutputPluginIdEditor.setText(juce::String(1));
     mOscOutputPluginIdEditor.setInputRestrictions(3, "0123456789");
     mOscOutputPluginIdEditor.addListener(this);
     mOscOutputPluginIdEditor.onReturnKey = [this] { this->grabKeyboardFocus(); };
@@ -37,7 +37,7 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
         } else {
             mListeners.call([&](Listener & l) {
                 l.oscOutputPluginIdChanged(1);
-                mOscOutputPluginIdEditor.setText(String(1));
+                mOscOutputPluginIdEditor.setText(juce::String(1));
             });
         }
     };
@@ -64,11 +64,11 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
         });
     };
 
-    mOscReceiveIpEditor.setText(IPAddress::getLocalAddress().toString());
+    mOscReceiveIpEditor.setText(juce::IPAddress::getLocalAddress().toString());
     mOscReceiveIpEditor.setReadOnly(true);
     addAndMakeVisible(&mOscReceiveIpEditor);
 
-    mOscReceivePortEditor.setText(String(mLastOscReceivePort));
+    mOscReceivePortEditor.setText(juce::String(mLastOscReceivePort));
     mOscReceivePortEditor.setInputRestrictions(5, "0123456789");
     mOscReceivePortEditor.addListener(this);
     mOscReceivePortEditor.onReturnKey = [this] { this->grabKeyboardFocus(); };
@@ -81,14 +81,14 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
         } else {
             mListeners.call([&](Listener & l) {
                 l.oscInputConnectionChanged(mOscReceiveToggle.getToggleState(), mLastOscReceivePort);
-                mOscReceivePortEditor.setText(String(mLastOscReceivePort));
+                mOscReceivePortEditor.setText(juce::String(mLastOscReceivePort));
             });
         }
     };
 
     addAndMakeVisible(&mOscReceivePortEditor);
 
-    mLastOscSendAddress = String("192.168.1.100");
+    mLastOscSendAddress = juce::String("192.168.1.100");
     mOscSendIpEditor.setText(mLastOscSendAddress);
     mOscSendIpEditor.setInputRestrictions(16, ".0123456789");
     mOscSendIpEditor.addListener(this);
@@ -105,14 +105,14 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
                 l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
                                              mLastOscSendAddress,
                                              mOscSendPortEditor.getText().getIntValue());
-                mOscSendIpEditor.setText(String(mLastOscSendAddress));
+                mOscSendIpEditor.setText(juce::String(mLastOscSendAddress));
             });
         }
     };
 
     addAndMakeVisible(&mOscSendIpEditor);
 
-    mOscSendPortEditor.setText(String(mLastOscSendPort));
+    mOscSendPortEditor.setText(juce::String(mLastOscSendPort));
     mOscSendPortEditor.setInputRestrictions(5, "0123456789");
     mOscSendPortEditor.addListener(this);
     mOscSendPortEditor.onReturnKey = [this] { this->grabKeyboardFocus(); };
@@ -128,7 +128,7 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
                 l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
                                              mOscSendIpEditor.getText(),
                                              mLastOscSendPort);
-                mOscSendPortEditor.setText(String(mLastOscSendPort));
+                mOscSendPortEditor.setText(juce::String(mLastOscSendPort));
             });
         }
     };
@@ -140,39 +140,39 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
 void InterfaceBoxComponent::setOscReceiveInputPort(int const port)
 {
     mLastOscReceivePort = port;
-    mOscReceivePortEditor.setText(String(port));
+    mOscReceivePortEditor.setText(juce::String(port));
 }
 
 //==============================================================================
 void InterfaceBoxComponent::setOscSendOutputPort(int const port)
 {
     mLastOscSendPort = port;
-    mOscSendPortEditor.setText(String{ port });
+    mOscSendPortEditor.setText(juce::String{ port });
 }
 
 //==============================================================================
 void InterfaceBoxComponent::setOscReceiveToggleState(bool const state)
 {
-    mOscReceiveToggle.setToggleState(state, NotificationType::dontSendNotification);
+    mOscReceiveToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
 void InterfaceBoxComponent::setOscSendToggleState(bool const state)
 {
-    mOscSendToggle.setToggleState(state, NotificationType::dontSendNotification);
+    mOscSendToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscSendOutputAddress(String const & address)
+void InterfaceBoxComponent::setOscSendOutputAddress(juce::String const & address)
 {
     mLastOscSendAddress = address;
     mOscSendIpEditor.setText(address);
 }
 
 //==============================================================================
-void InterfaceBoxComponent::paint(Graphics & g)
+void InterfaceBoxComponent::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

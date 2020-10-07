@@ -77,12 +77,12 @@ private:
     Radians mElevation{};
     float mDistance{ 1.0f };
 
-    Point<float> mPosition{};
+    juce::Point<float> mPosition{};
 
     Normalized mAzimuthSpan{};
     Normalized mElevationSpan{};
 
-    Colour mColour{ Colours::black };
+    juce::Colour mColour{ juce::Colours::black };
     ControlGrisAudioProcessor * mProcessor{};
 
 public:
@@ -122,26 +122,26 @@ public:
     [[nodiscard]] float getX() const { return mPosition.getX(); }
     void setY(float y, OriginOfChange origin);
     [[nodiscard]] float getY() const { return mPosition.getY(); }
-    [[nodiscard]] Point<float> const & getPos() const { return mPosition; }
-    void setPosition(Point<float> const & pos, OriginOfChange origin);
+    [[nodiscard]] juce::Point<float> const & getPos() const { return mPosition; }
+    void setPosition(juce::Point<float> const & pos, OriginOfChange origin);
 
     void computeXY();
     void computeAzimuthElevation();
 
     void setColorFromIndex(int numTotalSources);
-    [[nodiscard]] Colour getColour() const { return mColour; }
+    [[nodiscard]] juce::Colour getColour() const { return mColour; }
 
     void addGuiListener(Listener * listener) { mGuiListeners.add(listener); }
     void removeGuiListener(Listener * listener) { mGuiListeners.remove(listener); }
 
     void setProcessor(ControlGrisAudioProcessor * processor) { mProcessor = processor; }
 
-    static Point<float> getPositionFromAngle(Radians angle, float radius);
-    static Radians getAngleFromPosition(Point<float> const & position);
+    static juce::Point<float> getPositionFromAngle(Radians angle, float radius);
+    static Radians getAngleFromPosition(juce::Point<float> const & position);
 
-    static Point<float> clipPosition(Point<float> const & position, SpatMode spatMode);
-    static Point<float> clipDomePosition(Point<float> const & position);
-    static Point<float> clipCubePosition(Point<float> const & position);
+    static juce::Point<float> clipPosition(juce::Point<float> const & position, SpatMode spatMode);
+    static juce::Point<float> clipDomePosition(juce::Point<float> const & position);
+    static juce::Point<float> clipCubePosition(juce::Point<float> const & position);
 
 private:
     //==============================================================================

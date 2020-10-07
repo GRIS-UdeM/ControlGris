@@ -32,8 +32,8 @@
 
 //==============================================================================
 class ControlGrisAudioProcessorEditor final
-    : public AudioProcessorEditor
-    , private Value::Listener
+    : public juce::AudioProcessorEditor
+    , private juce::Value::Listener
     , public FieldComponent::Listener
     , public ParametersBoxComponent::Listener
     , public SettingsBoxComponent::Listener
@@ -44,7 +44,7 @@ class ControlGrisAudioProcessorEditor final
 {
     ControlGrisAudioProcessor & mProcessor;
     GrisLookAndFeel mGrisLookAndFeel;
-    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
+    juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
     PositionTrajectoryManager & mPositionTrajectoryManager;
     ElevationTrajectoryManager & mElevationTrajectoryManager;
@@ -61,7 +61,7 @@ class ControlGrisAudioProcessorEditor final
     ParametersBoxComponent mParametersBox;
     TrajectoryBoxComponent mTrajectoryBox;
 
-    TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
+    juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
     SettingsBoxComponent mSettingsBox;
     SourceBoxComponent mSourceBox;
@@ -72,8 +72,8 @@ class ControlGrisAudioProcessorEditor final
     bool mIsInsideSetPluginState;
     SourceIndex mSelectedSource;
 
-    Value mLastUIWidth;
-    Value mLastUIHeight;
+    juce::Value mLastUIWidth;
+    juce::Value mLastUIHeight;
 
 public:
     //==============================================================================
@@ -87,13 +87,13 @@ public:
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
-                                    AudioProcessorValueTreeState & vts,
+                                    juce::AudioProcessorValueTreeState & vts,
                                     PositionTrajectoryManager & positionAutomationManager,
                                     ElevationTrajectoryManager & elevationAutomationManager);
     //==============================================================================
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
-    void valueChanged(Value &) override;
+    void valueChanged(juce::Value &) override;
 
     // FieldComponent::Listeners
     void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) override;
@@ -146,7 +146,7 @@ public:
     // InterfaceBoxComponent::Listeners
     void oscOutputPluginIdChanged(int value) override;
     void oscInputConnectionChanged(bool state, int oscPort) override;
-    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
+    void oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort) override;
 
     void reloadUiState();
     void updateSpanLinkButton(bool state);

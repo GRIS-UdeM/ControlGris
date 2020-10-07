@@ -55,9 +55,9 @@ public:
     //==============================================================================
     [[nodiscard]] SourceIndex getSourceIndex() const;
 
-    void mouseDown(MouseEvent const & event) override;
-    void mouseDrag(MouseEvent const & event) override;
-    void mouseUp(MouseEvent const & event) override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
+    void mouseUp(juce::MouseEvent const & event) override;
     void updatePositionInParent() override;
 
 protected:
@@ -66,7 +66,7 @@ protected:
 
 private:
     //==============================================================================
-    void setSourcePosition(MouseEvent const & event) const;
+    void setSourcePosition(juce::MouseEvent const & event) const;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationSourceComponent)
 

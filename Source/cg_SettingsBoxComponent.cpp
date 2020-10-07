@@ -23,7 +23,7 @@
 //==============================================================================
 SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    mOscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
+    mOscFormatLabel.setText("OSC Format:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscFormatLabel);
 
     mOscFormatCombo.addItem("DOME - SpatGris", 1);
@@ -35,10 +35,10 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     mOscFormatCombo.setSelectedId(1);
     addAndMakeVisible(&mOscFormatCombo);
 
-    mOscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
+    mOscPortLabel.setText("OSC Port:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscPortLabel);
 
-    String defaultPort("18032");
+    juce::String defaultPort("18032");
     mOscPortEditor.setExplicitFocusOrder(4);
     mOscPortEditor.setText(defaultPort);
     mOscPortEditor.setInputRestrictions(5, "0123456789");
@@ -56,7 +56,7 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     };
     addAndMakeVisible(&mOscPortEditor);
 
-    mNumOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
+    mNumOfSourcesLabel.setText("Number of Sources:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mNumOfSourcesLabel);
 
     mNumOfSourcesEditor.setExplicitFocusOrder(2);
@@ -77,7 +77,7 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     };
     addAndMakeVisible(&mNumOfSourcesEditor);
 
-    mFirstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
+    mFirstSourceIdLabel.setText("First Source ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mFirstSourceIdLabel);
 
     mFirstSourceIdEditor.setExplicitFocusOrder(3);
@@ -109,19 +109,19 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
 //==============================================================================
 void SettingsBoxComponent::setOscFormat(SpatMode mode)
 {
-    mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
+    mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
 void SettingsBoxComponent::setOscPortNumber(int oscPortNumber)
 {
-    mOscPortEditor.setText(String(oscPortNumber));
+    mOscPortEditor.setText(juce::String(oscPortNumber));
 }
 
 //==============================================================================
 void SettingsBoxComponent::setNumberOfSources(int numOfSources)
 {
-    mNumOfSourcesEditor.setText(String(numOfSources));
+    mNumOfSourcesEditor.setText(juce::String(numOfSources));
 }
 
 //==============================================================================
@@ -133,13 +133,13 @@ void SettingsBoxComponent::setFirstSourceId(SourceId const firstSourceId)
 //==============================================================================
 void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
 {
-    mPositionActivateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
+    mPositionActivateButton.setToggleState(shouldBeOn, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SettingsBoxComponent::paint(Graphics & g)
+void SettingsBoxComponent::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

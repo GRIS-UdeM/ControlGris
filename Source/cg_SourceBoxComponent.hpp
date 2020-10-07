@@ -37,10 +37,10 @@ class DomeControls final : public juce::Component
 
     Degrees mCurrentAzimuth;
     Radians mCurrentElevation;
-    Label mElevationLabel;
-    Label mAzimuthLabel;
-    Slider mElevationSlider;
-    Slider mAzimuthSlider;
+    juce::Label mElevationLabel;
+    juce::Label mAzimuthLabel;
+    juce::Slider mElevationSlider;
+    juce::Slider mAzimuthSlider;
 
 public:
     //==============================================================================
@@ -68,12 +68,12 @@ class CubeControls final : public juce::Component
     float mCurrentX;
     float mCurrentY;
     float mCurrentZ;
-    Label mXLabel;
-    Label mYLabel;
-    Label mZLabel;
-    Slider mXSlider;
-    Slider mYSlider;
-    Slider mZSlider;
+    juce::Label mXLabel;
+    juce::Label mYLabel;
+    juce::Label mZLabel;
+    juce::Slider mXSlider;
+    juce::Slider mYSlider;
+    juce::Slider mZSlider;
 
 public:
     //==============================================================================
@@ -119,15 +119,15 @@ private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
     SourceIndex mSelectedSource;
 
-    Label mSourcePlacementLabel;
-    ComboBox mSourcePlacementCombo;
+    juce::Label mSourcePlacementLabel;
+    juce::ComboBox mSourcePlacementCombo;
 
-    Label mSourceNumberLabel;
-    ComboBox mSourceNumberCombo;
+    juce::Label mSourceNumberLabel;
+    juce::ComboBox mSourceNumberCombo;
 
     DomeControls mDomeControls;
     CubeControls mCubeControls;
@@ -153,7 +153,7 @@ public:
 
     void setSpatMode(SpatMode spatMode);
     //==============================================================================
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
 
 private:

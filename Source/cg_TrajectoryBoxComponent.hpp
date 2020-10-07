@@ -26,7 +26,7 @@
 #include "cg_constants.hpp"
 
 //==============================================================================
-class TrajectoryBoxComponent final : public Component
+class TrajectoryBoxComponent final : public juce::Component
 {
 public:
     //==============================================================================
@@ -60,44 +60,44 @@ public:
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
     SpatMode mSpatMode;
 
-    Label mSourceLinkLabel;
-    Label mTrajectoryTypeLabel;
+    juce::Label mSourceLinkLabel;
+    juce::Label mTrajectoryTypeLabel;
 
-    ComboBox mPositionTrajectoryTypeCombo;
-    ComboBox mElevationTrajectoryTypeCombo;
+    juce::ComboBox mPositionTrajectoryTypeCombo;
+    juce::ComboBox mElevationTrajectoryTypeCombo;
 
-    ToggleButton mPositionBackAndForthToggle;
-    ToggleButton mElevationBackAndForthToggle;
+    juce::ToggleButton mPositionBackAndForthToggle;
+    juce::ToggleButton mElevationBackAndForthToggle;
 
-    Label mDampeningLabel;
-    TextEditor mPositionDampeningEditor;
-    TextEditor mElevationDampeningEditor;
+    juce::Label mDampeningLabel;
+    juce::TextEditor mPositionDampeningEditor;
+    juce::TextEditor mElevationDampeningEditor;
 
-    Label mDeviationLabel;
-    TextEditor mDeviationEditor;
+    juce::Label mDeviationLabel;
+    juce::TextEditor mDeviationEditor;
 
-    Label mDurationLabel;
-    TextEditor mDurationEditor;
-    ComboBox mDurationUnitCombo;
+    juce::Label mDurationLabel;
+    juce::TextEditor mDurationEditor;
+    juce::ComboBox mDurationUnitCombo;
 
-    Label mCycleSpeedLabel;
-    Slider mCycleSpeedSlider;
+    juce::Label mCycleSpeedLabel;
+    juce::Slider mCycleSpeedSlider;
 
-    TextButton mPositionActivateButton;
-    TextButton mElevationActivateButton;
+    juce::TextButton mPositionActivateButton;
+    juce::TextButton mElevationActivateButton;
 
-    ComboBox mPositionSourceLinkCombo;
-    ComboBox mElevationSourceLinkCombo;
+    juce::ComboBox mPositionSourceLinkCombo;
+    juce::ComboBox mElevationSourceLinkCombo;
 
 public:
     //==============================================================================
     explicit TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~TrajectoryBoxComponent() final = default;
     //==============================================================================
-    void paint(Graphics &) final;
+    void paint(juce::Graphics &) final;
     void resized() final;
 
     void setNumberOfSources(int numOfSources);
@@ -121,13 +121,13 @@ public:
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
-    ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
-    ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
-    ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
+    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
+    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
+    juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
+    juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
 
     enum class SymmetricLinkComboState { enabled, disabled };
-    void setSymmetricLinkComboState(bool const allowed);
+    void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

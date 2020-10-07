@@ -20,16 +20,16 @@
 
 #include "cg_constants.hpp"
 
-String const Automation::Ids::X{ "recordingTrajectory_x" };
-String const Automation::Ids::Y{ "recordingTrajectory_y" };
-String const Automation::Ids::Z{ "recordingTrajectory_z" };
-String const Automation::Ids::POSITION_SOURCE_LINK{ "sourceLink" };
-String const Automation::Ids::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
-String const Automation::Ids::AZIMUTH_SPAN{ "azimuthSpan" };
-String const Automation::Ids::ELEVATION_SPAN{ "elevationSpan" };
-String const Automation::Ids::POSITION_PRESET{ "positionPreset" };
+juce::String const Automation::Ids::X{ "recordingTrajectory_x" };
+juce::String const Automation::Ids::Y{ "recordingTrajectory_y" };
+juce::String const Automation::Ids::Z{ "recordingTrajectory_z" };
+juce::String const Automation::Ids::POSITION_SOURCE_LINK{ "sourceLink" };
+juce::String const Automation::Ids::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
+juce::String const Automation::Ids::AZIMUTH_SPAN{ "azimuthSpan" };
+juce::String const Automation::Ids::ELEVATION_SPAN{ "elevationSpan" };
+juce::String const Automation::Ids::POSITION_PRESET{ "positionPreset" };
 
-Automation::Enum Automation::idToEnum(const String & name)
+Automation::Enum Automation::idToEnum(const juce::String & name)
 {
     if (name.compare(Ids::X) == 0) {
         return Enum::x;

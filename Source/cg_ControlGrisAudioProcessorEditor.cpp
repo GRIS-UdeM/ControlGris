@@ -26,7 +26,7 @@
 //==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     ControlGrisAudioProcessor & controlGrisAudioProcessor,
-    AudioProcessorValueTreeState & vts,
+    juce::AudioProcessorValueTreeState & vts,
     PositionTrajectoryManager & positionAutomationManager,
     ElevationTrajectoryManager & elevationAutomationManager)
     : AudioProcessorEditor(&controlGrisAudioProcessor)
@@ -51,23 +51,23 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     // Set up the interface.
     //----------------------
     mMainBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mMainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
+    mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mMainBanner);
 
     mElevationBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mElevationBanner.setText("Elevation", NotificationType::dontSendNotification);
+    mElevationBanner.setText("Elevation", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationBanner);
 
     mTrajectoryBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mTrajectoryBanner.setText("Trajectories", NotificationType::dontSendNotification);
+    mTrajectoryBanner.setText("Trajectories", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryBanner);
 
     mSettingsBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mSettingsBanner.setText("Configuration", NotificationType::dontSendNotification);
+    mSettingsBanner.setText("Configuration", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSettingsBanner);
 
     mPositionPresetBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mPositionPresetBanner.setText("Preset", NotificationType::dontSendNotification);
+    mPositionPresetBanner.setText("Preset", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mPositionPresetBanner);
 
     mPositionField.setLookAndFeel(&mGrisLookAndFeel);
@@ -98,10 +98,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mInterfaceBox.setLookAndFeel(&mGrisLookAndFeel);
     mInterfaceBox.addListener(this);
 
-    auto const bg{ mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId) };
+    auto const bg{ mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId) };
 
     mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
-    mConfigurationComponent.setColour(TabbedComponent::backgroundColourId, bg);
+    mConfigurationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
     mConfigurationComponent.addTab("Settings", bg, &mSettingsBox, false);
     mConfigurationComponent.addTab("Source", bg, &mSourceBox, false);
     mConfigurationComponent.addTab("Controllers", bg, &mInterfaceBox, false);
@@ -221,22 +221,22 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 {
     auto action = [=]() {
         mTrajectoryBox.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
-                                                                  NotificationType::dontSendNotification);
+                                                                  juce::NotificationType::dontSendNotification);
     };
-    auto const isMessageThread{ MessageManager::getInstance()->isThisTheMessageThread() };
+    auto const isMessageThread{ juce::MessageManager::getInstance()->isThisTheMessageThread() };
     if (isMessageThread) {
         action();
     } else {
-        MessageManager::callAsync(action);
+        juce::MessageManager::callAsync(action);
     }
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
-    MessageManager::callAsync([=] {
+    juce::MessageManager::callAsync([=] {
         mTrajectoryBox.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
-                                                                   NotificationType::dontSendNotification);
+                                                                   juce::NotificationType::dontSendNotification);
     });
 }
 
@@ -248,7 +248,7 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber)
 
 //==============================================================================
 // Value::Listener callback. Called when the stored window size changes.
-void ControlGrisAudioProcessorEditor::valueChanged(Value &)
+void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 {
     setSize(mLastUIWidth.getValue(), mLastUIHeight.getValue());
 }
@@ -713,7 +713,8 @@ void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber)
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
 {
-    mProcessor.getPresetsManager().deletePreset(presetNumber);
+    [[maybe_unused]] auto const success{ mProcessor.getPresetsManager().deletePreset(presetNumber) };
+    jassert(success);
 }
 
 //==============================================================================
@@ -734,7 +735,7 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, String oscAddress, int oscPort)
+void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort)
 {
     if (state) {
         mProcessor.createOscOutputConnection(oscAddress, oscPort);
@@ -744,9 +745,9 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, Str
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::paint(Graphics & g)
+void ControlGrisAudioProcessorEditor::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
@@ -761,13 +762,13 @@ void ControlGrisAudioProcessorEditor::resized()
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
     if (mProcessor.getSpatMode() == SpatMode::cube) {
-        mMainBanner.setText("Azimuth - Distance", NotificationType::dontSendNotification);
+        mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);
         mElevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
         mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
     } else {
-        mMainBanner.setText("Azimuth - Elevation", NotificationType::dontSendNotification);
+        mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(false);
         mElevationField.setVisible(false);
     }

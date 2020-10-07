@@ -75,8 +75,8 @@ public:
         return *this;
     }
 
-    constexpr operator Radians() const { return Radians{ mValue / 360.0f * MathConstants<float>::twoPi }; }
-    [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * MathConstants<float>::twoPi; }
+    constexpr operator Radians() const { return Radians{ mValue / 360.0f * juce::MathConstants<float>::twoPi }; }
+    [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * juce::MathConstants<float>::twoPi; }
     [[nodiscard]] constexpr float getAsDegrees() const { return mValue; }
     [[nodiscard]] constexpr Degrees simplified() const
     {

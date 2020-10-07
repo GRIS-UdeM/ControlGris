@@ -188,7 +188,7 @@ void CircularFixedRadiusStrategy::enforce_implementation(Sources & finalStates,
 {
     auto const initialAngle{ Radians::fromPoint(initialStates[sourceIndex].position) };
     auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
-    Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
+    juce::Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
     finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
@@ -204,8 +204,8 @@ SourceSnapshot CircularFixedRadiusStrategy::computeInitialStateFromFinalState_im
 
     auto const finalAngle{ Radians::fromPoint(finalPosition) };
     auto const inverseFinalAngle{ (finalAngle - mRotation).getAsRadians() };
-    Point<float> const newInitialPosition{ std::cos(inverseFinalAngle) * mRadius,
-                                           std::sin(inverseFinalAngle) * mRadius };
+    juce::Point<float> const newInitialPosition{ std::cos(inverseFinalAngle) * mRadius,
+                                                 std::sin(inverseFinalAngle) * mRadius };
 
     newInitialState.position = newInitialPosition;
     return newInitialState;
@@ -278,8 +278,8 @@ void CircularFixedAngleStrategy::enforce_implementation(Sources & finalStates,
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
     auto const initialRadius{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
     auto const finalRadius{ initialRadius * mRadiusRatio };
-    Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
-                                      std::sin(finalAngle.getAsRadians()) * finalRadius };
+    juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
+                                            std::sin(finalAngle.getAsRadians()) * finalRadius };
 
     finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
@@ -300,8 +300,8 @@ SourceSnapshot
 
     auto const newInitialAngle{ finalAngle - mRotation };
 
-    Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * newInitialRadius,
-                                           std::sin(newInitialAngle.getAsRadians()) * newInitialRadius };
+    juce::Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * newInitialRadius,
+                                                 std::sin(newInitialAngle.getAsRadians()) * newInitialRadius };
 
     newInitialState.position = newInitialPosition;
 
@@ -368,8 +368,8 @@ void CircularFullyFixedStrategy::enforce_implementation(Sources & finalStates,
     auto const ordering{ mOrdering[sourceIndex.toInt()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
-    Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
-                                      std::sin(finalAngle.getAsRadians()) * mRadius };
+    juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
+                                            std::sin(finalAngle.getAsRadians()) * mRadius };
 
     finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
@@ -385,8 +385,8 @@ SourceSnapshot
     Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
     auto const newInitialAngle{ finalAngle - mRotation };
 
-    Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * mRadius,
-                                           std::sin(newInitialAngle.getAsRadians()) * mRadius };
+    juce::Point<float> const newInitialPosition{ std::cos(newInitialAngle.getAsRadians()) * mRadius,
+                                                 std::sin(newInitialAngle.getAsRadians()) * mRadius };
 
     newInitialState.position = newInitialPosition;
 
@@ -405,7 +405,7 @@ void LinkSymmetricXStrategy::enforce_implementation(Sources & finalStates,
                                                     SourcesSnapshots const & initialStates,
                                                     SourceIndex const sourceIndex) const
 {
-    Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
+    juce::Point<float> const finalPosition{ mPrimarySourceFinalPosition.getX(), -mPrimarySourceFinalPosition.getY() };
     finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 
@@ -431,7 +431,7 @@ void LinkSymmetricYStrategy::enforce_implementation(Sources & finalStates,
                                                     SourcesSnapshots const & initialStates,
                                                     SourceIndex const sourceIndex) const
 {
-    Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
+    juce::Point<float> const finalPosition{ -mPrimarySourceFinalPosition.getX(), mPrimarySourceFinalPosition.getY() };
     finalStates[sourceIndex].setPosition(finalPosition, Source::OriginOfChange::link);
 }
 

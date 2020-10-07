@@ -48,7 +48,7 @@
 
 //==============================================================================
 class FieldComponent
-    : public Component
+    : public juce::Component
     , public Source::Listener
 {
 public:
@@ -74,7 +74,7 @@ public:
     }; // class FieldComponent::Listener
 
     //==============================================================================
-    ListenerList<Listener> mListeners{};
+    juce::ListenerList<Listener> mListeners{};
 
 protected:
     //==============================================================================
@@ -109,19 +109,19 @@ public:
     [[nodiscard]] Sources & getSources() { return mSources; }
     [[nodiscard]] Sources const & getSources() const { return mSources; }
     //==============================================================================
-    [[nodiscard]] virtual Rectangle<float> getEffectiveArea() const = 0;
+    [[nodiscard]] virtual juce::Rectangle<float> getEffectiveArea() const = 0;
 
 protected:
     //==============================================================================
-    void drawBackgroundGrid(Graphics & g) const;
+    void drawBackgroundGrid(juce::Graphics & g) const;
     //==============================================================================
     void sourceMoved() override;
     //==============================================================================
-    virtual void drawBackground(Graphics & g) const = 0;
+    virtual void drawBackground(juce::Graphics & g) const = 0;
     virtual void applySourceSelectionToComponents() = 0;
     virtual void notifySourcePositionChanged(SourceIndex sourceIndex) = 0;
     virtual void rebuildSourceComponents(int numberOfSources) = 0;
-    virtual void drawSpans(Graphics & g) const = 0;
+    virtual void drawSpans(juce::Graphics & g) const = 0;
 
 private:
     //==============================================================================
@@ -134,10 +134,10 @@ class PositionFieldComponent final : public FieldComponent
 {
     PositionTrajectoryManager & mAutomationManager;
     SpatMode mSpatMode{ SpatMode::dome };
-    std::optional<Point<float>> mLineDrawingStartPosition{ std::nullopt };
-    std::optional<Point<float>> mLineDrawingEndPosition{ std::nullopt };
-    SourceComponent mDrawingHandleComponent{ Colour::fromRGB(176, 176, 228), "X" };
-    OwnedArray<PositionSourceComponent> mSourceComponents{};
+    std::optional<juce::Point<float>> mLineDrawingStartPosition{ std::nullopt };
+    std::optional<juce::Point<float>> mLineDrawingEndPosition{ std::nullopt };
+    SourceComponent mDrawingHandleComponent{ juce::Colour::fromRGB(176, 176, 228), "X" };
+    juce::OwnedArray<PositionSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
@@ -154,29 +154,30 @@ public:
     [[nodiscard]] PositionTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
     PositionTrajectoryManager & getAutomationManager() { return mAutomationManager; }
 
-    void drawDomeSpans(Graphics & g) const;
-    void drawCubeSpans(Graphics & g) const;
+    void drawDomeSpans(juce::Graphics & g) const;
+    void drawCubeSpans(juce::Graphics & g) const;
     void setSpatMode(SpatMode spatMode);
 
-    void drawSpans(Graphics & g) const final;
-    void paint(Graphics & g) final;
+    void drawSpans(juce::Graphics & g) const final;
+    void paint(juce::Graphics & g) final;
     void resized() final;
     void rebuildSourceComponents(int numberOfSources) final;
-    [[nodiscard]] Rectangle<float> getEffectiveArea() const final;
+    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const final;
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
 
-    [[nodiscard]] Point<float> sourcePositionToComponentPosition(Point<float> const & sourcePosition) const;
-    [[nodiscard]] Line<float> sourcePositionToComponentPosition(Line<float> const & sourcePosition) const;
-    [[nodiscard]] Point<float> componentPositionToSourcePosition(Point<float> const & componentPosition) const;
+    [[nodiscard]] juce::Point<float> sourcePositionToComponentPosition(juce::Point<float> const & sourcePosition) const;
+    [[nodiscard]] juce::Line<float> sourcePositionToComponentPosition(juce::Line<float> const & sourcePosition) const;
+    [[nodiscard]] juce::Point<float>
+        componentPositionToSourcePosition(juce::Point<float> const & componentPosition) const;
 
 private:
     //==============================================================================
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void mouseUp(MouseEvent const & event) final;
-    void mouseMove(MouseEvent const & event) final;
+    void mouseDown(juce::MouseEvent const & event) final;
+    void mouseDrag(juce::MouseEvent const & event) final;
+    void mouseUp(juce::MouseEvent const & event) final;
+    void mouseMove(juce::MouseEvent const & event) final;
     void applySourceSelectionToComponents() final;
-    void drawBackground(Graphics & g) const final;
+    void drawBackground(juce::Graphics & g) const final;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionFieldComponent)
 
@@ -192,7 +193,7 @@ class ElevationFieldComponent final : public FieldComponent
 
     ElevationTrajectoryManager & mAutomationManager;
     ElevationDrawingHandle mDrawingHandle{ *this };
-    OwnedArray<ElevationSourceComponent> mSourceComponents{};
+    juce::OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
 public:
     //==============================================================================
@@ -208,22 +209,23 @@ public:
     //==============================================================================
     [[nodiscard]] ElevationTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
     ElevationTrajectoryManager & getAutomationManager() { return mAutomationManager; }
-    [[nodiscard]] Point<float> sourceElevationToComponentPosition(Radians sourceElevation, SourceIndex index) const;
-    [[nodiscard]] Radians componentPositionToSourceElevation(Point<float> const & componentPosition) const;
+    [[nodiscard]] juce::Point<float> sourceElevationToComponentPosition(Radians sourceElevation,
+                                                                        SourceIndex index) const;
+    [[nodiscard]] Radians componentPositionToSourceElevation(juce::Point<float> const & componentPosition) const;
     //==============================================================================
-    void paint(Graphics & g) final;
+    void paint(juce::Graphics & g) final;
     void resized() final;
-    void mouseDown(MouseEvent const & event) final;
-    void mouseDrag(MouseEvent const & event) final;
-    void mouseUp(MouseEvent const & event) final;
+    void mouseDown(juce::MouseEvent const & event) final;
+    void mouseDrag(juce::MouseEvent const & event) final;
+    void mouseUp(juce::MouseEvent const & event) final;
     void notifySourcePositionChanged(SourceIndex sourceIndex) final;
     void rebuildSourceComponents(int numberOfSources) final;
-    [[nodiscard]] Rectangle<float> getEffectiveArea() const final;
+    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const final;
 
 private:
     //==============================================================================
-    void drawSpans(Graphics & g) const final;
-    void drawBackground(Graphics & g) const final;
+    void drawSpans(juce::Graphics & g) const final;
+    void drawBackground(juce::Graphics & g) const final;
     void applySourceSelectionToComponents() final;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationFieldComponent)

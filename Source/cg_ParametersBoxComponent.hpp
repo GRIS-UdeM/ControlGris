@@ -27,8 +27,8 @@
 
 //==============================================================================
 class ParametersBoxComponent final
-    : public Component
-    , public Slider::Listener
+    : public juce::Component
+    , public juce::Slider::Listener
 {
 public:
     //==============================================================================
@@ -47,26 +47,26 @@ private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
     bool mDistanceEnabled{ false };
     bool mSpanLinked{ false };
 
     Source * mSelectedSource{};
 
-    Label mAzimuthLabel{};
-    Label mElevationLabel{};
-    Slider mAzimuthSpan{};
-    Slider mElevationSpan{};
+    juce::Label mAzimuthLabel{};
+    juce::Label mElevationLabel{};
+    juce::Slider mAzimuthSpan{};
+    juce::Slider mElevationSpan{};
 
 public:
     //==============================================================================
     ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~ParametersBoxComponent() final = default;
     //==============================================================================
-    void mouseDown(MouseEvent const & event) final;
-    void sliderValueChanged(Slider * slider) final;
-    void paint(Graphics &) final;
+    void mouseDown(juce::MouseEvent const & event) final;
+    void sliderValueChanged(juce::Slider * slider) final;
+    void paint(juce::Graphics &) final;
     void resized() final;
 
     void setSelectedSource(Source * source);

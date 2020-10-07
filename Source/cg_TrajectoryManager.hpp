@@ -46,7 +46,8 @@ public:
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
-        virtual void trajectoryPositionChanged(TrajectoryManager * manager, Point<float> position, Radians elevation)
+        virtual void
+            trajectoryPositionChanged(TrajectoryManager * manager, juce::Point<float> position, Radians elevation)
             = 0;
 
     private:
@@ -62,7 +63,7 @@ protected:
     //==============================================================================
     ControlGrisAudioProcessor & mProcessor;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
     bool mIsBackAndForth{ false };
     Direction mBackAndForthDirection{ Direction::forward };
@@ -78,8 +79,8 @@ protected:
     double mTrajectoryDeltaTime{};
     double mLastTrajectoryDeltaTime{};
     std::optional<Trajectory> mTrajectory{};
-    Point<float> mCurrentTrajectoryPoint{};
-    Point<float> mLastRecordingPoint{};
+    juce::Point<float> mCurrentTrajectoryPoint{};
+    juce::Point<float> mLastRecordingPoint{};
 
     Degrees mDegreeOfDeviationPerCycle{};
     Degrees mCurrentDegreeOfDeviation{};
@@ -105,9 +106,9 @@ public:
 
     void setPlaybackDuration(double const value) { mPlaybackDuration = value; }
 
-    void resetRecordingTrajectory(Point<float> currentPosition);
-    void addRecordingPoint(Point<float> const & pos);
-    [[nodiscard]] Point<float> getCurrentTrajectoryPoint() const;
+    void resetRecordingTrajectory(juce::Point<float> currentPosition);
+    void addRecordingPoint(juce::Point<float> const & pos);
+    [[nodiscard]] juce::Point<float> getCurrentTrajectoryPoint() const;
 
     void setTrajectoryDeltaTime(double relativeTimeFromPlay);
     [[nodiscard]] std::optional<Trajectory> const & getTrajectory() const { return mTrajectory; }
@@ -128,7 +129,7 @@ private:
     //==============================================================================
     void invertBackAndForthDirection();
     void computeCurrentTrajectoryPoint();
-    [[nodiscard]] Point<float> smoothRecordingPosition(Point<float> const & pos);
+    [[nodiscard]] juce::Point<float> smoothRecordingPosition(juce::Point<float> const & pos);
     //==============================================================================
     JUCE_LEAK_DETECTOR(TrajectoryManager)
 
@@ -157,7 +158,7 @@ public:
     }
     //==============================================================================
     [[nodiscard]] PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
-    void setTrajectoryType(PositionTrajectoryType type, Point<float> const & startPos);
+    void setTrajectoryType(PositionTrajectoryType type, juce::Point<float> const & startPos);
 
     void setSourceLink(PositionSourceLink const sourceLink) { mSourceLink = sourceLink; }
     [[nodiscard]] PositionSourceLink getSourceLink() const { return mSourceLink; }

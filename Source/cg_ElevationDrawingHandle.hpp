@@ -46,8 +46,8 @@ public:
     //==============================================================================
     explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
     //==============================================================================
-    void mouseDown(MouseEvent const & event) override;
-    void mouseDrag(MouseEvent const & event) override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
     void updatePositionInParent() override;
 
 private:

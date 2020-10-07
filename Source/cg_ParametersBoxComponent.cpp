@@ -23,13 +23,13 @@
 //==============================================================================
 ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    mAzimuthLabel.setText("Azimuth Span", NotificationType::dontSendNotification);
+    mAzimuthLabel.setText("Azimuth Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
 
-    mElevationLabel.setText("Elevation Span", NotificationType::dontSendNotification);
+    mElevationLabel.setText("Elevation Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationLabel);
 
-    mAzimuthSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    mAzimuthSpan.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     mAzimuthSpan.setRange(0.0, 1.0);
     mAzimuthSpan.addListener(this);
     mAzimuthSpan.onDragStart
@@ -41,7 +41,7 @@ ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel
         = [&]() { mListeners.call([&](Listener & l) { l.parametersBoxElevationSpanDragEnded(); }); };
     addAndMakeVisible(&mAzimuthSpan);
 
-    mElevationSpan.setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+    mElevationSpan.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
     mElevationSpan.setRange(0.0, 1.0);
     mElevationSpan.addListener(this);
     addAndMakeVisible(&mElevationSpan);
@@ -53,8 +53,8 @@ void ParametersBoxComponent::setSelectedSource(Source * source)
     if (mSelectedSource != source || source->getAzimuthSpan().toFloat() != mAzimuthSpan.getValue()
         || mElevationSpan.getValue() != source->getElevationSpan().toFloat()) {
         mSelectedSource = source;
-        mAzimuthSpan.setValue(source->getAzimuthSpan().toFloat(), NotificationType::dontSendNotification);
-        mElevationSpan.setValue(source->getElevationSpan().toFloat(), NotificationType::dontSendNotification);
+        mAzimuthSpan.setValue(source->getAzimuthSpan().toFloat(), juce::NotificationType::dontSendNotification);
+        mElevationSpan.setValue(source->getElevationSpan().toFloat(), juce::NotificationType::dontSendNotification);
         repaint();
     }
 }
@@ -74,27 +74,27 @@ void ParametersBoxComponent::setSpanLinkState(bool const spanLinkState)
 }
 
 //==============================================================================
-void ParametersBoxComponent::mouseDown(MouseEvent const & event)
+void ParametersBoxComponent::mouseDown(juce::MouseEvent const & event)
 {
     float const x{ getWidth() - 35.0f };
     float constexpr y = 15;
 
     // Area where the spanLinked arrow is shown.
-    Rectangle<float> const spanLinkedArrowArea{ 245.0f, 25.0f, 45.0f, 25.0f };
+    juce::Rectangle<float> const spanLinkedArrowArea{ 245.0f, 25.0f, 45.0f, 25.0f };
     if (spanLinkedArrowArea.contains(event.getMouseDownPosition().toFloat())) {
         mSpanLinked = !mSpanLinked;
         repaint();
     }
 
     // Area where the selected source is shown.
-    Rectangle<float> const selectedSourceArea{ x - 5.0f, y - 5.0f, 30.0f, 30.0f };
+    juce::Rectangle<float> const selectedSourceArea{ x - 5.0f, y - 5.0f, 30.0f, 30.0f };
     if (selectedSourceArea.contains(event.getMouseDownPosition().toFloat())) {
         mListeners.call([&](Listener & l) { l.parametersBoxSelectedSourceClicked(); });
     }
 }
 
 //==============================================================================
-void ParametersBoxComponent::sliderValueChanged(Slider * slider)
+void ParametersBoxComponent::sliderValueChanged(juce::Slider * slider)
 {
     auto const value{ slider->getValue() };
     auto const parameterId{ (slider == &mAzimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
@@ -103,11 +103,11 @@ void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 
     if (mSpanLinked) {
         if (parameterId == SourceParameter::azimuthSpan) {
-            mElevationSpan.setValue(value, NotificationType::sendNotificationAsync);
+            mElevationSpan.setValue(value, juce::NotificationType::sendNotificationAsync);
             mListeners.call(
                 [&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::elevationSpan, value); });
         } else if (parameterId == SourceParameter::elevationSpan) {
-            mAzimuthSpan.setValue(value, NotificationType::sendNotificationAsync);
+            mAzimuthSpan.setValue(value, juce::NotificationType::sendNotificationAsync);
             mListeners.call(
                 [&](Listener & l) { l.parametersBoxParameterChanged(SourceParameter::azimuthSpan, value); });
         }
@@ -115,37 +115,37 @@ void ParametersBoxComponent::sliderValueChanged(Slider * slider)
 }
 
 //==============================================================================
-void ParametersBoxComponent::paint(Graphics & g)
+void ParametersBoxComponent::paint(juce::Graphics & g)
 {
     auto constexpr y = 15.0f;
     auto const x{ getWidth() - 35.0f };
 
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 
     if (mSpanLinked)
-        g.setColour(Colours::orange);
+        g.setColour(juce::Colours::orange);
     else
-        g.setColour(Colours::black);
-    g.drawArrow(Line<float>(285.0f, 34.0f, 245.0f, 34.0f), 4, 10, 10);
-    g.drawArrow(Line<float>(250.0f, 34.0f, 290.0f, 34.0f), 4, 10, 10);
+        g.setColour(juce::Colours::black);
+    g.drawArrow(juce::Line<float>(285.0f, 34.0f, 245.0f, 34.0f), 4, 10, 10);
+    g.drawArrow(juce::Line<float>(250.0f, 34.0f, 290.0f, 34.0f), 4, 10, 10);
 
-    Rectangle<float> area{ x, y, 20, 20 };
+    juce::Rectangle<float> area{ x, y, 20, 20 };
     area.expand(3, 3);
-    g.setColour(Colour(.2f, .2f, .2f, 1.0f));
+    g.setColour(juce::Colour(.2f, .2f, .2f, 1.0f));
     g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-    g.setGradientFill(ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.0f),
-                                     x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                     y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                     mSelectedSource->getColour().withSaturation(1.0f),
-                                     x,
-                                     y,
-                                     true));
+    g.setGradientFill(juce::ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.0f),
+                                           x + SOURCE_FIELD_COMPONENT_RADIUS,
+                                           y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                           mSelectedSource->getColour().withSaturation(1.0f),
+                                           x,
+                                           y,
+                                           true));
     g.fillEllipse(area);
 
-    g.setColour(Colours::white);
+    g.setColour(juce::Colours::white);
     g.drawFittedText(mSelectedSource->getId().toString(),
                      area.getSmallestIntegerContainer(),
-                     Justification(Justification::centred),
+                     juce::Justification::centred,
                      1);
 }
 

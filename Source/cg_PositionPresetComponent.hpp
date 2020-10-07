@@ -25,7 +25,7 @@
 class PresetsManager;
 
 //==============================================================================
-class PresetButton final : public TextButton
+class PresetButton final : public juce::TextButton
 {
 public:
     //==============================================================================
@@ -52,7 +52,7 @@ public:
 
 private:
     //==============================================================================
-    ListenerList<Listener> mListeners{};
+    juce::ListenerList<Listener> mListeners{};
     bool mSaved{ false };
     bool mLoaded{ false };
 
@@ -71,8 +71,8 @@ public:
     void setLoadedState(bool loadedState);
     void refresh();
 
-    void clicked(ModifierKeys const & mods) override;
-    void internalClickCallback(ModifierKeys const & mods) override;
+    void clicked(juce::ModifierKeys const & mods) override;
+    void internalClickCallback(juce::ModifierKeys const & mods) override;
 
     [[nodiscard]] bool isSaved() const { return mSaved; }
 
@@ -86,8 +86,8 @@ private:
 
 //================================================================================
 class PositionPresetComponent final
-    : public Component
-    , public ChangeListener
+    : public juce::Component
+    , public juce::ChangeListener
     , private PresetButton::Listener
 {
 public:
@@ -114,11 +114,11 @@ public:
 
 private:
     //==============================================================================
-    ListenerList<Listener> mListeners{};
-    OwnedArray<PresetButton> mPresets{};
+    juce::ListenerList<Listener> mListeners{};
+    juce::OwnedArray<PresetButton> mPresets{};
     int mCurrentSelection{ -1 };
-    Label mActionLog{};
-    Label mAppVersionLabel{};
+    juce::Label mActionLog{};
+    juce::Label mAppVersionLabel{};
     PresetsManager & mPresetsManager;
 
 public:
@@ -134,7 +134,7 @@ public:
     PositionPresetComponent & operator=(PositionPresetComponent const &) = delete;
     PositionPresetComponent & operator=(PositionPresetComponent &&) = delete;
     //==============================================================================
-    void paint(Graphics & g) override { g.fillAll(Colour::fromRGB(64, 64, 64)); }
+    void paint(juce::Graphics & g) override { g.fillAll(juce::Colour::fromRGB(64, 64, 64)); }
     void resized() override;
 
     void buttonClicked(PresetButton * button) override;
@@ -149,7 +149,7 @@ public:
 
 private:
     //==============================================================================
-    void changeListenerCallback(ChangeBroadcaster * changeBroadcaster) override;
+    void changeListenerCallback(juce::ChangeBroadcaster * changeBroadcaster) override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionPresetComponent)
 }; // class PositionPresetComponent

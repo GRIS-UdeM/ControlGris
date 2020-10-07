@@ -32,7 +32,7 @@ public:
         friend ChangeGesturesManager;
         //==============================================================================
         ChangeGesturesManager & mManager;
-        String mParameterName;
+        juce::String mParameterName;
 
     public:
         //==============================================================================
@@ -45,7 +45,7 @@ public:
         ScopedLock & operator=(ScopedLock const &) = delete;
         ScopedLock & operator=(ScopedLock &&) = delete;
         //==============================================================================
-        ScopedLock(ChangeGesturesManager & manager, String const & parameterName);
+        ScopedLock(ChangeGesturesManager & manager, juce::String const & parameterName);
 
     private:
         //==============================================================================
@@ -55,8 +55,8 @@ public:
 
 private:
     //==============================================================================
-    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
-    HashMap<String, int> mGestureStates{};
+    juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
+    juce::HashMap<juce::String, int> mGestureStates{};
 
 public:
     //==============================================================================
@@ -69,15 +69,15 @@ public:
     ChangeGesturesManager & operator=(ChangeGesturesManager const &) = delete;
     ChangeGesturesManager & operator=(ChangeGesturesManager &&) = delete;
     //==============================================================================
-    explicit ChangeGesturesManager(AudioProcessorValueTreeState & audioProcessorValueTreeState)
+    explicit ChangeGesturesManager(juce::AudioProcessorValueTreeState & audioProcessorValueTreeState)
         : mAudioProcessorValueTreeState(audioProcessorValueTreeState)
     {
     }
     //==============================================================================
 
-    void beginGesture(String const & parameterName);
-    void endGesture(String const & parameterName);
-    ScopedLock getScopedLock(String const & parameterName);
+    void beginGesture(juce::String const & parameterName);
+    void endGesture(juce::String const & parameterName);
+    ScopedLock getScopedLock(juce::String const & parameterName);
 
 private:
     //==============================================================================

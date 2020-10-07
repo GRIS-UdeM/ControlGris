@@ -27,39 +27,39 @@ enum class FixedPositionType { terminal, initial };
 
 //==============================================================================
 // The parameter Layout creates the automatable mAudioProcessorValueTreeState.
-AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
+juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
-    using Parameter = AudioProcessorValueTreeState::Parameter;
+    using Parameter = juce::AudioProcessorValueTreeState::Parameter;
 
     std::vector<std::unique_ptr<Parameter>> parameters;
 
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::X,
-                                                     String("Recording Trajectory X"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     juce::String("Recording Trajectory X"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Y,
-                                                     String("Recording Trajectory Y"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     juce::String("Recording Trajectory Y"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Z,
-                                                     String("Recording Trajectory Z"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     juce::String("Recording Trajectory Z"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
 
     parameters.push_back(std::make_unique<Parameter>(
         Automation::Ids::POSITION_SOURCE_LINK,
-        String("Source Link"),
-        String(),
-        NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
+        juce::String("Source Link"),
+        juce::String(),
+        juce::NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
         0.0f,
         nullptr,
         nullptr,
@@ -67,9 +67,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         true,
         true));
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SOURCE_LINK,
-                                                     String("Source Link Alt"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 4.0f, 1.0f),
+                                                     juce::String("Source Link Alt"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr,
@@ -78,9 +78,9 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      true));
 
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::POSITION_PRESET,
-                                                     String("Position Preset"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 50.0f, 1.0f),
+                                                     juce::String("Position Preset"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr,
@@ -89,16 +89,16 @@ AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      true));
 
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::AZIMUTH_SPAN,
-                                                     String("Azimuth Span"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     juce::String("Azimuth Span"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
     parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SPAN,
-                                                     String("Elevation Span"),
-                                                     String(),
-                                                     NormalisableRange<float>(0.0f, 1.0f),
+                                                     juce::String("Elevation Span"),
+                                                     juce::String(),
+                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
@@ -120,7 +120,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
                        )
     ,
 #endif // JucePlugin_PreferredChannelConfigurations
-    mAudioProcessorValueTreeState(*this, nullptr, Identifier(JucePlugin_Name), createParameterLayout())
+    mAudioProcessorValueTreeState(*this, nullptr, juce::Identifier(JucePlugin_Name), createParameterLayout())
 
 {
     setLatencySamples(0);
@@ -165,15 +165,15 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     // mAudioProcessorValueTreeState, we need to keep track of the current parameter values to be
     // able to reload the last state of the plugin when we close/open the UI.
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        String oscId(i);
+        juce::String oscId(i);
         // Non-automatable, per source, mAudioProcessorValueTreeState.
-        mAudioProcessorValueTreeState.state.setProperty(String("p_azimuth_") + oscId,
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_azimuth_") + oscId,
                                                         i % 2 == 0 ? -90.0 : 90.0,
                                                         nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(String("p_elevation_") + oscId, 0.0, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(String("p_distance_") + oscId, 1.0, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(String("p_x_") + oscId, 0.0, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(String("p_y_") + oscId, 0.0, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_elevation_") + oscId, 0.0, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_distance_") + oscId, 1.0, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_x_") + oscId, 0.0, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_y_") + oscId, 0.0, nullptr);
 
         // Gives the source an initial id...
         auto & source{ mSources.get(i) };
@@ -218,7 +218,7 @@ ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::parameterChanged(String const & parameterId, float const newValue)
+void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterId, float const newValue)
 {
     if (std::isnan(newValue) || std::isinf(newValue)) {
         jassertfalse;
@@ -418,8 +418,8 @@ void ControlGrisAudioProcessor::sendOscMessage()
     if (!mOscConnected)
         return;
 
-    OSCAddressPattern const oscPattern("/spat/serv");
-    OSCMessage message(oscPattern);
+    juce::OSCAddressPattern const oscPattern("/spat/serv");
+    juce::OSCMessage message(oscPattern);
 
     for (auto const & source : mSources) {
         auto const azimuth{ source.getAzimuth().getAsRadians() };
@@ -477,7 +477,7 @@ bool ControlGrisAudioProcessor::disconnectOscInput(int const oscPort)
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::oscBundleReceived(OSCBundle const & bundle)
+void ControlGrisAudioProcessor::oscBundleReceived(juce::OSCBundle const & bundle)
 {
     for (auto const & element : bundle) {
         if (element.isMessage())
@@ -488,7 +488,7 @@ void ControlGrisAudioProcessor::oscBundleReceived(OSCBundle const & bundle)
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
+void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & message)
 {
     auto positionSourceLinkToProcess{ PositionSourceLink::undefined };
     auto elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
@@ -497,21 +497,24 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     auto z{ -1.0f };
     auto const address{ message.getAddressPattern().toString() };
     auto const pluginInstance{ juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() } };
-    if ((address == String(pluginInstance + "/traj/1/x") || address == String(pluginInstance + "/traj/1/xyz/1"))
+    if ((address == juce::String(pluginInstance + "/traj/1/x")
+         || address == juce::String(pluginInstance + "/traj/1/xyz/1"))
         && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
-    } else if ((address == String(pluginInstance + "/traj/1/y") || address == String(pluginInstance + "/traj/1/xyz/2"))
+    } else if ((address == juce::String(pluginInstance + "/traj/1/y")
+                || address == juce::String(pluginInstance + "/traj/1/xyz/2"))
                && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         y = message[0].getFloat32();
-    } else if ((address == String(pluginInstance + "/traj/1/z") || address == String(pluginInstance + "/traj/1/xyz/3"))
+    } else if ((address == juce::String(pluginInstance + "/traj/1/z")
+                || address == juce::String(pluginInstance + "/traj/1/xyz/3"))
                && static_cast<ElevationTrajectoryType>(mElevationTrajectoryManager.getTrajectoryType())
                       == ElevationTrajectoryType::realtime) {
         z = message[0].getFloat32();
-    } else if (address == String(pluginInstance + "/traj/1/xy")
+    } else if (address == juce::String(pluginInstance + "/traj/1/xy")
                && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
         y = message[1].getFloat32();
-    } else if (address == String(pluginInstance + "/traj/1/xyz")) {
+    } else if (address == juce::String(pluginInstance + "/traj/1/xyz")) {
         if (mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
             x = message[0].getFloat32();
             y = message[1].getFloat32();
@@ -520,57 +523,57 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
             == ElevationTrajectoryType::realtime) {
             z = message[2].getFloat32();
         }
-    } else if (address == String(pluginInstance + "/azispan")) {
+    } else if (address == juce::String(pluginInstance + "/azispan")) {
         for (auto & source : mSources) {
             source.setAzimuthSpan(Normalized{ message[0].getFloat32() });
         }
         auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
-    } else if (address == String(pluginInstance + "/elespan")) {
+    } else if (address == juce::String(pluginInstance + "/elespan")) {
         for (auto & source : mSources)
             source.setElevationSpan(Normalized{ message[0].getFloat32() });
         auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
-    } else if (address == String(pluginInstance + "/sourcelink/1/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/1/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(1);
-    } else if (address == String(pluginInstance + "/sourcelink/2/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/2/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(2);
-    } else if (address == String(pluginInstance + "/sourcelink/3/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/3/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(3);
-    } else if (address == String(pluginInstance + "/sourcelink/4/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/4/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(4);
-    } else if (address == String(pluginInstance + "/sourcelink/5/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/5/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(5);
-    } else if (address == String(pluginInstance + "/sourcelink/6/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink/6/1")) {
         if (message[0].getFloat32() == 1)
             positionSourceLinkToProcess = static_cast<PositionSourceLink>(6);
-    } else if (address == String(pluginInstance + "/sourcelink")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelink")) {
         positionSourceLinkToProcess = static_cast<PositionSourceLink>(message[0].getFloat32()); // 1 -> 6
-    } else if (address == String(pluginInstance + "/sourcelinkalt/1/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/1/1")) {
         if (message[0].getFloat32() == 1)
             elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(1);
-    } else if (address == String(pluginInstance + "/sourcelinkalt/2/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/2/1")) {
         if (message[0].getFloat32() == 1)
             elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(2);
-    } else if (address == String(pluginInstance + "/sourcelinkalt/3/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/3/1")) {
         if (message[0].getFloat32() == 1)
             elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(3);
-    } else if (address == String(pluginInstance + "/sourcelinkalt/4/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/4/1")) {
         if (message[0].getFloat32() == 1)
             elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(4);
-    } else if (address == String(pluginInstance + "/sourcelinkalt/5/1")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/5/1")) {
         if (message[0].getFloat32() == 1)
             elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(5);
-    } else if (address == String(pluginInstance + "/sourcelinkalt")) {
+    } else if (address == juce::String(pluginInstance + "/sourcelinkalt")) {
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
-    } else if (address == String(pluginInstance + "/presets")) {
+    } else if (address == juce::String(pluginInstance + "/presets")) {
         int newPreset = (int)message[0].getFloat32(); // 1 -> 50
         auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
         if (loaded) {
@@ -584,7 +587,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
     }
 
     if (x != -1.0f && y != -1.0f) {
-        mSources.getPrimarySource().setPosition(Point<float>{ x, y }, Source::OriginOfChange::osc);
+        mSources.getPrimarySource().setPosition(juce::Point<float>{ x, y }, Source::OriginOfChange::osc);
 
     } else if (y != -1.0f) {
         mSources.getPrimarySource().setY(y, Source::OriginOfChange::osc);
@@ -610,7 +613,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(OSCMessage const & message)
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddress, int const oscPort)
+bool ControlGrisAudioProcessor::createOscOutputConnection(juce::String const & oscAddress, int const oscPort)
 {
     disconnectOscOutput(oscAddress, oscPort);
 
@@ -631,7 +634,7 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(String const & oscAddr
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::disconnectOscOutput(String const & oscAddress, int const oscPort)
+bool ControlGrisAudioProcessor::disconnectOscOutput(juce::String const & oscAddress, int const oscPort)
 {
     if (mOscOutputConnected) {
         if (mOscOutputSender.disconnect()) {
@@ -676,9 +679,9 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         return;
     }
 
-    OSCMessage message(OSCAddressPattern("/tmp"));
+    juce::OSCMessage message(juce::OSCAddressPattern("/tmp"));
 
-    auto const pluginInstance = juce::String{ "/controlgris/" } + String{ getOscOutputPluginId() };
+    auto const pluginInstance = juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() };
 
     auto const trajectoryHandlePosition{ mSources.getPrimarySource().getPos() };
     auto const trajectory1x = trajectoryHandlePosition.getX();
@@ -686,49 +689,49 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     auto const trajectory1z = trajectoryHandlePosition.getY();
 
     if (lastTrajectoryX != trajectory1x) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/x"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/x"));
         message.addFloat32(trajectory1x);
         mOscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/1"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xyz/1"));
         message.addFloat32(trajectory1x);
         mOscOutputSender.send(message);
         message.clear();
     }
 
     if (lastTrajectoryY != trajectory1y) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/y"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/y"));
         message.addFloat32(trajectory1y);
         mOscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/2"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xyz/2"));
         message.addFloat32(trajectory1y);
         mOscOutputSender.send(message);
         message.clear();
     }
 
     if (lastTrajectoryZ != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/z"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/z"));
         message.addFloat32(trajectory1z);
         mOscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz/3"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xyz/3"));
         message.addFloat32(trajectory1z);
         mOscOutputSender.send(message);
         message.clear();
     }
 
     if (lastTrajectoryX != trajectory1x || lastTrajectoryY != trajectory1y || lastTrajectoryZ != trajectory1z) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xy"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xy"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         mOscOutputSender.send(message);
         message.clear();
 
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/traj/1/xyz"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xyz"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
         message.addFloat32(trajectory1z);
@@ -741,7 +744,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     lastTrajectoryZ = trajectory1z;
 
     if (lastAzimuthSpan != mSources.getPrimarySource().getAzimuthSpan()) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/azispan"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/azispan"));
         message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
@@ -749,7 +752,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     }
 
     if (lastElevationSpan != mSources.getPrimarySource().getElevationSpan()) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/elespan"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/elespan"));
         message.addFloat32(mSources.getPrimarySource().getElevationSpan().toFloat());
         mOscOutputSender.send(message);
         message.clear();
@@ -757,14 +760,15 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     }
 
     if (mPositionTrajectoryManager.getSourceLink() != lastPositionLink) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelink"));
-        message.addInt32(static_cast<int32>(mPositionTrajectoryManager.getSourceLink()));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/sourcelink"));
+        message.addInt32(static_cast<juce::int32>(mPositionTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
         message.clear();
 
-        String pattern = pluginInstance + String("/sourcelink/")
-                         + String(static_cast<int>(mPositionTrajectoryManager.getSourceLink())) + String("/1");
-        message.setAddressPattern(OSCAddressPattern(pattern));
+        juce::String pattern = pluginInstance + juce::String("/sourcelink/")
+                               + juce::String(static_cast<int>(mPositionTrajectoryManager.getSourceLink()))
+                               + juce::String("/1");
+        message.setAddressPattern(juce::OSCAddressPattern(pattern));
         message.addInt32(1);
         mOscOutputSender.send(message);
         message.clear();
@@ -773,14 +777,15 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     }
 
     if (static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()) != lastElevationLink) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
-        message.addInt32(static_cast<int32>(mElevationTrajectoryManager.getSourceLink()));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
+        message.addInt32(static_cast<juce::int32>(mElevationTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
         message.clear();
 
-        String patternAlt = pluginInstance + String("/sourcelinkalt/")
-                            + String(static_cast<int>(mElevationTrajectoryManager.getSourceLink())) + String("/1");
-        message.setAddressPattern(OSCAddressPattern(patternAlt));
+        juce::String patternAlt = pluginInstance + juce::String("/sourcelinkalt/")
+                                  + juce::String(static_cast<int>(mElevationTrajectoryManager.getSourceLink()))
+                                  + juce::String("/1");
+        message.setAddressPattern(juce::OSCAddressPattern(patternAlt));
         message.addInt32(1);
         mOscOutputSender.send(message);
         message.clear();
@@ -790,7 +795,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     auto const currentPreset{ mPresetManager.getCurrentPreset() };
     if (currentPreset != lastPresetNumber) {
-        message.setAddressPattern(OSCAddressPattern(pluginInstance + "/presets"));
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/presets"));
         message.addInt32(currentPreset);
         mOscOutputSender.send(message);
         message.clear();
@@ -846,17 +851,17 @@ void ControlGrisAudioProcessor::setPluginState()
     for (auto & source : mSources) {
         auto const index{ source.getIndex().toString() };
 
-        Identifier const azimuthPropertyString{ juce::String{ "p_azimuth_" } + index };
-        Identifier const elevationPropertyString{ juce::String{ "p_elevation_" } + index };
-        Identifier const distancePropertyString{ juce::String{ "p_distance_" } + index };
+        juce::Identifier const azimuthPropertyString{ juce::String{ "p_azimuth_" } + index };
+        juce::Identifier const elevationPropertyString{ juce::String{ "p_elevation_" } + index };
+        juce::Identifier const distancePropertyString{ juce::String{ "p_distance_" } + index };
 
         jassert(state.hasProperty(azimuthPropertyString));
         jassert(state.hasProperty(elevationPropertyString));
         jassert(state.hasProperty(distancePropertyString));
 
-        auto const rawAzimuth{ state.getProperty(azimuthPropertyString) };
-        auto const rawElevation{ state.getProperty(elevationPropertyString) };
-        auto const rawDistance{ state.getProperty(distancePropertyString) };
+        auto const & rawAzimuth{ state.getProperty(azimuthPropertyString) };
+        auto const & rawElevation{ state.getProperty(elevationPropertyString) };
+        auto const & rawDistance{ state.getProperty(distancePropertyString) };
 
         Normalized const azimuth{ rawAzimuth };
         Normalized const elevation{ rawElevation };
@@ -911,10 +916,10 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
         mAudioProcessorValueTreeState.state.setProperty("p_azimuth_" + param_id, value, nullptr);
         break;
     case SourceParameter::elevation:
-        mAudioProcessorValueTreeState.state.setProperty(String("p_elevation_") + param_id, value, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_elevation_") + param_id, value, nullptr);
         break;
     case SourceParameter::distance:
-        mAudioProcessorValueTreeState.state.setProperty(String("p_distance_") + param_id, value, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_distance_") + param_id, value, nullptr);
         break;
     case SourceParameter::x:
         jassertfalse;
@@ -938,7 +943,7 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
 }
 
 //==============================================================================
-String const ControlGrisAudioProcessor::getName() const
+juce::String const ControlGrisAudioProcessor::getName() const
 {
     return JucePlugin_Name;
 }
@@ -1015,13 +1020,13 @@ bool ControlGrisAudioProcessor::isBusesLayoutSupported(const BusesLayout & layou
 #endif
 
 //==============================================================================
-void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float> & buffer,
-                                             [[maybe_unused]] MidiBuffer & midiMessages)
+void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<float> & buffer,
+                                             [[maybe_unused]] juce::MidiBuffer & midiMessages)
 {
     auto const wasPlaying{ mIsPlaying };
-    AudioPlayHead * audioPlayHead = getPlayHead();
+    juce::AudioPlayHead * audioPlayHead = getPlayHead();
     if (audioPlayHead != nullptr) {
-        AudioPlayHead::CurrentPositionInfo currentPositionInfo{};
+        juce::AudioPlayHead::CurrentPositionInfo currentPositionInfo{};
         audioPlayHead->getCurrentPosition(currentPositionInfo);
         mIsPlaying = currentPositionInfo.isPlaying;
         mBpm = currentPositionInfo.bpm;
@@ -1034,8 +1039,8 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
         }
     }
 
-    if (!wasPlaying && mIsPlaying) {   // Initialization here only for Logic (also Reaper and Live), which are not
-        PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
+    if (!wasPlaying && mIsPlaying) {         // Initialization here only for Logic (also Reaper and Live), which are not
+        juce::PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
         if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
             initialize();
         }
@@ -1071,7 +1076,7 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] AudioBuffer<float>
 }
 
 //==============================================================================
-AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
+juce::AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
 {
     return new ControlGrisAudioProcessorEditor(*this,
                                                mAudioProcessorValueTreeState,
@@ -1080,13 +1085,13 @@ AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
+void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData)
 {
     for (int sourceIndex{}; sourceIndex < MAX_NUMBER_OF_SOURCES; ++sourceIndex) {
         juce::String const id{ sourceIndex };
-        Identifier const azimuthId{ String{ "p_azimuth_" } + id };
-        Identifier const elevationId{ String{ "p_elevation_" } + id };
-        Identifier const distanceId{ String{ "p_distance_" } + id };
+        juce::Identifier const azimuthId{ juce::String{ "p_azimuth_" } + id };
+        juce::Identifier const elevationId{ juce::String{ "p_elevation_" } + id };
+        juce::Identifier const distanceId{ juce::String{ "p_distance_" } + id };
         auto const & source{ mSources[sourceIndex] };
         auto const normalizedAzimuth{ source.getNormalizedAzimuth().toFloat() };
         auto const normalizedElevation{ source.getNormalizedElevation().toFloat() };
@@ -1106,7 +1111,7 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
             xmlState->removeChildElement(childExist, true);
         }
         if (mFixPositionData.getNumChildElements() > 0) {
-            auto * positionData{ new XmlElement{ mFixPositionData } };
+            auto * positionData{ new juce::XmlElement{ mFixPositionData } };
             xmlState->addChildElement(positionData);
         }
         copyXmlToBinary(*xmlState, destData);
@@ -1116,14 +1121,14 @@ void ControlGrisAudioProcessor::getStateInformation(MemoryBlock & destData)
 //==============================================================================
 void ControlGrisAudioProcessor::setStateInformation(void const * data, int const sizeInBytes)
 {
-    MessageManagerLock mmLock{};
+    juce::MessageManagerLock mmLock{};
 
     auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
     if (xmlState != nullptr) {
         // Set global settings values.
         //----------------------------
-        auto const valueTree{ ValueTree::fromXml(*xmlState) };
+        auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
         auto const spatMode{ static_cast<SpatMode>(static_cast<int>(valueTree.getProperty("oscFormat", 0))) };
         setSpatMode(spatMode);
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
@@ -1154,7 +1159,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         }
         // Replace the state and call automated parameter current values.
         //---------------------------------------------------------------
-        mAudioProcessorValueTreeState.replaceState(ValueTree::fromXml(*xmlState));
+        mAudioProcessorValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
     }
 
     setPluginState();
@@ -1242,7 +1247,7 @@ void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
         auto const index{ source.getIndex() };
-        MessageManager::callAsync([=] { editor->sourceBoxSelectionChanged(index); });
+        juce::MessageManager::callAsync([=] { editor->sourceBoxSelectionChanged(index); });
     }
 }
 
@@ -1258,10 +1263,6 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
         auto const normalized_y{ 1.0f - (source.getY() + 1.0f) / 2.0f };
         auto * x_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::X) };
         auto * y_param{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::Y) };
-        //        if (!mIsPlaying) { // TODO : why is this necessary ?
-        //            x_param->setValue(normalized_x);
-        //            y_param->setValue(normalized_y);
-        //        }
         x_param->setValueNotifyingHost(normalized_x);
         y_param->setValueNotifyingHost(normalized_y);
         break;
@@ -1280,7 +1281,7 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
 
 //==============================================================================
 // This creates new instances of the plugin..
-AudioProcessor * JUCE_CALLTYPE createPluginFilter()
+juce::AudioProcessor * JUCE_CALLTYPE createPluginFilter()
 {
     return new ControlGrisAudioProcessor{};
 }

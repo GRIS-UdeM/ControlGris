@@ -81,14 +81,14 @@ public:
     }
 
     [[nodiscard]] constexpr float getAsRadians() const { return mValue; }
-    [[nodiscard]] constexpr float getAsDegrees() const { return mValue / MathConstants<float>::twoPi * 360.0f; }
+    [[nodiscard]] constexpr float getAsDegrees() const { return mValue / juce::MathConstants<float>::twoPi * 360.0f; }
     [[nodiscard]] constexpr Radians simplified() const
     {
-        if (mValue < -MathConstants<float>::pi) {
-            return Radians{ mValue + MathConstants<float>::twoPi };
+        if (mValue < -juce::MathConstants<float>::pi) {
+            return Radians{ mValue + juce::MathConstants<float>::twoPi };
         }
-        if (mValue > MathConstants<float>::pi) {
-            return Radians{ mValue - MathConstants<float>::twoPi };
+        if (mValue > juce::MathConstants<float>::pi) {
+            return Radians{ mValue - juce::MathConstants<float>::twoPi };
         }
         return *this;
     }
@@ -96,7 +96,7 @@ public:
     {
         return Radians{ std::clamp(mValue, min.mValue, max.mValue) };
     }
-    static Radians fromPoint(Point<float> const & point)
+    static Radians fromPoint(juce::Point<float> const & point)
     {
         if (point.getX() == 0.0f && point.getY() == 0.0f) {
             return Radians{};
@@ -105,6 +105,6 @@ public:
     }
 }; // class Radians
 
-constexpr Radians pi{ MathConstants<float>::pi };
-constexpr Radians twoPi{ MathConstants<float>::twoPi };
-constexpr Radians halfPi{ MathConstants<float>::halfPi };
+constexpr Radians pi{ juce::MathConstants<float>::pi };
+constexpr Radians twoPi{ juce::MathConstants<float>::twoPi };
+constexpr Radians halfPi{ juce::MathConstants<float>::halfPi };

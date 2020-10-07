@@ -171,7 +171,7 @@ void Source::setY(float const y, OriginOfChange const origin)
 }
 
 //==============================================================================
-void Source::setPosition(Point<float> const & position, OriginOfChange const origin)
+void Source::setPosition(juce::Point<float> const & position, OriginOfChange const origin)
 {
     auto const clippedPosition{ clipPosition(position, mSpatMode) };
     if (mPosition != clippedPosition || shouldForceNotifications(origin)) {
@@ -233,18 +233,18 @@ Normalized Source::getNormalizedElevation() const
 }
 
 //==============================================================================
-Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
+juce::Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
 {
     auto const rotatedAngle{ angle - halfPi };
-    Point<float> const result{ std::cos(rotatedAngle.getAsRadians()) * radius,
-                               std::sin(rotatedAngle.getAsRadians()) * radius };
+    juce::Point<float> const result{ std::cos(rotatedAngle.getAsRadians()) * radius,
+                                     std::sin(rotatedAngle.getAsRadians()) * radius };
     return result;
 }
 
 //==============================================================================
-Radians Source::getAngleFromPosition(Point<float> const & position)
+Radians Source::getAngleFromPosition(juce::Point<float> const & position)
 {
-    auto const getAngle = [](Point<float> const & position) {
+    auto const getAngle = [](juce::Point<float> const & position) {
         if (position.getX() == 0.0f && position.getY() == 0.0f) {
             return 0.0f;
         }
@@ -256,13 +256,13 @@ Radians Source::getAngleFromPosition(Point<float> const & position)
 }
 
 //==============================================================================
-Point<float> Source::clipDomePosition(Point<float> const & position)
+juce::Point<float> Source::clipDomePosition(juce::Point<float> const & position)
 {
-    Point<float> result{};
+    juce::Point<float> result{};
     auto const radius{ position.getDistanceFromOrigin() };
     if (radius > 1.0f) {
         auto const angle{ std::atan2(position.getY(), position.getX()) };
-        result = Point<float>{ std::cos(angle), std::sin(angle) };
+        result = juce::Point<float>{ std::cos(angle), std::sin(angle) };
     } else {
         result = position;
     }
@@ -270,9 +270,10 @@ Point<float> Source::clipDomePosition(Point<float> const & position)
 }
 
 //==============================================================================
-Point<float> Source::clipCubePosition(Point<float> const & position)
+juce::Point<float> Source::clipCubePosition(juce::Point<float> const & position)
 {
-    Point<float> const result{ std::clamp(position.getX(), -1.0f, 1.0f), std::clamp(position.getY(), -1.0f, 1.0f) };
+    juce::Point<float> const result{ std::clamp(position.getX(), -1.0f, 1.0f),
+                                     std::clamp(position.getY(), -1.0f, 1.0f) };
     return result;
 }
 
@@ -289,9 +290,9 @@ void Source::notify(ChangeType type, OriginOfChange const origin)
 }
 
 //==============================================================================
-Point<float> Source::clipPosition(Point<float> const & position, SpatMode const spatMode)
+juce::Point<float> Source::clipPosition(juce::Point<float> const & position, SpatMode const spatMode)
 {
-    Point<float> result{};
+    juce::Point<float> result{};
     if (spatMode == SpatMode::dome) {
         result = clipDomePosition(position);
     } else {
@@ -320,7 +321,7 @@ void Source::setColorFromIndex(int const numTotalSources)
     if (hue > 1.0f) {
         hue -= 1.0f;
     }
-    mColour = Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
+    mColour = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
     notifyGuiListeners();
 }
 

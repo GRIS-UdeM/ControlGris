@@ -26,7 +26,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
 {
     mSpatMode = SpatMode::dome;
 
-    mSourceLinkLabel.setText("Source Link:", NotificationType::dontSendNotification);
+    mSourceLinkLabel.setText("Source Link:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourceLinkLabel);
 
     mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
@@ -49,7 +49,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         });
     };
 
-    mTrajectoryTypeLabel.setText("Trajectory Type:", NotificationType::dontSendNotification);
+    mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
 
     mPositionTrajectoryTypeCombo.addItemList(POSITION_TRAJECTORY_TYPE_TYPES, 1);
@@ -72,11 +72,11 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         });
     };
 
-    mDurationLabel.setText("Dur per cycle:", NotificationType::dontSendNotification);
+    mDurationLabel.setText("Dur per cycle:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDurationLabel);
 
     addAndMakeVisible(&mDurationEditor);
-    mDurationEditor.setTextToShowWhenEmpty("1", Colours::white);
+    mDurationEditor.setTextToShowWhenEmpty("1", juce::Colours::white);
     mDurationEditor.setText("5", false);
     mDurationEditor.setInputRestrictions(10, "0123456789.");
     mDurationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
@@ -99,16 +99,16 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         });
     };
 
-    mCycleSpeedLabel.setText("Cycle Speed:", NotificationType::dontSendNotification);
+    mCycleSpeedLabel.setText("Cycle Speed:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mCycleSpeedLabel);
 
-    mCycleSpeedSlider.setNormalisableRange(NormalisableRange<double>(-2.0f, 2.0f, 0.01f));
-    mCycleSpeedSlider.setValue(1.0, NotificationType::sendNotificationAsync);
-    mCycleSpeedSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mCycleSpeedSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mCycleSpeedSlider.setNormalisableRange(juce::NormalisableRange<double>(-2.0f, 2.0f, 0.01f));
+    mCycleSpeedSlider.setValue(1.0, juce::NotificationType::sendNotificationAsync);
+    mCycleSpeedSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
+    mCycleSpeedSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mCycleSpeedSlider);
 
-    mPositionActivateButton.addShortcut(KeyPress('a', 0, 0));
+    mPositionActivateButton.addShortcut(juce::KeyPress('a', 0, 0));
     addAndMakeVisible(&mPositionActivateButton);
     mPositionActivateButton.setButtonText("Activate");
     mPositionActivateButton.setClickingTogglesState(true);
@@ -127,11 +127,11 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
     };
     addAndMakeVisible(&mPositionBackAndForthToggle);
 
-    mDampeningLabel.setText("Number of cycles \ndampening:", NotificationType::dontSendNotification);
+    mDampeningLabel.setText("Number of cycles \ndampening:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDampeningLabel);
 
     addAndMakeVisible(&mPositionDampeningEditor);
-    mPositionDampeningEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mPositionDampeningEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mPositionDampeningEditor.setText("0", false);
     mPositionDampeningEditor.setInputRestrictions(10, "0123456789");
     mPositionDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
@@ -142,11 +142,11 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         mDurationUnitCombo.grabKeyboardFocus();
     };
 
-    mDeviationLabel.setText("Deviation degrees\nper cycle:", NotificationType::dontSendNotification);
+    mDeviationLabel.setText("Deviation degrees\nper cycle:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDeviationLabel);
 
     addAndMakeVisible(&mDeviationEditor);
-    mDeviationEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mDeviationEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mDeviationEditor.setText("0", false);
     mDeviationEditor.setInputRestrictions(10, "-0123456789.");
     mDeviationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
@@ -154,11 +154,11 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
         mListeners.call([&](Listener & l) {
             l.trajectoryBoxDeviationPerCycleChanged(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0f));
         });
-        mDeviationEditor.setText(String(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0)));
+        mDeviationEditor.setText(juce::String(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0)));
         mDurationUnitCombo.grabKeyboardFocus();
     };
 
-    mElevationActivateButton.addShortcut(KeyPress('a', ModifierKeys::shiftModifier, 0));
+    mElevationActivateButton.addShortcut(juce::KeyPress('a', juce::ModifierKeys::shiftModifier, 0));
     addChildComponent(&mElevationActivateButton);
     mElevationActivateButton.setButtonText("Activate");
     mElevationActivateButton.setClickingTogglesState(true);
@@ -178,7 +178,7 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
     addAndMakeVisible(&mElevationBackAndForthToggle);
 
     addAndMakeVisible(&mElevationDampeningEditor);
-    mElevationDampeningEditor.setTextToShowWhenEmpty("0", Colours::white);
+    mElevationDampeningEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mElevationDampeningEditor.setText("0", false);
     mElevationDampeningEditor.setInputRestrictions(10, "0123456789");
     mElevationDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
@@ -234,14 +234,14 @@ void TrajectoryBoxComponent::setElevationTrajectoryType(int const type)
 //==============================================================================
 void TrajectoryBoxComponent::setPositionBackAndForth(bool const state)
 {
-    mPositionBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
+    mPositionBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
 //==============================================================================
 void TrajectoryBoxComponent::setElevationBackAndForth(bool const state)
 {
-    mElevationBackAndForthToggle.setToggleState(state, NotificationType::sendNotification);
+    mElevationBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 
@@ -249,12 +249,12 @@ void TrajectoryBoxComponent::setElevationBackAndForth(bool const state)
 void TrajectoryBoxComponent::setPositionDampeningEnabled(bool const state)
 {
     mPositionDampeningEditor.setEnabled(state);
-    String text = mPositionDampeningEditor.getText();
+    juce::String text = mPositionDampeningEditor.getText();
     mPositionDampeningEditor.clear();
     if (state)
-        mPositionDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+        mPositionDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(235, 245, 250));
     else
-        mPositionDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+        mPositionDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(172, 172, 172));
     mPositionDampeningEditor.setText(text);
 }
 
@@ -262,31 +262,31 @@ void TrajectoryBoxComponent::setPositionDampeningEnabled(bool const state)
 void TrajectoryBoxComponent::setElevationDampeningEnabled(bool const state)
 {
     mElevationDampeningEditor.setEnabled(state);
-    String text = mElevationDampeningEditor.getText();
+    juce::String text = mElevationDampeningEditor.getText();
     mElevationDampeningEditor.clear();
     if (state)
-        mElevationDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(235, 245, 250));
+        mElevationDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(235, 245, 250));
     else
-        mElevationDampeningEditor.setColour(TextEditor::textColourId, Colour::fromRGB(172, 172, 172));
+        mElevationDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(172, 172, 172));
     mElevationDampeningEditor.setText(text);
 }
 
 //==============================================================================
 void TrajectoryBoxComponent::setPositionDampeningCycles(int const value)
 {
-    mPositionDampeningEditor.setText(String(value));
+    mPositionDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
 void TrajectoryBoxComponent::setElevationDampeningCycles(int const value)
 {
-    mElevationDampeningEditor.setText(String(value));
+    mElevationDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
 void TrajectoryBoxComponent::setDeviationPerCycle(float const value)
 {
-    mDeviationEditor.setText(String(value));
+    mDeviationEditor.setText(juce::String(value));
 }
 
 //==============================================================================
@@ -304,13 +304,13 @@ void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink const va
 //==============================================================================
 void TrajectoryBoxComponent::setPositionActivateState(bool const state)
 {
-    mPositionActivateButton.setToggleState(state, NotificationType::dontSendNotification);
+    mPositionActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
 void TrajectoryBoxComponent::setElevationActivateState(bool const state)
 {
-    mElevationActivateButton.setToggleState(state, NotificationType::dontSendNotification);
+    mElevationActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
@@ -323,7 +323,7 @@ void TrajectoryBoxComponent::setSymmetricLinkComboState(bool const allowed)
 //==============================================================================
 void TrajectoryBoxComponent::setCycleDuration(double const value)
 {
-    mDurationEditor.setText(String(value));
+    mDurationEditor.setText(juce::String(value));
     mListeners.call([&](Listener & l) {
         l.trajectoryBoxCycleDurationChanged(mDurationEditor.getText().getDoubleValue(),
                                             mDurationUnitCombo.getSelectedId());
@@ -333,7 +333,7 @@ void TrajectoryBoxComponent::setCycleDuration(double const value)
 //==============================================================================
 void TrajectoryBoxComponent::setDurationUnit(int const value)
 {
-    mDurationUnitCombo.setSelectedId(value, NotificationType::sendNotificationSync);
+    mDurationUnitCombo.setSelectedId(value, juce::NotificationType::sendNotificationSync);
     mListeners.call([&](Listener & l) {
         l.trajectoryBoxDurationUnitChanged(mDurationEditor.getText().getDoubleValue(),
                                            mDurationUnitCombo.getSelectedId());
@@ -341,9 +341,9 @@ void TrajectoryBoxComponent::setDurationUnit(int const value)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::paint(Graphics & g)
+void TrajectoryBoxComponent::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

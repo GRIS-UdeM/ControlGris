@@ -173,7 +173,7 @@ class CircularFullyFixedStrategy final : public LinkStrategy
 //==============================================================================
 class LinkSymmetricXStrategy final : public LinkStrategy
 {
-    Point<float> mPrimarySourceFinalPosition;
+    juce::Point<float> mPrimarySourceFinalPosition;
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates,
                                           [[maybe_unused]] SourcesSnapshots const & initialStates) override;
@@ -191,7 +191,7 @@ class LinkSymmetricXStrategy final : public LinkStrategy
 //==============================================================================
 class LinkSymmetricYStrategy final : public LinkStrategy
 {
-    Point<float> mPrimarySourceFinalPosition;
+    juce::Point<float> mPrimarySourceFinalPosition;
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates,
                                           [[maybe_unused]] SourcesSnapshots const & initialStates) override;
@@ -209,7 +209,7 @@ class LinkSymmetricYStrategy final : public LinkStrategy
 //==============================================================================
 class DeltaLockStrategy final : public LinkStrategy
 {
-    Point<float> mDelta;
+    juce::Point<float> mDelta;
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
     void enforce_implementation(Sources & finalStates,

@@ -57,7 +57,7 @@ void ElevationSourceComponent::sourceMoved()
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseDown(MouseEvent const & event)
+void ElevationSourceComponent::mouseDown(juce::MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
     mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
@@ -72,7 +72,7 @@ void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
+void ElevationSourceComponent::setSourcePosition(juce::MouseEvent const & event) const
 {
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
@@ -84,7 +84,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
+void ElevationSourceComponent::mouseDrag(juce::MouseEvent const & event)
 {
     if (mCanDrag && mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
@@ -93,7 +93,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseUp(MouseEvent const & event)
+void ElevationSourceComponent::mouseUp(juce::MouseEvent const & event)
 {
     if (mCanDrag) {
         mouseDrag(event);

@@ -17,18 +17,20 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include <JuceHeader.h>
 
 //==============================================================================
-// BannerComponent is a Label-derived class used to identify the different
-// UI sections of the plugin.
-class BannerComponent final : public Label
+/**
+ * A Label-derived class used to identify the different UI sections of the plugin.
+ */
+class BannerComponent final : public juce::Label
 {
-    static Colour const backgroundColour;
-    static Colour const outlineColour;
-    static Colour const textColour;
+    static juce::Colour const backgroundColour;
+    static juce::Colour const outlineColour;
+    static juce::Colour const textColour;
 
 public:
     //==============================================================================

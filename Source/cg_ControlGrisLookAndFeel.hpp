@@ -23,66 +23,66 @@
 #include <JuceHeader.h>
 
 //==============================================================================
-class GrisLookAndFeel final : public LookAndFeel_V3
+class GrisLookAndFeel final : public juce::LookAndFeel_V3
 {
     float mFontSize;
-    Font mFont{ juce::CustomTypeface::createSystemTypefaceFor(
+    juce::Font mFont{ juce::CustomTypeface::createSystemTypefaceFor(
         BinaryData::SinkinSans400Regular_otf,
         static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
-    Font mBigFont{ juce::CustomTypeface::createSystemTypefaceFor(
+    juce::Font mBigFont{ juce::CustomTypeface::createSystemTypefaceFor(
         BinaryData::SinkinSans400Regular_otf,
         static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
-    Font mBiggerFont{ juce::CustomTypeface::createSystemTypefaceFor(
+    juce::Font mBiggerFont{ juce::CustomTypeface::createSystemTypefaceFor(
         BinaryData::SinkinSans400Regular_otf,
         static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
 
-    Colour mBackgroundAndFieldColor;
-    Colour mWinBackgroundAndFieldColor;
-    Colour mLightColor;
-    Colour mDarkColor;
-    Colour mGreyColor;
-    Colour mEditBackgroundColor;
-    Colour mDisableBackgroundColor;
-    Colour mHlBackgroundColor;
-    Colour mOnColor;
-    Colour mOnColorOver;
-    Colour mOnColorDown;
-    Colour mOffColor;
-    Colour mGreenColor;
-    Colour mRedColor;
+    juce::Colour mBackgroundAndFieldColor;
+    juce::Colour mWinBackgroundAndFieldColor;
+    juce::Colour mLightColor;
+    juce::Colour mDarkColor;
+    juce::Colour mGreyColor;
+    juce::Colour mEditBackgroundColor;
+    juce::Colour mDisableBackgroundColor;
+    juce::Colour mHlBackgroundColor;
+    juce::Colour mOnColor;
+    juce::Colour mOnColorOver;
+    juce::Colour mOnColorDown;
+    juce::Colour mOffColor;
+    juce::Colour mGreenColor;
+    juce::Colour mRedColor;
 
 public:
     //==============================================================================
     GrisLookAndFeel();
 
-    [[nodiscard]] Font getFont() const { return this->mFont; }
-    Font getLabelFont([[maybe_unused]] Label & label) override { return this->mFont; }
-    Font getComboBoxFont([[maybe_unused]] ComboBox & comboBox) override { return this->mFont; }
-    Font getTextButtonFont(TextButton &, [[maybe_unused]] int buttonHeight) override { return this->mFont; }
-    Font getMenuBarFont(MenuBarComponent &,
-                        [[maybe_unused]] int itemIndex,
-                        [[maybe_unused]] String const & itemText) override
+    [[nodiscard]] juce::Font getFont() const { return this->mFont; }
+    juce::Font getLabelFont([[maybe_unused]] juce::Label & label) override { return this->mFont; }
+    juce::Font getComboBoxFont([[maybe_unused]] juce::ComboBox & comboBox) override { return this->mFont; }
+    juce::Font getTextButtonFont(juce::TextButton &, [[maybe_unused]] int buttonHeight) override { return this->mFont; }
+    juce::Font getMenuBarFont(juce::MenuBarComponent &,
+                              [[maybe_unused]] int itemIndex,
+                              [[maybe_unused]] juce::String const & itemText) override
     {
         return this->mFont;
     }
 
-    [[nodiscard]] Colour getWinBackgroundColor() const { return this->mWinBackgroundAndFieldColor; }
-    [[nodiscard]] Colour getBackgroundColor() const { return this->mBackgroundAndFieldColor; }
-    [[nodiscard]] Colour getFieldColor() const { return this->mBackgroundAndFieldColor; }
-    [[nodiscard]] Colour getFontColor() const { return this->mLightColor; }
-    [[nodiscard]] Colour getScrollBarColor() const { return this->mGreyColor; }
-    [[nodiscard]] Colour getDarkColor() const { return this->mDarkColor; }
-    [[nodiscard]] Colour getLightColor() const { return this->mLightColor; }
-    [[nodiscard]] Colour getEditBackgroundColor() const { return this->mEditBackgroundColor; }
-    [[nodiscard]] Colour getHighlightColor() const { return this->mHlBackgroundColor; }
-    [[nodiscard]] Colour getOnColor() const { return this->mOnColor; }
-    [[nodiscard]] Colour getOffColor() const { return this->mOffColor; }
-    [[nodiscard]] Colour getGreenColor() const { return this->mGreenColor; }
-    [[nodiscard]] Colour getRedColor() const { return this->mRedColor; }
+    [[nodiscard]] juce::Colour getWinBackgroundColor() const { return this->mWinBackgroundAndFieldColor; }
+    [[nodiscard]] juce::Colour getBackgroundColor() const { return this->mBackgroundAndFieldColor; }
+    [[nodiscard]] juce::Colour getFieldColor() const { return this->mBackgroundAndFieldColor; }
+    [[nodiscard]] juce::Colour getFontColor() const { return this->mLightColor; }
+    [[nodiscard]] juce::Colour getScrollBarColor() const { return this->mGreyColor; }
+    [[nodiscard]] juce::Colour getDarkColor() const { return this->mDarkColor; }
+    [[nodiscard]] juce::Colour getLightColor() const { return this->mLightColor; }
+    [[nodiscard]] juce::Colour getEditBackgroundColor() const { return this->mEditBackgroundColor; }
+    [[nodiscard]] juce::Colour getHighlightColor() const { return this->mHlBackgroundColor; }
+    [[nodiscard]] juce::Colour getOnColor() const { return this->mOnColor; }
+    [[nodiscard]] juce::Colour getOffColor() const { return this->mOffColor; }
+    [[nodiscard]] juce::Colour getGreenColor() const { return this->mGreenColor; }
+    [[nodiscard]] juce::Colour getRedColor() const { return this->mRedColor; }
 
     // https://github.com/audioplastic/Juce-look-and-feel-examples/blob/master/JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp
 
-    void drawComboBox(Graphics & g,
+    void drawComboBox(juce::Graphics & g,
                       int /*width*/,
                       int /*height*/,
                       bool /*isMouseButtonDown*/,
@@ -90,31 +90,35 @@ public:
                       int buttonY,
                       int buttonW,
                       int buttonH,
-                      ComboBox & box) override;
+                      juce::ComboBox & box) override;
 
-    void drawRoundThumb(Graphics & g, float x, float y, float diameter, const Colour & color, float outlineThickness)
-        const;
+    void drawRoundThumb(juce::Graphics & g,
+                        float x,
+                        float y,
+                        float diameter,
+                        const juce::Colour & color,
+                        float outlineThickness) const;
 
-    void drawPopupMenuItem(Graphics & g,
-                           const Rectangle<int> & area,
+    void drawPopupMenuItem(juce::Graphics & g,
+                           const juce::Rectangle<int> & area,
                            bool isSeparator,
                            bool isActive,
                            bool isHighlighted,
                            bool isTicked,
                            bool hasSubMenu,
-                           const String & text,
-                           const String & shortcutKeyText,
-                           const Drawable * icon,
-                           const Colour * textColourToUse) override;
+                           const juce::String & text,
+                           const juce::String & shortcutKeyText,
+                           const juce::Drawable * icon,
+                           const juce::Colour * textColourToUse) override;
 
-    void drawButtonBackground(Graphics & g,
-                              Button & button,
-                              [[maybe_unused]] Colour const & backgroundColor,
+    void drawButtonBackground(juce::Graphics & g,
+                              juce::Button & button,
+                              [[maybe_unused]] juce::Colour const & backgroundColor,
                               bool isMouseOverButton,
                               bool isButtonDown) override;
 
-    void drawTickBox(Graphics & g,
-                     Component & component,
+    void drawTickBox(juce::Graphics & g,
+                     juce::Component & component,
                      float x,
                      float y,
                      float w,
@@ -124,7 +128,7 @@ public:
                      [[maybe_unused]] bool isMouseOverButton,
                      [[maybe_unused]] bool isButtonDown) override;
 
-    void drawLinearSliderThumb(Graphics & g,
+    void drawLinearSliderThumb(juce::Graphics & g,
                                int x,
                                int y,
                                int width,
@@ -132,10 +136,10 @@ public:
                                float sliderPos,
                                [[maybe_unused]] float minSliderPos,
                                [[maybe_unused]] float maxSliderPos,
-                               Slider::SliderStyle const style,
-                               Slider & slider) override;
+                               juce::Slider::SliderStyle const style,
+                               juce::Slider & slider) override;
 
-    void drawLinearSlider(Graphics & g,
+    void drawLinearSlider(juce::Graphics & g,
                           int x,
                           int y,
                           int width,
@@ -143,10 +147,10 @@ public:
                           float sliderPos,
                           float minSliderPos,
                           float maxSliderPos,
-                          Slider::SliderStyle style,
-                          Slider & slider) override;
+                          juce::Slider::SliderStyle style,
+                          juce::Slider & slider) override;
 
-    void drawLinearSliderBackground(Graphics & g,
+    void drawLinearSliderBackground(juce::Graphics & g,
                                     int x,
                                     int y,
                                     int width,
@@ -154,28 +158,31 @@ public:
                                     float /*sliderPos*/,
                                     float /*minSliderPos*/,
                                     float /*maxSliderPos*/,
-                                    Slider::SliderStyle /*style*/,
-                                    Slider & slider) override;
+                                    juce::Slider::SliderStyle /*style*/,
+                                    juce::Slider & slider) override;
 
-    void fillTextEditorBackground(Graphics & g,
+    void fillTextEditorBackground(juce::Graphics & g,
                                   [[maybe_unused]] int width,
                                   [[maybe_unused]] int height,
-                                  TextEditor & t) override;
+                                  juce::TextEditor & t) override;
 
-    void drawTextEditorOutline(Graphics & g, int width, int height, TextEditor & t) override;
+    void drawTextEditorOutline(juce::Graphics & g, int width, int height, juce::TextEditor & t) override;
 
-    void drawToggleButton(Graphics & g, ToggleButton & button, bool isMouseOverButton, bool isButtonDown) override;
+    void drawToggleButton(juce::Graphics & g,
+                          juce::ToggleButton & button,
+                          bool isMouseOverButton,
+                          bool isButtonDown) override;
 
-    void drawTabButton(TabBarButton & button, Graphics & g, bool isMouseOver, bool isMouseDown) override;
+    void drawTabButton(juce::TabBarButton & button, juce::Graphics & g, bool isMouseOver, bool isMouseDown) override;
 
-    void createTabTextLayout(const TabBarButton & button,
+    void createTabTextLayout(const juce::TabBarButton & button,
                              float length,
                              float depth,
-                             Colour color,
-                             TextLayout & textLayout) const;
+                             juce::Colour color,
+                             juce::TextLayout & textLayout) const;
 
     // we don't use those, so far
-    void drawRotarySlider(Graphics & g,
+    void drawRotarySlider(juce::Graphics & g,
                           int x,
                           int y,
                           int width,
@@ -183,5 +190,5 @@ public:
                           float sliderPos,
                           float rotaryStartAngle,
                           float rotaryEndAngle,
-                          Slider & slider) override;
+                          juce::Slider & slider) override;
 };

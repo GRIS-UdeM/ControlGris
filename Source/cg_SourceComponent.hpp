@@ -30,8 +30,8 @@ class FieldComponent;
 //==============================================================================
 class SourceComponent : public juce::Component
 {
-    Colour mColour;
-    String mIcon;
+    juce::Colour mColour;
+    juce::String mIcon;
     bool mSelected{ false };
 
 protected:
@@ -52,16 +52,16 @@ public:
     SourceComponent & operator=(SourceComponent const &) = delete;
     SourceComponent & operator=(SourceComponent &&) = delete;
     //==============================================================================
-    SourceComponent(Colour colour, String const & icon);
+    SourceComponent(juce::Colour colour, juce::String const & icon);
     //==============================================================================
     void setSelected(bool selected);
-    void paint(Graphics & g) final;
+    void paint(juce::Graphics & g) final;
 
-    Colour getColour() const { return mColour; }
+    juce::Colour getColour() const { return mColour; }
     virtual void updatePositionInParent(){}; // TEMP
 protected:
     //==============================================================================
-    static DisplacementMode getDisplacementMode(MouseEvent const & event);
+    static DisplacementMode getDisplacementMode(juce::MouseEvent const & event);
     static bool isMoveAllowed(DisplacementMode displacementMode, bool isPrimarySource, PositionSourceLink sourceLink);
     static bool isMoveAllowed(DisplacementMode displatcementMode, bool isPrimarySource, ElevationSourceLink sourceLink);
 

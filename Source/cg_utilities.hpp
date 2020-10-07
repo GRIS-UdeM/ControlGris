@@ -27,7 +27,7 @@ class XmlElementDataSorter
 {
 private:
     //==============================================================================
-    String mAttributeToSort{};
+    juce::String mAttributeToSort{};
     int mDirection{};
 
 public:
@@ -41,13 +41,13 @@ public:
     XmlElementDataSorter & operator=(XmlElementDataSorter const &) = delete;
     XmlElementDataSorter & operator=(XmlElementDataSorter &&) = delete;
     //==============================================================================
-    XmlElementDataSorter(String const & attributeToSortBy, bool forwards) noexcept
+    XmlElementDataSorter(juce::String const & attributeToSortBy, bool forwards) noexcept
         : mAttributeToSort(attributeToSortBy)
         , mDirection(forwards ? 1 : -1)
     {
     }
     //==============================================================================
-    int compareElements(XmlElement * first, XmlElement * second) const
+    int compareElements(juce::XmlElement * first, juce::XmlElement * second) const
     {
         int result;
         if (first->getDoubleAttribute(mAttributeToSort) < second->getDoubleAttribute(mAttributeToSort))

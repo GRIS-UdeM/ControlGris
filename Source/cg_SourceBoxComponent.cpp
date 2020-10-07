@@ -28,13 +28,13 @@ DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     mCurrentAzimuth = {};
     mCurrentElevation = MAX_ELEVATION;
 
-    mElevationLabel.setText("Elevation:", NotificationType::dontSendNotification);
+    mElevationLabel.setText("Elevation:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationLabel);
 
-    mElevationSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
-    mElevationSlider.setValue(1.0, NotificationType::dontSendNotification);
-    mElevationSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mElevationSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mElevationSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.01f));
+    mElevationSlider.setValue(1.0, juce::NotificationType::dontSendNotification);
+    mElevationSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
+    mElevationSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
         mCurrentElevation = MAX_ELEVATION * (1.0f - mElevationSlider.getValue());
@@ -48,13 +48,13 @@ DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
         });
     };
 
-    mAzimuthLabel.setText("Azimuth:", NotificationType::dontSendNotification);
+    mAzimuthLabel.setText("Azimuth:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
 
-    mAzimuthSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 360.0f, 0.01f));
-    mAzimuthSlider.setValue(0.0, NotificationType::dontSendNotification);
-    mAzimuthSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 20);
-    mAzimuthSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mAzimuthSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 360.0f, 0.01f));
+    mAzimuthSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
+    mAzimuthSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
+    mAzimuthSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mAzimuthSlider);
     mAzimuthSlider.onValueChange = [this] {
         mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
@@ -84,8 +84,8 @@ void DomeControls::updateSliderValues(Source * source)
     if (mCurrentAzimuth.getAsDegrees() < 0.0f) {
         mCurrentAzimuth += Degrees{ 360.0f };
     }
-    mAzimuthSlider.setValue(mCurrentAzimuth.getAsDegrees(), NotificationType::dontSendNotification);
-    mElevationSlider.setValue(1.0f - mCurrentElevation / MAX_ELEVATION, NotificationType::dontSendNotification);
+    mAzimuthSlider.setValue(mCurrentAzimuth.getAsDegrees(), juce::NotificationType::dontSendNotification);
+    mElevationSlider.setValue(1.0f - mCurrentElevation / MAX_ELEVATION, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
@@ -95,29 +95,29 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     mCurrentY = { 0.0f };
     mCurrentZ = { 0.0f };
 
-    mXLabel.setText("X", NotificationType::dontSendNotification);
-    mYLabel.setText("Y", NotificationType::dontSendNotification);
-    mZLabel.setText("Z", NotificationType::dontSendNotification);
+    mXLabel.setText("X", juce::NotificationType::dontSendNotification);
+    mYLabel.setText("Y", juce::NotificationType::dontSendNotification);
+    mZLabel.setText("Z", juce::NotificationType::dontSendNotification);
 
     addAndMakeVisible(&mXLabel);
     addAndMakeVisible(&mYLabel);
     addAndMakeVisible(&mZLabel);
 
-    mXSlider.setNormalisableRange(NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
-    mYSlider.setNormalisableRange(NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
-    mZSlider.setNormalisableRange(NormalisableRange<double>(0.0f, 1.0f, 0.01f));
+    mXSlider.setNormalisableRange(juce::NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
+    mYSlider.setNormalisableRange(juce::NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
+    mZSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.01f));
 
-    mXSlider.setValue(0.0, NotificationType::dontSendNotification);
-    mYSlider.setValue(0.0, NotificationType::dontSendNotification);
-    mZSlider.setValue(0.0, NotificationType::dontSendNotification);
+    mXSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
+    mYSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
+    mZSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
 
-    mXSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
-    mYSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
-    mZSlider.setTextBoxStyle(Slider::TextBoxRight, false, 40, 15);
+    mXSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
+    mYSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
+    mZSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
 
-    mXSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-    mYSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
-    mZSlider.setColour(Slider::textBoxOutlineColourId, Colours::transparentBlack);
+    mXSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    mYSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+    mZSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
 
     addAndMakeVisible(&mXSlider);
     addAndMakeVisible(&mYSlider);
@@ -173,9 +173,9 @@ void CubeControls::updateSliderValues(Source * source)
     mCurrentY = source->getY();
     mCurrentZ = 1.0f - source->getElevation() / MAX_ELEVATION;
 
-    mXSlider.setValue(mCurrentX, NotificationType::dontSendNotification);
-    mYSlider.setValue(mCurrentY, NotificationType::dontSendNotification);
-    mZSlider.setValue(mCurrentZ, NotificationType::dontSendNotification);
+    mXSlider.setValue(mCurrentX, juce::NotificationType::dontSendNotification);
+    mYSlider.setValue(mCurrentY, juce::NotificationType::dontSendNotification);
+    mZSlider.setValue(mCurrentZ, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
@@ -186,7 +186,7 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMo
 {
     mSelectedSource = SourceIndex{};
 
-    mSourcePlacementLabel.setText("Source Placement:", NotificationType::dontSendNotification);
+    mSourcePlacementLabel.setText("Source Placement:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourcePlacementLabel);
 
     addAndMakeVisible(&mSourcePlacementCombo);
@@ -195,11 +195,11 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMo
     mSourcePlacementCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
             l.sourceBoxPlacementChanged(static_cast<SourcePlacement>(mSourcePlacementCombo.getSelectedId()));
-            mSourcePlacementCombo.setSelectedId(0, NotificationType::dontSendNotification);
+            mSourcePlacementCombo.setSelectedId(0, juce::NotificationType::dontSendNotification);
         });
     };
 
-    mSourceNumberLabel.setText("Source Number:", NotificationType::dontSendNotification);
+    mSourceNumberLabel.setText("Source Number:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourceNumberLabel);
 
     addAndMakeVisible(&mSourceNumberCombo);
@@ -219,9 +219,9 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMo
 }
 
 //==============================================================================
-void SourceBoxComponent::paint(Graphics & g)
+void SourceBoxComponent::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================

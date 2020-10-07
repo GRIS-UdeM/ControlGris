@@ -46,7 +46,7 @@ void TrajectoryManager::setPositionActivateState(bool const newState)
 }
 
 //==============================================================================
-void TrajectoryManager::resetRecordingTrajectory(Point<float> const currentPosition)
+void TrajectoryManager::resetRecordingTrajectory(juce::Point<float> const currentPosition)
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
             && currentPosition.getY() <= 1.0f);
@@ -58,7 +58,7 @@ void TrajectoryManager::resetRecordingTrajectory(Point<float> const currentPosit
 }
 
 //==============================================================================
-Point<float> TrajectoryManager::smoothRecordingPosition(Point<float> const & pos)
+juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float> const & pos)
 {
     constexpr auto smoothingFactor = 0.8f;
 
@@ -150,7 +150,7 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
     if (mDegreeOfDeviationPerCycle != Degrees{ 0.0f }) {
         bool deviationFlag{ true };
         if (mIsBackAndForth && mDampeningCycles > 0) {
-            if (approximatelyEqual(currentScaleMin, currentScaleMax)) {
+            if (juce::approximatelyEqual(currentScaleMin, currentScaleMax)) {
                 deviationFlag = false;
             }
         }
@@ -167,7 +167,7 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
 }
 
 //==============================================================================
-Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
+juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
@@ -206,7 +206,8 @@ void ElevationTrajectoryManager::sendTrajectoryPositionChangedEvent()
 }
 
 //==============================================================================
-void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
+void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const type,
+                                                  juce::Point<float> const & startPos)
 {
     mTrajectoryType = type;
     if (type == PositionTrajectoryType::realtime) {
@@ -218,7 +219,7 @@ void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const t
 }
 
 //==============================================================================
-void TrajectoryManager::addRecordingPoint(Point<float> const & pos)
+void TrajectoryManager::addRecordingPoint(juce::Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));

@@ -20,9 +20,9 @@
 
 #include "cg_BannerComponent.hpp"
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+juce::Colour const BannerComponent::backgroundColour = juce::Colour::fromRGB(64, 64, 64);
+juce::Colour const BannerComponent::outlineColour = juce::Colour::fromRGB(16, 16, 16);
+juce::Colour const BannerComponent::textColour = juce::Colour::fromRGB(255, 255, 255);
 
 //==============================================================================
 BannerComponent::BannerComponent() noexcept

@@ -27,7 +27,7 @@
 #include "cg_constants.hpp"
 
 //==============================================================================
-class SettingsBoxComponent final : public Component
+class SettingsBoxComponent final : public juce::Component
 {
 public:
     //==============================================================================
@@ -45,28 +45,28 @@ private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
-    Label mOscFormatLabel;
-    ComboBox mOscFormatCombo;
+    juce::Label mOscFormatLabel;
+    juce::ComboBox mOscFormatCombo;
 
-    Label mOscPortLabel;
-    TextEditor mOscPortEditor;
+    juce::Label mOscPortLabel;
+    juce::TextEditor mOscPortEditor;
 
-    Label mNumOfSourcesLabel;
-    TextEditor mNumOfSourcesEditor;
+    juce::Label mNumOfSourcesLabel;
+    juce::TextEditor mNumOfSourcesEditor;
 
-    Label mFirstSourceIdLabel;
-    TextEditor mFirstSourceIdEditor;
+    juce::Label mFirstSourceIdLabel;
+    juce::TextEditor mFirstSourceIdEditor;
 
-    ToggleButton mPositionActivateButton;
+    juce::ToggleButton mPositionActivateButton;
 
 public:
     //==============================================================================
     explicit SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel);
     ~SettingsBoxComponent() final = default;
 
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
 
     // These are only setters, they dont send notification.

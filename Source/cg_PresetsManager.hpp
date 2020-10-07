@@ -29,11 +29,11 @@
 #include "cg_constants.hpp"
 
 //==============================================================================
-class PresetsManager final : public ChangeBroadcaster
+class PresetsManager final : public juce::ChangeBroadcaster
 {
     //==============================================================================
     int mLastLoadedPreset{ 0 };
-    XmlElement & mData;
+    juce::XmlElement & mData;
     Sources & mSources;
     SourceLinkEnforcer & mPositionLinkEnforcer;
     SourceLinkEnforcer & mElevationLinkEnforcer;
@@ -49,7 +49,7 @@ public:
     PresetsManager & operator=(PresetsManager const &) = delete;
     PresetsManager & operator=(PresetsManager &&) = delete;
     //==============================================================================
-    PresetsManager(XmlElement & data,
+    PresetsManager(juce::XmlElement & data,
                    Sources & sources,
                    SourceLinkEnforcer & positionLinkEnforcer,
                    SourceLinkEnforcer & elevationLinkEnforcer);
@@ -66,8 +66,8 @@ public:
 private:
     //==============================================================================
     [[nodiscard]] bool contains(int presetNumber) const;
-    [[nodiscard]] std::unique_ptr<XmlElement> createPresetData(int presetNumber) const;
-    [[nodiscard]] std::optional<XmlElement *> getPresetData(int presetNumber) const;
+    [[nodiscard]] std::unique_ptr<juce::XmlElement> createPresetData(int presetNumber) const;
+    [[nodiscard]] std::optional<juce::XmlElement *> getPresetData(int presetNumber) const;
 
     [[nodiscard]] bool load(int presetNumber);
     //==============================================================================

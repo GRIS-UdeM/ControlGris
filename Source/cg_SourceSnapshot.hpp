@@ -29,7 +29,7 @@ class Source;
 
 //==============================================================================
 struct SourceSnapshot {
-    Point<float> position;
+    juce::Point<float> position;
     Radians z; // height in CUBE mode, elevation in DOME mode
     //==============================================================================
     SourceSnapshot() noexcept = default;
@@ -50,7 +50,7 @@ private:
 //==============================================================================
 struct SourcesSnapshots {
     SourceSnapshot primary{};
-    Array<SourceSnapshot> secondaries{};
+    juce::Array<SourceSnapshot> secondaries{};
     //==============================================================================
     SourceSnapshot const & operator[](SourceIndex const index) const;
     //==============================================================================

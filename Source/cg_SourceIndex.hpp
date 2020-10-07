@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include <JuceHeader.h>
+
 class SourceIndex
 {
 private:
@@ -38,7 +40,7 @@ public:
     constexpr explicit SourceIndex(int index) noexcept : mValue(index) {}
 
     constexpr int toInt() const { return mValue; }
-    String toString() const { return String{ mValue }; }
+    juce::String toString() const { return juce::String{ mValue }; }
 
     constexpr bool operator==(SourceIndex const & other) const { return mValue == other.mValue; }
     constexpr bool operator!=(SourceIndex const & other) const { return mValue != other.mValue; }
