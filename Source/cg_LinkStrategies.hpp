@@ -26,6 +26,8 @@
 #include "cg_SourceSnapshot.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 class Source;
 class Sources;
 class SourcesSnapshots;
@@ -311,3 +313,5 @@ class DeltaLockElevationStrategy final : public LinkStrategy
     //==============================================================================
     JUCE_LEAK_DETECTOR(DeltaLockElevationStrategy)
 };
+
+} // namespace gris

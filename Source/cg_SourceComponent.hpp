@@ -24,6 +24,8 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 class Source;
 class FieldComponent;
 
@@ -70,3 +72,5 @@ private:
     JUCE_LEAK_DETECTOR(SourceComponent)
 
 }; // class SourceComponent
+
+} // namespace gris

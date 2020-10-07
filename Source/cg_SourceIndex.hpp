@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 class SourceIndex
 {
 private:
@@ -60,4 +62,6 @@ public:
     }
 
     constexpr bool isValid() const { return mValue >= 0 && mValue < 8; } // TODO: remove magic number
-};
+};                                                                       // class SourceIndex
+
+} // namespace gris

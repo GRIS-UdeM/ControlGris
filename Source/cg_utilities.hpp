@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 //==============================================================================
 class XmlElementDataSorter
 {
@@ -64,3 +66,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(XmlElementDataSorter)
 };
+
+} // namespace gris

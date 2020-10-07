@@ -28,6 +28,8 @@
 #include "cg_SourceLinkEnforcer.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class PresetsManager final : public juce::ChangeBroadcaster
 {
@@ -73,3 +75,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(PresetsManager)
 };
+
+} // namespace gris

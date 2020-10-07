@@ -25,6 +25,8 @@
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class TrajectoryBoxComponent final : public juce::Component
 {
@@ -136,3 +138,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrajectoryBoxComponent)
 };
+
+} // namespace gris

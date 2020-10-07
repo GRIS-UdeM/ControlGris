@@ -25,6 +25,8 @@
 #include "cg_Radians.hpp"
 #include "cg_SourceComponent.hpp"
 
+namespace gris
+{
 class ElevationFieldComponent;
 
 //==============================================================================
@@ -55,3 +57,5 @@ private:
     JUCE_LEAK_DETECTOR(ElevationDrawingHandle)
 
 }; // class ElevationDrawingHandle
+
+} // namespace gris

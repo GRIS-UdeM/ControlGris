@@ -22,6 +22,8 @@
 
 #include "cg_PresetsManager.hpp"
 
+namespace gris
+{
 //==============================================================================
 void PresetButton::setSavedState(bool const savedState)
 {
@@ -187,3 +189,5 @@ void PositionPresetComponent::resized()
     mActionLog.setBounds(1, 25 * 24 + 2, width - 3, 20);
     mAppVersionLabel.setBounds(3, 25 * 24 + 35, width - 3, 20);
 }
+
+} // namespace gris

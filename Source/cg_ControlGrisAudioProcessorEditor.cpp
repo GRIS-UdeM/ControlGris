@@ -23,6 +23,8 @@
 #include "cg_ControlGrisAudioProcessor.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     ControlGrisAudioProcessor & controlGrisAudioProcessor,
@@ -793,3 +795,5 @@ void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 {
     mSourceBox.setSpatMode(spatMode);
 }
+
+} // namespace gris

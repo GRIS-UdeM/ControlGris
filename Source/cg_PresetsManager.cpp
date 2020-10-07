@@ -22,6 +22,8 @@
 
 #include "cg_utilities.hpp"
 
+namespace gris
+{
 enum class FixedPositionType { terminal, initial };
 
 //==============================================================================
@@ -287,3 +289,5 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
 
     return result;
 }
+
+} // namespace gris

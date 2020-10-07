@@ -25,6 +25,8 @@
 #include "cg_Radians.hpp"
 #include "cg_SourceIndex.hpp"
 
+namespace gris
+{
 class Source;
 
 //==============================================================================
@@ -60,3 +62,5 @@ struct SourcesSnapshots {
 private:
     JUCE_LEAK_DETECTOR(SourceSnapshot)
 }; // class SourcesSnapshots
+
+} // namespace gris

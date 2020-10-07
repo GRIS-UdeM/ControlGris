@@ -21,6 +21,8 @@
 #include "cg_TrajectoryBoxComponent.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -389,3 +391,5 @@ void TrajectoryBoxComponent::resized()
     mCycleSpeedLabel.setVisible(false);
     mCycleSpeedSlider.setVisible(false);
 }
+
+} // namespace gris

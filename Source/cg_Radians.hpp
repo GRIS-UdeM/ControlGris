@@ -24,6 +24,8 @@
 
 #include <algorithm>
 
+namespace gris
+{
 class Degrees;
 
 class Radians
@@ -108,3 +110,5 @@ public:
 constexpr Radians pi{ juce::MathConstants<float>::pi };
 constexpr Radians twoPi{ juce::MathConstants<float>::twoPi };
 constexpr Radians halfPi{ juce::MathConstants<float>::halfPi };
+
+} // namespace gris

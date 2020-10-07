@@ -23,6 +23,8 @@
 #include "cg_ElevationSourceComponent.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 FieldComponent::FieldComponent(Sources & sources) noexcept : mSources(sources)
 {
@@ -700,3 +702,5 @@ juce::Rectangle<float> ElevationFieldComponent::getEffectiveArea() const
     juce::Rectangle<float> const result{ LEFT_PADDING, TOP_PADDING, effectiveWidth, effectiveHeight };
     return result;
 }
+
+} // namespace gris

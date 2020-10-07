@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 //==============================================================================
 /**
  * A Label-derived class used to identify the different UI sections of the plugin.
@@ -46,4 +48,6 @@ public:
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(BannerComponent)
-};
+}; // class BannerComponent
+
+} // namespace gris

@@ -20,6 +20,8 @@
 
 #include "cg_SettingsBoxComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
 SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -159,3 +161,5 @@ void SettingsBoxComponent::resized()
 
     mPositionActivateButton.setBounds(5, 70, 150, 20);
 }
+
+} // namespace gris

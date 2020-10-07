@@ -23,6 +23,8 @@
 #include "cg_ControlGrisAudioProcessorEditor.hpp"
 #include "cg_TrajectoryManager.hpp"
 
+namespace gris
+{
 enum class FixedPositionType { terminal, initial };
 
 //==============================================================================
@@ -1279,9 +1281,11 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
     }
 }
 
+} // namespace gris
+
 //==============================================================================
 // This creates new instances of the plugin..
 juce::AudioProcessor * JUCE_CALLTYPE createPluginFilter()
 {
-    return new ControlGrisAudioProcessor{};
+    return new gris::ControlGrisAudioProcessor{};
 }

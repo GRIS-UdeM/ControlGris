@@ -24,6 +24,8 @@
 
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 void LinkStrategy::computeParameters(Sources const & finalStates, SourcesSnapshots const & initialStates)
 {
@@ -599,3 +601,5 @@ SourceSnapshot
 
     return result;
 }
+
+} // namespace gris

@@ -26,6 +26,8 @@
 #include "cg_SourceComponent.hpp"
 #include "cg_SourceIndex.hpp"
 
+namespace gris
+{
 class PositionFieldComponent;
 class PositionTrajectoryManager;
 
@@ -69,3 +71,5 @@ private:
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
 
 }; // class PositionSourceComponent
+
+} // namespace gris

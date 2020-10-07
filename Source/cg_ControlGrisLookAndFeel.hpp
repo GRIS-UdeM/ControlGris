@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 //==============================================================================
 class GrisLookAndFeel final : public juce::LookAndFeel_V3
 {
@@ -192,3 +194,5 @@ public:
                           float rotaryEndAngle,
                           juce::Slider & slider) override;
 };
+
+} // namespace gris

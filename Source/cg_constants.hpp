@@ -21,6 +21,8 @@
 
 #include "cg_Degrees.hpp"
 
+namespace gris
+{
 //==============================================================================
 // Global variables.
 constexpr int MIN_FIELD_WIDTH = 300;
@@ -159,3 +161,5 @@ enum class Enum { x, y, z, positionSourceLink, elevationSourceLink, azimuthSpan,
 Enum idToEnum(juce::String const & name);
 
 } // namespace Automation
+
+} // namespace gris

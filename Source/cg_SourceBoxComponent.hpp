@@ -28,6 +28,8 @@
 #include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 class SourceBoxComponent;
 
 //==============================================================================
@@ -160,3 +162,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceBoxComponent)
 };
+
+} // namespace gris

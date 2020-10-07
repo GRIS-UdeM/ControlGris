@@ -24,6 +24,8 @@
 
 #include "cg_ControlGrisLookAndFeel.hpp"
 
+namespace gris
+{
 //==============================================================================
 class InterfaceBoxComponent final
     : public juce::Component
@@ -84,3 +86,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InterfaceBoxComponent)
 };
+
+} // namespace gris

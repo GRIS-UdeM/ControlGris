@@ -29,6 +29,8 @@
 #include "cg_SourceIndex.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ControlGrisAudioProcessor;
 
@@ -256,3 +258,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(Sources)
 };
+
+} // namespace gris

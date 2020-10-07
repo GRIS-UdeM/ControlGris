@@ -20,6 +20,8 @@
 
 #include "cg_BannerComponent.hpp"
 
+namespace gris
+{
 juce::Colour const BannerComponent::backgroundColour = juce::Colour::fromRGB(64, 64, 64);
 juce::Colour const BannerComponent::outlineColour = juce::Colour::fromRGB(16, 16, 16);
 juce::Colour const BannerComponent::textColour = juce::Colour::fromRGB(255, 255, 255);
@@ -32,3 +34,5 @@ BannerComponent::BannerComponent() noexcept
     setColour(Label::outlineColourId, outlineColour);
     setColour(Label::textColourId, textColour);
 }
+
+} // namespace gris

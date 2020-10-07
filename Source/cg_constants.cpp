@@ -20,6 +20,8 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 juce::String const Automation::Ids::X{ "recordingTrajectory_x" };
 juce::String const Automation::Ids::Y{ "recordingTrajectory_y" };
 juce::String const Automation::Ids::Z{ "recordingTrajectory_z" };
@@ -59,3 +61,5 @@ Automation::Enum Automation::idToEnum(const juce::String & name)
     jassertfalse;
     return {};
 }
+
+} // namespace gris

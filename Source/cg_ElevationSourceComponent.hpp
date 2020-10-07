@@ -26,6 +26,8 @@
 #include "cg_SourceComponent.hpp"
 #include "cg_SourceIndex.hpp"
 
+namespace gris
+{
 class ElevationFieldComponent;
 class ElevationTrajectoryManager;
 
@@ -71,3 +73,5 @@ private:
     JUCE_LEAK_DETECTOR(ElevationSourceComponent)
 
 }; // Class ElevationSourceComponent
+
+} // namespace gris

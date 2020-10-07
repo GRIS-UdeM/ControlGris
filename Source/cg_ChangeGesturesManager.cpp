@@ -20,6 +20,8 @@
 
 #include "cg_ChangeGesturesManager.hpp"
 
+namespace gris
+{
 //==============================================================================
 ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager & manager, juce::String const & parameterName)
     : mManager(manager)
@@ -82,3 +84,5 @@ ChangeGesturesManager::ScopedLock ChangeGesturesManager::getScopedLock(const juc
 {
     return ChangeGesturesManager::ScopedLock{ *this, parameterName };
 }
+
+} // namespace gris

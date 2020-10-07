@@ -30,6 +30,8 @@
 #include "cg_SourceBoxComponent.hpp"
 #include "cg_TrajectoryBoxComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
@@ -162,3 +164,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor);
 };
+
+} // namespace gris

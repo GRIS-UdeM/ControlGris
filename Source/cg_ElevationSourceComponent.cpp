@@ -24,6 +24,8 @@
 #include "cg_FieldComponent.hpp"
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : SourceComponent(source.getColour(), source.getId().toString())
@@ -110,3 +112,5 @@ SourceIndex ElevationSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
+
+} // namespace gris

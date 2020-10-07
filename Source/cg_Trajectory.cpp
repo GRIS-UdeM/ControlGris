@@ -24,6 +24,8 @@
 
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, juce::Point<float> const & startingPoint) noexcept
     : mIsElevationDrawing(false)
@@ -345,3 +347,5 @@ juce::Array<juce::Point<float>> Trajectory::getBasicDownUpPoints()
 
     return result;
 }
+
+} // namespace gris

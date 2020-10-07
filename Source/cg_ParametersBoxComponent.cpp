@@ -20,6 +20,8 @@
 
 #include "cg_ParametersBoxComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
 ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -157,3 +159,5 @@ void ParametersBoxComponent::resized()
     mAzimuthSpan.setBounds(5, 23, 225, 20);
     mElevationSpan.setBounds(305, 23, 225, 20);
 }
+
+} // namespace gris

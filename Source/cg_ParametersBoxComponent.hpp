@@ -25,6 +25,8 @@
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ParametersBoxComponent final
     : public juce::Component
@@ -81,3 +83,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
 };
+
+} // namespace gris

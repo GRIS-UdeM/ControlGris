@@ -25,6 +25,8 @@
 #include "cg_Normalized.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //=========
 class Trajectory
 {
@@ -72,3 +74,5 @@ private:
     //=========
     JUCE_LEAK_DETECTOR(Trajectory);
 };
+
+} // namespace gris

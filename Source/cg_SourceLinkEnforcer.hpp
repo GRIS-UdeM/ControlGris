@@ -25,6 +25,8 @@
 #include "cg_SourceSnapshot.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class SourceLinkEnforcer
 {
@@ -71,3 +73,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 }; // class SourceLinkEnforcer
+
+} // namespace gris

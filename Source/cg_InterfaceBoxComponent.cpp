@@ -20,6 +20,8 @@
 
 #include "cg_InterfaceBoxComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
 InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -189,3 +191,5 @@ void InterfaceBoxComponent::resized()
     mOscSendPortEditor.setBounds(400, 35, 60, 20);
     mOscSendIpEditor.setBounds(470, 35, 120, 20);
 }
+
+} // namespace gris

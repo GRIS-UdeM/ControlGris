@@ -22,6 +22,8 @@
 
 #include "cg_FieldComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
 void ElevationDrawingHandle::mouseDown(juce::MouseEvent const & event)
 {
@@ -72,3 +74,5 @@ ElevationDrawingHandle::ElevationDrawingHandle(ElevationFieldComponent & fieldCo
 {
     setSelected(true);
 }
+
+} // namespace gris

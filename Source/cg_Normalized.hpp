@@ -20,6 +20,8 @@
 
 #pragma once
 
+namespace gris
+{
 class Normalized
 {
     float mValue{};
@@ -45,3 +47,5 @@ public:
 
     constexpr float operator*(float const rhs) const { return mValue * rhs; }
 }; // class Normalized
+
+} // namespace gris

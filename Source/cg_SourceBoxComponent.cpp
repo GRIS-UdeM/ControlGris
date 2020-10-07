@@ -22,6 +22,8 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
@@ -273,3 +275,5 @@ void SourceBoxComponent::setSpatMode(SpatMode const spatMode)
         jassertfalse;
     }
 }
+
+} // namespace gris

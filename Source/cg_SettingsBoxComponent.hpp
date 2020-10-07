@@ -26,6 +26,8 @@
 #include "cg_SourceId.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class SettingsBoxComponent final : public juce::Component
 {
@@ -84,3 +86,5 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsBoxComponent)
 };
+
+} // namespace gris

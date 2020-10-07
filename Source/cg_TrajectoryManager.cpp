@@ -22,6 +22,8 @@
 
 #include <algorithm>
 
+namespace gris
+{
 //==============================================================================
 TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
     : mProcessor(processor)
@@ -268,3 +270,5 @@ void ElevationTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType);
 }
+
+} // namespace gris

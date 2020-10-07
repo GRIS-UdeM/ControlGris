@@ -20,6 +20,8 @@
 
 #include "cg_ControlGrisLookAndFeel.hpp"
 
+namespace gris
+{
 //==============================================================================
 GrisLookAndFeel::GrisLookAndFeel()
 {
@@ -602,3 +604,5 @@ void GrisLookAndFeel::drawRotarySlider(juce::Graphics & g,
     outlineArc.addPieSegment(rx, ry, rw, rw, rotaryStartAngle, rotaryEndAngle, 0.0);
     g.strokePath(outlineArc, juce::PathStrokeType(lineThickness));
 }
+
+} // namespace gris

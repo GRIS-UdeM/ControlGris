@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 //==============================================================================
 class ChangeGesturesManager
 {
@@ -84,3 +86,5 @@ private:
     JUCE_LEAK_DETECTOR(ChangeGesturesManager);
 
 }; // class ChangeGesturesManager
+
+} // namespace gris

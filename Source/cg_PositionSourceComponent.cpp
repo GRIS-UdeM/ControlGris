@@ -24,6 +24,8 @@
 #include "cg_FieldComponent.hpp"
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : SourceComponent(source.getColour(), source.getId().toString())
@@ -112,3 +114,5 @@ SourceIndex PositionSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
+
+} // namespace gris

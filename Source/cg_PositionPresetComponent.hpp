@@ -22,6 +22,8 @@
 
 #include <JuceHeader.h>
 
+namespace gris
+{
 class PresetsManager;
 
 //==============================================================================
@@ -153,3 +155,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionPresetComponent)
 }; // class PositionPresetComponent
+
+} // namespace gris

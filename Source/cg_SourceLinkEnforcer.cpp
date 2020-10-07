@@ -22,6 +22,8 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink const sourceLink) : mSources(sources)
 {
@@ -214,12 +216,4 @@ void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
     }
 }
 
-// std::unique_ptr<LinkStrategy> SourceLinkEnforcer::getStrategy() const
-//{
-//    if (mPositionSourceLink != PositionSourceLink::undefined) {
-//        jassert(mElevationSourceLink == ElevationSourceLink::undefined);
-//        return LinkStrategy::make(mPositionSourceLink);
-//    }
-//    jassert(mElevationSourceLink != ElevationSourceLink::undefined);
-//    return LinkStrategy::make(mElevationSourceLink);
-//}
+} // namespace gris

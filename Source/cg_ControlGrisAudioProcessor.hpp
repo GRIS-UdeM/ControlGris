@@ -29,6 +29,8 @@
 #include "cg_TrajectoryManager.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ControlGrisAudioProcessor final
     : public juce::AudioProcessor
@@ -200,3 +202,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessor)
 };
+
+} // namespace gris

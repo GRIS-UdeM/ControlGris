@@ -31,6 +31,8 @@
 #include "cg_Source.hpp"
 #include "cg_TrajectoryManager.hpp"
 
+namespace gris
+{
 //==============================================================================
 // This file defines the classes that implement the 2D view (azimuth-elevation
 // or azimuth-distance) and the elevation view.
@@ -231,3 +233,5 @@ private:
     JUCE_LEAK_DETECTOR(ElevationFieldComponent)
 
 }; // class ElevationFieldComponent
+
+} // namespace gris

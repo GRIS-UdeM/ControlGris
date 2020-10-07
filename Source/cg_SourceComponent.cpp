@@ -22,6 +22,8 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 SourceComponent::SourceComponent(juce::Colour const colour, juce::String const & icon) : mColour(colour), mIcon(icon)
 {
@@ -114,3 +116,5 @@ bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displaceme
     jassertfalse;
     return false;
 }
+
+} // namespace gris

@@ -24,6 +24,8 @@
 
 #include "cg_ControlGrisAudioProcessor.hpp"
 
+namespace gris
+{
 bool Source::shouldForceNotifications(Source::OriginOfChange const origin) const
 {
     switch (origin) {
@@ -345,3 +347,5 @@ void Sources::setSize(int const size)
         source.setElevationSpan(elevationSpan);
     }
 }
+
+} // namespace gris
