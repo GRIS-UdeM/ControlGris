@@ -240,12 +240,12 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
 
     if (parameterId.compare(Automation::Ids::POSITION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<PositionSourceLink>(newValue + 1.0f) };
-        setPositionSourceLink(val);
+        setPositionSourceLink(val, SourceLinkEnforcer::OriginOfChange::automation);
     }
 
     if (parameterId.compare(Automation::Ids::ELEVATION_SOURCE_LINK) == 0) {
         auto const val{ static_cast<ElevationSourceLink>(newValue + 1.0f) };
-        setElevationSourceLink(val);
+        setElevationSourceLink(val, SourceLinkEnforcer::OriginOfChange::automation);
     }
 
     if (parameterId.compare(Automation::Ids::POSITION_PRESET) == 0) {
@@ -265,12 +265,14 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink)
+void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink,
+                                                      SourceLinkEnforcer::OriginOfChange const originOfChange)
 {
     if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
         return;
     }
 
+    // TODO : this doesnt work at all
     auto const isSymmetricLink{ newSourceLink == PositionSourceLink::symmetricX
                                 || newSourceLink == PositionSourceLink::symmetricY };
     if (mSources.size() != 2 && isSymmetricLink) {
@@ -284,12 +286,13 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSour
         editor->updateSourceLinkCombo(newSourceLink);
     }
 
-    mPositionSourceLinkEnforcer.setSourceLink(newSourceLink);
+    mPositionSourceLinkEnforcer.setSourceLink(newSourceLink, originOfChange);
     mPositionSourceLinkEnforcer.enforceSourceLink();
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSourceLink)
+void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink const newSourceLink,
+                                                       SourceLinkEnforcer::OriginOfChange const originOfChange)
 {
     if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
         mElevationTrajectoryManager.setSourceLink(newSourceLink);
@@ -299,7 +302,7 @@ void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink newSo
             ed->updateElevationSourceLinkCombo(newSourceLink);
         }
 
-        mElevationSourceLinkEnforcer.setSourceLink(newSourceLink);
+        mElevationSourceLinkEnforcer.setSourceLink(newSourceLink, originOfChange);
         mElevationSourceLinkEnforcer.enforceSourceLink();
     }
 }
@@ -315,10 +318,12 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 
     if (spatMode == SpatMode::dome) {
         // remove cube-specific gadgets
-        mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent);
+        mElevationSourceLinkEnforcer.setSourceLink(ElevationSourceLink::independent,
+                                                   SourceLinkEnforcer::OriginOfChange::automation);
     } else {
         jassert(spatMode == SpatMode::cube);
-        mElevationSourceLinkEnforcer.setSourceLink(mElevationTrajectoryManager.getSourceLink());
+        mElevationSourceLinkEnforcer.setSourceLink(mElevationTrajectoryManager.getSourceLink(),
+                                                   SourceLinkEnforcer::OriginOfChange::automation);
     }
 
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
@@ -367,7 +372,7 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     auto const isSymmetricLink{ positionSourceLink == PositionSourceLink::symmetricX
                                 || positionSourceLink == PositionSourceLink::symmetricY };
     if (isSymmetricLink && numOfSources != 2) {
-        setPositionSourceLink(PositionSourceLink::independent);
+        setPositionSourceLink(PositionSourceLink::independent, SourceLinkEnforcer::OriginOfChange::automation);
     }
 
     if (propagate) {
@@ -606,11 +611,11 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
     mPresetManager.loadIfPresetChanged(0);
 
     if (static_cast<bool>(positionSourceLinkToProcess)) {
-        setPositionSourceLink(positionSourceLinkToProcess);
+        setPositionSourceLink(positionSourceLinkToProcess, SourceLinkEnforcer::OriginOfChange::user);
     }
 
     if (static_cast<bool>(elevationSourceLinkToProcess)) {
-        setElevationSourceLink(elevationSourceLinkToProcess);
+        setElevationSourceLink(elevationSourceLinkToProcess, SourceLinkEnforcer::OriginOfChange::user);
     }
 }
 
@@ -1173,29 +1178,25 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
                                               Source::ChangeType changeType,
                                               Source::OriginOfChange origin)
 {
-    auto const isPositionChange{ changeType == Source::ChangeType::position };
-    jassert(isPositionChange ? true : changeType == Source::ChangeType::elevation);
-    auto const isPrimary{ source.isPrimarySource() };
-    SourceLinkEnforcer & sourceLinkEnforcer{ isPositionChange ? mPositionSourceLinkEnforcer
-                                                              : mElevationSourceLinkEnforcer };
-    // TODO : why can't we just use the ternary operator here?
-    TrajectoryManager * temp{ &mElevationTrajectoryManager };
-    if (isPositionChange) {
-        temp = &mPositionTrajectoryManager;
-    }
-    auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
-                                   || mElevationTrajectoryManager.getPositionActivateState() };
-    auto const isIndependentSourceLink{ mPositionTrajectoryManager.getSourceLink() == PositionSourceLink::independent
-                                        || mElevationTrajectoryManager.getSourceLink()
-                                               == ElevationSourceLink::independent };
-    TrajectoryManager & trajectoryManager{ *temp };
+    jassert(changeType == Source::ChangeType::position || changeType == Source::ChangeType::elevation);
+
+    auto & trajectoryManager{ changeType == Source::ChangeType::position
+                                  ? static_cast<TrajectoryManager &>(mPositionTrajectoryManager)
+                                  : static_cast<TrajectoryManager &>(mElevationTrajectoryManager) };
+    auto & sourceLinkEnforcer{ changeType == Source::ChangeType::position ? mPositionSourceLinkEnforcer
+                                                                          : mElevationSourceLinkEnforcer };
+    // auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
+    //                               || mElevationTrajectoryManager.getPositionActivateState() };
+    auto const isTrajectoryActive{ trajectoryManager.getPositionActivateState() };
+    auto const isPrimarySource{ source.isPrimarySource() };
+
     switch (origin) {
     case Source::OriginOfChange::none:
         return;
     case Source::OriginOfChange::userMove:
         sourceLinkEnforcer.sourceMoved(source);
         setSelectedSource(source);
-        if (isPrimary) {
+        if (isPrimarySource) {
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         } else {
@@ -1205,31 +1206,31 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::userAnchorMove:
         sourceLinkEnforcer.anchorMoved(source);
         setSelectedSource(source);
-        if (isPrimary) {
+        if (isPrimarySource) {
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         mPresetManager.loadIfPresetChanged(0);
         return;
     case Source::OriginOfChange::presetRecall:
-        jassert(isPrimary);
+        jassert(isPrimarySource);
         sourceLinkEnforcer.sourceMoved(source);
         trajectoryManager.sourceMoved(source);
         return;
     case Source::OriginOfChange::link:
-        if (isPrimary) {
+        if (isPrimarySource) {
             sourceLinkEnforcer.sourceMoved(source);
             trajectoryManager.sourceMoved(source);
             updatePrimarySourceParameters(changeType);
         }
         return;
     case Source::OriginOfChange::trajectory:
-        jassert(isPrimary);
+        jassert(isPrimarySource);
         sourceLinkEnforcer.sourceMoved(source);
         updatePrimarySourceParameters(changeType);
         return;
     case Source::OriginOfChange::osc:
-        jassert(isPrimary);
+        jassert(isPrimarySource);
         sourceLinkEnforcer.sourceMoved(source);
         trajectoryManager.sourceMoved(source);
         updatePrimarySourceParameters(changeType);

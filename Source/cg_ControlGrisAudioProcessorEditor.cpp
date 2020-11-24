@@ -296,7 +296,8 @@ void ControlGrisAudioProcessorEditor::settingsBoxNumberOfSourcesChanged(int cons
                                                              || currentPositionSourceLink
                                                                     == PositionSourceLink::symmetricY };
             if (isCurrentPositionSourceLinkSymmetric) {
-                mProcessor.setPositionSourceLink(PositionSourceLink::independent);
+                mProcessor.setPositionSourceLink(PositionSourceLink::independent,
+                                                 SourceLinkEnforcer::OriginOfChange::user);
             }
         }
 
@@ -554,6 +555,8 @@ void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 // TrajectoryBoxComponent::Listener callbacks.
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink const sourceLink)
 {
+    mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
+
     auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK) };
@@ -564,6 +567,8 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(Pos
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink const sourceLink)
 {
+    mProcessor.setElevationSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
+
     auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK) };

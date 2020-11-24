@@ -30,6 +30,10 @@ namespace gris
 //==============================================================================
 class SourceLinkEnforcer
 {
+public:
+    enum class OriginOfChange { user, automation };
+    //==============================================================================
+private:
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
@@ -50,8 +54,8 @@ public:
     SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink);
     SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink);
     //==============================================================================
-    void setSourceLink(ElevationSourceLink sourceLink);
-    void setSourceLink(PositionSourceLink sourceLink);
+    void setSourceLink(ElevationSourceLink sourceLink, OriginOfChange originOfChange);
+    void setSourceLink(PositionSourceLink sourceLink, OriginOfChange originOfChange);
     void numberOfSourcesChanged();
     void enforceSourceLink();
 
