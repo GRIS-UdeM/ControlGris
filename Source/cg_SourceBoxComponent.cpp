@@ -188,7 +188,7 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMo
 {
     mSelectedSource = SourceIndex{};
 
-    mSourcePlacementLabel.setText("Source Placement:", juce::NotificationType::dontSendNotification);
+    mSourcePlacementLabel.setText("Sources Placement:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourcePlacementLabel);
 
     addAndMakeVisible(&mSourcePlacementCombo);
