@@ -206,8 +206,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
-    handleOscConnection(true);
-
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(50);

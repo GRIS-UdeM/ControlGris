@@ -40,7 +40,7 @@ class ControlGrisAudioProcessor final
 {
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
-    bool mOscConnected{ false };
+    bool mOscConnected{ true };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
