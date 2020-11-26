@@ -128,13 +128,14 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     setLatencySamples(0);
 
     // Size of the plugin window.
-    mAudioProcessorValueTreeState.state.addChild({ "uiState", { { "width", 650 }, { "height", 700 } }, {} },
+    mAudioProcessorValueTreeState.state.addChild({ "uiState", { { "width", 650 }, { "height", 730 } }, {} },
                                                  -1,
                                                  nullptr);
 
     // Global setting mAudioProcessorValueTreeState.
     mAudioProcessorValueTreeState.state.setProperty("oscFormat", 0, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", 18032, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("oscAddress", "127.0.0.1", nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscConnected", true, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscInputPortNumber", 9000, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscInputConnected", false, nullptr);
@@ -334,7 +335,16 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
     mCurrentOscPort = oscPortNumber;
-    mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", mCurrentOscPort, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", oscPortNumber, nullptr);
+    createOscConnection(mCurrentOscAddress, oscPortNumber);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOscAddress(juce::String const & address)
+{
+    mCurrentOscAddress = address;
+    mAudioProcessorValueTreeState.state.setProperty("oscAddress", address, nullptr);
+    createOscConnection(address, mCurrentOscPort);
 }
 
 //==============================================================================
@@ -379,13 +389,13 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscConnection(juce::String const &, int const oscPort)
+bool ControlGrisAudioProcessor::createOscConnection(juce::String const & address, int const oscPort)
 {
     disconnectOsc();
 
-    mOscConnected = mOscSender.connect("127.0.0.1", oscPort);
+    mOscConnected = mOscSender.connect(address, oscPort);
     if (!mOscConnected)
-        std::cout << "Error: could not connect to UDP port " << oscPort << "." << std::endl;
+        std::cout << "Error: could not connect to UDP port " << oscPort << " at address " << address << std::endl;
     else
         mLastConnectedOscPort = oscPort;
 
@@ -1137,6 +1147,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         auto const spatMode{ static_cast<SpatMode>(static_cast<int>(valueTree.getProperty("oscFormat", 0))) };
         setSpatMode(spatMode);
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
+        setOscAddress(valueTree.getProperty("oscAddress", "127.0.0.1"));
         handleOscConnection(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
         setFirstSourceId(SourceId{ valueTree.getProperty("firstSourceId", 1) });

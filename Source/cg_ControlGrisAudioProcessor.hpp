@@ -137,6 +137,7 @@ public:
     SpatMode getSpatMode() const { return mSpatMode; }
 
     void setOscPortNumber(int oscPortNumber);
+    void setOscAddress(juce::String const & address);
     int getOscPortNumber() const { return mCurrentOscPort; }
 
     void setFirstSourceId(SourceId firstSourceId, bool propagate = true);

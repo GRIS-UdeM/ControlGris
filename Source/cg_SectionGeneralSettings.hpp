@@ -34,13 +34,14 @@ class SectionGeneralSettings final : public juce::Component
 public:
     //==============================================================================
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
-        virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
-        virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
-        virtual void settingsBoxOscActivated(bool state) = 0;
-        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
-        virtual void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) = 0;
+        virtual void oscFormatChangedCallback(SpatMode mode) = 0;
+        virtual void oscPortChangedCallback(int oscPort) = 0;
+        virtual void oscAddressChangedCallback(juce::String const & address) = 0;
+        virtual void oscStateChangedCallback(bool state) = 0;
+        virtual void numberOfSourcesChangedCallback(int numOfSources) = 0;
+        virtual void firstSourceIdChangedCallback(SourceId firstSourceId) = 0;
     };
 
 private:
@@ -55,6 +56,9 @@ private:
     juce::Label mOscPortLabel;
     juce::TextEditor mOscPortEditor;
 
+    juce::Label mOscAddressLabel;
+    juce::TextEditor mOscAddressEditor;
+
     juce::Label mNumOfSourcesLabel;
     juce::TextEditor mNumOfSourcesEditor;
 
@@ -66,10 +70,16 @@ private:
 public:
     //==============================================================================
     explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel);
-    ~SectionGeneralSettings() final = default;
+    //==============================================================================
+    SectionGeneralSettings() = delete;
+    ~SectionGeneralSettings() override = default;
 
-    void paint(juce::Graphics &) override;
-    void resized() override;
+    SectionGeneralSettings(SectionGeneralSettings const &) = delete;
+    SectionGeneralSettings(SectionGeneralSettings &&) = delete;
+
+    SectionGeneralSettings & operator=(SectionGeneralSettings const &) = delete;
+    SectionGeneralSettings & operator=(SectionGeneralSettings &&) = delete;
+    //==============================================================================
 
     // These are only setters, they dont send notification.
     //-----------------------------------------------------
@@ -77,14 +87,19 @@ public:
     void setFirstSourceId(SourceId firstSourceId);
     void setOscFormat(SpatMode mode);
     void setOscPortNumber(int oscPortNumber);
+    void setOscAddress(juce::String const & address);
     void setActivateButtonState(bool shouldBeOn);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+    //==============================================================================
+    // overrides
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SectionGeneralSettings)
+    JUCE_LEAK_DETECTOR(SectionGeneralSettings)
 };
 
 } // namespace gris

@@ -60,22 +60,22 @@ class ControlGrisAudioProcessorEditor final
     PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
-    SectionSourceSpan mParametersBox;
-    SectionTrajectory mTrajectoryBox;
+    SectionSourceSpan mSectionSourceSpan;
+    SectionTrajectory mSectionTrajectory;
 
     juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
-    SectionGeneralSettings mSettingsBox;
-    SectionSourcePosition mSourceBox;
-    SectionOscController mInterfaceBox;
+    SectionGeneralSettings mSectionGeneralSettings;
+    SectionSourcePosition mSectionSourcePosition;
+    SectionOscController mSectionOscController;
 
-    PositionPresetComponent mPositionPresetBox;
+    PositionPresetComponent mPositionPresetComponent;
 
     bool mIsInsideSetPluginState;
     SourceIndex mSelectedSource;
 
-    juce::Value mLastUIWidth;
-    juce::Value mLastUIHeight;
+    juce::Value mLastUiWidth;
+    juce::Value mLastUiHeight;
 
 public:
     //==============================================================================
@@ -109,11 +109,12 @@ public:
     void parametersBoxElevationSpanDragEnded() override;
 
     // SectionGeneralSettings::Listeners
-    void settingsBoxOscFormatChanged(SpatMode mode) override;
-    void settingsBoxOscPortNumberChanged(int oscPort) override;
-    void settingsBoxOscActivated(bool state) override;
-    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
-    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) override;
+    void oscFormatChangedCallback(SpatMode mode) override;
+    void oscPortChangedCallback(int oscPort) override;
+    void oscAddressChangedCallback(juce::String const & address) override;
+    void oscStateChangedCallback(bool state) override;
+    void numberOfSourcesChangedCallback(int numOfSources) override;
+    void firstSourceIdChangedCallback(SourceId firstSourceId) override;
 
     // SectionSourcePosition::Listeners
     void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
@@ -162,7 +163,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor);
+    JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
 };
 
 } // namespace gris
