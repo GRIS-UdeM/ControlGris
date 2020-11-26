@@ -30,10 +30,10 @@ namespace gris
 {
 class Source;
 class Sources;
-class SourcesSnapshots;
+struct SourcesSnapshots;
 class SourceLinkEnforcer;
 
-namespace SourceLinkStrategies
+namespace source_link_strategies
 {
 //==============================================================================
 class Base
@@ -313,6 +313,6 @@ class ElevationDeltaLock final : public Base
     JUCE_LEAK_DETECTOR(ElevationDeltaLock)
 };
 
-} // namespace SourceLinkStrategies
+} // namespace source_link_strategies
 
 } // namespace gris

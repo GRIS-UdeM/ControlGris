@@ -22,17 +22,17 @@
 
 namespace gris
 {
-juce::Colour const BannerComponent::backgroundColour = juce::Colour::fromRGB(64, 64, 64);
-juce::Colour const BannerComponent::outlineColour = juce::Colour::fromRGB(16, 16, 16);
-juce::Colour const BannerComponent::textColour = juce::Colour::fromRGB(255, 255, 255);
+juce::Colour const BannerComponent::BACKGROUND_COLOUR = juce::Colour::fromRGB(64, 64, 64);
+juce::Colour const BannerComponent::OUTLINE_COLOUR = juce::Colour::fromRGB(16, 16, 16);
+juce::Colour const BannerComponent::TEXT_COLOUR = juce::Colour::fromRGB(255, 255, 255);
 
 //==============================================================================
 BannerComponent::BannerComponent() noexcept
 {
     setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
+    setColour(Label::backgroundColourId, BACKGROUND_COLOUR);
+    setColour(Label::outlineColourId, OUTLINE_COLOUR);
+    setColour(Label::textColourId, TEXT_COLOUR);
 }
 
 } // namespace gris

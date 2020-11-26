@@ -38,7 +38,7 @@ private:
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
-    std::unique_ptr<SourceLinkStrategies::Base> mLinkStrategy;
+    std::unique_ptr<source_link_strategies::Base> mLinkStrategy;
 
 public:
     //==============================================================================

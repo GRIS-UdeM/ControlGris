@@ -379,7 +379,7 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
 }
 
 //==============================================================================
-bool ControlGrisAudioProcessor::createOscConnection(int const oscPort)
+bool ControlGrisAudioProcessor::createOscConnection(juce::String const &, int const oscPort)
 {
     disconnectOsc();
 
@@ -409,7 +409,7 @@ void ControlGrisAudioProcessor::handleOscConnection(bool const state)
 {
     if (state) {
         if (mLastConnectedOscPort != mCurrentOscPort) {
-            createOscConnection(mCurrentOscPort);
+            createOscConnection(mCurrentOscAddress, mCurrentOscPort);
         }
     } else {
         disconnectOsc();
@@ -910,21 +910,20 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
 
 //==============================================================================
 void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const sourceIndex,
-                                                        SourceParameter const parameterId,
+                                                        SourceParameter const sourceParameter,
                                                         float const value)
 {
     Normalized const normalized{ static_cast<float>(value) };
-    auto const param_id{ sourceIndex.toString() };
-    auto & source{ mSources[sourceIndex] };
-    switch (parameterId) {
+    auto const paramId{ sourceIndex.toString() };
+    switch (sourceParameter) {
     case SourceParameter::azimuth:
-        mAudioProcessorValueTreeState.state.setProperty("p_azimuth_" + param_id, value, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty("p_azimuth_" + paramId, value, nullptr);
         break;
     case SourceParameter::elevation:
-        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_elevation_") + param_id, value, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_elevation_") + paramId, value, nullptr);
         break;
     case SourceParameter::distance:
-        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_distance_") + param_id, value, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(juce::String("p_distance_") + paramId, value, nullptr);
         break;
     case SourceParameter::x:
         jassertfalse;

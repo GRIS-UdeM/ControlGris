@@ -45,6 +45,7 @@ class ControlGrisAudioProcessor final
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
     int mCurrentOscPort{ 18032 };
+    juce::String mCurrentOscAddress{ "127.0.0.1" };
     int mLastConnectedOscPort{ -1 };
     int mCurrentOscInputPort{ 8000 };
     int mCurrentOscOutputPort{ 9000 };
@@ -150,7 +151,7 @@ public:
     juce::AudioProcessorValueTreeState const & getValueTreeState() const { return mAudioProcessorValueTreeState; }
     juce::AudioProcessorValueTreeState & getValueTreeState() { return mAudioProcessorValueTreeState; }
     //==============================================================================
-    bool createOscConnection(int oscPort);
+    bool createOscConnection(juce::String const &, int oscPort);
     bool disconnectOsc();
     bool isOscConnected() const { return mOscConnected; }
     void handleOscConnection(bool state);

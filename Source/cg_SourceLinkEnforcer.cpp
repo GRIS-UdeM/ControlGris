@@ -52,7 +52,7 @@ void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink, Orig
     if (sourceLink != mPositionSourceLink) {
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
-        mLinkStrategy = SourceLinkStrategies::Base::make(sourceLink);
+        mLinkStrategy = source_link_strategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
@@ -73,7 +73,7 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink, Ori
     if (sourceLink != mElevationSourceLink) {
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
-        mLinkStrategy = SourceLinkStrategies::Base::make(sourceLink);
+        mLinkStrategy = source_link_strategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
@@ -161,7 +161,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
-            mLinkStrategy = SourceLinkStrategies::Base::make(PositionSourceLink::circular);
+            mLinkStrategy = source_link_strategies::Base::make(PositionSourceLink::circular);
         }
         mLinkStrategy->computeParameters(mSources, mSnapshots);
 
@@ -188,9 +188,9 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             if (mPositionSourceLink == PositionSourceLink::undefined) {
-                mLinkStrategy = SourceLinkStrategies::Base::make(mElevationSourceLink);
+                mLinkStrategy = source_link_strategies::Base::make(mElevationSourceLink);
             } else {
-                mLinkStrategy = SourceLinkStrategies::Base::make(mPositionSourceLink);
+                mLinkStrategy = source_link_strategies::Base::make(mPositionSourceLink);
             }
         }
         mSnapshots.primary = primaryStart;

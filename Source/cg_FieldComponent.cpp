@@ -67,12 +67,12 @@ void FieldComponent::drawBackgroundGrid(juce::Graphics & g) const
     auto const fieldComponentSize{ getWidth() };
     auto const fieldComponentSize_f{ static_cast<float>(fieldComponentSize) };
 
-    auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    jassert(lookAndFeel != nullptr);
+    auto * grisLookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    jassert(grisLookAndFeel != nullptr);
 
-    if (lookAndFeel != nullptr) {
+    if (grisLookAndFeel != nullptr) {
         // Draw the background.
-        g.setColour(lookAndFeel->getFieldColor());
+        g.setColour(grisLookAndFeel->getFieldColor());
         g.fillRect(0, 0, fieldComponentSize, fieldComponentSize);
         g.setColour(juce::Colours::black);
         g.drawRect(0, 0, fieldComponentSize, fieldComponentSize);
@@ -161,13 +161,13 @@ void PositionFieldComponent::drawBackground(juce::Graphics & g) const
 {
     auto const fieldComponentSize{ getWidth() };
     auto const fieldComponentSize_f{ static_cast<float>(fieldComponentSize) };
-    auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    jassert(lookAndFeel != nullptr);
+    auto * grisLookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    jassert(grisLookAndFeel != nullptr);
     auto const fieldCenter{ fieldComponentSize / 2.0f };
 
     drawBackgroundGrid(g);
 
-    g.setColour(lookAndFeel->getLightColor());
+    g.setColour(grisLookAndFeel->getLightColor());
     if (mSpatMode == SpatMode::dome) {
         // Draw big background circles.
         for (int i{ 1 }; i < 3; ++i) {
@@ -204,13 +204,13 @@ void ElevationFieldComponent::drawBackground(juce::Graphics & g) const
 {
     auto const fieldComponentSize{ getWidth() };
     auto const fieldComponentSize_f{ static_cast<float>(fieldComponentSize) };
-    auto * lookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
-    jassert(lookAndFeel != nullptr);
+    auto * grisLookAndFeel{ dynamic_cast<GrisLookAndFeel *>(&getLookAndFeel()) };
+    jassert(grisLookAndFeel != nullptr);
 
-    if (lookAndFeel != nullptr) {
+    if (grisLookAndFeel != nullptr) {
         drawBackgroundGrid(g);
 
-        g.setColour(lookAndFeel->getLightColor());
+        g.setColour(grisLookAndFeel->getLightColor());
         g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
         g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
     }
@@ -492,7 +492,7 @@ void PositionFieldComponent::mouseDrag(const juce::MouseEvent & event)
         auto const mousePosition{ event.getPosition() };
         auto const positionAsSource_unclipped{ componentPositionToSourcePosition(mousePosition.toFloat()) };
         auto const positionAsSource{ Source::clipPosition(positionAsSource_unclipped, mSpatMode) };
-        auto const positionAsComponent{ sourcePositionToComponentPosition(positionAsSource) };
+        auto const positionAsComponent{ sourcePositionToComponentPosition(positionAsSource).roundToInt() };
         mDrawingHandleComponent.setCentrePosition(positionAsComponent.getX(), positionAsComponent.getY());
 
         if (mLineDrawingStartPosition.has_value()) {

@@ -30,14 +30,14 @@ namespace gris
  */
 class BannerComponent final : public juce::Label
 {
-    static juce::Colour const backgroundColour;
-    static juce::Colour const outlineColour;
-    static juce::Colour const textColour;
+    static juce::Colour const BACKGROUND_COLOUR;
+    static juce::Colour const OUTLINE_COLOUR;
+    static juce::Colour const TEXT_COLOUR;
 
 public:
     //==============================================================================
     BannerComponent() noexcept;
-    ~BannerComponent() final = default;
+    ~BannerComponent() override = default;
 
     BannerComponent(BannerComponent const &) = delete;
     BannerComponent(BannerComponent &&) = delete;

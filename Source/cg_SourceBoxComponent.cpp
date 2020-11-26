@@ -126,7 +126,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     addAndMakeVisible(&mZSlider);
 
     mXSlider.onValueChange = [this] {
-        mCurrentX = mXSlider.getValue();
+        mCurrentX = static_cast<float>(mXSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
@@ -137,7 +137,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
         });
     };
     mYSlider.onValueChange = [this] {
-        mCurrentY = mYSlider.getValue();
+        mCurrentY = static_cast<float>(mYSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
@@ -148,7 +148,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
         });
     };
     mZSlider.onValueChange = [this] {
-        mCurrentZ = mZSlider.getValue();
+        mCurrentZ = static_cast<float>(mZSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
@@ -252,7 +252,7 @@ void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId con
 }
 
 //==============================================================================
-void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode spatMode)
+void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
 {
     mSelectedSource = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
@@ -260,6 +260,7 @@ void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const
     mCubeControls.updateSliderValues(source);
 }
 
+//==============================================================================
 void SourceBoxComponent::setSpatMode(SpatMode const spatMode)
 {
     switch (spatMode) {
