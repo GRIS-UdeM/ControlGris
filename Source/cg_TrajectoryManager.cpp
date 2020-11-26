@@ -32,10 +32,10 @@ TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Sour
 }
 
 //==============================================================================
-void TrajectoryManager::setPositionActivateState(bool const newState)
+void TrajectoryManager::setPositionActivateState(bool const state)
 {
-    mActivateState = newState;
-    if (newState) {
+    mActivateState = state;
+    if (state) {
         mTrajectoryDeltaTime = 0.0;
         mLastTrajectoryDeltaTime = 0.0;
         mBackAndForthDirection = Direction::forward;
@@ -57,6 +57,7 @@ void TrajectoryManager::resetRecordingTrajectory(juce::Point<float> const curren
     mTrajectory->clear();
     mTrajectory->addPoint(currentPosition);
     mLastRecordingPoint = currentPosition;
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================
@@ -72,7 +73,7 @@ juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float>
 void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
-    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0f);
+    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0);
     computeCurrentTrajectoryPoint();
     applyCurrentTrajectoryPointToPrimarySource();
 }
@@ -85,9 +86,9 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
         return;
     }
 
-    int const dampeningCyclesTimes2{ mDampeningCycles * 2 };
-    double currentScaleMin{ 0.0 };
-    double currentScaleMax{ 0.0 };
+    auto const dampeningCyclesTimes2{ mDampeningCycles * 2 };
+    double currentScaleMin{};
+    double currentScaleMax{};
 
     if (mTrajectory->size() > 0) {
         if (mTrajectoryDeltaTime < mLastTrajectoryDeltaTime) {
@@ -138,9 +139,9 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
             mDampeningLastDelta = delta;
         }
 
-        double const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
+        auto const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
         delta *= deltaRatio;
-        auto index{ static_cast<int>(delta) };
+        auto const index{ static_cast<int>(delta) };
         if (index + 1 < mTrajectory->size()) {
             Normalized const progression{ static_cast<float>(delta / mTrajectory->size()) };
             mCurrentTrajectoryPoint = mTrajectory->getPosition(progression);
@@ -150,7 +151,7 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
     }
 
     if (mDegreeOfDeviationPerCycle != Degrees{ 0.0f }) {
-        bool deviationFlag{ true };
+        auto deviationFlag{ true };
         if (mIsBackAndForth && mDampeningCycles > 0) {
             if (juce::approximatelyEqual(currentScaleMin, currentScaleMax)) {
                 deviationFlag = false;
@@ -173,9 +174,8 @@ juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
-    } else {
-        return mPrimarySource.getPos();
     }
+    return mPrimarySource.getPos();
 }
 
 //==============================================================================
@@ -197,6 +197,7 @@ void PositionTrajectoryManager::sendTrajectoryPositionChangedEvent()
 void PositionTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType, mPrimarySource.getPos());
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================

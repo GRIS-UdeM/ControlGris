@@ -209,7 +209,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
     // Connect OSC to default socket
     mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
-    
+
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(50);
