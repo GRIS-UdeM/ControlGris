@@ -53,7 +53,7 @@ void ElevationSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void ElevationSourceComponent::sourceMoved()
+void ElevationSourceComponent::sourceMovedCallback()
 {
     updatePositionInParent();
 }

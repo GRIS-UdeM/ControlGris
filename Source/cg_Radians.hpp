@@ -107,8 +107,8 @@ public:
     }
 }; // class Radians
 
-constexpr Radians pi{ juce::MathConstants<float>::pi };
-constexpr Radians twoPi{ juce::MathConstants<float>::twoPi };
-constexpr Radians halfPi{ juce::MathConstants<float>::halfPi };
+static constexpr Radians pi{ juce::MathConstants<float>::pi };
+static constexpr Radians twoPi{ juce::MathConstants<float>::twoPi };
+static constexpr Radians halfPi{ juce::MathConstants<float>::halfPi };
 
 } // namespace gris

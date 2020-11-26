@@ -41,12 +41,12 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     mElevationSlider.onValueChange = [this] {
         mCurrentElevation = MAX_ELEVATION * (1.0f - mElevationSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
-            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
-                                       std::nullopt,
-                                       mCurrentElevation,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt);
+            l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
+                                            std::nullopt,
+                                            mCurrentElevation,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt);
         });
     };
 
@@ -61,12 +61,12 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     mAzimuthSlider.onValueChange = [this] {
         mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
-            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
-                                       mCurrentAzimuth,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt);
+            l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
+                                            mCurrentAzimuth,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt);
         });
     };
 
@@ -128,34 +128,34 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     mXSlider.onValueChange = [this] {
         mCurrentX = static_cast<float>(mXSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
-            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       mCurrentX,
-                                       std::nullopt,
-                                       std::nullopt);
+            l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            mCurrentX,
+                                            std::nullopt,
+                                            std::nullopt);
         });
     };
     mYSlider.onValueChange = [this] {
         mCurrentY = static_cast<float>(mYSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
-            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       mCurrentY,
-                                       std::nullopt);
+            l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            mCurrentY,
+                                            std::nullopt);
         });
     };
     mZSlider.onValueChange = [this] {
         mCurrentZ = static_cast<float>(mZSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
-            l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       std::nullopt,
-                                       1.0f - mCurrentZ);
+            l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            std::nullopt,
+                                            1.0f - mCurrentZ);
         });
     };
 
@@ -196,7 +196,7 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, 
     mSourcePlacementCombo.addItemList(SOURCE_PLACEMENT_SKETCH, 1);
     mSourcePlacementCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.sourceBoxPlacementChanged(static_cast<SourcePlacement>(mSourcePlacementCombo.getSelectedId()));
+            l.sourcesPlacementChangedCallback(static_cast<SourcePlacement>(mSourcePlacementCombo.getSelectedId()));
             mSourcePlacementCombo.setSelectedId(0, juce::NotificationType::dontSendNotification);
         });
     };
@@ -212,7 +212,7 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, 
     mSourceNumberCombo.setSelectedId(mSelectedSource.toInt());
     mSourceNumberCombo.onChange = [this] {
         mSelectedSource = SourceIndex{ mSourceNumberCombo.getSelectedItemIndex() };
-        mListeners.call([&](Listener & l) { l.sourceBoxSelectionChanged(mSelectedSource); });
+        mListeners.call([&](Listener & l) { l.sourceSelectionChangedCallback(mSelectedSource); });
     };
 
     addAndMakeVisible(&mDomeControls);

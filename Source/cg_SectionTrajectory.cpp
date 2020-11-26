@@ -37,7 +37,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addAndMakeVisible(&mPositionSourceLinkCombo);
     mPositionSourceLinkCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxPositionSourceLinkChanged(
+            l.positionSourceLinkChangedCallback(
                 static_cast<PositionSourceLink>(mPositionSourceLinkCombo.getSelectedId()));
         });
     };
@@ -47,7 +47,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addChildComponent(&mElevationSourceLinkCombo);
     mElevationSourceLinkCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxElevationSourceLinkChanged(
+            l.elevationSourceLinkChangedCallback(
                 static_cast<ElevationSourceLink>(mElevationSourceLinkCombo.getSelectedId()));
         });
     };
@@ -60,7 +60,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addAndMakeVisible(&mPositionTrajectoryTypeCombo);
     mPositionTrajectoryTypeCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxPositionTrajectoryTypeChanged(
+            l.positionTrajectoryTypeChangedCallback(
                 static_cast<PositionTrajectoryType>(mPositionTrajectoryTypeCombo.getSelectedId()));
         });
     };
@@ -70,7 +70,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addChildComponent(&mElevationTrajectoryTypeCombo);
     mElevationTrajectoryTypeCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxElevationTrajectoryTypeChanged(
+            l.elevationTrajectoryTypeChangedCallback(
                 static_cast<ElevationTrajectoryType>(mElevationTrajectoryTypeCombo.getSelectedId()));
         });
     };
@@ -85,8 +85,8 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mDurationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
     mDurationEditor.onFocusLost = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxCycleDurationChanged(mDurationEditor.getText().getDoubleValue(),
-                                                mDurationUnitCombo.getSelectedId());
+            l.trajectoryCycleDurationChangedCallback(mDurationEditor.getText().getDoubleValue(),
+                                                     mDurationUnitCombo.getSelectedId());
         });
         mDurationUnitCombo.grabKeyboardFocus();
     };
@@ -97,8 +97,8 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mDurationUnitCombo.setSelectedId(1);
     mDurationUnitCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxDurationUnitChanged(mDurationEditor.getText().getDoubleValue(),
-                                               mDurationUnitCombo.getSelectedId());
+            l.trajectoryDurationUnitChangedCallback(mDurationEditor.getText().getDoubleValue(),
+                                                    mDurationUnitCombo.getSelectedId());
         });
     };
 
@@ -117,14 +117,14 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mPositionActivateButton.setClickingTogglesState(true);
     mPositionActivateButton.onClick = [this] {
         mListeners.call(
-            [&](Listener & l) { l.trajectoryBoxPositionActivateChanged(mPositionActivateButton.getToggleState()); });
+            [&](Listener & l) { l.positionTrajectoryStateChangedCallback(mPositionActivateButton.getToggleState()); });
         mDurationUnitCombo.grabKeyboardFocus();
     };
 
     mPositionBackAndForthToggle.setButtonText("Back & Forth");
     mPositionBackAndForthToggle.onClick = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxPositionBackAndForthChanged(mPositionBackAndForthToggle.getToggleState());
+            l.positionTrajectoryBackAndForthChangedCallback(mPositionBackAndForthToggle.getToggleState());
         });
         setPositionDampeningEnabled(mPositionBackAndForthToggle.getToggleState());
     };
@@ -140,7 +140,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mPositionDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
     mPositionDampeningEditor.onFocusLost = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxPositionDampeningCyclesChanged(mPositionDampeningEditor.getText().getIntValue());
+            l.positionTrajectoryDampeningCyclesChangedCallback(mPositionDampeningEditor.getText().getIntValue());
         });
         mDurationUnitCombo.grabKeyboardFocus();
     };
@@ -155,7 +155,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mDeviationEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
     mDeviationEditor.onFocusLost = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxDeviationPerCycleChanged(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0f));
+            l.trajectoryDeviationPerCycleChangedCallback(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0f));
         });
         mDeviationEditor.setText(juce::String(std::fmod(mDeviationEditor.getText().getFloatValue(), 360.0)));
         mDurationUnitCombo.grabKeyboardFocus();
@@ -166,15 +166,16 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mElevationActivateButton.setButtonText("Activate");
     mElevationActivateButton.setClickingTogglesState(true);
     mElevationActivateButton.onClick = [this] {
-        mListeners.call(
-            [&](Listener & l) { l.trajectoryBoxElevationActivateChanged(mElevationActivateButton.getToggleState()); });
+        mListeners.call([&](Listener & l) {
+            l.elevationTrajectoryStateChangedCallback(mElevationActivateButton.getToggleState());
+        });
         mDurationUnitCombo.grabKeyboardFocus();
     };
 
     mElevationBackAndForthToggle.setButtonText("Back & Forth");
     mElevationBackAndForthToggle.onClick = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxElevationBackAndForthChanged(mElevationBackAndForthToggle.getToggleState());
+            l.elevationTrajectoryBackAndForthChangedCallback(mElevationBackAndForthToggle.getToggleState());
         });
         setElevationDampeningEnabled(mElevationBackAndForthToggle.getToggleState());
     };
@@ -187,7 +188,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mElevationDampeningEditor.onReturnKey = [this] { mDurationUnitCombo.grabKeyboardFocus(); };
     mElevationDampeningEditor.onFocusLost = [this] {
         mListeners.call([&](Listener & l) {
-            l.trajectoryBoxElevationDampeningCyclesChanged(mElevationDampeningEditor.getText().getIntValue());
+            l.elevationTrajectoryDampeningCyclesChangedCallback(mElevationDampeningEditor.getText().getIntValue());
         });
         mDurationUnitCombo.grabKeyboardFocus();
     };
@@ -328,8 +329,8 @@ void SectionTrajectory::setCycleDuration(double const value)
 {
     mDurationEditor.setText(juce::String(value));
     mListeners.call([&](Listener & l) {
-        l.trajectoryBoxCycleDurationChanged(mDurationEditor.getText().getDoubleValue(),
-                                            mDurationUnitCombo.getSelectedId());
+        l.trajectoryCycleDurationChangedCallback(mDurationEditor.getText().getDoubleValue(),
+                                                 mDurationUnitCombo.getSelectedId());
     });
 }
 
@@ -338,8 +339,8 @@ void SectionTrajectory::setDurationUnit(int const value)
 {
     mDurationUnitCombo.setSelectedId(value, juce::NotificationType::sendNotificationSync);
     mListeners.call([&](Listener & l) {
-        l.trajectoryBoxDurationUnitChanged(mDurationEditor.getText().getDoubleValue(),
-                                           mDurationUnitCombo.getSelectedId());
+        l.trajectoryDurationUnitChangedCallback(mDurationEditor.getText().getDoubleValue(),
+                                                mDurationUnitCombo.getSelectedId());
     });
 }
 

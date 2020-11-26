@@ -37,12 +37,12 @@ public:
     struct Listener {
         virtual ~Listener() = default;
 
-        virtual void parametersBoxAzimuthSpanDragStarted() = 0;
-        virtual void parametersBoxAzimuthSpanDragEnded() = 0;
-        virtual void parametersBoxElevationSpanDragStarted() = 0;
-        virtual void parametersBoxElevationSpanDragEnded() = 0;
-        virtual void parametersBoxSelectedSourceClicked() = 0;
-        virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
+        virtual void azimuthSpanDragStartedCallback() = 0;
+        virtual void azimuthSpanDragEndedCallback() = 0;
+        virtual void elevationSpanDragStartedCallback() = 0;
+        virtual void elevationSpanDragEndedCallback() = 0;
+        virtual void selectedSourceClickedCallback() = 0;
+        virtual void parameterChangedCallback(SourceParameter sourceId, double value) = 0;
     };
 
 private:

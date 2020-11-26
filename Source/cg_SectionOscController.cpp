@@ -34,11 +34,12 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     mOscOutputPluginIdEditor.onReturnKey = [this] { this->grabKeyboardFocus(); };
     mOscOutputPluginIdEditor.onFocusLost = [this] {
         if (!mOscOutputPluginIdEditor.isEmpty()) {
-            mListeners.call(
-                [&](Listener & l) { l.oscOutputPluginIdChanged(mOscOutputPluginIdEditor.getText().getIntValue()); });
+            mListeners.call([&](Listener & l) {
+                l.oscOutputPluginIdChangedCallback(mOscOutputPluginIdEditor.getText().getIntValue());
+            });
         } else {
             mListeners.call([&](Listener & l) {
-                l.oscOutputPluginIdChanged(1);
+                l.oscOutputPluginIdChangedCallback(1);
                 mOscOutputPluginIdEditor.setText(juce::String(1));
             });
         }
@@ -51,8 +52,8 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     addAndMakeVisible(&mOscReceiveToggle);
     mOscReceiveToggle.onClick = [this] {
         mListeners.call([&](Listener & l) {
-            l.oscInputConnectionChanged(mOscReceiveToggle.getToggleState(),
-                                        mOscReceivePortEditor.getText().getIntValue());
+            l.oscInputConnectionChangedCallback(mOscReceiveToggle.getToggleState(),
+                                                mOscReceivePortEditor.getText().getIntValue());
         });
     };
 
@@ -60,9 +61,9 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     addAndMakeVisible(&mOscSendToggle);
     mOscSendToggle.onClick = [this] {
         mListeners.call([&](Listener & l) {
-            l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
-                                         mOscSendIpEditor.getText(),
-                                         mOscSendPortEditor.getText().getIntValue());
+            l.oscOutputConnectionChangedCallback(mOscSendToggle.getToggleState(),
+                                                 mOscSendIpEditor.getText(),
+                                                 mOscSendPortEditor.getText().getIntValue());
         });
     };
 
@@ -77,12 +78,12 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     mOscReceivePortEditor.onFocusLost = [this] {
         if (!mOscReceivePortEditor.isEmpty()) {
             mListeners.call([&](Listener & l) {
-                l.oscInputConnectionChanged(mOscReceiveToggle.getToggleState(),
-                                            mOscReceivePortEditor.getText().getIntValue());
+                l.oscInputConnectionChangedCallback(mOscReceiveToggle.getToggleState(),
+                                                    mOscReceivePortEditor.getText().getIntValue());
             });
         } else {
             mListeners.call([&](Listener & l) {
-                l.oscInputConnectionChanged(mOscReceiveToggle.getToggleState(), mLastOscReceivePort);
+                l.oscInputConnectionChangedCallback(mOscReceiveToggle.getToggleState(), mLastOscReceivePort);
                 mOscReceivePortEditor.setText(juce::String(mLastOscReceivePort));
             });
         }
@@ -98,15 +99,15 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     mOscSendIpEditor.onFocusLost = [this] {
         if (!mOscSendIpEditor.isEmpty()) {
             mListeners.call([&](Listener & l) {
-                l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
-                                             mOscSendIpEditor.getText(),
-                                             mOscSendPortEditor.getText().getIntValue());
+                l.oscOutputConnectionChangedCallback(mOscSendToggle.getToggleState(),
+                                                     mOscSendIpEditor.getText(),
+                                                     mOscSendPortEditor.getText().getIntValue());
             });
         } else {
             mListeners.call([&](Listener & l) {
-                l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
-                                             mLastOscSendAddress,
-                                             mOscSendPortEditor.getText().getIntValue());
+                l.oscOutputConnectionChangedCallback(mOscSendToggle.getToggleState(),
+                                                     mLastOscSendAddress,
+                                                     mOscSendPortEditor.getText().getIntValue());
                 mOscSendIpEditor.setText(juce::String(mLastOscSendAddress));
             });
         }
@@ -121,15 +122,15 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     mOscSendPortEditor.onFocusLost = [this] {
         if (!mOscSendPortEditor.isEmpty()) {
             mListeners.call([&](Listener & l) {
-                l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
-                                             mOscSendIpEditor.getText(),
-                                             mOscSendPortEditor.getText().getIntValue());
+                l.oscOutputConnectionChangedCallback(mOscSendToggle.getToggleState(),
+                                                     mOscSendIpEditor.getText(),
+                                                     mOscSendPortEditor.getText().getIntValue());
             });
         } else {
             mListeners.call([&](Listener & l) {
-                l.oscOutputConnectionChanged(mOscSendToggle.getToggleState(),
-                                             mOscSendIpEditor.getText(),
-                                             mLastOscSendPort);
+                l.oscOutputConnectionChangedCallback(mOscSendToggle.getToggleState(),
+                                                     mOscSendIpEditor.getText(),
+                                                     mLastOscSendPort);
                 mOscSendPortEditor.setText(juce::String(mLastOscSendPort));
             });
         }

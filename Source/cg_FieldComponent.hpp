@@ -67,11 +67,11 @@ public:
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
-        virtual void fieldSourcePositionChanged(SourceIndex sourceId, int whichField) = 0;
+        virtual void fieldSourcePositionChangedCallback(SourceIndex sourceId, int whichField) = 0;
 
     private:
         //==============================================================================
-        JUCE_LEAK_DETECTOR(Listener);
+        JUCE_LEAK_DETECTOR(Listener)
 
     }; // class FieldComponent::Listener
 
@@ -117,7 +117,7 @@ protected:
     //==============================================================================
     void drawBackgroundGrid(juce::Graphics & g) const;
     //==============================================================================
-    void sourceMoved() override;
+    void sourceMovedCallback() override;
     //==============================================================================
     virtual void drawBackground(juce::Graphics & g) const = 0;
     virtual void applySourceSelectionToComponents() = 0;

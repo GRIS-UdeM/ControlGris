@@ -98,15 +98,15 @@ public:
     void valueChanged(juce::Value &) override;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) override;
+    void fieldSourcePositionChangedCallback(SourceIndex sourceIndex, int whichField) override;
 
     // SectionSourceSpan::Listeners
-    void parametersBoxSelectedSourceClicked() override;
-    void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) override;
-    void parametersBoxAzimuthSpanDragStarted() override;
-    void parametersBoxAzimuthSpanDragEnded() override;
-    void parametersBoxElevationSpanDragStarted() override;
-    void parametersBoxElevationSpanDragEnded() override;
+    void selectedSourceClickedCallback() override;
+    void parameterChangedCallback(SourceParameter sourceParameter, double value) override;
+    void azimuthSpanDragStartedCallback() override;
+    void azimuthSpanDragEndedCallback() override;
+    void elevationSpanDragStartedCallback() override;
+    void elevationSpanDragEndedCallback() override;
 
     // SectionGeneralSettings::Listeners
     void oscFormatChangedCallback(SpatMode mode) override;
@@ -117,39 +117,39 @@ public:
     void firstSourceIdChangedCallback(SourceId firstSourceId) override;
 
     // SectionSourcePosition::Listeners
-    void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
-    void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
-    void sourceBoxPositionChanged(SourceIndex sourceIndex,
-                                  std::optional<Radians> azimuth,
-                                  std::optional<Radians> elevation,
-                                  std::optional<float> x,
-                                  std::optional<float> y,
-                                  std::optional<float> z) override;
+    void sourceSelectionChangedCallback(SourceIndex sourceIndex) override;
+    void sourcesPlacementChangedCallback(SourcePlacement sourcePlacement) override;
+    void sourcePositionChangedCallback(SourceIndex sourceIndex,
+                                       std::optional<Radians> azimuth,
+                                       std::optional<Radians> elevation,
+                                       std::optional<float> x,
+                                       std::optional<float> y,
+                                       std::optional<float> z) override;
 
     // SectionTrajectory::Listeners
-    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
-    void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) override;
-    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) override;
-    void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) override;
-    void trajectoryBoxPositionBackAndForthChanged(bool value) override;
-    void trajectoryBoxElevationBackAndForthChanged(bool value) override;
-    void trajectoryBoxPositionDampeningCyclesChanged(int value) override;
-    void trajectoryBoxElevationDampeningCyclesChanged(int value) override;
-    void trajectoryBoxDeviationPerCycleChanged(float degrees) override;
-    void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
-    void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
-    void trajectoryBoxPositionActivateChanged(bool value) override;
-    void trajectoryBoxElevationActivateChanged(bool value) override;
+    void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
+    void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
+    void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
+    void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;
+    void positionTrajectoryBackAndForthChangedCallback(bool value) override;
+    void elevationTrajectoryBackAndForthChangedCallback(bool value) override;
+    void positionTrajectoryDampeningCyclesChangedCallback(int value) override;
+    void elevationTrajectoryDampeningCyclesChangedCallback(int value) override;
+    void trajectoryDeviationPerCycleChangedCallback(float degrees) override;
+    void trajectoryCycleDurationChangedCallback(double duration, int mode) override;
+    void trajectoryDurationUnitChangedCallback(double duration, int mode) override;
+    void positionTrajectoryStateChangedCallback(bool value) override;
+    void elevationTrajectoryStateChangedCallback(bool value) override;
 
     // PositionPresetComponent::Listeners
-    void positionPresetChanged(int presetNumber) override;
-    void positionPresetSaved(int presetNumber) override;
-    void positionPresetDeleted(int presetNumber) override;
+    void positionPresetChangedCallback(int presetNumber) override;
+    void positionPresetSavedCallback(int presetNumber) override;
+    void positionPresetDeletedCallback(int presetNumber) override;
 
     // SectionOscController::Listeners
-    void oscOutputPluginIdChanged(int value) override;
-    void oscInputConnectionChanged(bool state, int oscPort) override;
-    void oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort) override;
+    void oscOutputPluginIdChangedCallback(int value) override;
+    void oscInputConnectionChangedCallback(bool state, int oscPort) override;
+    void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) override;
 
     void reloadUiState();
     void updateSpanLinkButton(bool state);

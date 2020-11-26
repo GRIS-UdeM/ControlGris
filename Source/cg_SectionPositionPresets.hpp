@@ -43,9 +43,9 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void buttonClicked(PresetButton * button) = 0;
-        virtual void savingPresetClicked(PresetButton * button) = 0;
-        virtual void deletingPresetClicked(PresetButton * button) = 0;
+        virtual void presetButtonClickedCallback(PresetButton * button) = 0;
+        virtual void savingPresetClickedCallback(PresetButton * button) = 0;
+        virtual void deletingPresetClickedCallback(PresetButton * button) = 0;
 
     private:
         //==============================================================================
@@ -105,9 +105,9 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void positionPresetChanged(int presetNumber) = 0;
-        virtual void positionPresetSaved(int presetNumber) = 0;
-        virtual void positionPresetDeleted(int presetNumber) = 0;
+        virtual void positionPresetChangedCallback(int presetNumber) = 0;
+        virtual void positionPresetSavedCallback(int presetNumber) = 0;
+        virtual void positionPresetDeletedCallback(int presetNumber) = 0;
 
     private:
         //==============================================================================
@@ -139,9 +139,9 @@ public:
     void paint(juce::Graphics & g) override { g.fillAll(juce::Colour::fromRGB(64, 64, 64)); }
     void resized() override;
 
-    void buttonClicked(PresetButton * button) override;
-    void savingPresetClicked(PresetButton * button) override;
-    void deletingPresetClicked(PresetButton * button) override;
+    void presetButtonClickedCallback(PresetButton * button) override;
+    void savingPresetClickedCallback(PresetButton * button) override;
+    void deletingPresetClickedCallback(PresetButton * button) override;
 
     void setPreset(int value, bool notify = false);
     void presetSaved(int presetNumber, bool isSaved) const;

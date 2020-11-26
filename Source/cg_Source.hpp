@@ -60,8 +60,8 @@ public:
 
     private:
         //==============================================================================
-        void handleAsyncUpdate() override { sourceMoved(); }
-        virtual void sourceMoved() = 0;
+        void handleAsyncUpdate() override { sourceMovedCallback(); }
+        virtual void sourceMovedCallback() = 0;
         //==============================================================================
         JUCE_LEAK_DETECTOR(Listener)
 

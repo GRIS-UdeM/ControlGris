@@ -66,7 +66,7 @@ private:
     //==============================================================================
     void setSourcePosition(juce::MouseEvent const & event) const;
     //==============================================================================
-    void sourceMoved() override;
+    void sourceMovedCallback() override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
 

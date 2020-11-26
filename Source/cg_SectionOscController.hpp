@@ -35,9 +35,9 @@ public:
     struct Listener {
         virtual ~Listener() = default;
 
-        virtual void oscOutputPluginIdChanged(int value) = 0;
-        virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
-        virtual void oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort) = 0;
+        virtual void oscOutputPluginIdChangedCallback(int value) = 0;
+        virtual void oscInputConnectionChangedCallback(bool state, int oscPort) = 0;
+        virtual void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) = 0;
     };
 
 private:

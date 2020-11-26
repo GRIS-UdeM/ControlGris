@@ -96,7 +96,7 @@ void FieldComponent::drawBackgroundGrid(juce::Graphics & g) const
 }
 
 //==============================================================================
-void FieldComponent::sourceMoved()
+void FieldComponent::sourceMovedCallback()
 {
     repaint();
 }
@@ -263,7 +263,7 @@ juce::Rectangle<float> PositionFieldComponent::getEffectiveArea() const
 //==============================================================================
 void PositionFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
-    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 0); });
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChangedCallback(sourceIndex, 0); });
 }
 
 //==============================================================================
@@ -635,7 +635,7 @@ void ElevationFieldComponent::mouseDown([[maybe_unused]] juce::MouseEvent const 
 //==============================================================================
 void ElevationFieldComponent::notifySourcePositionChanged(SourceIndex const sourceIndex)
 {
-    mListeners.call([&](Listener & l) { l.fieldSourcePositionChanged(sourceIndex, 1); });
+    mListeners.call([&](Listener & l) { l.fieldSourcePositionChangedCallback(sourceIndex, 1); });
 }
 
 //==============================================================================

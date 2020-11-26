@@ -106,14 +106,14 @@ public:
     struct Listener {
         virtual ~Listener() = default;
 
-        virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
-        virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
-        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex,
-                                              std::optional<Radians> azimuth,
-                                              std::optional<Radians> elevation,
-                                              std::optional<float> x,
-                                              std::optional<float> y,
-                                              std::optional<float> z)
+        virtual void sourcesPlacementChangedCallback(SourcePlacement value) = 0;
+        virtual void sourceSelectionChangedCallback(SourceIndex sourceIndex) = 0;
+        virtual void sourcePositionChangedCallback(SourceIndex sourceIndex,
+                                                   std::optional<Radians> azimuth,
+                                                   std::optional<Radians> elevation,
+                                                   std::optional<float> x,
+                                                   std::optional<float> y,
+                                                   std::optional<float> z)
             = 0;
     };
 

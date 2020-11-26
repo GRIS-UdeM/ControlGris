@@ -56,7 +56,7 @@ void PresetButton::refresh()
 //==============================================================================
 void PresetButton::clicked(juce::ModifierKeys const & mods)
 {
-    mListeners.call([&](Listener & l) { l.buttonClicked(this); });
+    mListeners.call([&](Listener & l) { l.presetButtonClickedCallback(this); });
     if (!mods.isShiftDown()) {
         mLoaded = getToggleState();
     }
@@ -67,10 +67,10 @@ void PresetButton::clicked(juce::ModifierKeys const & mods)
 void PresetButton::internalClickCallback(juce::ModifierKeys const & mods)
 {
     if (mods.isShiftDown()) {
-        mListeners.call([&](Listener & l) { l.savingPresetClicked(this); });
+        mListeners.call([&](Listener & l) { l.savingPresetClickedCallback(this); });
         mSaved = true;
     } else if (mSaved && mods.isAltDown()) {
-        mListeners.call([&](Listener & l) { l.deletingPresetClicked(this); });
+        mListeners.call([&](Listener & l) { l.deletingPresetClickedCallback(this); });
         setToggleState(false, juce::NotificationType::dontSendNotification);
         mLoaded = mSaved = false;
     } else if (mSaved) {
@@ -130,7 +130,7 @@ void PositionPresetComponent::setPreset(int const value, bool const notify)
         mPresets[value - 1]->setToggleState(true, juce::NotificationType::dontSendNotification);
         mCurrentSelection = value - 1;
         if (notify) {
-            buttonClicked(mPresets[value - 1]);
+            presetButtonClickedCallback(mPresets[value - 1]);
         }
     }
 }
@@ -151,28 +151,28 @@ void PositionPresetComponent::changeListenerCallback([[maybe_unused]] juce::Chan
 }
 
 //==============================================================================
-void PositionPresetComponent::buttonClicked(PresetButton * button)
+void PositionPresetComponent::presetButtonClickedCallback(PresetButton * button)
 {
     if (button->getToggleState()) {
         mCurrentSelection = button->getButtonText().getIntValue() - 1;
         mActionLog.setText(juce::String("Load ") + button->getButtonText(),
                            juce::NotificationType::dontSendNotification);
-        mListeners.call([&](Listener & l) { l.positionPresetChanged(button->getButtonText().getIntValue()); });
+        mListeners.call([&](Listener & l) { l.positionPresetChangedCallback(button->getButtonText().getIntValue()); });
     }
 }
 
 //==============================================================================
-void PositionPresetComponent::savingPresetClicked(PresetButton * button)
+void PositionPresetComponent::savingPresetClickedCallback(PresetButton * button)
 {
     mActionLog.setText(juce::String("Save ") + button->getButtonText(), juce::NotificationType::dontSendNotification);
-    mListeners.call([&](Listener & l) { l.positionPresetSaved(button->getButtonText().getIntValue()); });
+    mListeners.call([&](Listener & l) { l.positionPresetSavedCallback(button->getButtonText().getIntValue()); });
 }
 
 //==============================================================================
-void PositionPresetComponent::deletingPresetClicked(PresetButton * button)
+void PositionPresetComponent::deletingPresetClickedCallback(PresetButton * button)
 {
     mActionLog.setText(juce::String("Del ") + button->getButtonText(), juce::NotificationType::dontSendNotification);
-    mListeners.call([&](Listener & l) { l.positionPresetDeleted(button->getButtonText().getIntValue()); });
+    mListeners.call([&](Listener & l) { l.positionPresetDeletedCallback(button->getButtonText().getIntValue()); });
 }
 
 //==============================================================================

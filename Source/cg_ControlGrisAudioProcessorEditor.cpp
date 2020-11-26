@@ -324,7 +324,7 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
         mElevationField.refreshSources();
         mSectionSourcePosition.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
         if (initSourcePlacement) {
-            sourceBoxPlacementChanged(SourcePlacement::leftAlternate);
+            sourcesPlacementChangedCallback(SourcePlacement::leftAlternate);
         }
     }
 }
@@ -347,7 +347,7 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChangedCallback(SourceId cons
 
 //==============================================================================
 // SectionSourcePosition::Listener callbacks.
-void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex const sourceIndex)
+void ControlGrisAudioProcessorEditor::sourceSelectionChangedCallback(SourceIndex const sourceIndex)
 {
     mSelectedSource = sourceIndex;
 
@@ -360,7 +360,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex cons
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement const sourcePlacement)
+void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlacement const sourcePlacement)
 {
     auto const numOfSources = mProcessor.getSources().size();
     constexpr Degrees azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
@@ -490,12 +490,12 @@ void ControlGrisAudioProcessorEditor::sourceBoxPlacementChanged(SourcePlacement 
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const sourceIndex,
-                                                               std::optional<Radians> const azimuth,
-                                                               std::optional<Radians> const elevation,
-                                                               std::optional<float> const x,
-                                                               std::optional<float> const y,
-                                                               std::optional<float> const z)
+void ControlGrisAudioProcessorEditor::sourcePositionChangedCallback(SourceIndex const sourceIndex,
+                                                                    std::optional<Radians> const azimuth,
+                                                                    std::optional<Radians> const elevation,
+                                                                    std::optional<float> const x,
+                                                                    std::optional<float> const y,
+                                                                    std::optional<float> const z)
 {
     auto & source{ mProcessor.getSources()[sourceIndex] };
 
@@ -516,8 +516,8 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
 
 //==============================================================================
 // SectionSourceSpan::Listener callbacks.
-void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParameter const sourceParameter,
-                                                                    double const value)
+void ControlGrisAudioProcessorEditor::parameterChangedCallback(SourceParameter const sourceParameter,
+                                                               double const value)
 {
     mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, static_cast<float>(value));
 
@@ -528,7 +528,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParame
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
+void ControlGrisAudioProcessorEditor::selectedSourceClickedCallback()
 {
     // increment source index
     mSelectedSource = SourceIndex{ (mSelectedSource.toInt() + 1) % mProcessor.getSources().size() };
@@ -542,32 +542,32 @@ void ControlGrisAudioProcessorEditor::parametersBoxSelectedSourceClicked()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragStarted()
+void ControlGrisAudioProcessorEditor::azimuthSpanDragStartedCallback()
 {
     mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::AZIMUTH_SPAN);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::parametersBoxAzimuthSpanDragEnded()
+void ControlGrisAudioProcessorEditor::azimuthSpanDragEndedCallback()
 {
     mProcessor.getChangeGestureManager().endGesture(Automation::Ids::AZIMUTH_SPAN);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragStarted()
+void ControlGrisAudioProcessorEditor::elevationSpanDragStartedCallback()
 {
     mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::ELEVATION_SPAN);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
+void ControlGrisAudioProcessorEditor::elevationSpanDragEndedCallback()
 {
     mProcessor.getChangeGestureManager().endGesture(Automation::Ids::ELEVATION_SPAN);
 }
 
 //==============================================================================
 // SectionTrajectory::Listener callbacks.
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink const sourceLink)
+void ControlGrisAudioProcessorEditor::positionSourceLinkChangedCallback(PositionSourceLink const sourceLink)
 {
     mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
 
@@ -579,7 +579,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(Pos
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink const sourceLink)
+void ControlGrisAudioProcessorEditor::elevationSourceLinkChangedCallback(ElevationSourceLink const sourceLink)
 {
     mProcessor.setElevationSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
 
@@ -592,7 +592,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationSourceLinkChanged(El
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(PositionTrajectoryType value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
     mPositionTrajectoryManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
@@ -600,7 +600,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxPositionTrajectoryTypeChanged
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
     mElevationTrajectoryManager.setTrajectoryType(value);
@@ -608,42 +608,42 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxElevationTrajectoryTypeChange
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionBackAndForthChanged(bool value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryBackAndForthChangedCallback(bool value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForth", value, nullptr);
     mPositionTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationBackAndForthChanged(bool value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryBackAndForthChangedCallback(bool value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
     mElevationTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionDampeningCyclesChanged(int value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryDampeningCyclesChangedCallback(int value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCycles", value, nullptr);
     mPositionTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationDampeningCyclesChanged(int value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryDampeningCyclesChangedCallback(int value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
     mElevationTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxDeviationPerCycleChanged(float degrees)
+void ControlGrisAudioProcessorEditor::trajectoryDeviationPerCycleChangedCallback(float degrees)
 {
     mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
     mPositionTrajectoryManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double duration, int mode)
+void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(double duration, int mode)
 {
     mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
@@ -655,7 +655,7 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxCycleDurationChanged(double d
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double duration, int mode)
+void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(double duration, int mode)
 {
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
@@ -667,13 +667,13 @@ void ControlGrisAudioProcessorEditor::trajectoryBoxDurationUnitChanged(double du
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxPositionActivateChanged(bool value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(bool value)
 {
     mPositionTrajectoryManager.setPositionActivateState(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryBoxElevationActivateChanged(bool value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool value)
 {
     mElevationTrajectoryManager.setPositionActivateState(value);
 }
@@ -700,7 +700,7 @@ void ControlGrisAudioProcessorEditor::refresh()
 
 //==============================================================================
 // FieldComponent::Listener callback.
-void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex const sourceIndex, int whichField)
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChangedCallback(SourceIndex const sourceIndex, int whichField)
 {
     mProcessor.sourcePositionChanged(sourceIndex, whichField);
     mSelectedSource = sourceIndex;
@@ -714,7 +714,7 @@ void ControlGrisAudioProcessorEditor::fieldSourcePositionChanged(SourceIndex con
 
 //==============================================================================
 // PositionPresetComponent::Listener callback.
-void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumber)
+void ControlGrisAudioProcessorEditor::positionPresetChangedCallback(int const presetNumber)
 {
     mProcessor.getPresetsManager().forceLoad(presetNumber);
 
@@ -726,13 +726,13 @@ void ControlGrisAudioProcessorEditor::positionPresetChanged(int const presetNumb
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionPresetSaved(int presetNumber)
+void ControlGrisAudioProcessorEditor::positionPresetSavedCallback(int presetNumber)
 {
     mProcessor.getPresetsManager().save(presetNumber);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
+void ControlGrisAudioProcessorEditor::positionPresetDeletedCallback(int presetNumber)
 {
     [[maybe_unused]] auto const success{ mProcessor.getPresetsManager().deletePreset(presetNumber) };
     jassert(success);
@@ -740,13 +740,13 @@ void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
 
 //==============================================================================
 // SectionOscController::Listener callback.
-void ControlGrisAudioProcessorEditor::oscOutputPluginIdChanged(int value)
+void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int value)
 {
     mProcessor.setOscOutputPluginId(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int oscPort)
+void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool state, int oscPort)
 {
     if (state) {
         mProcessor.createOscInputConnection(oscPort);
@@ -756,7 +756,9 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChanged(bool state, int 
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort)
+void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool state,
+                                                                         juce::String oscAddress,
+                                                                         int oscPort)
 {
     if (state) {
         mProcessor.createOscOutputConnection(oscAddress, oscPort);

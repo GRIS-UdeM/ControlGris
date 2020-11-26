@@ -44,19 +44,19 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) = 0;
-        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) = 0;
-        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType trajectoryType) = 0;
-        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType trajectoryType) = 0;
-        virtual void trajectoryBoxPositionBackAndForthChanged(bool value) = 0;
-        virtual void trajectoryBoxElevationBackAndForthChanged(bool value) = 0;
-        virtual void trajectoryBoxPositionDampeningCyclesChanged(int value) = 0;
-        virtual void trajectoryBoxElevationDampeningCyclesChanged(int value) = 0;
-        virtual void trajectoryBoxDeviationPerCycleChanged(float value) = 0;
-        virtual void trajectoryBoxCycleDurationChanged(double duration, int mode) = 0;
-        virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
-        virtual void trajectoryBoxPositionActivateChanged(bool value) = 0;
-        virtual void trajectoryBoxElevationActivateChanged(bool value) = 0;
+        virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
+        virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
+        virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
+        virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
+        virtual void positionTrajectoryBackAndForthChangedCallback(bool value) = 0;
+        virtual void elevationTrajectoryBackAndForthChangedCallback(bool value) = 0;
+        virtual void positionTrajectoryDampeningCyclesChangedCallback(int value) = 0;
+        virtual void elevationTrajectoryDampeningCyclesChangedCallback(int value) = 0;
+        virtual void trajectoryDeviationPerCycleChangedCallback(float value) = 0;
+        virtual void trajectoryCycleDurationChangedCallback(double duration, int mode) = 0;
+        virtual void trajectoryDurationUnitChangedCallback(double duration, int mode) = 0;
+        virtual void positionTrajectoryStateChangedCallback(bool value) = 0;
+        virtual void elevationTrajectoryStateChangedCallback(bool value) = 0;
     };
 
 private:

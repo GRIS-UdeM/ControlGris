@@ -51,7 +51,7 @@ void PositionSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void PositionSourceComponent::sourceMoved()
+void PositionSourceComponent::sourceMovedCallback()
 {
     updatePositionInParent();
 }

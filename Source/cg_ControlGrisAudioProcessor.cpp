@@ -1259,7 +1259,7 @@ void ControlGrisAudioProcessor::setSelectedSource(const Source & source)
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
         auto const index{ source.getIndex() };
-        juce::MessageManager::callAsync([=] { editor->sourceBoxSelectionChanged(index); });
+        juce::MessageManager::callAsync([=] { editor->sourceSelectionChangedCallback(index); });
     }
 }
 
