@@ -267,11 +267,6 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
 void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSourceLink,
                                                       SourceLinkEnforcer::OriginOfChange const originOfChange)
 {
-    if (newSourceLink == mPositionTrajectoryManager.getSourceLink()) {
-        return;
-    }
-
-    // TODO : this doesnt work at all
     auto const isSymmetricLink{ newSourceLink == PositionSourceLink::symmetricX
                                 || newSourceLink == PositionSourceLink::symmetricY };
     if (mSources.size() != 2 && isSymmetricLink) {
@@ -293,17 +288,15 @@ void ControlGrisAudioProcessor::setPositionSourceLink(PositionSourceLink newSour
 void ControlGrisAudioProcessor::setElevationSourceLink(ElevationSourceLink const newSourceLink,
                                                        SourceLinkEnforcer::OriginOfChange const originOfChange)
 {
-    if (newSourceLink != mElevationTrajectoryManager.getSourceLink()) {
-        mElevationTrajectoryManager.setSourceLink(newSourceLink);
+    mElevationTrajectoryManager.setSourceLink(newSourceLink);
 
-        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        if (ed != nullptr) {
-            ed->updateElevationSourceLinkCombo(newSourceLink);
-        }
-
-        mElevationSourceLinkEnforcer.setSourceLink(newSourceLink, originOfChange);
-        mElevationSourceLinkEnforcer.enforceSourceLink();
+    auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (ed != nullptr) {
+        ed->updateElevationSourceLinkCombo(newSourceLink);
     }
+
+    mElevationSourceLinkEnforcer.setSourceLink(newSourceLink, originOfChange);
+    mElevationSourceLinkEnforcer.enforceSourceLink();
 }
 
 //==============================================================================

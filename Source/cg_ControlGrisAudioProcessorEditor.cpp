@@ -156,6 +156,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     //----------------------------
     oscFormatChangedCallback(mProcessor.getSpatMode());
     oscPortChangedCallback(mProcessor.getOscPortNumber());
+    oscAddressChangedCallback(mProcessor.getOscAddress());
     oscStateChangedCallback(mProcessor.isOscConnected());
     firstSourceIdChangedCallback(mProcessor.getFirstSourceId());
     numberOfSourcesChangedCallback(mProcessor.getSources().size());

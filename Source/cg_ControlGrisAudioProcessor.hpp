@@ -139,6 +139,7 @@ public:
     void setOscPortNumber(int oscPortNumber);
     void setOscAddress(juce::String const & address);
     int getOscPortNumber() const { return mCurrentOscPort; }
+    juce::String const & getOscAddress() const { return mCurrentOscAddress; }
 
     void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
     auto getFirstSourceId() const { return mFirstSourceId; }
