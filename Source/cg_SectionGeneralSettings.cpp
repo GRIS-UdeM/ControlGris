@@ -18,45 +18,67 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SettingsBoxComponent.hpp"
+#include "cg_SectionGeneralSettings.hpp"
 
-//==============================================================================
-SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+namespace gris
 {
-    mOscFormatLabel.setText("OSC Format:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&mOscFormatLabel);
+//==============================================================================
+SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+{
+    mOscFormatLabel.setText("OSC Format:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(mOscFormatLabel);
 
     mOscFormatCombo.addItem("DOME - SpatGris", 1);
     mOscFormatCombo.addItem("CUBE - SpatGris", 2);
     mOscFormatCombo.onChange = [this] {
-        mListeners.call(
-            [&](Listener & l) { l.settingsBoxOscFormatChanged((SpatMode)(mOscFormatCombo.getSelectedId() - 1)); });
+        mListeners.call([&](Listener & l) {
+            l.oscFormatChangedCallback(static_cast<SpatMode>(mOscFormatCombo.getSelectedId() - 1));
+        });
     };
     mOscFormatCombo.setSelectedId(1);
-    addAndMakeVisible(&mOscFormatCombo);
+    addAndMakeVisible(mOscFormatCombo);
 
-    mOscPortLabel.setText("OSC Port:", NotificationType::dontSendNotification);
-    addAndMakeVisible(&mOscPortLabel);
+    mOscPortLabel.setText("OSC Port:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(mOscPortLabel);
 
-    String defaultPort("18032");
+    juce::String defaultPort("18032");
     mOscPortEditor.setExplicitFocusOrder(4);
     mOscPortEditor.setText(defaultPort);
     mOscPortEditor.setInputRestrictions(5, "0123456789");
     mOscPortEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
     mOscPortEditor.onFocusLost = [this, defaultPort] {
         if (!mOscPortEditor.isEmpty()) {
-            mListeners.call(
-                [&](Listener & l) { l.settingsBoxOscPortNumberChanged(mOscPortEditor.getText().getIntValue()); });
+            mListeners.call([&](Listener & l) { l.oscPortChangedCallback(mOscPortEditor.getText().getIntValue()); });
         } else {
             mListeners.call([&](Listener & l) {
-                l.settingsBoxOscPortNumberChanged(defaultPort.getIntValue());
+                l.oscPortChangedCallback(defaultPort.getIntValue());
                 mOscPortEditor.setText(defaultPort);
             });
         }
     };
-    addAndMakeVisible(&mOscPortEditor);
+    addAndMakeVisible(mOscPortEditor);
 
-    mNumOfSourcesLabel.setText("Number of Sources:", NotificationType::dontSendNotification);
+    mOscAddressLabel.setText("OSC Address:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(mOscAddressLabel);
+
+    juce::String const defaultAddress{ "127.0.0.1" };
+    mOscAddressEditor.setExplicitFocusOrder(5);
+    mOscAddressEditor.setText(defaultAddress);
+    mOscAddressEditor.setInputRestrictions(15, "0123456789.");
+    mOscAddressEditor.onReturnKey = [this]() -> void { mOscFormatCombo.grabKeyboardFocus(); };
+    mOscAddressEditor.onFocusLost = [this, defaultAddress]() -> void {
+        if (!mOscAddressEditor.isEmpty()) {
+            mListeners.call([&](Listener & l) { l.oscAddressChangedCallback(mOscAddressEditor.getText()); });
+        } else {
+            mListeners.call([&](Listener & l) {
+                l.oscAddressChangedCallback(defaultAddress);
+                mOscAddressEditor.setText(defaultAddress);
+            });
+        }
+    };
+    addAndMakeVisible(mOscAddressEditor);
+
+    mNumOfSourcesLabel.setText("Number of Sources:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mNumOfSourcesLabel);
 
     mNumOfSourcesEditor.setExplicitFocusOrder(2);
@@ -65,19 +87,18 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     mNumOfSourcesEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
     mNumOfSourcesEditor.onFocusLost = [this] {
         if (!mNumOfSourcesEditor.isEmpty()) {
-            mListeners.call([&](Listener & l) {
-                l.settingsBoxNumberOfSourcesChanged(mNumOfSourcesEditor.getText().getIntValue());
-            });
+            mListeners.call(
+                [&](Listener & l) { l.numberOfSourcesChangedCallback(mNumOfSourcesEditor.getText().getIntValue()); });
         } else {
             mListeners.call([&](Listener & l) {
-                l.settingsBoxNumberOfSourcesChanged(1);
+                l.numberOfSourcesChangedCallback(1);
                 mNumOfSourcesEditor.setText("1");
             });
         }
     };
     addAndMakeVisible(&mNumOfSourcesEditor);
 
-    mFirstSourceIdLabel.setText("First Source ID:", NotificationType::dontSendNotification);
+    mFirstSourceIdLabel.setText("First Source ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mFirstSourceIdLabel);
 
     mFirstSourceIdEditor.setExplicitFocusOrder(3);
@@ -87,11 +108,11 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     mFirstSourceIdEditor.onFocusLost = [this] {
         if (!mFirstSourceIdEditor.isEmpty()) {
             mListeners.call([&](Listener & l) {
-                l.settingsBoxFirstSourceIdChanged(SourceId{ mFirstSourceIdEditor.getText().getIntValue() });
+                l.firstSourceIdChangedCallback(SourceId{ mFirstSourceIdEditor.getText().getIntValue() });
             });
         } else {
             mListeners.call([&](Listener & l) {
-                l.settingsBoxFirstSourceIdChanged(SourceId{ 1 });
+                l.firstSourceIdChangedCallback(SourceId{ 1 });
                 mFirstSourceIdEditor.setText("1");
             });
         }
@@ -101,49 +122,55 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
     mPositionActivateButton.setExplicitFocusOrder(1);
     mPositionActivateButton.setButtonText("Activate OSC");
     mPositionActivateButton.onClick = [this] {
-        mListeners.call([&](Listener & l) { l.settingsBoxOscActivated(mPositionActivateButton.getToggleState()); });
+        mListeners.call([&](Listener & l) { l.oscStateChangedCallback(mPositionActivateButton.getToggleState()); });
     };
     addAndMakeVisible(&mPositionActivateButton);
 }
 
 //==============================================================================
-void SettingsBoxComponent::setOscFormat(SpatMode mode)
+void SectionGeneralSettings::setOscFormat(SpatMode mode)
 {
-    mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, NotificationType::dontSendNotification);
+    mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SettingsBoxComponent::setOscPortNumber(int oscPortNumber)
+void SectionGeneralSettings::setOscPortNumber(int const oscPortNumber)
 {
-    mOscPortEditor.setText(String(oscPortNumber));
+    mOscPortEditor.setText(juce::String(oscPortNumber));
 }
 
 //==============================================================================
-void SettingsBoxComponent::setNumberOfSources(int numOfSources)
+void SectionGeneralSettings::setOscAddress(juce::String const & address)
 {
-    mNumOfSourcesEditor.setText(String(numOfSources));
+    mOscAddressEditor.setText(address);
 }
 
 //==============================================================================
-void SettingsBoxComponent::setFirstSourceId(SourceId const firstSourceId)
+void SectionGeneralSettings::setNumberOfSources(int const numOfSources)
+{
+    mNumOfSourcesEditor.setText(juce::String(numOfSources));
+}
+
+//==============================================================================
+void SectionGeneralSettings::setFirstSourceId(SourceId const firstSourceId)
 {
     mFirstSourceIdEditor.setText(firstSourceId.toString());
 }
 
 //==============================================================================
-void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
+void SectionGeneralSettings::setActivateButtonState(bool const shouldBeOn)
 {
-    mPositionActivateButton.setToggleState(shouldBeOn, NotificationType::dontSendNotification);
+    mPositionActivateButton.setToggleState(shouldBeOn, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SettingsBoxComponent::paint(Graphics & g)
+void SectionGeneralSettings::paint(juce::Graphics & g)
 {
-    g.fillAll(mGrisLookAndFeel.findColour(ResizableWindow::backgroundColourId));
+    g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SettingsBoxComponent::resized()
+void SectionGeneralSettings::resized()
 {
     mOscFormatLabel.setBounds(5, 10, 90, 15);
     mOscFormatCombo.setBounds(95, 10, 150, 20);
@@ -151,11 +178,16 @@ void SettingsBoxComponent::resized()
     mOscPortLabel.setBounds(5, 40, 90, 15);
     mOscPortEditor.setBounds(95, 40, 150, 20);
 
+    mOscAddressLabel.setBounds(5, 70, 90, 15);
+    mOscAddressEditor.setBounds(95, 70, 150, 20);
+
+    mPositionActivateButton.setBounds(5, 100, 150, 20);
+
     mNumOfSourcesLabel.setBounds(265, 10, 130, 15);
     mNumOfSourcesEditor.setBounds(395, 10, 40, 15);
 
     mFirstSourceIdLabel.setBounds(265, 40, 130, 15);
     mFirstSourceIdEditor.setBounds(395, 40, 40, 15);
-
-    mPositionActivateButton.setBounds(5, 70, 150, 20);
 }
+
+} // namespace gris

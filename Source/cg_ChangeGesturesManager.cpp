@@ -20,8 +20,10 @@
 
 #include "cg_ChangeGesturesManager.hpp"
 
+namespace gris
+{
 //==============================================================================
-ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager & manager, String const & parameterName)
+ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager & manager, juce::String const & parameterName)
     : mManager(manager)
     , mParameterName(parameterName)
 {
@@ -45,7 +47,7 @@ ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager::ScopedLock 
 }
 
 //==============================================================================
-void ChangeGesturesManager::beginGesture(String const & parameterName)
+void ChangeGesturesManager::beginGesture(juce::String const & parameterName)
 {
     if (!mGestureStates.contains(parameterName)) {
         mGestureStates.set(parameterName, 0);
@@ -62,7 +64,7 @@ void ChangeGesturesManager::beginGesture(String const & parameterName)
 }
 
 //==============================================================================
-void ChangeGesturesManager::endGesture(String const & parameterName)
+void ChangeGesturesManager::endGesture(juce::String const & parameterName)
 {
     jassert(mGestureStates.contains(parameterName));
 
@@ -78,7 +80,9 @@ void ChangeGesturesManager::endGesture(String const & parameterName)
     jassert(mGestureStates[parameterName] >= 0);
 }
 
-ChangeGesturesManager::ScopedLock ChangeGesturesManager::getScopedLock(const String & parameterName)
+ChangeGesturesManager::ScopedLock ChangeGesturesManager::getScopedLock(const juce::String & parameterName)
 {
     return ChangeGesturesManager::ScopedLock{ *this, parameterName };
 }
+
+} // namespace gris

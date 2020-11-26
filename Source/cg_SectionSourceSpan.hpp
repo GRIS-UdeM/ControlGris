@@ -23,64 +23,73 @@
 #include <JuceHeader.h>
 
 #include "cg_ControlGrisLookAndFeel.hpp"
-#include "cg_SourceId.hpp"
-#include "cg_constants.hpp"
+#include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
-class SettingsBoxComponent final : public Component
+class SectionSourceSpan final
+    : public juce::Component
+    , public juce::Slider::Listener
 {
 public:
     //==============================================================================
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
-        virtual void settingsBoxOscFormatChanged(SpatMode mode) = 0;
-        virtual void settingsBoxOscPortNumberChanged(int oscPort) = 0;
-        virtual void settingsBoxOscActivated(bool state) = 0;
-        virtual void settingsBoxNumberOfSourcesChanged(int numOfSources) = 0;
-        virtual void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) = 0;
+        virtual void azimuthSpanDragStartedCallback() = 0;
+        virtual void azimuthSpanDragEndedCallback() = 0;
+        virtual void elevationSpanDragStartedCallback() = 0;
+        virtual void elevationSpanDragEndedCallback() = 0;
+        virtual void selectedSourceClickedCallback() = 0;
+        virtual void parameterChangedCallback(SourceParameter sourceId, double value) = 0;
     };
 
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
-    Label mOscFormatLabel;
-    ComboBox mOscFormatCombo;
+    bool mDistanceEnabled{ false };
+    bool mSpanLinked{ false };
 
-    Label mOscPortLabel;
-    TextEditor mOscPortEditor;
+    Source * mSelectedSource{};
 
-    Label mNumOfSourcesLabel;
-    TextEditor mNumOfSourcesEditor;
-
-    Label mFirstSourceIdLabel;
-    TextEditor mFirstSourceIdEditor;
-
-    ToggleButton mPositionActivateButton;
+    juce::Label mAzimuthLabel{};
+    juce::Label mElevationLabel{};
+    juce::Slider mAzimuthSpan{};
+    juce::Slider mElevationSpan{};
 
 public:
     //==============================================================================
-    explicit SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~SettingsBoxComponent() final = default;
+    SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel);
+    //==============================================================================
+    SectionSourceSpan() = delete;
+    ~SectionSourceSpan() override = default;
 
-    void paint(Graphics &) override;
+    SectionSourceSpan(SectionSourceSpan const &) = delete;
+    SectionSourceSpan(SectionSourceSpan &&) = delete;
+
+    SectionSourceSpan & operator=(SectionSourceSpan const &) = delete;
+    SectionSourceSpan & operator=(SectionSourceSpan &&) = delete;
+    //==============================================================================
+    void mouseDown(juce::MouseEvent const & event) override;
+    void sliderValueChanged(juce::Slider * slider) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
 
-    // These are only setters, they dont send notification.
-    //-----------------------------------------------------
-    void setNumberOfSources(int numOfSources);
-    void setFirstSourceId(SourceId firstSourceId);
-    void setOscFormat(SpatMode mode);
-    void setOscPortNumber(int oscPortNumber);
-    void setActivateButtonState(bool shouldBeOn);
+    void setSelectedSource(Source * source);
+    void setDistanceEnabled(bool distanceEnabled);
+    void setSpanLinkState(bool spanLinkState);
+    bool getSpanLinkState() const { return mSpanLinked; }
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionSourceSpan)
 };
+
+} // namespace gris

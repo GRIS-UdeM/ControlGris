@@ -22,36 +22,55 @@
 
 #include "cg_Radians.hpp"
 
+namespace gris
+{
 class Degrees
 {
     float mValue{};
 
 public:
     constexpr Degrees() noexcept = default;
+
     constexpr explicit Degrees(float const value) noexcept : mValue(value) {}
+
     constexpr Degrees(Radians const radians) noexcept : Degrees(radians.getAsDegrees()) {}
+
     ~Degrees() noexcept = default;
 
     constexpr Degrees(Degrees const & other) = default;
+
     constexpr Degrees(Degrees && other) noexcept = default;
 
     constexpr Degrees & operator=(Degrees const &) = default;
+
     constexpr Degrees & operator=(Degrees &&) noexcept = default;
 
     constexpr bool operator<(Degrees const other) const { return mValue < other.mValue; }
+
     constexpr bool operator>(Degrees const other) const { return mValue > other.mValue; }
+
     constexpr bool operator<=(Degrees const other) const { return mValue <= other.mValue; }
+
     constexpr bool operator>=(Degrees const other) const { return mValue >= other.mValue; }
+
     constexpr bool operator==(Degrees const other) const { return mValue == other.mValue; }
+
     constexpr bool operator!=(Degrees const other) const { return mValue != other.mValue; }
 
     constexpr Degrees operator-() const { return Degrees{ -mValue }; }
+
     constexpr Degrees operator+(Degrees const & other) const { return Degrees{ mValue + other.mValue }; }
+
     constexpr Degrees operator-(Degrees const & other) const { return Degrees{ mValue - other.mValue }; }
+
     constexpr Degrees operator*(float const value) const { return Degrees{ mValue * value }; }
+
     constexpr Degrees operator*(int const value) const { return Degrees{ mValue * static_cast<float>(value) }; }
+
     constexpr Degrees operator/(float const value) const { return Degrees{ mValue / value }; }
+
     constexpr Degrees operator/(int const value) const { return Degrees{ mValue / static_cast<float>(value) }; }
+
     constexpr float operator/(Degrees const other) const { return mValue / other.mValue; }
 
     constexpr Degrees & operator+=(Degrees const & other)
@@ -59,25 +78,31 @@ public:
         mValue += other.mValue;
         return *this;
     }
+
     constexpr Degrees & operator-=(Degrees const & other)
     {
         mValue -= other.mValue;
         return *this;
     }
+
     constexpr Degrees & operator*=(float const value)
     {
         mValue *= value;
         return *this;
     }
+
     constexpr Degrees & operator/=(float const value)
     {
         mValue /= value;
         return *this;
     }
 
-    constexpr operator Radians() const { return Radians{ mValue / 360.0f * MathConstants<float>::twoPi }; }
-    [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * MathConstants<float>::twoPi; }
+    constexpr operator Radians() const { return Radians{ mValue / 360.0f * juce::MathConstants<float>::twoPi }; }
+
+    [[nodiscard]] constexpr float getAsRadians() const { return mValue / 360.0f * juce::MathConstants<float>::twoPi; }
+
     [[nodiscard]] constexpr float getAsDegrees() const { return mValue; }
+
     [[nodiscard]] constexpr Degrees simplified() const
     {
         constexpr auto circle{ 360.0f };
@@ -91,3 +116,5 @@ public:
         return *this;
     }
 }; // class Degrees
+
+} // namespace gris

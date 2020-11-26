@@ -25,17 +25,19 @@
 #include "cg_Normalized.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //=========
 class Trajectory
 {
 protected:
     //=========
-    Array<Point<float>> mPoints{};
+    juce::Array<juce::Point<float>> mPoints{};
     bool mIsElevationDrawing{ false };
 
 public:
     //=========
-    Trajectory(PositionTrajectoryType positionTrajectoryType, Point<float> const & startingPoint) noexcept;
+    Trajectory(PositionTrajectoryType positionTrajectoryType, juce::Point<float> const & startingPoint) noexcept;
     Trajectory(ElevationTrajectoryType elevationTrajectoryType) noexcept;
 
     Trajectory(Trajectory const &) = default;
@@ -46,15 +48,15 @@ public:
     Trajectory & operator=(Trajectory const &) = default;
     Trajectory & operator=(Trajectory &&) noexcept = default;
 
-    Point<float> const & getStartPosition() const { return mPoints.getReference(0); }
-    Point<float> const & getEndPosition() const { return mPoints.getReference(mPoints.size() - 1); }
-    Point<float> getPosition(Normalized normalized) const;
+    juce::Point<float> const & getStartPosition() const { return mPoints.getReference(0); }
+    juce::Point<float> const & getEndPosition() const { return mPoints.getReference(mPoints.size() - 1); }
+    juce::Point<float> getPosition(Normalized normalized) const;
 
     void clear() { mPoints.clear(); }
-    void addPoint(Point<float> const & point);
+    void addPoint(juce::Point<float> const & point);
     int size() const { return mPoints.size(); }
 
-    Path getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const;
+    juce::Path getDrawablePath(juce::Rectangle<float> const & drawArea, SpatMode spatMode) const;
 
 private:
     //=========
@@ -63,12 +65,14 @@ private:
     void rotate(Radians angle);
     void scale(float magnitude);
 
-    static Array<Point<float>> getBasicCirclePoints();
-    static Array<Point<float>> getBasicEllipsePoints();
-    static Array<Point<float>> getBasicSpiralPoints();
-    static Array<Point<float>> getBasicSquarePoints();
-    static Array<Point<float>> getBasicTrianglePoints();
-    static Array<Point<float>> getBasicDownUpPoints();
+    static juce::Array<juce::Point<float>> getBasicCirclePoints();
+    static juce::Array<juce::Point<float>> getBasicEllipsePoints();
+    static juce::Array<juce::Point<float>> getBasicSpiralPoints();
+    static juce::Array<juce::Point<float>> getBasicSquarePoints();
+    static juce::Array<juce::Point<float>> getBasicTrianglePoints();
+    static juce::Array<juce::Point<float>> getBasicDownUpPoints();
     //=========
     JUCE_LEAK_DETECTOR(Trajectory);
 };
+
+} // namespace gris

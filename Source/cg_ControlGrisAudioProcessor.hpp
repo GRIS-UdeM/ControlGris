@@ -29,25 +29,27 @@
 #include "cg_TrajectoryManager.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ControlGrisAudioProcessor final
-    : public AudioProcessor
-    , public AudioProcessorValueTreeState::Listener
-    //    , public TrajectoryManager::Listener
-    , public Timer
-    , private OSCReceiver::Listener<OSCReceiver::RealtimeCallback>
+    : public juce::AudioProcessor
+    , public juce::AudioProcessorValueTreeState::Listener
+    , public juce::Timer
+    , private juce::OSCReceiver::Listener<juce::OSCReceiver::RealtimeCallback>
 {
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
-    bool mOscConnected{ false };
+    bool mOscConnected{ true };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
     int mCurrentOscPort{ 18032 };
+    juce::String mCurrentOscAddress{ "127.0.0.1" };
     int mLastConnectedOscPort{ -1 };
     int mCurrentOscInputPort{ 8000 };
     int mCurrentOscOutputPort{ 9000 };
-    String mCurrentOscOutputAddress{ "192.168.1.100" };
+    juce::String mCurrentOscOutputAddress{ "192.168.1.100" };
     bool mNeedsInitialization{ true };
 
     double mInitTimeOnPlay{ 0.0 };
@@ -59,17 +61,17 @@ class ControlGrisAudioProcessor final
     bool mCanStopActivate{ false };
     double mBpm{ 120 };
 
-    OSCSender mOscSender;
-    OSCSender mOscOutputSender;
-    OSCReceiver mOscInputReceiver;
+    juce::OSCSender mOscSender;
+    juce::OSCSender mOscOutputSender;
+    juce::OSCReceiver mOscInputReceiver;
 
-    XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
+    juce::XmlElement mFixPositionData{ FIXED_POSITION_DATA_TAG };
 
     Sources mSources{};
     SourceLinkEnforcer mPositionSourceLinkEnforcer{ mSources, PositionSourceLink::independent };
     SourceLinkEnforcer mElevationSourceLinkEnforcer{ mSources, ElevationSourceLink::independent };
 
-    AudioProcessorValueTreeState mAudioProcessorValueTreeState;
+    juce::AudioProcessorValueTreeState mAudioProcessorValueTreeState;
 
     ChangeGesturesManager mChangeGesturesManager{ mAudioProcessorValueTreeState };
     PresetsManager mPresetManager{ mFixPositionData,
@@ -98,14 +100,14 @@ public:
     bool isBusesLayoutSupported(BusesLayout const & layouts) const override;
 #endif
 
-    void processBlock(AudioBuffer<float> &, MidiBuffer &) override;
+    void processBlock(juce::AudioBuffer<float> &, juce::MidiBuffer &) override;
 
     //==============================================================================
-    AudioProcessorEditor * createEditor() override;
+    juce::AudioProcessorEditor * createEditor() override;
     bool hasEditor() const override { return true; } // (change this to false if you choose to not supply an editor)
 
     //==============================================================================
-    String const getName() const override;
+    juce::String const getName() const override;
 
     bool acceptsMidi() const override;
     bool producesMidi() const override;
@@ -120,22 +122,24 @@ public:
       // so this should be at least 1, even if you're not really implementing programs.
     int getCurrentProgram() override { return 0; }
     void setCurrentProgram([[maybe_unused]] int index) override {}
-    String const getProgramName([[maybe_unused]] int index) override { return {}; }
-    void changeProgramName([[maybe_unused]] int index, [[maybe_unused]] String const & newName) override {}
+    juce::String const getProgramName([[maybe_unused]] int index) override { return {}; }
+    void changeProgramName([[maybe_unused]] int index, [[maybe_unused]] juce::String const & newName) override {}
 
     //==============================================================================
-    void getStateInformation(MemoryBlock & destData) override;
+    void getStateInformation(juce::MemoryBlock & destData) override;
     void setStateInformation(const void * data, int sizeInBytes) override;
 
     //==============================================================================
-    void parameterChanged(String const & parameterId, float newValue) override;
+    void parameterChanged(juce::String const & parameterId, float newValue) override;
 
     //==============================================================================
     void setSpatMode(SpatMode spatMode);
     SpatMode getSpatMode() const { return mSpatMode; }
 
     void setOscPortNumber(int oscPortNumber);
+    void setOscAddress(juce::String const & address);
     int getOscPortNumber() const { return mCurrentOscPort; }
+    juce::String const & getOscAddress() const { return mCurrentOscAddress; }
 
     void setFirstSourceId(SourceId firstSourceId, bool propagate = true);
     auto getFirstSourceId() const { return mFirstSourceId; }
@@ -146,10 +150,10 @@ public:
     auto const & getSources() const { return mSources; }
 
     //==============================================================================
-    AudioProcessorValueTreeState const & getValueTreeState() const { return mAudioProcessorValueTreeState; }
-    AudioProcessorValueTreeState & getValueTreeState() { return mAudioProcessorValueTreeState; }
+    juce::AudioProcessorValueTreeState const & getValueTreeState() const { return mAudioProcessorValueTreeState; }
+    juce::AudioProcessorValueTreeState & getValueTreeState() { return mAudioProcessorValueTreeState; }
     //==============================================================================
-    bool createOscConnection(int oscPort);
+    bool createOscConnection(juce::String const &, int oscPort);
     bool disconnectOsc();
     bool isOscConnected() const { return mOscConnected; }
     void handleOscConnection(bool state);
@@ -158,11 +162,11 @@ public:
     bool createOscInputConnection(int oscPort);
     bool disconnectOscInput(int oscPort);
     bool getOscInputConnected() const { return mOscInputConnected; }
-    void oscMessageReceived(const OSCMessage & message) override;
-    void oscBundleReceived(const OSCBundle & bundle) override;
+    void oscMessageReceived(const juce::OSCMessage & message) override;
+    void oscBundleReceived(const juce::OSCBundle & bundle) override;
 
-    bool createOscOutputConnection(String const & oscAddress, int oscPort);
-    bool disconnectOscOutput(String const & oscAddress, int oscPort);
+    bool createOscOutputConnection(juce::String const & oscAddress, int oscPort);
+    bool disconnectOscOutput(juce::String const & oscAddress, int oscPort);
     bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);
@@ -186,8 +190,8 @@ public:
 
     ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
-    void setPositionSourceLink(PositionSourceLink value);
-    void setElevationSourceLink(ElevationSourceLink value);
+    void setPositionSourceLink(PositionSourceLink newSourceLink, SourceLinkEnforcer::OriginOfChange originOfChange);
+    void setElevationSourceLink(ElevationSourceLink newSourceLink, SourceLinkEnforcer::OriginOfChange originOfChange);
 
     PresetsManager & getPresetsManager() { return mPresetManager; }
     PresetsManager const & getPresetsManager() const { return mPresetManager; }
@@ -200,3 +204,5 @@ private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessor)
 };
+
+} // namespace gris

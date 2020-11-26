@@ -24,27 +24,29 @@
 
 #include "cg_BannerComponent.hpp"
 #include "cg_FieldComponent.hpp"
-#include "cg_InterfaceBoxComponent.hpp"
-#include "cg_ParametersBoxComponent.hpp"
-#include "cg_PositionPresetComponent.hpp"
-#include "cg_SourceBoxComponent.hpp"
-#include "cg_TrajectoryBoxComponent.hpp"
+#include "cg_SectionOscController.hpp"
+#include "cg_SectionPositionPresets.hpp"
+#include "cg_SectionSourcePosition.hpp"
+#include "cg_SectionSourceSpan.hpp"
+#include "cg_SectionTrajectory.hpp"
 
+namespace gris
+{
 //==============================================================================
 class ControlGrisAudioProcessorEditor final
-    : public AudioProcessorEditor
-    , private Value::Listener
+    : public juce::AudioProcessorEditor
+    , private juce::Value::Listener
     , public FieldComponent::Listener
-    , public ParametersBoxComponent::Listener
-    , public SettingsBoxComponent::Listener
-    , public SourceBoxComponent::Listener
-    , public TrajectoryBoxComponent::Listener
-    , public InterfaceBoxComponent::Listener
+    , public SectionSourceSpan::Listener
+    , public SectionGeneralSettings::Listener
+    , public SectionSourcePosition::Listener
+    , public SectionTrajectory::Listener
+    , public SectionOscController::Listener
     , public PositionPresetComponent::Listener
 {
     ControlGrisAudioProcessor & mProcessor;
     GrisLookAndFeel mGrisLookAndFeel;
-    AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
+    juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
     PositionTrajectoryManager & mPositionTrajectoryManager;
     ElevationTrajectoryManager & mElevationTrajectoryManager;
@@ -58,22 +60,22 @@ class ControlGrisAudioProcessorEditor final
     PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
-    ParametersBoxComponent mParametersBox;
-    TrajectoryBoxComponent mTrajectoryBox;
+    SectionSourceSpan mSectionSourceSpan;
+    SectionTrajectory mSectionTrajectory;
 
-    TabbedComponent mConfigurationComponent{ TabbedButtonBar::Orientation::TabsAtTop };
+    juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
-    SettingsBoxComponent mSettingsBox;
-    SourceBoxComponent mSourceBox;
-    InterfaceBoxComponent mInterfaceBox;
+    SectionGeneralSettings mSectionGeneralSettings;
+    SectionSourcePosition mSectionSourcePosition;
+    SectionOscController mSectionOscController;
 
-    PositionPresetComponent mPositionPresetBox;
+    PositionPresetComponent mPositionPresetComponent;
 
     bool mIsInsideSetPluginState;
     SourceIndex mSelectedSource;
 
-    Value mLastUIWidth;
-    Value mLastUIHeight;
+    juce::Value mLastUiWidth;
+    juce::Value mLastUiHeight;
 
 public:
     //==============================================================================
@@ -87,66 +89,67 @@ public:
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
-                                    AudioProcessorValueTreeState & vts,
+                                    juce::AudioProcessorValueTreeState & vts,
                                     PositionTrajectoryManager & positionAutomationManager,
                                     ElevationTrajectoryManager & elevationAutomationManager);
     //==============================================================================
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
-    void valueChanged(Value &) override;
+    void valueChanged(juce::Value &) override;
 
     // FieldComponent::Listeners
-    void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) override;
+    void fieldSourcePositionChangedCallback(SourceIndex sourceIndex, int whichField) override;
 
-    // ParametersBoxComponent::Listeners
-    void parametersBoxSelectedSourceClicked() override;
-    void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) override;
-    void parametersBoxAzimuthSpanDragStarted() override;
-    void parametersBoxAzimuthSpanDragEnded() override;
-    void parametersBoxElevationSpanDragStarted() override;
-    void parametersBoxElevationSpanDragEnded() override;
+    // SectionSourceSpan::Listeners
+    void selectedSourceClickedCallback() override;
+    void parameterChangedCallback(SourceParameter sourceParameter, double value) override;
+    void azimuthSpanDragStartedCallback() override;
+    void azimuthSpanDragEndedCallback() override;
+    void elevationSpanDragStartedCallback() override;
+    void elevationSpanDragEndedCallback() override;
 
-    // SettingsBoxComponent::Listeners
-    void settingsBoxOscFormatChanged(SpatMode mode) override;
-    void settingsBoxOscPortNumberChanged(int oscPort) override;
-    void settingsBoxOscActivated(bool state) override;
-    void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
-    void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) override;
+    // SectionGeneralSettings::Listeners
+    void oscFormatChangedCallback(SpatMode mode) override;
+    void oscPortChangedCallback(int oscPort) override;
+    void oscAddressChangedCallback(juce::String const & address) override;
+    void oscStateChangedCallback(bool state) override;
+    void numberOfSourcesChangedCallback(int numOfSources) override;
+    void firstSourceIdChangedCallback(SourceId firstSourceId) override;
 
-    // SourceBoxComponent::Listeners
-    void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
-    void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
-    void sourceBoxPositionChanged(SourceIndex sourceIndex,
-                                  std::optional<Radians> azimuth,
-                                  std::optional<Radians> elevation,
-                                  std::optional<float> x,
-                                  std::optional<float> y,
-                                  std::optional<float> z) override;
+    // SectionSourcePosition::Listeners
+    void sourceSelectionChangedCallback(SourceIndex sourceIndex) override;
+    void sourcesPlacementChangedCallback(SourcePlacement sourcePlacement) override;
+    void sourcePositionChangedCallback(SourceIndex sourceIndex,
+                                       std::optional<Radians> azimuth,
+                                       std::optional<Radians> elevation,
+                                       std::optional<float> x,
+                                       std::optional<float> y,
+                                       std::optional<float> z) override;
 
-    // TrajectoryBoxComponent::Listeners
-    void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
-    void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) override;
-    void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) override;
-    void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType value) override;
-    void trajectoryBoxPositionBackAndForthChanged(bool value) override;
-    void trajectoryBoxElevationBackAndForthChanged(bool value) override;
-    void trajectoryBoxPositionDampeningCyclesChanged(int value) override;
-    void trajectoryBoxElevationDampeningCyclesChanged(int value) override;
-    void trajectoryBoxDeviationPerCycleChanged(float degrees) override;
-    void trajectoryBoxCycleDurationChanged(double duration, int mode) override;
-    void trajectoryBoxDurationUnitChanged(double duration, int mode) override;
-    void trajectoryBoxPositionActivateChanged(bool value) override;
-    void trajectoryBoxElevationActivateChanged(bool value) override;
+    // SectionTrajectory::Listeners
+    void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
+    void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
+    void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
+    void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;
+    void positionTrajectoryBackAndForthChangedCallback(bool value) override;
+    void elevationTrajectoryBackAndForthChangedCallback(bool value) override;
+    void positionTrajectoryDampeningCyclesChangedCallback(int value) override;
+    void elevationTrajectoryDampeningCyclesChangedCallback(int value) override;
+    void trajectoryDeviationPerCycleChangedCallback(float degrees) override;
+    void trajectoryCycleDurationChangedCallback(double duration, int mode) override;
+    void trajectoryDurationUnitChangedCallback(double duration, int mode) override;
+    void positionTrajectoryStateChangedCallback(bool value) override;
+    void elevationTrajectoryStateChangedCallback(bool value) override;
 
     // PositionPresetComponent::Listeners
-    void positionPresetChanged(int presetNumber) override;
-    void positionPresetSaved(int presetNumber) override;
-    void positionPresetDeleted(int presetNumber) override;
+    void positionPresetChangedCallback(int presetNumber) override;
+    void positionPresetSavedCallback(int presetNumber) override;
+    void positionPresetDeletedCallback(int presetNumber) override;
 
-    // InterfaceBoxComponent::Listeners
-    void oscOutputPluginIdChanged(int value) override;
-    void oscInputConnectionChanged(bool state, int oscPort) override;
-    void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) override;
+    // SectionOscController::Listeners
+    void oscOutputPluginIdChangedCallback(int value) override;
+    void oscInputConnectionChangedCallback(bool state, int oscPort) override;
+    void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) override;
 
     void reloadUiState();
     void updateSpanLinkButton(bool state);
@@ -160,5 +163,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor);
+    JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)
 };
+
+} // namespace gris

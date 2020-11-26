@@ -17,23 +17,27 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
 #include <JuceHeader.h>
 
-//==============================================================================
-// BannerComponent is a Label-derived class used to identify the different
-// UI sections of the plugin.
-class BannerComponent final : public Label
+namespace gris
 {
-    static Colour const backgroundColour;
-    static Colour const outlineColour;
-    static Colour const textColour;
+//==============================================================================
+/**
+ * A Label-derived class used to identify the different UI sections of the plugin.
+ */
+class BannerComponent final : public juce::Label
+{
+    static juce::Colour const BACKGROUND_COLOUR;
+    static juce::Colour const OUTLINE_COLOUR;
+    static juce::Colour const TEXT_COLOUR;
 
 public:
     //==============================================================================
     BannerComponent() noexcept;
-    ~BannerComponent() final = default;
+    ~BannerComponent() override = default;
 
     BannerComponent(BannerComponent const &) = delete;
     BannerComponent(BannerComponent &&) = delete;
@@ -44,4 +48,6 @@ public:
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(BannerComponent)
-};
+}; // class BannerComponent
+
+} // namespace gris

@@ -22,6 +22,8 @@
 
 #include <algorithm>
 
+namespace gris
+{
 //==============================================================================
 TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
     : mProcessor(processor)
@@ -30,10 +32,10 @@ TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Sour
 }
 
 //==============================================================================
-void TrajectoryManager::setPositionActivateState(bool const newState)
+void TrajectoryManager::setPositionActivateState(bool const state)
 {
-    mActivateState = newState;
-    if (newState) {
+    mActivateState = state;
+    if (state) {
         mTrajectoryDeltaTime = 0.0;
         mLastTrajectoryDeltaTime = 0.0;
         mBackAndForthDirection = Direction::forward;
@@ -46,7 +48,7 @@ void TrajectoryManager::setPositionActivateState(bool const newState)
 }
 
 //==============================================================================
-void TrajectoryManager::resetRecordingTrajectory(Point<float> const currentPosition)
+void TrajectoryManager::resetRecordingTrajectory(juce::Point<float> const currentPosition)
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
             && currentPosition.getY() <= 1.0f);
@@ -55,10 +57,11 @@ void TrajectoryManager::resetRecordingTrajectory(Point<float> const currentPosit
     mTrajectory->clear();
     mTrajectory->addPoint(currentPosition);
     mLastRecordingPoint = currentPosition;
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================
-Point<float> TrajectoryManager::smoothRecordingPosition(Point<float> const & pos)
+juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float> const & pos)
 {
     constexpr auto smoothingFactor = 0.8f;
 
@@ -70,7 +73,7 @@ Point<float> TrajectoryManager::smoothRecordingPosition(Point<float> const & pos
 void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
-    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0f);
+    mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0);
     computeCurrentTrajectoryPoint();
     applyCurrentTrajectoryPointToPrimarySource();
 }
@@ -83,9 +86,9 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
         return;
     }
 
-    int const dampeningCyclesTimes2{ mDampeningCycles * 2 };
-    double currentScaleMin{ 0.0 };
-    double currentScaleMax{ 0.0 };
+    auto const dampeningCyclesTimes2{ mDampeningCycles * 2 };
+    double currentScaleMin{};
+    double currentScaleMax{};
 
     if (mTrajectory->size() > 0) {
         if (mTrajectoryDeltaTime < mLastTrajectoryDeltaTime) {
@@ -136,9 +139,9 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
             mDampeningLastDelta = delta;
         }
 
-        double const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
+        auto const deltaRatio{ static_cast<double>(mTrajectory->size() - 1) / mTrajectory->size() };
         delta *= deltaRatio;
-        auto index{ static_cast<int>(delta) };
+        auto const index{ static_cast<int>(delta) };
         if (index + 1 < mTrajectory->size()) {
             Normalized const progression{ static_cast<float>(delta / mTrajectory->size()) };
             mCurrentTrajectoryPoint = mTrajectory->getPosition(progression);
@@ -148,9 +151,9 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
     }
 
     if (mDegreeOfDeviationPerCycle != Degrees{ 0.0f }) {
-        bool deviationFlag{ true };
+        auto deviationFlag{ true };
         if (mIsBackAndForth && mDampeningCycles > 0) {
-            if (approximatelyEqual(currentScaleMin, currentScaleMax)) {
+            if (juce::approximatelyEqual(currentScaleMin, currentScaleMax)) {
                 deviationFlag = false;
             }
         }
@@ -167,13 +170,12 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
 }
 
 //==============================================================================
-Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
+juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
-    } else {
-        return mPrimarySource.getPos();
     }
+    return mPrimarySource.getPos();
 }
 
 //==============================================================================
@@ -195,6 +197,7 @@ void PositionTrajectoryManager::sendTrajectoryPositionChangedEvent()
 void PositionTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType, mPrimarySource.getPos());
+    mBackAndForthDirection = Direction::forward;
 }
 
 //==============================================================================
@@ -206,7 +209,8 @@ void ElevationTrajectoryManager::sendTrajectoryPositionChangedEvent()
 }
 
 //==============================================================================
-void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const type, Point<float> const & startPos)
+void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const type,
+                                                  juce::Point<float> const & startPos)
 {
     mTrajectoryType = type;
     if (type == PositionTrajectoryType::realtime) {
@@ -218,7 +222,7 @@ void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const t
 }
 
 //==============================================================================
-void TrajectoryManager::addRecordingPoint(Point<float> const & pos)
+void TrajectoryManager::addRecordingPoint(juce::Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));
@@ -267,3 +271,5 @@ void ElevationTrajectoryManager::recomputeTrajectory()
 {
     this->setTrajectoryType(mTrajectoryType);
 }
+
+} // namespace gris

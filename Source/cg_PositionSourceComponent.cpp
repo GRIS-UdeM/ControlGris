@@ -24,6 +24,8 @@
 #include "cg_FieldComponent.hpp"
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : SourceComponent(source.getColour(), source.getId().toString())
@@ -49,13 +51,13 @@ void PositionSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void PositionSourceComponent::sourceMoved()
+void PositionSourceComponent::sourceMovedCallback()
 {
     updatePositionInParent();
 }
 
 //==============================================================================
-void PositionSourceComponent::mouseDown(MouseEvent const & event)
+void PositionSourceComponent::mouseDown(juce::MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
     mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
@@ -71,7 +73,7 @@ void PositionSourceComponent::mouseDown(MouseEvent const & event)
 }
 
 //==============================================================================
-void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
+void PositionSourceComponent::setSourcePosition(juce::MouseEvent const & event) const
 {
     jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
 
@@ -85,7 +87,7 @@ void PositionSourceComponent::setSourcePosition(MouseEvent const & event) const
 }
 
 //==============================================================================
-void PositionSourceComponent::mouseDrag(MouseEvent const & event)
+void PositionSourceComponent::mouseDrag(juce::MouseEvent const & event)
 {
     if (mCanDrag && mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
@@ -94,7 +96,7 @@ void PositionSourceComponent::mouseDrag(MouseEvent const & event)
 }
 
 //==============================================================================
-void PositionSourceComponent::mouseUp(MouseEvent const & event)
+void PositionSourceComponent::mouseUp(juce::MouseEvent const & event)
 {
     if (mCanDrag) {
         mouseDrag(event);
@@ -112,3 +114,5 @@ SourceIndex PositionSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
+
+} // namespace gris

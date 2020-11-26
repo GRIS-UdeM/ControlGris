@@ -24,6 +24,8 @@
 #include "cg_FieldComponent.hpp"
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
 ElevationSourceComponent::ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept
     : SourceComponent(source.getColour(), source.getId().toString())
@@ -51,13 +53,13 @@ void ElevationSourceComponent::updatePositionInParent()
 }
 
 //==============================================================================
-void ElevationSourceComponent::sourceMoved()
+void ElevationSourceComponent::sourceMovedCallback()
 {
     updatePositionInParent();
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseDown(MouseEvent const & event)
+void ElevationSourceComponent::mouseDown(juce::MouseEvent const & event)
 {
     mDisplacementMode = getDisplacementMode(event);
     mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
@@ -72,7 +74,7 @@ void ElevationSourceComponent::mouseDown(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
+void ElevationSourceComponent::setSourcePosition(juce::MouseEvent const & event) const
 {
     auto const eventRelativeToFieldComponent{ event.getEventRelativeTo(&mFieldComponent) };
     auto const newElevation{ mFieldComponent.componentPositionToSourceElevation(
@@ -84,7 +86,7 @@ void ElevationSourceComponent::setSourcePosition(MouseEvent const & event) const
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
+void ElevationSourceComponent::mouseDrag(juce::MouseEvent const & event)
 {
     if (mCanDrag && mFieldComponent.getSelectedSourceIndex() == mSource.getIndex()) {
         jassert(mFieldComponent.getWidth() == mFieldComponent.getHeight());
@@ -93,7 +95,7 @@ void ElevationSourceComponent::mouseDrag(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationSourceComponent::mouseUp(MouseEvent const & event)
+void ElevationSourceComponent::mouseUp(juce::MouseEvent const & event)
 {
     if (mCanDrag) {
         mouseDrag(event);
@@ -110,3 +112,5 @@ SourceIndex ElevationSourceComponent::getSourceIndex() const
 {
     return mSource.getIndex();
 }
+
+} // namespace gris

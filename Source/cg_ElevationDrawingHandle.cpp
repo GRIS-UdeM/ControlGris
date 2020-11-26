@@ -22,15 +22,17 @@
 
 #include "cg_FieldComponent.hpp"
 
+namespace gris
+{
 //==============================================================================
-void ElevationDrawingHandle::mouseDown(MouseEvent const & event)
+void ElevationDrawingHandle::mouseDown(juce::MouseEvent const & event)
 {
     constexpr float DUMMY{ 0.0f };
 
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
     auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
     mCurrentElevation = elevation;
-    Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
+    juce::Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
     auto & automationManager{ mFieldComponent.getAutomationManager() };
     automationManager.resetRecordingTrajectory(position);
@@ -41,14 +43,14 @@ void ElevationDrawingHandle::mouseDown(MouseEvent const & event)
 }
 
 //==============================================================================
-void ElevationDrawingHandle::mouseDrag(MouseEvent const & event)
+void ElevationDrawingHandle::mouseDrag(juce::MouseEvent const & event)
 {
     auto & automationManager{ mFieldComponent.getAutomationManager() };
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
     auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
     mCurrentElevation = elevation;
     constexpr auto DUMMY{ 0.0f };
-    Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
+    juce::Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
     automationManager.addRecordingPoint(position);
 
@@ -67,8 +69,10 @@ void ElevationDrawingHandle::updatePositionInParent()
 
 //==============================================================================
 ElevationDrawingHandle::ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
-    : SourceComponent(Colour::fromRGB(176, 176, 228), "X")
+    : SourceComponent(juce::Colour::fromRGB(176, 176, 228), "X")
     , mFieldComponent(fieldComponent)
 {
     setSelected(true);
 }
+
+} // namespace gris

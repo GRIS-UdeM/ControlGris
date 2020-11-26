@@ -22,10 +22,12 @@
 
 #include "cg_constants.hpp"
 
-//==============================================================================
-SourceComponent::SourceComponent(Colour const colour, String const & icon) : mColour(colour), mIcon(icon)
+namespace gris
 {
-    if (colour == Colours::black) {
+//==============================================================================
+SourceComponent::SourceComponent(juce::Colour const colour, juce::String const & icon) : mColour(colour), mIcon(icon)
+{
+    if (colour == juce::Colours::black) {
         jassertfalse;
     }
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2.0f;
@@ -41,25 +43,26 @@ void SourceComponent::setSelected(bool const selected)
 }
 
 //==============================================================================
-void SourceComponent::paint(Graphics & g)
+void SourceComponent::paint(juce::Graphics & g)
 {
     auto const lineThickness{ static_cast<float>(mSelected ? MAX_LINE_THICKNESS : 1) };
     auto const saturation{ (mSelected) ? 1.0f : 0.8f };
     auto const colour{ mColour.withMultipliedSaturation(saturation) };
     auto const center{ getLocalBounds().getCentre().toFloat() };
-    auto const area{ Rectangle<float>{ SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER }.withCentre(
-        center) };
+    auto const area{
+        juce::Rectangle<float>{ SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER }.withCentre(center)
+    };
 
     g.setColour(colour);
     g.drawEllipse(area, lineThickness);
-    g.setGradientFill(ColourGradient(colour.darker(0.8f), center, colour, center / 5.0f, true));
+    g.setGradientFill(juce::ColourGradient(colour.darker(0.8f), center, colour, center / 5.0f, true));
     g.fillEllipse(area);
-    g.setColour(Colours::white);
-    g.drawFittedText(mIcon, area.getSmallestIntegerContainer(), Justification::centred, 1);
+    g.setColour(juce::Colours::white);
+    g.drawFittedText(mIcon, area.getSmallestIntegerContainer(), juce::Justification::centred, 1);
 }
 
 //==============================================================================
-SourceComponent::DisplacementMode SourceComponent::getDisplacementMode(MouseEvent const & event)
+SourceComponent::DisplacementMode SourceComponent::getDisplacementMode(juce::MouseEvent const & event)
 {
     auto const pressedModifierKey{ event.mods.getRawFlags() & DISPLACEMENT_MODIFIER };
     return pressedModifierKey ? DisplacementMode::selectedSourceOnly : DisplacementMode::all;
@@ -113,3 +116,5 @@ bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displaceme
     jassertfalse;
     return false;
 }
+
+} // namespace gris

@@ -20,21 +20,25 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_LinkStrategies.hpp"
 #include "cg_Source.hpp"
 #include "cg_SourceSnapshot.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 class SourceLinkEnforcer
 {
+public:
+    enum class OriginOfChange { user, automation };
+    //==============================================================================
+private:
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
     ElevationSourceLink mElevationSourceLink{ ElevationSourceLink::undefined };
-    std::unique_ptr<LinkStrategy> mLinkStrategy;
+    std::unique_ptr<source_link_strategies::Base> mLinkStrategy;
 
 public:
     //==============================================================================
@@ -50,8 +54,8 @@ public:
     SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink);
     SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink);
     //==============================================================================
-    void setSourceLink(ElevationSourceLink sourceLink);
-    void setSourceLink(PositionSourceLink sourceLink);
+    void setSourceLink(ElevationSourceLink sourceLink, OriginOfChange originOfChange);
+    void setSourceLink(PositionSourceLink sourceLink, OriginOfChange originOfChange);
     void numberOfSourcesChanged();
     void enforceSourceLink();
 
@@ -70,7 +74,8 @@ private:
     void primaryAnchorMoved();
     void secondaryAnchorMoved(SourceIndex sourceIndex);
     void saveCurrentPositionsToInitialStates();
-    // std::unique_ptr<LinkStrategy> getStrategy() const;
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceLinkEnforcer)
 }; // class SourceLinkEnforcer
+
+} // namespace gris

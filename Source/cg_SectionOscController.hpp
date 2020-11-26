@@ -24,57 +24,67 @@
 
 #include "cg_ControlGrisLookAndFeel.hpp"
 
+namespace gris
+{
 //==============================================================================
-class InterfaceBoxComponent final
-    : public Component
-    , public TextEditor::Listener
+class SectionOscController final
+    : public juce::Component
+    , public juce::TextEditor::Listener
 {
 public:
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
-        virtual void oscOutputPluginIdChanged(int value) = 0;
-        virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
-        virtual void oscOutputConnectionChanged(bool state, String oscAddress, int oscPort) = 0;
+        virtual void oscOutputPluginIdChangedCallback(int value) = 0;
+        virtual void oscInputConnectionChangedCallback(bool state, int oscPort) = 0;
+        virtual void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) = 0;
     };
 
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners{};
+    juce::ListenerList<Listener> mListeners{};
 
-    ToggleButton mOscReceiveToggle{};
-    ToggleButton mOscSendToggle{};
+    juce::ToggleButton mOscReceiveToggle{};
+    juce::ToggleButton mOscSendToggle{};
 
-    Label mOscOutputPluginIdLabel{};
-    TextEditor mOscOutputPluginIdEditor{};
+    juce::Label mOscOutputPluginIdLabel{};
+    juce::TextEditor mOscOutputPluginIdEditor{};
 
-    TextEditor mOscReceiveIpEditor{};
-    TextEditor mOscReceivePortEditor{};
-    TextEditor mOscSendIpEditor{};
-    TextEditor mOscSendPortEditor{};
+    juce::TextEditor mOscReceiveIpEditor{};
+    juce::TextEditor mOscReceivePortEditor{};
+    juce::TextEditor mOscSendIpEditor{};
+    juce::TextEditor mOscSendPortEditor{};
 
     int mLastOscReceivePort{ 9000 };
     int mLastOscSendPort{ 8000 };
-    String mLastOscSendAddress{};
+    juce::String mLastOscSendAddress{};
 
 public:
     //==============================================================================
-    explicit InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
+    explicit SectionOscController(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void textEditorReturnKeyPressed([[maybe_unused]] TextEditor & editor) final { unfocusAllComponents(); }
-    void paint(Graphics &) final;
-    void resized() final;
+    SectionOscController() = delete;
+    ~SectionOscController() override { setLookAndFeel(nullptr); } // TODO : necessary ?
 
-    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(String(id)); }
+    SectionOscController(SectionOscController const &) = delete;
+    SectionOscController(SectionOscController &&) = delete;
+
+    SectionOscController & operator=(SectionOscController const &) = delete;
+    SectionOscController & operator=(SectionOscController &&) = delete;
+    //==============================================================================
+    void textEditorReturnKeyPressed([[maybe_unused]] juce::TextEditor & editor) override { unfocusAllComponents(); }
+    void paint(juce::Graphics &) override;
+    void resized() override;
+
+    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(juce::String(id)); }
 
     void setOscReceiveToggleState(bool state);
     void setOscReceiveInputPort(int port);
 
     void setOscSendToggleState(bool state);
-    void setOscSendOutputAddress(String const & address);
+    void setOscSendOutputAddress(juce::String const & address);
     void setOscSendOutputPort(int port);
 
     void addListener(Listener * l) { mListeners.add(l); }
@@ -82,5 +92,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InterfaceBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionOscController)
 };
+
+} // namespace gris

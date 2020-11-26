@@ -23,61 +23,83 @@
 #include <JuceHeader.h>
 
 #include "cg_ControlGrisLookAndFeel.hpp"
-#include "cg_Source.hpp"
+#include "cg_SourceId.hpp"
+#include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
-class ParametersBoxComponent final
-    : public Component
-    , public Slider::Listener
+class SectionGeneralSettings final : public juce::Component
 {
 public:
     //==============================================================================
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
-        virtual void parametersBoxAzimuthSpanDragStarted() = 0;
-        virtual void parametersBoxAzimuthSpanDragEnded() = 0;
-        virtual void parametersBoxElevationSpanDragStarted() = 0;
-        virtual void parametersBoxElevationSpanDragEnded() = 0;
-        virtual void parametersBoxSelectedSourceClicked() = 0;
-        virtual void parametersBoxParameterChanged(SourceParameter sourceId, double value) = 0;
+        virtual void oscFormatChangedCallback(SpatMode mode) = 0;
+        virtual void oscPortChangedCallback(int oscPort) = 0;
+        virtual void oscAddressChangedCallback(juce::String const & address) = 0;
+        virtual void oscStateChangedCallback(bool state) = 0;
+        virtual void numberOfSourcesChangedCallback(int numOfSources) = 0;
+        virtual void firstSourceIdChangedCallback(SourceId firstSourceId) = 0;
     };
 
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
-    bool mDistanceEnabled{ false };
-    bool mSpanLinked{ false };
+    juce::Label mOscFormatLabel;
+    juce::ComboBox mOscFormatCombo;
 
-    Source * mSelectedSource{};
+    juce::Label mOscPortLabel;
+    juce::TextEditor mOscPortEditor;
 
-    Label mAzimuthLabel{};
-    Label mElevationLabel{};
-    Slider mAzimuthSpan{};
-    Slider mElevationSpan{};
+    juce::Label mOscAddressLabel;
+    juce::TextEditor mOscAddressEditor;
+
+    juce::Label mNumOfSourcesLabel;
+    juce::TextEditor mNumOfSourcesEditor;
+
+    juce::Label mFirstSourceIdLabel;
+    juce::TextEditor mFirstSourceIdEditor;
+
+    juce::ToggleButton mPositionActivateButton;
 
 public:
     //==============================================================================
-    ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~ParametersBoxComponent() final = default;
+    explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void mouseDown(MouseEvent const & event) final;
-    void sliderValueChanged(Slider * slider) final;
-    void paint(Graphics &) final;
-    void resized() final;
+    SectionGeneralSettings() = delete;
+    ~SectionGeneralSettings() override = default;
 
-    void setSelectedSource(Source * source);
-    void setDistanceEnabled(bool distanceEnabled);
-    void setSpanLinkState(bool spanLinkState);
-    bool getSpanLinkState() const { return mSpanLinked; }
+    SectionGeneralSettings(SectionGeneralSettings const &) = delete;
+    SectionGeneralSettings(SectionGeneralSettings &&) = delete;
+
+    SectionGeneralSettings & operator=(SectionGeneralSettings const &) = delete;
+    SectionGeneralSettings & operator=(SectionGeneralSettings &&) = delete;
+    //==============================================================================
+
+    // These are only setters, they dont send notification.
+    //-----------------------------------------------------
+    void setNumberOfSources(int numOfSources);
+    void setFirstSourceId(SourceId firstSourceId);
+    void setOscFormat(SpatMode mode);
+    void setOscPortNumber(int oscPortNumber);
+    void setOscAddress(juce::String const & address);
+    void setActivateButtonState(bool shouldBeOn);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+    //==============================================================================
+    // overrides
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionGeneralSettings)
 };
+
+} // namespace gris

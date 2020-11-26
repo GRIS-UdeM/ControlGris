@@ -28,23 +28,25 @@
 #include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
-class SourceBoxComponent;
+namespace gris
+{
+class SectionSourcePosition;
 
 //==============================================================================
 class DomeControls final : public juce::Component
 {
-    SourceBoxComponent & mSourceBoxComponent;
+    SectionSourcePosition & mSourceBoxComponent;
 
     Degrees mCurrentAzimuth;
     Radians mCurrentElevation;
-    Label mElevationLabel;
-    Label mAzimuthLabel;
-    Slider mElevationSlider;
-    Slider mAzimuthSlider;
+    juce::Label mElevationLabel;
+    juce::Label mAzimuthLabel;
+    juce::Slider mElevationSlider;
+    juce::Slider mAzimuthSlider;
 
 public:
     //==============================================================================
-    explicit DomeControls(SourceBoxComponent & sourceBoxComponent);
+    explicit DomeControls(SectionSourcePosition & sourceBoxComponent);
     ~DomeControls() override = default;
 
     DomeControls(DomeControls const &) = delete;
@@ -63,21 +65,21 @@ private:
 //==============================================================================
 class CubeControls final : public juce::Component
 {
-    SourceBoxComponent & mSourceBoxComponent;
+    SectionSourcePosition & mSourceBoxComponent;
 
     float mCurrentX;
     float mCurrentY;
     float mCurrentZ;
-    Label mXLabel;
-    Label mYLabel;
-    Label mZLabel;
-    Slider mXSlider;
-    Slider mYSlider;
-    Slider mZSlider;
+    juce::Label mXLabel;
+    juce::Label mYLabel;
+    juce::Label mZLabel;
+    juce::Slider mXSlider;
+    juce::Slider mYSlider;
+    juce::Slider mZSlider;
 
 public:
     //==============================================================================
-    explicit CubeControls(SourceBoxComponent & sourceBoxComponent);
+    explicit CubeControls(SectionSourcePosition & sourceBoxComponent);
     ~CubeControls() override = default;
 
     CubeControls(CubeControls const &) = delete;
@@ -94,7 +96,7 @@ private:
 }; // CubeControls
 
 //==============================================================================
-class SourceBoxComponent final : public juce::Component
+class SectionSourcePosition final : public juce::Component
 {
     friend DomeControls;
     friend CubeControls;
@@ -104,14 +106,14 @@ public:
     struct Listener {
         virtual ~Listener() = default;
 
-        virtual void sourceBoxPlacementChanged(SourcePlacement value) = 0;
-        virtual void sourceBoxSelectionChanged(SourceIndex sourceIndex) = 0;
-        virtual void sourceBoxPositionChanged(SourceIndex sourceIndex,
-                                              std::optional<Radians> azimuth,
-                                              std::optional<Radians> elevation,
-                                              std::optional<float> x,
-                                              std::optional<float> y,
-                                              std::optional<float> z)
+        virtual void sourcesPlacementChangedCallback(SourcePlacement value) = 0;
+        virtual void sourceSelectionChangedCallback(SourceIndex sourceIndex) = 0;
+        virtual void sourcePositionChangedCallback(SourceIndex sourceIndex,
+                                                   std::optional<Radians> azimuth,
+                                                   std::optional<Radians> elevation,
+                                                   std::optional<float> x,
+                                                   std::optional<float> y,
+                                                   std::optional<float> z)
             = 0;
     };
 
@@ -119,31 +121,31 @@ private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
 
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
 
     SourceIndex mSelectedSource;
 
-    Label mSourcePlacementLabel;
-    ComboBox mSourcePlacementCombo;
+    juce::Label mSourcePlacementLabel;
+    juce::ComboBox mSourcePlacementCombo;
 
-    Label mSourceNumberLabel;
-    ComboBox mSourceNumberCombo;
+    juce::Label mSourceNumberLabel;
+    juce::ComboBox mSourceNumberCombo;
 
     DomeControls mDomeControls;
     CubeControls mCubeControls;
 
 public:
     //==============================================================================
-    explicit SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
+    explicit SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
     //==============================================================================
-    SourceBoxComponent() = delete;
-    ~SourceBoxComponent() override = default;
+    SectionSourcePosition() = delete;
+    ~SectionSourcePosition() override = default;
 
-    SourceBoxComponent(SourceBoxComponent const &) = delete;
-    SourceBoxComponent(SourceBoxComponent &&) = delete;
+    SectionSourcePosition(SectionSourcePosition const &) = delete;
+    SectionSourcePosition(SectionSourcePosition &&) = delete;
 
-    SourceBoxComponent & operator=(SourceBoxComponent const &) = delete;
-    SourceBoxComponent & operator=(SourceBoxComponent &&) = delete;
+    SectionSourcePosition & operator=(SectionSourcePosition const &) = delete;
+    SectionSourcePosition & operator=(SectionSourcePosition &&) = delete;
     //==============================================================================
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
@@ -153,10 +155,12 @@ public:
 
     void setSpatMode(SpatMode spatMode);
     //==============================================================================
-    void paint(Graphics &) override;
+    void paint(juce::Graphics &) override;
     void resized() override;
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SourceBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionSourcePosition)
 };
+
+} // namespace gris

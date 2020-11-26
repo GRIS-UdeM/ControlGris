@@ -20,6 +20,10 @@
 
 #pragma once
 
+#include <JuceHeader.h>
+
+namespace gris
+{
 class SourceId
 {
 private:
@@ -38,7 +42,7 @@ public:
     constexpr explicit SourceId(int index) noexcept : mValue(index) {}
 
     constexpr int toInt() const { return mValue; }
-    String toString() const { return String{ mValue }; }
+    juce::String toString() const { return juce::String{ mValue }; }
 
     constexpr bool operator==(SourceId const & other) const { return mValue == other.mValue; }
     constexpr bool operator!=(SourceId const & other) const { return mValue != other.mValue; }
@@ -62,3 +66,5 @@ public:
 
     constexpr bool isValid() const { return mValue > 0 && mValue <= 128; } // TODO: remove magic number
 };                                                                         // class SourceId
+
+} // namespace gris

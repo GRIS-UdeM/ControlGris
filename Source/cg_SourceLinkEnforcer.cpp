@@ -22,38 +22,58 @@
 
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
 SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, PositionSourceLink const sourceLink) : mSources(sources)
 {
-    setSourceLink(sourceLink);
+    setSourceLink(sourceLink, OriginOfChange::user);
 }
 
 //==============================================================================
 SourceLinkEnforcer::SourceLinkEnforcer(Sources & sources, ElevationSourceLink const sourceLink) : mSources(sources)
 {
-    setSourceLink(sourceLink);
+    setSourceLink(sourceLink, OriginOfChange::user);
 }
 
 //==============================================================================
-void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink)
+void SourceLinkEnforcer::setSourceLink(PositionSourceLink const sourceLink, OriginOfChange const originOfChange)
 {
+    // If it's the user who changed the source link, we need to bake the positions before making the change. Otherwise,
+    // we use the current positions to that time jumps in the DAW always result in the same position regardless of where
+    // the sources were.
     jassert(sourceLink != PositionSourceLink::undefined);
+    jassert(originOfChange == OriginOfChange::automation || originOfChange == OriginOfChange::user);
+
+    if (originOfChange == OriginOfChange::user) {
+        saveCurrentPositionsToInitialStates();
+    }
+
     if (sourceLink != mPositionSourceLink) {
         mPositionSourceLink = sourceLink;
         mElevationSourceLink = ElevationSourceLink::undefined;
-        mLinkStrategy = LinkStrategy::make(sourceLink);
+        mLinkStrategy = source_link_strategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
 
 //==============================================================================
-void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink)
+void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink, OriginOfChange const originOfChange)
 {
+    // If it's the user who changed the source link, we need to bake the positions before making the change. Otherwise,
+    // we use the current positions to that time jumps in the DAW always result in the same position regardless of where
+    // the sources were.
     jassert(sourceLink != ElevationSourceLink::undefined);
+    jassert(originOfChange == OriginOfChange::automation || originOfChange == OriginOfChange::user);
+
+    if (originOfChange == OriginOfChange::user) {
+        saveCurrentPositionsToInitialStates();
+    }
+
     if (sourceLink != mElevationSourceLink) {
         mElevationSourceLink = sourceLink;
         mPositionSourceLink = PositionSourceLink::undefined;
-        mLinkStrategy = LinkStrategy::make(sourceLink);
+        mLinkStrategy = source_link_strategies::Base::make(sourceLink);
         enforceSourceLink();
     }
 }
@@ -141,7 +161,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
-            mLinkStrategy = LinkStrategy::make(PositionSourceLink::circular);
+            mLinkStrategy = source_link_strategies::Base::make(PositionSourceLink::circular);
         }
         mLinkStrategy->computeParameters(mSources, mSnapshots);
 
@@ -168,9 +188,9 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             if (mPositionSourceLink == PositionSourceLink::undefined) {
-                mLinkStrategy = LinkStrategy::make(mElevationSourceLink);
+                mLinkStrategy = source_link_strategies::Base::make(mElevationSourceLink);
             } else {
-                mLinkStrategy = LinkStrategy::make(mPositionSourceLink);
+                mLinkStrategy = source_link_strategies::Base::make(mPositionSourceLink);
             }
         }
         mSnapshots.primary = primaryStart;
@@ -214,12 +234,4 @@ void SourceLinkEnforcer::saveCurrentPositionsToInitialStates()
     }
 }
 
-// std::unique_ptr<LinkStrategy> SourceLinkEnforcer::getStrategy() const
-//{
-//    if (mPositionSourceLink != PositionSourceLink::undefined) {
-//        jassert(mElevationSourceLink == ElevationSourceLink::undefined);
-//        return LinkStrategy::make(mPositionSourceLink);
-//    }
-//    jassert(mElevationSourceLink != ElevationSourceLink::undefined);
-//    return LinkStrategy::make(mElevationSourceLink);
-//}
+} // namespace gris

@@ -24,8 +24,10 @@
 
 #include "cg_Source.hpp"
 
+namespace gris
+{
 //==============================================================================
-Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, Point<float> const & startingPoint) noexcept
+Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, juce::Point<float> const & startingPoint) noexcept
     : mIsElevationDrawing(false)
 {
     switch (trajectoryType) {
@@ -110,17 +112,17 @@ Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept
 }
 
 //==============================================================================
-Path Trajectory::getDrawablePath(Rectangle<float> const & drawArea, SpatMode spatMode) const
+juce::Path Trajectory::getDrawablePath(juce::Rectangle<float> const & drawArea, SpatMode spatMode) const
 {
-    auto trajectoryPositionToComponentPosition = [&](Point<float> const & trajectoryPosition) {
+    auto trajectoryPositionToComponentPosition = [&](juce::Point<float> const & trajectoryPosition) {
         auto const clippedPoint{ Source::clipPosition(trajectoryPosition, spatMode) };
-        auto const normalizedPoint{ (clippedPoint + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+        auto const normalizedPoint{ (clippedPoint + juce::Point<float>{ 1.0f, 1.0f }) / 2.0f };
         auto const x{ normalizedPoint.getX() * drawArea.getWidth() + drawArea.getX() };
         auto const y{ normalizedPoint.getY() * drawArea.getHeight() + drawArea.getY() };
-        return Point<float>{ x, y };
+        return juce::Point<float>{ x, y };
     };
 
-    Path result{};
+    juce::Path result{};
     if (!mPoints.isEmpty()) {
         result.startNewSubPath(trajectoryPositionToComponentPosition(mPoints.getReference(0)));
         for (int i{ 1 }; i < mPoints.size(); ++i) {
@@ -131,7 +133,7 @@ Path Trajectory::getDrawablePath(Rectangle<float> const & drawArea, SpatMode spa
 }
 
 //==============================================================================
-Point<float> Trajectory::getPosition(Normalized const normalized) const
+juce::Point<float> Trajectory::getPosition(Normalized const normalized) const
 {
     auto const nbPoints{ static_cast<float>(mPoints.size()) };
     auto const index_f{ (nbPoints - 1.0f) * normalized.toFloat() };
@@ -148,7 +150,7 @@ Point<float> Trajectory::getPosition(Normalized const normalized) const
 }
 
 //==============================================================================
-void Trajectory::addPoint(Point<float> const & point)
+void Trajectory::addPoint(juce::Point<float> const & point)
 {
     mPoints.add(point);
 
@@ -198,25 +200,25 @@ void Trajectory::scale(float magnitude)
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicCirclePoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicCirclePoints()
 {
     constexpr int NB_POINTS = 300;
 
-    Array<Point<float>> result{};
+    juce::Array<juce::Point<float>> result{};
     result.ensureStorageAllocated(NB_POINTS);
     for (int i{}; i < NB_POINTS; ++i) {
-        auto const angle{ static_cast<float>(i) / static_cast<float>(NB_POINTS) * MathConstants<float>::twoPi };
-        result.add(Point<float>{ std::cos(angle), std::sin(angle) });
+        auto const angle{ static_cast<float>(i) / static_cast<float>(NB_POINTS) * juce::MathConstants<float>::twoPi };
+        result.add(juce::Point<float>{ std::cos(angle), std::sin(angle) });
     }
 
     return result;
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicEllipsePoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicEllipsePoints()
 {
     // just squish a circle!
-    Array<Point<float>> result{ getBasicCirclePoints() };
+    juce::Array<juce::Point<float>> result{ getBasicCirclePoints() };
     for (auto & point : result) {
         point.setY(point.getY() * 0.5f);
     }
@@ -225,23 +227,23 @@ Array<Point<float>> Trajectory::getBasicEllipsePoints()
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicSpiralPoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicSpiralPoints()
 {
     constexpr int NB_ROTATIONS = 3;
     constexpr int NB_POINTS_PER_ROTATION = 100;
     constexpr int NB_POINTS = NB_ROTATIONS * NB_POINTS_PER_ROTATION;
 
-    constexpr float angleStep{ MathConstants<float>::twoPi / static_cast<float>(NB_POINTS_PER_ROTATION) };
+    constexpr float angleStep{ juce::MathConstants<float>::twoPi / static_cast<float>(NB_POINTS_PER_ROTATION) };
     constexpr float radiusStep{ 1.0f / static_cast<float>(NB_POINTS) };
 
-    Array<Point<float>> result{};
+    juce::Array<juce::Point<float>> result{};
     result.ensureStorageAllocated(NB_POINTS);
 
     float radius{};
     float angle{};
 
     for (int i{}; i < NB_POINTS; ++i) {
-        result.add(Point<float>{ std::cos(angle) * radius, std::sin(angle) * radius });
+        result.add(juce::Point<float>{ std::cos(angle) * radius, std::sin(angle) * radius });
         radius += radiusStep;
         angle += angleStep;
     }
@@ -250,22 +252,22 @@ Array<Point<float>> Trajectory::getBasicSpiralPoints()
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicSquarePoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicSquarePoints()
 {
     constexpr int NB_POINTS_PER_SIDE = 75;
     constexpr int NB_POINTS = NB_POINTS_PER_SIDE * 4;
 
     constexpr float STEP = 1.0f / NB_POINTS_PER_SIDE;
 
-    constexpr Point<float> startingPoint{ 1.0f, 0.0f };
-    constexpr Point<float> step_up_left{ -STEP, STEP };
-    constexpr Point<float> step_down_left{ -STEP, -STEP };
-    constexpr Point<float> step_down_right{ STEP, -STEP };
-    constexpr Point<float> step_up_right{ STEP, STEP };
+    constexpr juce::Point<float> startingPoint{ 1.0f, 0.0f };
+    constexpr juce::Point<float> step_up_left{ -STEP, STEP };
+    constexpr juce::Point<float> step_down_left{ -STEP, -STEP };
+    constexpr juce::Point<float> step_down_right{ STEP, -STEP };
+    constexpr juce::Point<float> step_up_right{ STEP, STEP };
 
     auto currentPoint{ startingPoint };
 
-    Array<Point<float>> result{};
+    juce::Array<juce::Point<float>> result{};
     result.ensureStorageAllocated(NB_POINTS);
 
     for (int i{}; i < NB_POINTS_PER_SIDE; ++i) {
@@ -289,24 +291,24 @@ Array<Point<float>> Trajectory::getBasicSquarePoints()
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicTrianglePoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicTrianglePoints()
 {
     constexpr int NB_POINTS_PER_SIDE = 100;
     constexpr int NB_POINTS = NB_POINTS_PER_SIDE * 3;
 
     constexpr float sqrt3{ 1.73205080757f };
     constexpr float sideLength{ sqrt3 }; // that's just how equilateral triangles work!
-    constexpr Point<float> initialPoint{ 1.0f, 0.0f };
+    constexpr juce::Point<float> initialPoint{ 1.0f, 0.0f };
     constexpr auto step{ sideLength / static_cast<float>(NB_POINTS_PER_SIDE) };
 
     constexpr auto up_left_slope{ Degrees{ 150.0f }.getAsRadians() };
     constexpr auto up_right_slope{ Degrees{ 30.0f }.getAsRadians() };
 
-    Point<float> const up_left_step{ std::cos(up_left_slope) * step, std::sin(up_left_slope) * step };
-    Point<float> const up_right_step{ std::cos(up_right_slope) * step, std::sin(up_right_slope) * step };
-    constexpr Point<float> down_step{ 0.0f, -step };
+    juce::Point<float> const up_left_step{ std::cos(up_left_slope) * step, std::sin(up_left_slope) * step };
+    juce::Point<float> const up_right_step{ std::cos(up_right_slope) * step, std::sin(up_right_slope) * step };
+    constexpr juce::Point<float> down_step{ 0.0f, -step };
 
-    Array<Point<float>> result{};
+    juce::Array<juce::Point<float>> result{};
     result.ensureStorageAllocated(NB_POINTS);
 
     auto currentPoint{ initialPoint };
@@ -327,17 +329,17 @@ Array<Point<float>> Trajectory::getBasicTrianglePoints()
 }
 
 //==============================================================================
-Array<Point<float>> Trajectory::getBasicDownUpPoints()
+juce::Array<juce::Point<float>> Trajectory::getBasicDownUpPoints()
 {
     constexpr int NB_POINTS = 200;
 
-    Array<Point<float>> result{};
+    juce::Array<juce::Point<float>> result{};
     result.ensureStorageAllocated(NB_POINTS);
 
-    constexpr Point<float> step{ 2.0f / (NB_POINTS - 1), 2.0f / (NB_POINTS - 1) };
-    constexpr Point<float> startingPoint{ -1.0f, -1.0f };
+    constexpr juce::Point<float> step{ 2.0f / (NB_POINTS - 1), 2.0f / (NB_POINTS - 1) };
+    constexpr juce::Point<float> startingPoint{ -1.0f, -1.0f };
 
-    Point<float> currentPoint{ startingPoint };
+    juce::Point<float> currentPoint{ startingPoint };
     for (int i{}; i < NB_POINTS; ++i) {
         result.add(currentPoint);
         currentPoint += step;
@@ -345,3 +347,5 @@ Array<Point<float>> Trajectory::getBasicDownUpPoints()
 
     return result;
 }
+
+} // namespace gris

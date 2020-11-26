@@ -20,15 +20,19 @@
 
 #include "cg_BannerComponent.hpp"
 
-Colour const BannerComponent::backgroundColour = Colour::fromRGB(64, 64, 64);
-Colour const BannerComponent::outlineColour = Colour::fromRGB(16, 16, 16);
-Colour const BannerComponent::textColour = Colour::fromRGB(255, 255, 255);
+namespace gris
+{
+juce::Colour const BannerComponent::BACKGROUND_COLOUR = juce::Colour::fromRGB(64, 64, 64);
+juce::Colour const BannerComponent::OUTLINE_COLOUR = juce::Colour::fromRGB(16, 16, 16);
+juce::Colour const BannerComponent::TEXT_COLOUR = juce::Colour::fromRGB(255, 255, 255);
 
 //==============================================================================
 BannerComponent::BannerComponent() noexcept
 {
     setEditable(false, false, false);
-    setColour(Label::backgroundColourId, backgroundColour);
-    setColour(Label::outlineColourId, outlineColour);
-    setColour(Label::textColourId, textColour);
+    setColour(Label::backgroundColourId, BACKGROUND_COLOUR);
+    setColour(Label::outlineColourId, OUTLINE_COLOUR);
+    setColour(Label::textColourId, TEXT_COLOUR);
 }
+
+} // namespace gris

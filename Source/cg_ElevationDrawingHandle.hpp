@@ -25,6 +25,8 @@
 #include "cg_Radians.hpp"
 #include "cg_SourceComponent.hpp"
 
+namespace gris
+{
 class ElevationFieldComponent;
 
 //==============================================================================
@@ -46,8 +48,8 @@ public:
     //==============================================================================
     explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
     //==============================================================================
-    void mouseDown(MouseEvent const & event) override;
-    void mouseDrag(MouseEvent const & event) override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
     void updatePositionInParent() override;
 
 private:
@@ -55,3 +57,5 @@ private:
     JUCE_LEAK_DETECTOR(ElevationDrawingHandle)
 
 }; // class ElevationDrawingHandle
+
+} // namespace gris

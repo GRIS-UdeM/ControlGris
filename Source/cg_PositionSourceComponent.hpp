@@ -26,6 +26,8 @@
 #include "cg_SourceComponent.hpp"
 #include "cg_SourceIndex.hpp"
 
+namespace gris
+{
 class PositionFieldComponent;
 class PositionTrajectoryManager;
 
@@ -55,17 +57,19 @@ public:
     //==============================================================================
     [[nodiscard]] SourceIndex getSourceIndex() const;
 
-    void mouseDown(MouseEvent const & event) override;
-    void mouseDrag(MouseEvent const & event) override;
-    void mouseUp(MouseEvent const & event) override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
+    void mouseUp(juce::MouseEvent const & event) override;
     void updatePositionInParent() override;
 
 private:
     //==============================================================================
-    void setSourcePosition(MouseEvent const & event) const;
+    void setSourcePosition(juce::MouseEvent const & event) const;
     //==============================================================================
-    void sourceMoved() override;
+    void sourceMovedCallback() override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionSourceComponent)
 
 }; // class PositionSourceComponent
+
+} // namespace gris

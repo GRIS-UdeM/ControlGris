@@ -22,22 +22,25 @@
 
 #include "cg_utilities.hpp"
 
+namespace gris
+{
 enum class FixedPositionType { terminal, initial };
 
 //==============================================================================
-String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
+juce::String
+    getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
 {
-    String const type{ fixedPositionType == FixedPositionType::terminal ? "_terminal" : "" };
-    String result{};
+    juce::String const type{ fixedPositionType == FixedPositionType::terminal ? "_terminal" : "" };
+    juce::String result{};
     switch (dimension) {
     case 0:
-        result = String("S") + String(index.toInt() + 1) + type + String("_X");
+        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_X");
         break;
     case 1:
-        result = String("S") + String(index.toInt() + 1) + type + String("_Y");
+        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_Y");
         break;
     case 2:
-        result = String("S") + String(index.toInt() + 1) + type + String("_Z");
+        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_Z");
         break;
     default:
         jassertfalse; // how did you get there?
@@ -46,7 +49,7 @@ String getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIn
 }
 
 //==============================================================================
-PresetsManager::PresetsManager(XmlElement & data,
+PresetsManager::PresetsManager(juce::XmlElement & data,
                                Sources & sources,
                                SourceLinkEnforcer & positionLinkEnforcer,
                                SourceLinkEnforcer & elevationLinkEnforcer)
@@ -97,12 +100,12 @@ bool PresetsManager::load(int const presetNumber)
             auto const xPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 0) };
             auto const yPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 1) };
             if (presetData->hasAttribute(xPosId) && presetData->hasAttribute(yPosId)) {
-                Point<float> const normalizedInversedPosition{
+                juce::Point<float> const normalizedInversedPosition{
                     static_cast<float>(presetData->getDoubleAttribute(xPosId)),
                     static_cast<float>(presetData->getDoubleAttribute(yPosId))
                 };
-                auto const inversedPosition{ normalizedInversedPosition * 2.0f - Point<float>{ 1.0f, 1.0f } };
-                Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
+                auto const inversedPosition{ normalizedInversedPosition * 2.0f - juce::Point<float>{ 1.0f, 1.0f } };
+                juce::Point<float> const position{ inversedPosition.getX(), inversedPosition.getY() * -1.0f };
                 snapshot.position = position;
                 auto const zPosId{ getFixedPosSourceName(FixedPositionType::initial, index, 2) };
                 if (presetData->hasAttribute(zPosId)) {
@@ -127,15 +130,16 @@ bool PresetsManager::load(int const presetNumber)
         auto const yTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 1) };
         auto const zTerminalPositionId{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
 
-        Point<float> terminalPosition;
+        juce::Point<float> terminalPosition;
         if (presetData->hasAttribute(xTerminalPositionId) && presetData->hasAttribute(yTerminalPositionId)) {
-            Point<float> const inversedNormalizedTerminalPosition{
+            juce::Point<float> const inversedNormalizedTerminalPosition{
                 static_cast<float>(presetData->getDoubleAttribute(xTerminalPositionId)),
                 static_cast<float>(presetData->getDoubleAttribute(yTerminalPositionId))
             };
             auto const inversedTerminalPosition{ inversedNormalizedTerminalPosition * 2.0f
-                                                 - Point<float>{ 1.0f, 1.0f } };
-            terminalPosition = Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
+                                                 - juce::Point<float>{ 1.0f, 1.0f } };
+            terminalPosition
+                = juce::Point<float>{ inversedTerminalPosition.getX(), inversedTerminalPosition.getY() * -1.0f };
         } else {
             terminalPosition = snapshots.primary.position;
         }
@@ -168,7 +172,7 @@ bool PresetsManager::contains(int const presetNumber) const
 }
 
 //==============================================================================
-std::optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
+std::optional<juce::XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
 {
     forEachXmlChildElement(mData, element)
     {
@@ -181,10 +185,10 @@ std::optional<XmlElement *> PresetsManager::getPresetData(int const presetNumber
 }
 
 //==============================================================================
-std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNumber) const
+std::unique_ptr<juce::XmlElement> PresetsManager::createPresetData(int const presetNumber) const
 {
     // Build a new fixed position element.
-    auto result{ std::make_unique<XmlElement>("ITEM") };
+    auto result{ std::make_unique<juce::XmlElement>("ITEM") };
     result->setAttribute("ID", presetNumber);
 
     auto const & positionSnapshots{ mPositionLinkEnforcer.getSnapshots() };
@@ -199,10 +203,10 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
         auto const position{ positionSnapshots[sourceIndex].position };
         auto const elevation{ elevationsSnapshots[sourceIndex].z };
 
-        Point<float> const mirroredPosition{ position.getX(), position.getY() * -1.0f };
+        juce::Point<float> const mirroredPosition{ position.getX(), position.getY() * -1.0f };
         auto const normalizedElevation{ elevation / MAX_ELEVATION };
 
-        auto const mirroredNormalizedPosition{ (mirroredPosition + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+        auto const mirroredNormalizedPosition{ (mirroredPosition + juce::Point<float>{ 1.0f, 1.0f }) / 2.0f };
         auto const inversedNormalizedElevation{ 1.0f - normalizedElevation };
 
         result->setAttribute(xName, mirroredNormalizedPosition.getX());
@@ -215,11 +219,11 @@ std::unique_ptr<XmlElement> PresetsManager::createPresetData(int const presetNum
     auto const zName{ getFixedPosSourceName(FixedPositionType::terminal, SourceIndex{ 0 }, 2) };
 
     auto const position{ mSources.getPrimarySource().getPos() };
-    Point<float> const mirroredPosition{
+    juce::Point<float> const mirroredPosition{
         position.getX(),
         position.getY() * -1.0f
     }; // For some legacy reason, we store a normalized value with inversed Y.
-    auto const inversedNormalizedPosition{ (mirroredPosition + Point<float>{ 1.0f, 1.0f }) / 2.0f };
+    auto const inversedNormalizedPosition{ (mirroredPosition + juce::Point<float>{ 1.0f, 1.0f }) / 2.0f };
     auto const inversedNormalizedElevation{
         1.0f - mSources.getPrimarySource().getNormalizedElevation().toFloat()
     }; // Same this happens with elevation.
@@ -285,3 +289,5 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
 
     return result;
 }
+
+} // namespace gris

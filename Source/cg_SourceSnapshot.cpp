@@ -22,6 +22,8 @@
 
 #include "cg_Source.hpp"
 
+namespace gris
+{
 SourceSnapshot::SourceSnapshot(Source const & source) noexcept : position(source.getPos()), z(source.getElevation())
 {
 }
@@ -43,3 +45,5 @@ SourceSnapshot & SourcesSnapshots::operator[](SourceIndex const index)
     }
     return secondaries.getReference(index.toInt() - 1);
 }
+
+} // namespace gris

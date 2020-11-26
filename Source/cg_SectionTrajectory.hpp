@@ -25,8 +25,10 @@
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
 
+namespace gris
+{
 //==============================================================================
-class TrajectoryBoxComponent final : public Component
+class SectionTrajectory final : public juce::Component
 {
 public:
     //==============================================================================
@@ -42,63 +44,71 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) = 0;
-        virtual void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) = 0;
-        virtual void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType trajectoryType) = 0;
-        virtual void trajectoryBoxElevationTrajectoryTypeChanged(ElevationTrajectoryType trajectoryType) = 0;
-        virtual void trajectoryBoxPositionBackAndForthChanged(bool value) = 0;
-        virtual void trajectoryBoxElevationBackAndForthChanged(bool value) = 0;
-        virtual void trajectoryBoxPositionDampeningCyclesChanged(int value) = 0;
-        virtual void trajectoryBoxElevationDampeningCyclesChanged(int value) = 0;
-        virtual void trajectoryBoxDeviationPerCycleChanged(float value) = 0;
-        virtual void trajectoryBoxCycleDurationChanged(double duration, int mode) = 0;
-        virtual void trajectoryBoxDurationUnitChanged(double duration, int mode) = 0;
-        virtual void trajectoryBoxPositionActivateChanged(bool value) = 0;
-        virtual void trajectoryBoxElevationActivateChanged(bool value) = 0;
+        virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
+        virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
+        virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
+        virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
+        virtual void positionTrajectoryBackAndForthChangedCallback(bool value) = 0;
+        virtual void elevationTrajectoryBackAndForthChangedCallback(bool value) = 0;
+        virtual void positionTrajectoryDampeningCyclesChangedCallback(int value) = 0;
+        virtual void elevationTrajectoryDampeningCyclesChangedCallback(int value) = 0;
+        virtual void trajectoryDeviationPerCycleChangedCallback(float value) = 0;
+        virtual void trajectoryCycleDurationChangedCallback(double duration, int mode) = 0;
+        virtual void trajectoryDurationUnitChangedCallback(double duration, int mode) = 0;
+        virtual void positionTrajectoryStateChangedCallback(bool value) = 0;
+        virtual void elevationTrajectoryStateChangedCallback(bool value) = 0;
     };
 
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
-    ListenerList<Listener> mListeners;
+    juce::ListenerList<Listener> mListeners;
     SpatMode mSpatMode;
 
-    Label mSourceLinkLabel;
-    Label mTrajectoryTypeLabel;
+    juce::Label mSourceLinkLabel;
+    juce::Label mTrajectoryTypeLabel;
 
-    ComboBox mPositionTrajectoryTypeCombo;
-    ComboBox mElevationTrajectoryTypeCombo;
+    juce::ComboBox mPositionTrajectoryTypeCombo;
+    juce::ComboBox mElevationTrajectoryTypeCombo;
 
-    ToggleButton mPositionBackAndForthToggle;
-    ToggleButton mElevationBackAndForthToggle;
+    juce::ToggleButton mPositionBackAndForthToggle;
+    juce::ToggleButton mElevationBackAndForthToggle;
 
-    Label mDampeningLabel;
-    TextEditor mPositionDampeningEditor;
-    TextEditor mElevationDampeningEditor;
+    juce::Label mDampeningLabel;
+    juce::TextEditor mPositionDampeningEditor;
+    juce::TextEditor mElevationDampeningEditor;
 
-    Label mDeviationLabel;
-    TextEditor mDeviationEditor;
+    juce::Label mDeviationLabel;
+    juce::TextEditor mDeviationEditor;
 
-    Label mDurationLabel;
-    TextEditor mDurationEditor;
-    ComboBox mDurationUnitCombo;
+    juce::Label mDurationLabel;
+    juce::TextEditor mDurationEditor;
+    juce::ComboBox mDurationUnitCombo;
 
-    Label mCycleSpeedLabel;
-    Slider mCycleSpeedSlider;
+    juce::Label mCycleSpeedLabel;
+    juce::Slider mCycleSpeedSlider;
 
-    TextButton mPositionActivateButton;
-    TextButton mElevationActivateButton;
+    juce::TextButton mPositionActivateButton;
+    juce::TextButton mElevationActivateButton;
 
-    ComboBox mPositionSourceLinkCombo;
-    ComboBox mElevationSourceLinkCombo;
+    juce::ComboBox mPositionSourceLinkCombo;
+    juce::ComboBox mElevationSourceLinkCombo;
 
 public:
     //==============================================================================
-    explicit TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~TrajectoryBoxComponent() final = default;
+    explicit SectionTrajectory(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void paint(Graphics &) final;
-    void resized() final;
+    SectionTrajectory() = delete;
+    ~SectionTrajectory() override = default;
+
+    SectionTrajectory(SectionTrajectory const &) = delete;
+    SectionTrajectory(SectionTrajectory &&) = delete;
+
+    SectionTrajectory & operator=(SectionTrajectory const &) = delete;
+    SectionTrajectory & operator=(SectionTrajectory &&) = delete;
+    //==============================================================================
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
@@ -121,18 +131,20 @@ public:
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
-    ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
-    ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
-    ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
+    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
+    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
+    juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
+    juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
 
     enum class SymmetricLinkComboState { enabled, disabled };
-    void setSymmetricLinkComboState(bool const allowed);
+    void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrajectoryBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionTrajectory)
 };
+
+} // namespace gris
