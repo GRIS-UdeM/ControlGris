@@ -28,14 +28,14 @@
 namespace gris
 {
 //==============================================================================
-class ParametersBoxComponent final
+class SectionSourceSpan final
     : public juce::Component
     , public juce::Slider::Listener
 {
 public:
     //==============================================================================
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void parametersBoxAzimuthSpanDragStarted() = 0;
         virtual void parametersBoxAzimuthSpanDragEnded() = 0;
@@ -63,13 +63,21 @@ private:
 
 public:
     //==============================================================================
-    ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~ParametersBoxComponent() final = default;
+    SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void mouseDown(juce::MouseEvent const & event) final;
-    void sliderValueChanged(juce::Slider * slider) final;
-    void paint(juce::Graphics &) final;
-    void resized() final;
+    SectionSourceSpan() = delete;
+    ~SectionSourceSpan() override = default;
+
+    SectionSourceSpan(SectionSourceSpan const &) = delete;
+    SectionSourceSpan(SectionSourceSpan &&) = delete;
+
+    SectionSourceSpan & operator=(SectionSourceSpan const &) = delete;
+    SectionSourceSpan & operator=(SectionSourceSpan &&) = delete;
+    //==============================================================================
+    void mouseDown(juce::MouseEvent const & event) override;
+    void sliderValueChanged(juce::Slider * slider) override;
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
     void setSelectedSource(Source * source);
     void setDistanceEnabled(bool distanceEnabled);
@@ -81,7 +89,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(ParametersBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionSourceSpan)
 };
 
 } // namespace gris

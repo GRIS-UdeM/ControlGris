@@ -24,11 +24,11 @@
 
 #include "cg_BannerComponent.hpp"
 #include "cg_FieldComponent.hpp"
-#include "cg_InterfaceBoxComponent.hpp"
-#include "cg_ParametersBoxComponent.hpp"
-#include "cg_PositionPresetComponent.hpp"
-#include "cg_SourceBoxComponent.hpp"
-#include "cg_TrajectoryBoxComponent.hpp"
+#include "cg_SectionOscController.hpp"
+#include "cg_SectionPositionPresets.hpp"
+#include "cg_SectionSourcePosition.hpp"
+#include "cg_SectionSourceSpan.hpp"
+#include "cg_SectionTrajectory.hpp"
 
 namespace gris
 {
@@ -37,11 +37,11 @@ class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
     , private juce::Value::Listener
     , public FieldComponent::Listener
-    , public ParametersBoxComponent::Listener
-    , public SettingsBoxComponent::Listener
-    , public SourceBoxComponent::Listener
-    , public TrajectoryBoxComponent::Listener
-    , public InterfaceBoxComponent::Listener
+    , public SectionSourceSpan::Listener
+    , public SectionGeneralSettings::Listener
+    , public SectionSourcePosition::Listener
+    , public SectionTrajectory::Listener
+    , public SectionOscController::Listener
     , public PositionPresetComponent::Listener
 {
     ControlGrisAudioProcessor & mProcessor;
@@ -60,14 +60,14 @@ class ControlGrisAudioProcessorEditor final
     PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
-    ParametersBoxComponent mParametersBox;
-    TrajectoryBoxComponent mTrajectoryBox;
+    SectionSourceSpan mParametersBox;
+    SectionTrajectory mTrajectoryBox;
 
     juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
-    SettingsBoxComponent mSettingsBox;
-    SourceBoxComponent mSourceBox;
-    InterfaceBoxComponent mInterfaceBox;
+    SectionGeneralSettings mSettingsBox;
+    SectionSourcePosition mSourceBox;
+    SectionOscController mInterfaceBox;
 
     PositionPresetComponent mPositionPresetBox;
 
@@ -100,7 +100,7 @@ public:
     // FieldComponent::Listeners
     void fieldSourcePositionChanged(SourceIndex sourceIndex, int whichField) override;
 
-    // ParametersBoxComponent::Listeners
+    // SectionSourceSpan::Listeners
     void parametersBoxSelectedSourceClicked() override;
     void parametersBoxParameterChanged(SourceParameter sourceParameter, double value) override;
     void parametersBoxAzimuthSpanDragStarted() override;
@@ -108,14 +108,14 @@ public:
     void parametersBoxElevationSpanDragStarted() override;
     void parametersBoxElevationSpanDragEnded() override;
 
-    // SettingsBoxComponent::Listeners
+    // SectionGeneralSettings::Listeners
     void settingsBoxOscFormatChanged(SpatMode mode) override;
     void settingsBoxOscPortNumberChanged(int oscPort) override;
     void settingsBoxOscActivated(bool state) override;
     void settingsBoxNumberOfSourcesChanged(int numOfSources) override;
     void settingsBoxFirstSourceIdChanged(SourceId firstSourceId) override;
 
-    // SourceBoxComponent::Listeners
+    // SectionSourcePosition::Listeners
     void sourceBoxSelectionChanged(SourceIndex sourceIndex) override;
     void sourceBoxPlacementChanged(SourcePlacement sourcePlacement) override;
     void sourceBoxPositionChanged(SourceIndex sourceIndex,
@@ -125,7 +125,7 @@ public:
                                   std::optional<float> y,
                                   std::optional<float> z) override;
 
-    // TrajectoryBoxComponent::Listeners
+    // SectionTrajectory::Listeners
     void trajectoryBoxPositionSourceLinkChanged(PositionSourceLink sourceLink) override;
     void trajectoryBoxElevationSourceLinkChanged(ElevationSourceLink sourceLink) override;
     void trajectoryBoxPositionTrajectoryTypeChanged(PositionTrajectoryType value) override;
@@ -145,7 +145,7 @@ public:
     void positionPresetSaved(int presetNumber) override;
     void positionPresetDeleted(int presetNumber) override;
 
-    // InterfaceBoxComponent::Listeners
+    // SectionOscController::Listeners
     void oscOutputPluginIdChanged(int value) override;
     void oscInputConnectionChanged(bool state, int oscPort) override;
     void oscOutputConnectionChanged(bool state, juce::String oscAddress, int oscPort) override;

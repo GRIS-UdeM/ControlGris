@@ -256,7 +256,7 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 }
 
 //==============================================================================
-// SettingsBoxComponent::Listener callbacks.
+// SectionGeneralSettings::Listener callbacks.
 void ControlGrisAudioProcessorEditor::settingsBoxOscFormatChanged(SpatMode mode)
 {
     mSettingsBox.setOscFormat(mode);
@@ -332,7 +332,7 @@ void ControlGrisAudioProcessorEditor::settingsBoxFirstSourceIdChanged(SourceId c
 }
 
 //==============================================================================
-// SourceBoxComponent::Listener callbacks.
+// SectionSourcePosition::Listener callbacks.
 void ControlGrisAudioProcessorEditor::sourceBoxSelectionChanged(SourceIndex const sourceIndex)
 {
     mSelectedSource = sourceIndex;
@@ -501,7 +501,7 @@ void ControlGrisAudioProcessorEditor::sourceBoxPositionChanged(SourceIndex const
 }
 
 //==============================================================================
-// ParametersBoxComponent::Listener callbacks.
+// SectionSourceSpan::Listener callbacks.
 void ControlGrisAudioProcessorEditor::parametersBoxParameterChanged(SourceParameter const sourceParameter,
                                                                     double const value)
 {
@@ -552,7 +552,7 @@ void ControlGrisAudioProcessorEditor::parametersBoxElevationSpanDragEnded()
 }
 
 //==============================================================================
-// TrajectoryBoxComponent::Listener callbacks.
+// SectionTrajectory::Listener callbacks.
 void ControlGrisAudioProcessorEditor::trajectoryBoxPositionSourceLinkChanged(PositionSourceLink const sourceLink)
 {
     mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
@@ -725,7 +725,7 @@ void ControlGrisAudioProcessorEditor::positionPresetDeleted(int presetNumber)
 }
 
 //==============================================================================
-// InterfaceBoxComponent::Listener callback.
+// SectionOscController::Listener callback.
 void ControlGrisAudioProcessorEditor::oscOutputPluginIdChanged(int value)
 {
     mProcessor.setOscOutputPluginId(value);

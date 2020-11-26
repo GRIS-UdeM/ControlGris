@@ -18,12 +18,12 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_ParametersBoxComponent.hpp"
+#include "cg_SectionSourceSpan.hpp"
 
 namespace gris
 {
 //==============================================================================
-ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mAzimuthLabel.setText("Azimuth Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
@@ -50,7 +50,7 @@ ParametersBoxComponent::ParametersBoxComponent(GrisLookAndFeel & grisLookAndFeel
 }
 
 //==============================================================================
-void ParametersBoxComponent::setSelectedSource(Source * source)
+void SectionSourceSpan::setSelectedSource(Source * source)
 {
     if (mSelectedSource != source || source->getAzimuthSpan().toFloat() != mAzimuthSpan.getValue()
         || mElevationSpan.getValue() != source->getElevationSpan().toFloat()) {
@@ -62,21 +62,21 @@ void ParametersBoxComponent::setSelectedSource(Source * source)
 }
 
 //==============================================================================
-void ParametersBoxComponent::setDistanceEnabled(bool const distanceEnabled)
+void SectionSourceSpan::setDistanceEnabled(bool const distanceEnabled)
 {
     mDistanceEnabled = distanceEnabled;
     resized();
 }
 
 //==============================================================================
-void ParametersBoxComponent::setSpanLinkState(bool const spanLinkState)
+void SectionSourceSpan::setSpanLinkState(bool const spanLinkState)
 {
     mSpanLinked = spanLinkState;
     repaint();
 }
 
 //==============================================================================
-void ParametersBoxComponent::mouseDown(juce::MouseEvent const & event)
+void SectionSourceSpan::mouseDown(juce::MouseEvent const & event)
 {
     float const x{ getWidth() - 35.0f };
     float constexpr y = 15;
@@ -96,7 +96,7 @@ void ParametersBoxComponent::mouseDown(juce::MouseEvent const & event)
 }
 
 //==============================================================================
-void ParametersBoxComponent::sliderValueChanged(juce::Slider * slider)
+void SectionSourceSpan::sliderValueChanged(juce::Slider * slider)
 {
     auto const value{ slider->getValue() };
     auto const parameterId{ (slider == &mAzimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
@@ -117,7 +117,7 @@ void ParametersBoxComponent::sliderValueChanged(juce::Slider * slider)
 }
 
 //==============================================================================
-void ParametersBoxComponent::paint(juce::Graphics & g)
+void SectionSourceSpan::paint(juce::Graphics & g)
 {
     auto constexpr y = 15.0f;
     auto const x{ getWidth() - 35.0f };
@@ -152,7 +152,7 @@ void ParametersBoxComponent::paint(juce::Graphics & g)
 }
 
 //==============================================================================
-void ParametersBoxComponent::resized()
+void SectionSourceSpan::resized()
 {
     mAzimuthLabel.setBounds(5, 3, 225, 20);
     mElevationLabel.setBounds(305, 3, 225, 20);

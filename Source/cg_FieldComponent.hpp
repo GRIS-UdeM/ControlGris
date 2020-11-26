@@ -27,7 +27,7 @@
 #include "cg_ElevationDrawingHandle.hpp"
 #include "cg_ElevationSourceComponent.hpp"
 #include "cg_PositionSourceComponent.hpp"
-#include "cg_SettingsBoxComponent.hpp"
+#include "cg_SectionGeneralSettings.hpp"
 #include "cg_Source.hpp"
 #include "cg_TrajectoryManager.hpp"
 

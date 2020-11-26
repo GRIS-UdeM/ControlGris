@@ -30,12 +30,12 @@
 
 namespace gris
 {
-class SourceBoxComponent;
+class SectionSourcePosition;
 
 //==============================================================================
 class DomeControls final : public juce::Component
 {
-    SourceBoxComponent & mSourceBoxComponent;
+    SectionSourcePosition & mSourceBoxComponent;
 
     Degrees mCurrentAzimuth;
     Radians mCurrentElevation;
@@ -46,7 +46,7 @@ class DomeControls final : public juce::Component
 
 public:
     //==============================================================================
-    explicit DomeControls(SourceBoxComponent & sourceBoxComponent);
+    explicit DomeControls(SectionSourcePosition & sourceBoxComponent);
     ~DomeControls() override = default;
 
     DomeControls(DomeControls const &) = delete;
@@ -65,7 +65,7 @@ private:
 //==============================================================================
 class CubeControls final : public juce::Component
 {
-    SourceBoxComponent & mSourceBoxComponent;
+    SectionSourcePosition & mSourceBoxComponent;
 
     float mCurrentX;
     float mCurrentY;
@@ -79,7 +79,7 @@ class CubeControls final : public juce::Component
 
 public:
     //==============================================================================
-    explicit CubeControls(SourceBoxComponent & sourceBoxComponent);
+    explicit CubeControls(SectionSourcePosition & sourceBoxComponent);
     ~CubeControls() override = default;
 
     CubeControls(CubeControls const &) = delete;
@@ -96,7 +96,7 @@ private:
 }; // CubeControls
 
 //==============================================================================
-class SourceBoxComponent final : public juce::Component
+class SectionSourcePosition final : public juce::Component
 {
     friend DomeControls;
     friend CubeControls;
@@ -136,16 +136,16 @@ private:
 
 public:
     //==============================================================================
-    explicit SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
+    explicit SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
     //==============================================================================
-    SourceBoxComponent() = delete;
-    ~SourceBoxComponent() override = default;
+    SectionSourcePosition() = delete;
+    ~SectionSourcePosition() override = default;
 
-    SourceBoxComponent(SourceBoxComponent const &) = delete;
-    SourceBoxComponent(SourceBoxComponent &&) = delete;
+    SectionSourcePosition(SectionSourcePosition const &) = delete;
+    SectionSourcePosition(SectionSourcePosition &&) = delete;
 
-    SourceBoxComponent & operator=(SourceBoxComponent const &) = delete;
-    SourceBoxComponent & operator=(SourceBoxComponent &&) = delete;
+    SectionSourcePosition & operator=(SectionSourcePosition const &) = delete;
+    SectionSourcePosition & operator=(SectionSourcePosition &&) = delete;
     //==============================================================================
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
@@ -160,7 +160,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SourceBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionSourcePosition)
 };
 
 } // namespace gris

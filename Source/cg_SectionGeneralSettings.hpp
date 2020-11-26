@@ -29,7 +29,7 @@
 namespace gris
 {
 //==============================================================================
-class SettingsBoxComponent final : public juce::Component
+class SectionGeneralSettings final : public juce::Component
 {
 public:
     //==============================================================================
@@ -65,8 +65,8 @@ private:
 
 public:
     //==============================================================================
-    explicit SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~SettingsBoxComponent() final = default;
+    explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel);
+    ~SectionGeneralSettings() final = default;
 
     void paint(juce::Graphics &) override;
     void resized() override;
@@ -84,7 +84,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SettingsBoxComponent)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SectionGeneralSettings)
 };
 
 } // namespace gris

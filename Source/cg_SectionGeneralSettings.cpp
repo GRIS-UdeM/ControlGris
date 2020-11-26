@@ -18,12 +18,12 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SettingsBoxComponent.hpp"
+#include "cg_SectionGeneralSettings.hpp"
 
 namespace gris
 {
 //==============================================================================
-SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscFormatLabel.setText("OSC Format:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscFormatLabel);
@@ -109,43 +109,43 @@ SettingsBoxComponent::SettingsBoxComponent(GrisLookAndFeel & grisLookAndFeel) : 
 }
 
 //==============================================================================
-void SettingsBoxComponent::setOscFormat(SpatMode mode)
+void SectionGeneralSettings::setOscFormat(SpatMode mode)
 {
     mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SettingsBoxComponent::setOscPortNumber(int oscPortNumber)
+void SectionGeneralSettings::setOscPortNumber(int oscPortNumber)
 {
     mOscPortEditor.setText(juce::String(oscPortNumber));
 }
 
 //==============================================================================
-void SettingsBoxComponent::setNumberOfSources(int numOfSources)
+void SectionGeneralSettings::setNumberOfSources(int numOfSources)
 {
     mNumOfSourcesEditor.setText(juce::String(numOfSources));
 }
 
 //==============================================================================
-void SettingsBoxComponent::setFirstSourceId(SourceId const firstSourceId)
+void SectionGeneralSettings::setFirstSourceId(SourceId const firstSourceId)
 {
     mFirstSourceIdEditor.setText(firstSourceId.toString());
 }
 
 //==============================================================================
-void SettingsBoxComponent::setActivateButtonState(bool shouldBeOn)
+void SectionGeneralSettings::setActivateButtonState(bool shouldBeOn)
 {
     mPositionActivateButton.setToggleState(shouldBeOn, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SettingsBoxComponent::paint(juce::Graphics & g)
+void SectionGeneralSettings::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SettingsBoxComponent::resized()
+void SectionGeneralSettings::resized()
 {
     mOscFormatLabel.setBounds(5, 10, 90, 15);
     mOscFormatCombo.setBounds(95, 10, 150, 20);

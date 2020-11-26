@@ -144,7 +144,7 @@ public:
     void deletingPresetClicked(PresetButton * button) override;
 
     void setPreset(int value, bool notify = false);
-    void presetSaved(int presetNumber, bool isSaved);
+    void presetSaved(int presetNumber, bool isSaved) const;
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

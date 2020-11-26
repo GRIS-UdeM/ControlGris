@@ -28,7 +28,7 @@
 namespace gris
 {
 //==============================================================================
-class TrajectoryBoxComponent final : public juce::Component
+class SectionTrajectory final : public juce::Component
 {
 public:
     //==============================================================================
@@ -96,11 +96,19 @@ private:
 
 public:
     //==============================================================================
-    explicit TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~TrajectoryBoxComponent() final = default;
+    explicit SectionTrajectory(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void paint(juce::Graphics &) final;
-    void resized() final;
+    SectionTrajectory() = delete;
+    ~SectionTrajectory() override = default;
+
+    SectionTrajectory(SectionTrajectory const &) = delete;
+    SectionTrajectory(SectionTrajectory &&) = delete;
+
+    SectionTrajectory & operator=(SectionTrajectory const &) = delete;
+    SectionTrajectory & operator=(SectionTrajectory &&) = delete;
+    //==============================================================================
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
@@ -136,7 +144,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TrajectoryBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionTrajectory)
 };
 
 } // namespace gris

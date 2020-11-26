@@ -18,13 +18,14 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_TrajectoryBoxComponent.hpp"
+#include "cg_SectionTrajectory.hpp"
+
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mSpatMode = SpatMode::dome;
 
@@ -193,14 +194,14 @@ TrajectoryBoxComponent::TrajectoryBoxComponent(GrisLookAndFeel & grisLookAndFeel
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setSpatMode(SpatMode const spatMode)
+void SectionTrajectory::setSpatMode(SpatMode const spatMode)
 {
     mSpatMode = spatMode;
     resized();
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setNumberOfSources(int const numOfSources)
+void SectionTrajectory::setNumberOfSources(int const numOfSources)
 {
     if (numOfSources == 1) {
         mPositionSourceLinkCombo.setSelectedId(1);
@@ -222,33 +223,33 @@ void TrajectoryBoxComponent::setNumberOfSources(int const numOfSources)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setTrajectoryType(int const type)
+void SectionTrajectory::setTrajectoryType(int const type)
 {
     mPositionTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationTrajectoryType(int const type)
+void SectionTrajectory::setElevationTrajectoryType(int const type)
 {
     mElevationTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionBackAndForth(bool const state)
+void SectionTrajectory::setPositionBackAndForth(bool const state)
 {
     mPositionBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationBackAndForth(bool const state)
+void SectionTrajectory::setElevationBackAndForth(bool const state)
 {
     mElevationBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionDampeningEnabled(bool const state)
+void SectionTrajectory::setPositionDampeningEnabled(bool const state)
 {
     mPositionDampeningEditor.setEnabled(state);
     juce::String text = mPositionDampeningEditor.getText();
@@ -261,7 +262,7 @@ void TrajectoryBoxComponent::setPositionDampeningEnabled(bool const state)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationDampeningEnabled(bool const state)
+void SectionTrajectory::setElevationDampeningEnabled(bool const state)
 {
     mElevationDampeningEditor.setEnabled(state);
     juce::String text = mElevationDampeningEditor.getText();
@@ -274,56 +275,56 @@ void TrajectoryBoxComponent::setElevationDampeningEnabled(bool const state)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionDampeningCycles(int const value)
+void SectionTrajectory::setPositionDampeningCycles(int const value)
 {
     mPositionDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationDampeningCycles(int const value)
+void SectionTrajectory::setElevationDampeningCycles(int const value)
 {
     mElevationDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setDeviationPerCycle(float const value)
+void SectionTrajectory::setDeviationPerCycle(float const value)
 {
     mDeviationEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionSourceLink(PositionSourceLink const value)
+void SectionTrajectory::setPositionSourceLink(PositionSourceLink const value)
 {
     mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationSourceLink(ElevationSourceLink const value)
+void SectionTrajectory::setElevationSourceLink(ElevationSourceLink const value)
 {
     mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setPositionActivateState(bool const state)
+void SectionTrajectory::setPositionActivateState(bool const state)
 {
     mPositionActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setElevationActivateState(bool const state)
+void SectionTrajectory::setElevationActivateState(bool const state)
 {
     mElevationActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setSymmetricLinkComboState(bool const allowed)
+void SectionTrajectory::setSymmetricLinkComboState(bool const allowed)
 {
     mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), allowed);
     mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), allowed);
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setCycleDuration(double const value)
+void SectionTrajectory::setCycleDuration(double const value)
 {
     mDurationEditor.setText(juce::String(value));
     mListeners.call([&](Listener & l) {
@@ -333,7 +334,7 @@ void TrajectoryBoxComponent::setCycleDuration(double const value)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::setDurationUnit(int const value)
+void SectionTrajectory::setDurationUnit(int const value)
 {
     mDurationUnitCombo.setSelectedId(value, juce::NotificationType::sendNotificationSync);
     mListeners.call([&](Listener & l) {
@@ -343,13 +344,13 @@ void TrajectoryBoxComponent::setDurationUnit(int const value)
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::paint(juce::Graphics & g)
+void SectionTrajectory::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void TrajectoryBoxComponent::resized()
+void SectionTrajectory::resized()
 {
     mSourceLinkLabel.setBounds(5, 10, 150, 20);
     mPositionSourceLinkCombo.setBounds(115, 10, 175, 20);

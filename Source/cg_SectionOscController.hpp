@@ -27,13 +27,13 @@
 namespace gris
 {
 //==============================================================================
-class InterfaceBoxComponent final
+class SectionOscController final
     : public juce::Component
     , public juce::TextEditor::Listener
 {
 public:
     struct Listener {
-        virtual ~Listener() {}
+        virtual ~Listener() = default;
 
         virtual void oscOutputPluginIdChanged(int value) = 0;
         virtual void oscInputConnectionChanged(bool state, int oscPort) = 0;
@@ -63,12 +63,20 @@ private:
 
 public:
     //==============================================================================
-    explicit InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel);
-    ~InterfaceBoxComponent() final { setLookAndFeel(nullptr); }
+    explicit SectionOscController(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    void textEditorReturnKeyPressed([[maybe_unused]] juce::TextEditor & editor) final { unfocusAllComponents(); }
-    void paint(juce::Graphics &) final;
-    void resized() final;
+    SectionOscController() = delete;
+    ~SectionOscController() override { setLookAndFeel(nullptr); } // TODO : necessary ?
+
+    SectionOscController(SectionOscController const &) = delete;
+    SectionOscController(SectionOscController &&) = delete;
+
+    SectionOscController & operator=(SectionOscController const &) = delete;
+    SectionOscController & operator=(SectionOscController &&) = delete;
+    //==============================================================================
+    void textEditorReturnKeyPressed([[maybe_unused]] juce::TextEditor & editor) override { unfocusAllComponents(); }
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
     void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(juce::String(id)); }
 
@@ -84,7 +92,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(InterfaceBoxComponent)
+    JUCE_LEAK_DETECTOR(SectionOscController)
 };
 
 } // namespace gris

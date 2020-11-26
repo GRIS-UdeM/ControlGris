@@ -18,12 +18,12 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_InterfaceBoxComponent.hpp"
+#include "cg_SectionOscController.hpp"
 
 namespace gris
 {
 //==============================================================================
-InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscOutputPluginIdLabel.setText("OSC output plugin ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscOutputPluginIdLabel);
@@ -139,46 +139,46 @@ InterfaceBoxComponent::InterfaceBoxComponent(GrisLookAndFeel & grisLookAndFeel) 
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscReceiveInputPort(int const port)
+void SectionOscController::setOscReceiveInputPort(int const port)
 {
     mLastOscReceivePort = port;
     mOscReceivePortEditor.setText(juce::String(port));
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscSendOutputPort(int const port)
+void SectionOscController::setOscSendOutputPort(int const port)
 {
     mLastOscSendPort = port;
     mOscSendPortEditor.setText(juce::String{ port });
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscReceiveToggleState(bool const state)
+void SectionOscController::setOscReceiveToggleState(bool const state)
 {
     mOscReceiveToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscSendToggleState(bool const state)
+void SectionOscController::setOscSendToggleState(bool const state)
 {
     mOscSendToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void InterfaceBoxComponent::setOscSendOutputAddress(juce::String const & address)
+void SectionOscController::setOscSendOutputAddress(juce::String const & address)
 {
     mLastOscSendAddress = address;
     mOscSendIpEditor.setText(address);
 }
 
 //==============================================================================
-void InterfaceBoxComponent::paint(juce::Graphics & g)
+void SectionOscController::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void InterfaceBoxComponent::resized()
+void SectionOscController::resized()
 {
     mOscOutputPluginIdLabel.setBounds(5, 10, 135, 20);
     mOscOutputPluginIdEditor.setBounds(140, 10, 70, 20);

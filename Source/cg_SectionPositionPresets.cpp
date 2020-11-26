@@ -18,7 +18,7 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_PositionPresetComponent.hpp"
+#include "cg_SectionPositionPresets.hpp"
 
 #include "cg_PresetsManager.hpp"
 
@@ -136,7 +136,7 @@ void PositionPresetComponent::setPreset(int const value, bool const notify)
 }
 
 //==============================================================================
-void PositionPresetComponent::presetSaved(int const presetNumber, bool const isSaved)
+void PositionPresetComponent::presetSaved(int const presetNumber, bool const isSaved) const
 {
     if (mPresets[presetNumber - 1] != nullptr) {
         mPresets[presetNumber - 1]->setSavedState(isSaved);

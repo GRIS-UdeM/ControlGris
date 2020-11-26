@@ -18,14 +18,14 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SourceBoxComponent.hpp"
+#include "cg_SectionSourcePosition.hpp"
 
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
     mCurrentAzimuth = {};
     mCurrentElevation = MAX_ELEVATION;
@@ -40,7 +40,7 @@ DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
         mCurrentElevation = MAX_ELEVATION * (1.0f - mElevationSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
                                        mCurrentElevation,
@@ -60,7 +60,7 @@ DomeControls::DomeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     addAndMakeVisible(&mAzimuthSlider);
     mAzimuthSlider.onValueChange = [this] {
         mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
-        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        mCurrentAzimuth,
                                        std::nullopt,
@@ -91,7 +91,7 @@ void DomeControls::updateSliderValues(Source * source)
 }
 
 //==============================================================================
-CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
     mCurrentX = { 0.0f };
     mCurrentY = { 0.0f };
@@ -127,7 +127,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
 
     mXSlider.onValueChange = [this] {
         mCurrentX = static_cast<float>(mXSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
                                        std::nullopt,
@@ -138,7 +138,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     };
     mYSlider.onValueChange = [this] {
         mCurrentY = static_cast<float>(mYSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
                                        std::nullopt,
@@ -149,7 +149,7 @@ CubeControls::CubeControls(SourceBoxComponent & sourceBoxComponent) : mSourceBox
     };
     mZSlider.onValueChange = [this] {
         mCurrentZ = static_cast<float>(mZSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SourceBoxComponent::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourceBoxPositionChanged(mSourceBoxComponent.mSelectedSource,
                                        std::nullopt,
                                        std::nullopt,
@@ -181,7 +181,7 @@ void CubeControls::updateSliderValues(Source * source)
 }
 
 //==============================================================================
-SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
+SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
     : mGrisLookAndFeel(grisLookAndFeel)
     , mDomeControls(*this)
     , mCubeControls(*this)
@@ -221,13 +221,13 @@ SourceBoxComponent::SourceBoxComponent(GrisLookAndFeel & grisLookAndFeel, SpatMo
 }
 
 //==============================================================================
-void SourceBoxComponent::paint(juce::Graphics & g)
+void SectionSourcePosition::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SourceBoxComponent::resized()
+void SectionSourcePosition::resized()
 {
     mSourcePlacementLabel.setBounds(5, 10, 150, 15);
     mSourcePlacementCombo.setBounds(130, 10, 150, 20);
@@ -240,7 +240,7 @@ void SourceBoxComponent::resized()
 }
 
 //==============================================================================
-void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
+void SectionSourcePosition::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
 {
     mSourceNumberCombo.clear();
     for (auto id = firstSourceId; id < firstSourceId + numOfSources; ++id) {
@@ -252,7 +252,7 @@ void SourceBoxComponent::setNumberOfSources(int const numOfSources, SourceId con
 }
 
 //==============================================================================
-void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
+void SectionSourcePosition::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
 {
     mSelectedSource = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
@@ -261,7 +261,7 @@ void SourceBoxComponent::updateSelectedSource(Source * source, SourceIndex const
 }
 
 //==============================================================================
-void SourceBoxComponent::setSpatMode(SpatMode const spatMode)
+void SectionSourcePosition::setSpatMode(SpatMode const spatMode)
 {
     switch (spatMode) {
     case SpatMode::dome:
