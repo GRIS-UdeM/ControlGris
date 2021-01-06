@@ -251,8 +251,9 @@ void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSo
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::updatePositionPreset(int presetNumber)
+void ControlGrisAudioProcessorEditor::updatePositionPreset(int const presetNumber)
 {
+    juce::MessageManagerLock mml{};
     mPositionPresetComponent.setPreset(presetNumber, true);
 }
 

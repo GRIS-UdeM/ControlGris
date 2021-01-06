@@ -68,6 +68,7 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
     };
 
     mOscReceiveIpEditor.setText(juce::IPAddress::getLocalAddress().toString());
+    // mOscReceiveIpEditor.setText("127.0.0.1");
     mOscReceiveIpEditor.setReadOnly(true);
     addAndMakeVisible(&mOscReceiveIpEditor);
 

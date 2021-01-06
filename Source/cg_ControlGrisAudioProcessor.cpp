@@ -501,91 +501,92 @@ void ControlGrisAudioProcessor::oscBundleReceived(juce::OSCBundle const & bundle
 //==============================================================================
 void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & message)
 {
+    if (!message[0].isFloat32()) {
+        return;
+    }
+
     auto positionSourceLinkToProcess{ PositionSourceLink::undefined };
     auto elevationSourceLinkToProcess{ ElevationSourceLink::undefined };
-    auto x{ -1.0f };
-    auto y{ -1.0f };
-    auto z{ -1.0f };
+    std::optional<float> x{};
+    std::optional<float> y{};
+    std::optional<float> z{};
     auto const address{ message.getAddressPattern().toString() };
     auto const pluginInstance{ juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() } };
-    if ((address == juce::String(pluginInstance + "/traj/1/x")
-         || address == juce::String(pluginInstance + "/traj/1/xyz/1"))
-        && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+    auto const positionTrajectory{ mPositionTrajectoryManager.getTrajectoryType() };
+    auto const elevationTrajectory{ mElevationTrajectoryManager.getTrajectoryType() };
+
+    if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
+        && positionTrajectory == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
-    } else if ((address == juce::String(pluginInstance + "/traj/1/y")
-                || address == juce::String(pluginInstance + "/traj/1/xyz/2"))
-               && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
-        y = message[0].getFloat32();
-    } else if ((address == juce::String(pluginInstance + "/traj/1/z")
-                || address == juce::String(pluginInstance + "/traj/1/xyz/3"))
-               && static_cast<ElevationTrajectoryType>(mElevationTrajectoryManager.getTrajectoryType())
-                      == ElevationTrajectoryType::realtime) {
-        z = message[0].getFloat32();
-    } else if (address == juce::String(pluginInstance + "/traj/1/xy")
-               && mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+    } else if ((address == pluginInstance + "/traj/1/y" || address == pluginInstance + "/traj/1/xyz/2")
+               && positionTrajectory == PositionTrajectoryType::realtime) {
+        y = 1.0f - message[0].getFloat32();
+    } else if ((address == pluginInstance + "/traj/1/z" || address == pluginInstance + "/traj/1/xyz/3")
+               && elevationTrajectory == ElevationTrajectoryType::realtime) {
+        z = 1.0f - message[0].getFloat32();
+    } else if (address == pluginInstance + "/traj/1/xy" && positionTrajectory == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
-        y = message[1].getFloat32();
-    } else if (address == juce::String(pluginInstance + "/traj/1/xyz")) {
-        if (mPositionTrajectoryManager.getTrajectoryType() == PositionTrajectoryType::realtime) {
+        y = 1.0f - message[1].getFloat32();
+    } else if (address == pluginInstance + "/traj/1/xyz") {
+        if (positionTrajectory == PositionTrajectoryType::realtime) {
             x = message[0].getFloat32();
-            y = message[1].getFloat32();
+            y = 1.0f - message[1].getFloat32();
         }
-        if (static_cast<ElevationTrajectoryType>(mElevationTrajectoryManager.getTrajectoryType())
-            == ElevationTrajectoryType::realtime) {
-            z = message[2].getFloat32();
+        if (elevationTrajectory == ElevationTrajectoryType::realtime) {
+            z = 1.0f - message[2].getFloat32();
         }
-    } else if (address == juce::String(pluginInstance + "/azispan")) {
+    } else if (address == pluginInstance + "/azispan") {
         for (auto & source : mSources) {
             source.setAzimuthSpan(Normalized{ message[0].getFloat32() });
         }
         auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
-    } else if (address == juce::String(pluginInstance + "/elespan")) {
+    } else if (address == pluginInstance + "/elespan") {
         for (auto & source : mSources)
             source.setElevationSpan(Normalized{ message[0].getFloat32() });
         auto const gestureLock{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)
             ->setValueNotifyingHost(message[0].getFloat32());
-    } else if (address == juce::String(pluginInstance + "/sourcelink/1/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(1);
-    } else if (address == juce::String(pluginInstance + "/sourcelink/2/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(2);
-    } else if (address == juce::String(pluginInstance + "/sourcelink/3/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(3);
-    } else if (address == juce::String(pluginInstance + "/sourcelink/4/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(4);
-    } else if (address == juce::String(pluginInstance + "/sourcelink/5/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(5);
-    } else if (address == juce::String(pluginInstance + "/sourcelink/6/1")) {
-        if (message[0].getFloat32() == 1)
-            positionSourceLinkToProcess = static_cast<PositionSourceLink>(6);
-    } else if (address == juce::String(pluginInstance + "/sourcelink")) {
+    } else if (address == pluginInstance + "/sourcelink/1/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::independent;
+    } else if (address == pluginInstance + "/sourcelink/2/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::circular;
+    } else if (address == pluginInstance + "/sourcelink/3/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::circularFixedRadius;
+    } else if (address == pluginInstance + "/sourcelink/4/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::circularFixedAngle;
+    } else if (address == pluginInstance + "/sourcelink/5/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::circularFullyFixed;
+    } else if (address == pluginInstance + "/sourcelink/6/1") {
+        if (message[0].getFloat32() == 1.0f)
+            positionSourceLinkToProcess = PositionSourceLink::deltaLock;
+    } else if (address == pluginInstance + "/sourcelink") {
         positionSourceLinkToProcess = static_cast<PositionSourceLink>(message[0].getFloat32()); // 1 -> 6
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/1/1")) {
-        if (message[0].getFloat32() == 1)
-            elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(1);
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/2/1")) {
-        if (message[0].getFloat32() == 1)
-            elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(2);
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/3/1")) {
-        if (message[0].getFloat32() == 1)
-            elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(3);
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/4/1")) {
-        if (message[0].getFloat32() == 1)
-            elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(4);
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt/5/1")) {
-        if (message[0].getFloat32() == 1)
-            elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(5);
-    } else if (address == juce::String(pluginInstance + "/sourcelinkalt")) {
+    } else if (address == pluginInstance + "/sourcelinkalt/1/1") {
+        if (message[0].getFloat32() == 1.0f)
+            elevationSourceLinkToProcess = ElevationSourceLink::independent;
+    } else if (address == pluginInstance + "/sourcelinkalt/2/1") {
+        if (message[0].getFloat32() == 1.0f)
+            elevationSourceLinkToProcess = ElevationSourceLink::fixedElevation;
+    } else if (address == pluginInstance + "/sourcelinkalt/3/1") {
+        if (message[0].getFloat32() == 1.0f)
+            elevationSourceLinkToProcess = ElevationSourceLink::linearMin;
+    } else if (address == pluginInstance + "/sourcelinkalt/4/1") {
+        if (message[0].getFloat32() == 1.0f)
+            elevationSourceLinkToProcess = ElevationSourceLink::linearMax;
+    } else if (address == pluginInstance + "/sourcelinkalt/5/1") {
+        if (message[0].getFloat32() == 1.0f)
+            elevationSourceLinkToProcess = ElevationSourceLink::deltaLock;
+    } else if (address == pluginInstance + "/sourcelinkalt") {
         elevationSourceLinkToProcess = static_cast<ElevationSourceLink>(message[0].getFloat32()); // 1 -> 5
-    } else if (address == juce::String(pluginInstance + "/presets")) {
-        int newPreset = (int)message[0].getFloat32(); // 1 -> 50
+    } else if (address == pluginInstance + "/presets") {
+        int newPreset = static_cast<int>(message[0].getFloat32()); // 1 -> 50
         auto const loaded{ mPresetManager.loadIfPresetChanged(newPreset) };
         if (loaded) {
             mPositionTrajectoryManager.recomputeTrajectory();
@@ -597,28 +598,29 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         }
     }
 
-    if (x != -1.0f && y != -1.0f) {
-        mSources.getPrimarySource().setPosition(juce::Point<float>{ x, y }, Source::OriginOfChange::osc);
-
-    } else if (y != -1.0f) {
-        mSources.getPrimarySource().setY(y, Source::OriginOfChange::osc);
-    } else if (x != -1.0f) {
-        mSources.getPrimarySource().setX(x, Source::OriginOfChange::osc);
+    if (x && y) {
+        auto const correctedPoint{ juce::Point<float>{ *x, *y } * 2.0f - juce::Point<float>{ 1.0f, 1.0f } };
+        mSources.getPrimarySource().setPosition(correctedPoint, Source::OriginOfChange::osc);
+    } else if (x) {
+        mSources.getPrimarySource().setX(Normalized{ *x }, Source::OriginOfChange::osc);
+    } else if (y) {
+        mSources.getPrimarySource().setY(Normalized{ *y }, Source::OriginOfChange::osc);
     }
     sourcePositionChanged(SourceIndex{ 0 }, 0);
 
-    if (z != -1.0f) {
-        mSources.getPrimarySource().setY(z, Source::OriginOfChange::osc);
+    if (z) {
+        mSources.getPrimarySource().setElevation(Normalized{ *z }, Source::OriginOfChange::osc);
         mElevationTrajectoryManager.sendTrajectoryPositionChangedEvent();
+        sourcePositionChanged(SourceIndex{ 0 }, 1);
     }
 
     mPresetManager.loadIfPresetChanged(0);
 
-    if (static_cast<bool>(positionSourceLinkToProcess)) {
+    if (positionSourceLinkToProcess != PositionSourceLink::undefined) {
         setPositionSourceLink(positionSourceLinkToProcess, SourceLinkEnforcer::OriginOfChange::user);
     }
 
-    if (static_cast<bool>(elevationSourceLinkToProcess)) {
+    if (elevationSourceLinkToProcess != ElevationSourceLink::undefined) {
         setElevationSourceLink(elevationSourceLinkToProcess, SourceLinkEnforcer::OriginOfChange::user);
     }
 }
@@ -630,8 +632,7 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(juce::String const & o
 
     mOscOutputConnected = mOscOutputSender.connect(oscAddress, oscPort);
     if (!mOscOutputConnected)
-        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << "."
-                  << std::endl;
+        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << ".\n";
     else {
         mCurrentOscOutputPort = oscPort;
         mCurrentOscOutputAddress = oscAddress;
@@ -694,10 +695,11 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     auto const pluginInstance = juce::String{ "/controlgris/" } + juce::String{ getOscOutputPluginId() };
 
-    auto const trajectoryHandlePosition{ mSources.getPrimarySource().getPos() };
+    auto const trajectoryHandlePosition{ (mSources.getPrimarySource().getPos() + juce::Point<float>{ 1.0f, 1.0f })
+                                         / 2.0f };
     auto const trajectory1x = trajectoryHandlePosition.getX();
-    auto const trajectory1y = trajectoryHandlePosition.getY();
-    auto const trajectory1z = trajectoryHandlePosition.getY();
+    auto const trajectory1y = 1.0f - trajectoryHandlePosition.getY();
+    auto const trajectory1z = 1.0f - mSources.getPrimarySource().getNormalizedElevation().toFloat();
 
     if (lastTrajectoryX != trajectory1x) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/x"));
