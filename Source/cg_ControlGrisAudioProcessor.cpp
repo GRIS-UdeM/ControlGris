@@ -207,9 +207,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
 
-    // Connect OSC to default socket
-    mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
-
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
     startTimerHz(50);
@@ -426,7 +423,7 @@ void ControlGrisAudioProcessor::handleOscConnection(bool const state)
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscMessage()
 {
-    if (!mOscConnected)
+    if (!mOscConnected || mNeedsInitialization)
         return;
 
     juce::OSCAddressPattern const oscPattern("/spat/serv");
@@ -993,6 +990,11 @@ bool ControlGrisAudioProcessor::isMidiEffect() const
 //==============================================================================
 void ControlGrisAudioProcessor::initialize()
 {
+    if (!mOscConnected) {
+        // Connect OSC to default socket
+        mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
+    }
+    
     mNeedsInitialization = true;
     mLastTime = mLastTimerTime = 10000000.0;
     mCanStopActivate = true;
