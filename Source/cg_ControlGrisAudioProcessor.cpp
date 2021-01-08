@@ -994,7 +994,7 @@ void ControlGrisAudioProcessor::initialize()
         // Connect OSC to default socket
         mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
     }
-    
+
     mNeedsInitialization = true;
     mLastTime = mLastTimerTime = 10000000.0;
     mCanStopActivate = true;
@@ -1136,7 +1136,9 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
 //==============================================================================
 void ControlGrisAudioProcessor::setStateInformation(void const * data, int const sizeInBytes)
 {
-    juce::MessageManagerLock mmLock{};
+    // TODO : There used to be a MessageManager lock here, but it is causing a deadlock on ProTools. The
+    // JUCE_ASSERT_MESSAGE_MANAGER_IS_LOCKED fails. Removing the lock seems ok on ProTools, but it should be tested on
+    // other hosts.
 
     auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
