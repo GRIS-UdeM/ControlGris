@@ -25,7 +25,7 @@ namespace gris
 //==============================================================================
 SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    mOscFormatLabel.setText("OSC Format:", juce::NotificationType::dontSendNotification);
+    mOscFormatLabel.setText("Mode:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(mOscFormatLabel);
 
     mOscFormatCombo.addItem("DOME - SpatGris", 1);
@@ -58,7 +58,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     };
     addAndMakeVisible(mOscPortEditor);
 
-    mOscAddressLabel.setText("OSC Address:", juce::NotificationType::dontSendNotification);
+    mOscAddressLabel.setText("IP Address:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(mOscAddressLabel);
 
     juce::String const defaultAddress{ "127.0.0.1" };
