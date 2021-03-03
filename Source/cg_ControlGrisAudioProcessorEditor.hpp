@@ -79,19 +79,18 @@ class ControlGrisAudioProcessorEditor final
 
 public:
     //==============================================================================
-    ControlGrisAudioProcessorEditor() = delete;
-    ~ControlGrisAudioProcessorEditor() override;
-
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor const &) = delete;
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor &&) = delete;
-
-    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
-    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
-    //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     juce::AudioProcessorValueTreeState & vts,
                                     PositionTrajectoryManager & positionAutomationManager,
                                     ElevationTrajectoryManager & elevationAutomationManager);
+    //==============================================================================
+    ControlGrisAudioProcessorEditor() = delete;
+    ~ControlGrisAudioProcessorEditor() override;
+    //==============================================================================
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor const &) = delete;
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessorEditor &&) = delete;
+    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
+    ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
