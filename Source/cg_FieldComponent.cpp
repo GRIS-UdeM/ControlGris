@@ -182,13 +182,28 @@ void PositionFieldComponent::drawBackground(juce::Graphics & g) const
         g.drawEllipse(x, x, w, w, 1);
     } else {
         // Draw big background squares.
-        float const offset{ fieldComponentSize * 0.2f };
-        float const size{ fieldComponentSize * 0.6f };
-        g.drawRect(offset, offset, size, size);
-        g.drawRect(10, 10, fieldComponentSize - 20, fieldComponentSize - 20);
+        static constexpr auto BASE_OFFSET{ SOURCE_FIELD_COMPONENT_RADIUS };
+        auto const usableLength{ fieldComponentSize - SOURCE_FIELD_COMPONENT_DIAMETER };
+
+        auto const getCenteredRect = [usableLength](float const size) -> juce::Rectangle<float> {
+            jassert(usableLength >= size);
+            auto const offset{ BASE_OFFSET + (usableLength - size) / 2.0f };
+            juce::Rectangle<float> const result{ offset, offset, size, size };
+            return result;
+        };
+
+        auto const noAttenuationRect{ getCenteredRect(usableLength / LBAP_FAR_FIELD) };
+        auto const maxAttenuationRect{ getCenteredRect(usableLength) };
+        g.setColour(juce::Colour::fromRGB(55, 56, 57));
+        g.drawEllipse(noAttenuationRect, 1.0f);
+        g.drawEllipse(maxAttenuationRect, 1.0f);
+        g.setColour(grisLookAndFeel->getLightColor());
+        g.drawRect(noAttenuationRect);
+        g.drawRect(maxAttenuationRect);
     }
 
     // Draw cross.
+    g.setColour(grisLookAndFeel->getLightColor());
     g.drawLine(fieldCenter,
                SOURCE_FIELD_COMPONENT_RADIUS,
                fieldCenter,
