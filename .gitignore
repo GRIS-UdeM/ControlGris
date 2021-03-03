@@ -1,6 +1,7 @@
 # Vs code files
 .vscode/
 build/
+.vs
 
 # Mac OS X Desktop Services Store files
 *.DS_Store

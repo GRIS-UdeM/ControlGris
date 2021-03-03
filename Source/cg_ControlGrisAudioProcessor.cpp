@@ -384,15 +384,19 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscConnection(juce::String const & address, int const oscPort)
 {
-    disconnectOsc();
+    if (!disconnectOsc()) {
+        return false;
+    }
 
     mOscConnected = mOscSender.connect(address, oscPort);
-    if (!mOscConnected)
+    if (!mOscConnected) {
         std::cout << "Error: could not connect to UDP port " << oscPort << " at address " << address << std::endl;
-    else
-        mLastConnectedOscPort = oscPort;
+        return false;
+    }
 
-    return mOscConnected;
+    mLastConnectedOscPort = oscPort;
+
+    return true;
 }
 
 //==============================================================================
@@ -408,23 +412,26 @@ bool ControlGrisAudioProcessor::disconnectOsc()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::handleOscConnection(bool const state)
+void ControlGrisAudioProcessor::setOscActive(bool const state)
 {
+    mOscActivated = state;
+
     if (state) {
-        if (mLastConnectedOscPort != mCurrentOscPort) {
-            createOscConnection(mCurrentOscAddress, mCurrentOscPort);
+        if (mLastConnectedOscPort != mCurrentOscPort || !mOscConnected) {
+            mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
         }
     } else {
-        disconnectOsc();
+        mOscConnected = !disconnectOsc();
     }
-    mAudioProcessorValueTreeState.state.setProperty("oscConnected", isOscConnected(), nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("oscConnected", isOscActive(), nullptr);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscMessage()
 {
-    if (!mOscConnected || mNeedsInitialization)
+    if (!mOscConnected || mNeedsInitialization || !mOscActivated) {
         return;
+    }
 
     juce::OSCAddressPattern const oscPattern("/spat/serv");
     juce::OSCMessage message(oscPattern);
@@ -990,7 +997,7 @@ bool ControlGrisAudioProcessor::isMidiEffect() const
 //==============================================================================
 void ControlGrisAudioProcessor::initialize()
 {
-    if (!mOscConnected) {
+    if (!mOscConnected && mOscActivated) {
         // Connect OSC to default socket
         mOscConnected = createOscConnection(mCurrentOscAddress, mCurrentOscPort);
     }
@@ -1150,7 +1157,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         setSpatMode(spatMode);
         setOscPortNumber(valueTree.getProperty("oscPortNumber", 18032));
         setOscAddress(valueTree.getProperty("oscAddress", "127.0.0.1"));
-        handleOscConnection(valueTree.getProperty("oscConnected", true));
+        setOscActive(valueTree.getProperty("oscConnected", true));
         setNumberOfSources(valueTree.getProperty("numberOfSources", 1), false);
         setFirstSourceId(SourceId{ valueTree.getProperty("firstSourceId", 1) });
         setOscOutputPluginId(valueTree.getProperty("oscOutputPluginId", 1));
