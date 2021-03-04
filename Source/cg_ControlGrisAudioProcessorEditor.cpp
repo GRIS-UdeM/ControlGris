@@ -157,7 +157,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     oscFormatChangedCallback(mProcessor.getSpatMode());
     oscPortChangedCallback(mProcessor.getOscPortNumber());
     oscAddressChangedCallback(mProcessor.getOscAddress());
-    oscStateChangedCallback(mProcessor.isOscConnected());
+    oscStateChangedCallback(mProcessor.isOscActive());
     firstSourceIdChangedCallback(mProcessor.getFirstSourceId());
     numberOfSourcesChangedCallback(mProcessor.getSources().size());
 
@@ -295,8 +295,8 @@ void ControlGrisAudioProcessorEditor::oscAddressChangedCallback(juce::String con
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscStateChangedCallback(bool const state)
 {
-    mProcessor.handleOscConnection(state);
-    mSectionGeneralSettings.setActivateButtonState(mProcessor.isOscConnected());
+    mProcessor.setOscActive(state);
+    mSectionGeneralSettings.setActivateButtonState(mProcessor.isOscActive());
 }
 
 //==============================================================================

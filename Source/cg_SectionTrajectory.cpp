@@ -111,7 +111,9 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mCycleSpeedSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mCycleSpeedSlider);
 
-    mPositionActivateButton.addShortcut(juce::KeyPress('a', 0, 0));
+    // Removed because this interacted with DAWs
+    // mPositionActivateButton.addShortcut(juce::KeyPress('a', 0, 0));
+
     addAndMakeVisible(&mPositionActivateButton);
     mPositionActivateButton.setButtonText("Activate");
     mPositionActivateButton.setClickingTogglesState(true);

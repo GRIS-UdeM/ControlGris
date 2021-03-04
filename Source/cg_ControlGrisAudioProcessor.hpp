@@ -40,6 +40,7 @@ class ControlGrisAudioProcessor final
 {
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
+    bool mOscActivated{ true };
     bool mOscConnected{ true };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
@@ -153,24 +154,25 @@ public:
     juce::AudioProcessorValueTreeState const & getValueTreeState() const { return mAudioProcessorValueTreeState; }
     juce::AudioProcessorValueTreeState & getValueTreeState() { return mAudioProcessorValueTreeState; }
     //==============================================================================
-    bool createOscConnection(juce::String const &, int oscPort);
-    bool disconnectOsc();
-    bool isOscConnected() const { return mOscConnected; }
-    void handleOscConnection(bool state);
+    [[nodiscard]] bool createOscConnection(juce::String const &, int oscPort);
+    [[nodiscard]] bool disconnectOsc();
+    [[nodiscard]] bool isOscConnected() const { return mOscConnected; }
+    [[nodiscard]] bool isOscActive() const { return mOscActivated; }
+    void setOscActive(bool state);
     void sendOscMessage();
 
-    bool createOscInputConnection(int oscPort);
-    bool disconnectOscInput(int oscPort);
-    bool getOscInputConnected() const { return mOscInputConnected; }
+    [[nodiscard]] bool createOscInputConnection(int oscPort);
+    [[nodiscard]] bool disconnectOscInput(int oscPort);
+    [[nodiscard]] bool getOscInputConnected() const { return mOscInputConnected; }
     void oscMessageReceived(const juce::OSCMessage & message) override;
     void oscBundleReceived(const juce::OSCBundle & bundle) override;
 
-    bool createOscOutputConnection(juce::String const & oscAddress, int oscPort);
-    bool disconnectOscOutput(juce::String const & oscAddress, int oscPort);
-    bool getOscOutputConnected() const { return mOscOutputConnected; }
+    [[nodiscard]] bool createOscOutputConnection(juce::String const & oscAddress, int oscPort);
+    [[nodiscard]] bool disconnectOscOutput(juce::String const & oscAddress, int oscPort);
+    [[nodiscard]] bool getOscOutputConnected() const { return mOscOutputConnected; }
     void sendOscOutputMessage();
     void setOscOutputPluginId(int pluginId);
-    int getOscOutputPluginId() const;
+    [[nodiscard]] int getOscOutputPluginId() const;
 
     void timerCallback() override;
 

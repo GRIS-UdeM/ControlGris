@@ -69,9 +69,9 @@ SourceComponent::DisplacementMode SourceComponent::getDisplacementMode(juce::Mou
 }
 
 //==============================================================================
-bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode displacementMode,
-                                    bool isPrimarySource,
-                                    PositionSourceLink sourceLink)
+bool SourceComponent::isMoveAllowed(SourceComponent::DisplacementMode const displacementMode,
+                                    bool const isPrimarySource,
+                                    PositionSourceLink const sourceLink)
 {
     if (isPrimarySource || displacementMode == DisplacementMode::all) {
         return true;

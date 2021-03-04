@@ -103,6 +103,7 @@ public:
     void setSelectedSource(std::optional<SourceIndex> selectedSource);
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
+    [[nodiscard]] bool isPlaying() const { return mIsPlaying; }
     void addListener(Listener * l) { mListeners.add(l); }
     void displayInvalidSourceMoveWarning(bool state);
 
@@ -145,7 +146,7 @@ public:
     //==============================================================================
     PositionFieldComponent() = delete;
     PositionFieldComponent(Sources & sources, PositionTrajectoryManager & positionAutomationManager) noexcept;
-    ~PositionFieldComponent() noexcept final = default;
+    ~PositionFieldComponent() noexcept override = default;
 
     PositionFieldComponent(PositionFieldComponent const &) = delete;
     PositionFieldComponent(PositionFieldComponent &&) = delete;
@@ -160,12 +161,12 @@ public:
     void drawCubeSpans(juce::Graphics & g) const;
     void setSpatMode(SpatMode spatMode);
 
-    void drawSpans(juce::Graphics & g) const final;
-    void paint(juce::Graphics & g) final;
-    void resized() final;
-    void rebuildSourceComponents(int numberOfSources) final;
-    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const final;
-    void notifySourcePositionChanged(SourceIndex sourceIndex) final;
+    void drawSpans(juce::Graphics & g) const override;
+    void paint(juce::Graphics & g) override;
+    void resized() override;
+    void rebuildSourceComponents(int numberOfSources) override;
+    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const override;
+    void notifySourcePositionChanged(SourceIndex sourceIndex) override;
 
     [[nodiscard]] juce::Point<float> sourcePositionToComponentPosition(juce::Point<float> const & sourcePosition) const;
     [[nodiscard]] juce::Line<float> sourcePositionToComponentPosition(juce::Line<float> const & sourcePosition) const;
@@ -174,12 +175,12 @@ public:
 
 private:
     //==============================================================================
-    void mouseDown(juce::MouseEvent const & event) final;
-    void mouseDrag(juce::MouseEvent const & event) final;
-    void mouseUp(juce::MouseEvent const & event) final;
-    void mouseMove(juce::MouseEvent const & event) final;
-    void applySourceSelectionToComponents() final;
-    void drawBackground(juce::Graphics & g) const final;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
+    void mouseUp(juce::MouseEvent const & event) override;
+    void mouseMove(juce::MouseEvent const & event) override;
+    void applySourceSelectionToComponents() override;
+    void drawBackground(juce::Graphics & g) const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(PositionFieldComponent)
 
@@ -200,8 +201,8 @@ class ElevationFieldComponent final : public FieldComponent
 public:
     //==============================================================================
     ElevationFieldComponent() = delete;
-    ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & mPositionTrajectoryManager) noexcept;
-    ~ElevationFieldComponent() noexcept final = default;
+    ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & positionTrajectoryManager) noexcept;
+    ~ElevationFieldComponent() noexcept override = default;
 
     ElevationFieldComponent(ElevationFieldComponent const &) = delete;
     ElevationFieldComponent(ElevationFieldComponent &&) = delete;
@@ -215,20 +216,20 @@ public:
                                                                         SourceIndex index) const;
     [[nodiscard]] Radians componentPositionToSourceElevation(juce::Point<float> const & componentPosition) const;
     //==============================================================================
-    void paint(juce::Graphics & g) final;
-    void resized() final;
-    void mouseDown(juce::MouseEvent const & event) final;
-    void mouseDrag(juce::MouseEvent const & event) final;
-    void mouseUp(juce::MouseEvent const & event) final;
-    void notifySourcePositionChanged(SourceIndex sourceIndex) final;
-    void rebuildSourceComponents(int numberOfSources) final;
-    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const final;
+    void paint(juce::Graphics & g) override;
+    void resized() override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void mouseDrag(juce::MouseEvent const & event) override;
+    void mouseUp(juce::MouseEvent const & event) override;
+    void notifySourcePositionChanged(SourceIndex sourceIndex) override;
+    void rebuildSourceComponents(int numberOfSources) override;
+    [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const override;
 
 private:
     //==============================================================================
-    void drawSpans(juce::Graphics & g) const final;
-    void drawBackground(juce::Graphics & g) const final;
-    void applySourceSelectionToComponents() final;
+    void drawSpans(juce::Graphics & g) const override;
+    void drawBackground(juce::Graphics & g) const override;
+    void applySourceSelectionToComponents() override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationFieldComponent)
 

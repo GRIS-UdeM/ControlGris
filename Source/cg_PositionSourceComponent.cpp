@@ -22,6 +22,7 @@
 
 #include "cg_ControlGrisAudioProcessor.hpp"
 #include "cg_FieldComponent.hpp"
+#include "cg_PersistentStorage.h"
 #include "cg_Source.hpp"
 
 namespace gris
@@ -59,10 +60,42 @@ void PositionSourceComponent::sourceMovedCallback()
 //==============================================================================
 void PositionSourceComponent::mouseDown(juce::MouseEvent const & event)
 {
+    static auto tempHideError{ !showSecondarySourceDragErrorMessage };
+
+    auto const isPrimarySource{ mSource.isPrimarySource() };
+    if (mFieldComponent.isPlaying() && !isPrimarySource && !tempHideError) {
+        mCanDrag = false;
+        juce::String const error{ "You are moving a secondary source during playback : please note that secondary "
+                                  "sources cannot be automated in ControlGRIS. Automation on more than one source can "
+                                  "be done using source links or with multiple ControlGRIS instances." };
+        juce::AlertWindow alert{ "Warning", error, juce::AlertWindow::InfoIcon, this };
+        enum class Button { closed = -1, ok = 0, hideForNow, hideForever };
+        alert.addButton("Ok", static_cast<int>(Button::ok));
+        alert.addButton("Hide for now", static_cast<int>(Button::hideForNow));
+        alert.addButton("Hide forever", static_cast<int>(Button::hideForever));
+        alert.setDropShadowEnabled(true);
+        auto const userAction{ static_cast<Button>(alert.runModalLoop()) };
+        switch (userAction) {
+        case Button::hideForever:
+            tempHideError = true;
+            setShowSecondarySourceDragErrorMessage(false);
+            break;
+        case Button::hideForNow:
+            tempHideError = true;
+            break;
+        case Button::closed:
+        case Button::ok:
+            break;
+        default:
+            jassertfalse;
+        }
+        return;
+    }
+
     mDisplacementMode = getDisplacementMode(event);
-    mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
+    mCanDrag = isMoveAllowed(mDisplacementMode, isPrimarySource, mTrajectoryManager.getSourceLink());
     if (mCanDrag) {
-        if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
+        if (isPrimarySource || mDisplacementMode == DisplacementMode::all) {
             mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::X);
             mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Y);
         }
