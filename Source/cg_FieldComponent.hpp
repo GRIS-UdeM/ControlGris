@@ -103,6 +103,7 @@ public:
     void setSelectedSource(std::optional<SourceIndex> selectedSource);
     [[nodiscard]] auto const & getSelectedSourceIndex() const { return mSelectedSource; }
     void setIsPlaying(bool const state) { mIsPlaying = state; }
+    [[nodiscard]] bool isPlaying() const { return mIsPlaying; }
     void addListener(Listener * l) { mListeners.add(l); }
     void displayInvalidSourceMoveWarning(bool state);
 

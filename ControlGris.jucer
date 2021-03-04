@@ -103,6 +103,10 @@
             file="Source/cg_LinkStrategies.cpp"/>
       <FILE id="AEvwp0" name="cg_LinkStrategies.hpp" compile="0" resource="0"
             file="Source/cg_LinkStrategies.hpp"/>
+      <FILE id="T5KUHo" name="cg_PersistentStorage.cpp" compile="1" resource="0"
+            file="Source/cg_PersistentStorage.cpp"/>
+      <FILE id="NR00Ni" name="cg_PersistentStorage.h" compile="0" resource="0"
+            file="Source/cg_PersistentStorage.h"/>
       <FILE id="uTBx2J" name="cg_PresetsManager.cpp" compile="1" resource="0"
             file="Source/cg_PresetsManager.cpp"/>
       <FILE id="hQP6b3" name="cg_PresetsManager.hpp" compile="0" resource="0"
