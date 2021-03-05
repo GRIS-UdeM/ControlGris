@@ -46,18 +46,6 @@ function copy_to_temp() {
 	for filename in *.component; do
 		cp -r "$filename" "$TEMP_PATH"
 	done
-	for filename in *.aaxplugin; do
-		cp -r "$filename" "$TEMP_PATH"
-	done
-}
-
-function sign_aax() {
-	cd "$TEMP_PATH"
-	aaxPath=`echo *.aaxplugin`
-	tempAxxPath="aaxPath_SIGNED"
-	wraptool sign --verbose --signid "$signUser" --account grisresearch --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A --in "$aaxPath" --out "$tempAxxPath" --autoinstall on || exit -1
-	rm -r "$aaxPath"
-	mv "$tempAxxPath" "$aaxPath"
 }
 
 function sign() {
@@ -110,6 +98,15 @@ function staple() {
 	done
 }
 
+function sign_aax() {
+	cd "$BIN_PATH"
+	pluginPath=`echo *.aaxplugin`
+	cp -r "$pluginPath" "$TEMP_PATH"
+	cd "$TEMP_PATH"
+	wraptool sign --verbose --signid "$signUser" --account grisresearch --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A --in "$pluginPath" --autoinstall on --extrasigningoptions "--timestamp --options runtime" || exit 1
+	# wraptool sign --verbose --signid "$signUser" --account grisresearch --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A --in "$aaxPath" --autoinstall on --notarize-username "$signUser" --notarize-password "$password" --extrasigningoptions "--timestamp --options runtime" || exit 1
+}
+
 function bundle() {
 	cd "$TEMP_PATH"
 	zip -r "../ControlGRIS_MacOS_x64_$VERSION.zip" *
@@ -121,12 +118,14 @@ VERSION=`get_app_version`
 run_projucer
 build
 copy_to_temp
-sign_aax
 sign
 send_for_notarisation
 wait_a_bit
 wait_for_notarization
 staple
+sign_aax
 bundle
 
 echo "Done !"
+
+# xcrun altool --notarization-info "f82e93e4-aaaf-4990-ad04-fdb222ececc2" -u "samuel.beland@gmail.com"
