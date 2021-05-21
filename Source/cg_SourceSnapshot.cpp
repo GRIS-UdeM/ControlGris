@@ -30,20 +30,20 @@ SourceSnapshot::SourceSnapshot(Source const & source) noexcept : position(source
 
 SourceSnapshot const & SourcesSnapshots::operator[](SourceIndex const index) const
 {
-    jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
-    if (index.toInt() == 0) {
+    jassert(index.get() >= 0 && index.get() < secondaries.size() + 1);
+    if (index.get() == 0) {
         return primary;
     }
-    return secondaries.getReference(index.toInt() - 1);
+    return secondaries.getReference(index.get() - 1);
 }
 
 SourceSnapshot & SourcesSnapshots::operator[](SourceIndex const index)
 {
-    jassert(index.toInt() >= 0 && index.toInt() < secondaries.size() + 1);
-    if (index.toInt() == 0) {
+    jassert(index.get() >= 0 && index.get() < secondaries.size() + 1);
+    if (index.get() == 0) {
         return primary;
     }
-    return secondaries.getReference(index.toInt() - 1);
+    return secondaries.getReference(index.get() - 1);
 }
 
 } // namespace gris

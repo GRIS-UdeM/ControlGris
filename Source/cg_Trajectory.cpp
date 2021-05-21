@@ -136,7 +136,7 @@ juce::Path Trajectory::getDrawablePath(juce::Rectangle<float> const & drawArea, 
 juce::Point<float> Trajectory::getPosition(Normalized const normalized) const
 {
     auto const nbPoints{ static_cast<float>(mPoints.size()) };
-    auto const index_f{ (nbPoints - 1.0f) * normalized.toFloat() };
+    auto const index_f{ (nbPoints - 1.0f) * normalized.get() };
     auto const index_a{ static_cast<int>(std::floor(index_f)) };
     auto const index_b{ static_cast<int>(std::ceil(index_f)) };
     auto const balance{ std::fmod(index_f, 1.0f) };

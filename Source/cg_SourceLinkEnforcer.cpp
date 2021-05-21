@@ -126,7 +126,7 @@ void SourceLinkEnforcer::primarySourceMoved()
 //==============================================================================
 void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 {
-    jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
+    jassert(sourceIndex.get() > 0 && sourceIndex.get() < MAX_NUMBER_OF_SOURCES);
 
     auto const spatMode{ mSources.getPrimarySource().getSpatMode() };
     auto const isElevationSourceLink{ mElevationSourceLink != ElevationSourceLink::undefined };
@@ -212,9 +212,9 @@ void SourceLinkEnforcer::primaryAnchorMoved()
 //==============================================================================
 void SourceLinkEnforcer::secondaryAnchorMoved(SourceIndex const sourceIndex)
 {
-    jassert(sourceIndex.toInt() > 0 && sourceIndex.toInt() < MAX_NUMBER_OF_SOURCES);
+    jassert(sourceIndex.get() > 0 && sourceIndex.get() < MAX_NUMBER_OF_SOURCES);
 
-    auto const secondaryIndex{ sourceIndex.toInt() - 1 };
+    auto const secondaryIndex{ sourceIndex.get() - 1 };
     auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
     mLinkStrategy->computeParameters(mSources, mSnapshots);
     auto const newSecondaryAnchor{

@@ -180,7 +180,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 
         // Gives the source an initial id...
         auto & source{ mSources.get(i) };
-        source.setId(SourceId{ i + mFirstSourceId.toInt() });
+        source.setId(SourceId{ i + mFirstSourceId.get() });
         // .. and colour
         source.setColorFromIndex(mSources.size());
         // .. and coordinates.
@@ -233,7 +233,7 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
         Normalized const invNormalized{ 1.0f - newValue };
         mSources.getPrimarySource().setY(invNormalized, Source::OriginOfChange::automation);
     } else if (parameterId.compare(Automation::Ids::Z) == 0 && mSpatMode == SpatMode::cube) {
-        auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.toFloat()) };
+        auto const newElevation{ MAX_ELEVATION - (MAX_ELEVATION * normalized.get()) };
         mSources.getPrimarySource().setElevation(newElevation, Source::OriginOfChange::automation);
     }
 
@@ -344,9 +344,9 @@ void ControlGrisAudioProcessor::setOscAddress(juce::String const & address)
 void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, bool const propagate)
 {
     mFirstSourceId = firstSourceId;
-    mAudioProcessorValueTreeState.state.setProperty("firstSourceId", mFirstSourceId.toInt(), nullptr);
+    mAudioProcessorValueTreeState.state.setProperty("firstSourceId", mFirstSourceId.get(), nullptr);
     for (int i{}; i < MAX_NUMBER_OF_SOURCES; ++i) {
-        mSources.get(i).setId(SourceId{ i + mFirstSourceId.toInt() });
+        mSources.get(i).setId(SourceId{ i + mFirstSourceId.get() });
     }
 
     if (propagate) {
@@ -444,11 +444,11 @@ void ControlGrisAudioProcessor::sendOscMessage()
         auto const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
 
         message.clear();
-        message.addInt32(source.getId().toInt() - 1); // osc id starts at 0
+        message.addInt32(source.getId().get() - 1); // osc id starts at 0
         message.addFloat32(azimuth);
         message.addFloat32(elevation);
-        message.addFloat32(azimuthSpan);
-        message.addFloat32(elevationSpan);
+        message.addFloat32(azimuthSpan.get());
+        message.addFloat32(elevationSpan.get());
         message.addFloat32(distance);
         message.addFloat32(0.0);
 
@@ -703,7 +703,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
                                          / 2.0f };
     auto const trajectory1x = trajectoryHandlePosition.getX();
     auto const trajectory1y = 1.0f - trajectoryHandlePosition.getY();
-    auto const trajectory1z = 1.0f - mSources.getPrimarySource().getNormalizedElevation().toFloat();
+    auto const trajectory1z = 1.0f - mSources.getPrimarySource().getNormalizedElevation().get();
 
     if (lastTrajectoryX != trajectory1x) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/x"));
@@ -762,7 +762,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     if (lastAzimuthSpan != mSources.getPrimarySource().getAzimuthSpan()) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/azispan"));
-        message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().toFloat());
+        message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().get());
         mOscOutputSender.send(message);
         message.clear();
         lastAzimuthSpan = mSources.getPrimarySource().getAzimuthSpan();
@@ -770,7 +770,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
 
     if (lastElevationSpan != mSources.getPrimarySource().getElevationSpan()) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/elespan"));
-        message.addFloat32(mSources.getPrimarySource().getElevationSpan().toFloat());
+        message.addFloat32(mSources.getPrimarySource().getElevationSpan().get());
         mOscOutputSender.send(message);
         message.clear();
         lastElevationSpan = mSources.getPrimarySource().getElevationSpan();
@@ -904,10 +904,10 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
     auto const & source{ mSources[sourceIndex] };
     if (whichField == 0) {
         if (getSpatMode() == SpatMode::dome) {
-            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().toFloat());
-            setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().get());
+            setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().get());
         } else {
-            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().toFloat());
+            setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().get());
             setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
         }
         if (source.isPrimarySource()) {
@@ -915,7 +915,7 @@ void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, i
                                                          mSources.getPrimarySource().getPos());
         }
     } else {
-        setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().toFloat());
+        setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().get());
         mElevationTrajectoryManager.setTrajectoryType(mElevationTrajectoryManager.getTrajectoryType());
     }
 }
@@ -1115,8 +1115,8 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
         juce::Identifier const elevationId{ juce::String{ "p_elevation_" } + id };
         juce::Identifier const distanceId{ juce::String{ "p_distance_" } + id };
         auto const & source{ mSources[sourceIndex] };
-        auto const normalizedAzimuth{ source.getNormalizedAzimuth().toFloat() };
-        auto const normalizedElevation{ source.getNormalizedElevation().toFloat() };
+        auto const normalizedAzimuth{ source.getNormalizedAzimuth().get() };
+        auto const normalizedElevation{ source.getNormalizedElevation().get() };
         auto const distance{ source.getDistance() };
 
         mAudioProcessorValueTreeState.state.setProperty(azimuthId, normalizedAzimuth, nullptr);

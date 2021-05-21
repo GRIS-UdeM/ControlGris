@@ -20,9 +20,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
-#include "cg_Normalized.hpp"
+#include "cg_StrongTypes.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
@@ -38,7 +36,7 @@ protected:
 public:
     //=========
     Trajectory(PositionTrajectoryType positionTrajectoryType, juce::Point<float> const & startingPoint) noexcept;
-    Trajectory(ElevationTrajectoryType elevationTrajectoryType) noexcept;
+    explicit Trajectory(ElevationTrajectoryType elevationTrajectoryType) noexcept;
 
     Trajectory(Trajectory const &) = default;
     Trajectory(Trajectory &&) noexcept = default;

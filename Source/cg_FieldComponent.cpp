@@ -322,13 +322,12 @@ void PositionFieldComponent::drawDomeSpans(juce::Graphics & g) const
     for (auto const & source : mSources) {
         auto const azimuth{ source.getAzimuth() };
         auto const elevation{ source.getNormalizedElevation() };
-        auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan().toFloat()).getAsRadians() };
+        auto const azimuthSpan{ (Degrees{ 180.0f } * source.getAzimuthSpan().get()).getAsRadians() };
         auto const elevationSpan{ source.getElevationSpan() };
 
         // Calculate min and max elevation in degrees.
         juce::Range<float> const elevationLimits{ 0.0f, 1.0f };
-        juce::Range<float> const elevationRange{ (elevation - elevationSpan).toFloat(),
-                                                 (elevation + elevationSpan).toFloat() };
+        juce::Range<float> const elevationRange{ (elevation - elevationSpan).get(), (elevation + elevationSpan).get() };
         auto const clippedElevationRange{ elevationRange.getIntersectionWith(elevationLimits) };
 
         juce::Point<float> const lower_corner_a{ std::cos(azimuthSpan) * clippedElevationRange.getStart(),
@@ -384,7 +383,7 @@ void PositionFieldComponent::drawCubeSpans(juce::Graphics & g) const
     auto const effectiveWidth{ getEffectiveArea().getWidth() };
 
     for (auto const & source : mSources) {
-        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().toFloat() * MAGIC_MAX_SPAN_RATIO
+        float const azimuthSpan{ effectiveWidth * source.getAzimuthSpan().get() * MAGIC_MAX_SPAN_RATIO
                                  + MIN_SPAN_WIDTH };
         float const halfAzimuthSpan{ azimuthSpan / 2.0f };
         float const saturation{ (mSelectedSource == source.getIndex()) ? 1.0f : 0.5f };
@@ -563,7 +562,7 @@ void ElevationFieldComponent::drawSpans(juce::Graphics & g) const
         auto const saturation{ (mSelectedSource == source.getIndex()) ? 1.0f : 0.75f };
         auto const position{ sourceElevationToComponentPosition(source.getElevation(), source.getIndex()) };
 
-        auto const halfSpanHeight{ source.getElevationSpan().toFloat() * effectiveArea.getHeight() };
+        auto const halfSpanHeight{ source.getElevationSpan().get() * effectiveArea.getHeight() };
         auto const spanHeight{ halfSpanHeight * 2.0f };
 
         juce::Rectangle<float> spanArea{ position.getX() - SOURCE_FIELD_COMPONENT_RADIUS,
@@ -682,9 +681,9 @@ juce::Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(R
     auto const widthBetweenEachSource{ availableWidth / static_cast<float>(mSources.size() + 1) };
 
     auto const x{
-        LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.toInt() + 1))
+        LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.get() + 1))
     }; // We add +1 to the index for the drawing handle.
-    auto const clippedElevation{ sourceElevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
+    auto const clippedElevation{ sourceElevation.clamped(MIN_ELEVATION, MAX_ELEVATION) };
     auto const y{ clippedElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     juce::Point<float> const result{ x, y };
 
@@ -700,7 +699,7 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(juce::Point<
     auto const effectiveHeight{ static_cast<float>(getHeight()) - TOP_PADDING - BOTTOM_PADDING };
 
     Radians const elevation{ MAX_ELEVATION * ((componentPosition.getY() - TOP_PADDING) / effectiveHeight) };
-    auto const result{ elevation.clamp(MIN_ELEVATION, MAX_ELEVATION) };
+    auto const result{ elevation.clamped(MIN_ELEVATION, MAX_ELEVATION) };
 
     return result;
 }

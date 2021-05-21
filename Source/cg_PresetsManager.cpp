@@ -34,13 +34,13 @@ juce::String
     juce::String result{};
     switch (dimension) {
     case 0:
-        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_X");
+        result = juce::String("S") + juce::String(index.get() + 1) + type + juce::String("_X");
         break;
     case 1:
-        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_Y");
+        result = juce::String("S") + juce::String(index.get() + 1) + type + juce::String("_Y");
         break;
     case 2:
-        result = juce::String("S") + juce::String(index.toInt() + 1) + type + juce::String("_Z");
+        result = juce::String("S") + juce::String(index.get() + 1) + type + juce::String("_Z");
         break;
     default:
         jassertfalse; // how did you get there?
@@ -225,7 +225,7 @@ std::unique_ptr<juce::XmlElement> PresetsManager::createPresetData(int const pre
     }; // For some legacy reason, we store a normalized value with inversed Y.
     auto const inversedNormalizedPosition{ (mirroredPosition + juce::Point<float>{ 1.0f, 1.0f }) / 2.0f };
     auto const inversedNormalizedElevation{
-        1.0f - mSources.getPrimarySource().getNormalizedElevation().toFloat()
+        1.0f - mSources.getPrimarySource().getNormalizedElevation().get()
     }; // Same this happens with elevation.
 
     result->setAttribute(xName, inversedNormalizedPosition.getX());

@@ -474,10 +474,10 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
                                            SourceParameter::azimuth,
-                                           mProcessor.getSources()[i].getNormalizedAzimuth().toFloat());
+                                           mProcessor.getSources()[i].getNormalizedAzimuth().get());
         mProcessor.setSourceParameterValue(i,
                                            SourceParameter::elevation,
-                                           mProcessor.getSources()[i].getNormalizedElevation().toFloat());
+                                           mProcessor.getSources()[i].getNormalizedElevation().get());
         mProcessor.setSourceParameterValue(i, SourceParameter::distance, mProcessor.getSources()[i].getDistance());
     }
 
@@ -533,7 +533,7 @@ void ControlGrisAudioProcessorEditor::parameterChangedCallback(SourceParameter c
 void ControlGrisAudioProcessorEditor::selectedSourceClickedCallback()
 {
     // increment source index
-    mSelectedSource = SourceIndex{ (mSelectedSource.toInt() + 1) % mProcessor.getSources().size() };
+    mSelectedSource = SourceIndex{ (mSelectedSource.get() + 1) % mProcessor.getSources().size() };
 
     mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);

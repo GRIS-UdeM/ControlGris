@@ -81,7 +81,7 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
 void DomeControls::updateSliderValues(Source * source)
 {
     mCurrentAzimuth = source->getAzimuth();
-    mCurrentElevation = MAX_ELEVATION * source->getNormalizedElevation().toFloat();
+    mCurrentElevation = MAX_ELEVATION * source->getNormalizedElevation().get();
 
     if (mCurrentAzimuth.getAsDegrees() < 0.0f) {
         mCurrentAzimuth += Degrees{ 360.0f };
@@ -209,7 +209,7 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, 
     for (auto i{ 1 }; i <= 8; ++i) {
         mSourceNumberCombo.addItem(juce::String{ i }, i);
     }
-    mSourceNumberCombo.setSelectedId(mSelectedSource.toInt());
+    mSourceNumberCombo.setSelectedId(mSelectedSource.get());
     mSourceNumberCombo.onChange = [this] {
         mSelectedSource = SourceIndex{ mSourceNumberCombo.getSelectedItemIndex() };
         mListeners.call([&](Listener & l) { l.sourceSelectionChangedCallback(mSelectedSource); });
@@ -243,19 +243,19 @@ void SectionSourcePosition::resized()
 void SectionSourcePosition::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
 {
     mSourceNumberCombo.clear();
-    for (auto id = firstSourceId; id < firstSourceId + numOfSources; ++id) {
-        mSourceNumberCombo.addItem(id.toString(), id.toInt());
+    for (auto id = firstSourceId; id < firstSourceId + SourceId{ numOfSources }; ++id) {
+        mSourceNumberCombo.addItem(id.toString(), id.get());
     }
     if (mSelectedSource >= SourceIndex{ numOfSources })
         mSelectedSource = SourceIndex{ 0 };
-    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
+    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.get());
 }
 
 //==============================================================================
 void SectionSourcePosition::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
 {
     mSelectedSource = sourceIndex;
-    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.toInt());
+    mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.get());
     mDomeControls.updateSliderValues(source);
     mCubeControls.updateSliderValues(source);
 }

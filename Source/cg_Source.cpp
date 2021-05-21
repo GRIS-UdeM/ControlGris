@@ -47,7 +47,7 @@ bool Source::shouldForceNotifications(Source::OriginOfChange const origin) const
 //==============================================================================
 void Source::setAzimuth(Radians const azimuth, OriginOfChange const origin)
 {
-    auto const balancedAzimuth{ azimuth.simplified() };
+    auto const balancedAzimuth{ azimuth.centered() };
     if (balancedAzimuth != mAzimuth || shouldForceNotifications(origin)) {
         mAzimuth = balancedAzimuth;
         computeXY();
@@ -58,13 +58,13 @@ void Source::setAzimuth(Radians const azimuth, OriginOfChange const origin)
 //==============================================================================
 void Source::setAzimuth(Normalized const normalizedAzimuth, OriginOfChange const origin)
 {
-    setAzimuth(twoPi * normalizedAzimuth.toFloat() - pi, origin);
+    setAzimuth(TWO_PI * normalizedAzimuth.get() - PI, origin);
 }
 
 //==============================================================================
 Normalized Source::getNormalizedAzimuth() const
 {
-    return Normalized{ (mAzimuth + pi) / twoPi };
+    return Normalized{ (mAzimuth + PI) / TWO_PI };
 }
 
 //==============================================================================
@@ -81,7 +81,7 @@ void Source::setElevation(Radians const elevation, OriginOfChange const origin)
 //==============================================================================
 void Source::setElevation(Normalized const normalizedElevation, OriginOfChange const origin)
 {
-    auto const newValue{ halfPi * normalizedElevation.toFloat() };
+    auto const newValue{ HALF_PI * normalizedElevation.get() };
     setElevation(newValue, origin);
 }
 
@@ -103,7 +103,7 @@ void Source::setCoordinates(Radians const azimuth,
                             float const distance,
                             OriginOfChange const origin)
 {
-    auto const balancedAzimuth{ azimuth.simplified() };
+    auto const balancedAzimuth{ azimuth.centered() };
     auto const clippedElevation{ clipElevation(elevation) };
     jassert(distance >= 0.0f);
 
@@ -152,13 +152,13 @@ void Source::setX(float const x, OriginOfChange const origin)
 //==============================================================================
 void Source::setX(Normalized const x, OriginOfChange const origin)
 {
-    setX(x.toFloat() * 2.0f - 1.0f, origin);
+    setX(x.get() * 2.0f - 1.0f, origin);
 }
 
 //==============================================================================
 void Source::setY(Normalized const y, OriginOfChange const origin)
 {
-    setY(y.toFloat() * 2.0f - 1.0f, origin);
+    setY(y.get() * 2.0f - 1.0f, origin);
 }
 
 //==============================================================================
@@ -210,7 +210,7 @@ void Source::computeAzimuthElevation()
         // TODO : when the position converges to the origin via an automation, one of the dimension is going to get to
         // zero before the other. This is going to drastically change the angle. We need to insulate the real automation
         // from a listener callback initiated by some other source.
-        mAzimuth = getAngleFromPosition(mPosition).simplified();
+        mAzimuth = getAngleFromPosition(mPosition).centered();
     }
 
     auto const radius{ mPosition.getDistanceFromOrigin() };
@@ -220,7 +220,7 @@ void Source::computeAzimuthElevation()
             jassert(!std::isnan(mAzimuth.getAsRadians()));
             mPosition = getPositionFromAngle(mAzimuth, clippedRadius);
         }
-        auto const elevation{ halfPi * clippedRadius };
+        auto const elevation{ HALF_PI * clippedRadius };
         mElevation = elevation;
         mDistance = clippedRadius;
     } else {
@@ -231,13 +231,13 @@ void Source::computeAzimuthElevation()
 //==============================================================================
 Normalized Source::getNormalizedElevation() const
 {
-    return Normalized{ mElevation / halfPi };
+    return Normalized{ mElevation / HALF_PI };
 }
 
 //==============================================================================
 juce::Point<float> Source::getPositionFromAngle(Radians const angle, float const radius)
 {
-    auto const rotatedAngle{ angle - halfPi };
+    auto const rotatedAngle{ angle - HALF_PI };
     juce::Point<float> const result{ std::cos(rotatedAngle.getAsRadians()) * radius,
                                      std::sin(rotatedAngle.getAsRadians()) * radius };
     return result;
@@ -253,7 +253,7 @@ Radians Source::getAngleFromPosition(juce::Point<float> const & position)
         return std::atan2(position.getY(), position.getX());
     };
     Radians const angle{ getAngle(position) };
-    auto const rotatedAngle{ angle + halfPi };
+    auto const rotatedAngle{ angle + HALF_PI };
     return rotatedAngle;
 }
 
@@ -307,7 +307,7 @@ juce::Point<float> Source::clipPosition(juce::Point<float> const & position, Spa
 //==============================================================================
 Radians Source::clipElevation(Radians const elevation)
 {
-    return Radians{ std::clamp(elevation, Radians{ 0.0f }, halfPi) };
+    return Radians{ std::clamp(elevation, Radians{ 0.0f }, HALF_PI) };
 }
 
 //==============================================================================
@@ -319,7 +319,7 @@ float Source::clipCoordinate(float const coord)
 //==============================================================================
 void Source::setColorFromIndex(int const numTotalSources)
 {
-    auto hue{ static_cast<float>(mIndex.toInt()) / static_cast<float>(numTotalSources) + 0.577251f };
+    auto hue{ static_cast<float>(mIndex.get()) / static_cast<float>(numTotalSources) + 0.577251f };
     if (hue > 1.0f) {
         hue -= 1.0f;
     }

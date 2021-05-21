@@ -50,11 +50,11 @@ SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisL
 //==============================================================================
 void SectionSourceSpan::setSelectedSource(Source * source)
 {
-    if (mSelectedSource != source || source->getAzimuthSpan().toFloat() != mAzimuthSpan.getValue()
-        || mElevationSpan.getValue() != source->getElevationSpan().toFloat()) {
+    if (mSelectedSource != source || source->getAzimuthSpan().get() != mAzimuthSpan.getValue()
+        || mElevationSpan.getValue() != source->getElevationSpan().get()) {
         mSelectedSource = source;
-        mAzimuthSpan.setValue(source->getAzimuthSpan().toFloat(), juce::NotificationType::dontSendNotification);
-        mElevationSpan.setValue(source->getElevationSpan().toFloat(), juce::NotificationType::dontSendNotification);
+        mAzimuthSpan.setValue(source->getAzimuthSpan().get(), juce::NotificationType::dontSendNotification);
+        mElevationSpan.setValue(source->getElevationSpan().get(), juce::NotificationType::dontSendNotification);
         repaint();
     }
 }

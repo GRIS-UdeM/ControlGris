@@ -24,9 +24,7 @@
 
 #include <JuceHeader.h>
 
-#include "cg_Normalized.hpp"
-#include "cg_SourceId.hpp"
-#include "cg_SourceIndex.hpp"
+#include "cg_StrongTypes.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
@@ -212,8 +210,8 @@ public:
         }
         return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
-    [[nodiscard]] Source & get(SourceIndex const index) { return get(index.toInt()); }
-    [[nodiscard]] Source const & get(SourceIndex const index) const { return get(index.toInt()); }
+    [[nodiscard]] Source & get(SourceIndex const index) { return get(index.get()); }
+    [[nodiscard]] Source const & get(SourceIndex const index) const { return get(index.get()); }
     [[nodiscard]] Source & operator[](int const index)
     {
         jassert(index >= 0 && index < MAX_NUMBER_OF_SOURCES); // TODO: should check for mSize
@@ -230,8 +228,8 @@ public:
         }
         return mSecondarySources[static_cast<size_t>(index) - 1u];
     }
-    [[nodiscard]] Source & operator[](SourceIndex const index) { return (*this)[index.toInt()]; }
-    [[nodiscard]] Source const & operator[](SourceIndex const index) const { return (*this)[index.toInt()]; }
+    [[nodiscard]] Source & operator[](SourceIndex const index) { return (*this)[index.get()]; }
+    [[nodiscard]] Source const & operator[](SourceIndex const index) const { return (*this)[index.get()]; }
 
     void init(ControlGrisAudioProcessor * processor)
     {

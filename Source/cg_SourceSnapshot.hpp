@@ -20,10 +20,7 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
-#include "cg_Radians.hpp"
-#include "cg_SourceIndex.hpp"
+#include "cg_StrongTypes.hpp"
 
 namespace gris
 {

@@ -135,8 +135,8 @@ void Circular::computeParameters_implementation(Sources const & finalState, Sour
     auto const & primarySourceInitialState{ initialStates.primary };
 
     auto constexpr notQuiteZero{ 0.01f };
-    auto const primarySourceInitialAngle{ Radians::fromPoint(primarySourceInitialState.position) };
-    auto const primarySourceFinalAngle{ Radians::fromPoint(primarySourceFinalState.getPos()) };
+    auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
+    auto const primarySourceFinalAngle{ Radians::angleOf(primarySourceFinalState.getPos()) };
     mRotation = primarySourceFinalAngle - primarySourceInitialAngle;
     auto const primarySourceInitialRadius{ primarySourceInitialState.position.getDistanceFromOrigin() };
     auto const primarySourceFinalRadius{ primarySourceFinalState.getPos().getDistanceFromOrigin() };
@@ -175,8 +175,8 @@ void CircularFixedRadius::computeParameters_implementation(Sources const & final
 {
     auto const & primarySourceFinalState{ finalStates.getPrimarySource() };
 
-    auto const primarySourceInitialAngle{ Radians::fromPoint(initialStates.primary.position) };
-    auto const primarySourceFinalAngle{ Radians::fromPoint(primarySourceFinalState.getPos()) };
+    auto const primarySourceInitialAngle{ Radians::angleOf(initialStates.primary.position) };
+    auto const primarySourceFinalAngle{ Radians::angleOf(primarySourceFinalState.getPos()) };
     mRotation = primarySourceFinalAngle - primarySourceInitialAngle;
     mRadius = primarySourceFinalState.getPos().getDistanceFromOrigin();
 }
@@ -186,7 +186,7 @@ void CircularFixedRadius::enforce_implementation(Sources & finalStates,
                                                  SourcesSnapshots const & initialStates,
                                                  SourceIndex const sourceIndex) const
 {
-    auto const initialAngle{ Radians::fromPoint(initialStates[sourceIndex].position) };
+    auto const initialAngle{ Radians::angleOf(initialStates[sourceIndex].position) };
     auto const finalAngle{ (mRotation + initialAngle).getAsRadians() };
     juce::Point<float> const finalPosition{ std::cos(finalAngle) * mRadius, std::sin(finalAngle) * mRadius };
 
@@ -202,7 +202,7 @@ SourceSnapshot
     auto const finalPosition{ finalStates[sourceIndex].getPos() };
     auto newInitialState{ initialStates[sourceIndex] };
 
-    auto const finalAngle{ Radians::fromPoint(finalPosition) };
+    auto const finalAngle{ Radians::angleOf(finalPosition) };
     auto const inverseFinalAngle{ (finalAngle - mRotation).getAsRadians() };
     juce::Point<float> const newInitialPosition{ std::cos(inverseFinalAngle) * mRadius,
                                                  std::sin(inverseFinalAngle) * mRadius };
@@ -228,9 +228,9 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
     jassert(!std::isnan(mRadiusRatio));
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
-    mPrimarySourceFinalAngle = Radians::fromPoint(primarySourceFinalPosition);
+    mPrimarySourceFinalAngle = Radians::angleOf(primarySourceFinalPosition);
     mDeviationPerSource = Degrees{ 360.0f } / finalStates.size();
-    auto const primarySourceInitialAngle{ Radians::fromPoint(primarySourceInitialState.position) };
+    auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
     mRotation = mPrimarySourceFinalAngle - primarySourceInitialAngle;
 
     // copy initialAngles
@@ -239,19 +239,19 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
         auto const sourceIndex{ finalState.getIndex() };
 
         auto const & initialState{ initialStates[sourceIndex] };
-        auto const initialAngle{ Radians::fromPoint(initialState.position) };
+        auto const initialAngle{ Radians::angleOf(initialState.position) };
         jassert(!std::isnan(initialAngle.getAsRadians()));
 
-        initialAngles[sourceIndex.toInt()] = std::make_pair(initialAngle, sourceIndex);
+        initialAngles[sourceIndex.get()] = std::make_pair(initialAngle, sourceIndex);
     }
     // make all initialAngles bigger than the primary source's
-    auto const minAngle{ Radians::fromPoint(initialStates.primary.position) };
-    auto const maxAngle{ minAngle + twoPi };
+    auto const minAngle{ Radians::angleOf(initialStates.primary.position) };
+    auto const maxAngle{ minAngle + TWO_PI };
     std::for_each(std::begin(initialAngles),
                   std::begin(initialAngles) + finalStates.size(),
                   [&](std::pair<Degrees, SourceIndex> & data) {
                       while (data.first < minAngle) {
-                          data.first += twoPi;
+                          data.first += TWO_PI;
                       }
                       jassert(data.first >= minAngle);
                       jassert(data.first < maxAngle);
@@ -263,7 +263,7 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
     // store ordering
     for (int i{}; i < finalStates.size(); ++i) {
         auto const sourceIndex{ initialAngles[i].second };
-        mOrdering[sourceIndex.toInt()] = i;
+        mOrdering[sourceIndex.get()] = i;
     }
     jassert(mOrdering[0ull] == 0);
 }
@@ -273,7 +273,7 @@ void CircularFixedAngle::enforce_implementation(Sources & finalStates,
                                                 SourcesSnapshots const & initialStates,
                                                 SourceIndex const sourceIndex) const
 {
-    auto const ordering{ mOrdering[sourceIndex.toInt()] };
+    auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
     auto const initialRadius{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
@@ -296,7 +296,7 @@ SourceSnapshot
     auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / divisor };
 
     Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
-    auto const ordering{ mOrdering[sourceIndex.toInt()] };
+    auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const newInitialAngle{ finalAngle - mRotation };
 
@@ -321,9 +321,9 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
     mRadius = primarySourceFinalState.getPos().getDistanceFromOrigin();
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
-    mPrimarySourceFinalAngle = Radians::fromPoint(primarySourceFinalPosition);
+    mPrimarySourceFinalAngle = Radians::angleOf(primarySourceFinalPosition);
     mDeviationPerSource = Degrees{ 360.0f } / finalStates.size();
-    auto const primarySourceInitialAngle{ Radians::fromPoint(primarySourceInitialState.position) };
+    auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
     mRotation = mPrimarySourceFinalAngle - primarySourceInitialAngle;
 
     // copy initialAngles
@@ -332,18 +332,18 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
         auto const sourceIndex{ finalState.getIndex() };
 
         auto const & initialState{ initialStates[sourceIndex] };
-        auto const initialAngle{ Radians::fromPoint(initialState.position) };
+        auto const initialAngle{ Radians::angleOf(initialState.position) };
 
-        initialAngles[sourceIndex.toInt()] = std::make_pair(initialAngle, sourceIndex);
+        initialAngles[sourceIndex.get()] = std::make_pair(initialAngle, sourceIndex);
     }
     // make all initialAngles bigger than the primary source's
-    auto const minAngle{ Radians::fromPoint(initialStates.primary.position) };
-    auto const maxAngle{ minAngle + twoPi };
+    auto const minAngle{ Radians::angleOf(initialStates.primary.position) };
+    auto const maxAngle{ minAngle + TWO_PI };
     std::for_each(std::begin(initialAngles),
                   std::begin(initialAngles) + finalStates.size(),
                   [&](std::pair<Degrees, SourceIndex> & data) {
                       if (data.first < minAngle) {
-                          data.first += twoPi;
+                          data.first += TWO_PI;
                       }
                       jassert(data.first >= minAngle);
                       jassert(data.first < maxAngle);
@@ -355,7 +355,7 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
     // store ordering
     for (int i{}; i < finalStates.size(); ++i) {
         auto const sourceIndex{ initialAngles[i].second };
-        mOrdering[sourceIndex.toInt()] = i;
+        mOrdering[sourceIndex.get()] = i;
     }
     jassert(mOrdering[0ull] == 0);
 }
@@ -365,7 +365,7 @@ void CircularFullyFixed::enforce_implementation(Sources & finalStates,
                                                 SourcesSnapshots const & /*initialStates*/,
                                                 SourceIndex const sourceIndex) const
 {
-    auto const ordering{ mOrdering[sourceIndex.toInt()] };
+    auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
     juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
@@ -525,7 +525,7 @@ void LinearMin::enforce_implementation(Sources & finalStates,
                                        SourcesSnapshots const & /*initialStates*/,
                                        SourceIndex const sourceIndex) const
 {
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
+    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.get() };
     finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 
@@ -535,7 +535,7 @@ SourceSnapshot LinearMin::computeInitialStateFromFinalState_implementation([[may
                                                                            SourceIndex const sourceIndex) const
 {
     SourceSnapshot result{};
-    result.z = mBaseElevation - mElevationPerSource * sourceIndex.toInt();
+    result.z = mBaseElevation - mElevationPerSource * sourceIndex.get();
     return result;
 }
 
@@ -551,7 +551,7 @@ void LinearMax::enforce_implementation(Sources & finalStates,
                                        SourcesSnapshots const & /*initialStates*/,
                                        SourceIndex const sourceIndex) const
 {
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.toInt() };
+    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.get() };
     finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 

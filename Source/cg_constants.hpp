@@ -19,7 +19,7 @@
  *************************************************************************/
 #pragma once
 
-#include "cg_Degrees.hpp"
+#include "cg_StrongTypes.hpp"
 
 namespace gris
 {
