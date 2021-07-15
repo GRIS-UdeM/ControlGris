@@ -1,0 +1,205 @@
+#!/bin/bash
+
+if [ $# -ne 1 ];then
+	echo "You must give the notarizing account app-specific password as an argument."
+	exit 1
+fi
+
+export INSTALLER_SIGNATURE="Developer ID Installer: Samuel Beland (Q2A837SX87)"
+export APP_SIGNATURE="Developer ID Application: Samuel Beland (Q2A837SX87)"
+export NOTARIZE_USER="samuel.beland@gmail.com"
+export PASS="$1"
+export IDENTIFIER="ca.umontreal.musique.gris.controlgris"
+export PROJECT_PATH="`pwd`"
+export PROJECT_FILE="$PROJECT_PATH/ControlGris.jucer"
+export XCODE_PATH="$PROJECT_PATH/Builds/MacOSX"
+export BIN_PATH="$XCODE_PATH/build/Release/"
+export TEMP_PATH="$PROJECT_PATH/out"
+export PLIST_PATH="$PROJECT_PATH/Application.plist"
+export ZIP_PATH="$TEMP_PATH/plugins.zip"
+
+#==============================================================================
+# get app version
+export PROJECT_FILE="ControlGris.jucer"
+export VERSION=`Projucer --get-version "$PROJECT_FILE"`
+echo "Version is $VERSION"
+export PKG_NAME="ControlGris_$VERSION.pkg"
+
+#==============================================================================
+function generate_project() {
+	echo "Generating project files..."
+	Projucer --resave "$PROJECT_FILE" || exit 1
+	cd "$PROJECT_PATH"
+}
+
+#==============================================================================
+function build() {
+	cd "$XCODE_PATH"
+	echo "Building ControlGris $VERSION"
+	chmod -R 755 .
+	xcodebuild -configuration Release || exit 1
+	# xcodebuild -configuration Release -quiet || exit 1
+}
+
+#==============================================================================
+function copy_to_temp() {
+	cd "$BIN_PATH"
+	mkdir "$TEMP_PATH"
+	echo "Copying plugins..."
+	for filename in *.vst; do
+		cp -r "$filename" "$TEMP_PATH"
+	done
+	for filename in *.vst3; do
+		cp -r "$filename" "$TEMP_PATH"
+	done
+	for filename in *.component; do
+		cp -r "$filename" "$TEMP_PATH"
+	done
+}
+
+#==============================================================================
+function sign() {
+	cd "$TEMP_PATH"
+	echo "Signing plugins..."
+	for filename in *; do
+		codesign -s "$APP_SIGNATURE" -v "$filename" --options=runtime --timestamp
+	done
+}
+
+#==============================================================================
+function send_for_notarisation() {
+	cd "$TEMP_PATH"
+	zip -r "$ZIP_PATH" *
+	echo "Sending to notarization authority..."
+	xcrun altool --notarize-app --primary-bundle-id "$IDENTIFIER" -u "$NOTARIZE_USER" -p "$PASS" --file "$ZIP_PATH"
+	rm "$ZIP_PATH"
+}
+
+#==============================================================================
+function get_last_request_uuid() {
+	history=`xcrun altool --notarization-history 0 -u "$NOTARIZE_USER" -p "$PASS"`
+	echo "$history" | head -n 6 | tail -n 1 | cut -d' ' -f 4
+}
+
+#==============================================================================
+function wait_for_notarization() {
+	echo "Checking for notarization success..."
+	echo "waiting a bit..."
+	sleep 30
+	WAITING=" in progress"
+	SUCCESS=" success"
+	uuid=`get_last_request_uuid`
+	status="$WAITING"
+	while [[ "$status" == "$WAITING" ]];do
+		sleep 10
+		history=`xcrun altool --notarization-info "$uuid" -u "$NOTARIZE_USER" -p "$PASS"`
+		status=`echo "$history" | grep Status | head -n 1 | cut -d: -f 2`
+		echo "Status is \"$status\""
+	done
+	if [[ "$status" != "$SUCCESS" ]];then
+		echo "Error : notarization was refused"
+		exit 1
+	fi
+}
+
+#==============================================================================
+function staple() {
+	cd "$TEMP_PATH"
+	echo "Rubber stamping plugins..."
+	for filename in *;do
+		xcrun stapler staple "$filename" || exit 1
+	done
+}
+
+#==============================================================================
+function sign_aax() {
+	echo "Signing aax plugin..."
+	cd "$BIN_PATH"
+	PLUGIN_PATH=`echo *.aaxplugin`
+	OUT_PATH="$TEMP_PATH/$PLUGIN_PATH"
+	echo "Copying \"$PLUGIN_PATH\" to \"$OUT_PATH\""
+	cp -rf "$PLUGIN_PATH" "$OUT_PATH" || exit 1
+	codesign -s "$APP_SIGNATURE" -v "$OUT_PATH" --options=runtime --timestamp || exit 1
+	# wraptool sign \
+	# 		 --verbose \
+	# 		 --signid "$APP_SIGNATURE" \
+	# 		 --account grisresearch \
+	# 		 --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A \
+	# 		 --in "$OUT_PATH" \
+	# 		 --autoinstall on \
+	# 		 --notarize-username "$NOTARIZE_USER" \
+	# 		 --notarize-password "$PASS" \
+	# 		 --extrasigningoptions "--timestamp --options runtime" \
+	# 		 || exit 1
+}
+
+#==============================================================================
+function build_tree() {
+	echo "Building directory structure..."
+	cd $TEMP_PATH
+	BASE_PATH="Product/Library/Audio/Plug-Ins"
+	AU_PATH="$BASE_PATH/Components"
+	VST_PATH="$BASE_PATH/VST"
+	VST3_PATH="$BASE_PATH/VST3"
+	AAX_PATH="Product/Library/Application Support/Avid/Audio/Plug-Ins"
+
+	mkdir -p "$AU_PATH" || exit 1
+	mkdir -p "$VST_PATH" || exit 1
+	mkdir -p "$VST3_PATH" || exit 1
+	mkdir -p "$AAX_PATH" || exit 1
+
+	cp -r *.component "$AU_PATH" || exit 1
+	cp -r *.vst "$VST_PATH" || exit 1
+	cp -r *.vst3 "$VST3_PATH" || exit 1
+	cp -r *.aaxplugin "$AAX_PATH" || exit 1
+}
+
+#==============================================================================
+function package() {
+	echo "building Application.pkg"
+	cd $TEMP_PATH
+	pkgbuild    --root "Product" \
+	            --install-location "/" \
+	            --identifier "$IDENTIFIER" \
+	            --version "$VERSION" \
+	            "$PKG_NAME" || exit 1
+	# pkgbuild    --identifier "$IDENTIFIER" \
+	#             --root "Library" \
+	#             --version "$VERSION" \
+	#             --component-plist "$PLIST_PATH" \
+	#             --sign "$INSTALLER_SIGNATURE" \
+	#             --timestamp \
+	#             "$PKG_NAME" || exit 1
+}
+
+#==============================================================================
+function sign_and_notarize_pkg()
+{
+	echo "Signing and notarizing pkg..."
+	cd "$TEMP_PATH" || exit 1
+	codesign -s "$APP_SIGNATURE" -v "$PKG_NAME" --options=runtime --timestamp || exit 1
+	# xcrun altool --notarize-app --primary-bundle-id "$IDENTIFIER.pkg" -u "$NOTARIZE_USER" -p "$PASS" --file "$PKG_NAME" || exit 1
+	# wait_for_notarization
+	# xcrun stapler staple "$PKG_NAME" || exit 1
+}
+
+#==============================================================================
+generate_project
+build
+copy_to_temp
+sign
+# send_for_notarisation
+# wait_for_notarization
+# staple
+sign_aax
+build_tree
+package
+# sign_and_notarize_pkg
+
+echo "Done !"
+
+exit 0
+
+# codesign --test-requirement="=notarized" --verify --verbose 
+# xcrun altool --notarization-info "3efa8938-68ee-495a-90c9-7baadc349a43" -u "samuel.beland@gmail.com" -p ""
+# xcrun altool --notarization-info "f82e93e4-aaaf-4990-ad04-fdb222ececc2" -u "samuel.beland@gmail.com"

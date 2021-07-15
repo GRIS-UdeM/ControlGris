@@ -1,3 +1,6 @@
+# MacOS pkb dir
+out/
+
 # Vs code files
 .vscode/
 build/
