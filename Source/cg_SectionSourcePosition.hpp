@@ -67,15 +67,15 @@ class CubeControls final : public juce::Component
 {
     SectionSourcePosition & mSourceBoxComponent;
 
-    float mCurrentX;
-    float mCurrentY;
-    float mCurrentZ;
-    juce::Label mXLabel;
-    juce::Label mYLabel;
-    juce::Label mZLabel;
-    juce::Slider mXSlider;
-    juce::Slider mYSlider;
-    juce::Slider mZSlider;
+    float mCurrentX{};
+    float mCurrentY{};
+    float mCurrentZ{};
+    juce::Label mXLabel{};
+    juce::Label mYLabel{};
+    juce::Label mZLabel{};
+    juce::Slider mXSlider{};
+    juce::Slider mYSlider{};
+    juce::Slider mZSlider{};
 
 public:
     //==============================================================================

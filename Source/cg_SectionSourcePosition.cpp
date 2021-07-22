@@ -93,37 +93,27 @@ void DomeControls::updateSliderValues(Source * source)
 //==============================================================================
 CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
-    mCurrentX = { 0.0f };
-    mCurrentY = { 0.0f };
-    mCurrentZ = { 0.0f };
+    auto const initLabel = [&](juce::Label & label, juce::String const & text) {
+        label.setText(text + ":", juce::NotificationType::dontSendNotification);
+        label.setJustificationType(juce::Justification::centredRight);
+        addAndMakeVisible(label);
+    };
 
-    mXLabel.setText("X", juce::NotificationType::dontSendNotification);
-    mYLabel.setText("Y", juce::NotificationType::dontSendNotification);
-    mZLabel.setText("Z", juce::NotificationType::dontSendNotification);
+    auto const initSlider = [&](juce::Slider & slider, double const minValue) {
+        slider.setNormalisableRange(juce::NormalisableRange<double>{ minValue, 1.0, 0.01 });
+        slider.setValue(0.0, juce::dontSendNotification);
+        slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
+        slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
+        addAndMakeVisible(slider);
+    };
 
-    addAndMakeVisible(&mXLabel);
-    addAndMakeVisible(&mYLabel);
-    addAndMakeVisible(&mZLabel);
+    initLabel(mXLabel, "X");
+    initLabel(mYLabel, "Y");
+    initLabel(mZLabel, "Z");
 
-    mXSlider.setNormalisableRange(juce::NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
-    mYSlider.setNormalisableRange(juce::NormalisableRange<double>(-1.0f, 1.0f, 0.01f));
-    mZSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.01f));
-
-    mXSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
-    mYSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
-    mZSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
-
-    mXSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
-    mYSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
-    mZSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
-
-    mXSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
-    mYSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
-    mZSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
-
-    addAndMakeVisible(&mXSlider);
-    addAndMakeVisible(&mYSlider);
-    addAndMakeVisible(&mZSlider);
+    initSlider(mXSlider, -1.0);
+    initSlider(mYSlider, -1.0);
+    initSlider(mZSlider, 0.0);
 
     mXSlider.onValueChange = [this] {
         mCurrentX = static_cast<float>(mXSlider.getValue());
@@ -137,7 +127,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
         });
     };
     mYSlider.onValueChange = [this] {
-        mCurrentY = static_cast<float>(mYSlider.getValue());
+        mCurrentY = static_cast<float>(mYSlider.getValue() * -1.0);
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,
@@ -159,13 +149,16 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
         });
     };
 
-    mXLabel.setBounds(0, 0, 150, 15);
-    mYLabel.setBounds(0, 20, 150, 15);
-    mZLabel.setBounds(0, 40, 150, 15);
+    auto const setLine = [&](juce::Label & label, juce::Slider & slider, int const line) {
+        static constexpr auto LINE_HEIGHT = 20;
+        auto const y{ line * LINE_HEIGHT };
+        label.setBounds(0, y, 70, LINE_HEIGHT);
+        slider.setBounds(75, y, 200, LINE_HEIGHT);
+    };
 
-    mXSlider.setBounds(75, 0, 200, 20);
-    mYSlider.setBounds(75, 20, 200, 20);
-    mZSlider.setBounds(75, 40, 200, 20);
+    setLine(mXLabel, mXSlider, 0);
+    setLine(mYLabel, mYSlider, 1);
+    setLine(mZLabel, mZSlider, 2);
 }
 
 //==============================================================================
@@ -176,7 +169,7 @@ void CubeControls::updateSliderValues(Source * source)
     mCurrentZ = 1.0f - source->getElevation() / MAX_ELEVATION;
 
     mXSlider.setValue(mCurrentX, juce::NotificationType::dontSendNotification);
-    mYSlider.setValue(mCurrentY, juce::NotificationType::dontSendNotification);
+    mYSlider.setValue(mCurrentY * -1.0f, juce::NotificationType::dontSendNotification);
     mZSlider.setValue(mCurrentZ, juce::NotificationType::dontSendNotification);
 }
 

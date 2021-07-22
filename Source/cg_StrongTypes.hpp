@@ -108,10 +108,7 @@ public:
     [[nodiscard]] constexpr bool operator>=(Derived const & other) const { return mValue >= other.mValue; }
     //==============================================================================
     [[nodiscard]] constexpr type const & get() const { return mValue; }
-    [[nodiscard]] juce::String toString(int const precision = 2) const
-    {
-        return juce::String{ mValue, precision };
-    }
+    [[nodiscard]] juce::String toString(int const precision = 2) const { return juce::String{ mValue, precision }; }
     //==============================================================================
     [[nodiscard]] constexpr Derived operator-() const { return Derived{ -mValue }; }
     [[nodiscard]] constexpr Derived operator+(Derived const & other) const { return Derived{ mValue + other.mValue }; }
