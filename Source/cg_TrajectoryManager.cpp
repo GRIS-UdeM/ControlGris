@@ -82,7 +82,7 @@ void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 void TrajectoryManager::computeCurrentTrajectoryPoint()
 {
     if (!mTrajectory.has_value()) {
-        mCurrentTrajectoryPoint = mPrimarySource.getPos();
+        mCurrentTrajectoryPoint = extractTrajectoryPointFromPrimarySource();
         return;
     }
 
@@ -201,6 +201,12 @@ void PositionTrajectoryManager::recomputeTrajectory()
 }
 
 //==============================================================================
+juce::Point<float> PositionTrajectoryManager::extractTrajectoryPointFromPrimarySource() const
+{
+    return mPrimarySource.getPos();
+}
+
+//==============================================================================
 void ElevationTrajectoryManager::sendTrajectoryPositionChangedEvent()
 {
     mListeners.call([&](Listener & l) {
@@ -272,4 +278,9 @@ void ElevationTrajectoryManager::recomputeTrajectory()
     this->setTrajectoryType(mTrajectoryType);
 }
 
+//==============================================================================
+juce::Point<float> ElevationTrajectoryManager::extractTrajectoryPointFromPrimarySource() const
+{
+    return juce::Point<float>{ 0.0f, mPrimarySource.getNormalizedElevation().get() * 2.0f - 1.0f };
+}
 } // namespace gris

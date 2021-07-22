@@ -127,6 +127,10 @@ public:
     virtual void recomputeTrajectory() = 0;
     virtual void applyCurrentTrajectoryPointToPrimarySource() = 0;
 
+protected:
+    //==============================================================================
+    [[nodiscard]] virtual juce::Point<float> extractTrajectoryPointFromPrimarySource() const = 0;
+
 private:
     //==============================================================================
     void invertBackAndForthDirection();
@@ -171,6 +175,8 @@ public:
 
 private:
     //==============================================================================
+    [[nodiscard]] juce::Point<float> extractTrajectoryPointFromPrimarySource() const override;
+    //==============================================================================
     JUCE_LEAK_DETECTOR(PositionTrajectoryManager)
 
 }; // PositionTrajectoryManager
@@ -208,6 +214,8 @@ public:
     void recomputeTrajectory() override;
 
 private:
+    //==============================================================================
+    [[nodiscard]] juce::Point<float> extractTrajectoryPointFromPrimarySource() const override;
     //==============================================================================
     JUCE_LEAK_DETECTOR(ElevationTrajectoryManager)
 
