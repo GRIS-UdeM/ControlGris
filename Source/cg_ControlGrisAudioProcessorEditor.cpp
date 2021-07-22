@@ -725,6 +725,11 @@ void ControlGrisAudioProcessorEditor::positionPresetChangedCallback(int const pr
 
     auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_PRESET) };
     parameter->setValueNotifyingHost(newValue);
+
+    mProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
+    if (mProcessor.getSpatMode() == SpatMode::cube) {
+        mProcessor.updatePrimarySourceParameters(Source::ChangeType::elevation);
+    }
 }
 
 //==============================================================================
