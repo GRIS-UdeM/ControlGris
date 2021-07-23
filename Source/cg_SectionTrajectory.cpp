@@ -29,7 +29,7 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
 {
     mSpatMode = SpatMode::dome;
 
-    mSourceLinkLabel.setText("Source Link:", juce::NotificationType::dontSendNotification);
+    mSourceLinkLabel.setText("Sources Link:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourceLinkLabel);
 
     mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
