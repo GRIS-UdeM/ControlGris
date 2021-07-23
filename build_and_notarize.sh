@@ -62,14 +62,53 @@ function sign() {
 	cd "$TEMP_PATH"
 	echo "Signing plugins..."
 	for filename in *; do
-		codesign -s "$APP_SIGNATURE" -v "$filename" --options=runtime --timestamp
+		codesign \
+			-s "$APP_SIGNATURE" \
+			-v "$filename" \
+			--options=runtime \
+			--timestamp \
+			--deep \
+			|| exit 1
 	done
+}
+
+#==============================================================================
+function sign_aax() {
+	echo "Signing aax plugin..."
+	cd "$BIN_PATH"
+	PLUGIN_NAME=`echo *.aaxplugin`
+	IN_PATH="$TEMP_PATH/unsigned_$PLUGIN_NAME"
+	OUT_PATH="$TEMP_PATH/$PLUGIN_NAME"
+	cp -rf "$PLUGIN_NAME" "$IN_PATH" || exit 1
+	codesign \
+		-s "$APP_SIGNATURE" \
+		-v "$IN_PATH" \
+		--options=runtime \
+		--timestamp \
+		--deep \
+		|| exit 1
+	mv "$IN_PATH" "$OUT_PATH" || exit 1
+	# wraptool sign \
+	# 		 --verbose \
+	# 		 --signid "$APP_SIGNATURE" \
+	# 		 --account grisresearch \
+	# 		 --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A \
+	# 		 --in "$IN_PATH" \
+	# 		 --out "$OUT_PATH" \
+	# 		 --autoinstall on \
+	# 		 --dsigharden \
+	# 		 --extrasigningoptions "--timestamp --options runtime" \
+	# 		 || exit 1
+	#		 # --notarize-username "$NOTARIZE_USER" \
+	# 		 # --notarize-password "$PASS" \
+	# rm -fr "$IN_PATH"
 }
 
 #==============================================================================
 function send_for_notarisation() {
 	cd "$TEMP_PATH"
-	zip -r "$ZIP_PATH" *
+	# zip -r "$ZIP_PATH" *
+	ditto -c -k --sequesterRsrc --keepParent . "$ZIP_PATH"
 	echo "Sending to notarization authority..."
 	xcrun altool --notarize-app --primary-bundle-id "$IDENTIFIER" -u "$NOTARIZE_USER" -p "$PASS" --file "$ZIP_PATH"
 	rm "$ZIP_PATH"
@@ -97,7 +136,11 @@ function wait_for_notarization() {
 		echo "Status is \"$status\""
 	done
 	if [[ "$status" != "$SUCCESS" ]];then
-		echo "Error : notarization was refused"
+		echo -e "Error : notarization was refused, see the report:\n"
+		xcrun altool \
+			--notarization-info "$uuid" \
+			-u "$NOTARIZE_USER" \
+			-p "$PASS"
 		exit 1
 	fi
 }
@@ -109,28 +152,6 @@ function staple() {
 	for filename in *;do
 		xcrun stapler staple "$filename" || exit 1
 	done
-}
-
-#==============================================================================
-function sign_aax() {
-	echo "Signing aax plugin..."
-	cd "$BIN_PATH"
-	PLUGIN_PATH=`echo *.aaxplugin`
-	OUT_PATH="$TEMP_PATH/$PLUGIN_PATH"
-	echo "Copying \"$PLUGIN_PATH\" to \"$OUT_PATH\""
-	cp -rf "$PLUGIN_PATH" "$OUT_PATH" || exit 1
-	codesign -s "$APP_SIGNATURE" -v "$OUT_PATH" --options=runtime --timestamp || exit 1
-	# wraptool sign \
-	# 		 --verbose \
-	# 		 --signid "$APP_SIGNATURE" \
-	# 		 --account grisresearch \
-	# 		 --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A \
-	# 		 --in "$OUT_PATH" \
-	# 		 --autoinstall on \
-	# 		 --notarize-username "$NOTARIZE_USER" \
-	# 		 --notarize-password "$PASS" \
-	# 		 --extrasigningoptions "--timestamp --options runtime" \
-	# 		 || exit 1
 }
 
 #==============================================================================
@@ -162,44 +183,41 @@ function package() {
 	            --install-location "/" \
 	            --identifier "$IDENTIFIER" \
 	            --version "$VERSION" \
+	            --sign "$INSTALLER_SIGNATURE" \
+	            --timestamp \
 	            "$PKG_NAME" || exit 1
-	# pkgbuild    --identifier "$IDENTIFIER" \
-	#             --root "Library" \
-	#             --version "$VERSION" \
-	#             --component-plist "$PLIST_PATH" \
-	#             --sign "$INSTALLER_SIGNATURE" \
-	#             --timestamp \
-	#             "$PKG_NAME" || exit 1
 }
 
 #==============================================================================
 function sign_and_notarize_pkg()
 {
 	echo "Signing and notarizing pkg..."
+
 	cd "$TEMP_PATH" || exit 1
-	codesign -s "$APP_SIGNATURE" -v "$PKG_NAME" --options=runtime --timestamp || exit 1
-	# xcrun altool --notarize-app --primary-bundle-id "$IDENTIFIER.pkg" -u "$NOTARIZE_USER" -p "$PASS" --file "$PKG_NAME" || exit 1
-	# wait_for_notarization
-	# xcrun stapler staple "$PKG_NAME" || exit 1
+
+	xcrun altool \
+		--notarize-app \
+		--primary-bundle-id "$IDENTIFIER.pkg" \
+		-u "$NOTARIZE_USER" \
+		-p "$PASS" \
+		--file "$PKG_NAME" \
+		|| exit 1
+	wait_for_notarization
+	xcrun stapler staple "$PKG_NAME" || exit 1
 }
 
 #==============================================================================
-generate_project
+# generate_project
 build
 copy_to_temp
 sign
-# send_for_notarisation
-# wait_for_notarization
-# staple
 sign_aax
 build_tree
 package
-# sign_and_notarize_pkg
+sign_and_notarize_pkg
 
 echo "Done !"
 
 exit 0
 
 # codesign --test-requirement="=notarized" --verify --verbose 
-# xcrun altool --notarization-info "3efa8938-68ee-495a-90c9-7baadc349a43" -u "samuel.beland@gmail.com" -p ""
-# xcrun altool --notarization-info "f82e93e4-aaaf-4990-ad04-fdb222ececc2" -u "samuel.beland@gmail.com"
