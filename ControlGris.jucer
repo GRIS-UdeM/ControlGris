@@ -158,9 +158,10 @@
     <XCODE_MAC targetFolder="Builds/MacOSX" hardenedRuntime="1">
       <CONFIGURATIONS>
         <CONFIGURATION isDebug="1" name="Debug" targetName="ControlGris" osxArchitecture="Native"
-                       auBinaryLocation="$(HOME)/Library/Audio/Plug-Ins/Components/"/>
+                       auBinaryLocation="$(HOME)/Library/Audio/Plug-Ins/Components/"
+                       enablePluginBinaryCopyStep="0"/>
         <CONFIGURATION isDebug="0" name="Release" targetName="ControlGris" osxArchitecture="Native"
-                       recommendedWarnings="LLVM"/>
+                       recommendedWarnings="LLVM" enablePluginBinaryCopyStep="0"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../../JUCE/modules"/>
