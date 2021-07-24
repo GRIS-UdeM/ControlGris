@@ -9,7 +9,7 @@ export INSTALLER_SIGNATURE="Developer ID Installer: Samuel Beland (Q2A837SX87)"
 export APP_SIGNATURE="Developer ID Application: Samuel Beland (Q2A837SX87)"
 export NOTARIZE_USER="samuel.beland@gmail.com"
 export PASS="$1"
-export IDENTIFIER="ca.umontreal.musique.gris.controlgris"
+export IDENTIFIER="ca.umontreal.musique.gris.controlgris.pkg"
 export PROJECT_PATH="`pwd`"
 export PROJECT_FILE="$PROJECT_PATH/ControlGris.jucer"
 export XCODE_PATH="$PROJECT_PATH/Builds/MacOSX"
@@ -189,7 +189,7 @@ function package() {
 }
 
 #==============================================================================
-function sign_and_notarize_pkg()
+function notarize_pkg()
 {
 	echo "Signing and notarizing pkg..."
 
@@ -197,7 +197,7 @@ function sign_and_notarize_pkg()
 
 	xcrun altool \
 		--notarize-app \
-		--primary-bundle-id "$IDENTIFIER.pkg" \
+		--primary-bundle-id "$IDENTIFIER" \
 		-u "$NOTARIZE_USER" \
 		-p "$PASS" \
 		--file "$PKG_NAME" \
@@ -208,13 +208,13 @@ function sign_and_notarize_pkg()
 
 #==============================================================================
 # generate_project
-build
+# build
 copy_to_temp
 sign
 sign_aax
 build_tree
 package
-sign_and_notarize_pkg
+# notarize_pkg
 
 echo "Done !"
 
