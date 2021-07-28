@@ -105,7 +105,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
     mConfigurationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
     mConfigurationComponent.addTab("Settings", bg, &mSectionGeneralSettings, false);
-    mConfigurationComponent.addTab("Source", bg, &mSectionSourcePosition, false);
+    mConfigurationComponent.addTab("Sources", bg, &mSectionSourcePosition, false);
     mConfigurationComponent.addTab("Controllers", bg, &mSectionOscController, false);
     addAndMakeVisible(mConfigurationComponent);
 
