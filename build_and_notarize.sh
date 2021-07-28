@@ -29,6 +29,7 @@ export PKG_PATH="$TEMP_PATH/ControlGris_$VERSION.pkg"
 
 #==============================================================================
 function generate_project() {
+	# NOTE : this creates the project file with unusable file permissions...
 	echo "Generating project files..."
 	Projucer --resave "$PROJECT_FILE" || exit 1
 	cd "$PROJECT_PATH"
@@ -36,15 +37,15 @@ function generate_project() {
 
 #==============================================================================
 function build() {
+	echo -e "$LINE\nBuilding ControlGris $VERSION\n$LINE"
 	cd "$XCODE_PATH"
-	echo -e "$LINE\nBuilding ControlGris $VERSION"
 	chmod -R 755 .
 	xcodebuild -configuration Release || exit 1
 }
 
 #==============================================================================
 function copy_to_temp() {
-	echo -e "$LINE\nCopying plugins..."
+	echo -e "$LINE\nCopying non-aax plugins...\n$LINE"
 	cd "$BIN_PATH" || exit 1
 	rm -fr "$TEMP_PATH"
 	mkdir "$TEMP_PATH"
@@ -61,20 +62,9 @@ function copy_to_temp() {
 
 #==============================================================================
 function sign() {
-	echo -e "$LINE\nSigning plugins..."
+	echo -e "$LINE\nSigning non-aax plugins...\n$LINE"
 	cd "$TEMP_PATH"
 	for filename in *; do
-		# wraptool sign \
-		# 	 --verbose \
-		# 	 --signid "$APP_SIGNATURE" \
-		# 	 --account grisresearch \
-		# 	 --wcguid A4B35290-7C9C-11EB-8B4D-00505692C25A \
-		# 	 --in "$filename" \
-		# 	 --out "$filename" \
-		# 	 --autoinstall on \
-		# 	 --dsigharden \
-		# 	 --extrasigningoptions "--timestamp --options runtime" \
-		# 	 || exit 1
 		codesign \
 			-s "$APP_SIGNATURE" \
 			-v "$filename" \
@@ -86,7 +76,7 @@ function sign() {
 
 #==============================================================================
 function sign_aax() {
-	echo -e "$LINE\nSigning aax plugin..."
+	echo -e "$LINE\nSigning aax plugin...\n$LINE"
 	cd "$BIN_PATH"
 	PLUGIN_NAME=`echo *.aaxplugin`
 	IN_PATH="$TEMP_PATH/unsigned_$PLUGIN_NAME"
@@ -104,8 +94,6 @@ function sign_aax() {
 			 --dsigharden \
 			 --extrasigningoptions "--timestamp --options runtime" \
 			 || exit 1
-			 # --notarize-username "$NOTARIZE_USER" \
-			 # --notarize-password "$PASS" \
 	rm -fr "$IN_PATH" || exit 1
 }
 
@@ -132,11 +120,8 @@ function build_tree() {
 
 #==============================================================================
 function package() {
-	echo -e "$LINE\nBuilding package..."
+	echo -e "$LINE\nBuilding package...\n$LINE"
 	cd $TEMP_PATH
-
-	export IN_PATH="$PKG_PATH.unsigned"
-	export OUT_PATH="$PKG_PATH"
 
 	pkgbuild    --root "Product" \
 	            --install-location "/" \
@@ -150,38 +135,26 @@ function package() {
 #==============================================================================
 function notarize_pkg()
 {
-	echo -e "$LINE\nNotarizing pkg..."
+	echo -e "$LINE\nNotarizing pkg...\n$LINE"
 
 	cd "$TEMP_PATH" || exit 1
 
-	# xcrun altool \
-	# 	--notarize-app \
-	# 	--primary-bundle-id "$IDENTIFIER" \
-	# 	-u "$NOTARIZE_USER" \
-	# 	-p "$PASS" \
-	# 	--file "$PKG_PATH" \
-	# 	|| exit 1
-	# wait_for_notarization
-	# xcrun stapler staple "$PKG_PATH" || exit 1
-
-	/Applications/PACEAntiPiracy/Eden/Fusion/Current/scripts/notarize.py \
-		--file "$PKG_PATH" \
-		--username "$NOTARIZE_USER" \
-		--password "$PASS" \
+	xcrun altool \
+		--notarize-app \
 		--primary-bundle-id "$IDENTIFIER" \
+		-u "$NOTARIZE_USER" \
+		-p "$PASS" \
+		--file "$PKG_PATH" \
 		|| exit 1
-}
+	wait_for_notarization
+	xcrun stapler staple "$PKG_PATH" || exit 1
 
-#==============================================================================
-
-#==============================================================================
-function send_for_notarisation() {
-	echo -e "$LINE\nSending to notarization authority..."
-	cd "$TEMP_PATH"
-	# zip -r "$ZIP_PATH" *
-	ditto -c -k --sequesterRsrc --keepParent . "$ZIP_PATH"
-	xcrun altool --notarize-app --primary-bundle-id "$IDENTIFIER" -u "$NOTARIZE_USER" -p "$PASS" --file "$ZIP_PATH"
-	rm "$ZIP_PATH"
+	# /Applications/PACEAntiPiracy/Eden/Fusion/Current/scripts/notarize.py \
+	# 	--file "$PKG_PATH" \
+	# 	--username "$NOTARIZE_USER" \
+	# 	--password "$PASS" \
+	# 	--primary-bundle-id "$IDENTIFIER" \
+	# 	|| exit 1
 }
 
 #==============================================================================
@@ -192,7 +165,7 @@ function get_last_request_uuid() {
 
 #==============================================================================
 function wait_for_notarization() {
-	echo -e "$LINE\nChecking for notarization success..."
+	echo -e "$LINE\nChecking for notarization success...\n$LINE"
 	echo "waiting a bit..."
 	sleep 30
 	WAITING=" in progress"
@@ -215,22 +188,7 @@ function wait_for_notarization() {
 	fi
 }
 
-#==============================================================================
-function staple() {
-	echo -e "$LINE\nRubber stamping plugins..."
-	cd "$TEMP_PATH" || exit 1
-	for filename in *;do
-		xcrun stapler staple "$filename" || exit 1
-	done
-}
-
-#==============================================================================
-# wait_for_notarization
-# exit 1
-#==============================================================================
-
-# generate_project
-# build
+build
 copy_to_temp
 sign
 sign_aax
@@ -238,8 +196,4 @@ build_tree
 package
 notarize_pkg
 
-echo "Done !"
-
-exit 0
-
-# codesign --test-requirement="=notarized" --verify --verbose 
+echo -e "$LINE\nDone !\n$LINE"
