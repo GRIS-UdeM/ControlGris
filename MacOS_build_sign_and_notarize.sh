@@ -148,13 +148,6 @@ function notarize_pkg()
 		|| exit 1
 	wait_for_notarization
 	xcrun stapler staple "$PKG_PATH" || exit 1
-
-	# /Applications/PACEAntiPiracy/Eden/Fusion/Current/scripts/notarize.py \
-	# 	--file "$PKG_PATH" \
-	# 	--username "$NOTARIZE_USER" \
-	# 	--password "$PASS" \
-	# 	--primary-bundle-id "$IDENTIFIER" \
-	# 	|| exit 1
 }
 
 #==============================================================================
