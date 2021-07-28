@@ -72,7 +72,7 @@ class ControlGrisAudioProcessorEditor final
     PositionPresetComponent mPositionPresetComponent;
 
     bool mIsInsideSetPluginState;
-    SourceIndex mSelectedSource;
+    SourceIndex mSelectedSource{};
 
     juce::Value mLastUiWidth;
     juce::Value mLastUiHeight;

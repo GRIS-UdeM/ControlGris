@@ -122,6 +122,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
+    setResizable(true, true);
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
     mLastUiWidth.referTo(
@@ -747,13 +748,13 @@ void ControlGrisAudioProcessorEditor::positionPresetDeletedCallback(int presetNu
 
 //==============================================================================
 // SectionOscController::Listener callback.
-void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int value)
+void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int const value)
 {
     mProcessor.setOscOutputPluginId(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool state, int oscPort)
+void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool const state, int const oscPort)
 {
     if (state) {
         mProcessor.createOscInputConnection(oscPort);
@@ -763,9 +764,9 @@ void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool sta
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool state,
-                                                                         juce::String oscAddress,
-                                                                         int oscPort)
+void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool const state,
+                                                                         juce::String const oscAddress,
+                                                                         int const oscPort)
 {
     if (state) {
         mProcessor.createOscOutputConnection(oscAddress, oscPort);
