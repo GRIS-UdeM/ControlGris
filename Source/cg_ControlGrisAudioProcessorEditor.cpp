@@ -378,99 +378,63 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
     auto const distance{ isCubeMode ? 0.7f : 1.0f };
 
-    switch (sourcePlacement) {
-    case SourcePlacement::leftAlternate: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            if (numOfSources <= 2) {
-                source.setCoordinates(azims2[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else if (numOfSources <= 4) {
-                source.setCoordinates(azims4[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else if (numOfSources <= 6) {
-                source.setCoordinates(azims6[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else {
-                source.setCoordinates(azims8[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            }
+    auto const getAzimuths = [&]() {
+        if (numOfSources <= 2) {
+            return azims2;
         }
-        break;
-    }
-    case SourcePlacement::rightAlternate: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            if (numOfSources <= 2) {
-                source.setCoordinates(-azims2[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else if (numOfSources <= 4) {
-                source.setCoordinates(-azims4[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else if (numOfSources <= 6) {
-                source.setCoordinates(-azims6[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            } else {
-                source.setCoordinates(-azims8[i], elevation, distance, Source::OriginOfChange::userAnchorMove);
-            }
+        if (numOfSources <= 4) {
+            return azims4;
         }
-        break;
-    }
-    case SourcePlacement::leftClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i - offset };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
+        if (numOfSources <= 6) {
+            return azims6;
         }
-        break;
-    }
-    case SourcePlacement::leftCounterClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i - offset };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            mProcessor.getSources()[i].setCoordinates(azimuth,
-                                                      elevation,
-                                                      distance,
-                                                      Source::OriginOfChange::userAnchorMove);
+        return azims8;
+    };
+
+    auto const * const azimuths{ getAzimuths() };
+
+    auto const getAzimuthValue = [&](int const sourceIndex) {
+        switch (sourcePlacement) {
+        case SourcePlacement::leftAlternate:
+            return azimuths[sourceIndex];
+        case SourcePlacement::rightAlternate:
+            return -azimuths[sourceIndex];
+        case SourcePlacement::leftClockwise:
+            return Degrees{ 360.0f } / numOfSources * sourceIndex - offset;
+        case SourcePlacement::leftCounterClockwise:
+            return Degrees{ 360.0f } / numOfSources * -sourceIndex - offset;
+        case SourcePlacement::rightClockwise:
+            return Degrees{ 360.0f } / numOfSources * sourceIndex + offset;
+        case SourcePlacement::rightCounterClockwise:
+            return Degrees{ 360.0f } / numOfSources * -sourceIndex + offset;
+        case SourcePlacement::topClockwise:
+            return Degrees{ 360.0f } / numOfSources * sourceIndex;
+        case SourcePlacement::topCounterClockwise:
+            return Degrees{ 360.0f } / numOfSources * -sourceIndex;
+        default:
+            jassertfalse;
+            break;
         }
-        break;
+        return Degrees{};
+    };
+
+    auto const sourceLink{ mPositionTrajectoryManager.getSourceLink() };
+    mProcessor.setPositionSourceLink(PositionSourceLink::independent, SourceLinkEnforcer::OriginOfChange::automation);
+
+    auto const setPosition = [&](int const sourceIndex) {
+        auto & source{ mProcessor.getSources()[sourceIndex] };
+        auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
+        source.setCoordinates(getAzimuthValue(sourceIndex),
+                              elevation,
+                              distance,
+                              Source::OriginOfChange::userAnchorMove);
+    };
+
+    for (auto sourceIndex{ numOfSources - 1 }; sourceIndex >= 0; --sourceIndex) {
+        setPosition(sourceIndex);
     }
-    case SourcePlacement::rightClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i + offset };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
-        }
-        break;
-    }
-    case SourcePlacement::rightCounterClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i + offset };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
-        }
-        break;
-    }
-    case SourcePlacement::topClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * i };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
-        }
-        break;
-    }
-    case SourcePlacement::topCounterClockwise: {
-        for (int i{}; i < numOfSources; ++i) {
-            auto & source{ mProcessor.getSources()[i] };
-            auto const azimuth{ Degrees{ 360.0f } / numOfSources * -i };
-            auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
-            source.setCoordinates(azimuth, elevation, distance, Source::OriginOfChange::userAnchorMove);
-        }
-        break;
-    }
-    case SourcePlacement::undefined:
-        jassertfalse;
-    }
+
+    // mProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
         mProcessor.setSourceParameterValue(i,
@@ -483,11 +447,13 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
     }
 
     mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
+                                                SourceIndex{},
                                                 mProcessor.getSpatMode());
 
     mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
                                                  mProcessor.getSources().getPrimarySource().getPos());
+
+    mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::automation);
 
     repaint();
 }

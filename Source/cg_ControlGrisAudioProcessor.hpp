@@ -192,6 +192,8 @@ public:
 
     ChangeGesturesManager & getChangeGestureManager() { return mChangeGesturesManager; }
 
+    PositionSourceLink getPositionSourceLink() const { return mPositionTrajectoryManager.getSourceLink(); }
+
     void setPositionSourceLink(PositionSourceLink newSourceLink, SourceLinkEnforcer::OriginOfChange originOfChange);
     void setElevationSourceLink(ElevationSourceLink newSourceLink, SourceLinkEnforcer::OriginOfChange originOfChange);
 
