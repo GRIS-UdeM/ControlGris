@@ -139,6 +139,8 @@ public:
     void trajectoryDurationUnitChangedCallback(double duration, int mode) override;
     void positionTrajectoryStateChangedCallback(bool value) override;
     void elevationTrajectoryStateChangedCallback(bool value) override;
+    void positionActivateLockChangedCallback(bool value) override;
+    void elevationActivateLockChangedCallback(bool value) override;
 
     // PositionPresetComponent::Listeners
     void positionPresetChangedCallback(int presetNumber) override;

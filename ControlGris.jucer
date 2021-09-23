@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" pluginFormats="buildAAX,buildAU,buildVST,buildVST3"
+<JUCERPROJECT id="m50y5Z" name="ControlGris" projectType="audioplug" pluginFormats="buildAAX,buildAU,buildStandalone,buildVST,buildVST3"
               version="1.3" bundleIdentifier="com.gris.umontreal.controlgris"
               companyName="UdeM" aaxIdentifier="com.udem.GRIS.ControlGris"
               pluginManufacturer="UdeM" pluginManufacturerCode="UdeM" pluginCode="Xzz1"
@@ -9,6 +9,10 @@
               companyWebsite="ca.umontreal.musique.gris.controlgris" addUsingNamespaceToJuceHeader="0"
               displaySplashScreen="1">
   <MAINGROUP id="gDqxm3" name="ControlGris">
+    <GROUP id="{FD5EC3DC-E225-3A15-A9A0-0F2805BC38BD}" name="Resources">
+      <FILE id="WajJ7f" name="lock_closed.png" compile="0" resource="1" file="Resources/lock_closed.png"/>
+      <FILE id="KuvV9e" name="lock_open.png" compile="0" resource="1" file="Resources/lock_open.png"/>
+    </GROUP>
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
         <FILE id="MrPims" name="cg_CartesianVector.cpp" compile="1" resource="0"
@@ -113,6 +117,10 @@
               file="Source/cg_TitledComponent.cpp"/>
         <FILE id="ZPfmQN" name="cg_TitledComponent.hpp" compile="0" resource="0"
               file="Source/cg_TitledComponent.hpp"/>
+        <FILE id="YtKZZV" name="cg_ToggleImage.cpp" compile="1" resource="0"
+              file="Source/cg_ToggleImage.cpp"/>
+        <FILE id="f9cLEK" name="cg_ToggleImage.hpp" compile="0" resource="0"
+              file="Source/cg_ToggleImage.hpp"/>
       </GROUP>
       <FILE id="xmyiNi" name="cg_ChangeGesturesManager.cpp" compile="1" resource="0"
             file="Source/cg_ChangeGesturesManager.cpp"/>

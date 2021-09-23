@@ -222,13 +222,13 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
+void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool const state)
 {
     mSectionSourceSpan.setSpanLinkState(state);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
+void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink const value)
 {
     auto action = [=]() {
         mSectionTrajectory.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
@@ -243,7 +243,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
+void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink const value)
 {
     juce::MessageManager::callAsync([=] {
         mSectionTrajectory.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
@@ -267,7 +267,7 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 
 //==============================================================================
 // SectionGeneralSettings::Listener callbacks.
-void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode mode)
+void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode const mode)
 {
     mSectionGeneralSettings.setOscFormat(mode);
     mProcessor.setSpatMode(mode);
@@ -561,7 +561,7 @@ void ControlGrisAudioProcessorEditor::elevationSourceLinkChangedCallback(Elevati
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(PositionTrajectoryType value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(PositionTrajectoryType const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
     mPositionTrajectoryManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
@@ -569,7 +569,7 @@ void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(Posi
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
     mElevationTrajectoryManager.setTrajectoryType(value);
@@ -577,45 +577,45 @@ void ControlGrisAudioProcessorEditor::elevationTrajectoryTypeChangedCallback(Ele
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionTrajectoryBackAndForthChangedCallback(bool value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryBackAndForthChangedCallback(bool const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForth", value, nullptr);
     mPositionTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationTrajectoryBackAndForthChangedCallback(bool value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryBackAndForthChangedCallback(bool const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
     mElevationTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionTrajectoryDampeningCyclesChangedCallback(int value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryDampeningCyclesChangedCallback(int const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCycles", value, nullptr);
     mPositionTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationTrajectoryDampeningCyclesChangedCallback(int value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryDampeningCyclesChangedCallback(int const value)
 {
     mAudioProcessorValueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
     mElevationTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryDeviationPerCycleChangedCallback(float degrees)
+void ControlGrisAudioProcessorEditor::trajectoryDeviationPerCycleChangedCallback(float const degrees)
 {
     mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
     mPositionTrajectoryManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(double duration, int mode)
+void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(double const duration, int const mode)
 {
     mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
-    double dur = duration;
+    auto dur{ duration };
     if (mode == 2) {
         dur = duration * 60.0 / mProcessor.getBpm();
     }
@@ -624,7 +624,7 @@ void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(dou
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(double duration, int mode)
+void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(double const duration, int const mode)
 {
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
@@ -636,15 +636,27 @@ void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(doub
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(bool value)
+void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(bool const value)
 {
     mPositionTrajectoryManager.setPositionActivateState(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool value)
+void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool const value)
 {
     mElevationTrajectoryManager.setPositionActivateState(value);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::positionActivateLockChangedCallback(bool const /*value*/)
+{
+    // TODO
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::elevationActivateLockChangedCallback(bool const /*value*/)
+{
+    // TODO
 }
 
 //==============================================================================

@@ -20,13 +20,33 @@
 
 #include "cg_SectionTrajectory.hpp"
 
+#include "BinaryData.h"
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel)
+    : mGrisLookAndFeel(grisLookAndFeel)
+    , mLockedImage{ juce::PNGImageFormat::loadFrom(BinaryData::lock_closed_png, BinaryData::lock_closed_pngSize) }
+    , mUnlockedImage{ juce::PNGImageFormat::loadFrom(BinaryData::lock_open_png, BinaryData::lock_open_pngSize) }
 {
+    auto const initLockButton = [&](ToggleImage & button, bool const isPosition) {
+        addAndMakeVisible(button);
+        if (isPosition) {
+            auto const callback
+                = [&](Listener & listener) { listener.positionActivateLockChangedCallback(button.getToggleState()); };
+            button.onClick = [this, callback]() { mListeners.call(callback); };
+        } else {
+            auto const callback
+                = [&](Listener & listener) { listener.elevationActivateLockChangedCallback(button.getToggleState()); };
+            button.onClick = [this, callback]() { mListeners.call(callback); };
+        }
+    };
+
+    initLockButton(mPositionActivateLockButton, true);
+    initLockButton(mElevationActivateLockButton, false);
+
     mSpatMode = SpatMode::dome;
 
     mSourceLinkLabel.setText("Sources Link:", juce::NotificationType::dontSendNotification);
@@ -364,23 +384,27 @@ void SectionTrajectory::resized()
     mPositionDampeningEditor.setBounds(115, 70, 75, 20);
     mDeviationLabel.setBounds(5, 100, 150, 20);
     mDeviationEditor.setBounds(115, 100, 75, 20);
-    mPositionActivateButton.setBounds(114, 130, 176, 20);
+    mPositionActivateButton.setBounds(114, 130, 151, 20);
+    mPositionActivateLockButton.setBounds(270, 130, 20, 20);
 
     if (mSpatMode == SpatMode::cube) {
         mElevationSourceLinkCombo.setVisible(true);
         mElevationTrajectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);
+        mElevationActivateLockButton.setVisible(true);
         mElevationBackAndForthToggle.setVisible(true);
         mElevationDampeningEditor.setVisible(true);
         mElevationSourceLinkCombo.setBounds(305, 10, 175, 20);
         mElevationTrajectoryTypeCombo.setBounds(305, 40, 175, 20);
         mElevationBackAndForthToggle.setBounds(386, 70, 94, 20);
         mElevationDampeningEditor.setBounds(305, 70, 75, 20);
-        mElevationActivateButton.setBounds(304, 130, 176, 20);
+        mElevationActivateButton.setBounds(304, 130, 151, 20);
+        mElevationActivateLockButton.setBounds(460, 130, 20, 20);
     } else {
         mElevationSourceLinkCombo.setVisible(false);
         mElevationTrajectoryTypeCombo.setVisible(false);
         mElevationActivateButton.setVisible(false);
+        mElevationActivateLockButton.setVisible(false);
         mElevationBackAndForthToggle.setVisible(false);
         mElevationDampeningEditor.setVisible(false);
     }

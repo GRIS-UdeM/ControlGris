@@ -20,10 +20,14 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
+#include "cg_ToggleImage.hpp"
 #include "cg_constants.hpp"
+
+namespace
+{
+juce::BorderSize<float> const LOCK_PADDING{ 3.0f, 2.0f, 3.0f, 2.0f };
+}
 
 namespace gris
 {
@@ -57,6 +61,8 @@ public:
         virtual void trajectoryDurationUnitChangedCallback(double duration, int mode) = 0;
         virtual void positionTrajectoryStateChangedCallback(bool value) = 0;
         virtual void elevationTrajectoryStateChangedCallback(bool value) = 0;
+        virtual void positionActivateLockChangedCallback(bool value) = 0;
+        virtual void elevationActivateLockChangedCallback(bool value) = 0;
     };
 
 private:
@@ -90,6 +96,11 @@ private:
 
     juce::TextButton mPositionActivateButton;
     juce::TextButton mElevationActivateButton;
+
+    juce::Image mLockedImage;
+    juce::Image mUnlockedImage;
+    ToggleImage mPositionActivateLockButton{ mUnlockedImage, mLockedImage, LOCK_PADDING };
+    ToggleImage mElevationActivateLockButton{ mUnlockedImage, mLockedImage, LOCK_PADDING };
 
     juce::ComboBox mPositionSourceLinkCombo;
     juce::ComboBox mElevationSourceLinkCombo;
