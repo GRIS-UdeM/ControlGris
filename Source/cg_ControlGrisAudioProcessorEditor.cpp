@@ -27,23 +27,23 @@ namespace gris
 {
 //==============================================================================
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
-    ControlGrisAudioProcessor & controlGrisAudioProcessor,
+    ControlGrisAudioProcessor & audioProcessor,
     juce::AudioProcessorValueTreeState & vts,
     PositionTrajectoryManager & positionTrajectoryManager,
     ElevationTrajectoryManager & elevationTrajectoryManager)
-    : AudioProcessorEditor(&controlGrisAudioProcessor)
-    , mProcessor(controlGrisAudioProcessor)
+    : AudioProcessorEditor(&audioProcessor)
+    , mAudioProcessor(audioProcessor)
     , mAudioProcessorValueTreeState(vts)
     , mPositionTrajectoryManager(positionTrajectoryManager)
     , mElevationTrajectoryManager(elevationTrajectoryManager)
-    , mPositionField(controlGrisAudioProcessor.getSources(), positionTrajectoryManager)
-    , mElevationField(controlGrisAudioProcessor.getSources(), elevationTrajectoryManager)
-    , mSectionSourceSpan(vts, mGrisLookAndFeel)
+    , mPositionField(audioProcessor.getSources(), positionTrajectoryManager)
+    , mElevationField(audioProcessor.getSources(), elevationTrajectoryManager)
+    , mSectionSourceSpan(audioProcessor, *this, mGrisLookAndFeel)
     , mSectionTrajectory(mGrisLookAndFeel)
     , mSectionGeneralSettings(mGrisLookAndFeel)
-    , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode())
+    , mSectionSourcePosition(mGrisLookAndFeel, audioProcessor.getSpatMode())
     , mSectionOscController(mGrisLookAndFeel)
-    , mPositionPresetComponent(controlGrisAudioProcessor.getPresetsManager())
+    , mPositionPresetComponent(audioProcessor.getPresetsManager())
 {
     setLookAndFeel(&mGrisLookAndFeel);
 
@@ -81,7 +81,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     addAndMakeVisible(&mElevationField);
 
     mSectionSourceSpan.setLookAndFeel(&mGrisLookAndFeel);
-    mSectionSourceSpan.addListener(this);
     addAndMakeVisible(&mSectionSourceSpan);
 
     mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
@@ -118,7 +117,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mPositionField.refreshSources();
     mElevationField.refreshSources();
 
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
@@ -126,9 +125,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
 
     mLastUiWidth.referTo(
-        mProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
+        mAudioProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
     mLastUiHeight.referTo(
-        mProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
+        mAudioProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("height", nullptr));
 
     // set our component's initial size to be the last one that was stored in the filter's settings
     setSize(mLastUiWidth.getValue(), mLastUiHeight.getValue());
@@ -155,12 +154,12 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 
     // Set global settings values.
     //----------------------------
-    oscFormatChangedCallback(mProcessor.getSpatMode());
-    oscPortChangedCallback(mProcessor.getOscPortNumber());
-    oscAddressChangedCallback(mProcessor.getOscAddress());
-    oscStateChangedCallback(mProcessor.isOscActive());
-    firstSourceIdChangedCallback(mProcessor.getFirstSourceId());
-    numberOfSourcesChangedCallback(mProcessor.getSources().size());
+    oscFormatChangedCallback(mAudioProcessor.getSpatMode());
+    oscPortChangedCallback(mAudioProcessor.getOscPortNumber());
+    oscAddressChangedCallback(mAudioProcessor.getOscAddress());
+    oscStateChangedCallback(mAudioProcessor.isOscActive());
+    firstSourceIdChangedCallback(mAudioProcessor.getFirstSourceId());
+    numberOfSourcesChangedCallback(mAudioProcessor.getSources().size());
 
     mSectionOscController.setOscOutputPluginId(mAudioProcessorValueTreeState.state.getProperty("oscOutputPluginId", 1));
     mSectionOscController.setOscReceiveToggleState(
@@ -199,7 +198,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 
     // Update the position preset box.
     //--------------------------------
-    auto const savedPresets{ mProcessor.getPresetsManager().getSavedPresets() };
+    auto const savedPresets{ mAudioProcessor.getPresetsManager().getSavedPresets() };
     int index{ 1 };
     for (auto const saved : savedPresets) {
         mPositionPresetComponent.presetSaved(index++, saved);
@@ -207,12 +206,12 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 
     // Update the interface.
     //----------------------
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
-                                                mProcessor.getSpatMode());
+                                                mAudioProcessor.getSpatMode());
 
     auto const preset{ static_cast<int>(static_cast<float>(
         mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::POSITION_PRESET).getValue())) };
@@ -267,12 +266,10 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 
 //==============================================================================
 // SectionGeneralSettings::Listener callbacks.
-void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode mode)
+void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode const mode)
 {
     mSectionGeneralSettings.setOscFormat(mode);
-    mProcessor.setSpatMode(mode);
-    auto const selectionIsLBAP{ mode == SpatMode::cube };
-    mSectionSourceSpan.setDistanceEnabled(selectionIsLBAP);
+    mAudioProcessor.setSpatMode(mode);
     mPositionField.setSpatMode(mode);
     mSectionTrajectory.setSpatMode(mode);
     repaint();
@@ -282,29 +279,29 @@ void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode mode)
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscPortChangedCallback(int const oscPort)
 {
-    mProcessor.setOscPortNumber(oscPort);
+    mAudioProcessor.setOscPortNumber(oscPort);
     mSectionGeneralSettings.setOscPortNumber(oscPort);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscAddressChangedCallback(juce::String const & address)
 {
-    mProcessor.setOscAddress(address);
+    mAudioProcessor.setOscAddress(address);
     mSectionGeneralSettings.setOscAddress(address);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscStateChangedCallback(bool const state)
 {
-    mProcessor.setOscActive(state);
-    mSectionGeneralSettings.setActivateButtonState(mProcessor.isOscActive());
+    mAudioProcessor.setOscActive(state);
+    mSectionGeneralSettings.setActivateButtonState(mAudioProcessor.isOscActive());
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const numOfSources)
 {
-    if (mProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
-        auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
+    if (mAudioProcessor.getSources().size() != numOfSources || mIsInsideSetPluginState) {
+        auto const initSourcePlacement{ mAudioProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
         auto const symmetricLinkAllowed{ numOfSources == 2 };
         mSectionTrajectory.setSymmetricLinkComboState(symmetricLinkAllowed);
@@ -313,19 +310,19 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
                                                              || currentPositionSourceLink
                                                                     == PositionSourceLink::symmetricY };
             if (isCurrentPositionSourceLinkSymmetric) {
-                mProcessor.setPositionSourceLink(PositionSourceLink::independent,
-                                                 SourceLinkEnforcer::OriginOfChange::user);
+                mAudioProcessor.setPositionSourceLink(PositionSourceLink::independent,
+                                                      SourceLinkEnforcer::OriginOfChange::user);
             }
         }
 
         mSelectedSource = {};
-        mProcessor.setNumberOfSources(numOfSources);
+        mAudioProcessor.setNumberOfSources(numOfSources);
         mSectionGeneralSettings.setNumberOfSources(numOfSources);
         mSectionTrajectory.setNumberOfSources(numOfSources);
-        mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+        mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
         mPositionField.refreshSources();
         mElevationField.refreshSources();
-        mSectionSourcePosition.setNumberOfSources(numOfSources, mProcessor.getFirstSourceId());
+        mSectionSourcePosition.setNumberOfSources(numOfSources, mAudioProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourcesPlacementChangedCallback(SourcePlacement::leftAlternate);
         }
@@ -335,14 +332,14 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
 //==============================================================================
 void ControlGrisAudioProcessorEditor::firstSourceIdChangedCallback(SourceId const firstSourceId)
 {
-    mProcessor.setFirstSourceId(firstSourceId);
+    mAudioProcessor.setFirstSourceId(firstSourceId);
     mSectionGeneralSettings.setFirstSourceId(firstSourceId);
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-    mSectionSourcePosition.setNumberOfSources(mProcessor.getSources().size(), firstSourceId);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSectionSourcePosition.setNumberOfSources(mAudioProcessor.getSources().size(), firstSourceId);
 
-    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
-    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
-    if (mProcessor.getSpatMode() == SpatMode::cube)
+    mPositionField.rebuildSourceComponents(mAudioProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mAudioProcessor.getSources().size());
+    if (mAudioProcessor.getSpatMode() == SpatMode::cube)
         mElevationField.repaint();
 
     mSectionSourceSpan.repaint();
@@ -354,18 +351,18 @@ void ControlGrisAudioProcessorEditor::sourceSelectionChangedCallback(SourceIndex
 {
     mSelectedSource = sourceIndex;
 
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
-                                                mProcessor.getSpatMode());
+                                                mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlacement const sourcePlacement)
 {
-    auto const numOfSources = mProcessor.getSources().size();
+    auto const numOfSources = mAudioProcessor.getSources().size();
     constexpr Degrees azims2[2] = { Degrees{ -90.0f }, Degrees{ 90.0f } };
     constexpr Degrees azims4[4] = { Degrees{ -45.0f }, Degrees{ 45.0f }, Degrees{ -135.0f }, Degrees{ 135.0f } };
     constexpr Degrees azims6[6] = { Degrees{ -30.0f }, Degrees{ 30.0f },   Degrees{ -90.0f },
@@ -373,7 +370,7 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
     constexpr Degrees azims8[8] = { Degrees{ -22.5f },  Degrees{ 22.5f },  Degrees{ -67.5f },  Degrees{ 67.5f },
                                     Degrees{ -112.5f }, Degrees{ 112.5f }, Degrees{ -157.5f }, Degrees{ 157.5f } };
 
-    auto const isCubeMode{ mProcessor.getSpatMode() == SpatMode::cube };
+    auto const isCubeMode{ mAudioProcessor.getSpatMode() == SpatMode::cube };
 
     auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
     auto const distance{ isCubeMode ? 0.7f : 1.0f };
@@ -419,10 +416,11 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
     };
 
     auto const sourceLink{ mPositionTrajectoryManager.getSourceLink() };
-    mProcessor.setPositionSourceLink(PositionSourceLink::independent, SourceLinkEnforcer::OriginOfChange::automation);
+    mAudioProcessor.setPositionSourceLink(PositionSourceLink::independent,
+                                          SourceLinkEnforcer::OriginOfChange::automation);
 
     auto const setPosition = [&](int const sourceIndex) {
-        auto & source{ mProcessor.getSources()[sourceIndex] };
+        auto & source{ mAudioProcessor.getSources()[sourceIndex] };
         auto const elevation{ isCubeMode ? source.getElevation() : MAX_ELEVATION };
         source.setCoordinates(getAzimuthValue(sourceIndex),
                               elevation,
@@ -434,26 +432,28 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
         setPosition(sourceIndex);
     }
 
-    // mProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
+    // mAudioProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
 
     for (SourceIndex i{}; i < SourceIndex{ numOfSources }; ++i) {
-        mProcessor.setSourceParameterValue(i,
-                                           SourceParameter::azimuth,
-                                           mProcessor.getSources()[i].getNormalizedAzimuth().get());
-        mProcessor.setSourceParameterValue(i,
-                                           SourceParameter::elevation,
-                                           mProcessor.getSources()[i].getNormalizedElevation().get());
-        mProcessor.setSourceParameterValue(i, SourceParameter::distance, mProcessor.getSources()[i].getDistance());
+        mAudioProcessor.setSourceParameterValue(i,
+                                                SourceParameter::azimuth,
+                                                mAudioProcessor.getSources()[i].getNormalizedAzimuth().get());
+        mAudioProcessor.setSourceParameterValue(i,
+                                                SourceParameter::elevation,
+                                                mAudioProcessor.getSources()[i].getNormalizedElevation().get());
+        mAudioProcessor.setSourceParameterValue(i,
+                                                SourceParameter::distance,
+                                                mAudioProcessor.getSources()[i].getDistance());
     }
 
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 SourceIndex{},
-                                                mProcessor.getSpatMode());
+                                                mAudioProcessor.getSpatMode());
 
     mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
-                                                 mProcessor.getSources().getPrimarySource().getPos());
+                                                 mAudioProcessor.getSources().getPrimarySource().getPos());
 
-    mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::automation);
+    mAudioProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::automation);
 
     repaint();
 }
@@ -466,7 +466,7 @@ void ControlGrisAudioProcessorEditor::sourcePositionChangedCallback(SourceIndex 
                                                                     std::optional<float> const y,
                                                                     std::optional<float> const z)
 {
-    auto & source{ mProcessor.getSources()[sourceIndex] };
+    auto & source{ mAudioProcessor.getSources()[sourceIndex] };
 
     if (azimuth) {
         source.setAzimuth(*azimuth, Source::OriginOfChange::userMove);
@@ -484,78 +484,42 @@ void ControlGrisAudioProcessorEditor::sourcePositionChangedCallback(SourceIndex 
 }
 
 //==============================================================================
-// SectionSourceSpan::Listener callbacks.
-void ControlGrisAudioProcessorEditor::parameterChangedCallback(SourceParameter const sourceParameter,
-                                                               double const value)
-{
-    mProcessor.setSourceParameterValue(mSelectedSource, sourceParameter, static_cast<float>(value));
-
-    mPositionField.repaint();
-    if (mProcessor.getSpatMode() == SpatMode::cube) {
-        mElevationField.repaint();
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::selectedSourceClickedCallback()
+void ControlGrisAudioProcessorEditor::selectedSourceClicked()
 {
     // increment source index
-    mSelectedSource = SourceIndex{ (mSelectedSource.get() + 1) % mProcessor.getSources().size() };
+    mSelectedSource = SourceIndex{ (mSelectedSource.get() + 1) % mAudioProcessor.getSources().size() };
 
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
-                                                mProcessor.getSpatMode());
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::azimuthSpanDragStartedCallback()
-{
-    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::AZIMUTH_SPAN);
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::azimuthSpanDragEndedCallback()
-{
-    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::AZIMUTH_SPAN);
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::elevationSpanDragStartedCallback()
-{
-    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::ELEVATION_SPAN);
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::elevationSpanDragEndedCallback()
-{
-    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::ELEVATION_SPAN);
+                                                mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
 // SectionTrajectory::Listener callbacks.
 void ControlGrisAudioProcessorEditor::positionSourceLinkChangedCallback(PositionSourceLink const sourceLink)
 {
-    mProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
+    mAudioProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
 
     auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK) };
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_SOURCE_LINK) };
+    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(
+        Automation::Ids::POSITION_SOURCE_LINK) };
     parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::elevationSourceLinkChangedCallback(ElevationSourceLink const sourceLink)
 {
-    mProcessor.setElevationSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
+    mAudioProcessor.setElevationSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
 
     auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
     auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK) };
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(
+    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(
         Automation::Ids::ELEVATION_SOURCE_LINK) };
     parameter->setValueNotifyingHost(value);
 }
@@ -564,7 +528,7 @@ void ControlGrisAudioProcessorEditor::elevationSourceLinkChangedCallback(Elevati
 void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(PositionTrajectoryType value)
 {
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    mPositionTrajectoryManager.setTrajectoryType(value, mProcessor.getSources()[0].getPos());
+    mPositionTrajectoryManager.setTrajectoryType(value, mAudioProcessor.getSources()[0].getPos());
     mPositionField.repaint();
 }
 
@@ -617,7 +581,7 @@ void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(dou
     mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / mProcessor.getBpm();
+        dur = duration * 60.0 / mAudioProcessor.getBpm();
     }
     mPositionTrajectoryManager.setPlaybackDuration(dur);
     mElevationTrajectoryManager.setPlaybackDuration(dur);
@@ -629,7 +593,7 @@ void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(doub
     mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
     double dur = duration;
     if (mode == 2) {
-        dur = duration * 60.0 / mProcessor.getBpm();
+        dur = duration * 60.0 / mAudioProcessor.getBpm();
     }
     mPositionTrajectoryManager.setPlaybackDuration(dur);
     mElevationTrajectoryManager.setPlaybackDuration(dur);
@@ -651,13 +615,13 @@ void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bo
 // Update the interface if anything has changed (mostly automations).
 void ControlGrisAudioProcessorEditor::refresh()
 {
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
-                                                mProcessor.getSpatMode());
+                                                mAudioProcessor.getSpatMode());
 
-    mPositionField.setIsPlaying(mProcessor.isPlaying());
-    mElevationField.setIsPlaying(mProcessor.isPlaying());
+    mPositionField.setIsPlaying(mAudioProcessor.isPlaying());
+    mElevationField.setIsPlaying(mAudioProcessor.isPlaying());
 
     if (mSectionTrajectory.getPositionActivateState() != mPositionTrajectoryManager.getPositionActivateState()) {
         mSectionTrajectory.setPositionActivateState(mPositionTrajectoryManager.getPositionActivateState());
@@ -671,44 +635,44 @@ void ControlGrisAudioProcessorEditor::refresh()
 // FieldComponent::Listener callback.
 void ControlGrisAudioProcessorEditor::fieldSourcePositionChangedCallback(SourceIndex const sourceIndex, int whichField)
 {
-    mProcessor.sourcePositionChanged(sourceIndex, whichField);
+    mAudioProcessor.sourcePositionChanged(sourceIndex, whichField);
     mSelectedSource = sourceIndex;
-    mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[sourceIndex]);
+    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[sourceIndex]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mProcessor.getSources()[mSelectedSource],
+    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
-                                                mProcessor.getSpatMode());
+                                                mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
 // PositionPresetComponent::Listener callback.
 void ControlGrisAudioProcessorEditor::positionPresetChangedCallback(int const presetNumber)
 {
-    mProcessor.getPresetsManager().forceLoad(presetNumber);
+    mAudioProcessor.getPresetsManager().forceLoad(presetNumber);
 
     auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };
     auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
 
-    auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_PRESET) };
+    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_PRESET) };
     parameter->setValueNotifyingHost(newValue);
 
-    mProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
-    if (mProcessor.getSpatMode() == SpatMode::cube) {
-        mProcessor.updatePrimarySourceParameters(Source::ChangeType::elevation);
+    mAudioProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
+    if (mAudioProcessor.getSpatMode() == SpatMode::cube) {
+        mAudioProcessor.updatePrimarySourceParameters(Source::ChangeType::elevation);
     }
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetSavedCallback(int presetNumber)
 {
-    mProcessor.getPresetsManager().save(presetNumber);
+    mAudioProcessor.getPresetsManager().save(presetNumber);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionPresetDeletedCallback(int presetNumber)
 {
-    [[maybe_unused]] auto const success{ mProcessor.getPresetsManager().deletePreset(presetNumber) };
+    [[maybe_unused]] auto const success{ mAudioProcessor.getPresetsManager().deletePreset(presetNumber) };
     jassert(success);
 }
 
@@ -716,16 +680,16 @@ void ControlGrisAudioProcessorEditor::positionPresetDeletedCallback(int presetNu
 // SectionOscController::Listener callback.
 void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int const value)
 {
-    mProcessor.setOscOutputPluginId(value);
+    mAudioProcessor.setOscOutputPluginId(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool const state, int const oscPort)
 {
     if (state) {
-        mProcessor.createOscInputConnection(oscPort);
+        mAudioProcessor.createOscInputConnection(oscPort);
     } else {
-        mProcessor.disconnectOscInput(oscPort);
+        mAudioProcessor.disconnectOscInput(oscPort);
     }
 }
 
@@ -735,9 +699,9 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool co
                                                                          int const oscPort)
 {
     if (state) {
-        mProcessor.createOscOutputConnection(oscAddress, oscPort);
+        mAudioProcessor.createOscOutputConnection(oscAddress, oscPort);
     } else {
-        mProcessor.disconnectOscOutput(oscAddress, oscPort);
+        mAudioProcessor.disconnectOscOutput(oscAddress, oscPort);
     }
 }
 
@@ -758,7 +722,7 @@ void ControlGrisAudioProcessorEditor::resized()
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
-    if (mProcessor.getSpatMode() == SpatMode::cube) {
+    if (mAudioProcessor.getSpatMode() == SpatMode::cube) {
         mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);

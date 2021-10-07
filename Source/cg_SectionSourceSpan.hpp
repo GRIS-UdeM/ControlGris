@@ -27,30 +27,15 @@
 
 namespace gris
 {
+class ControlGrisAudioProcessor;
+class ControlGrisAudioProcessorEditor;
 //==============================================================================
-class SectionSourceSpan final
-    : public juce::Component
-    , public juce::Slider::Listener
+class SectionSourceSpan final : public juce::Component
 {
-public:
     //==============================================================================
-    struct Listener {
-        virtual ~Listener() = default;
-
-        virtual void azimuthSpanDragStartedCallback() = 0;
-        virtual void azimuthSpanDragEndedCallback() = 0;
-        virtual void elevationSpanDragStartedCallback() = 0;
-        virtual void elevationSpanDragEndedCallback() = 0;
-        virtual void selectedSourceClickedCallback() = 0;
-        virtual void parameterChangedCallback(SourceParameter sourceId, double value) = 0;
-    };
-
-private:
-    //==============================================================================
-    juce::AudioProcessorValueTreeState & mVst;
+    ControlGrisAudioProcessor & mAudioProcessor;
+    ControlGrisAudioProcessorEditor & mAudioProcessorEditor;
     GrisLookAndFeel & mGrisLookAndFeel;
-
-    juce::ListenerList<Listener> mListeners;
 
     bool mDistanceEnabled{ false };
     bool mSpanLinked{ false };
@@ -62,13 +47,14 @@ private:
     juce::Slider mAzimuthSpan{};
     juce::Slider mElevationSpan{};
 
-    juce::AudioProcessorValueTreeState::SliderAttachment mAzimuthSliderAttachment{ mVst,
-                                                                                   Automation::Ids::AZIMUTH_SPAN,
-                                                                                   mAzimuthSpan };
+    juce::AudioProcessorValueTreeState::SliderAttachment mAzimuthSliderAttachment;
+    juce::AudioProcessorValueTreeState::SliderAttachment mElevationSliderAttachment;
 
 public:
     //==============================================================================
-    SectionSourceSpan(juce::AudioProcessorValueTreeState & vst, GrisLookAndFeel & grisLookAndFeel);
+    SectionSourceSpan(ControlGrisAudioProcessor & audioProcessor,
+                      ControlGrisAudioProcessorEditor & audioProcessorEditor,
+                      GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
     SectionSourceSpan() = delete;
     ~SectionSourceSpan() override = default;
@@ -80,17 +66,11 @@ public:
     SectionSourceSpan & operator=(SectionSourceSpan &&) = delete;
     //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
-    void sliderValueChanged(juce::Slider * slider) override;
     void paint(juce::Graphics &) override;
     void resized() override;
 
     void setSelectedSource(Source * source);
-    void setDistanceEnabled(bool distanceEnabled);
     void setSpanLinkState(bool spanLinkState);
-    bool getSpanLinkState() const { return mSpanLinked; }
-
-    void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

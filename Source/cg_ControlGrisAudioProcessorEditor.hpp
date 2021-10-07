@@ -37,14 +37,13 @@ class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
     , private juce::Value::Listener
     , public FieldComponent::Listener
-    , public SectionSourceSpan::Listener
     , public SectionGeneralSettings::Listener
     , public SectionSourcePosition::Listener
     , public SectionTrajectory::Listener
     , public SectionOscController::Listener
     , public PositionPresetComponent::Listener
 {
-    ControlGrisAudioProcessor & mProcessor;
+    ControlGrisAudioProcessor & mAudioProcessor;
     GrisLookAndFeel mGrisLookAndFeel;
     juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
 
@@ -79,7 +78,7 @@ class ControlGrisAudioProcessorEditor final
 
 public:
     //==============================================================================
-    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
+    ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & audioProcessor,
                                     juce::AudioProcessorValueTreeState & vts,
                                     PositionTrajectoryManager & positionTrajectoryManager,
                                     ElevationTrajectoryManager & elevationTrajectoryManager);
@@ -100,12 +99,7 @@ public:
     void fieldSourcePositionChangedCallback(SourceIndex sourceIndex, int whichField) override;
 
     // SectionSourceSpan::Listeners
-    void selectedSourceClickedCallback() override;
-    void parameterChangedCallback(SourceParameter sourceParameter, double value) override;
-    void azimuthSpanDragStartedCallback() override;
-    void azimuthSpanDragEndedCallback() override;
-    void elevationSpanDragStartedCallback() override;
-    void elevationSpanDragEndedCallback() override;
+    void selectedSourceClicked();
 
     // SectionGeneralSettings::Listeners
     void oscFormatChangedCallback(SpatMode mode) override;
