@@ -421,7 +421,7 @@ void PositionFieldComponent::paint(juce::Graphics & g)
     }
     // position dot
     if (mIsPlaying && !isMouseButtonDown() && mAutomationManager.getTrajectoryType() != PositionTrajectoryType::realtime
-        && mAutomationManager.getPositionActivateState()) {
+        && mAutomationManager.getActivateState()) {
         constexpr float radius = 4.0f;
         constexpr float diameter = radius * 2.0f;
         juce::Point<float> const dotCenter{ sourcePositionToComponentPosition(
@@ -616,7 +616,7 @@ void ElevationFieldComponent::paint(juce::Graphics & g)
     if (mIsPlaying && !isMouseButtonDown()
         && static_cast<ElevationTrajectoryType>(mAutomationManager.getTrajectoryType())
                != ElevationTrajectoryType::realtime
-        && mAutomationManager.getPositionActivateState()) {
+        && mAutomationManager.getActivateState()) {
         auto const currentTrajectoryPosition{ mAutomationManager.getCurrentTrajectoryPoint() };
         auto const normalizedCurrentTrajectoryPosition{ (currentTrajectoryPosition + juce::Point<float>{ 1.0f, 1.0f })
                                                         / 2.0f };

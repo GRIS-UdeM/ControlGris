@@ -25,14 +25,15 @@
 namespace gris
 {
 //==============================================================================
-TrajectoryManager::TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
+AbstractTrajectoryManager::AbstractTrajectoryManager(ControlGrisAudioProcessor & processor,
+                                                     Source & principalSource) noexcept
     : mProcessor(processor)
     , mPrimarySource(principalSource)
 {
 }
 
 //==============================================================================
-void TrajectoryManager::setPositionActivateState(bool const state)
+void AbstractTrajectoryManager::setActivateState(bool const state)
 {
     mActivateState = state;
     if (state) {
@@ -48,7 +49,13 @@ void TrajectoryManager::setPositionActivateState(bool const state)
 }
 
 //==============================================================================
-void TrajectoryManager::resetRecordingTrajectory(juce::Point<float> const currentPosition)
+void AbstractTrajectoryManager::setActivateLockState(bool const state)
+{
+    mActivateLockState = state;
+}
+
+//==============================================================================
+void AbstractTrajectoryManager::resetRecordingTrajectory(juce::Point<float> const currentPosition)
 {
     jassert(currentPosition.getX() >= -1.0f && currentPosition.getX() <= 1.0f && currentPosition.getY() >= -1.0f
             && currentPosition.getY() <= 1.0f);
@@ -61,7 +68,7 @@ void TrajectoryManager::resetRecordingTrajectory(juce::Point<float> const curren
 }
 
 //==============================================================================
-juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float> const & pos)
+juce::Point<float> AbstractTrajectoryManager::smoothRecordingPosition(juce::Point<float> const & pos)
 {
     constexpr auto smoothingFactor = 0.8f;
 
@@ -70,7 +77,7 @@ juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float>
 }
 
 //==============================================================================
-void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
+void AbstractTrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
     mTrajectoryDeltaTime = std::fmod(mTrajectoryDeltaTime, 1.0);
@@ -79,7 +86,7 @@ void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay
 }
 
 //==============================================================================
-void TrajectoryManager::computeCurrentTrajectoryPoint()
+void AbstractTrajectoryManager::computeCurrentTrajectoryPoint()
 {
     if (!mTrajectory.has_value()) {
         mCurrentTrajectoryPoint = extractTrajectoryPointFromPrimarySource();
@@ -170,7 +177,7 @@ void TrajectoryManager::computeCurrentTrajectoryPoint()
 }
 
 //==============================================================================
-juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
+juce::Point<float> AbstractTrajectoryManager::getCurrentTrajectoryPoint() const
 {
     if (mActivateState) {
         return mCurrentTrajectoryPoint;
@@ -179,7 +186,7 @@ juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 }
 
 //==============================================================================
-void TrajectoryManager::sourceMoved(Source & source)
+void AbstractTrajectoryManager::sourceMoved(Source & source)
 {
     jassert(source.isPrimarySource());
     recomputeTrajectory();
@@ -228,14 +235,14 @@ void PositionTrajectoryManager::setTrajectoryType(PositionTrajectoryType const t
 }
 
 //==============================================================================
-void TrajectoryManager::addRecordingPoint(juce::Point<float> const & pos)
+void AbstractTrajectoryManager::addRecordingPoint(juce::Point<float> const & pos)
 {
     jassert(mTrajectory.has_value());
     mTrajectory->addPoint(smoothRecordingPosition(pos));
 }
 
 //==============================================================================
-void TrajectoryManager::invertBackAndForthDirection()
+void AbstractTrajectoryManager::invertBackAndForthDirection()
 {
     mBackAndForthDirection = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
 }

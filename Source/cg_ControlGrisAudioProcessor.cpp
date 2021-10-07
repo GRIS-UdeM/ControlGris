@@ -146,7 +146,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("firstSourceId", 1, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscOutputPluginId", 1, nullptr);
 
-    // Trajectory box persitent settings.
+    // Trajectory box persistent settings.
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType",
                                                     static_cast<int>(PositionTrajectoryType::realtime),
                                                     nullptr);
@@ -829,10 +829,10 @@ void ControlGrisAudioProcessor::timerCallback()
     // automation
     if (mLastTimerTime != getCurrentTime()) {
         auto const deltaTime{ getCurrentTime() - getInitTimeOnPlay() };
-        if (mPositionTrajectoryManager.getPositionActivateState()) {
+        if (mPositionTrajectoryManager.getActivateState()) {
             mPositionTrajectoryManager.setTrajectoryDeltaTime(deltaTime);
         }
-        if (mSpatMode == SpatMode::cube && mElevationTrajectoryManager.getPositionActivateState()) {
+        if (mSpatMode == SpatMode::cube && mElevationTrajectoryManager.getActivateState()) {
             mElevationTrajectoryManager.setTrajectoryDeltaTime(deltaTime);
         }
     }
@@ -840,10 +840,10 @@ void ControlGrisAudioProcessor::timerCallback()
     mLastTimerTime = getCurrentTime();
 
     if (mCanStopActivate && !mIsPlaying) {
-        if (mPositionTrajectoryManager.getPositionActivateState())
-            mPositionTrajectoryManager.setPositionActivateState(false);
-        if (mElevationTrajectoryManager.getPositionActivateState())
-            mElevationTrajectoryManager.setPositionActivateState(false);
+        if (mPositionTrajectoryManager.getActivateState())
+            mPositionTrajectoryManager.setActivateState(false);
+        if (mElevationTrajectoryManager.getActivateState())
+            mElevationTrajectoryManager.setActivateState(false);
         mCanStopActivate = false;
 
         if (editor != nullptr) {
@@ -1069,8 +1069,8 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
     }
 
     // deal with trajectory recording gestures
-    bool const isPositionTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState() };
-    bool const isElevationTrajectoryActive{ mElevationTrajectoryManager.getPositionActivateState() };
+    bool const isPositionTrajectoryActive{ mPositionTrajectoryManager.getActivateState() };
+    bool const isElevationTrajectoryActive{ mElevationTrajectoryManager.getActivateState() };
 
     static bool positionGestureStarted{ false };
     static bool elevationGestureStarted{ false };
@@ -1198,13 +1198,13 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     jassert(changeType == Source::ChangeType::position || changeType == Source::ChangeType::elevation);
 
     auto & trajectoryManager{ changeType == Source::ChangeType::position
-                                  ? static_cast<TrajectoryManager &>(mPositionTrajectoryManager)
-                                  : static_cast<TrajectoryManager &>(mElevationTrajectoryManager) };
+                                  ? static_cast<AbstractTrajectoryManager &>(mPositionTrajectoryManager)
+                                  : static_cast<AbstractTrajectoryManager &>(mElevationTrajectoryManager) };
     auto & sourceLinkEnforcer{ changeType == Source::ChangeType::position ? mPositionSourceLinkEnforcer
                                                                           : mElevationSourceLinkEnforcer };
     // auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
     //                               || mElevationTrajectoryManager.getPositionActivateState() };
-    auto const isTrajectoryActive{ trajectoryManager.getPositionActivateState() };
+    auto const isTrajectoryActive{ trajectoryManager.getActivateState() };
     auto const isPrimarySource{ source.isPrimarySource() };
 
     switch (origin) {

@@ -32,7 +32,7 @@ namespace gris
 class ControlGrisAudioProcessor;
 
 //==============================================================================
-class TrajectoryManager
+class AbstractTrajectoryManager
 {
 public:
     //==============================================================================
@@ -48,8 +48,9 @@ public:
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
-        virtual void
-            trajectoryPositionChanged(TrajectoryManager * manager, juce::Point<float> position, Radians elevation)
+        virtual void trajectoryPositionChanged(AbstractTrajectoryManager * manager,
+                                               juce::Point<float> position,
+                                               Radians elevation)
             = 0;
 
     private:
@@ -67,14 +68,15 @@ protected:
 
     juce::ListenerList<Listener> mListeners;
 
-    bool mIsBackAndForth{ false };
+    bool mIsBackAndForth{};
     Direction mBackAndForthDirection{ Direction::forward };
 
     int mDampeningCycles{};
     int mDampeningCycleCount{};
     double mDampeningLastDelta{};
 
-    bool mActivateState{ false };
+    bool mActivateState{};
+    bool mActivateLockState{};
     double mPlaybackDuration{ 5.0 };
     double mCurrentPlaybackDuration{ 5.0 };
 
@@ -92,19 +94,21 @@ protected:
 
 public:
     //==============================================================================
-    TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
-    virtual ~TrajectoryManager() = default;
+    AbstractTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
+    virtual ~AbstractTrajectoryManager() = default;
 
-    TrajectoryManager(TrajectoryManager const &) = delete;
-    TrajectoryManager(TrajectoryManager &&) = delete;
+    AbstractTrajectoryManager(AbstractTrajectoryManager const &) = delete;
+    AbstractTrajectoryManager(AbstractTrajectoryManager &&) = delete;
 
-    TrajectoryManager & operator=(TrajectoryManager const &) = delete;
-    TrajectoryManager & operator=(TrajectoryManager &&) = delete;
+    AbstractTrajectoryManager & operator=(AbstractTrajectoryManager const &) = delete;
+    AbstractTrajectoryManager & operator=(AbstractTrajectoryManager &&) = delete;
     //==============================================================================
     [[nodiscard]] ControlGrisAudioProcessor & getProcessor() const { return mProcessor; }
 
-    void setPositionActivateState(bool state);
-    [[nodiscard]] bool getPositionActivateState() const { return mActivateState; }
+    void setActivateState(bool state);
+    [[nodiscard]] bool getActivateState() const { return mActivateState; }
+
+    void setActivateLockState(bool state);
 
     void setPlaybackDuration(double const value) { mPlaybackDuration = value; }
 
@@ -137,12 +141,12 @@ private:
     void computeCurrentTrajectoryPoint();
     [[nodiscard]] juce::Point<float> smoothRecordingPosition(juce::Point<float> const & pos);
     //==============================================================================
-    JUCE_LEAK_DETECTOR(TrajectoryManager)
+    JUCE_LEAK_DETECTOR(AbstractTrajectoryManager)
 
 }; // TrajectoryManager
 
 //==============================================================================
-class PositionTrajectoryManager final : public TrajectoryManager
+class PositionTrajectoryManager final : public AbstractTrajectoryManager
 {
     PositionTrajectoryType mTrajectoryType{ PositionTrajectoryType::drawing };
     PositionSourceLink mSourceLink{ PositionSourceLink::independent };
@@ -159,7 +163,7 @@ public:
     PositionTrajectoryManager & operator=(PositionTrajectoryManager &&) = delete;
     //==============================================================================
     PositionTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : TrajectoryManager(processor, principalSource)
+        : AbstractTrajectoryManager(processor, principalSource)
     {
     }
     //==============================================================================
@@ -182,7 +186,7 @@ private:
 }; // PositionTrajectoryManager
 
 //==============================================================================
-class ElevationTrajectoryManager final : public TrajectoryManager
+class ElevationTrajectoryManager final : public AbstractTrajectoryManager
 {
     ElevationTrajectoryType mTrajectoryType{ ElevationTrajectoryType::drawing };
     ElevationSourceLink mSourceLink{ ElevationSourceLink::independent };
@@ -199,7 +203,7 @@ public:
     ElevationTrajectoryManager & operator=(ElevationTrajectoryManager &&) = delete;
     //==============================================================================
     ElevationTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : TrajectoryManager(processor, principalSource)
+        : AbstractTrajectoryManager(processor, principalSource)
     {
     }
     //==============================================================================

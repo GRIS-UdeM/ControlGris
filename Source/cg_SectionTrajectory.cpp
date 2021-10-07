@@ -31,21 +31,13 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel)
     , mLockedImage{ juce::PNGImageFormat::loadFrom(BinaryData::lock_closed_png, BinaryData::lock_closed_pngSize) }
     , mUnlockedImage{ juce::PNGImageFormat::loadFrom(BinaryData::lock_open_png, BinaryData::lock_open_pngSize) }
 {
-    auto const initLockButton = [&](ToggleImage & button, bool const isPosition) {
+    auto const initLockButton = [&](ToggleImage & button) {
+        button.addListener(this);
         addAndMakeVisible(button);
-        if (isPosition) {
-            auto const callback
-                = [&](Listener & listener) { listener.positionActivateLockChangedCallback(button.getToggleState()); };
-            button.onClick = [this, callback]() { mListeners.call(callback); };
-        } else {
-            auto const callback
-                = [&](Listener & listener) { listener.elevationActivateLockChangedCallback(button.getToggleState()); };
-            button.onClick = [this, callback]() { mListeners.call(callback); };
-        }
     };
 
-    initLockButton(mPositionActivateLockButton, true);
-    initLockButton(mElevationActivateLockButton, false);
+    initLockButton(mPositionActivateLockButton);
+    initLockButton(mElevationActivateLockButton);
 
     mSpatMode = SpatMode::dome;
 
@@ -344,6 +336,23 @@ void SectionTrajectory::setSymmetricLinkComboState(bool const allowed)
 {
     mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), allowed);
     mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), allowed);
+}
+
+//==============================================================================
+void SectionTrajectory::buttonClicked(juce::Button * const button)
+{
+    auto const state{ button->getToggleState() };
+    if (button == &mPositionActivateLockButton) {
+        mPositionActivateButton.setEnabled(!state);
+        mListeners.call([state](Listener & listener) { listener.positionActivateLockChangedCallback(state); });
+        return;
+    }
+    if (button == &mElevationActivateLockButton) {
+        mElevationActivateButton.setEnabled(!state);
+        mListeners.call([state](Listener & listener) { listener.elevationActivateLockChangedCallback(state); });
+        return;
+    }
+    jassertfalse;
 }
 
 //==============================================================================

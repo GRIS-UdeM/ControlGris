@@ -32,7 +32,9 @@ juce::BorderSize<float> const LOCK_PADDING{ 3.0f, 2.0f, 3.0f, 2.0f };
 namespace gris
 {
 //==============================================================================
-class SectionTrajectory final : public juce::Component
+class SectionTrajectory final
+    : public juce::Component
+    , public juce::TextButton::Listener
 {
 public:
     //==============================================================================
@@ -137,21 +139,22 @@ public:
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
 
-    bool getPositionActivateState() const { return mPositionActivateButton.getToggleState(); }
-    bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
+    [[nodiscard]] bool getPositionActivateState() const { return mPositionActivateButton.getToggleState(); }
+    [[nodiscard]] bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
-    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
-    juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
-    juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
+    [[nodiscard]] juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
+    [[nodiscard]] juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
+    [[nodiscard]] juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
+    [[nodiscard]] juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
 
-    enum class SymmetricLinkComboState { enabled, disabled };
     void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+
+    void buttonClicked(juce::Button * button) override;
 
 private:
     //==============================================================================

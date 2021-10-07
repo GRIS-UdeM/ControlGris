@@ -638,25 +638,25 @@ void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(doub
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(bool const value)
 {
-    mPositionTrajectoryManager.setPositionActivateState(value);
+    mPositionTrajectoryManager.setActivateState(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool const value)
 {
-    mElevationTrajectoryManager.setPositionActivateState(value);
+    mElevationTrajectoryManager.setActivateState(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::positionActivateLockChangedCallback(bool const /*value*/)
+void ControlGrisAudioProcessorEditor::positionActivateLockChangedCallback(bool const value)
 {
-    // TODO
+    mPositionTrajectoryManager.setActivateLockState(value);
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationActivateLockChangedCallback(bool const /*value*/)
+void ControlGrisAudioProcessorEditor::elevationActivateLockChangedCallback(bool const value)
 {
-    // TODO
+    mElevationTrajectoryManager.setActivateLockState(value);
 }
 
 //==============================================================================
@@ -671,11 +671,11 @@ void ControlGrisAudioProcessorEditor::refresh()
     mPositionField.setIsPlaying(mProcessor.isPlaying());
     mElevationField.setIsPlaying(mProcessor.isPlaying());
 
-    if (mSectionTrajectory.getPositionActivateState() != mPositionTrajectoryManager.getPositionActivateState()) {
-        mSectionTrajectory.setPositionActivateState(mPositionTrajectoryManager.getPositionActivateState());
+    if (mSectionTrajectory.getPositionActivateState() != mPositionTrajectoryManager.getActivateState()) {
+        mSectionTrajectory.setPositionActivateState(mPositionTrajectoryManager.getActivateState());
     }
-    if (mSectionTrajectory.getElevationActivateState() != mElevationTrajectoryManager.getPositionActivateState()) {
-        mSectionTrajectory.setElevationActivateState(mElevationTrajectoryManager.getPositionActivateState());
+    if (mSectionTrajectory.getElevationActivateState() != mElevationTrajectoryManager.getActivateState()) {
+        mSectionTrajectory.setElevationActivateState(mElevationTrajectoryManager.getActivateState());
     }
 }
 

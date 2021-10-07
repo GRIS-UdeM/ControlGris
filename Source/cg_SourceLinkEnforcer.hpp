@@ -42,17 +42,15 @@ private:
 
 public:
     //==============================================================================
-    SourceLinkEnforcer() = delete;
-    ~SourceLinkEnforcer() noexcept = default;
-
-    SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
-    SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
-
-    SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
-    SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
-    //==============================================================================
     SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink);
     SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink);
+    SourceLinkEnforcer() = delete;
+    ~SourceLinkEnforcer() noexcept = default;
+    //==============================================================================
+    SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
     //==============================================================================
     void setSourceLink(ElevationSourceLink sourceLink, OriginOfChange originOfChange);
     void setSourceLink(PositionSourceLink sourceLink, OriginOfChange originOfChange);
