@@ -81,8 +81,8 @@ public:
     //==============================================================================
     ControlGrisAudioProcessorEditor(ControlGrisAudioProcessor & controlGrisAudioProcessor,
                                     juce::AudioProcessorValueTreeState & vts,
-                                    PositionTrajectoryManager & positionAutomationManager,
-                                    ElevationTrajectoryManager & elevationAutomationManager);
+                                    PositionTrajectoryManager & positionTrajectoryManager,
+                                    ElevationTrajectoryManager & elevationTrajectoryManager);
     //==============================================================================
     ControlGrisAudioProcessorEditor() = delete;
     ~ControlGrisAudioProcessorEditor() override;

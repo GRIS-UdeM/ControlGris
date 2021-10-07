@@ -56,7 +56,6 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                                      0.0f,
                                                      nullptr,
                                                      nullptr));
-
     parameters.push_back(std::make_unique<Parameter>(
         Automation::Ids::POSITION_SOURCE_LINK,
         juce::String("Source Link"),

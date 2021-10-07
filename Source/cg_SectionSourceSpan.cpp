@@ -23,7 +23,9 @@
 namespace gris
 {
 //==============================================================================
-SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionSourceSpan::SectionSourceSpan(juce::AudioProcessorValueTreeState & vst, GrisLookAndFeel & grisLookAndFeel)
+    : mVst(vst)
+    , mGrisLookAndFeel(grisLookAndFeel)
 {
     mAzimuthLabel.setText("Azimuth Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
@@ -32,10 +34,10 @@ SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addAndMakeVisible(&mElevationLabel);
 
     mAzimuthSpan.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    mAzimuthSpan.setRange(0.0, 1.0);
-    mAzimuthSpan.addListener(this);
-    mAzimuthSpan.onDragStart = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragStartedCallback(); }); };
-    mAzimuthSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragEndedCallback(); }); };
+    // mAzimuthSpan.setRange(0.0, 1.0);
+    // mAzimuthSpan.addListener(this);
+    // mAzimuthSpan.onDragStart = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragStartedCallback(); }); };
+    // mAzimuthSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragEndedCallback(); }); };
     mElevationSpan.onDragStart
         = [&]() { mListeners.call([&](Listener & l) { l.elevationSpanDragStartedCallback(); }); };
     mElevationSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.elevationSpanDragEndedCallback(); }); };
@@ -53,7 +55,7 @@ void SectionSourceSpan::setSelectedSource(Source * source)
     if (mSelectedSource != source || source->getAzimuthSpan().get() != mAzimuthSpan.getValue()
         || mElevationSpan.getValue() != source->getElevationSpan().get()) {
         mSelectedSource = source;
-        mAzimuthSpan.setValue(source->getAzimuthSpan().get(), juce::NotificationType::dontSendNotification);
+        // mAzimuthSpan.setValue(source->getAzimuthSpan().get(), juce::NotificationType::dontSendNotification);
         mElevationSpan.setValue(source->getElevationSpan().get(), juce::NotificationType::dontSendNotification);
         repaint();
     }
@@ -99,7 +101,7 @@ void SectionSourceSpan::sliderValueChanged(juce::Slider * slider)
     auto const value{ slider->getValue() };
     auto const parameterId{ (slider == &mAzimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };
 
-    mListeners.call([&](Listener & l) { l.parameterChangedCallback(parameterId, value); });
+    // mListeners.call([&](Listener & l) { l.parameterChangedCallback(parameterId, value); });
 
     if (mSpanLinked) {
         if (parameterId == SourceParameter::azimuthSpan) {

@@ -47,6 +47,7 @@ public:
 
 private:
     //==============================================================================
+    juce::AudioProcessorValueTreeState & mVst;
     GrisLookAndFeel & mGrisLookAndFeel;
 
     juce::ListenerList<Listener> mListeners;
@@ -61,9 +62,13 @@ private:
     juce::Slider mAzimuthSpan{};
     juce::Slider mElevationSpan{};
 
+    juce::AudioProcessorValueTreeState::SliderAttachment mAzimuthSliderAttachment{ mVst,
+                                                                                   Automation::Ids::AZIMUTH_SPAN,
+                                                                                   mAzimuthSpan };
+
 public:
     //==============================================================================
-    SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel);
+    SectionSourceSpan(juce::AudioProcessorValueTreeState & vst, GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
     SectionSourceSpan() = delete;
     ~SectionSourceSpan() override = default;

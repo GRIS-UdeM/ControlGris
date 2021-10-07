@@ -29,16 +29,16 @@ namespace gris
 ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     ControlGrisAudioProcessor & controlGrisAudioProcessor,
     juce::AudioProcessorValueTreeState & vts,
-    PositionTrajectoryManager & positionAutomationManager,
-    ElevationTrajectoryManager & elevationAutomationManager)
+    PositionTrajectoryManager & positionTrajectoryManager,
+    ElevationTrajectoryManager & elevationTrajectoryManager)
     : AudioProcessorEditor(&controlGrisAudioProcessor)
     , mProcessor(controlGrisAudioProcessor)
     , mAudioProcessorValueTreeState(vts)
-    , mPositionTrajectoryManager(positionAutomationManager)
-    , mElevationTrajectoryManager(elevationAutomationManager)
-    , mPositionField(controlGrisAudioProcessor.getSources(), positionAutomationManager)
-    , mElevationField(controlGrisAudioProcessor.getSources(), elevationAutomationManager)
-    , mSectionSourceSpan(mGrisLookAndFeel)
+    , mPositionTrajectoryManager(positionTrajectoryManager)
+    , mElevationTrajectoryManager(elevationTrajectoryManager)
+    , mPositionField(controlGrisAudioProcessor.getSources(), positionTrajectoryManager)
+    , mElevationField(controlGrisAudioProcessor.getSources(), elevationTrajectoryManager)
+    , mSectionSourceSpan(vts, mGrisLookAndFeel)
     , mSectionTrajectory(mGrisLookAndFeel)
     , mSectionGeneralSettings(mGrisLookAndFeel)
     , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode())
