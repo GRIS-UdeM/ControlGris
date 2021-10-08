@@ -96,8 +96,8 @@ void PositionSourceComponent::mouseDown(juce::MouseEvent const & event)
     mCanDrag = isMoveAllowed(mDisplacementMode, isPrimarySource, mTrajectoryManager.getSourceLink());
     if (mCanDrag) {
         if (isPrimarySource || mDisplacementMode == DisplacementMode::all) {
-            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(ParameterIds::Automatable::X);
-            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(ParameterIds::Automatable::Y);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(parameters::dynamic::X);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(parameters::dynamic::Y);
         }
         setSourcePosition(event);
     } else {
@@ -134,8 +134,8 @@ void PositionSourceComponent::mouseUp(juce::MouseEvent const & event)
     if (mCanDrag) {
         mouseDrag(event);
         if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(ParameterIds::Automatable::X);
-            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(ParameterIds::Automatable::Y);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(parameters::dynamic::X);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(parameters::dynamic::Y);
         }
     } else {
         mFieldComponent.displayInvalidSourceMoveWarning(false);

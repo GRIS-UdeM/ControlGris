@@ -44,14 +44,14 @@ SectionTrajectory::SectionTrajectory(ControlGrisAudioProcessor & audioProcessor,
               addAndMakeVisible(combo);
           };
 
-    initCombo(mPositionSourceLinkCombo, POSITION_SOURCE_LINK_TYPES, ParameterIds::Automatable::POSITION_SOURCE_LINK);
-    initCombo(mElevationSourceLinkCombo, ELEVATION_SOURCE_LINK_TYPES, ParameterIds::Automatable::ELEVATION_SOURCE_LINK);
+    initCombo(mPositionSourceLinkCombo, POSITION_SOURCE_LINK_TYPES, parameters::dynamic::POSITION_SOURCE_LINK);
+    initCombo(mElevationSourceLinkCombo, ELEVATION_SOURCE_LINK_TYPES, parameters::dynamic::ELEVATION_SOURCE_LINK);
     initCombo(mPositionTrajectoryTypeCombo,
               POSITION_TRAJECTORY_TYPE_TYPES,
-              ParameterIds::NonAutomatable::POSITION_TRAJECTORY_TYPE); // TODO : remove magic value
+              parameters::statics::POSITION_TRAJECTORY_TYPE); // TODO : remove magic value
     initCombo(mElevationTrajectoryTypeCombo,
               ELEVATION_TRAJECTORY_TYPE_TYPES,
-              ParameterIds::NonAutomatable::ELEVATION_TRAJECTORY_TYPE); // TODO : remove magic value
+              parameters::statics::ELEVATION_TRAJECTORY_TYPE); // TODO : remove magic value
 
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);

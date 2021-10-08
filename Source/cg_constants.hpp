@@ -36,6 +36,20 @@ constexpr Radians MIN_ELEVATION = Degrees{ 0.0f };
 constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 
 //==============================================================================
+// Defaults
+constexpr int DEFAULT_OSC_PORT = 18032;
+constexpr int DEFAULT_OSC_INPUT_PORT = 9000;
+constexpr int DEFAULT_OSC_OUTPUT_PORT = 8000;
+constexpr int DEFAULT_NUM_SOURCES = 2;
+constexpr int DEFAULT_FIRST_SOURCE_ID = 1;
+constexpr int DEFAULT_OSC_OUTPUT_PLUGIN_ID = 1;
+
+constexpr bool DEFAULT_OSC_ACTIVE = true;
+
+extern juce::String const DEFAULT_OSC_ADDRESS;
+extern juce::String const DEFAULT_OSC_OUTPUT_ADDRESS;
+
+//==============================================================================
 // Spatialisation modes.
 enum class SpatMode { dome, cube };
 
@@ -109,9 +123,9 @@ extern juce::StringArray const FIXED_POSITION_DATA_HEADERS;
 
 extern juce::String const FIXED_POSITION_DATA_TAG;
 
-namespace ParameterIds
+namespace parameters
 {
-namespace Automatable
+namespace dynamic
 {
 juce::String extern const X;
 juce::String extern const Y;
@@ -121,14 +135,14 @@ juce::String extern const ELEVATION_SOURCE_LINK;
 juce::String extern const AZIMUTH_SPAN;
 juce::String extern const ELEVATION_SPAN;
 juce::String extern const POSITION_PRESET;
-} // namespace Automatable
+} // namespace dynamic
 
-namespace NonAutomatable
+namespace statics
 {
 juce::String extern const OSC_FORMAT;
 juce::String extern const OSC_PORT;
 juce::String extern const OSC_ADDRESS;
-juce::String extern const OSC_CONNECTED;
+juce::String extern const OSC_ACTIVE;
 juce::String extern const OSC_INPUT_PORT;
 juce::String extern const OSC_INPUT_CONNECTED;
 juce::String extern const OSC_OUTPUT_ADDRESS;
@@ -147,8 +161,8 @@ juce::String extern const ELEVATION_DAMPENING_CYCLES;
 juce::String extern const DEVIATION_PER_CYCLE;
 juce::String extern const CYCLE_DURATION;
 juce::String extern const DURATION_UNIT;
-} // namespace NonAutomatable
+} // namespace statics
 
-} // namespace ParameterIds
+} // namespace parameters
 
 } // namespace gris

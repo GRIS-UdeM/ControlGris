@@ -22,37 +22,49 @@
 
 namespace gris
 {
-juce::String const ParameterIds::Automatable::X{ "recordingTrajectory_x" };
-juce::String const ParameterIds::Automatable::Y{ "recordingTrajectory_y" };
-juce::String const ParameterIds::Automatable::Z{ "recordingTrajectory_z" };
-juce::String const ParameterIds::Automatable::POSITION_SOURCE_LINK{ "sourceLink" };
-juce::String const ParameterIds::Automatable::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
-juce::String const ParameterIds::Automatable::AZIMUTH_SPAN{ "azimuthSpan" };
-juce::String const ParameterIds::Automatable::ELEVATION_SPAN{ "elevationSpan" };
-juce::String const ParameterIds::Automatable::POSITION_PRESET{ "positionPreset" };
+//==============================================================================
+// Plugin parameter tags
 
-juce::String const ParameterIds::NonAutomatable::OSC_FORMAT{ "oscFormat" };
-juce::String const ParameterIds::NonAutomatable::OSC_PORT{ "oscPortNumber" };
-juce::String const ParameterIds::NonAutomatable::OSC_ADDRESS{ "oscAddress" };
-juce::String const ParameterIds::NonAutomatable::OSC_CONNECTED{ "oscConnected" };
-juce::String const ParameterIds::NonAutomatable::OSC_INPUT_PORT{ "oscInputPortNumber" };
-juce::String const ParameterIds::NonAutomatable::OSC_INPUT_CONNECTED{ "oscInputConnected" };
-juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_ADDRESS{ "oscOutputAddress" };
-juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_PORT{ "oscOutputPortNumber" };
-juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_CONNECTED{ "oscOutputConnected" };
-juce::String const ParameterIds::NonAutomatable::NUM_SOURCES{ "numberOfSources" };
-juce::String const ParameterIds::NonAutomatable::FIRST_SOURCE_ID{ "firstSourceId" };
-juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_PLUGIN_ID{ "oscOutputPluginId" };
+juce::String const parameters::dynamic::X{ "recordingTrajectory_x" };
+juce::String const parameters::dynamic::Y{ "recordingTrajectory_y" };
+juce::String const parameters::dynamic::Z{ "recordingTrajectory_z" };
+juce::String const parameters::dynamic::POSITION_SOURCE_LINK{ "sourceLink" };
+juce::String const parameters::dynamic::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
+juce::String const parameters::dynamic::AZIMUTH_SPAN{ "azimuthSpan" };
+juce::String const parameters::dynamic::ELEVATION_SPAN{ "elevationSpan" };
+juce::String const parameters::dynamic::POSITION_PRESET{ "positionPreset" };
 
-juce::String const ParameterIds::NonAutomatable::POSITION_TRAJECTORY_TYPE{ "trajectoryType" };
-juce::String const ParameterIds::NonAutomatable::ELEVATION_TRAJECTORY_TYPE{ "trajectoryTypeAlt" };
-juce::String const ParameterIds::NonAutomatable::POSITION_BACK_AND_FORTH{ "backAndForth" };
-juce::String const ParameterIds::NonAutomatable::ELEVATION_BACK_AND_FORTH{ "backAndForthAlt" };
-juce::String const ParameterIds::NonAutomatable::POSITION_DAMPENING_CYCLES{ "dampeningCycles" };
-juce::String const ParameterIds::NonAutomatable::ELEVATION_DAMPENING_CYCLES{ "dampeningCyclesAlt" };
-juce::String const ParameterIds::NonAutomatable::DEVIATION_PER_CYCLE{ "deviationPerCycle" };
-juce::String const ParameterIds::NonAutomatable::CYCLE_DURATION{ "cycleDuration" };
-juce::String const ParameterIds::NonAutomatable::DURATION_UNIT{ "durationUnit" };
+juce::String const parameters::statics::OSC_FORMAT{ "oscFormat" };
+juce::String const parameters::statics::OSC_PORT{ "oscPortNumber" };
+juce::String const parameters::statics::OSC_ADDRESS{ "oscAddress" };
+juce::String const parameters::statics::OSC_ACTIVE{ "oscConnected" };
+juce::String const parameters::statics::OSC_INPUT_PORT{ "oscInputPortNumber" };
+juce::String const parameters::statics::OSC_INPUT_CONNECTED{ "oscInputConnected" };
+juce::String const parameters::statics::OSC_OUTPUT_ADDRESS{ "oscOutputAddress" };
+juce::String const parameters::statics::OSC_OUTPUT_PORT{ "oscOutputPortNumber" };
+juce::String const parameters::statics::OSC_OUTPUT_CONNECTED{ "oscOutputConnected" };
+juce::String const parameters::statics::NUM_SOURCES{ "numberOfSources" };
+juce::String const parameters::statics::FIRST_SOURCE_ID{ "firstSourceId" };
+juce::String const parameters::statics::OSC_OUTPUT_PLUGIN_ID{ "oscOutputPluginId" };
+
+juce::String const parameters::statics::POSITION_TRAJECTORY_TYPE{ "trajectoryType" };
+juce::String const parameters::statics::ELEVATION_TRAJECTORY_TYPE{ "trajectoryTypeAlt" };
+juce::String const parameters::statics::POSITION_BACK_AND_FORTH{ "backAndForth" };
+juce::String const parameters::statics::ELEVATION_BACK_AND_FORTH{ "backAndForthAlt" };
+juce::String const parameters::statics::POSITION_DAMPENING_CYCLES{ "dampeningCycles" };
+juce::String const parameters::statics::ELEVATION_DAMPENING_CYCLES{ "dampeningCyclesAlt" };
+juce::String const parameters::statics::DEVIATION_PER_CYCLE{ "deviationPerCycle" };
+juce::String const parameters::statics::CYCLE_DURATION{ "cycleDuration" };
+juce::String const parameters::statics::DURATION_UNIT{ "durationUnit" };
+
+//==============================================================================
+// Defaults
+
+juce::String const DEFAULT_OSC_ADDRESS = "127.0.0.1";
+juce::String const DEFAULT_OSC_OUTPUT_ADDRESS = "192.168.1.100";
+
+//==============================================================================
+// Other string values
 
 juce::String const SOURCE_SELECTION_WARNING{ "This source link does not allow individual moves." };
 
