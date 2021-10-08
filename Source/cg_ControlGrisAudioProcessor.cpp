@@ -1240,18 +1240,18 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         };
 
         auto const spatMode{ static_cast<SpatMode>(extract(parameters::statics::OSC_FORMAT, 0)) };
-        auto const oscPort{ extract(parameters::statics::OSC_PORT, 18032) };
-        auto const oscAddress{ extract(parameters::statics::OSC_ADDRESS, juce::String{ "127.0.0.1" }) };
-        auto const oscActive{ extract(parameters::statics::OSC_ACTIVE, true) };
-        auto const numSources{ extract(parameters::statics::NUM_SOURCES, 1) };
-        auto const firstSourceId{ SourceId{ extract(parameters::statics::FIRST_SOURCE_ID, 1) } };
-        auto const oscOutputPluginId{ extract(parameters::statics::OSC_OUTPUT_PLUGIN_ID, 1) };
+        auto const oscPort{ extract(parameters::statics::OSC_PORT, DEFAULT_OSC_PORT) };
+        auto const oscAddress{ extract(parameters::statics::OSC_ADDRESS, DEFAULT_OSC_ADDRESS) };
+        auto const oscActive{ extract(parameters::statics::OSC_ACTIVE, DEFAULT_OSC_ACTIVE) };
+        auto const numSources{ extract(parameters::statics::NUM_SOURCES, DEFAULT_NUM_SOURCES) };
+        auto const firstSourceId{ SourceId{ extract(parameters::statics::FIRST_SOURCE_ID, DEFAULT_FIRST_SOURCE_ID) } };
+        auto const oscOutputPluginId{ extract(parameters::statics::OSC_OUTPUT_PLUGIN_ID,
+                                              DEFAULT_OSC_OUTPUT_PLUGIN_ID) };
         auto const oscInputConnected{ extract(parameters::statics::OSC_INPUT_CONNECTED, false) };
-        auto const oscInputPort{ extract(parameters::statics::OSC_INPUT_PORT, 9000) };
+        auto const oscInputPort{ extract(parameters::statics::OSC_INPUT_PORT, DEFAULT_OSC_INPUT_PORT) };
         auto const oscOutputConnected{ extract(parameters::statics::OSC_OUTPUT_CONNECTED, false) };
-        auto const oscOutputAddress{ extract(parameters::statics::OSC_OUTPUT_ADDRESS,
-                                             juce::String{ "192.168.1.100" }) };
-        auto const oscOutputPort{ extract(parameters::statics::OSC_OUTPUT_ADDRESS, 8000) };
+        auto const oscOutputAddress{ extract(parameters::statics::OSC_OUTPUT_ADDRESS, DEFAULT_OSC_OUTPUT_ADDRESS) };
+        auto const oscOutputPort{ extract(parameters::statics::OSC_OUTPUT_PORT, DEFAULT_OSC_OUTPUT_PORT) };
 
         setSpatMode(spatMode);
         setOscPortNumber(oscPort);
