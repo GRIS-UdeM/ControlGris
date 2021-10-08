@@ -1235,9 +1235,8 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         // Set global settings values.
         //----------------------------
         auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
-        auto const extract = [&](juce::String const & tag, auto const defaultValue) -> decltype(defaultValue) {
-            return static_cast<decltype(defaultValue)>(valueTree.getProperty(tag, defaultValue));
-        };
+        auto const extract = [&](juce::String const & tag, auto const defaultValue) ->
+            typename std::remove_cv<decltype(defaultValue)>::type { return valueTree.getProperty(tag, defaultValue); };
 
         auto const spatMode{ static_cast<SpatMode>(extract(parameters::statics::OSC_FORMAT, 0)) };
         auto const oscPort{ extract(parameters::statics::OSC_PORT, DEFAULT_OSC_PORT) };
