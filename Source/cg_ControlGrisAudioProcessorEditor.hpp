@@ -120,9 +120,6 @@ public:
                                        std::optional<float> z) override;
 
     // SectionTrajectory::Listeners
-    void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
-    void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
-    void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;
     void positionTrajectoryBackAndForthChangedCallback(bool value) override;
     void elevationTrajectoryBackAndForthChangedCallback(bool value) override;
     void positionTrajectoryDampeningCyclesChangedCallback(int value) override;
@@ -143,10 +140,11 @@ public:
     void oscInputConnectionChangedCallback(bool state, int oscPort) override;
     void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) override;
 
+    void repaintPositionField();
+    void repaintElevationField();
+
     void reloadUiState();
     void updateSpanLinkButton(bool state);
-    void updateSourceLinkCombo(PositionSourceLink value);
-    void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);
 
     void refresh();

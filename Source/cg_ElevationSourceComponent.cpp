@@ -65,7 +65,7 @@ void ElevationSourceComponent::mouseDown(juce::MouseEvent const & event)
     mCanDrag = isMoveAllowed(mDisplacementMode, mSource.isPrimarySource(), mTrajectoryManager.getSourceLink());
     if (mCanDrag) {
         if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(Automation::Ids::Z);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().beginGesture(ParameterIds::Automatable::Z);
         }
         setSourcePosition(event);
     } else {
@@ -100,7 +100,7 @@ void ElevationSourceComponent::mouseUp(juce::MouseEvent const & event)
     if (mCanDrag) {
         mouseDrag(event);
         if (mSource.isPrimarySource() || mDisplacementMode == DisplacementMode::all) {
-            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(Automation::Ids::Z);
+            mTrajectoryManager.getProcessor().getChangeGestureManager().endGesture(ParameterIds::Automatable::Z);
         }
     } else {
         mFieldComponent.displayInvalidSourceMoveWarning(false);

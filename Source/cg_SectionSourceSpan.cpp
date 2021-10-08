@@ -32,8 +32,12 @@ SectionSourceSpan::SectionSourceSpan(ControlGrisAudioProcessor & audioProcessor,
     : mAudioProcessor(audioProcessor)
     , mAudioProcessorEditor(audioProcessorEditor)
     , mGrisLookAndFeel(grisLookAndFeel)
-    , mAzimuthSliderAttachment(audioProcessor.getValueTreeState(), Automation::Ids::AZIMUTH_SPAN, mAzimuthSpan)
-    , mElevationSliderAttachment(audioProcessor.getValueTreeState(), Automation::Ids::ELEVATION_SPAN, mElevationSpan)
+    , mAzimuthSliderAttachment(audioProcessor.getValueTreeState(),
+                               ParameterIds::Automatable::AZIMUTH_SPAN,
+                               mAzimuthSpan)
+    , mElevationSliderAttachment(audioProcessor.getValueTreeState(),
+                                 ParameterIds::Automatable::ELEVATION_SPAN,
+                                 mElevationSpan)
 {
     mAzimuthLabel.setText("Azimuth Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);

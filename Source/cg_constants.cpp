@@ -22,45 +22,37 @@
 
 namespace gris
 {
-juce::String const Automation::Ids::X{ "recordingTrajectory_x" };
-juce::String const Automation::Ids::Y{ "recordingTrajectory_y" };
-juce::String const Automation::Ids::Z{ "recordingTrajectory_z" };
-juce::String const Automation::Ids::POSITION_SOURCE_LINK{ "sourceLink" };
-juce::String const Automation::Ids::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
-juce::String const Automation::Ids::AZIMUTH_SPAN{ "azimuthSpan" };
-juce::String const Automation::Ids::ELEVATION_SPAN{ "elevationSpan" };
-juce::String const Automation::Ids::POSITION_PRESET{ "positionPreset" };
+juce::String const ParameterIds::Automatable::X{ "recordingTrajectory_x" };
+juce::String const ParameterIds::Automatable::Y{ "recordingTrajectory_y" };
+juce::String const ParameterIds::Automatable::Z{ "recordingTrajectory_z" };
+juce::String const ParameterIds::Automatable::POSITION_SOURCE_LINK{ "sourceLink" };
+juce::String const ParameterIds::Automatable::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
+juce::String const ParameterIds::Automatable::AZIMUTH_SPAN{ "azimuthSpan" };
+juce::String const ParameterIds::Automatable::ELEVATION_SPAN{ "elevationSpan" };
+juce::String const ParameterIds::Automatable::POSITION_PRESET{ "positionPreset" };
 
-Automation::Enum Automation::idToEnum(const juce::String & name)
-{
-    if (name.compare(Ids::X) == 0) {
-        return Enum::x;
-    }
-    if (name.compare(Ids::Y) == 0) {
-        return Enum::y;
-    }
-    if (name.compare(Ids::Z) == 0) {
-        return Enum::z;
-    }
-    if (name.compare(Ids::POSITION_SOURCE_LINK) == 0) {
-        return Enum::positionSourceLink;
-    }
-    if (name.compare(Ids::ELEVATION_SOURCE_LINK) == 0) {
-        return Enum::elevationSourceLink;
-    }
-    if (name.compare(Ids::AZIMUTH_SPAN) == 0) {
-        return Enum::azimuthSpan;
-    }
-    if (name.compare(Ids::ELEVATION_SPAN) == 0) {
-        return Enum::elevationSpan;
-    }
-    if (name.compare(Ids::POSITION_PRESET) == 0) {
-        return Enum::positionPreset;
-    }
+juce::String const ParameterIds::NonAutomatable::OSC_FORMAT{ "oscFormat" };
+juce::String const ParameterIds::NonAutomatable::OSC_PORT{ "oscPortNumber" };
+juce::String const ParameterIds::NonAutomatable::OSC_ADDRESS{ "oscAddress" };
+juce::String const ParameterIds::NonAutomatable::OSC_CONNECTED{ "oscConnected" };
+juce::String const ParameterIds::NonAutomatable::OSC_INPUT_PORT{ "oscInputPortNumber" };
+juce::String const ParameterIds::NonAutomatable::OSC_INPUT_CONNECTED{ "oscInputConnected" };
+juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_ADDRESS{ "oscOutputAddress" };
+juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_PORT{ "oscOutputPortNumber" };
+juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_CONNECTED{ "oscOutputConnected" };
+juce::String const ParameterIds::NonAutomatable::NUM_SOURCES{ "numberOfSources" };
+juce::String const ParameterIds::NonAutomatable::FIRST_SOURCE_ID{ "firstSourceId" };
+juce::String const ParameterIds::NonAutomatable::OSC_OUTPUT_PLUGIN_ID{ "oscOutputPluginId" };
 
-    jassertfalse;
-    return {};
-}
+juce::String const ParameterIds::NonAutomatable::POSITION_TRAJECTORY_TYPE{ "trajectoryType" };
+juce::String const ParameterIds::NonAutomatable::ELEVATION_TRAJECTORY_TYPE{ "trajectoryTypeAlt" };
+juce::String const ParameterIds::NonAutomatable::POSITION_BACK_AND_FORTH{ "backAndForth" };
+juce::String const ParameterIds::NonAutomatable::ELEVATION_BACK_AND_FORTH{ "backAndForthAlt" };
+juce::String const ParameterIds::NonAutomatable::POSITION_DAMPENING_CYCLES{ "dampeningCycles" };
+juce::String const ParameterIds::NonAutomatable::ELEVATION_DAMPENING_CYCLES{ "dampeningCyclesAlt" };
+juce::String const ParameterIds::NonAutomatable::DEVIATION_PER_CYCLE{ "deviationPerCycle" };
+juce::String const ParameterIds::NonAutomatable::CYCLE_DURATION{ "cycleDuration" };
+juce::String const ParameterIds::NonAutomatable::DURATION_UNIT{ "durationUnit" };
 
 juce::String const SOURCE_SELECTION_WARNING{ "This source link does not allow individual moves." };
 

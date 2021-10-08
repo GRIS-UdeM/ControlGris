@@ -34,45 +34,27 @@ SectionTrajectory::SectionTrajectory(ControlGrisAudioProcessor & audioProcessor,
     mSourceLinkLabel.setText("Sources Link:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSourceLinkLabel);
 
-    mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
-    mPositionSourceLinkComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
-        audioProcessor.getValueTreeState(),
-        Automation::Ids::POSITION_SOURCE_LINK,
-        mPositionSourceLinkCombo);
-    addAndMakeVisible(&mPositionSourceLinkCombo);
+    auto const initCombo
+        = [&](juce::ComboBox & combo, juce::StringArray const & items, juce::String const & parameterId) {
+              combo.addItemList(items, 1);
+              mAttachments.add(std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+                  audioProcessor.getValueTreeState(),
+                  parameterId,
+                  combo));
+              addAndMakeVisible(combo);
+          };
 
-    mElevationSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
-    mElevationSourceLinkCombo.setSelectedId(1);
-    addChildComponent(&mElevationSourceLinkCombo);
-    mElevationSourceLinkCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.elevationSourceLinkChangedCallback(
-                static_cast<ElevationSourceLink>(mElevationSourceLinkCombo.getSelectedId()));
-        });
-    };
+    initCombo(mPositionSourceLinkCombo, POSITION_SOURCE_LINK_TYPES, ParameterIds::Automatable::POSITION_SOURCE_LINK);
+    initCombo(mElevationSourceLinkCombo, ELEVATION_SOURCE_LINK_TYPES, ParameterIds::Automatable::ELEVATION_SOURCE_LINK);
+    initCombo(mPositionTrajectoryTypeCombo,
+              POSITION_TRAJECTORY_TYPE_TYPES,
+              ParameterIds::NonAutomatable::POSITION_TRAJECTORY_TYPE); // TODO : remove magic value
+    initCombo(mElevationTrajectoryTypeCombo,
+              ELEVATION_TRAJECTORY_TYPE_TYPES,
+              ParameterIds::NonAutomatable::ELEVATION_TRAJECTORY_TYPE); // TODO : remove magic value
 
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
-
-    mPositionTrajectoryTypeCombo.addItemList(POSITION_TRAJECTORY_TYPE_TYPES, 1);
-    mPositionTrajectoryTypeCombo.setSelectedId(1);
-    addAndMakeVisible(&mPositionTrajectoryTypeCombo);
-    mPositionTrajectoryTypeCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.positionTrajectoryTypeChangedCallback(
-                static_cast<PositionTrajectoryType>(mPositionTrajectoryTypeCombo.getSelectedId()));
-        });
-    };
-
-    mElevationTrajectoryTypeCombo.addItemList(ELEVATION_TRAJECTORY_TYPE_TYPES, 1);
-    mElevationTrajectoryTypeCombo.setSelectedId(1);
-    addChildComponent(&mElevationTrajectoryTypeCombo);
-    mElevationTrajectoryTypeCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.elevationTrajectoryTypeChangedCallback(
-                static_cast<ElevationTrajectoryType>(mElevationTrajectoryTypeCombo.getSelectedId()));
-        });
-    };
 
     mDurationLabel.setText("Dur per cycle:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDurationLabel);
@@ -219,18 +201,6 @@ void SectionTrajectory::setNumberOfSources(int const numOfSources)
 }
 
 //==============================================================================
-void SectionTrajectory::setTrajectoryType(int const type)
-{
-    mPositionTrajectoryTypeCombo.setSelectedId(type);
-}
-
-//==============================================================================
-void SectionTrajectory::setElevationTrajectoryType(int const type)
-{
-    mElevationTrajectoryTypeCombo.setSelectedId(type);
-}
-
-//==============================================================================
 void SectionTrajectory::setPositionBackAndForth(bool const state)
 {
     mPositionBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
@@ -286,12 +256,6 @@ void SectionTrajectory::setElevationDampeningCycles(int const value)
 void SectionTrajectory::setDeviationPerCycle(float const value)
 {
     mDeviationEditor.setText(juce::String(value));
-}
-
-//==============================================================================
-void SectionTrajectory::setElevationSourceLink(ElevationSourceLink const value)
-{
-    mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================

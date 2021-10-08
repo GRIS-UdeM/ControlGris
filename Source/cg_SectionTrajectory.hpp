@@ -45,9 +45,6 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
-        virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
-        virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
         virtual void positionTrajectoryBackAndForthChangedCallback(bool value) = 0;
         virtual void elevationTrajectoryBackAndForthChangedCallback(bool value) = 0;
         virtual void positionTrajectoryDampeningCyclesChangedCallback(int value) = 0;
@@ -94,7 +91,7 @@ private:
     juce::ComboBox mPositionSourceLinkCombo;
     juce::ComboBox mElevationSourceLinkCombo;
 
-    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> mPositionSourceLinkComboAttachment{};
+    juce::OwnedArray<juce::AudioProcessorValueTreeState::ComboBoxAttachment> mAttachments{};
 
 public:
     //==============================================================================
@@ -114,15 +111,12 @@ public:
 
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
-    void setTrajectoryType(int type);
-    void setElevationTrajectoryType(int type);
     void setPositionBackAndForth(bool state);
     void setElevationBackAndForth(bool state);
     void setPositionDampeningEnabled(bool state);
     void setElevationDampeningEnabled(bool state);
     void setPositionDampeningCycles(int value);
     void setElevationDampeningCycles(int value);
-    void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
@@ -132,16 +126,10 @@ public:
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
-    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
-    juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
-    juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
-
     enum class SymmetricLinkComboState { enabled, disabled };
     void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
-    void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

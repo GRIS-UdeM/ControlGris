@@ -86,8 +86,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
     mSectionTrajectory.addListener(this);
     addAndMakeVisible(mSectionTrajectory);
-    mSectionTrajectory.setElevationSourceLink(
-        static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
     mSectionGeneralSettings.setLookAndFeel(&mGrisLookAndFeel);
     mSectionGeneralSettings.addListener(this);
@@ -160,40 +158,43 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     firstSourceIdChangedCallback(mAudioProcessor.getFirstSourceId());
     numberOfSourcesChangedCallback(mAudioProcessor.getSources().size());
 
-    mSectionOscController.setOscOutputPluginId(mAudioProcessorValueTreeState.state.getProperty("oscOutputPluginId", 1));
+    mSectionOscController.setOscOutputPluginId(
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_OUTPUT_PLUGIN_ID, 1));
     mSectionOscController.setOscReceiveToggleState(
-        mAudioProcessorValueTreeState.state.getProperty("oscInputConnected", false));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_INPUT_CONNECTED, false));
     mSectionOscController.setOscReceiveInputPort(
-        mAudioProcessorValueTreeState.state.getProperty("oscInputPortNumber", 9000));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_INPUT_PORT, 9000));
 
     mSectionOscController.setOscSendToggleState(
-        mAudioProcessorValueTreeState.state.getProperty("oscOutputConnected", false));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_OUTPUT_CONNECTED, false));
     mSectionOscController.setOscSendOutputAddress(
-        mAudioProcessorValueTreeState.state.getProperty("oscOutputAddress", "192.168.1.100"));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_OUTPUT_ADDRESS,
+                                                        "192.168.1.100"));
     mSectionOscController.setOscSendOutputPort(
-        mAudioProcessorValueTreeState.state.getProperty("oscOutputPortNumber", 8000));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::OSC_OUTPUT_PORT, 8000));
 
     // Set state for trajectory box persistent values.
-    //------------------------------------------------
-    mSectionTrajectory.setTrajectoryType(mAudioProcessorValueTreeState.state.getProperty("trajectoryType", 1));
-    mSectionTrajectory.setElevationTrajectoryType(
-        mAudioProcessorValueTreeState.state.getProperty("trajectoryTypeAlt", 1));
-    mSectionTrajectory.setPositionBackAndForth(mAudioProcessorValueTreeState.state.getProperty("backAndForth", false));
+    //-----------------------------------------------
+    mSectionTrajectory.setPositionBackAndForth(
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::POSITION_BACK_AND_FORTH, false));
     mSectionTrajectory.setElevationBackAndForth(
-        mAudioProcessorValueTreeState.state.getProperty("backAndForthAlt", false));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::ELEVATION_BACK_AND_FORTH, false));
     mSectionTrajectory.setPositionDampeningCycles(
-        mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::POSITION_DAMPENING_CYCLES, 0));
     mPositionTrajectoryManager.setPositionDampeningCycles(
-        mAudioProcessorValueTreeState.state.getProperty("dampeningCycles", 0));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::POSITION_DAMPENING_CYCLES, 0));
     mSectionTrajectory.setElevationDampeningCycles(
-        mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::ELEVATION_DAMPENING_CYCLES, 0));
     mElevationTrajectoryManager.setPositionDampeningCycles(
-        mAudioProcessorValueTreeState.state.getProperty("dampeningCyclesAlt", 0));
-    mSectionTrajectory.setDeviationPerCycle(mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0));
-    mPositionTrajectoryManager.setDeviationPerCycle(
-        Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
-    mSectionTrajectory.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
-    mSectionTrajectory.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::ELEVATION_DAMPENING_CYCLES, 0));
+    mSectionTrajectory.setDeviationPerCycle(
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::DEVIATION_PER_CYCLE, 0));
+    mPositionTrajectoryManager.setDeviationPerCycle(Degrees{
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::DEVIATION_PER_CYCLE, 0) });
+    mSectionTrajectory.setCycleDuration(
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::CYCLE_DURATION, 5.0));
+    mSectionTrajectory.setDurationUnit(
+        mAudioProcessorValueTreeState.state.getProperty(ParameterIds::NonAutomatable::DURATION_UNIT, 1));
 
     // Update the position preset box.
     //--------------------------------
@@ -213,7 +214,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
                                                 mAudioProcessor.getSpatMode());
 
     auto const preset{ static_cast<int>(static_cast<float>(
-        mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::POSITION_PRESET).getValue())) };
+        mAudioProcessorValueTreeState.getParameterAsValue(ParameterIds::Automatable::POSITION_PRESET).getValue())) };
     mPositionPresetComponent.setPreset(preset, false);
 
     mIsInsideSetPluginState = false;
@@ -223,30 +224,6 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 {
     mSectionSourceSpan.setSpanLinkState(state);
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
-{
-    auto action = [=]() {
-        mSectionTrajectory.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
-                                                                      juce::NotificationType::dontSendNotification);
-    };
-    auto const isMessageThread{ juce::MessageManager::getInstance()->isThisTheMessageThread() };
-    if (isMessageThread) {
-        action();
-    } else {
-        juce::MessageManager::callAsync(action);
-    }
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
-{
-    juce::MessageManager::callAsync([=] {
-        mSectionTrajectory.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
-                                                                       juce::NotificationType::dontSendNotification);
-    });
 }
 
 //==============================================================================
@@ -497,73 +474,54 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::elevationSourceLinkChangedCallback(ElevationSourceLink const sourceLink)
-{
-    mAudioProcessor.setElevationSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
-
-    auto const howMany{ static_cast<float>(ELEVATION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SOURCE_LINK) };
-    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(
-        Automation::Ids::ELEVATION_SOURCE_LINK) };
-    parameter->setValueNotifyingHost(value);
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::positionTrajectoryTypeChangedCallback(PositionTrajectoryType value)
-{
-    mAudioProcessorValueTreeState.state.setProperty("trajectoryType", static_cast<int>(value), nullptr);
-    mPositionTrajectoryManager.setTrajectoryType(value, mAudioProcessor.getSources()[0].getPos());
-    mPositionField.repaint();
-}
-
-//==============================================================================
-void ControlGrisAudioProcessorEditor::elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value)
-{
-    mAudioProcessorValueTreeState.state.setProperty("trajectoryTypeAlt", static_cast<int>(value), nullptr);
-    mElevationTrajectoryManager.setTrajectoryType(value);
-    mElevationField.repaint();
-}
-
-//==============================================================================
 void ControlGrisAudioProcessorEditor::positionTrajectoryBackAndForthChangedCallback(bool value)
 {
-    mAudioProcessorValueTreeState.state.setProperty("backAndForth", value, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::POSITION_BACK_AND_FORTH,
+                                                    value,
+                                                    nullptr);
     mPositionTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::elevationTrajectoryBackAndForthChangedCallback(bool value)
 {
-    mAudioProcessorValueTreeState.state.setProperty("backAndForthAlt", value, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::ELEVATION_BACK_AND_FORTH,
+                                                    value,
+                                                    nullptr);
     mElevationTrajectoryManager.setPositionBackAndForth(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::positionTrajectoryDampeningCyclesChangedCallback(int value)
 {
-    mAudioProcessorValueTreeState.state.setProperty("dampeningCycles", value, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::POSITION_DAMPENING_CYCLES,
+                                                    value,
+                                                    nullptr);
     mPositionTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::elevationTrajectoryDampeningCyclesChangedCallback(int value)
 {
-    mAudioProcessorValueTreeState.state.setProperty("dampeningCyclesAlt", value, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::ELEVATION_DAMPENING_CYCLES,
+                                                    value,
+                                                    nullptr);
     mElevationTrajectoryManager.setPositionDampeningCycles(value);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryDeviationPerCycleChangedCallback(float degrees)
 {
-    mAudioProcessorValueTreeState.state.setProperty("deviationPerCycle", degrees, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::DEVIATION_PER_CYCLE,
+                                                    degrees,
+                                                    nullptr);
     mPositionTrajectoryManager.setDeviationPerCycle(Degrees{ degrees });
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(double duration, int mode)
 {
-    mAudioProcessorValueTreeState.state.setProperty("cycleDuration", duration, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::CYCLE_DURATION, duration, nullptr);
     double dur = duration;
     if (mode == 2) {
         dur = duration * 60.0 / mAudioProcessor.getBpm();
@@ -575,7 +533,7 @@ void ControlGrisAudioProcessorEditor::trajectoryCycleDurationChangedCallback(dou
 //==============================================================================
 void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(double duration, int mode)
 {
-    mAudioProcessorValueTreeState.state.setProperty("durationUnit", mode, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(ParameterIds::NonAutomatable::DURATION_UNIT, mode, nullptr);
     double dur = duration;
     if (mode == 2) {
         dur = duration * 60.0 / mAudioProcessor.getBpm();
@@ -636,10 +594,11 @@ void ControlGrisAudioProcessorEditor::positionPresetChangedCallback(int const pr
 {
     mAudioProcessor.getPresetsManager().forceLoad(presetNumber);
 
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_PRESET) };
+    auto * parameter{ mAudioProcessorValueTreeState.getParameter(ParameterIds::Automatable::POSITION_PRESET) };
     auto const newValue{ static_cast<float>(presetNumber) / static_cast<float>(NUMBER_OF_POSITION_PRESETS) };
 
-    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::POSITION_PRESET) };
+    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(
+        ParameterIds::Automatable::POSITION_PRESET) };
     parameter->setValueNotifyingHost(newValue);
 
     mAudioProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
@@ -688,6 +647,18 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool co
     } else {
         mAudioProcessor.disconnectOscOutput(oscAddress, oscPort);
     }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::repaintPositionField()
+{
+    mPositionField.repaint();
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::repaintElevationField()
+{
+    mElevationField.repaint();
 }
 
 //==============================================================================

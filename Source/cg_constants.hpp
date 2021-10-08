@@ -109,9 +109,9 @@ extern juce::StringArray const FIXED_POSITION_DATA_HEADERS;
 
 extern juce::String const FIXED_POSITION_DATA_TAG;
 
-namespace Automation
+namespace ParameterIds
 {
-namespace Ids
+namespace Automatable
 {
 juce::String extern const X;
 juce::String extern const Y;
@@ -121,12 +121,34 @@ juce::String extern const ELEVATION_SOURCE_LINK;
 juce::String extern const AZIMUTH_SPAN;
 juce::String extern const ELEVATION_SPAN;
 juce::String extern const POSITION_PRESET;
-} // namespace Ids
+} // namespace Automatable
 
-enum class Enum { x, y, z, positionSourceLink, elevationSourceLink, azimuthSpan, elevationSpan, positionPreset };
+namespace NonAutomatable
+{
+juce::String extern const OSC_FORMAT;
+juce::String extern const OSC_PORT;
+juce::String extern const OSC_ADDRESS;
+juce::String extern const OSC_CONNECTED;
+juce::String extern const OSC_INPUT_PORT;
+juce::String extern const OSC_INPUT_CONNECTED;
+juce::String extern const OSC_OUTPUT_ADDRESS;
+juce::String extern const OSC_OUTPUT_PORT;
+juce::String extern const OSC_OUTPUT_CONNECTED;
+juce::String extern const NUM_SOURCES;
+juce::String extern const FIRST_SOURCE_ID;
+juce::String extern const OSC_OUTPUT_PLUGIN_ID;
 
-Enum idToEnum(juce::String const & name);
+juce::String extern const POSITION_TRAJECTORY_TYPE;
+juce::String extern const ELEVATION_TRAJECTORY_TYPE;
+juce::String extern const POSITION_BACK_AND_FORTH;
+juce::String extern const ELEVATION_BACK_AND_FORTH;
+juce::String extern const POSITION_DAMPENING_CYCLES;
+juce::String extern const ELEVATION_DAMPENING_CYCLES;
+juce::String extern const DEVIATION_PER_CYCLE;
+juce::String extern const CYCLE_DURATION;
+juce::String extern const DURATION_UNIT;
+} // namespace NonAutomatable
 
-} // namespace Automation
+} // namespace ParameterIds
 
 } // namespace gris
