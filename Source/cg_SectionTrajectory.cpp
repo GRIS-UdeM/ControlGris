@@ -20,12 +20,14 @@
 
 #include "cg_SectionTrajectory.hpp"
 
+#include "cg_ControlGrisAudioProcessor.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionTrajectory::SectionTrajectory(ControlGrisAudioProcessor & audioProcessor, GrisLookAndFeel & grisLookAndFeel)
+    : mGrisLookAndFeel(grisLookAndFeel)
 {
     mSpatMode = SpatMode::dome;
 
@@ -33,14 +35,11 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     addAndMakeVisible(&mSourceLinkLabel);
 
     mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
-    mPositionSourceLinkCombo.setSelectedId(1);
+    mPositionSourceLinkComboAttachment = std::make_unique<juce::AudioProcessorValueTreeState::ComboBoxAttachment>(
+        audioProcessor.getValueTreeState(),
+        Automation::Ids::POSITION_SOURCE_LINK,
+        mPositionSourceLinkCombo);
     addAndMakeVisible(&mPositionSourceLinkCombo);
-    mPositionSourceLinkCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.positionSourceLinkChangedCallback(
-                static_cast<PositionSourceLink>(mPositionSourceLinkCombo.getSelectedId()));
-        });
-    };
 
     mElevationSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
     mElevationSourceLinkCombo.setSelectedId(1);
@@ -216,13 +215,7 @@ void SectionTrajectory::setNumberOfSources(int const numOfSources)
         mElevationSourceLinkCombo.setEnabled(true);
     }
 
-    if (numOfSources == 2) {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), true);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), true);
-    } else {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), false);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), false);
-    }
+    setSymmetricLinkComboState(numOfSources == 2);
 }
 
 //==============================================================================
@@ -293,12 +286,6 @@ void SectionTrajectory::setElevationDampeningCycles(int const value)
 void SectionTrajectory::setDeviationPerCycle(float const value)
 {
     mDeviationEditor.setText(juce::String(value));
-}
-
-//==============================================================================
-void SectionTrajectory::setPositionSourceLink(PositionSourceLink const value)
-{
-    mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================

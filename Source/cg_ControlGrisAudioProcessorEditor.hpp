@@ -120,7 +120,6 @@ public:
                                        std::optional<float> z) override;
 
     // SectionTrajectory::Listeners
-    void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
     void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
     void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
     void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;

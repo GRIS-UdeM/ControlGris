@@ -39,7 +39,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mPositionField(audioProcessor.getSources(), positionTrajectoryManager)
     , mElevationField(audioProcessor.getSources(), elevationTrajectoryManager)
     , mSectionSourceSpan(audioProcessor, *this, mGrisLookAndFeel)
-    , mSectionTrajectory(mGrisLookAndFeel)
+    , mSectionTrajectory(audioProcessor, mGrisLookAndFeel)
     , mSectionGeneralSettings(mGrisLookAndFeel)
     , mSectionSourcePosition(mGrisLookAndFeel, audioProcessor.getSpatMode())
     , mSectionOscController(mGrisLookAndFeel)
@@ -86,7 +86,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
     mSectionTrajectory.addListener(this);
     addAndMakeVisible(mSectionTrajectory);
-    mSectionTrajectory.setPositionSourceLink(mPositionTrajectoryManager.getSourceLink());
     mSectionTrajectory.setElevationSourceLink(
         static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
@@ -495,20 +494,6 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked()
     mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
                                                 mSelectedSource,
                                                 mAudioProcessor.getSpatMode());
-}
-
-//==============================================================================
-// SectionTrajectory::Listener callbacks.
-void ControlGrisAudioProcessorEditor::positionSourceLinkChangedCallback(PositionSourceLink const sourceLink)
-{
-    mAudioProcessor.setPositionSourceLink(sourceLink, SourceLinkEnforcer::OriginOfChange::user);
-
-    auto const howMany{ static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1) };
-    auto const value{ (static_cast<float>(sourceLink) - 1.0f) / howMany };
-    auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::POSITION_SOURCE_LINK) };
-    auto const gestureLock{ mAudioProcessor.getChangeGestureManager().getScopedLock(
-        Automation::Ids::POSITION_SOURCE_LINK) };
-    parameter->setValueNotifyingHost(value);
 }
 
 //==============================================================================

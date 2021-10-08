@@ -27,6 +27,7 @@
 
 namespace gris
 {
+class ControlGrisAudioProcessor;
 //==============================================================================
 class SectionTrajectory final : public juce::Component
 {
@@ -44,7 +45,6 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
         virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
         virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
         virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
@@ -94,9 +94,11 @@ private:
     juce::ComboBox mPositionSourceLinkCombo;
     juce::ComboBox mElevationSourceLinkCombo;
 
+    std::unique_ptr<juce::AudioProcessorValueTreeState::ComboBoxAttachment> mPositionSourceLinkComboAttachment{};
+
 public:
     //==============================================================================
-    explicit SectionTrajectory(GrisLookAndFeel & grisLookAndFeel);
+    SectionTrajectory(ControlGrisAudioProcessor & audioProcessor, GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
     SectionTrajectory() = delete;
     ~SectionTrajectory() override = default;
@@ -120,7 +122,6 @@ public:
     void setElevationDampeningEnabled(bool state);
     void setPositionDampeningCycles(int value);
     void setElevationDampeningCycles(int value);
-    void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
