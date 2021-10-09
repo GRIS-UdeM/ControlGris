@@ -159,18 +159,20 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     numberOfSourcesChangedCallback(mAudioProcessor.getSources().size());
 
     mSectionOscController.setOscOutputPluginId(
-        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PLUGIN_ID, 1));
+        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PLUGIN_ID,
+                                                        DEFAULT_OSC_OUTPUT_PLUGIN_ID));
     mSectionOscController.setOscReceiveToggleState(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_INPUT_CONNECTED, false));
     mSectionOscController.setOscReceiveInputPort(
-        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_INPUT_PORT, 9000));
+        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_INPUT_PORT, DEFAULT_OSC_INPUT_PORT));
 
     mSectionOscController.setOscSendToggleState(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_CONNECTED, false));
     mSectionOscController.setOscSendOutputAddress(
-        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_ADDRESS, "192.168.1.100"));
+        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_ADDRESS,
+                                                        DEFAULT_OSC_OUTPUT_ADDRESS));
     mSectionOscController.setOscSendOutputPort(
-        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PORT, 8000));
+        mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PORT, DEFAULT_OSC_OUTPUT_PORT));
 
     // Set state for trajectory box persistent values.
     //-----------------------------------------------
@@ -220,7 +222,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
+void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool const state)
 {
     mSectionSourceSpan.setSpanLinkState(state);
 }
