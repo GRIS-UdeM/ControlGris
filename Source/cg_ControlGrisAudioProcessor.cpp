@@ -1236,60 +1236,61 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 
     auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
-    if (xmlState != nullptr) {
-        // Set global settings values.
-        //----------------------------
-        auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
-        auto const extract = [&](juce::String const & tag, auto const defaultValue) ->
-            typename std::remove_cv<decltype(defaultValue)>::type { return valueTree.getProperty(tag, defaultValue); };
-
-        auto const spatMode{ static_cast<SpatMode>(extract(parameters::statics::OSC_FORMAT, 0)) };
-        auto const oscPort{ extract(parameters::statics::OSC_PORT, DEFAULT_OSC_PORT) };
-        auto const oscAddress{ extract(parameters::statics::OSC_ADDRESS, DEFAULT_OSC_ADDRESS) };
-        auto const oscActive{ extract(parameters::statics::OSC_ACTIVE, DEFAULT_OSC_ACTIVE) };
-        auto const numSources{ extract(parameters::statics::NUM_SOURCES, DEFAULT_NUM_SOURCES) };
-        auto const firstSourceId{ SourceId{ extract(parameters::statics::FIRST_SOURCE_ID, DEFAULT_FIRST_SOURCE_ID) } };
-        auto const oscOutputPluginId{ extract(parameters::statics::OSC_OUTPUT_PLUGIN_ID,
-                                              DEFAULT_OSC_OUTPUT_PLUGIN_ID) };
-        auto const oscInputConnected{ extract(parameters::statics::OSC_INPUT_CONNECTED, false) };
-        auto const oscInputPort{ extract(parameters::statics::OSC_INPUT_PORT, DEFAULT_OSC_INPUT_PORT) };
-        auto const oscOutputConnected{ extract(parameters::statics::OSC_OUTPUT_CONNECTED, false) };
-        auto const oscOutputAddress{ extract(parameters::statics::OSC_OUTPUT_ADDRESS, DEFAULT_OSC_OUTPUT_ADDRESS) };
-        auto const oscOutputPort{ extract(parameters::statics::OSC_OUTPUT_PORT, DEFAULT_OSC_OUTPUT_PORT) };
-
-        setSpatMode(spatMode);
-        setOscPortNumber(oscPort);
-        setOscAddress(oscAddress);
-        setOscActive(oscActive);
-        setNumberOfSources(numSources);
-        setFirstSourceId(firstSourceId);
-        setOscOutputPluginId(oscOutputPluginId);
-
-        if (oscInputConnected) {
-            [[maybe_unused]] auto const success{ createOscInputConnection(oscInputPort) };
-            jassert(success);
-        }
-
-        if (oscOutputConnected) {
-            [[maybe_unused]] auto const success{ createOscOutputConnection(oscOutputAddress, oscOutputPort) };
-            jassert(success);
-        }
-
-        // Load saved fixed positions.
-        //----------------------------
-        auto * positionData{ xmlState->getChildByName(FIXED_POSITION_DATA_TAG) };
-        if (positionData) {
-            mFixPositionData.deleteAllChildElements();
-            mFixPositionData = *positionData;
-            mPositionSourceLinkEnforcer.enforceSourceLink();
-            if (mSpatMode == SpatMode::cube) {
-                mElevationSourceLinkEnforcer.enforceSourceLink();
-            }
-        }
-        // Replace the state and call automated parameter current values.
-        //---------------------------------------------------------------
-        mAudioProcessorValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+    if (xmlState == nullptr) {
+        return;
     }
+
+    // Set global settings values.
+    //----------------------------
+    auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
+    auto const extract = [&](juce::String const & tag, auto const defaultValue) ->
+        typename std::remove_cv<decltype(defaultValue)>::type { return valueTree.getProperty(tag, defaultValue); };
+
+    auto const spatMode{ static_cast<SpatMode>(extract(parameters::statics::OSC_FORMAT, 0)) };
+    auto const oscPort{ extract(parameters::statics::OSC_PORT, DEFAULT_OSC_PORT) };
+    auto const oscAddress{ extract(parameters::statics::OSC_ADDRESS, DEFAULT_OSC_ADDRESS) };
+    auto const oscActive{ extract(parameters::statics::OSC_ACTIVE, DEFAULT_OSC_ACTIVE) };
+    auto const numSources{ extract(parameters::statics::NUM_SOURCES, DEFAULT_NUM_SOURCES) };
+    auto const firstSourceId{ SourceId{ extract(parameters::statics::FIRST_SOURCE_ID, DEFAULT_FIRST_SOURCE_ID) } };
+    auto const oscOutputPluginId{ extract(parameters::statics::OSC_OUTPUT_PLUGIN_ID, DEFAULT_OSC_OUTPUT_PLUGIN_ID) };
+    auto const oscInputConnected{ extract(parameters::statics::OSC_INPUT_CONNECTED, false) };
+    auto const oscInputPort{ extract(parameters::statics::OSC_INPUT_PORT, DEFAULT_OSC_INPUT_PORT) };
+    auto const oscOutputConnected{ extract(parameters::statics::OSC_OUTPUT_CONNECTED, false) };
+    auto const oscOutputAddress{ extract(parameters::statics::OSC_OUTPUT_ADDRESS, DEFAULT_OSC_OUTPUT_ADDRESS) };
+    auto const oscOutputPort{ extract(parameters::statics::OSC_OUTPUT_PORT, DEFAULT_OSC_OUTPUT_PORT) };
+
+    setSpatMode(spatMode);
+    setOscPortNumber(oscPort);
+    setOscAddress(oscAddress);
+    setOscActive(oscActive);
+    setNumberOfSources(numSources);
+    setFirstSourceId(firstSourceId);
+    setOscOutputPluginId(oscOutputPluginId);
+
+    if (oscInputConnected) {
+        [[maybe_unused]] auto const success{ createOscInputConnection(oscInputPort) };
+        jassert(success);
+    }
+
+    if (oscOutputConnected) {
+        [[maybe_unused]] auto const success{ createOscOutputConnection(oscOutputAddress, oscOutputPort) };
+        jassert(success);
+    }
+
+    // Load saved fixed positions.
+    //----------------------------
+    auto * positionData{ xmlState->getChildByName(FIXED_POSITION_DATA_TAG) };
+    if (positionData) {
+        mFixPositionData.deleteAllChildElements();
+        mFixPositionData = *positionData;
+        mPositionSourceLinkEnforcer.enforceSourceLink();
+        if (mSpatMode == SpatMode::cube) {
+            mElevationSourceLinkEnforcer.enforceSourceLink();
+        }
+    }
+    // Replace the state and call automated parameter current values.
+    //---------------------------------------------------------------
+    mAudioProcessorValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
 
     setPluginState();
 }
