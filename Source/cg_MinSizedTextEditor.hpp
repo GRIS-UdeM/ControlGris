@@ -57,10 +57,7 @@ private:
 
 public:
     //==============================================================================
-    SpatTextEditor(juce::String const & label,
-                   juce::String const & tooltip,
-                   Listener & listener,
-                   GrisLookAndFeel & lookAndFeel);
+    SpatTextEditor(juce::String const & label, juce::String const & tooltip, Listener & listener);
     ~SpatTextEditor() override = default;
     //==============================================================================
     SpatTextEditor(SpatTextEditor const &) = delete;

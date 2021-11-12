@@ -208,10 +208,7 @@ private:
 
 public:
     //==============================================================================
-    explicit LayoutComponent(Orientation orientation,
-                             bool isHorizontalScrollable,
-                             bool isVerticalScrollable,
-                             GrisLookAndFeel & lookAndFeel) noexcept;
+    explicit LayoutComponent(Orientation orientation, bool isHorizontalScrollable, bool isVerticalScrollable) noexcept;
     ~LayoutComponent() override = default;
     //==============================================================================
     LayoutComponent(LayoutComponent const &) = delete;

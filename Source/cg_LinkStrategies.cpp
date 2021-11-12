@@ -229,7 +229,7 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
     mPrimarySourceFinalAngle = Radians::angleOf(primarySourceFinalPosition);
-    mDeviationPerSource = Degrees{ 360.0f } / finalStates.size();
+    mDeviationPerSource = Degrees{ 360.0f } / narrow<float>(finalStates.size());
     auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
     mRotation = mPrimarySourceFinalAngle - primarySourceInitialAngle;
 
@@ -275,7 +275,7 @@ void CircularFixedAngle::enforce_implementation(Sources & finalStates,
 {
     auto const ordering{ mOrdering[sourceIndex.get()] };
 
-    auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
+    auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * narrow<float>(ordering) };
     auto const initialRadius{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
     auto const finalRadius{ initialRadius * mRadiusRatio };
     juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
@@ -322,7 +322,7 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
     mPrimarySourceFinalAngle = Radians::angleOf(primarySourceFinalPosition);
-    mDeviationPerSource = Degrees{ 360.0f } / finalStates.size();
+    mDeviationPerSource = Degrees{ 360.0f } / narrow<float>(finalStates.size());
     auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
     mRotation = mPrimarySourceFinalAngle - primarySourceInitialAngle;
 
@@ -367,7 +367,7 @@ void CircularFullyFixed::enforce_implementation(Sources & finalStates,
 {
     auto const ordering{ mOrdering[sourceIndex.get()] };
 
-    auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
+    auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * narrow<float>(ordering) };
     juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * mRadius,
                                             std::sin(finalAngle.getAsRadians()) * mRadius };
 
@@ -517,7 +517,7 @@ SourceSnapshot FixedElevation::computeInitialStateFromFinalState_implementation(
 void LinearMin::computeParameters_implementation(Sources const & sources, SourcesSnapshots const & /*snapshots*/)
 {
     mBaseElevation = sources.getPrimarySource().getElevation();
-    mElevationPerSource = ELEVATION_DIFF / (sources.size() - 1);
+    mElevationPerSource = ELEVATION_DIFF / narrow<float>(sources.size() - 1);
 }
 
 //==============================================================================
@@ -525,7 +525,7 @@ void LinearMin::enforce_implementation(Sources & finalStates,
                                        SourcesSnapshots const & /*initialStates*/,
                                        SourceIndex const sourceIndex) const
 {
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.get() };
+    auto const newElevation{ mBaseElevation + mElevationPerSource * narrow<float>(sourceIndex.get()) };
     finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 
@@ -535,7 +535,7 @@ SourceSnapshot LinearMin::computeInitialStateFromFinalState_implementation([[may
                                                                            SourceIndex const sourceIndex) const
 {
     SourceSnapshot result{};
-    result.z = mBaseElevation - mElevationPerSource * sourceIndex.get();
+    result.z = mBaseElevation - mElevationPerSource * narrow<float>(sourceIndex.get());
     return result;
 }
 
@@ -543,7 +543,7 @@ SourceSnapshot LinearMin::computeInitialStateFromFinalState_implementation([[may
 void LinearMax::computeParameters_implementation(Sources const & sources, SourcesSnapshots const & /*snapshots*/)
 {
     mBaseElevation = sources.getPrimarySource().getElevation();
-    mElevationPerSource = ELEVATION_DIFF / (sources.size() - 1);
+    mElevationPerSource = ELEVATION_DIFF / narrow<float>(sources.size() - 1);
 }
 
 //==============================================================================
@@ -551,7 +551,7 @@ void LinearMax::enforce_implementation(Sources & finalStates,
                                        SourcesSnapshots const & /*initialStates*/,
                                        SourceIndex const sourceIndex) const
 {
-    auto const newElevation{ mBaseElevation + mElevationPerSource * sourceIndex.get() };
+    auto const newElevation{ mBaseElevation + mElevationPerSource * narrow<float>(sourceIndex.get()) };
     finalStates[sourceIndex].setElevation(newElevation, Source::OriginOfChange::link);
 }
 

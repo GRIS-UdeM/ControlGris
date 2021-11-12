@@ -30,8 +30,7 @@ static auto const MAX_ELEM = [](auto const a, auto const b) {
 //==============================================================================
 LayoutComponent::LayoutComponent(Orientation const orientation,
                                  bool const isHorizontalScrollable,
-                                 bool const isVerticalScrollable,
-                                 GrisLookAndFeel & lookAndFeel) noexcept
+                                 bool const isVerticalScrollable) noexcept
     : mOrientation(orientation)
     , mIsHorizontalScrollable(isHorizontalScrollable)
     , mIsVerticalScrollable(isVerticalScrollable)

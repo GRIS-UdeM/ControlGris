@@ -247,7 +247,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 //==============================================================================
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
-    disconnectOsc();
+    [[maybe_unused]] auto const success{ disconnectOsc() };
+    jassert(success);
 }
 
 //==============================================================================
@@ -401,7 +402,8 @@ void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
     mCurrentOscPort = oscPortNumber;
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_PORT, oscPortNumber, nullptr);
-    createOscConnection(mCurrentOscAddress, oscPortNumber);
+    [[maybe_unused]] auto const success{ createOscConnection(mCurrentOscAddress, oscPortNumber) };
+    jassert(success);
 }
 
 //==============================================================================
@@ -409,7 +411,8 @@ void ControlGrisAudioProcessor::setOscAddress(juce::String const & address)
 {
     mCurrentOscAddress = address;
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_ADDRESS, address, nullptr);
-    createOscConnection(address, mCurrentOscPort);
+    [[maybe_unused]] auto const success{ createOscConnection(address, mCurrentOscPort) };
+    jassert(success);
 }
 
 //==============================================================================
@@ -534,7 +537,8 @@ void ControlGrisAudioProcessor::sendOscMessage()
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
 {
-    disconnectOscInput(oscPort);
+    [[maybe_unused]] auto const success{ disconnectOscInput(oscPort) };
+    jassert(success);
 
     mOscInputConnected = mOscInputReceiver.connect(oscPort);
     if (!mOscInputConnected) {
@@ -710,7 +714,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscOutputConnection(juce::String const & oscAddress, int const oscPort)
 {
-    disconnectOscOutput(oscAddress, oscPort);
+    [[maybe_unused]] auto const success{ disconnectOscOutput(oscAddress, oscPort) };
+    jassert(success);
 
     mOscOutputConnected = mOscOutputSender.connect(oscAddress, oscPort);
     if (!mOscOutputConnected)
@@ -1261,11 +1266,13 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         setOscOutputPluginId(oscOutputPluginId);
 
         if (oscInputConnected) {
-            createOscInputConnection(oscInputPort);
+            [[maybe_unused]] auto const success{ createOscInputConnection(oscInputPort) };
+            jassert(success);
         }
 
         if (oscOutputConnected) {
-            createOscOutputConnection(oscOutputAddress, oscOutputPort);
+            [[maybe_unused]] auto const success{ createOscOutputConnection(oscOutputAddress, oscOutputPort) };
+            jassert(success);
         }
 
         // Load saved fixed positions.
