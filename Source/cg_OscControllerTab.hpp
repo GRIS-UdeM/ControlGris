@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -27,7 +27,7 @@
 namespace gris
 {
 //==============================================================================
-class SectionOscController final
+class OscControllerTab final
     : public juce::Component
     , public juce::TextEditor::Listener
 {
@@ -63,16 +63,16 @@ private:
 
 public:
     //==============================================================================
-    explicit SectionOscController(GrisLookAndFeel & grisLookAndFeel);
+    explicit OscControllerTab(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    SectionOscController() = delete;
-    ~SectionOscController() override { setLookAndFeel(nullptr); } // TODO : necessary ?
+    OscControllerTab() = delete;
+    ~OscControllerTab() override { setLookAndFeel(nullptr); } // TODO : necessary ?
 
-    SectionOscController(SectionOscController const &) = delete;
-    SectionOscController(SectionOscController &&) = delete;
+    OscControllerTab(OscControllerTab const &) = delete;
+    OscControllerTab(OscControllerTab &&) = delete;
 
-    SectionOscController & operator=(SectionOscController const &) = delete;
-    SectionOscController & operator=(SectionOscController &&) = delete;
+    OscControllerTab & operator=(OscControllerTab const &) = delete;
+    OscControllerTab & operator=(OscControllerTab &&) = delete;
     //==============================================================================
     void textEditorReturnKeyPressed([[maybe_unused]] juce::TextEditor & editor) override { unfocusAllComponents(); }
     void paint(juce::Graphics &) override;
@@ -92,7 +92,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SectionOscController)
+    JUCE_LEAK_DETECTOR(OscControllerTab)
 };
 
 } // namespace gris

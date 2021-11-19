@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *

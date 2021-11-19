@@ -71,36 +71,22 @@
               resource="0" file="Source/cg_ControlGrisLookAndFeel.cpp"/>
         <FILE id="TZznEU" name="cg_ControlGrisLookAndFeel.hpp" compile="0"
               resource="0" file="Source/cg_ControlGrisLookAndFeel.hpp"/>
-        <FILE id="pMKjMl" name="cg_LayoutComponent.cpp" compile="1" resource="0"
-              file="Source/cg_LayoutComponent.cpp"/>
-        <FILE id="jroCHS" name="cg_LayoutComponent.hpp" compile="0" resource="0"
-              file="Source/cg_LayoutComponent.hpp"/>
-        <FILE id="CFujJ5" name="cg_MinSizedComponent.hpp" compile="0" resource="0"
-              file="Source/cg_MinSizedComponent.hpp"/>
-        <FILE id="PwwAKY" name="cg_MinSizedSlider.cpp" compile="1" resource="0"
-              file="Source/cg_MinSizedSlider.cpp"/>
-        <FILE id="xIqcQI" name="cg_MinSizedSlider.hpp" compile="0" resource="0"
-              file="Source/cg_MinSizedSlider.hpp"/>
-        <FILE id="T0BqJP" name="cg_MinSizedTextEditor.cpp" compile="1" resource="0"
-              file="Source/cg_MinSizedTextEditor.cpp"/>
-        <FILE id="OzeJGV" name="cg_MinSizedTextEditor.hpp" compile="0" resource="0"
-              file="Source/cg_MinSizedTextEditor.hpp"/>
-        <FILE id="HI1dem" name="cg_SectionGeneralSettings.cpp" compile="1"
-              resource="0" file="Source/cg_SectionGeneralSettings.cpp"/>
-        <FILE id="qBqct9" name="cg_SectionGeneralSettings.hpp" compile="0"
-              resource="0" file="Source/cg_SectionGeneralSettings.hpp"/>
-        <FILE id="WJNM89" name="cg_SectionOscController.cpp" compile="1" resource="0"
-              file="Source/cg_SectionOscController.cpp"/>
-        <FILE id="lmO3cO" name="cg_SectionOscController.hpp" compile="0" resource="0"
-              file="Source/cg_SectionOscController.hpp"/>
+        <FILE id="HI1dem" name="cg_GeneralSettingsTab.cpp" compile="1" resource="0"
+              file="Source/cg_GeneralSettingsTab.cpp"/>
+        <FILE id="qBqct9" name="cg_GeneralSettingsTab.hpp" compile="0" resource="0"
+              file="Source/cg_GeneralSettingsTab.hpp"/>
+        <FILE id="WJNM89" name="cg_OscControllerTab.cpp" compile="1" resource="0"
+              file="Source/cg_OscControllerTab.cpp"/>
+        <FILE id="lmO3cO" name="cg_OscControllerTab.hpp" compile="0" resource="0"
+              file="Source/cg_OscControllerTab.hpp"/>
         <FILE id="IqJ0vG" name="cg_SectionPositionPresets.cpp" compile="1"
               resource="0" file="Source/cg_SectionPositionPresets.cpp"/>
         <FILE id="fzL7XR" name="cg_SectionPositionPresets.hpp" compile="0"
               resource="0" file="Source/cg_SectionPositionPresets.hpp"/>
-        <FILE id="tr9Qib" name="cg_SectionSourcePosition.cpp" compile="1" resource="0"
-              file="Source/cg_SectionSourcePosition.cpp"/>
-        <FILE id="nU1MFT" name="cg_SectionSourcePosition.hpp" compile="0" resource="0"
-              file="Source/cg_SectionSourcePosition.hpp"/>
+        <FILE id="tr9Qib" name="cg_SourcePositionTab.cpp" compile="1" resource="0"
+              file="Source/cg_SourcePositionTab.cpp"/>
+        <FILE id="nU1MFT" name="cg_SourcePositionTab.hpp" compile="0" resource="0"
+              file="Source/cg_SourcePositionTab.hpp"/>
         <FILE id="tMh8VU" name="cg_SectionSourceSpan.cpp" compile="1" resource="0"
               file="Source/cg_SectionSourceSpan.cpp"/>
         <FILE id="qmk3iz" name="cg_SectionSourceSpan.hpp" compile="0" resource="0"
@@ -109,10 +95,6 @@
               file="Source/cg_SectionTrajectory.cpp"/>
         <FILE id="PxuaoO" name="cg_SectionTrajectory.hpp" compile="0" resource="0"
               file="Source/cg_SectionTrajectory.hpp"/>
-        <FILE id="acz4Ei" name="cg_TitledComponent.cpp" compile="1" resource="0"
-              file="Source/cg_TitledComponent.cpp"/>
-        <FILE id="ZPfmQN" name="cg_TitledComponent.hpp" compile="0" resource="0"
-              file="Source/cg_TitledComponent.hpp"/>
       </GROUP>
       <FILE id="xmyiNi" name="cg_ChangeGesturesManager.cpp" compile="1" resource="0"
             file="Source/cg_ChangeGesturesManager.cpp"/>

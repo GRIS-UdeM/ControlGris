@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -18,12 +18,12 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SectionOscController.hpp"
+#include "cg_OscControllerTab.hpp"
 
 namespace gris
 {
 //==============================================================================
-SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+OscControllerTab::OscControllerTab(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscOutputPluginIdLabel.setText("OSC output plugin ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscOutputPluginIdLabel);
@@ -141,46 +141,46 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
 }
 
 //==============================================================================
-void SectionOscController::setOscReceiveInputPort(int const port)
+void OscControllerTab::setOscReceiveInputPort(int const port)
 {
     mLastOscReceivePort = port;
     mOscReceivePortEditor.setText(juce::String(port));
 }
 
 //==============================================================================
-void SectionOscController::setOscSendOutputPort(int const port)
+void OscControllerTab::setOscSendOutputPort(int const port)
 {
     mLastOscSendPort = port;
     mOscSendPortEditor.setText(juce::String{ port });
 }
 
 //==============================================================================
-void SectionOscController::setOscReceiveToggleState(bool const state)
+void OscControllerTab::setOscReceiveToggleState(bool const state)
 {
     mOscReceiveToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionOscController::setOscSendToggleState(bool const state)
+void OscControllerTab::setOscSendToggleState(bool const state)
 {
     mOscSendToggle.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionOscController::setOscSendOutputAddress(juce::String const & address)
+void OscControllerTab::setOscSendOutputAddress(juce::String const & address)
 {
     mLastOscSendAddress = address;
     mOscSendIpEditor.setText(address);
 }
 
 //==============================================================================
-void SectionOscController::paint(juce::Graphics & g)
+void OscControllerTab::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SectionOscController::resized()
+void OscControllerTab::resized()
 {
     mOscOutputPluginIdLabel.setBounds(5, 10, 135, 20);
     mOscOutputPluginIdEditor.setBounds(140, 10, 70, 20);

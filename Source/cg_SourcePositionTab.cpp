@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -18,14 +18,15 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SectionSourcePosition.hpp"
+#include "cg_SourcePositionTab.hpp"
 
+#include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+DomeControls::DomeControls(SourcePositionTab & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
     mCurrentAzimuth = {};
     mCurrentElevation = MAX_ELEVATION;
@@ -40,7 +41,7 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
         mCurrentElevation = MAX_ELEVATION * static_cast<float>(1.0 - mElevationSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SourcePositionTab::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,
                                             mCurrentElevation,
@@ -60,7 +61,7 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     addAndMakeVisible(&mAzimuthSlider);
     mAzimuthSlider.onValueChange = [this] {
         mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
-        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SourcePositionTab::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             mCurrentAzimuth,
                                             std::nullopt,
@@ -91,7 +92,7 @@ void DomeControls::updateSliderValues(Source * source)
 }
 
 //==============================================================================
-CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+CubeControls::CubeControls(SourcePositionTab & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
 {
     auto const initLabel = [&](juce::Label & label, juce::String const & text) {
         label.setText(text + ":", juce::NotificationType::dontSendNotification);
@@ -117,7 +118,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
 
     mXSlider.onValueChange = [this] {
         mCurrentX = static_cast<float>(mXSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SourcePositionTab::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,
                                             std::nullopt,
@@ -128,7 +129,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     };
     mYSlider.onValueChange = [this] {
         mCurrentY = static_cast<float>(mYSlider.getValue() * -1.0);
-        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SourcePositionTab::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,
                                             std::nullopt,
@@ -139,7 +140,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     };
     mZSlider.onValueChange = [this] {
         mCurrentZ = static_cast<float>(mZSlider.getValue());
-        mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
+        mSourceBoxComponent.mListeners.call([&](SourcePositionTab::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,
                                             std::nullopt,
@@ -174,7 +175,7 @@ void CubeControls::updateSliderValues(Source * source)
 }
 
 //==============================================================================
-SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
+SourcePositionTab::SourcePositionTab(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
     : mGrisLookAndFeel(grisLookAndFeel)
     , mDomeControls(*this)
     , mCubeControls(*this)
@@ -214,13 +215,13 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, 
 }
 
 //==============================================================================
-void SectionSourcePosition::paint(juce::Graphics & g)
+void SourcePositionTab::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SectionSourcePosition::resized()
+void SourcePositionTab::resized()
 {
     mSourcePlacementLabel.setBounds(5, 10, 150, 15);
     mSourcePlacementCombo.setBounds(130, 10, 150, 20);
@@ -233,7 +234,7 @@ void SectionSourcePosition::resized()
 }
 
 //==============================================================================
-void SectionSourcePosition::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
+void SourcePositionTab::setNumberOfSources(int const numOfSources, SourceId const firstSourceId)
 {
     mSourceNumberCombo.clear();
     for (auto id = firstSourceId; id < firstSourceId + SourceId{ numOfSources }; ++id) {
@@ -245,7 +246,7 @@ void SectionSourcePosition::setNumberOfSources(int const numOfSources, SourceId 
 }
 
 //==============================================================================
-void SectionSourcePosition::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
+void SourcePositionTab::updateSelectedSource(Source * source, SourceIndex const sourceIndex, SpatMode /*spatMode*/)
 {
     mSelectedSource = sourceIndex;
     mSourceNumberCombo.setSelectedItemIndex(mSelectedSource.get());
@@ -254,7 +255,7 @@ void SectionSourcePosition::updateSelectedSource(Source * source, SourceIndex co
 }
 
 //==============================================================================
-void SectionSourcePosition::setSpatMode(SpatMode const spatMode)
+void SourcePositionTab::setSpatMode(SpatMode const spatMode)
 {
     switch (spatMode) {
     case SpatMode::dome:

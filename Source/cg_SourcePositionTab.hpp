@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -25,17 +25,17 @@
 #include <JuceHeader.h>
 
 #include "cg_ControlGrisLookAndFeel.hpp"
-#include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
 {
-class SectionSourcePosition;
+class Source;
+class SourcePositionTab;
 
 //==============================================================================
 class DomeControls final : public juce::Component
 {
-    SectionSourcePosition & mSourceBoxComponent;
+    SourcePositionTab & mSourceBoxComponent;
 
     Degrees mCurrentAzimuth;
     Radians mCurrentElevation;
@@ -46,7 +46,7 @@ class DomeControls final : public juce::Component
 
 public:
     //==============================================================================
-    explicit DomeControls(SectionSourcePosition & sourceBoxComponent);
+    explicit DomeControls(SourcePositionTab & sourceBoxComponent);
     ~DomeControls() override = default;
 
     DomeControls(DomeControls const &) = delete;
@@ -65,7 +65,7 @@ private:
 //==============================================================================
 class CubeControls final : public juce::Component
 {
-    SectionSourcePosition & mSourceBoxComponent;
+    SourcePositionTab & mSourceBoxComponent;
 
     float mCurrentX{};
     float mCurrentY{};
@@ -79,7 +79,7 @@ class CubeControls final : public juce::Component
 
 public:
     //==============================================================================
-    explicit CubeControls(SectionSourcePosition & sourceBoxComponent);
+    explicit CubeControls(SourcePositionTab & sourceBoxComponent);
     ~CubeControls() override = default;
 
     CubeControls(CubeControls const &) = delete;
@@ -96,7 +96,7 @@ private:
 }; // CubeControls
 
 //==============================================================================
-class SectionSourcePosition final : public juce::Component
+class SourcePositionTab final : public juce::Component
 {
     friend DomeControls;
     friend CubeControls;
@@ -136,16 +136,16 @@ private:
 
 public:
     //==============================================================================
-    explicit SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
+    explicit SourcePositionTab(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
     //==============================================================================
-    SectionSourcePosition() = delete;
-    ~SectionSourcePosition() override = default;
+    SourcePositionTab() = delete;
+    ~SourcePositionTab() override = default;
 
-    SectionSourcePosition(SectionSourcePosition const &) = delete;
-    SectionSourcePosition(SectionSourcePosition &&) = delete;
+    SourcePositionTab(SourcePositionTab const &) = delete;
+    SourcePositionTab(SourcePositionTab &&) = delete;
 
-    SectionSourcePosition & operator=(SectionSourcePosition const &) = delete;
-    SectionSourcePosition & operator=(SectionSourcePosition &&) = delete;
+    SourcePositionTab & operator=(SourcePositionTab const &) = delete;
+    SourcePositionTab & operator=(SourcePositionTab &&) = delete;
     //==============================================================================
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
@@ -160,7 +160,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SectionSourcePosition)
+    JUCE_LEAK_DETECTOR(SourcePositionTab)
 };
 
 } // namespace gris

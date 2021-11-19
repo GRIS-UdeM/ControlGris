@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -18,12 +18,12 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SectionGeneralSettings.hpp"
+#include "cg_GeneralSettingsTab.hpp"
 
 namespace gris
 {
 //==============================================================================
-SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+GeneralSettingsTab::GeneralSettingsTab(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mOscFormatLabel.setText("Mode:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(mOscFormatLabel);
@@ -128,49 +128,49 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
 }
 
 //==============================================================================
-void SectionGeneralSettings::setOscFormat(SpatMode mode)
+void GeneralSettingsTab::setOscFormat(SpatMode mode)
 {
     mOscFormatCombo.setSelectedId(static_cast<int>(mode) + 1, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionGeneralSettings::setOscPortNumber(int const oscPortNumber)
+void GeneralSettingsTab::setOscPortNumber(int const oscPortNumber)
 {
     mOscPortEditor.setText(juce::String(oscPortNumber));
 }
 
 //==============================================================================
-void SectionGeneralSettings::setOscAddress(juce::String const & address)
+void GeneralSettingsTab::setOscAddress(juce::String const & address)
 {
     mOscAddressEditor.setText(address);
 }
 
 //==============================================================================
-void SectionGeneralSettings::setNumberOfSources(int const numOfSources)
+void GeneralSettingsTab::setNumberOfSources(int const numOfSources)
 {
     mNumOfSourcesEditor.setText(juce::String(numOfSources));
 }
 
 //==============================================================================
-void SectionGeneralSettings::setFirstSourceId(SourceId const firstSourceId)
+void GeneralSettingsTab::setFirstSourceId(SourceId const firstSourceId)
 {
     mFirstSourceIdEditor.setText(firstSourceId.toString());
 }
 
 //==============================================================================
-void SectionGeneralSettings::setActivateButtonState(bool const shouldBeOn)
+void GeneralSettingsTab::setActivateButtonState(bool const shouldBeOn)
 {
     mPositionActivateButton.setToggleState(shouldBeOn, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionGeneralSettings::paint(juce::Graphics & g)
+void GeneralSettingsTab::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SectionGeneralSettings::resized()
+void GeneralSettingsTab::resized()
 {
     mOscFormatLabel.setBounds(5, 10, 90, 15);
     mOscFormatCombo.setBounds(95, 10, 150, 20);

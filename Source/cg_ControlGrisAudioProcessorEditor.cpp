@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -242,7 +242,7 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 }
 
 //==============================================================================
-// SectionGeneralSettings::Listener callbacks.
+// GeneralSettingsTab::Listener callbacks.
 void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode const mode)
 {
     mGeneralSettingsTab.setOscFormat(mode);
@@ -323,7 +323,7 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChangedCallback(SourceId cons
 }
 
 //==============================================================================
-// SectionSourcePosition::Listener callbacks.
+// SourcePositionTab::Listener callbacks.
 void ControlGrisAudioProcessorEditor::sourceSelectionChangedCallback(SourceIndex const sourceIndex)
 {
     mSelectedSource = sourceIndex;
@@ -613,7 +613,7 @@ void ControlGrisAudioProcessorEditor::positionPresetDeletedCallback(int presetNu
 }
 
 //==============================================================================
-// SectionOscController::Listener callback.
+// OscControllerTab::Listener callback.
 void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int const value)
 {
     mAudioProcessor.setOscOutputPluginId(value);

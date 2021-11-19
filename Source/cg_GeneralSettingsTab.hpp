@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -29,7 +29,7 @@
 namespace gris
 {
 //==============================================================================
-class SectionGeneralSettings final : public juce::Component
+class GeneralSettingsTab final : public juce::Component
 {
 public:
     //==============================================================================
@@ -69,16 +69,16 @@ private:
 
 public:
     //==============================================================================
-    explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel);
+    explicit GeneralSettingsTab(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    SectionGeneralSettings() = delete;
-    ~SectionGeneralSettings() override = default;
+    GeneralSettingsTab() = delete;
+    ~GeneralSettingsTab() override = default;
 
-    SectionGeneralSettings(SectionGeneralSettings const &) = delete;
-    SectionGeneralSettings(SectionGeneralSettings &&) = delete;
+    GeneralSettingsTab(GeneralSettingsTab const &) = delete;
+    GeneralSettingsTab(GeneralSettingsTab &&) = delete;
 
-    SectionGeneralSettings & operator=(SectionGeneralSettings const &) = delete;
-    SectionGeneralSettings & operator=(SectionGeneralSettings &&) = delete;
+    GeneralSettingsTab & operator=(GeneralSettingsTab const &) = delete;
+    GeneralSettingsTab & operator=(GeneralSettingsTab &&) = delete;
     //==============================================================================
 
     // These are only setters, they dont send notification.
@@ -99,7 +99,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SectionGeneralSettings)
+    JUCE_LEAK_DETECTOR(GeneralSettingsTab)
 };
 
 } // namespace gris

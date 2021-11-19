@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ * Copyright 2021 UdeM - GRIS - Samuel BÃ©land & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -24,11 +24,11 @@
 
 #include "cg_BannerComponent.hpp"
 #include "cg_FieldComponent.hpp"
-#include "cg_SectionOscController.hpp"
+#include "cg_OscControllerTab.hpp"
 #include "cg_SectionPositionPresets.hpp"
-#include "cg_SectionSourcePosition.hpp"
 #include "cg_SectionSourceSpan.hpp"
 #include "cg_SectionTrajectory.hpp"
+#include "cg_SourcePositionTab.hpp"
 
 namespace gris
 {
@@ -38,10 +38,10 @@ class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
     , private juce::Value::Listener
     , public FieldComponent::Listener
-    , public SectionGeneralSettings::Listener
-    , public SectionSourcePosition::Listener
+    , public GeneralSettingsTab::Listener
+    , public SourcePositionTab::Listener
     , public SectionTrajectory::Listener
-    , public SectionOscController::Listener
+    , public OscControllerTab::Listener
     , public PositionPresetComponent::Listener
 {
     ControlGrisAudioProcessor & mAudioProcessor;
@@ -65,9 +65,9 @@ class ControlGrisAudioProcessorEditor final
 
     juce::TabbedComponent mConfigurationTabs{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
-    SectionGeneralSettings mGeneralSettingsTab;
-    SectionSourcePosition mSourcePositionTab;
-    SectionOscController mOscControllerTab;
+    GeneralSettingsTab mGeneralSettingsTab;
+    SourcePositionTab mSourcePositionTab;
+    OscControllerTab mOscControllerTab;
 
     PositionPresetComponent mPositionPresetComponent;
 
@@ -111,7 +111,7 @@ public:
     // SectionSourceSpan::Listeners
     void selectedSourceClicked();
 
-    // SectionGeneralSettings::Listeners
+    // GeneralSettingsTab::Listeners
     void oscFormatChangedCallback(SpatMode mode) override;
     void oscPortChangedCallback(int oscPort) override;
     void oscAddressChangedCallback(juce::String const & address) override;
@@ -119,7 +119,7 @@ public:
     void numberOfSourcesChangedCallback(int numOfSources) override;
     void firstSourceIdChangedCallback(SourceId firstSourceId) override;
 
-    // SectionSourcePosition::Listeners
+    // SourcePositionTab::Listeners
     void sourceSelectionChangedCallback(SourceIndex sourceIndex) override;
     void sourcesPlacementChangedCallback(SourcePlacement sourcePlacement) override;
     void sourcePositionChangedCallback(SourceIndex sourceIndex,
@@ -145,7 +145,7 @@ public:
     void positionPresetSavedCallback(int presetNumber) override;
     void positionPresetDeletedCallback(int presetNumber) override;
 
-    // SectionOscController::Listeners
+    // OscControllerTab::Listeners
     void oscOutputPluginIdChangedCallback(int value) override;
     void oscInputConnectionChangedCallback(bool state, int oscPort) override;
     void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) override;
