@@ -1,22 +1,28 @@
+/**************************************************************************
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
+ *                                                                        *
+ * This file is part of ControlGris, a multi-source spatialization plugin *
+ *                                                                        *
+ * ControlGris is free software: you can redistribute it and/or modify    *
+ * it under the terms of the GNU Lesser General Public License as         *
+ * published by the Free Software Foundation, either version 3 of the     *
+ * License, or (at your option) any later version.                        *
+ *                                                                        *
+ * ControlGris is distributed in the hope that it will be useful,         *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
+ * GNU Lesser General Public License for more details.                    *
+ *                                                                        *
+ * You should have received a copy of the GNU Lesser General Public       *
+ * License along with ControlGris.  If not, see                           *
+ * <http://www.gnu.org/licenses/>.                                        *
+ *************************************************************************/
+
 /*
- * Code copied from Jonathan Boccara's blog.
+ * Code taken from Jonathan Boccara's blog.
  *
  * https://www.fluentcpp.com/2019/08/30/how-to-disable-a-warning-in-cpp/
  *
- */
-
-/*
- * Usage:
- *
- * DISABLE_WARNING_PUSH
- *
- * DISABLE_WARNING_UNREFERENCED_FORMAL_PARAMETER
- * DISABLE_WARNING_UNREFERENCED_FUNCTION
- *
- * code where you want
- * to disable the warnings
- *
- * DISABLE_WARNING_POP
  */
 
 #pragma once

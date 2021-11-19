@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -1307,7 +1307,7 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
                                   : static_cast<TrajectoryManager &>(mElevationTrajectoryManager) };
     auto & sourceLinkEnforcer{ changeType == Source::ChangeType::position ? mPositionSourceLinkEnforcer
                                                                           : mElevationSourceLinkEnforcer };
-    // auto const isTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState()
+    // auto const isTrajectoryActive{ mElevationTrajectoryManager.getPositionActivateState()
     //                               || mElevationTrajectoryManager.getPositionActivateState() };
     auto const isTrajectoryActive{ trajectoryManager.getPositionActivateState() };
     auto const isPrimarySource{ source.isPrimarySource() };

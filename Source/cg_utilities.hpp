@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -27,29 +27,25 @@ namespace gris
 //==============================================================================
 class XmlElementDataSorter
 {
-private:
-    //==============================================================================
     juce::String mAttributeToSort{};
     int mDirection{};
 
 public:
     //==============================================================================
-    XmlElementDataSorter() = delete;
-    ~XmlElementDataSorter() noexcept = default;
-
-    XmlElementDataSorter(XmlElementDataSorter const &) = delete;
-    XmlElementDataSorter(XmlElementDataSorter &&) = delete;
-
-    XmlElementDataSorter & operator=(XmlElementDataSorter const &) = delete;
-    XmlElementDataSorter & operator=(XmlElementDataSorter &&) = delete;
-    //==============================================================================
-    XmlElementDataSorter(juce::String const & attributeToSortBy, bool forwards) noexcept
-        : mAttributeToSort(attributeToSortBy)
+    XmlElementDataSorter(juce::String attributeToSortBy, bool const forwards) noexcept
+        : mAttributeToSort(std::move(attributeToSortBy))
         , mDirection(forwards ? 1 : -1)
     {
     }
+    XmlElementDataSorter() = delete;
+    ~XmlElementDataSorter() noexcept = default;
     //==============================================================================
-    int compareElements(juce::XmlElement * first, juce::XmlElement * second) const
+    XmlElementDataSorter(XmlElementDataSorter const &) = delete;
+    XmlElementDataSorter(XmlElementDataSorter &&) = delete;
+    XmlElementDataSorter & operator=(XmlElementDataSorter const &) = delete;
+    XmlElementDataSorter & operator=(XmlElementDataSorter &&) = delete;
+    //==============================================================================
+    [[nodiscard]] int compareElements(juce::XmlElement const * first, juce::XmlElement const * second) const
     {
         int result;
         if (first->getDoubleAttribute(mAttributeToSort) < second->getDoubleAttribute(mAttributeToSort))

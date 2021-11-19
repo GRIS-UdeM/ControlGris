@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -38,11 +38,11 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mElevationTrajectoryManager(elevationTrajectoryManager)
     , mPositionField(audioProcessor.getSources(), positionTrajectoryManager)
     , mElevationField(audioProcessor.getSources(), elevationTrajectoryManager)
-    , mSectionSourceSpan(audioProcessor, *this, mGrisLookAndFeel)
-    , mSectionTrajectory(audioProcessor, mGrisLookAndFeel)
-    , mSectionGeneralSettings(mGrisLookAndFeel)
-    , mSectionSourcePosition(mGrisLookAndFeel, audioProcessor.getSpatMode())
-    , mSectionOscController(mGrisLookAndFeel)
+    , mSpansSection(audioProcessor, *this, mGrisLookAndFeel)
+    , mTrajectorySection(audioProcessor, mGrisLookAndFeel)
+    , mGeneralSettingsTab(mGrisLookAndFeel)
+    , mSourcePositionTab(mGrisLookAndFeel, audioProcessor.getSpatMode())
+    , mOscControllerTab(mGrisLookAndFeel)
     , mPositionPresetComponent(audioProcessor.getPresetsManager())
 {
     setLookAndFeel(&mGrisLookAndFeel);
@@ -68,9 +68,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSettingsBanner.setText("Configuration", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mSettingsBanner);
 
-    mPositionPresetBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mPositionPresetBanner.setText("Preset", juce::NotificationType::dontSendNotification);
-    addAndMakeVisible(&mPositionPresetBanner);
+    mPresetsBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mPresetsBanner.setText("Preset", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(&mPresetsBanner);
 
     mPositionField.setLookAndFeel(&mGrisLookAndFeel);
     mPositionField.addListener(this);
@@ -80,30 +80,30 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mElevationField.addListener(this);
     addAndMakeVisible(&mElevationField);
 
-    mSectionSourceSpan.setLookAndFeel(&mGrisLookAndFeel);
-    addAndMakeVisible(&mSectionSourceSpan);
+    mSpansSection.setLookAndFeel(&mGrisLookAndFeel);
+    addAndMakeVisible(&mSpansSection);
 
-    mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
-    mSectionTrajectory.addListener(this);
-    addAndMakeVisible(mSectionTrajectory);
+    mTrajectorySection.setLookAndFeel(&mGrisLookAndFeel);
+    mTrajectorySection.addListener(this);
+    addAndMakeVisible(mTrajectorySection);
 
-    mSectionGeneralSettings.setLookAndFeel(&mGrisLookAndFeel);
-    mSectionGeneralSettings.addListener(this);
+    mGeneralSettingsTab.setLookAndFeel(&mGrisLookAndFeel);
+    mGeneralSettingsTab.addListener(this);
 
-    mSectionSourcePosition.setLookAndFeel(&mGrisLookAndFeel);
-    mSectionSourcePosition.addListener(this);
+    mSourcePositionTab.setLookAndFeel(&mGrisLookAndFeel);
+    mSourcePositionTab.addListener(this);
 
-    mSectionOscController.setLookAndFeel(&mGrisLookAndFeel);
-    mSectionOscController.addListener(this);
+    mOscControllerTab.setLookAndFeel(&mGrisLookAndFeel);
+    mOscControllerTab.addListener(this);
 
     auto const bg{ mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId) };
 
-    mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
-    mConfigurationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
-    mConfigurationComponent.addTab("Settings", bg, &mSectionGeneralSettings, false);
-    mConfigurationComponent.addTab("Sources", bg, &mSectionSourcePosition, false);
-    mConfigurationComponent.addTab("Controllers", bg, &mSectionOscController, false);
-    addAndMakeVisible(mConfigurationComponent);
+    mConfigurationTabs.setLookAndFeel(&mGrisLookAndFeel);
+    mConfigurationTabs.setColour(juce::TabbedComponent::backgroundColourId, bg);
+    mConfigurationTabs.addTab("Settings", bg, &mGeneralSettingsTab, false);
+    mConfigurationTabs.addTab("Sources", bg, &mSourcePositionTab, false);
+    mConfigurationTabs.addTab("Controllers", bg, &mOscControllerTab, false);
+    addAndMakeVisible(mConfigurationTabs);
 
     mPositionPresetComponent.setLookAndFeel(&mGrisLookAndFeel);
     mPositionPresetComponent.addListener(this);
@@ -114,12 +114,12 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mPositionField.refreshSources();
     mElevationField.refreshSources();
 
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
 
     // Manage dynamic window size of the plugin.
     //------------------------------------------
     setResizable(true, true);
-    setResizeLimits(MIN_FIELD_WIDTH + 50, MIN_FIELD_WIDTH + 20, 1800, 1300);
+    setResizeLimits(MIN_FIELD_WIDTH_PIXELS + 50, MIN_FIELD_WIDTH_PIXELS + 20, 1800, 1300);
 
     mLastUiWidth.referTo(
         mAudioProcessor.getValueTreeState().state.getChildWithName("uiState").getPropertyAsValue("width", nullptr));
@@ -140,7 +140,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 //==============================================================================
 ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor()
 {
-    mConfigurationComponent.setLookAndFeel(nullptr);
+    mConfigurationTabs.setLookAndFeel(nullptr);
     setLookAndFeel(nullptr);
 }
 
@@ -158,43 +158,43 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     firstSourceIdChangedCallback(mAudioProcessor.getFirstSourceId());
     numberOfSourcesChangedCallback(mAudioProcessor.getSources().size());
 
-    mSectionOscController.setOscOutputPluginId(
+    mOscControllerTab.setOscOutputPluginId(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PLUGIN_ID,
                                                         DEFAULT_OSC_OUTPUT_PLUGIN_ID));
-    mSectionOscController.setOscReceiveToggleState(
+    mOscControllerTab.setOscReceiveToggleState(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_INPUT_CONNECTED, false));
-    mSectionOscController.setOscReceiveInputPort(
+    mOscControllerTab.setOscReceiveInputPort(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_INPUT_PORT, DEFAULT_OSC_INPUT_PORT));
 
-    mSectionOscController.setOscSendToggleState(
+    mOscControllerTab.setOscSendToggleState(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_CONNECTED, false));
-    mSectionOscController.setOscSendOutputAddress(
+    mOscControllerTab.setOscSendOutputAddress(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_ADDRESS,
                                                         DEFAULT_OSC_OUTPUT_ADDRESS));
-    mSectionOscController.setOscSendOutputPort(
+    mOscControllerTab.setOscSendOutputPort(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::OSC_OUTPUT_PORT, DEFAULT_OSC_OUTPUT_PORT));
 
     // Set state for trajectory box persistent values.
     //-----------------------------------------------
-    mSectionTrajectory.setPositionBackAndForth(
+    mTrajectorySection.setPositionBackAndForth(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::POSITION_BACK_AND_FORTH, false));
-    mSectionTrajectory.setElevationBackAndForth(
+    mTrajectorySection.setElevationBackAndForth(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::ELEVATION_BACK_AND_FORTH, false));
-    mSectionTrajectory.setPositionDampeningCycles(
+    mTrajectorySection.setPositionDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::POSITION_DAMPENING_CYCLES, 0));
     mPositionTrajectoryManager.setPositionDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::POSITION_DAMPENING_CYCLES, 0));
-    mSectionTrajectory.setElevationDampeningCycles(
+    mTrajectorySection.setElevationDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::ELEVATION_DAMPENING_CYCLES, 0));
     mElevationTrajectoryManager.setPositionDampeningCycles(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::ELEVATION_DAMPENING_CYCLES, 0));
-    mSectionTrajectory.setDeviationPerCycle(
+    mTrajectorySection.setDeviationPerCycle(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::DEVIATION_PER_CYCLE, 0));
     mPositionTrajectoryManager.setDeviationPerCycle(
         Degrees{ mAudioProcessorValueTreeState.state.getProperty(parameters::statics::DEVIATION_PER_CYCLE, 0) });
-    mSectionTrajectory.setCycleDuration(
+    mTrajectorySection.setCycleDuration(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::CYCLE_DURATION, 5.0));
-    mSectionTrajectory.setDurationUnit(
+    mTrajectorySection.setDurationUnit(
         mAudioProcessorValueTreeState.state.getProperty(parameters::statics::DURATION_UNIT, 1));
 
     // Update the position preset box.
@@ -207,12 +207,12 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 
     // Update the interface.
     //----------------------
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
-                                                mAudioProcessor.getSpatMode());
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            mSelectedSource,
+                                            mAudioProcessor.getSpatMode());
 
     auto const preset{ static_cast<int>(static_cast<float>(
         mAudioProcessorValueTreeState.getParameterAsValue(parameters::dynamic::POSITION_PRESET).getValue())) };
@@ -224,7 +224,7 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool const state)
 {
-    mSectionSourceSpan.setSpanLinkState(state);
+    mSpansSection.setSpanLinkState(state);
 }
 
 //==============================================================================
@@ -245,10 +245,10 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 // SectionGeneralSettings::Listener callbacks.
 void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode const mode)
 {
-    mSectionGeneralSettings.setOscFormat(mode);
+    mGeneralSettingsTab.setOscFormat(mode);
     mAudioProcessor.setSpatMode(mode);
     mPositionField.setSpatMode(mode);
-    mSectionTrajectory.setSpatMode(mode);
+    mTrajectorySection.setSpatMode(mode);
     repaint();
     resized();
 }
@@ -257,21 +257,21 @@ void ControlGrisAudioProcessorEditor::oscFormatChangedCallback(SpatMode const mo
 void ControlGrisAudioProcessorEditor::oscPortChangedCallback(int const oscPort)
 {
     mAudioProcessor.setOscPortNumber(oscPort);
-    mSectionGeneralSettings.setOscPortNumber(oscPort);
+    mGeneralSettingsTab.setOscPortNumber(oscPort);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscAddressChangedCallback(juce::String const & address)
 {
     mAudioProcessor.setOscAddress(address);
-    mSectionGeneralSettings.setOscAddress(address);
+    mGeneralSettingsTab.setOscAddress(address);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::oscStateChangedCallback(bool const state)
 {
     mAudioProcessor.setOscActive(state);
-    mSectionGeneralSettings.setActivateButtonState(mAudioProcessor.isOscActive());
+    mGeneralSettingsTab.setActivateButtonState(mAudioProcessor.isOscActive());
 }
 
 //==============================================================================
@@ -281,7 +281,7 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
         auto const initSourcePlacement{ mAudioProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
         auto const symmetricLinkAllowed{ numOfSources == 2 };
-        mSectionTrajectory.setSymmetricLinkComboState(symmetricLinkAllowed);
+        mTrajectorySection.setSymmetricLinkComboState(symmetricLinkAllowed);
         if (!symmetricLinkAllowed) {
             auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::symmetricX
                                                              || currentPositionSourceLink
@@ -294,12 +294,12 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
 
         mSelectedSource = {};
         mAudioProcessor.setNumberOfSources(numOfSources);
-        mSectionGeneralSettings.setNumberOfSources(numOfSources);
-        mSectionTrajectory.setNumberOfSources(numOfSources);
-        mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+        mGeneralSettingsTab.setNumberOfSources(numOfSources);
+        mTrajectorySection.setNumberOfSources(numOfSources);
+        mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
         mPositionField.refreshSources();
         mElevationField.refreshSources();
-        mSectionSourcePosition.setNumberOfSources(numOfSources, mAudioProcessor.getFirstSourceId());
+        mSourcePositionTab.setNumberOfSources(numOfSources, mAudioProcessor.getFirstSourceId());
         if (initSourcePlacement) {
             sourcesPlacementChangedCallback(SourcePlacement::leftAlternate);
         }
@@ -310,16 +310,16 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
 void ControlGrisAudioProcessorEditor::firstSourceIdChangedCallback(SourceId const firstSourceId)
 {
     mAudioProcessor.setFirstSourceId(firstSourceId);
-    mSectionGeneralSettings.setFirstSourceId(firstSourceId);
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
-    mSectionSourcePosition.setNumberOfSources(mAudioProcessor.getSources().size(), firstSourceId);
+    mGeneralSettingsTab.setFirstSourceId(firstSourceId);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSourcePositionTab.setNumberOfSources(mAudioProcessor.getSources().size(), firstSourceId);
 
     mPositionField.rebuildSourceComponents(mAudioProcessor.getSources().size());
     mElevationField.rebuildSourceComponents(mAudioProcessor.getSources().size());
     if (mAudioProcessor.getSpatMode() == SpatMode::cube)
         mElevationField.repaint();
 
-    mSectionSourceSpan.repaint();
+    mSpansSection.repaint();
 }
 
 //==============================================================================
@@ -328,12 +328,12 @@ void ControlGrisAudioProcessorEditor::sourceSelectionChangedCallback(SourceIndex
 {
     mSelectedSource = sourceIndex;
 
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
-                                                mAudioProcessor.getSpatMode());
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            mSelectedSource,
+                                            mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
@@ -423,9 +423,9 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
                                                 mAudioProcessor.getSources()[i].getDistance());
     }
 
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                SourceIndex{},
-                                                mAudioProcessor.getSpatMode());
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            SourceIndex{},
+                                            mAudioProcessor.getSpatMode());
 
     mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
                                                  mAudioProcessor.getSources().getPrimarySource().getPos());
@@ -466,12 +466,12 @@ void ControlGrisAudioProcessorEditor::selectedSourceClicked()
     // increment source index
     mSelectedSource = SourceIndex{ (mSelectedSource.get() + 1) % mAudioProcessor.getSources().size() };
 
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
-                                                mAudioProcessor.getSpatMode());
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            mSelectedSource,
+                                            mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
@@ -549,34 +549,35 @@ void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bo
 // Update the interface if anything has changed (mostly automations).
 void ControlGrisAudioProcessorEditor::refresh()
 {
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
-                                                mAudioProcessor.getSpatMode());
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            mSelectedSource,
+                                            mAudioProcessor.getSpatMode());
 
     mPositionField.setIsPlaying(mAudioProcessor.isPlaying());
     mElevationField.setIsPlaying(mAudioProcessor.isPlaying());
 
-    if (mSectionTrajectory.getPositionActivateState() != mPositionTrajectoryManager.getPositionActivateState()) {
-        mSectionTrajectory.setPositionActivateState(mPositionTrajectoryManager.getPositionActivateState());
+    if (mTrajectorySection.getPositionActivateState() != mPositionTrajectoryManager.getPositionActivateState()) {
+        mTrajectorySection.setPositionActivateState(mPositionTrajectoryManager.getPositionActivateState());
     }
-    if (mSectionTrajectory.getElevationActivateState() != mElevationTrajectoryManager.getPositionActivateState()) {
-        mSectionTrajectory.setElevationActivateState(mElevationTrajectoryManager.getPositionActivateState());
+    if (mTrajectorySection.getElevationActivateState() != mElevationTrajectoryManager.getPositionActivateState()) {
+        mTrajectorySection.setElevationActivateState(mElevationTrajectoryManager.getPositionActivateState());
     }
 }
 
 //==============================================================================
 // FieldComponent::Listener callback.
-void ControlGrisAudioProcessorEditor::fieldSourcePositionChangedCallback(SourceIndex const sourceIndex, int whichField)
+void ControlGrisAudioProcessorEditor::fieldSourcePositionChangedCallback(SourceIndex const sourceIndex,
+                                                                         int const whichField)
 {
     mAudioProcessor.sourcePositionChanged(sourceIndex, whichField);
     mSelectedSource = sourceIndex;
-    mSectionSourceSpan.setSelectedSource(&mAudioProcessor.getSources()[sourceIndex]);
+    mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[sourceIndex]);
     mPositionField.setSelectedSource(mSelectedSource);
     mElevationField.setSelectedSource(mSelectedSource);
-    mSectionSourcePosition.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
-                                                mSelectedSource,
-                                                mAudioProcessor.getSpatMode());
+    mSourcePositionTab.updateSelectedSource(&mAudioProcessor.getSources()[mSelectedSource],
+                                            mSelectedSource,
+                                            mAudioProcessor.getSpatMode());
 }
 
 //==============================================================================
@@ -668,7 +669,7 @@ void ControlGrisAudioProcessorEditor::resized()
     auto const width{ getWidth() - 50 }; // Remove position preset space.
     auto const height{ getHeight() };
 
-    auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
+    auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH_PIXELS) };
 
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
@@ -685,25 +686,25 @@ void ControlGrisAudioProcessorEditor::resized()
         mElevationField.setVisible(false);
     }
 
-    mSectionSourceSpan.setBounds(0, fieldSize + 20, width, 50);
+    mSpansSection.setBounds(0, fieldSize + 20, width, 50);
 
     mTrajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
-    mSectionTrajectory.setBounds(0, fieldSize + 90, width, 160);
+    mTrajectorySection.setBounds(0, fieldSize + 90, width, 160);
 
     mSettingsBanner.setBounds(0, fieldSize + 250, width, 20);
-    mConfigurationComponent.setBounds(0, fieldSize + 270, width, 160);
+    mConfigurationTabs.setBounds(0, fieldSize + 270, width, 160);
 
     mLastUiWidth = getWidth();
     mLastUiHeight = getHeight();
 
-    mPositionPresetBanner.setBounds(width, 0, 50, 20);
+    mPresetsBanner.setBounds(width, 0, 50, 20);
     mPositionPresetComponent.setBounds(width, 20, 50, height - 20);
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 {
-    mSectionSourcePosition.setSpatMode(spatMode);
+    mSourcePositionTab.setSpatMode(spatMode);
 }
 
 } // namespace gris

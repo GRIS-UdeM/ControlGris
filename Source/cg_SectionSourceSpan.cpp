@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -105,8 +105,8 @@ void SectionSourceSpan::paint(juce::Graphics & g)
     g.setColour(juce::Colour(.2f, .2f, .2f, 1.0f));
     g.drawEllipse(area.translated(.5f, .5f), 1.0f);
     g.setGradientFill(juce::ColourGradient(mSelectedSource->getColour().withSaturation(1.0f).darker(1.0f),
-                                           x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                           y + SOURCE_FIELD_COMPONENT_RADIUS,
+                                           x + SOURCE_FIELD_COMPONENT_RADIUS_PIXELS,
+                                           y + SOURCE_FIELD_COMPONENT_RADIUS_PIXELS,
                                            mSelectedSource->getColour().withSaturation(1.0f),
                                            x,
                                            y,

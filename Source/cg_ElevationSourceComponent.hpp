@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -32,6 +32,7 @@ class ElevationFieldComponent;
 class ElevationTrajectoryManager;
 
 //==============================================================================
+/** A draggable component that represents a source in the elevation field. */
 class ElevationSourceComponent final
     : public SourceComponent
     , public Source::Listener
@@ -39,24 +40,22 @@ class ElevationSourceComponent final
     ElevationFieldComponent & mFieldComponent;
     ElevationTrajectoryManager & mTrajectoryManager;
     Source & mSource;
-    DisplacementMode mDisplacementMode;
+    DisplacementMode mDisplacementMode{};
     bool mCanDrag{};
 
 public:
     //==============================================================================
+    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
     ElevationSourceComponent() = delete;
     ~ElevationSourceComponent() noexcept override;
-
+    //==============================================================================
     ElevationSourceComponent(ElevationSourceComponent const &) = delete;
     ElevationSourceComponent(ElevationSourceComponent &&) = delete;
-
     ElevationSourceComponent & operator=(ElevationSourceComponent const &) = delete;
     ElevationSourceComponent & operator=(ElevationSourceComponent &&) = delete;
     //==============================================================================
-    ElevationSourceComponent(ElevationFieldComponent & fieldComponent, Source & source) noexcept;
-    //==============================================================================
     [[nodiscard]] SourceIndex getSourceIndex() const;
-
+    //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
     void mouseDrag(juce::MouseEvent const & event) override;
     void mouseUp(juce::MouseEvent const & event) override;

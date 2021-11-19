@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -38,10 +38,9 @@ public:
     //==============================================================================
     BannerComponent() noexcept;
     ~BannerComponent() override = default;
-
+    //==============================================================================
     BannerComponent(BannerComponent const &) = delete;
     BannerComponent(BannerComponent &&) = delete;
-
     BannerComponent & operator=(BannerComponent const &) = delete;
     BannerComponent & operator=(BannerComponent &&) = delete;
 

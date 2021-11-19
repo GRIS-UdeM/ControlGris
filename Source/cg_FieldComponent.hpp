@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -34,21 +34,10 @@
 namespace gris
 {
 //==============================================================================
-// This file defines the classes that implement the 2D view (azimuth-elevation
-// or azimuth-distance) and the elevation view.
-//
-// Classes:
-//   FieldComponent : The base class. Implements the common attributes and
-//                    methods of the two views.
-//   PositionFieldComponent : The 2D view as a cartesian plane. It is used to show
-//                        and control two parameters, azimuth-elevation for the
-//                        VBAP algorithm and azimuth-distance for the LBAP
-//                        algorithm.
-//   ElevationFieldComponent : The 1D view used to show and control the elevation
-//                             parameter for the LBAP algorithm.
-//==============================================================================
-
-//==============================================================================
+/** Base class for a component that displays a flatten view of the sources' positions.
+ *
+ * TODO : This whole UI system is a mess and should be reimplemented ASAP
+ */
 class FieldComponent
     : public juce::Component
     , public Source::Listener
@@ -60,10 +49,9 @@ public:
     public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
-
+        //==============================================================================
         Listener(Listener const &) = delete;
         Listener(Listener &&) = delete;
-
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
@@ -88,16 +76,14 @@ protected:
 
 public:
     //==============================================================================
+    explicit FieldComponent(Sources & sources) noexcept;
     FieldComponent() = delete;
     ~FieldComponent() noexcept override;
-
+    //==============================================================================
     FieldComponent(FieldComponent const &) = delete;
     FieldComponent(FieldComponent &&) = delete;
-
     FieldComponent & operator=(FieldComponent const &) = delete;
     FieldComponent & operator=(FieldComponent &&) = delete;
-    //==============================================================================
-    explicit FieldComponent(Sources & sources) noexcept;
     //==============================================================================
     void refreshSources();
     void setSelectedSource(std::optional<SourceIndex> selectedSource);
@@ -106,12 +92,10 @@ public:
     [[nodiscard]] bool isPlaying() const { return mIsPlaying; }
     void addListener(Listener * l) { mListeners.add(l); }
     void displayInvalidSourceMoveWarning(bool state);
-
-    void paint(juce::Graphics & g) override;
-
     [[nodiscard]] Sources & getSources() { return mSources; }
     [[nodiscard]] Sources const & getSources() const { return mSources; }
     //==============================================================================
+    void paint(juce::Graphics & g) override;
     [[nodiscard]] virtual juce::Rectangle<float> getEffectiveArea() const = 0;
 
 protected:
@@ -133,9 +117,10 @@ private:
 }; // class FieldComponent
 
 //==============================================================================
+/** A 2D view used to display the sources' [x,y] coordinates. */
 class PositionFieldComponent final : public FieldComponent
 {
-    PositionTrajectoryManager & mAutomationManager;
+    PositionTrajectoryManager & mPositionTrajectoryManager;
     SpatMode mSpatMode{ SpatMode::dome };
     std::optional<juce::Point<float>> mLineDrawingStartPosition{ std::nullopt };
     std::optional<juce::Point<float>> mLineDrawingEndPosition{ std::nullopt };
@@ -147,31 +132,28 @@ public:
     PositionFieldComponent() = delete;
     PositionFieldComponent(Sources & sources, PositionTrajectoryManager & positionAutomationManager) noexcept;
     ~PositionFieldComponent() noexcept override = default;
-
+    //==============================================================================
     PositionFieldComponent(PositionFieldComponent const &) = delete;
     PositionFieldComponent(PositionFieldComponent &&) = delete;
-
     PositionFieldComponent & operator=(PositionFieldComponent const &) = delete;
     PositionFieldComponent & operator=(PositionFieldComponent &&) = delete;
     //==============================================================================
-    [[nodiscard]] PositionTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
-    PositionTrajectoryManager & getAutomationManager() { return mAutomationManager; }
-
+    [[nodiscard]] PositionTrajectoryManager const & getTrajectoryManager() const { return mPositionTrajectoryManager; }
+    [[nodiscard]] PositionTrajectoryManager & getTrajectoryManager() { return mPositionTrajectoryManager; }
     void drawDomeSpans(juce::Graphics & g) const;
     void drawCubeSpans(juce::Graphics & g) const;
     void setSpatMode(SpatMode spatMode);
-
+    [[nodiscard]] juce::Point<float> sourcePositionToComponentPosition(juce::Point<float> const & sourcePosition) const;
+    [[nodiscard]] juce::Line<float> sourcePositionToComponentPosition(juce::Line<float> const & sourcePosition) const;
+    [[nodiscard]] juce::Point<float>
+        componentPositionToSourcePosition(juce::Point<float> const & componentPosition) const;
+    //==============================================================================
     void drawSpans(juce::Graphics & g) const override;
     void paint(juce::Graphics & g) override;
     void resized() override;
     void rebuildSourceComponents(int numberOfSources) override;
     [[nodiscard]] juce::Rectangle<float> getEffectiveArea() const override;
     void notifySourcePositionChanged(SourceIndex sourceIndex) override;
-
-    [[nodiscard]] juce::Point<float> sourcePositionToComponentPosition(juce::Point<float> const & sourcePosition) const;
-    [[nodiscard]] juce::Line<float> sourcePositionToComponentPosition(juce::Line<float> const & sourcePosition) const;
-    [[nodiscard]] juce::Point<float>
-        componentPositionToSourcePosition(juce::Point<float> const & componentPosition) const;
 
 private:
     //==============================================================================
@@ -187,6 +169,7 @@ private:
 }; // class PositionFieldComponent
 
 //==============================================================================
+/** A 2D view used to display the sources' elevation (z coordinate). */
 class ElevationFieldComponent final : public FieldComponent
 {
     static constexpr auto TOP_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
@@ -194,7 +177,7 @@ class ElevationFieldComponent final : public FieldComponent
     static constexpr auto LEFT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
     static constexpr auto RIGHT_PADDING{ SOURCE_FIELD_COMPONENT_DIAMETER };
 
-    ElevationTrajectoryManager & mAutomationManager;
+    ElevationTrajectoryManager & mElevationTrajectoryManager;
     ElevationDrawingHandle mDrawingHandle{ *this };
     juce::OwnedArray<ElevationSourceComponent> mSourceComponents{};
 
@@ -203,15 +186,17 @@ public:
     ElevationFieldComponent() = delete;
     ElevationFieldComponent(Sources & sources, ElevationTrajectoryManager & positionTrajectoryManager) noexcept;
     ~ElevationFieldComponent() noexcept override = default;
-
+    //==============================================================================
     ElevationFieldComponent(ElevationFieldComponent const &) = delete;
     ElevationFieldComponent(ElevationFieldComponent &&) = delete;
-
     ElevationFieldComponent & operator=(ElevationFieldComponent const &) = delete;
     ElevationFieldComponent & operator=(ElevationFieldComponent &&) = delete;
     //==============================================================================
-    [[nodiscard]] ElevationTrajectoryManager const & getAutomationManager() const { return mAutomationManager; }
-    ElevationTrajectoryManager & getAutomationManager() { return mAutomationManager; }
+    [[nodiscard]] ElevationTrajectoryManager const & getTrajectoryManager() const
+    {
+        return mElevationTrajectoryManager;
+    }
+    ElevationTrajectoryManager & getTrajectoryManager() { return mElevationTrajectoryManager; }
     [[nodiscard]] juce::Point<float> sourceElevationToComponentPosition(Radians sourceElevation,
                                                                         SourceIndex index) const;
     [[nodiscard]] Radians componentPositionToSourceElevation(juce::Point<float> const & componentPosition) const;

@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -30,23 +30,22 @@ namespace gris
 class ElevationFieldComponent;
 
 //==============================================================================
+/** A draggable component used to create elevation trajectories. */
 class ElevationDrawingHandle final : public SourceComponent
 {
-    ElevationFieldComponent & mFieldComponent;
+    ElevationFieldComponent & mElevationFieldComponent;
     Radians mCurrentElevation;
 
 public:
     //==============================================================================
+    explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
     ElevationDrawingHandle() = delete;
     ~ElevationDrawingHandle() noexcept override = default;
-
+    //==============================================================================
     ElevationDrawingHandle(ElevationDrawingHandle const &) = delete;
     ElevationDrawingHandle(ElevationDrawingHandle &&) = delete;
-
     ElevationDrawingHandle & operator=(ElevationDrawingHandle const &) = delete;
     ElevationDrawingHandle & operator=(ElevationDrawingHandle &&) = delete;
-    //==============================================================================
-    explicit ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept;
     //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
     void mouseDrag(juce::MouseEvent const & event) override;

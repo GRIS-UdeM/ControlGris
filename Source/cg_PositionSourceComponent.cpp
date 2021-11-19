@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -31,7 +31,7 @@ namespace gris
 PositionSourceComponent::PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source)
     : SourceComponent(source.getColour(), source.getId().toString())
     , mFieldComponent(fieldComponent)
-    , mTrajectoryManager(fieldComponent.getAutomationManager())
+    , mTrajectoryManager(fieldComponent.getTrajectoryManager())
     , mSource(source)
 {
     source.addGuiListener(this);

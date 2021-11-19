@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -33,6 +33,7 @@
 namespace gris
 {
 //==============================================================================
+/** The main UI component used to interact with the plugin. */
 class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
     , private juce::Value::Listener
@@ -44,29 +45,29 @@ class ControlGrisAudioProcessorEditor final
     , public PositionPresetComponent::Listener
 {
     ControlGrisAudioProcessor & mAudioProcessor;
-    GrisLookAndFeel mGrisLookAndFeel;
     juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
-
     PositionTrajectoryManager & mPositionTrajectoryManager;
     ElevationTrajectoryManager & mElevationTrajectoryManager;
+
+    GrisLookAndFeel mGrisLookAndFeel;
 
     BannerComponent mMainBanner;
     BannerComponent mElevationBanner;
     BannerComponent mTrajectoryBanner;
     BannerComponent mSettingsBanner;
-    BannerComponent mPositionPresetBanner;
+    BannerComponent mPresetsBanner;
 
     PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
 
-    SectionSourceSpan mSectionSourceSpan;
-    SectionTrajectory mSectionTrajectory;
+    SectionSourceSpan mSpansSection;
+    SectionTrajectory mTrajectorySection;
 
-    juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
+    juce::TabbedComponent mConfigurationTabs{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
-    SectionGeneralSettings mSectionGeneralSettings;
-    SectionSourcePosition mSectionSourcePosition;
-    SectionOscController mSectionOscController;
+    SectionGeneralSettings mGeneralSettingsTab;
+    SectionSourcePosition mSourcePositionTab;
+    SectionOscController mOscControllerTab;
 
     PositionPresetComponent mPositionPresetComponent;
 
@@ -82,7 +83,6 @@ public:
                                     juce::AudioProcessorValueTreeState & vts,
                                     PositionTrajectoryManager & positionTrajectoryManager,
                                     ElevationTrajectoryManager & elevationTrajectoryManager);
-    //==============================================================================
     ControlGrisAudioProcessorEditor() = delete;
     ~ControlGrisAudioProcessorEditor() override;
     //==============================================================================
@@ -91,11 +91,21 @@ public:
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
+    void repaintPositionField();
+    void repaintElevationField();
+    void reloadUiState();
+    void updateSpanLinkButton(bool state);
+    void updatePositionPreset(int presetNumber);
+    void refresh();
+    void setSpatMode(SpatMode spatMode);
+    //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
+
+    // Value::Listener
     void valueChanged(juce::Value &) override;
 
-    // FieldComponent::Listeners
+    // FieldComponent::Listener
     void fieldSourcePositionChangedCallback(SourceIndex sourceIndex, int whichField) override;
 
     // SectionSourceSpan::Listeners
@@ -139,17 +149,6 @@ public:
     void oscOutputPluginIdChangedCallback(int value) override;
     void oscInputConnectionChangedCallback(bool state, int oscPort) override;
     void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) override;
-
-    void repaintPositionField();
-    void repaintElevationField();
-
-    void reloadUiState();
-    void updateSpanLinkButton(bool state);
-    void updatePositionPreset(int presetNumber);
-
-    void refresh();
-
-    void setSpatMode(SpatMode spatMode);
 
 private:
     //==============================================================================

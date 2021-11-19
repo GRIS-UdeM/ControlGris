@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -30,39 +30,41 @@ void ElevationDrawingHandle::mouseDown(juce::MouseEvent const & event)
     constexpr float DUMMY{ 0.0f };
 
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
-    auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
+    auto const elevation{ mElevationFieldComponent.componentPositionToSourceElevation(relativePosition) };
     mCurrentElevation = elevation;
     juce::Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
-    auto & automationManager{ mFieldComponent.getAutomationManager() };
+    auto & automationManager{ mElevationFieldComponent.getTrajectoryManager() };
     automationManager.resetRecordingTrajectory(position);
     automationManager.addRecordingPoint(position); // two points minimum are needed for elevation drawing
 
-    setCentrePosition(mFieldComponent.sourceElevationToComponentPosition(elevation, SourceIndex{ -1 }).toInt());
-    mFieldComponent.repaint();
+    setCentrePosition(
+        mElevationFieldComponent.sourceElevationToComponentPosition(elevation, SourceIndex{ -1 }).toInt());
+    mElevationFieldComponent.repaint();
 }
 
 //==============================================================================
 void ElevationDrawingHandle::mouseDrag(juce::MouseEvent const & event)
 {
-    auto & automationManager{ mFieldComponent.getAutomationManager() };
+    auto & automationManager{ mElevationFieldComponent.getTrajectoryManager() };
     auto const relativePosition{ event.getEventRelativeTo(getParentComponent()).getPosition().toFloat() };
-    auto const elevation{ mFieldComponent.componentPositionToSourceElevation(relativePosition) };
+    auto const elevation{ mElevationFieldComponent.componentPositionToSourceElevation(relativePosition) };
     mCurrentElevation = elevation;
     constexpr auto DUMMY{ 0.0f };
     juce::Point<float> const position{ DUMMY, elevation / MAX_ELEVATION * 2.0f - 1.0f };
 
     automationManager.addRecordingPoint(position);
 
-    setCentrePosition(mFieldComponent.sourceElevationToComponentPosition(elevation, SourceIndex{ -1 }).toInt());
-    mFieldComponent.repaint();
+    setCentrePosition(
+        mElevationFieldComponent.sourceElevationToComponentPosition(elevation, SourceIndex{ -1 }).toInt());
+    mElevationFieldComponent.repaint();
 }
 
 //==============================================================================
 void ElevationDrawingHandle::updatePositionInParent()
 {
     auto const newSourcePosition{
-        mFieldComponent.sourceElevationToComponentPosition(mCurrentElevation, SourceIndex{ -1 }).toInt()
+        mElevationFieldComponent.sourceElevationToComponentPosition(mCurrentElevation, SourceIndex{ -1 }).toInt()
     };
     setCentrePosition(newSourcePosition);
 }
@@ -70,7 +72,7 @@ void ElevationDrawingHandle::updatePositionInParent()
 //==============================================================================
 ElevationDrawingHandle::ElevationDrawingHandle(ElevationFieldComponent & fieldComponent) noexcept
     : SourceComponent(juce::Colour::fromRGB(176, 176, 228), "X")
-    , mFieldComponent(fieldComponent)
+    , mElevationFieldComponent(fieldComponent)
 {
     setSelected(true);
 }

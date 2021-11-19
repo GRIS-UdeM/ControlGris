@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -25,12 +25,13 @@ namespace gris
 {
 //==============================================================================
 // Global variables.
-constexpr int MIN_FIELD_WIDTH = 300;
+constexpr int MIN_FIELD_WIDTH_PIXELS = 300;
 constexpr int MAX_NUMBER_OF_SOURCES = 8;
 constexpr int NUMBER_OF_POSITION_PRESETS = 50;
-constexpr float SOURCE_FIELD_COMPONENT_RADIUS = 12.0f;
-constexpr float SOURCE_FIELD_COMPONENT_DIAMETER = SOURCE_FIELD_COMPONENT_RADIUS * 2.0f;
-constexpr auto LBAP_FAR_FIELD = 1.666666667f;
+constexpr float SOURCE_FIELD_COMPONENT_RADIUS_PIXELS = 12.0f;
+constexpr float SOURCE_FIELD_COMPONENT_DIAMETER = SOURCE_FIELD_COMPONENT_RADIUS_PIXELS * 2.0f;
+/** Considering that the radius of a dome is 1, how far can a source or speaker go in any direction in and CUBE? */
+constexpr auto LBAP_FAR_FIELD_RATIO = 1.666666667f;
 
 constexpr Radians MIN_ELEVATION = Degrees{ 0.0f };
 constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
@@ -50,7 +51,7 @@ extern juce::String const DEFAULT_OSC_ADDRESS;
 extern juce::String const DEFAULT_OSC_OUTPUT_ADDRESS;
 
 //==============================================================================
-// Spatialisation modes.
+// Spatialization modes.
 enum class SpatMode { dome, cube };
 
 extern juce::String const SOURCE_SELECTION_WARNING;
@@ -123,8 +124,10 @@ extern juce::StringArray const FIXED_POSITION_DATA_HEADERS;
 
 extern juce::String const FIXED_POSITION_DATA_TAG;
 
+/** The parameters that are part of a ControlGRIS state. */
 namespace parameters
 {
+/** The parameters that CAN be automated in the DAW. */
 namespace dynamic
 {
 juce::String extern const X;
@@ -137,6 +140,7 @@ juce::String extern const ELEVATION_SPAN;
 juce::String extern const POSITION_PRESET;
 } // namespace dynamic
 
+/** The parameters that CANNOT be automated in the DAW. */
 namespace statics
 {
 juce::String extern const OSC_FORMAT;

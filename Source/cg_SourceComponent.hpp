@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_constants.hpp"
 
 namespace gris
@@ -30,10 +28,11 @@ class Source;
 class FieldComponent;
 
 //==============================================================================
+/** A base class for a draggable Component in a field (position or elevation). */
 class SourceComponent : public juce::Component
 {
-    juce::Colour mColour;
-    juce::String mIcon;
+    juce::Colour mColour{};
+    juce::String mIcon{};
     bool mSelected{ false };
 
 protected:
@@ -45,32 +44,32 @@ protected:
 
 public:
     //==============================================================================
+    SourceComponent(juce::Colour colour, juce::String const & icon);
     SourceComponent() = delete;
-    virtual ~SourceComponent() = default;
-
+    ~SourceComponent() override = default;
+    //==============================================================================
     SourceComponent(SourceComponent const &) = delete;
     SourceComponent(SourceComponent &&) = delete;
-
     SourceComponent & operator=(SourceComponent const &) = delete;
     SourceComponent & operator=(SourceComponent &&) = delete;
     //==============================================================================
-    SourceComponent(juce::Colour colour, juce::String const & icon);
-    //==============================================================================
     void setSelected(bool selected);
     void paint(juce::Graphics & g) final;
+    [[nodiscard]] juce::Colour getColour() const { return mColour; }
+    //==============================================================================
+    virtual void updatePositionInParent() {}
 
-    juce::Colour getColour() const { return mColour; }
-    virtual void updatePositionInParent(){}; // TEMP
 protected:
     //==============================================================================
-    static DisplacementMode getDisplacementMode(juce::MouseEvent const & event);
-    static bool isMoveAllowed(DisplacementMode displacementMode, bool isPrimarySource, PositionSourceLink sourceLink);
-    static bool isMoveAllowed(DisplacementMode displatcementMode, bool isPrimarySource, ElevationSourceLink sourceLink);
+    [[nodiscard]] static DisplacementMode getDisplacementMode(juce::MouseEvent const & event);
+    [[nodiscard]] static bool
+        isMoveAllowed(DisplacementMode displacementMode, bool isPrimarySource, PositionSourceLink sourceLink);
+    [[nodiscard]] static bool
+        isMoveAllowed(DisplacementMode displacementMode, bool isPrimarySource, ElevationSourceLink sourceLink);
 
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourceComponent)
-
 }; // class SourceComponent
 
 } // namespace gris

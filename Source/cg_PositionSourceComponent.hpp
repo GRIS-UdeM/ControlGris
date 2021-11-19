@@ -1,5 +1,5 @@
 /**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
+ * Copyright 2021 UdeM - GRIS - Samuel Béland & Olivier Belanger          *
  *                                                                        *
  * This file is part of ControlGris, a multi-source spatialization plugin *
  *                                                                        *
@@ -32,6 +32,7 @@ class PositionFieldComponent;
 class PositionTrajectoryManager;
 
 //==============================================================================
+/** A draggable Component that represents a source in the position field. */
 class PositionSourceComponent final
     : public SourceComponent
     , public Source::Listener
@@ -44,19 +45,17 @@ class PositionSourceComponent final
 
 public:
     //==============================================================================
+    PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
     PositionSourceComponent() = delete;
     ~PositionSourceComponent() override;
-
+    //==============================================================================
     PositionSourceComponent(PositionSourceComponent const &) = delete;
     PositionSourceComponent(PositionSourceComponent &&) = delete;
-
     PositionSourceComponent & operator=(PositionSourceComponent const &) = delete;
     PositionSourceComponent & operator=(PositionSourceComponent &&) = delete;
     //==============================================================================
-    PositionSourceComponent(PositionFieldComponent & fieldComponent, Source & source);
-    //==============================================================================
     [[nodiscard]] SourceIndex getSourceIndex() const;
-
+    //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
     void mouseDrag(juce::MouseEvent const & event) override;
     void mouseUp(juce::MouseEvent const & event) override;
