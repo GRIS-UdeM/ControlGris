@@ -21,9 +21,6 @@
 #pragma once
 
 #include "cg_LinkStrategies.hpp"
-#include "cg_Source.hpp"
-#include "cg_SourceSnapshot.hpp"
-#include "cg_constants.hpp"
 
 namespace gris
 {

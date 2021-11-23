@@ -134,7 +134,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     // Load the last saved state of the plugin.
     //-----------------------------------------
-    reloadUiState();
+    init();
 }
 
 //==============================================================================
@@ -145,7 +145,7 @@ ControlGrisAudioProcessorEditor::~ControlGrisAudioProcessorEditor()
 }
 
 //==============================================================================
-void ControlGrisAudioProcessorEditor::reloadUiState()
+void ControlGrisAudioProcessorEditor::init()
 {
     mIsInsideSetPluginState = true;
 
@@ -546,7 +546,6 @@ void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bo
 }
 
 //==============================================================================
-// Update the interface if anything has changed (mostly automations).
 void ControlGrisAudioProcessorEditor::refresh()
 {
     mSpansSection.setSelectedSource(&mAudioProcessor.getSources()[mSelectedSource]);

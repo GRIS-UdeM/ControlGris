@@ -24,7 +24,9 @@
 namespace gris
 {
 //==============================================================================
-// Global variables.
+// Spatialization modes.
+enum class SpatMode { dome, cube };
+//==============================================================================
 constexpr int MIN_FIELD_WIDTH_PIXELS = 300;
 constexpr int MAX_NUMBER_OF_SOURCES = 8;
 constexpr int NUMBER_OF_POSITION_PRESETS = 50;
@@ -39,21 +41,19 @@ constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 //==============================================================================
 // Defaults
 constexpr int DEFAULT_OSC_PORT = 18032;
-constexpr int DEFAULT_OSC_INPUT_PORT = 9000;
-constexpr int DEFAULT_OSC_OUTPUT_PORT = 8000;
+constexpr int DEFAULT_OSC_INPUT_PORT = 8000;
+constexpr int DEFAULT_OSC_OUTPUT_PORT = 9000;
 constexpr int DEFAULT_NUM_SOURCES = 2;
 constexpr int DEFAULT_FIRST_SOURCE_ID = 1;
 constexpr int DEFAULT_OSC_OUTPUT_PLUGIN_ID = 1;
-
+constexpr SpatMode DEFAULT_SPAT_MODE = SpatMode::dome;
+constexpr double DEFAULT_BPM = 120.0;
 constexpr bool DEFAULT_OSC_ACTIVE = true;
 
 extern juce::String const DEFAULT_OSC_ADDRESS;
 extern juce::String const DEFAULT_OSC_OUTPUT_ADDRESS;
 
 //==============================================================================
-// Spatialization modes.
-enum class SpatMode { dome, cube };
-
 extern juce::String const SOURCE_SELECTION_WARNING;
 
 //==============================================================================
@@ -90,6 +90,7 @@ enum class PositionSourceLink {
 extern juce::StringArray const POSITION_SOURCE_LINK_TYPES;
 
 enum class ElevationSourceLink { undefined, independent, fixedElevation, linearMin, linearMax, deltaLock };
+
 extern juce::StringArray const ELEVATION_SOURCE_LINK_TYPES;
 
 //==============================================================================
@@ -116,12 +117,12 @@ extern juce::StringArray const POSITION_TRAJECTORY_TYPE_TYPES;
 ;
 
 enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
+
 extern juce::StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES;
 
 //==============================================================================
 // Fix position data headers.
 extern juce::StringArray const FIXED_POSITION_DATA_HEADERS;
-
 extern juce::String const FIXED_POSITION_DATA_TAG;
 
 /** The parameters that are part of a ControlGRIS state. */
@@ -166,7 +167,5 @@ juce::String extern const DEVIATION_PER_CYCLE;
 juce::String extern const CYCLE_DURATION;
 juce::String extern const DURATION_UNIT;
 } // namespace statics
-
 } // namespace parameters
-
 } // namespace gris

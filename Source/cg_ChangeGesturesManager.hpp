@@ -45,20 +45,18 @@ public:
 
     public:
         //==============================================================================
+        ScopedLock(ChangeGesturesManager & manager, juce::String const & parameterName);
         ScopedLock() = delete;
         ~ScopedLock();
-
+        //==============================================================================
         ScopedLock(ScopedLock const &) = delete;
         ScopedLock(ScopedLock && other) noexcept;
-
         ScopedLock & operator=(ScopedLock const &) = delete;
         ScopedLock & operator=(ScopedLock &&) = delete;
-        //==============================================================================
-        ScopedLock(ChangeGesturesManager & manager, juce::String const & parameterName);
 
     private:
         //==============================================================================
-        JUCE_LEAK_DETECTOR(ScopedLock);
+        JUCE_LEAK_DETECTOR(ScopedLock)
 
     }; // class ScopedLock
 
@@ -69,21 +67,15 @@ private:
 
 public:
     //==============================================================================
+    explicit ChangeGesturesManager(juce::AudioProcessorValueTreeState & audioProcessorValueTreeState);
     ChangeGesturesManager() = delete;
     ~ChangeGesturesManager() noexcept = default;
-
+    //==============================================================================
     ChangeGesturesManager(ChangeGesturesManager const &) = delete;
     ChangeGesturesManager(ChangeGesturesManager &&) = delete;
-
     ChangeGesturesManager & operator=(ChangeGesturesManager const &) = delete;
     ChangeGesturesManager & operator=(ChangeGesturesManager &&) = delete;
     //==============================================================================
-    explicit ChangeGesturesManager(juce::AudioProcessorValueTreeState & audioProcessorValueTreeState)
-        : mAudioProcessorValueTreeState(audioProcessorValueTreeState)
-    {
-    }
-    //==============================================================================
-
     void beginGesture(juce::String const & parameterName);
     void endGesture(juce::String const & parameterName);
     ScopedLock getScopedLock(juce::String const & parameterName);

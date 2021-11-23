@@ -20,28 +20,36 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
-#include "cg_StrongTypes.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
+/** A tabbed component used to modify general plugin settings. */
 class GeneralSettingsTab final : public juce::Component
 {
 public:
     //==============================================================================
     struct Listener {
+        Listener() = default;
         virtual ~Listener() = default;
-
+        //==============================================================================
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = default;
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = default;
+        //==============================================================================
         virtual void oscFormatChangedCallback(SpatMode mode) = 0;
         virtual void oscPortChangedCallback(int oscPort) = 0;
         virtual void oscAddressChangedCallback(juce::String const & address) = 0;
         virtual void oscStateChangedCallback(bool state) = 0;
         virtual void numberOfSourcesChangedCallback(int numOfSources) = 0;
         virtual void firstSourceIdChangedCallback(SourceId firstSourceId) = 0;
+
+    private:
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener)
     };
 
 private:
@@ -70,17 +78,14 @@ private:
 public:
     //==============================================================================
     explicit GeneralSettingsTab(GrisLookAndFeel & grisLookAndFeel);
-    //==============================================================================
     GeneralSettingsTab() = delete;
     ~GeneralSettingsTab() override = default;
-
+    //==============================================================================
     GeneralSettingsTab(GeneralSettingsTab const &) = delete;
     GeneralSettingsTab(GeneralSettingsTab &&) = delete;
-
     GeneralSettingsTab & operator=(GeneralSettingsTab const &) = delete;
     GeneralSettingsTab & operator=(GeneralSettingsTab &&) = delete;
     //==============================================================================
-
     // These are only setters, they dont send notification.
     //-----------------------------------------------------
     void setNumberOfSources(int numOfSources);
@@ -89,11 +94,10 @@ public:
     void setOscPortNumber(int oscPortNumber);
     void setOscAddress(juce::String const & address);
     void setActivateButtonState(bool shouldBeOn);
-
+    //==============================================================================
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
     //==============================================================================
-    // overrides
     void paint(juce::Graphics &) override;
     void resized() override;
 

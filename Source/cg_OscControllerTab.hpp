@@ -20,24 +20,37 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
 
 namespace gris
 {
 //==============================================================================
+/** A tabbed component used to modify a plugin's OSC controller settings (for when someone wishes to control a
+ * ControlGRIS plugin with an external controller). */
 class OscControllerTab final
     : public juce::Component
     , public juce::TextEditor::Listener
 {
 public:
-    struct Listener {
+    //==============================================================================
+    class Listener
+    {
+    public:
+        Listener() = default;
         virtual ~Listener() = default;
-
+        //==============================================================================
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = default;
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = default;
+        //==============================================================================
         virtual void oscOutputPluginIdChangedCallback(int value) = 0;
         virtual void oscInputConnectionChangedCallback(bool state, int oscPort) = 0;
         virtual void oscOutputConnectionChangedCallback(bool state, juce::String oscAddress, int oscPort) = 0;
+
+    private:
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener)
     };
 
 private:
@@ -64,31 +77,26 @@ private:
 public:
     //==============================================================================
     explicit OscControllerTab(GrisLookAndFeel & grisLookAndFeel);
-    //==============================================================================
     OscControllerTab() = delete;
-    ~OscControllerTab() override { setLookAndFeel(nullptr); } // TODO : necessary ?
-
+    ~OscControllerTab() override { setLookAndFeel(nullptr); } // TODO : is this necessary ?
+    //==============================================================================
     OscControllerTab(OscControllerTab const &) = delete;
     OscControllerTab(OscControllerTab &&) = delete;
-
     OscControllerTab & operator=(OscControllerTab const &) = delete;
     OscControllerTab & operator=(OscControllerTab &&) = delete;
+    //==============================================================================
+    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(juce::String(id)); }
+    void setOscReceiveToggleState(bool state);
+    void setOscReceiveInputPort(int port);
+    void setOscSendToggleState(bool state);
+    void setOscSendOutputAddress(juce::String const & address);
+    void setOscSendOutputPort(int port);
+    void addListener(Listener * l) { mListeners.add(l); }
+    [[maybe_unused]] void removeListener(Listener * l) { mListeners.remove(l); }
     //==============================================================================
     void textEditorReturnKeyPressed([[maybe_unused]] juce::TextEditor & editor) override { unfocusAllComponents(); }
     void paint(juce::Graphics &) override;
     void resized() override;
-
-    void setOscOutputPluginId(int const id) { mOscOutputPluginIdEditor.setText(juce::String(id)); }
-
-    void setOscReceiveToggleState(bool state);
-    void setOscReceiveInputPort(int port);
-
-    void setOscSendToggleState(bool state);
-    void setOscSendOutputAddress(juce::String const & address);
-    void setOscSendOutputPort(int port);
-
-    void addListener(Listener * l) { mListeners.add(l); }
-    [[maybe_unused]] void removeListener(Listener * l) { mListeners.remove(l); }
 
 private:
     //==============================================================================

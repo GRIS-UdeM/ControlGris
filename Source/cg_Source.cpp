@@ -311,9 +311,9 @@ Radians Source::clipElevation(Radians const elevation)
 }
 
 //==============================================================================
-float Source::clipCoordinate(float const coord)
+float Source::clipCoordinate(float const coordinate)
 {
-    return std::clamp(coord, -1.0f, 1.0f);
+    return std::clamp(coordinate, -1.0f, 1.0f);
 }
 
 //==============================================================================

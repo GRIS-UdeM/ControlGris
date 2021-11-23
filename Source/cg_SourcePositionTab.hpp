@@ -20,12 +20,10 @@
 
 #pragma once
 
-#include <optional>
-
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
+
+#include <optional>
 
 namespace gris
 {
@@ -33,6 +31,7 @@ class Source;
 class SourcePositionTab;
 
 //==============================================================================
+/** A bunch of sliders used to modify a source's position when in DOME mode. */
 class DomeControls final : public juce::Component
 {
     SourcePositionTab & mSourceBoxComponent;
@@ -47,11 +46,11 @@ class DomeControls final : public juce::Component
 public:
     //==============================================================================
     explicit DomeControls(SourcePositionTab & sourceBoxComponent);
+    DomeControls() = delete;
     ~DomeControls() override = default;
-
+    //==============================================================================
     DomeControls(DomeControls const &) = delete;
     DomeControls(DomeControls &&) = delete;
-
     DomeControls & operator=(DomeControls const &) = delete;
     DomeControls & operator=(DomeControls &&) = delete;
     //==============================================================================
@@ -63,6 +62,7 @@ private:
 }; // DomeControls
 
 //==============================================================================
+/** A bunch of sliders used to modify a source's position when in CUBE mode. */
 class CubeControls final : public juce::Component
 {
     SourcePositionTab & mSourceBoxComponent;
@@ -81,10 +81,9 @@ public:
     //==============================================================================
     explicit CubeControls(SourcePositionTab & sourceBoxComponent);
     ~CubeControls() override = default;
-
+    //==============================================================================
     CubeControls(CubeControls const &) = delete;
     CubeControls(CubeControls &&) = delete;
-
     CubeControls & operator=(CubeControls const &) = delete;
     CubeControls & operator=(CubeControls &&) = delete;
     //==============================================================================
@@ -96,6 +95,7 @@ private:
 }; // CubeControls
 
 //==============================================================================
+/** A tabbed component used to precisely modify a the selected source's position. */
 class SourcePositionTab final : public juce::Component
 {
     friend DomeControls;
@@ -103,9 +103,17 @@ class SourcePositionTab final : public juce::Component
 
 public:
     //==============================================================================
-    struct Listener {
+    class Listener
+    {
+    public:
+        Listener() = default;
         virtual ~Listener() = default;
-
+        //==============================================================================
+        Listener(Listener const &) = delete;
+        Listener(Listener &&) = default;
+        Listener & operator=(Listener const &) = delete;
+        Listener & operator=(Listener &&) = default;
+        //==============================================================================
         virtual void sourcesPlacementChangedCallback(SourcePlacement value) = 0;
         virtual void sourceSelectionChangedCallback(SourceIndex sourceIndex) = 0;
         virtual void sourcePositionChangedCallback(SourceIndex sourceIndex,
@@ -115,6 +123,10 @@ public:
                                                    std::optional<float> y,
                                                    std::optional<float> z)
             = 0;
+
+    private:
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(Listener)
     };
 
 private:
@@ -122,12 +134,9 @@ private:
     GrisLookAndFeel & mGrisLookAndFeel;
 
     juce::ListenerList<Listener> mListeners;
-
     SourceIndex mSelectedSource;
-
     juce::Label mSourcePlacementLabel;
     juce::ComboBox mSourcePlacementCombo;
-
     juce::Label mSourceNumberLabel;
     juce::ComboBox mSourceNumberCombo;
 
@@ -137,22 +146,18 @@ private:
 public:
     //==============================================================================
     explicit SourcePositionTab(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
-    //==============================================================================
     SourcePositionTab() = delete;
     ~SourcePositionTab() override = default;
-
+    //==============================================================================
     SourcePositionTab(SourcePositionTab const &) = delete;
     SourcePositionTab(SourcePositionTab &&) = delete;
-
     SourcePositionTab & operator=(SourcePositionTab const &) = delete;
     SourcePositionTab & operator=(SourcePositionTab &&) = delete;
     //==============================================================================
     void setNumberOfSources(int numOfSources, SourceId firstSourceId);
     void updateSelectedSource(Source * source, SourceIndex sourceIndex, SpatMode spatMode);
-
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
-
     void setSpatMode(SpatMode spatMode);
     //==============================================================================
     void paint(juce::Graphics &) override;

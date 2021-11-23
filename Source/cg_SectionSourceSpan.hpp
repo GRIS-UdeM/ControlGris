@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_Source.hpp"
 
@@ -30,9 +28,9 @@ namespace gris
 class ControlGrisAudioProcessor;
 class ControlGrisAudioProcessorEditor;
 //==============================================================================
+/** A component that displays span sliders. */
 class SectionSourceSpan final : public juce::Component
 {
-    //==============================================================================
     ControlGrisAudioProcessor & mAudioProcessor;
     ControlGrisAudioProcessorEditor & mAudioProcessorEditor;
     GrisLookAndFeel & mGrisLookAndFeel;
@@ -55,22 +53,20 @@ public:
     SectionSourceSpan(ControlGrisAudioProcessor & audioProcessor,
                       ControlGrisAudioProcessorEditor & audioProcessorEditor,
                       GrisLookAndFeel & grisLookAndFeel);
-    //==============================================================================
     SectionSourceSpan() = delete;
     ~SectionSourceSpan() override = default;
-
+    //==============================================================================
     SectionSourceSpan(SectionSourceSpan const &) = delete;
     SectionSourceSpan(SectionSourceSpan &&) = delete;
-
     SectionSourceSpan & operator=(SectionSourceSpan const &) = delete;
     SectionSourceSpan & operator=(SectionSourceSpan &&) = delete;
+    //==============================================================================
+    void setSelectedSource(Source * source);
+    void setSpanLinkState(bool spanLinkState);
     //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
     void paint(juce::Graphics &) override;
     void resized() override;
-
-    void setSelectedSource(Source * source);
-    void setSpanLinkState(bool spanLinkState);
 
 private:
     //==============================================================================

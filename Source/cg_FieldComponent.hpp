@@ -20,15 +20,10 @@
 
 #pragma once
 
-#include <type_traits>
-
-#include <JuceHeader.h>
-
 #include "cg_ElevationDrawingHandle.hpp"
 #include "cg_ElevationSourceComponent.hpp"
 #include "cg_GeneralSettingsTab.hpp"
 #include "cg_PositionSourceComponent.hpp"
-#include "cg_Source.hpp"
 #include "cg_TrajectoryManager.hpp"
 
 namespace gris
@@ -36,7 +31,7 @@ namespace gris
 //==============================================================================
 /** Base class for a component that displays a flatten view of the sources' positions.
  *
- * TODO : This whole UI system is a mess and should be reimplemented ASAP
+ * TODO : This whole UI system is a mess
  */
 class FieldComponent
     : public juce::Component

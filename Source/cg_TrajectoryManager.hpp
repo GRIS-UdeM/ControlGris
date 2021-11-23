@@ -19,13 +19,10 @@
  *************************************************************************/
 #pragma once
 
-#include <optional>
-
-#include <JuceHeader.h>
-
 #include "cg_Source.hpp"
 #include "cg_Trajectory.hpp"
-#include "cg_constants.hpp"
+
+#include <optional>
 
 namespace gris
 {

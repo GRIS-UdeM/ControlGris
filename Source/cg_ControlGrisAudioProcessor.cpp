@@ -400,6 +400,8 @@ void ControlGrisAudioProcessor::setSpatMode(SpatMode const spatMode)
 //==============================================================================
 void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
+    JUCE_ASSERT_MESSAGE_THREAD;
+
     mCurrentOscPort = oscPortNumber;
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_PORT, oscPortNumber, nullptr);
     [[maybe_unused]] auto const success{ createOscConnection(mCurrentOscAddress, oscPortNumber) };
@@ -409,6 +411,8 @@ void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 //==============================================================================
 void ControlGrisAudioProcessor::setOscAddress(juce::String const & address)
 {
+    JUCE_ASSERT_MESSAGE_THREAD;
+
     mCurrentOscAddress = address;
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_ADDRESS, address, nullptr);
     [[maybe_unused]] auto const success{ createOscConnection(address, mCurrentOscPort) };
@@ -432,13 +436,13 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
+void ControlGrisAudioProcessor::setNumberOfSources(int const numSources, bool const sendOscMessageRightAway)
 {
-    if (numOfSources == mSources.size()) {
+    if (numSources == mSources.size()) {
         return;
     }
 
-    mSources.setSize(numOfSources);
+    mSources.setSize(numSources);
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::NUM_SOURCES, mSources.size(), nullptr);
 
     mPositionSourceLinkEnforcer.numberOfSourcesChanged();
@@ -449,11 +453,11 @@ void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool 
     auto const positionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
     auto const isSymmetricLink{ positionSourceLink == PositionSourceLink::symmetricX
                                 || positionSourceLink == PositionSourceLink::symmetricY };
-    if (isSymmetricLink && numOfSources != 2) {
+    if (isSymmetricLink && numSources != 2) {
         setPositionSourceLink(PositionSourceLink::independent, SourceLinkEnforcer::OriginOfChange::automation);
     }
 
-    if (propagate) {
+    if (sendOscMessageRightAway) {
         sendOscMessage();
     }
 }
@@ -949,9 +953,7 @@ void ControlGrisAudioProcessor::timerCallback()
 //==============================================================================
 void ControlGrisAudioProcessor::setPluginState()
 {
-    // If no preset is loaded, try to restore the last saved positions.
-    //    if (mPresetManager.getCurrentPreset() == 0) {
-    auto & state{ mAudioProcessorValueTreeState.state };
+    auto const & state{ mAudioProcessorValueTreeState.state };
     for (auto & source : mSources) {
         auto const index{ source.getIndex().toString() };
 
@@ -975,27 +977,31 @@ void ControlGrisAudioProcessor::setPluginState()
         source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
         source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
     }
-    //    }
 
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
     if (editor != nullptr) {
-        editor->reloadUiState();
+        editor->init();
     }
 
     sendOscMessage();
 }
 
 //==============================================================================
-void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex sourceIndex, int whichField)
+void ControlGrisAudioProcessor::sourcePositionChanged(SourceIndex const sourceIndex, int const whichField)
 {
     auto const & source{ mSources[sourceIndex] };
     if (whichField == 0) {
-        if (getSpatMode() == SpatMode::dome) {
+        switch (getSpatMode()) {
+        case SpatMode::dome:
             setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().get());
             setSourceParameterValue(sourceIndex, SourceParameter::elevation, source.getNormalizedElevation().get());
-        } else {
+            break;
+        case SpatMode::cube:
             setSourceParameterValue(sourceIndex, SourceParameter::azimuth, source.getNormalizedAzimuth().get());
             setSourceParameterValue(sourceIndex, SourceParameter::distance, source.getDistance());
+            break;
+        default:
+            jassertfalse;
         }
         if (source.isPrimarySource()) {
             mPositionTrajectoryManager.setTrajectoryType(mPositionTrajectoryManager.getTrajectoryType(),
@@ -1043,42 +1049,6 @@ void ControlGrisAudioProcessor::setSourceParameterValue(SourceIndex const source
         mAudioProcessorValueTreeState.getParameter(parameters::dynamic::ELEVATION_SPAN)->setValueNotifyingHost(value);
         break;
     }
-}
-
-//==============================================================================
-juce::String const ControlGrisAudioProcessor::getName() const
-{
-    return JucePlugin_Name;
-}
-
-//==============================================================================
-bool ControlGrisAudioProcessor::acceptsMidi() const
-{
-#if JucePlugin_WantsMidiInput
-    return true;
-#else
-    return false;
-#endif
-}
-
-//==============================================================================
-bool ControlGrisAudioProcessor::producesMidi() const
-{
-#if JucePlugin_ProducesMidiOutput
-    return true;
-#else
-    return false;
-#endif
-}
-
-//==============================================================================
-bool ControlGrisAudioProcessor::isMidiEffect() const
-{
-#if JucePlugin_IsMidiEffect
-    return true;
-#else
-    return false;
-#endif
 }
 
 //==============================================================================
@@ -1297,8 +1267,8 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
 
 //==============================================================================
 void ControlGrisAudioProcessor::sourceChanged(Source & source,
-                                              Source::ChangeType changeType,
-                                              Source::OriginOfChange origin)
+                                              Source::ChangeType const changeType,
+                                              Source::OriginOfChange const origin)
 {
     jassert(changeType == Source::ChangeType::position || changeType == Source::ChangeType::elevation);
 

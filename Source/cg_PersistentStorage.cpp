@@ -46,6 +46,7 @@ bool showSecondarySourceDragErrorMessage{ getShowSecondarySourceDragErrorMessage
 
 void setShowSecondarySourceDragErrorMessage(bool const state)
 {
+    showSecondarySourceDragErrorMessage = state;
     auto storage{ getPersistentStorage() };
     storage.setValue(SHOW_SECONDARY_SOURCE_DRAG_ERROR_MESSAGE_TAG, state);
     storage.saveIfNeeded();

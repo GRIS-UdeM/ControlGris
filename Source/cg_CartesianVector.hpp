@@ -41,10 +41,10 @@ struct CartesianVector {
     [[nodiscard]] float length() const noexcept;
     /** @return the Euclidean distance squared. */
     [[nodiscard]] constexpr float length2() const noexcept;
-    [[nodiscard]] constexpr CartesianVector mean(CartesianVector const & other) const noexcept;
-    [[nodiscard]] constexpr float dotProduct(CartesianVector const & other) const noexcept;
-    [[nodiscard]] float angleWith(CartesianVector const & other) const noexcept;
+    /** @return a flat projection of this vector on the [x,z] plane. */
     [[nodiscard]] juce::Point<float> discardZ() const noexcept;
+    [[nodiscard]] constexpr CartesianVector midPoint(CartesianVector const & other) const noexcept;
+    [[nodiscard]] constexpr float dotProduct(CartesianVector const & other) const noexcept;
     [[nodiscard]] CartesianVector crossProduct(CartesianVector const & other) const noexcept;
 };
 
@@ -87,7 +87,7 @@ constexpr float CartesianVector::dotProduct(CartesianVector const & other) const
 }
 
 //==============================================================================
-constexpr CartesianVector CartesianVector::mean(CartesianVector const & other) const noexcept
+constexpr CartesianVector CartesianVector::midPoint(CartesianVector const & other) const noexcept
 {
     auto const newX{ (x + other.x) * 0.5f };
     auto const newY{ (y + other.y) * 0.5f };

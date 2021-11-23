@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_BannerComponent.hpp"
 #include "cg_FieldComponent.hpp"
 #include "cg_OscControllerTab.hpp"
@@ -91,11 +89,15 @@ public:
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor const &) = delete;
     ControlGrisAudioProcessorEditor & operator=(ControlGrisAudioProcessorEditor &&) = delete;
     //==============================================================================
+    /** Initializes the UI from the AudioProcessor's state. */
+    void init();
+    /** Marks the x-y field as needing to be repainted. */
     void repaintPositionField();
+    /** Marks the z field as needing to be repainted. */
     void repaintElevationField();
-    void reloadUiState();
     void updateSpanLinkButton(bool state);
     void updatePositionPreset(int presetNumber);
+    /** Updates the interface if anything has changed (mostly from automations). */
     void refresh();
     void setSpatMode(SpatMode spatMode);
     //==============================================================================

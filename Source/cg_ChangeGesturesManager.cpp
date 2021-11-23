@@ -47,6 +47,12 @@ ChangeGesturesManager::ScopedLock::ScopedLock(ChangeGesturesManager::ScopedLock 
 }
 
 //==============================================================================
+ChangeGesturesManager::ChangeGesturesManager(juce::AudioProcessorValueTreeState & audioProcessorValueTreeState)
+    : mAudioProcessorValueTreeState(audioProcessorValueTreeState)
+{
+}
+
+//==============================================================================
 void ChangeGesturesManager::beginGesture(juce::String const & parameterName)
 {
     if (!mGestureStates.contains(parameterName)) {

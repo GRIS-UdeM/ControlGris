@@ -20,11 +20,6 @@
 
 #pragma once
 
-#include <array>
-
-#include <JuceHeader.h>
-
-#include "cg_StrongTypes.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
@@ -46,11 +41,10 @@ public:
     public:
         //==============================================================================
         Listener() = default;
-        virtual ~Listener() = default;
-
+        ~Listener() override = default;
+        //==============================================================================
         Listener(Listener const &) = delete;
         Listener(Listener &&) = delete;
-
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
@@ -145,11 +139,11 @@ public:
 
 private:
     //==============================================================================
-    bool shouldForceNotifications(OriginOfChange origin) const;
+    [[nodiscard]] bool shouldForceNotifications(OriginOfChange origin) const;
     void notify(ChangeType changeType, OriginOfChange origin);
     void notifyGuiListeners();
-    static Radians clipElevation(Radians elevation);
-    static float clipCoordinate(float coord);
+    [[nodiscard]] static Radians clipElevation(Radians elevation);
+    [[nodiscard]] static float clipCoordinate(float coordinate);
     //==============================================================================
     JUCE_LEAK_DETECTOR(Source)
 };

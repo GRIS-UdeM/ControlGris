@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
 
@@ -29,6 +27,7 @@ namespace gris
 {
 class ControlGrisAudioProcessor;
 //==============================================================================
+/** A component that displays trajectory controls. */
 class SectionTrajectory final : public juce::Component
 {
 public:
@@ -96,19 +95,14 @@ private:
 public:
     //==============================================================================
     SectionTrajectory(ControlGrisAudioProcessor & audioProcessor, GrisLookAndFeel & grisLookAndFeel);
-    //==============================================================================
     SectionTrajectory() = delete;
     ~SectionTrajectory() override = default;
-
+    //==============================================================================
     SectionTrajectory(SectionTrajectory const &) = delete;
     SectionTrajectory(SectionTrajectory &&) = delete;
-
     SectionTrajectory & operator=(SectionTrajectory const &) = delete;
     SectionTrajectory & operator=(SectionTrajectory &&) = delete;
     //==============================================================================
-    void paint(juce::Graphics &) override;
-    void resized() override;
-
     void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
     void setPositionBackAndForth(bool state);
@@ -130,6 +124,9 @@ public:
     void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
+    //==============================================================================
+    void paint(juce::Graphics &) override;
+    void resized() override;
 
 private:
     //==============================================================================

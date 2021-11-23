@@ -20,9 +20,6 @@
 
 #pragma once
 
-#include <JuceHeader.h>
-
-#include "cg_Source.hpp"
 #include "cg_SourceSnapshot.hpp"
 #include "cg_constants.hpp"
 
@@ -33,9 +30,14 @@ class Sources;
 struct SourcesSnapshots;
 class SourceLinkEnforcer;
 
+/** All the ways a primary source's position can influence the positions of the other sources. */
 namespace source_link_strategies
 {
 //==============================================================================
+/** Base class for a source link strategy.
+ *
+ * Link strategies define how the secondary sources move in reaction to the primary source.
+ */
 class Base
 {
     friend SourceLinkEnforcer;
@@ -45,17 +47,16 @@ public:
     //==============================================================================
     Base() noexcept = default;
     virtual ~Base() noexcept = default;
-
+    //==============================================================================
     Base(Base const &) = default;
     Base(Base &&) noexcept = default;
-
     Base & operator=(Base const &) = default;
     Base & operator=(Base &&) = default;
     //==============================================================================
-    void computeParameters(Sources const & finalStates, SourcesSnapshots const & initialStates);
-    void enforce(Sources & finalStates, SourcesSnapshots const & initialState, SourceIndex sourceIndex) const;
-    void enforce(Sources & finalStates, SourcesSnapshots const & initialState) const;
-    [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState(Sources const & finalStates,
+    void init(Sources const & currentStates, SourcesSnapshots const & initialStates);
+    void apply(Sources & currentStates, SourcesSnapshots const & initialStates, SourceIndex sourceIndex) const;
+    void apply(Sources & currentStates, SourcesSnapshots const & initialStates) const;
+    [[nodiscard]] SourceSnapshot computeInitialStateFromFinalState(Sources const & currentStates,
                                                                    SourcesSnapshots const & initialStates,
                                                                    SourceIndex sourceIndex) const;
     [[nodiscard]] bool isInitialized() const { return mInitialized; }
@@ -65,13 +66,11 @@ public:
 
 private:
     //==============================================================================
-    virtual void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates)
-        = 0;
-    virtual void enforce_implementation(Sources & finalStates,
-                                        SourcesSnapshots const & initialStates,
-                                        SourceIndex sourceIndex) const = 0;
+    virtual void initImpl(Sources const & currentStates, SourcesSnapshots const & initialStates) = 0;
+    virtual void
+        applyImpl(Sources & currentStates, SourcesSnapshots const & initialStates, SourceIndex sourceIndex) const = 0;
     [[nodiscard]] virtual SourceSnapshot
-        computeInitialStateFromFinalState_implementation(Sources const & finalStates,
+        computeInitialStateFromFinalState_implementation(Sources const & currentStates,
                                                          SourcesSnapshots const & initialStates,
                                                          SourceIndex sourceIndex) const = 0;
     //==============================================================================
@@ -83,10 +82,10 @@ private:
 // only use full to recall saved positions
 class PositionIndependent final : public Base
 {
-    void computeParameters_implementation(Sources const &, SourcesSnapshots const &) override {}
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const &, SourcesSnapshots const &) override {}
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -101,10 +100,10 @@ class Circular final : public Base
     Radians mRotation{};
     float mRadiusRatio{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalState, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalState, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -119,10 +118,10 @@ class CircularFixedRadius final : public Base
     Radians mRotation{};
     float mRadius{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -140,10 +139,10 @@ class CircularFixedAngle final : public Base
     float mRadiusRatio{};
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -162,10 +161,10 @@ class CircularFullyFixed final : public Base
     float mRadius{};
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -179,10 +178,10 @@ class SymmetricX final : public Base
 {
     juce::Point<float> mPrimarySourceFinalPosition;
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -196,10 +195,10 @@ class SymmetricY final : public Base
 {
     juce::Point<float> mPrimarySourceFinalPosition;
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -213,10 +212,10 @@ class PositionDeltaLock final : public Base
 {
     juce::Point<float> mDelta;
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -229,10 +228,10 @@ class PositionDeltaLock final : public Base
 // only usefuLl to recall saved positions
 class ElevationIndependent final : public Base
 {
-    void computeParameters_implementation(Sources const &, SourcesSnapshots const &) override {}
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const &, SourcesSnapshots const &) override {}
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -246,10 +245,10 @@ class FixedElevation final : public Base
 {
     Radians mElevation{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -265,10 +264,10 @@ class LinearMin final : public Base
     Radians mBaseElevation{};
     Radians mElevationPerSource{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & sources, SourcesSnapshots const & snapshots) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -284,10 +283,10 @@ class LinearMax final : public Base
     Radians mBaseElevation{};
     Radians mElevationPerSource{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & sources, SourcesSnapshots const & snapshots) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
@@ -299,12 +298,12 @@ class LinearMax final : public Base
 //==============================================================================
 class ElevationDeltaLock final : public Base
 {
-    Radians mDelta;
+    Radians mDelta{};
     //==============================================================================
-    void computeParameters_implementation(Sources const & sources, SourcesSnapshots const & snapshots) override;
-    void enforce_implementation(Sources & finalStates,
-                                SourcesSnapshots const & initialStates,
-                                SourceIndex sourceIndex) const override;
+    void initImpl(Sources const & sources, SourcesSnapshots const & snapshots) override;
+    void applyImpl(Sources & finalStates,
+                   SourcesSnapshots const & initialStates,
+                   SourceIndex sourceIndex) const override;
     [[nodiscard]] SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,

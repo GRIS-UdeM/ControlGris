@@ -20,13 +20,9 @@
 
 #pragma once
 
-#include <array>
-#include <optional>
-
-#include <JuceHeader.h>
-
 #include "cg_SourceLinkEnforcer.hpp"
-#include "cg_constants.hpp"
+
+#include <optional>
 
 namespace gris
 {

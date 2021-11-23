@@ -19,7 +19,7 @@
  *************************************************************************/
 
 #include "cg_SourceLinkEnforcer.hpp"
-
+#include "cg_Source.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
@@ -81,8 +81,8 @@ void SourceLinkEnforcer::setSourceLink(ElevationSourceLink const sourceLink, Ori
 //==============================================================================
 void SourceLinkEnforcer::enforceSourceLink()
 {
-    mLinkStrategy->computeParameters(mSources, mSnapshots);
-    mLinkStrategy->enforce(mSources, mSnapshots);
+    mLinkStrategy->init(mSources, mSnapshots);
+    mLinkStrategy->apply(mSources, mSnapshots);
     if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
         || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
         // circularFixedAngle & circularFullyFixed links require the snapshots to be up-to-date or else moving the
@@ -143,8 +143,8 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
     if (isElevationSourceLink) {
         // get expected elevation
         auto const currentElevation{ mSources[sourceIndex].getElevation() };
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
-        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        mLinkStrategy->init(mSources, mSnapshots);
+        mLinkStrategy->applyImpl(mSources, mSnapshots, sourceIndex);
         auto const expectedElevation{ mSources[sourceIndex].getElevation() };
 
         // get motion
@@ -163,28 +163,28 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             mLinkStrategy = source_link_strategies::Base::make(PositionSourceLink::circular);
         }
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
+        mLinkStrategy->init(mSources, mSnapshots);
 
         // get motion start and end
-        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        mLinkStrategy->applyImpl(mSources, mSnapshots, sourceIndex);
         SourceSnapshot const motionStart{ mSources[sourceIndex] };
         auto const motionEnd{ secondaryEnd };
 
         // train motion
         mSnapshots.primary = motionStart;
         mSources.getPrimarySource().setPosition(motionEnd.position, Source::OriginOfChange::none);
-        mLinkStrategy->computeParameters(mSources, mSnapshots);
+        mLinkStrategy->init(mSources, mSnapshots);
 
         // apply motion to secondary source (temp)
         mSnapshots.primary = primaryEnd;
         mSnapshots[sourceIndex] = primaryEnd;
-        mLinkStrategy->enforce_implementation(mSources, mSnapshots, sourceIndex);
+        mLinkStrategy->applyImpl(mSources, mSnapshots, sourceIndex);
         SourceSnapshot const target{ mSources[sourceIndex] };
 
         // rebuild source snapshot
         mSnapshots[sourceIndex] = secondaryStart;
 
-        // enforce link
+        // apply link
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             if (mPositionSourceLink == PositionSourceLink::undefined) {
@@ -201,7 +201,7 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
 //==============================================================================
 void SourceLinkEnforcer::primaryAnchorMoved()
 {
-    // mLinkStrategy->computeParameters(mSources, mSnapshots);
+    // mLinkStrategy->init(mSources, mSnapshots);
     auto const newPrimarySnapshot{
         mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, mSources.getPrimarySource().getIndex())
     };
@@ -216,7 +216,7 @@ void SourceLinkEnforcer::secondaryAnchorMoved(SourceIndex const sourceIndex)
 
     auto const secondaryIndex{ sourceIndex.get() - 1 };
     auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
-    mLinkStrategy->computeParameters(mSources, mSnapshots);
+    mLinkStrategy->init(mSources, mSnapshots);
     auto const newSecondaryAnchor{
         mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, sourceIndex)
     };

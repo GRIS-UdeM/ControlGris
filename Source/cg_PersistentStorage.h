@@ -20,6 +20,8 @@
 
 #pragma once
 
+/** A global flag that enables an error message shown to the user when dragging a secondary source. */
 extern bool showSecondarySourceDragErrorMessage;
 
+/** Writes to persistent storage so that the showSecondarySourceDragErrorMessage flag is forever set. */
 void setShowSecondarySourceDragErrorMessage(bool state);
