@@ -22,6 +22,7 @@
 
 #include "cg_ChangeGesturesManager.hpp"
 #include "cg_PresetsManager.hpp"
+#include "cg_Sources.hpp"
 #include "cg_TrajectoryManager.hpp"
 
 namespace gris

@@ -28,6 +28,7 @@
 
 namespace gris
 {
+class Sources;
 //==============================================================================
 /** Base class for a component that displays a flatten view of the sources' positions.
  *

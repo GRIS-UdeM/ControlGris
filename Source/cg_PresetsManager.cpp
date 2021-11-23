@@ -20,7 +20,7 @@
 
 #include "cg_PresetsManager.hpp"
 
-#include "cg_Source.hpp"
+#include "cg_Sources.hpp"
 #include "cg_utilities.hpp"
 
 namespace gris

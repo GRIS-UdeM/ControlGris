@@ -122,6 +122,8 @@
             file="Source/cg_SourceLinkEnforcer.cpp"/>
       <FILE id="oI6Fsq" name="cg_SourceLinkEnforcer.hpp" compile="0" resource="0"
             file="Source/cg_SourceLinkEnforcer.hpp"/>
+      <FILE id="X8W1hL" name="cg_Sources.cpp" compile="1" resource="0" file="Source/cg_Sources.cpp"/>
+      <FILE id="Qkc8Jg" name="cg_Sources.hpp" compile="0" resource="0" file="Source/cg_Sources.hpp"/>
       <FILE id="fssYVg" name="cg_SourceSnapshot.cpp" compile="1" resource="0"
             file="Source/cg_SourceSnapshot.cpp"/>
       <FILE id="R7fA0n" name="cg_SourceSnapshot.hpp" compile="0" resource="0"

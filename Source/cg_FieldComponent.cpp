@@ -21,6 +21,7 @@
 #include "cg_FieldComponent.hpp"
 
 #include "cg_ElevationSourceComponent.hpp"
+#include "cg_Sources.hpp"
 #include "cg_constants.hpp"
 
 namespace gris

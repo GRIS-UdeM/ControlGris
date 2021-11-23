@@ -19,7 +19,7 @@
  *************************************************************************/
 
 #include "cg_LinkStrategies.hpp"
-#include "cg_Source.hpp"
+#include "cg_Sources.hpp"
 
 namespace gris
 {

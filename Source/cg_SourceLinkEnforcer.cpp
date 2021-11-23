@@ -19,7 +19,7 @@
  *************************************************************************/
 
 #include "cg_SourceLinkEnforcer.hpp"
-#include "cg_Source.hpp"
+#include "cg_Sources.hpp"
 #include "cg_constants.hpp"
 
 namespace gris
