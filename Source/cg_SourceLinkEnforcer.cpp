@@ -203,7 +203,7 @@ void SourceLinkEnforcer::primaryAnchorMoved()
 {
     // mLinkStrategy->init(mSources, mSnapshots);
     auto const newPrimarySnapshot{
-        mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, mSources.getPrimarySource().getIndex())
+        mLinkStrategy->deduceInitialState(mSources, mSnapshots, mSources.getPrimarySource().getIndex())
     };
     mSnapshots.primary = newPrimarySnapshot;
     enforceSourceLink();
@@ -217,9 +217,7 @@ void SourceLinkEnforcer::secondaryAnchorMoved(SourceIndex const sourceIndex)
     auto const secondaryIndex{ sourceIndex.get() - 1 };
     auto & snapshot{ mSnapshots.secondaries.getReference(secondaryIndex) };
     mLinkStrategy->init(mSources, mSnapshots);
-    auto const newSecondaryAnchor{
-        mLinkStrategy->computeInitialStateFromFinalState(mSources, mSnapshots, sourceIndex)
-    };
+    auto const newSecondaryAnchor{ mLinkStrategy->deduceInitialState(mSources, mSnapshots, sourceIndex) };
     snapshot = newSecondaryAnchor;
     primarySourceMoved(); // some positions are invalid - fix them right away
 }

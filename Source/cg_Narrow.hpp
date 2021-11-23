@@ -20,8 +20,6 @@
 
 #pragma once
 
-#include "cg_IsRelease.hpp"
-
 #include <JuceHeader.h>
 
 #include <type_traits>

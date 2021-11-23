@@ -47,6 +47,7 @@ std::optional<T> stringToEnum(juce::String const & string, juce::StringArray con
 
     auto const index{ strings.indexOf(string, true) };
     if (index == INVALID_INDEX) {
+        jassertfalse;
         return std::nullopt;
     }
 
