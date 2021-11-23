@@ -70,6 +70,13 @@ juce::Point<float> TrajectoryManager::smoothRecordingPosition(juce::Point<float>
 }
 
 //==============================================================================
+PositionTrajectoryManager::PositionTrajectoryManager(ControlGrisAudioProcessor & processor,
+                                                     Source & principalSource) noexcept
+    : TrajectoryManager(processor, principalSource)
+{
+}
+
+//==============================================================================
 void TrajectoryManager::setTrajectoryDeltaTime(double const relativeTimeFromPlay)
 {
     mTrajectoryDeltaTime = relativeTimeFromPlay / mCurrentPlaybackDuration;
@@ -238,6 +245,13 @@ void TrajectoryManager::addRecordingPoint(juce::Point<float> const & pos)
 void TrajectoryManager::invertBackAndForthDirection()
 {
     mBackAndForthDirection = mBackAndForthDirection == Direction::forward ? Direction::backward : Direction::forward;
+}
+
+//==============================================================================
+ElevationTrajectoryManager::ElevationTrajectoryManager(ControlGrisAudioProcessor & processor,
+                                                       Source & principalSource) noexcept
+    : TrajectoryManager(processor, principalSource)
+{
 }
 
 //==============================================================================

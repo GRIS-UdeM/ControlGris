@@ -50,7 +50,7 @@ void Source::setAzimuth(Radians const azimuth, OriginOfChange const origin)
     auto const balancedAzimuth{ azimuth.centered() };
     if (balancedAzimuth != mAzimuth || shouldForceNotifications(origin)) {
         mAzimuth = balancedAzimuth;
-        computeXY();
+        computeXy();
         notify(ChangeType::position, origin);
     }
 }
@@ -73,7 +73,7 @@ void Source::setElevation(Radians const elevation, OriginOfChange const origin)
     auto const clippedElevation{ clipElevation(elevation) };
     if (clippedElevation != mElevation || shouldForceNotifications(origin)) {
         mElevation = clippedElevation;
-        computeXY();
+        computeXy();
         notify(ChangeType::elevation, origin);
     }
 }
@@ -92,7 +92,7 @@ void Source::setDistance(float const distance, OriginOfChange const origin)
 
     if (distance != mDistance || shouldForceNotifications(origin)) {
         mDistance = distance;
-        computeXY();
+        computeXy();
         notify(ChangeType::position, origin);
     }
 }
@@ -112,7 +112,7 @@ void Source::setCoordinates(Radians const azimuth,
         mAzimuth = azimuth;
         mElevation = elevation;
         mDistance = distance;
-        computeXY();
+        computeXy();
         notify(ChangeType::position, origin);
         if (mSpatMode == SpatMode::cube) {
             notify(ChangeType::elevation, origin);
@@ -184,7 +184,7 @@ void Source::setPosition(juce::Point<float> const & position, OriginOfChange con
 }
 
 //==============================================================================
-void Source::computeXY()
+void Source::computeXy()
 {
     float const radius{ [&] {
         if (mSpatMode == SpatMode::dome) { // azimuth - elevation
@@ -294,14 +294,11 @@ void Source::notify(ChangeType type, OriginOfChange const origin)
 //==============================================================================
 juce::Point<float> Source::clipPosition(juce::Point<float> const & position, SpatMode const spatMode)
 {
-    juce::Point<float> result{};
     if (spatMode == SpatMode::dome) {
-        result = clipDomePosition(position);
-    } else {
-        jassert(spatMode == SpatMode::cube);
-        result = clipCubePosition(position);
+        return clipDomePosition(position);
     }
-    return result;
+    jassert(spatMode == SpatMode::cube);
+    return clipCubePosition(position);
 }
 
 //==============================================================================

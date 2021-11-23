@@ -29,6 +29,7 @@ class ControlGrisAudioProcessor;
 
 enum class SourceParameter { azimuth, elevation, distance, x, y, azimuthSpan, elevationSpan };
 //==============================================================================
+/** A source controlled by this plugin. */
 class Source
 {
 public:
@@ -91,12 +92,12 @@ public:
     [[nodiscard]] SpatMode getSpatMode() const { return mSpatMode; }
 
     void setAzimuth(Radians azimuth, OriginOfChange origin);
-    void setAzimuth(Normalized azimuth, OriginOfChange origin);
+    void setAzimuth(Normalized normalizedAzimuth, OriginOfChange origin);
     [[nodiscard]] Radians getAzimuth() const { return mAzimuth; }
     [[nodiscard]] Normalized getNormalizedAzimuth() const;
 
     void setElevation(Radians elevation, OriginOfChange origin);
-    void setElevation(Normalized elevation, OriginOfChange origin);
+    void setElevation(Normalized normalizedElevation, OriginOfChange origin);
     [[nodiscard]] Radians getElevation() const { return mElevation; }
     [[nodiscard]] Normalized getNormalizedElevation() const;
 
@@ -119,7 +120,7 @@ public:
     [[nodiscard]] juce::Point<float> const & getPos() const { return mPosition; }
     void setPosition(juce::Point<float> const & pos, OriginOfChange origin);
 
-    void computeXY();
+    void computeXy();
     void computeAzimuthElevation();
 
     void setColorFromIndex(int numTotalSources);

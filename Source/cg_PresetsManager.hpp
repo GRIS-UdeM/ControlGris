@@ -27,6 +27,7 @@
 namespace gris
 {
 //==============================================================================
+/** A class responsible for saving and loading position presets. */
 class PresetsManager final : public juce::ChangeBroadcaster
 {
     //==============================================================================
@@ -38,23 +39,20 @@ class PresetsManager final : public juce::ChangeBroadcaster
 
 public:
     //==============================================================================
-    PresetsManager() = delete;
-    ~PresetsManager() noexcept override = default;
-
-    PresetsManager(PresetsManager const &) = delete;
-    PresetsManager(PresetsManager &&) = delete;
-
-    PresetsManager & operator=(PresetsManager const &) = delete;
-    PresetsManager & operator=(PresetsManager &&) = delete;
-    //==============================================================================
     PresetsManager(juce::XmlElement & data,
                    Sources & sources,
                    SourceLinkEnforcer & positionLinkEnforcer,
                    SourceLinkEnforcer & elevationLinkEnforcer);
+    PresetsManager() = delete;
+    ~PresetsManager() noexcept override = default;
+    //==============================================================================
+    PresetsManager(PresetsManager const &) = delete;
+    PresetsManager(PresetsManager &&) = delete;
+    PresetsManager & operator=(PresetsManager const &) = delete;
+    PresetsManager & operator=(PresetsManager &&) = delete;
     //==============================================================================
     [[nodiscard]] int getCurrentPreset() const;
     [[nodiscard]] std::array<bool, NUMBER_OF_POSITION_PRESETS> getSavedPresets() const;
-
     bool loadIfPresetChanged(int presetNumber);
     bool forceLoad(int presetNumber);
     void save(int presetNumber) const;
@@ -66,7 +64,6 @@ private:
     [[nodiscard]] bool contains(int presetNumber) const;
     [[nodiscard]] std::unique_ptr<juce::XmlElement> createPresetData(int presetNumber) const;
     [[nodiscard]] std::optional<juce::XmlElement *> getPresetData(int presetNumber) const;
-
     [[nodiscard]] bool load(int presetNumber);
     //==============================================================================
     JUCE_LEAK_DETECTOR(PresetsManager)

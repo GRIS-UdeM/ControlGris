@@ -24,51 +24,48 @@
 
 namespace gris
 {
-//=========
+//==============================================================================
 class Trajectory
 {
 protected:
-    //=========
+    //==============================================================================
     juce::Array<juce::Point<float>> mPoints{};
     bool mIsElevationDrawing{ false };
 
 public:
-    //=========
-    Trajectory(PositionTrajectoryType positionTrajectoryType, juce::Point<float> const & startingPoint) noexcept;
+    //==============================================================================
     explicit Trajectory(ElevationTrajectoryType elevationTrajectoryType) noexcept;
-
+    Trajectory(PositionTrajectoryType positionTrajectoryType, juce::Point<float> const & startingPoint) noexcept;
+    ~Trajectory() noexcept = default;
+    //==============================================================================
     Trajectory(Trajectory const &) = default;
     Trajectory(Trajectory &&) noexcept = default;
-
-    ~Trajectory() noexcept = default;
-
     Trajectory & operator=(Trajectory const &) = default;
     Trajectory & operator=(Trajectory &&) noexcept = default;
-
-    juce::Point<float> const & getStartPosition() const { return mPoints.getReference(0); }
-    juce::Point<float> const & getEndPosition() const { return mPoints.getReference(mPoints.size() - 1); }
-    juce::Point<float> getPosition(Normalized normalized) const;
-
-    void clear() { mPoints.clear(); }
+    //==============================================================================
+    [[nodiscard]] int size() const { return mPoints.size(); }
     void addPoint(juce::Point<float> const & point);
-    int size() const { return mPoints.size(); }
-
-    juce::Path getDrawablePath(juce::Rectangle<float> const & drawArea, SpatMode spatMode) const;
+    void clear() { mPoints.clear(); }
+    //==============================================================================
+    [[nodiscard]] juce::Point<float> const & getStartPosition() const { return mPoints.getReference(0); }
+    [[nodiscard]] juce::Point<float> const & getEndPosition() const { return mPoints.getReference(mPoints.size() - 1); }
+    [[nodiscard]] juce::Point<float> getPosition(Normalized normalized) const;
+    [[nodiscard]] juce::Path getDrawablePath(juce::Rectangle<float> const & drawArea, SpatMode spatMode) const;
 
 private:
-    //=========
+    //==============================================================================
     void invertDirection();
     void flipOnHorizontalAxis();
     void rotate(Radians angle);
     void scale(float magnitude);
-
-    static juce::Array<juce::Point<float>> getBasicCirclePoints();
-    static juce::Array<juce::Point<float>> getBasicEllipsePoints();
-    static juce::Array<juce::Point<float>> getBasicSpiralPoints();
-    static juce::Array<juce::Point<float>> getBasicSquarePoints();
-    static juce::Array<juce::Point<float>> getBasicTrianglePoints();
-    static juce::Array<juce::Point<float>> getBasicDownUpPoints();
-    //=========
+    //==============================================================================
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicCirclePoints();
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicEllipsePoints();
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicSpiralPoints();
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicSquarePoints();
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicTrianglePoints();
+    [[nodiscard]] static juce::Array<juce::Point<float>> getBasicDownUpPoints();
+    //==============================================================================
     JUCE_LEAK_DETECTOR(Trajectory);
 };
 

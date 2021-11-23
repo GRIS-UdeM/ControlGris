@@ -30,7 +30,6 @@ class Sources;
 struct SourcesSnapshots;
 class SourceLinkEnforcer;
 
-/** All the ways a primary source's position can influence the positions of the other sources. */
 namespace source_link_strategies
 {
 //==============================================================================
@@ -79,7 +78,7 @@ private:
 }; // class Base
 
 //==============================================================================
-// only use full to recall saved positions
+/** Only use full to recall saved positions */
 class PositionIndependent final : public Base
 {
     void initImpl(Sources const &, SourcesSnapshots const &) override {}

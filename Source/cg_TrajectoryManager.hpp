@@ -29,6 +29,7 @@ namespace gris
 class ControlGrisAudioProcessor;
 
 //==============================================================================
+/** An abstract base class for a trajectory manager (either position [x,y] or elevation [z]). */
 class TrajectoryManager
 {
 public:
@@ -38,10 +39,9 @@ public:
     public:
         Listener() noexcept = default;
         virtual ~Listener() noexcept = default;
-
+        //==============================================================================
         Listener(Listener const &) = delete;
         Listener(Listener &&) = delete;
-
         Listener & operator=(Listener const &) = delete;
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
@@ -91,10 +91,9 @@ public:
     //==============================================================================
     TrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
     virtual ~TrajectoryManager() = default;
-
+    //==============================================================================
     TrajectoryManager(TrajectoryManager const &) = delete;
     TrajectoryManager(TrajectoryManager &&) = delete;
-
     TrajectoryManager & operator=(TrajectoryManager const &) = delete;
     TrajectoryManager & operator=(TrajectoryManager &&) = delete;
     //==============================================================================
@@ -146,23 +145,17 @@ class PositionTrajectoryManager final : public TrajectoryManager
 
 public:
     //==============================================================================
+    PositionTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
     PositionTrajectoryManager() = delete;
     ~PositionTrajectoryManager() noexcept override = default;
-
+    //==============================================================================
     PositionTrajectoryManager(PositionTrajectoryManager const &) = delete;
     PositionTrajectoryManager(PositionTrajectoryManager &&) = delete;
-
     PositionTrajectoryManager & operator=(PositionTrajectoryManager const &) = delete;
     PositionTrajectoryManager & operator=(PositionTrajectoryManager &&) = delete;
     //==============================================================================
-    PositionTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : TrajectoryManager(processor, principalSource)
-    {
-    }
-    //==============================================================================
     [[nodiscard]] PositionTrajectoryType getTrajectoryType() const { return mTrajectoryType; }
     void setTrajectoryType(PositionTrajectoryType type, juce::Point<float> const & startPos);
-
     void setSourceLink(PositionSourceLink const sourceLink) { mSourceLink = sourceLink; }
     [[nodiscard]] PositionSourceLink getSourceLink() const { return mSourceLink; }
     //==============================================================================
@@ -186,19 +179,14 @@ class ElevationTrajectoryManager final : public TrajectoryManager
 
 public:
     //==============================================================================
+    ElevationTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept;
     ElevationTrajectoryManager() = delete;
     ~ElevationTrajectoryManager() noexcept override = default;
-
+    //==============================================================================
     ElevationTrajectoryManager(ElevationTrajectoryManager const &) = delete;
     ElevationTrajectoryManager(ElevationTrajectoryManager &&) = delete;
-
     ElevationTrajectoryManager & operator=(ElevationTrajectoryManager const &) = delete;
     ElevationTrajectoryManager & operator=(ElevationTrajectoryManager &&) = delete;
-    //==============================================================================
-    ElevationTrajectoryManager(ControlGrisAudioProcessor & processor, Source & principalSource) noexcept
-        : TrajectoryManager(processor, principalSource)
-    {
-    }
     //==============================================================================
     void setTrajectoryType(ElevationTrajectoryType type);
     [[nodiscard]] ElevationTrajectoryType getTrajectoryType() const { return mTrajectoryType; }

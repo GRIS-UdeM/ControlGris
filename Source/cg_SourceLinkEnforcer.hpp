@@ -29,8 +29,9 @@ class SourceLinkEnforcer
 {
 public:
     enum class OriginOfChange { user, automation };
-    //==============================================================================
+
 private:
+    //==============================================================================
     Sources & mSources;
     SourcesSnapshots mSnapshots{};
     PositionSourceLink mPositionSourceLink{ PositionSourceLink::undefined };
@@ -39,30 +40,26 @@ private:
 
 public:
     //==============================================================================
-    SourceLinkEnforcer() = delete;
-    ~SourceLinkEnforcer() noexcept = default;
-
-    SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
-    SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
-
-    SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
-    SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
-    //==============================================================================
     SourceLinkEnforcer(Sources & sources, PositionSourceLink sourceLink);
     SourceLinkEnforcer(Sources & sources, ElevationSourceLink sourceLink);
+    SourceLinkEnforcer() = delete;
+    ~SourceLinkEnforcer() noexcept = default;
+    //==============================================================================
+    SourceLinkEnforcer(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer(SourceLinkEnforcer &&) = delete;
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer const &) = delete;
+    SourceLinkEnforcer & operator=(SourceLinkEnforcer &&) = delete;
     //==============================================================================
     void setSourceLink(ElevationSourceLink sourceLink, OriginOfChange originOfChange);
     void setSourceLink(PositionSourceLink sourceLink, OriginOfChange originOfChange);
     void numberOfSourcesChanged();
     void enforceSourceLink();
-
+    //==============================================================================
     [[nodiscard]] auto const & getSnapshots() const { return mSnapshots; }
-
+    void loadSnapshots(SourcesSnapshots const & snapshots) { mSnapshots = snapshots; }
     //==============================================================================
     void sourceMoved(Source & source);
     void anchorMoved(Source & source);
-
-    void loadSnapshots(SourcesSnapshots const & snapshots) { mSnapshots = snapshots; }
 
 private:
     //==============================================================================

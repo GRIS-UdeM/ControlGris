@@ -27,36 +27,37 @@ namespace gris
 class Source;
 
 //==============================================================================
+/** A snapshot of a source's position, used mainly for source linking. */
 struct SourceSnapshot {
     juce::Point<float> position;
-    Radians z; // height in CUBE mode, elevation in DOME mode
-    //==============================================================================
-    SourceSnapshot() noexcept = default;
-    ~SourceSnapshot() = default;
-
-    SourceSnapshot(SourceSnapshot const &) = default;
-    SourceSnapshot(SourceSnapshot &&) = default;
-
-    SourceSnapshot & operator=(SourceSnapshot const &) = default;
-    SourceSnapshot & operator=(SourceSnapshot &&) = default;
+    Radians z{}; // height in CUBE mode, elevation in DOME mode
     //==============================================================================
     explicit SourceSnapshot(Source const & source) noexcept;
+    SourceSnapshot() noexcept = default;
+    ~SourceSnapshot() = default;
+    //==============================================================================
+    SourceSnapshot(SourceSnapshot const &) = default;
+    SourceSnapshot(SourceSnapshot &&) = default;
+    SourceSnapshot & operator=(SourceSnapshot const &) = default;
+    SourceSnapshot & operator=(SourceSnapshot &&) = default;
 
 private:
+    //==============================================================================
     JUCE_LEAK_DETECTOR(SourceSnapshot)
 }; // class SourceSnapshot
 
 //==============================================================================
+/** A collection of source snapshots. */
 struct SourcesSnapshots {
     SourceSnapshot primary{};
     juce::Array<SourceSnapshot> secondaries{};
     //==============================================================================
-    SourceSnapshot const & operator[](SourceIndex const index) const;
-    //==============================================================================
-    SourceSnapshot & operator[](SourceIndex const index);
-    int size() const { return secondaries.size() + 1; }
+    [[nodiscard]] SourceSnapshot const & operator[](SourceIndex index) const;
+    [[nodiscard]] SourceSnapshot & operator[](SourceIndex index);
+    [[nodiscard]] int size() const noexcept { return secondaries.size() + 1; }
 
 private:
+    //==============================================================================
     JUCE_LEAK_DETECTOR(SourceSnapshot)
 }; // class SourcesSnapshots
 
