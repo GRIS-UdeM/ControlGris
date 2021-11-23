@@ -10,6 +10,34 @@
               displaySplashScreen="1" defines="JUCE_DISPLAY_SPLASH_SCREEN=0&#10;JUCE_MODAL_LOOPS_PERMITTED=1">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
+      <GROUP id="{16DEDBB5-1C28-8C9D-8079-2163A36EF1BA}" name="Data">
+        <GROUP id="{01410472-5F66-6099-4537-9E8769CDE888}" name="Enums">
+          <FILE id="sB7s0w" name="cg_ElevationSourceLink.cpp" compile="1" resource="0"
+                file="Source/cg_ElevationSourceLink.cpp"/>
+          <FILE id="JXnxDR" name="cg_ElevationSourceLink.hpp" compile="0" resource="0"
+                file="Source/cg_ElevationSourceLink.hpp"/>
+          <FILE id="cNDY3K" name="cg_ElevationTrajectoryType.cpp" compile="1"
+                resource="0" file="Source/cg_ElevationTrajectoryType.cpp"/>
+          <FILE id="AuDz2h" name="cg_ElevationTrajectoryType.hpp" compile="0"
+                resource="0" file="Source/cg_ElevationTrajectoryType.hpp"/>
+          <FILE id="KgTf0Y" name="cg_PositionSourceLink.cpp" compile="1" resource="0"
+                file="Source/cg_PositionSourceLink.cpp"/>
+          <FILE id="u8V7BK" name="cg_PositionSourceLink.hpp" compile="0" resource="0"
+                file="Source/cg_PositionSourceLink.hpp"/>
+          <FILE id="oszEPX" name="cg_PositionTrajectoryType.cpp" compile="1"
+                resource="0" file="Source/cg_PositionTrajectoryType.cpp"/>
+          <FILE id="uzoK5Z" name="cg_PositionTrajectoryType.hpp" compile="0"
+                resource="0" file="Source/cg_PositionTrajectoryType.hpp"/>
+          <FILE id="TpcnYU" name="cg_SourcePlacement.cpp" compile="1" resource="0"
+                file="Source/cg_SourcePlacement.cpp"/>
+          <FILE id="mX0FeJ" name="cg_SourcePlacement.hpp" compile="0" resource="0"
+                file="Source/cg_SourcePlacement.hpp"/>
+          <FILE id="hDNlub" name="cg_SpatMode.cpp" compile="1" resource="0" file="Source/cg_SpatMode.cpp"/>
+          <FILE id="kBlVDz" name="cg_SpatMode.hpp" compile="0" resource="0" file="Source/cg_SpatMode.hpp"/>
+        </GROUP>
+        <FILE id="r7HG1S" name="cg_data.cpp" compile="1" resource="0" file="Source/cg_data.cpp"/>
+        <FILE id="E9WYHc" name="cg_data.hpp" compile="0" resource="0" file="Source/cg_data.hpp"/>
+      </GROUP>
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
         <FILE id="MrPims" name="cg_CartesianVector.cpp" compile="1" resource="0"
               file="Source/cg_CartesianVector.cpp"/>
@@ -29,6 +57,8 @@
         <FILE id="pvfyvE" name="cg_utilities.hpp" compile="0" resource="0"
               file="Source/cg_utilities.hpp"/>
         <FILE id="W2OezW" name="cg_Warnings.hpp" compile="0" resource="0" file="Source/cg_Warnings.hpp"/>
+        <FILE id="a92wdn" name="cg_IsRelease.hpp" compile="0" resource="0"
+              file="Source/cg_IsRelease.hpp"/>
       </GROUP>
       <GROUP id="{8BFD9DB4-C1DD-99C9-FCA0-B0E191B8FE8D}" name="Resources">
         <FILE id="JVPA2I" name="SinkinSans-400Regular.otf" compile="0" resource="1"

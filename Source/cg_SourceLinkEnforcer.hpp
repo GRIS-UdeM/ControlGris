@@ -20,7 +20,9 @@
 
 #pragma once
 
+#include "cg_ElevationSourceLink.hpp"
 #include "cg_LinkStrategies.hpp"
+#include "cg_PositionSourceLink.hpp"
 
 namespace gris
 {

@@ -26,6 +26,7 @@
 #include "cg_SectionPositionPresets.hpp"
 #include "cg_SectionSourceSpan.hpp"
 #include "cg_SectionTrajectory.hpp"
+#include "cg_SourcePlacement.hpp"
 #include "cg_SourcePositionTab.hpp"
 
 namespace gris

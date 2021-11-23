@@ -187,7 +187,7 @@ SourcePositionTab::SourcePositionTab(GrisLookAndFeel & grisLookAndFeel, SpatMode
 
     addAndMakeVisible(&mSourcePlacementCombo);
     mSourcePlacementCombo.setTextWhenNothingSelected("Choose a source placement...");
-    mSourcePlacementCombo.addItemList(SOURCE_PLACEMENT_SKETCH, 1);
+    mSourcePlacementCombo.addItemList(SOURCE_PLACEMENT_STRINGS, 1);
     mSourcePlacementCombo.onChange = [this] {
         mListeners.call([&](Listener & l) {
             l.sourcesPlacementChangedCallback(static_cast<SourcePlacement>(mSourcePlacementCombo.getSelectedId()));

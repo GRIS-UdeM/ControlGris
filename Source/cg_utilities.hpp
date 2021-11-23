@@ -20,10 +20,39 @@
 
 #pragma once
 
+#include "cg_IsRelease.hpp"
+
 #include <JuceHeader.h>
+
+#include <optional>
 
 namespace gris
 {
+template<typename T>
+juce::String const & enumToString(T const & value, juce::StringArray const & strings) noexcept(IS_RELEASE)
+{
+    jassert(!strings.isEmpty());
+    auto const index{ static_cast<int>(value) };
+    if (index < 0 || index >= strings.size()) {
+        jassertfalse;
+        return strings.getReference(0);
+    }
+    return strings.getReference(index);
+}
+
+template<typename T>
+std::optional<T> stringToEnum(juce::String const & string, juce::StringArray const & strings) noexcept(IS_RELEASE)
+{
+    static constexpr auto INVALID_INDEX = -1;
+
+    auto const index{ strings.indexOf(string, true) };
+    if (index == INVALID_INDEX) {
+        return std::nullopt;
+    }
+
+    return static_cast<T>(index);
+}
+
 //==============================================================================
 class XmlElementDataSorter
 {

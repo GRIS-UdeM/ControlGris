@@ -24,48 +24,32 @@
 
 #include <JuceHeader.h>
 
-#include <type_traits>
+#include <optional>
 
 namespace gris
 {
-/** jassert() seems to prevent narrow() from being constexpr on Apple Clang. */
-#if defined(NDEBUG) || defined(__APPLE__)
 //==============================================================================
-/** Does a static_cast.
- *
- * On Windows and Linux debug builds, it also verifies that the original value is preserved. */
-template<typename To, typename From>
-constexpr To narrow(From const & value) noexcept
-{
-    return static_cast<To>(value);
-}
-#else
+// Trajectories -> Trajectory Type popup choices.
+enum class PositionTrajectoryType {
+    undefined,
+    realtime,
+    drawing,
+    circleClockwise,
+    circleCounterClockwise,
+    ellipseClockwise,
+    ellipseCounterClockwise,
+    spiralClockwiseOutIn,
+    spiralCounterClockwiseOutIn,
+    spiralClockwiseInOut,
+    spiralCounterClockwiseInOut,
+    squareClockwise,
+    squareCounterClockwise,
+    triangleClockwise,
+    triangleCounterClockwise
+};
+
 //==============================================================================
-/** Does a static_cast.
- *
- * On Windows and Linux debug builds, it also verifies that the original value is preserved. */
-template<typename To, typename From>
-[[nodiscard]] constexpr To narrow(From const & value)
-{
-    static_assert(std::is_scalar_v<From> && std::is_scalar_v<To>, "narrow() can only be used with scalar types.");
-
-    auto const result{ static_cast<To>(value) };
-
-    if constexpr (std::is_signed_v<From> != std::is_signed_v<To>) {
-        // If you hit this assertion, it means that you tried casting a negative value into an unsigned type.
-        jassert(value >= 0);
-        // If you hit this assertion, it means that you tried casting a positive value into a signed type that was to
-        // narrow for it.
-        jassert(result >= 0);
-    }
-
-    auto const sanity_check{ static_cast<From>(result) };
-
-    // If you hit this assertion, it either means that you tried casting a value into a type that was too narrow for it
-    // or that you loss precision when going to of from a floating point type.
-    jassert(sanity_check == value);
-
-    return result;
-}
-#endif
+extern juce::StringArray const POSITION_TRAJECTORY_TYPE_STRINGS;
+std::optional<PositionTrajectoryType> toPositionTrajectoryType(juce::String const & string) noexcept(IS_RELEASE);
+juce::String const & toString(PositionTrajectoryType const & positionTrajectoryType) noexcept(IS_RELEASE);
 } // namespace gris

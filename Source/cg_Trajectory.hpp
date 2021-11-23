@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "cg_ElevationTrajectoryType.hpp"
+#include "cg_PositionTrajectoryType.hpp"
 #include "cg_constants.hpp"
 
 namespace gris

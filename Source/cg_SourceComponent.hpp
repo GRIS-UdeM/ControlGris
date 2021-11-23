@@ -20,6 +20,8 @@
 
 #pragma once
 
+#include "cg_ElevationSourceLink.hpp"
+#include "cg_PositionSourceLink.hpp"
 #include "cg_constants.hpp"
 
 namespace gris

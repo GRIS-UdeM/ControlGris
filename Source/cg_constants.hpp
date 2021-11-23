@@ -17,15 +17,14 @@
  * License along with ControlGris.  If not, see                           *
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
+
 #pragma once
 
+#include "cg_SpatMode.hpp"
 #include "cg_StrongTypes.hpp"
 
 namespace gris
 {
-//==============================================================================
-// Spatialization modes.
-enum class SpatMode { dome, cube };
 //==============================================================================
 constexpr int MIN_FIELD_WIDTH_PIXELS = 300;
 constexpr int MAX_NUMBER_OF_SOURCES = 8;
@@ -55,71 +54,6 @@ extern juce::String const DEFAULT_OSC_OUTPUT_ADDRESS;
 
 //==============================================================================
 extern juce::String const SOURCE_SELECTION_WARNING;
-
-//==============================================================================
-// Configuration -> Source tab -> Source Placement popup choices.
-enum class SourcePlacement {
-    undefined,
-    leftAlternate,
-    rightAlternate,
-    leftClockwise,
-    leftCounterClockwise,
-    rightClockwise,
-    rightCounterClockwise,
-    topClockwise,
-    topCounterClockwise
-};
-
-extern juce::StringArray const SOURCE_PLACEMENT_SKETCH;
-;
-
-//==============================================================================
-// Trajectories -> Source Link popup choices.
-enum class PositionSourceLink {
-    undefined,
-    independent,
-    circular,
-    circularFixedRadius,
-    circularFixedAngle,
-    circularFullyFixed,
-    deltaLock,
-    symmetricX,
-    symmetricY
-};
-
-extern juce::StringArray const POSITION_SOURCE_LINK_TYPES;
-
-enum class ElevationSourceLink { undefined, independent, fixedElevation, linearMin, linearMax, deltaLock };
-
-extern juce::StringArray const ELEVATION_SOURCE_LINK_TYPES;
-
-//==============================================================================
-// Trajectories -> Trajectory Type popup choices.
-enum class PositionTrajectoryType {
-    undefined,
-    realtime,
-    drawing,
-    circleClockwise,
-    circleCounterClockwise,
-    ellipseClockwise,
-    ellipseCounterClockwise,
-    spiralClockwiseOutIn,
-    spiralCounterClockwiseOutIn,
-    spiralClockwiseInOut,
-    spiralCounterClockwiseInOut,
-    squareClockwise,
-    squareCounterClockwise,
-    triangleClockwise,
-    triangleCounterClockwise
-};
-
-extern juce::StringArray const POSITION_TRAJECTORY_TYPE_TYPES;
-;
-
-enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
-
-extern juce::StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES;
-
 //==============================================================================
 // Fix position data headers.
 extern juce::StringArray const FIXED_POSITION_DATA_HEADERS;

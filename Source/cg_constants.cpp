@@ -68,46 +68,6 @@ juce::String const DEFAULT_OSC_OUTPUT_ADDRESS = "192.168.1.100";
 
 juce::String const SOURCE_SELECTION_WARNING{ "This source link does not allow individual moves." };
 
-juce::StringArray const SOURCE_PLACEMENT_SKETCH{
-    juce::String("Left Alternate"),  juce::String("Right Alternate"),
-    juce::String("Left Clockwise"),  juce::String("Left Counter Clockwise"),
-    juce::String("Right Clockwise"), juce::String("Right Counter Clockwise"),
-    juce::String("Top Clockwise"),   juce::String("Top Counter Clockwise")
-};
-
-juce::StringArray const POSITION_SOURCE_LINK_TYPES{
-    juce::String("Independent"),           juce::String("Circular"),
-    juce::String("Circular Fixed Radius"), juce::String("Circular Fixed Angle"),
-    juce::String("Circular Fully Fixed"),  juce::String("Delta Lock"),
-    juce::String("Symmetric X"),           juce::String("Symmetric Y")
-};
-
-juce::StringArray const ELEVATION_SOURCE_LINK_TYPES{ juce::String("Independent"),
-                                                     juce::String("Equal Elevation"),
-                                                     juce::String("Bottom-Top"),
-                                                     juce::String("Top-Bottom"),
-                                                     juce::String("Delta Lock") };
-
-juce::StringArray const POSITION_TRAJECTORY_TYPE_TYPES{ juce::String("Realtime"),
-                                                        juce::String("Drawing"),
-                                                        juce::String("Circle Clockwise"),
-                                                        juce::String("Circle Counter Clockwise"),
-                                                        juce::String("Ellipse Clockwise"),
-                                                        juce::String("Ellipse Counter Clockwise"),
-                                                        juce::String("Spiral Clockwise Out In"),
-                                                        juce::String("Spiral Counter Clockwise Out In"),
-                                                        juce::String("Spiral Clockwise In Out"),
-                                                        juce::String("Spiral Counter Clockwise In Out"),
-                                                        juce::String("Square Clockwise"),
-                                                        juce::String("Square Counter Clockwise"),
-                                                        juce::String("Triangle Clockwise"),
-                                                        juce::String("Triangle Counter Clockwise") };
-
-juce::StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES{ juce::String("Realtime"),
-                                                         juce::String("Drawing"),
-                                                         juce::String("Up Down"),
-                                                         juce::String("Down Up") };
-
 juce::StringArray const FIXED_POSITION_DATA_HEADERS{
     // TODO: is this useful?
     juce::String("ID"),   juce::String("S1_X"), juce::String("S1_Y"), juce::String("S1_Z"), juce::String("S2_X"),

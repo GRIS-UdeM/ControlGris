@@ -44,14 +44,14 @@ SectionTrajectory::SectionTrajectory(ControlGrisAudioProcessor & audioProcessor,
               addAndMakeVisible(combo);
           };
 
-    initCombo(mPositionSourceLinkCombo, POSITION_SOURCE_LINK_TYPES, parameters::dynamic::POSITION_SOURCE_LINK);
-    initCombo(mElevationSourceLinkCombo, ELEVATION_SOURCE_LINK_TYPES, parameters::dynamic::ELEVATION_SOURCE_LINK);
+    initCombo(mPositionSourceLinkCombo, POSITION_SOURCE_LINK_STRINGS, parameters::dynamic::POSITION_SOURCE_LINK);
+    initCombo(mElevationSourceLinkCombo, ELEVATION_SOURCE_LINK_STRINGS, parameters::dynamic::ELEVATION_SOURCE_LINK);
     initCombo(mPositionTrajectoryTypeCombo,
-              POSITION_TRAJECTORY_TYPE_TYPES,
-              parameters::statics::POSITION_TRAJECTORY_TYPE); // TODO : remove magic value
+              POSITION_TRAJECTORY_TYPE_STRINGS,
+              parameters::statics::POSITION_TRAJECTORY_TYPE);
     initCombo(mElevationTrajectoryTypeCombo,
-              ELEVATION_TRAJECTORY_TYPE_TYPES,
-              parameters::statics::ELEVATION_TRAJECTORY_TYPE); // TODO : remove magic value
+              ELEVATION_TRAJECTORY_TYPE_STRINGS,
+              parameters::statics::ELEVATION_TRAJECTORY_TYPE);
 
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
@@ -86,7 +86,7 @@ SectionTrajectory::SectionTrajectory(ControlGrisAudioProcessor & audioProcessor,
     mCycleSpeedLabel.setText("Cycle Speed:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mCycleSpeedLabel);
 
-    mCycleSpeedSlider.setNormalisableRange(juce::NormalisableRange<double>(-2.0f, 2.0f, 0.01f));
+    mCycleSpeedSlider.setNormalisableRange(juce::NormalisableRange<double>(-2.0, 2.0, 0.01));
     mCycleSpeedSlider.setValue(1.0, juce::NotificationType::sendNotificationAsync);
     mCycleSpeedSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
     mCycleSpeedSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
@@ -218,7 +218,7 @@ void SectionTrajectory::setElevationBackAndForth(bool const state)
 void SectionTrajectory::setPositionDampeningEnabled(bool const state)
 {
     mPositionDampeningEditor.setEnabled(state);
-    juce::String text = mPositionDampeningEditor.getText();
+    auto const text{ mPositionDampeningEditor.getText() };
     mPositionDampeningEditor.clear();
     if (state)
         mPositionDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(235, 245, 250));
@@ -231,7 +231,7 @@ void SectionTrajectory::setPositionDampeningEnabled(bool const state)
 void SectionTrajectory::setElevationDampeningEnabled(bool const state)
 {
     mElevationDampeningEditor.setEnabled(state);
-    juce::String text = mElevationDampeningEditor.getText();
+    auto const text{ mElevationDampeningEditor.getText() };
     mElevationDampeningEditor.clear();
     if (state)
         mElevationDampeningEditor.setColour(juce::TextEditor::textColourId, juce::Colour::fromRGB(235, 245, 250));

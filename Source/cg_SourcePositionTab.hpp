@@ -21,6 +21,7 @@
 #pragma once
 
 #include "cg_ControlGrisLookAndFeel.hpp"
+#include "cg_SourcePlacement.hpp"
 #include "cg_constants.hpp"
 
 #include <optional>

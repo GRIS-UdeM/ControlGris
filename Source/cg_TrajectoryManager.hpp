@@ -19,6 +19,10 @@
  *************************************************************************/
 #pragma once
 
+#include "cg_ElevationSourceLink.hpp"
+#include "cg_ElevationTrajectoryType.hpp"
+#include "cg_PositionSourceLink.hpp"
+#include "cg_PositionTrajectoryType.hpp"
 #include "cg_Source.hpp"
 #include "cg_Trajectory.hpp"
 
