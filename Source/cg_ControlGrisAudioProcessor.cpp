@@ -1179,11 +1179,12 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     DBG("Loading xml state :\n");
     DBG(xmlState->toString());
 
-    // Set global settings values.
-    //----------------------------
+    // Static values
     auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
-    auto const extract = [&](juce::String const & tag, auto const defaultValue) ->
-        typename std::remove_cv<decltype(defaultValue)>::type { return valueTree.getProperty(tag, defaultValue); };
+    auto const extract
+        = [&](juce::String const & tag, auto const defaultValue) -> std::remove_cv_t<decltype(defaultValue)> {
+        return valueTree.getProperty(tag, defaultValue);
+    };
 
     auto const spatMode{ static_cast<SpatMode>(extract(parameters::statics::OSC_FORMAT, 0)) };
     auto const oscPort{ extract(parameters::statics::OSC_PORT, DEFAULT_OSC_PORT) };
@@ -1229,7 +1230,8 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     }
     // Replace the state and call automated parameter current values.
     //---------------------------------------------------------------
-    mAudioProcessorValueTreeState.replaceState(valueTree);
+    mAudioProcessorValueTreeState.state = valueTree;
+    // mAudioProcessorValueTreeState.replaceState(valueTree);
 
     for (auto & source : mSources) {
         auto const index{ source.getIndex().toString() };
@@ -1259,6 +1261,8 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     if (editor != nullptr) {
         editor->init();
     }
+
+    // Dynamic Values
 
     sendOscMessage();
 }
