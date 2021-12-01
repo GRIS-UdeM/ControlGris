@@ -126,8 +126,6 @@ public:
     /** Creates an OSC connection and sets play start time. Usually called when playback is started or is about to
      * start. */
     void initialize();
-    /** Loads values from the current AudioProcessorValueTreeState. */
-    void setPluginState();
     /** Called when a value has been manually changed, either by the user or by an external OSC controller. */
     void sourcePositionChanged(SourceIndex sourceIndex, int whichField);
     void setSourceParameterValue(SourceIndex sourceIndex, SourceParameter sourceParameter, float value);
@@ -172,7 +170,9 @@ public:
     juce::String const getProgramName([[maybe_unused]] int index) override { return {}; }
     void changeProgramName([[maybe_unused]] int index, [[maybe_unused]] juce::String const & newName) override {}
     //==============================================================================
+    /** Save the plugin's state to a raw memory chunk. */
     void getStateInformation(juce::MemoryBlock & destData) override;
+    /** Loads a plugin state from a raw memory chunk. */
     void setStateInformation(const void * data, int sizeInBytes) override;
     //==============================================================================
     /** Called when a parameter in the AudioProcessorValueTreeState has changed */

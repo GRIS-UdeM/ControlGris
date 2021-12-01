@@ -33,31 +33,31 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     using Parameter = juce::AudioProcessorValueTreeState::Parameter;
 
-    std::vector<std::unique_ptr<Parameter>> parameters;
+    juce::AudioProcessorValueTreeState::ParameterLayout result{};
 
     // Automatable params
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::X,
-                                                     "Recording Trajectory X",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::Y,
-                                                     "Recording Trajectory Y",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::Z,
-                                                     "Recording Trajectory Z",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(
+    result.add(std::make_unique<Parameter>(parameters::dynamic::X,
+                                           "Recording Trajectory X",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::Y,
+                                           "Recording Trajectory Y",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::Z,
+                                           "Recording Trajectory Z",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr));
+    result.add(std::make_unique<Parameter>(
         parameters::dynamic::POSITION_SOURCE_LINK,
         "Source Link",
         "",
@@ -68,45 +68,45 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         false,
         true,
         true));
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::ELEVATION_SOURCE_LINK,
-                                                     "Source Link Alt",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr,
-                                                     false,
-                                                     true,
-                                                     true));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::ELEVATION_SOURCE_LINK,
+                                           "Source Link Alt",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr,
+                                           false,
+                                           true,
+                                           true));
 
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::POSITION_PRESET,
-                                                     "Position Preset",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr,
-                                                     false,
-                                                     true,
-                                                     true));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::POSITION_PRESET,
+                                           "Position Preset",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr,
+                                           false,
+                                           true,
+                                           true));
 
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::AZIMUTH_SPAN,
-                                                     "Azimuth Span",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(parameters::dynamic::ELEVATION_SPAN,
-                                                     "Elevation Span",
-                                                     "",
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::AZIMUTH_SPAN,
+                                           "Azimuth Span",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr));
+    result.add(std::make_unique<Parameter>(parameters::dynamic::ELEVATION_SPAN,
+                                           "Elevation Span",
+                                           "",
+                                           juce::NormalisableRange<float>(0.0f, 1.0f),
+                                           0.0f,
+                                           nullptr,
+                                           nullptr));
 
     // Non-Automatable params
-    parameters.push_back(std::make_unique<Parameter>(
+    result.add(std::make_unique<Parameter>(
         parameters::statics::POSITION_TRAJECTORY_TYPE,
         "Position Trajectory",
         "",
@@ -117,7 +117,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         false,
         false,
         true));
-    parameters.push_back(std::make_unique<Parameter>(
+    result.add(std::make_unique<Parameter>(
         parameters::statics::ELEVATION_TRAJECTORY_TYPE,
         "Elevation Trajectory",
         "",
@@ -129,7 +129,7 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
         false,
         true));
 
-    return juce::AudioProcessorValueTreeState::ParameterLayout{ parameters.begin(), parameters.end() };
+    return result;
 }
 
 //==============================================================================
@@ -471,7 +471,8 @@ bool ControlGrisAudioProcessor::createOscConnection(juce::String const & address
 
     mOscConnected = mOscSender.connect(address, oscPort);
     if (!mOscConnected) {
-        std::cout << "Error: could not connect to UDP port " << oscPort << " at address " << address << std::endl;
+        DBG(juce::String{ "Error: could not connect to UDP port " } + juce::String{ oscPort } + " at address "
+            + juce::String{ address } + '\n');
         return false;
     }
 
@@ -545,19 +546,18 @@ bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
     jassert(success);
 
     mOscInputConnected = mOscInputReceiver.connect(oscPort);
-    if (!mOscInputConnected) {
-        std::cout << "Error: could not connect to UDP input port " << oscPort << "." << std::endl;
-    } else {
-        mOscInputReceiver.addListener(this);
-        mCurrentOscInputPort = oscPort;
-        mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_INPUT_PORT, oscPort, nullptr);
-    }
-
     mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_INPUT_CONNECTED,
                                                     getOscInputConnected(),
                                                     nullptr);
+    if (!mOscInputConnected) {
+        DBG(juce::String{ "Error: could not connect to UDP input port " } + juce::String{ oscPort } + '\n');
+        return false;
+    }
+    mOscInputReceiver.addListener(this);
+    mCurrentOscInputPort = oscPort;
+    mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_INPUT_PORT, oscPort, nullptr);
 
-    return mOscInputConnected;
+    return true;
 }
 
 //==============================================================================
@@ -722,20 +722,21 @@ bool ControlGrisAudioProcessor::createOscOutputConnection(juce::String const & o
     jassert(success);
 
     mOscOutputConnected = mOscOutputSender.connect(oscAddress, oscPort);
-    if (!mOscOutputConnected)
-        std::cout << "Error: could not connect to UDP output port " << oscPort << " on address " << oscAddress << ".\n";
-    else {
-        mCurrentOscOutputPort = oscPort;
-        mCurrentOscOutputAddress = oscAddress;
-        mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_PORT, oscPort, nullptr);
-        mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_ADDRESS, oscAddress, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_CONNECTED,
+                                                    mOscOutputConnected,
+                                                    nullptr);
+    if (!mOscOutputConnected) {
+        DBG(juce::String{ "Error: could not connect to UDP output port " } + juce::String{ oscPort } + " on address "
+            + juce::String{ oscAddress } + '\n');
+        return false;
     }
 
-    mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_CONNECTED,
-                                                    getOscOutputConnected(),
-                                                    nullptr);
+    mCurrentOscOutputPort = oscPort;
+    mCurrentOscOutputAddress = oscAddress;
+    mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_PORT, oscPort, nullptr);
+    mAudioProcessorValueTreeState.state.setProperty(parameters::statics::OSC_OUTPUT_ADDRESS, oscAddress, nullptr);
 
-    return mOscOutputConnected;
+    return true;
 }
 
 //==============================================================================
@@ -948,42 +949,6 @@ void ControlGrisAudioProcessor::timerCallback()
 
     sendOscMessage();
     sendOscOutputMessage();
-}
-
-//==============================================================================
-void ControlGrisAudioProcessor::setPluginState()
-{
-    auto const & state{ mAudioProcessorValueTreeState.state };
-    for (auto & source : mSources) {
-        auto const index{ source.getIndex().toString() };
-
-        juce::Identifier const azimuthPropertyString{ juce::String{ "p_azimuth_" } + index };
-        juce::Identifier const elevationPropertyString{ juce::String{ "p_elevation_" } + index };
-        juce::Identifier const distancePropertyString{ juce::String{ "p_distance_" } + index };
-
-        jassert(state.hasProperty(azimuthPropertyString));
-        jassert(state.hasProperty(elevationPropertyString));
-        jassert(state.hasProperty(distancePropertyString));
-
-        auto const & rawAzimuth{ state.getProperty(azimuthPropertyString) };
-        auto const & rawElevation{ state.getProperty(elevationPropertyString) };
-        auto const & rawDistance{ state.getProperty(distancePropertyString) };
-
-        Normalized const azimuth{ rawAzimuth };
-        Normalized const elevation{ rawElevation };
-        float const distance{ rawDistance };
-
-        source.setAzimuth(azimuth, Source::OriginOfChange::userAnchorMove);
-        source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
-        source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
-    }
-
-    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-    if (editor != nullptr) {
-        editor->init();
-    }
-
-    sendOscMessage();
 }
 
 //==============================================================================
@@ -1207,8 +1172,12 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     auto const xmlState{ getXmlFromBinary(data, sizeInBytes) };
 
     if (xmlState == nullptr) {
+        jassertfalse;
         return;
     }
+
+    DBG("Loading xml state :\n");
+    DBG(xmlState->toString());
 
     // Set global settings values.
     //----------------------------
@@ -1260,9 +1229,38 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     }
     // Replace the state and call automated parameter current values.
     //---------------------------------------------------------------
-    mAudioProcessorValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+    mAudioProcessorValueTreeState.replaceState(valueTree);
 
-    setPluginState();
+    for (auto & source : mSources) {
+        auto const index{ source.getIndex().toString() };
+
+        juce::Identifier const azimuthPropertyString{ juce::String{ "p_azimuth_" } + index };
+        juce::Identifier const elevationPropertyString{ juce::String{ "p_elevation_" } + index };
+        juce::Identifier const distancePropertyString{ juce::String{ "p_distance_" } + index };
+
+        jassert(valueTree.hasProperty(azimuthPropertyString));
+        jassert(valueTree.hasProperty(elevationPropertyString));
+        jassert(valueTree.hasProperty(distancePropertyString));
+
+        auto const & rawAzimuth{ valueTree.getProperty(azimuthPropertyString) };
+        auto const & rawElevation{ valueTree.getProperty(elevationPropertyString) };
+        auto const & rawDistance{ valueTree.getProperty(distancePropertyString) };
+
+        Normalized const azimuth{ rawAzimuth };
+        Normalized const elevation{ rawElevation };
+        float const distance{ rawDistance };
+
+        source.setAzimuth(azimuth, Source::OriginOfChange::userAnchorMove);
+        source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
+        source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
+    }
+
+    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (editor != nullptr) {
+        editor->init();
+    }
+
+    sendOscMessage();
 }
 
 //==============================================================================
