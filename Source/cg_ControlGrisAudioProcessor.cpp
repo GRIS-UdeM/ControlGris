@@ -1180,7 +1180,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
     DBG(xmlState->toString());
 
     // Static values
-    auto const valueTree{ juce::ValueTree::fromXml(*xmlState) };
+    auto valueTree{ juce::ValueTree::fromXml(*xmlState) };
     auto const extract
         = [&](juce::String const & tag, auto const defaultValue) -> std::remove_cv_t<decltype(defaultValue)> {
         return valueTree.getProperty(tag, defaultValue);
@@ -1228,6 +1228,25 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
             mElevationSourceLinkEnforcer.enforceSourceLink();
         }
     }
+
+    auto const * version{ valueTree.getPropertyPointer("VERSION") };
+    if (version == nullptr) {
+        auto const decrement = [&](juce::Identifier const & identifier) {
+            auto const & oldValue{ valueTree[identifier] };
+            jassert(oldValue.isString());
+            auto const newValue{ oldValue.toString().getFloatValue() - 1.0f };
+            valueTree.setProperty(identifier, newValue, nullptr);
+        };
+
+        decrement(parameters::statics::POSITION_TRAJECTORY_TYPE);
+        decrement(parameters::statics::ELEVATION_TRAJECTORY_TYPE);
+    }
+
+    setPositionTrajectoryType(
+        static_cast<PositionTrajectoryType>(extract(parameters::statics::POSITION_TRAJECTORY_TYPE, 0.0f)));
+    setElevationTrajectoryType(
+        static_cast<ElevationTrajectoryType>(extract(parameters::statics::ELEVATION_TRAJECTORY_TYPE, 0.0f)));
+
     // Replace the state and call automated parameter current values.
     //---------------------------------------------------------------
     mAudioProcessorValueTreeState.state = valueTree;

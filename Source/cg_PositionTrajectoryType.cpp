@@ -25,8 +25,7 @@
 namespace gris
 {
 //==============================================================================
-juce::StringArray const POSITION_TRAJECTORY_TYPE_STRINGS{ "Realtime",
-                                                          "Drawing",
+juce::StringArray const POSITION_TRAJECTORY_TYPE_STRINGS{ "Drawing",
                                                           "Circle Clockwise",
                                                           "Circle Counter Clockwise",
                                                           "Ellipse Clockwise",

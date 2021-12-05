@@ -31,7 +31,6 @@ namespace gris
 //==============================================================================
 // Trajectories -> Trajectory Type popup choices.
 enum class PositionTrajectoryType {
-    undefined,
     realtime,
     drawing,
     circleClockwise,

@@ -29,7 +29,7 @@
 namespace gris
 {
 //==============================================================================
-enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
+enum class ElevationTrajectoryType { realtime, drawing, downUp, upDown };
 
 //==============================================================================
 extern juce::StringArray const ELEVATION_TRAJECTORY_TYPE_STRINGS;

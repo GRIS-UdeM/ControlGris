@@ -78,7 +78,6 @@ Trajectory::Trajectory(PositionTrajectoryType const trajectoryType, juce::Point<
     case PositionTrajectoryType::drawing:
         break;
     case PositionTrajectoryType::realtime: // do not make a trajectory in realtime mode!
-    case PositionTrajectoryType::undefined:
     default:
         jassertfalse;
     }
@@ -105,7 +104,6 @@ Trajectory::Trajectory(ElevationTrajectoryType const trajectoryType) noexcept
         mPoints.clear();
         break;
     case ElevationTrajectoryType::realtime: // do not make a trajectory in realtime mode!
-    case ElevationTrajectoryType::undefined:
     default:
         jassertfalse;
     }
