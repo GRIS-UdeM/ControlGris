@@ -12,7 +12,7 @@ sudo apt-get install clang-10 git ladspa-sdk freeglut3-dev libasound2-dev libcur
 
 ### Download Juce
 
-Download it from [https://shop.juce.com/get-juce/download](https://shop.juce.com/get-juce/download) page.
+Download and extract [Juce 6.1.5](https://github.com/juce-framework/JUCE/releases/tag/6.1.5)
 
 ### Download the Steinberg VST SDK
 
