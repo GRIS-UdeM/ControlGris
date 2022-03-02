@@ -7,9 +7,9 @@ fi
 
 export LINE=":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
-export INSTALLER_SIGNATURE="Developer ID Installer: Samuel Beland (Q2A837SX87)"
-export APP_SIGNATURE="Developer ID Application: Samuel Beland (Q2A837SX87)"
-export NOTARIZE_USER="samuel.beland@gmail.com"
+export INSTALLER_SIGNATURE="Developer ID Installer: Gael Lane Lepine (62PMMWH49Z)"
+export APP_SIGNATURE="Developer ID Application: Gael Lane Lepine (62PMMWH49Z)"
+export NOTARIZE_USER="glanelepine@gmail.com"
 export PASS="$1"
 export IDENTIFIER="ca.umontreal.musique.gris.controlgris.pkg"
 
