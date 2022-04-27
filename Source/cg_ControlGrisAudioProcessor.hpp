@@ -62,6 +62,11 @@ class ControlGrisAudioProcessor final
     bool mCanStopActivate{ false };
     double mBpm{ 120 };
 
+    bool mPositionGestureStarted{};
+    bool mElevationGestureStarted{};
+
+    juce::Uuid uniqueID{}; // for debugging purposes
+
     juce::OSCSender mOscSender;
     juce::OSCSender mOscOutputSender;
     juce::OSCReceiver mOscInputReceiver;

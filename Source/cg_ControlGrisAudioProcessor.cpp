@@ -1072,24 +1072,21 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
     bool const isPositionTrajectoryActive{ mPositionTrajectoryManager.getPositionActivateState() };
     bool const isElevationTrajectoryActive{ mElevationTrajectoryManager.getPositionActivateState() };
 
-    static bool positionGestureStarted{ false };
-    static bool elevationGestureStarted{ false };
-
-    if (isPositionTrajectoryActive && mIsPlaying && !positionGestureStarted) {
-        positionGestureStarted = true;
+    if (isPositionTrajectoryActive && mIsPlaying && !mPositionGestureStarted) {
+        mPositionGestureStarted = true;
         mChangeGesturesManager.beginGesture(Automation::Ids::X);
         mChangeGesturesManager.beginGesture(Automation::Ids::Y);
-    } else if ((!isPositionTrajectoryActive || !mIsPlaying) && positionGestureStarted) {
-        positionGestureStarted = false;
+    } else if ((!isPositionTrajectoryActive || !mIsPlaying) && mPositionGestureStarted) {
+        mPositionGestureStarted = false;
         mChangeGesturesManager.endGesture(Automation::Ids::X);
         mChangeGesturesManager.endGesture(Automation::Ids::Y);
     }
     if (mSpatMode == SpatMode::cube) {
-        if (isElevationTrajectoryActive && mIsPlaying && !elevationGestureStarted) {
-            elevationGestureStarted = true;
+        if (isElevationTrajectoryActive && mIsPlaying && !mElevationGestureStarted) {
+            mElevationGestureStarted = true;
             mChangeGesturesManager.beginGesture(Automation::Ids::Z);
-        } else if ((!isElevationTrajectoryActive || !mIsPlaying) && elevationGestureStarted) {
-            elevationGestureStarted = false;
+        } else if ((!isElevationTrajectoryActive || !mIsPlaying) && mElevationGestureStarted) {
+            mElevationGestureStarted = false;
             mChangeGesturesManager.endGesture(Automation::Ids::Z);
         }
     }
