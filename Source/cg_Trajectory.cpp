@@ -218,7 +218,7 @@ juce::Array<juce::Point<float>> Trajectory::getBasicCirclePoints()
 juce::Array<juce::Point<float>> Trajectory::getBasicEllipsePoints()
 {
     // just squish a circle!
-    juce::Array<juce::Point<float>> result( getBasicCirclePoints() );
+    juce::Array<juce::Point<float>> result(getBasicCirclePoints());
     for (auto & point : result) {
         point.setY(point.getY() * 0.5f);
     }

@@ -680,17 +680,6 @@ int ControlGrisAudioProcessor::getOscOutputPluginId() const
 //==============================================================================
 void ControlGrisAudioProcessor::sendOscOutputMessage()
 {
-    static constexpr auto IMPOSSIBLE_NUMBER{ std::numeric_limits<float>::min() };
-
-    static auto lastTrajectoryX{ IMPOSSIBLE_NUMBER };
-    static auto lastTrajectoryY{ IMPOSSIBLE_NUMBER };
-    static auto lastTrajectoryZ{ IMPOSSIBLE_NUMBER };
-    static Normalized lastAzimuthSpan{ IMPOSSIBLE_NUMBER };
-    static Normalized lastElevationSpan{ IMPOSSIBLE_NUMBER };
-    static auto lastPositionLink{ PositionSourceLink::undefined };
-    static auto lastElevationLink{ ElevationSourceLink::undefined };
-    static auto lastPresetNumber{ std::numeric_limits<int>::min() };
-
     if (!mOscOutputConnected) {
         return;
     }
@@ -705,7 +694,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
     auto const trajectory1y = 1.0f - trajectoryHandlePosition.getY();
     auto const trajectory1z = 1.0f - mSources.getPrimarySource().getNormalizedElevation().get();
 
-    if (lastTrajectoryX != trajectory1x) {
+    if (mLastTrajectoryX != trajectory1x) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/x"));
         message.addFloat32(trajectory1x);
         mOscOutputSender.send(message);
@@ -717,7 +706,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (lastTrajectoryY != trajectory1y) {
+    if (mLastTrajectoryY != trajectory1y) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/y"));
         message.addFloat32(trajectory1y);
         mOscOutputSender.send(message);
@@ -729,7 +718,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (lastTrajectoryZ != trajectory1z) {
+    if (mLastTrajectoryZ != trajectory1z) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/z"));
         message.addFloat32(trajectory1z);
         mOscOutputSender.send(message);
@@ -741,7 +730,7 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    if (lastTrajectoryX != trajectory1x || lastTrajectoryY != trajectory1y || lastTrajectoryZ != trajectory1z) {
+    if (mLastTrajectoryX != trajectory1x || mLastTrajectoryY != trajectory1y || mLastTrajectoryZ != trajectory1z) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/traj/1/xy"));
         message.addFloat32(trajectory1x);
         message.addFloat32(trajectory1y);
@@ -756,27 +745,27 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
     }
 
-    lastTrajectoryX = trajectory1x;
-    lastTrajectoryY = trajectory1y;
-    lastTrajectoryZ = trajectory1z;
+    mLastTrajectoryX = trajectory1x;
+    mLastTrajectoryY = trajectory1y;
+    mLastTrajectoryZ = trajectory1z;
 
-    if (lastAzimuthSpan != mSources.getPrimarySource().getAzimuthSpan()) {
+    if (mLastAzimuthSpan != mSources.getPrimarySource().getAzimuthSpan()) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/azispan"));
         message.addFloat32(mSources.getPrimarySource().getAzimuthSpan().get());
         mOscOutputSender.send(message);
         message.clear();
-        lastAzimuthSpan = mSources.getPrimarySource().getAzimuthSpan();
+        mLastAzimuthSpan = mSources.getPrimarySource().getAzimuthSpan();
     }
 
-    if (lastElevationSpan != mSources.getPrimarySource().getElevationSpan()) {
+    if (mLastElevationSpan != mSources.getPrimarySource().getElevationSpan()) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/elespan"));
         message.addFloat32(mSources.getPrimarySource().getElevationSpan().get());
         mOscOutputSender.send(message);
         message.clear();
-        lastElevationSpan = mSources.getPrimarySource().getElevationSpan();
+        mLastElevationSpan = mSources.getPrimarySource().getElevationSpan();
     }
 
-    if (mPositionTrajectoryManager.getSourceLink() != lastPositionLink) {
+    if (mPositionTrajectoryManager.getSourceLink() != mLastPositionLink) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/sourcelink"));
         message.addInt32(static_cast<juce::int32>(mPositionTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
@@ -790,10 +779,10 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         mOscOutputSender.send(message);
         message.clear();
 
-        lastPositionLink = mPositionTrajectoryManager.getSourceLink();
+        mLastPositionLink = mPositionTrajectoryManager.getSourceLink();
     }
 
-    if (static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()) != lastElevationLink) {
+    if (static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()) != mLastElevationLink) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/sourcelinkalt"));
         message.addInt32(static_cast<juce::int32>(mElevationTrajectoryManager.getSourceLink()));
         mOscOutputSender.send(message);
@@ -807,17 +796,17 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         mOscOutputSender.send(message);
         message.clear();
 
-        lastElevationLink = static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink());
+        mLastElevationLink = static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink());
     }
 
     auto const currentPreset{ mPresetManager.getCurrentPreset() };
-    if (currentPreset != lastPresetNumber) {
+    if (currentPreset != mLastPresetNumber) {
         message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/presets"));
         message.addInt32(currentPreset);
         mOscOutputSender.send(message);
         message.clear();
 
-        lastPresetNumber = currentPreset;
+        mLastPresetNumber = currentPreset;
     }
 }
 
