@@ -47,7 +47,7 @@ SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : 
 
     addAndMakeVisible(&mOscOutputPluginIdEditor);
 
-    mOscReceiveToggle.setButtonText("Receive on port");
+    mOscReceiveToggle.setButtonText("Receive on port : IP");
     mOscReceiveToggle.setExplicitFocusOrder(1);
     addAndMakeVisible(&mOscReceiveToggle);
     mOscReceiveToggle.onClick = [this] {
