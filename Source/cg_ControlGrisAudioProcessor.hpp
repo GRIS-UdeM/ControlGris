@@ -65,7 +65,18 @@ class ControlGrisAudioProcessor final
     bool mPositionGestureStarted{};
     bool mElevationGestureStarted{};
 
-    juce::Uuid uniqueID{}; // for debugging purposes
+    // juce::Uuid uniqueID{}; // for debugging purposes
+
+    // OSC stuff
+    const float IMPOSSIBLE_NUMBER{ std::numeric_limits<float>::min() };
+    float mLastTrajectoryX{ IMPOSSIBLE_NUMBER };
+    float mLastTrajectoryY{ IMPOSSIBLE_NUMBER };
+    float mLastTrajectoryZ{ IMPOSSIBLE_NUMBER };
+    Normalized mLastAzimuthSpan{ IMPOSSIBLE_NUMBER };
+    Normalized mLastElevationSpan{ IMPOSSIBLE_NUMBER };
+    PositionSourceLink mLastPositionLink{ PositionSourceLink::undefined };
+    ElevationSourceLink mLastElevationLink{ ElevationSourceLink::undefined };
+    int mLastPresetNumber{ std::numeric_limits<int>::min() };
 
     juce::OSCSender mOscSender;
     juce::OSCSender mOscOutputSender;
