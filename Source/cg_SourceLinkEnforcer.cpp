@@ -159,6 +159,16 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         auto const secondaryStart{ mSnapshots[sourceIndex] };
         SourceSnapshot const secondaryEnd{ mSources[sourceIndex] };
 
+        // take a snapshot of sources length ratios if mLinkStrategy is circularFixedAngle
+        std::array<float, MAX_NUMBER_OF_SOURCES> tmpFixedAngleSecSourcesLengthRatio;
+        if (mLinkStrategy.get()->isInitialized()) {
+            if (mPositionSourceLink == PositionSourceLink::circularFixedAngle) {
+                source_link_strategies::CircularFixedAngle * circularFixedLinkStrategy
+                    = static_cast<source_link_strategies::CircularFixedAngle *>(mLinkStrategy.get());
+                tmpFixedAngleSecSourcesLengthRatio = circularFixedLinkStrategy->getSecSourcesLengthRatio();
+            }
+        }
+
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             mLinkStrategy = source_link_strategies::Base::make(PositionSourceLink::circular);
@@ -188,9 +198,13 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             if (mPositionSourceLink == PositionSourceLink::undefined) {
-                mLinkStrategy = source_link_strategies::Base::make(mElevationSourceLink);
+                mLinkStrategy = source_link_strategies::Base::make(mElevationSourceLink); // how can we reach this ?
             } else {
                 mLinkStrategy = source_link_strategies::Base::make(mPositionSourceLink);
+                source_link_strategies::CircularFixedAngle * circularFixedLinkStrategy
+                    = static_cast<source_link_strategies::CircularFixedAngle *>(mLinkStrategy.get());
+                circularFixedLinkStrategy->setSecSourcesLengthRatio(tmpFixedAngleSecSourcesLengthRatio);
+                circularFixedLinkStrategy->setSecSourcesLengthRatioInitialized();
             }
         }
         mSnapshots.primary = primaryStart;

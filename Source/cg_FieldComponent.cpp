@@ -684,6 +684,7 @@ juce::Point<float> ElevationFieldComponent::sourceElevationToComponentPosition(R
         LEFT_PADDING + widthBetweenEachSource * (static_cast<float>(index.get() + 1))
     }; // We add +1 to the index for the drawing handle.
     auto const clippedElevation{ sourceElevation.clamped(MIN_ELEVATION, MAX_ELEVATION) };
+    jassert(!std::isnan(clippedElevation.getAsRadians()));
     auto const y{ clippedElevation / MAX_ELEVATION * availableHeight + TOP_PADDING };
     juce::Point<float> const result{ x, y };
 

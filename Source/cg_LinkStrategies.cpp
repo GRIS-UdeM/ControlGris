@@ -218,14 +218,30 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
     auto const & primarySourceInitialState{ initialStates.primary };
     auto const & primarySourceFinalState{ finalStates.getPrimarySource() };
 
-    auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) }; // dont divide by zero!
-    auto const primarySourceInitialRadius{ std::max(primarySourceInitialState.position.getDistanceFromOrigin(),
-                                                    notQuiteZero) };
-    mRadiusRatio = primarySourceFinalState.getPos().getDistanceFromOrigin() / primarySourceInitialRadius;
-    if (std::isinf(mRadiusRatio)) {
-        mRadiusRatio = std::numeric_limits<float>::max();
+    // auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) }; // dont divide by zero!
+    auto constexpr notQuiteZero{ 0.001f };
+
+    // initialize distance ratios of secondary sources
+    if (!mSecSourcesLengthRatioInitialized) {
+        mSecSourcesLengthRatio.fill(0.0f);
+        for (auto const & finalState : finalStates) {
+            auto const sourceIndex{ finalState.getIndex() };
+            auto const primaryDistFromOrig{ primarySourceInitialState.position.getDistanceFromOrigin() };
+            auto const secDistFromOrig{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
+            float distPrimSecRatio{};
+            if (primaryDistFromOrig == 0.0f && secDistFromOrig == 0.0f && sourceIndex.get() != 0) {
+                distPrimSecRatio = 1;
+            } else if (primaryDistFromOrig == 0.0f) {
+                distPrimSecRatio = secDistFromOrig / notQuiteZero;
+            } else if (secDistFromOrig == 0.0f) {
+                distPrimSecRatio = notQuiteZero / primaryDistFromOrig;
+            } else {
+                distPrimSecRatio = secDistFromOrig / primaryDistFromOrig;
+            }
+            mSecSourcesLengthRatio[sourceIndex.get()] = distPrimSecRatio;
+        }
+        mSecSourcesLengthRatioInitialized = true;
     }
-    jassert(!std::isnan(mRadiusRatio));
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
     mPrimarySourceFinalAngle = Radians::angleOf(primarySourceFinalPosition);
@@ -273,11 +289,15 @@ void CircularFixedAngle::enforce_implementation(Sources & finalStates,
                                                 SourcesSnapshots const & initialStates,
                                                 SourceIndex const sourceIndex) const
 {
+    auto constexpr notQuiteZero{ 0.0000001f };
     auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * ordering };
-    auto const initialRadius{ initialStates[sourceIndex].position.getDistanceFromOrigin() };
-    auto const finalRadius{ initialRadius * mRadiusRatio };
+    auto const primaryDistFromOrig{ initialStates.primary.position.getDistanceFromOrigin() == 0.0f
+                                        ? notQuiteZero
+                                        : initialStates.primary.position.getDistanceFromOrigin() };
+    auto const radiusRatio = mSecSourcesLengthRatio[sourceIndex.get()];
+    auto const finalRadius{ primaryDistFromOrig * radiusRatio };
     juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
                                             std::sin(finalAngle.getAsRadians()) * finalRadius };
 
@@ -292,7 +312,8 @@ SourceSnapshot
     SourceSnapshot newInitialState{ initialStates[sourceIndex] };
 
     static const float notQuiteZero{ std::nextafter(0.0f, 1.0f) };
-    auto const divisor{ std::max(notQuiteZero, mRadiusRatio) };
+    auto const radiusRatio = mSecSourcesLengthRatio[sourceIndex.get()];
+    auto const divisor{ std::max(notQuiteZero, radiusRatio) };
     auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / divisor };
 
     Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
@@ -306,6 +327,24 @@ SourceSnapshot
     newInitialState.position = newInitialPosition;
 
     return newInitialState;
+}
+
+//==============================================================================
+std::array<float, MAX_NUMBER_OF_SOURCES> CircularFixedAngle::getSecSourcesLengthRatio()
+{
+    return mSecSourcesLengthRatio;
+}
+
+//==============================================================================
+void CircularFixedAngle::setSecSourcesLengthRatio(std::array<float, MAX_NUMBER_OF_SOURCES> & secSourcesLengthRatio)
+{
+    mSecSourcesLengthRatio = secSourcesLengthRatio;
+}
+
+//==============================================================================
+void CircularFixedAngle::setSecSourcesLengthRatioInitialized()
+{
+    mSecSourcesLengthRatioInitialized = true;
 }
 
 //==============================================================================

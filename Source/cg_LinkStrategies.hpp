@@ -137,7 +137,8 @@ class CircularFixedAngle final : public Base
     Radians mDeviationPerSource{};
     Radians mPrimarySourceFinalAngle{};
     Radians mRotation{};
-    float mRadiusRatio{};
+    std::array<float, MAX_NUMBER_OF_SOURCES> mSecSourcesLengthRatio{};
+    bool mSecSourcesLengthRatioInitialized{};
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
@@ -148,6 +149,11 @@ class CircularFixedAngle final : public Base
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
                                                          SourceIndex sourceIndex) const override;
+    //==============================================================================
+public:
+    std::array<float, MAX_NUMBER_OF_SOURCES> getSecSourcesLengthRatio();
+    void setSecSourcesLengthRatio(std::array<float, MAX_NUMBER_OF_SOURCES> & secSourcesLengthRatio);
+    void setSecSourcesLengthRatioInitialized();
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularFixedAngle)
 };
