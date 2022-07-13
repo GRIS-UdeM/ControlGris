@@ -1037,16 +1037,16 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
     auto const wasPlaying{ mIsPlaying };
     juce::AudioPlayHead * audioPlayHead = getPlayHead();
     if (audioPlayHead != nullptr) {
-        juce::AudioPlayHead::CurrentPositionInfo currentPositionInfo{};
-        audioPlayHead->getCurrentPosition(currentPositionInfo);
-        mIsPlaying = currentPositionInfo.isPlaying;
-        mBpm = currentPositionInfo.bpm;
+        auto currentPositionInfo = audioPlayHead->getPosition();
+        mIsPlaying = currentPositionInfo->getIsPlaying();
+        mBpm = currentPositionInfo->getBpm().orFallback(120.0);
         if (mNeedsInitialization) {
-            mInitTimeOnPlay = mCurrentTime
-                = currentPositionInfo.timeInSeconds < 0.0 ? 0.0 : currentPositionInfo.timeInSeconds;
+            mInitTimeOnPlay = mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0) < 0.0
+                                                 ? 0.0
+                                                 : currentPositionInfo->getTimeInSeconds().orFallback(0.0);
             mNeedsInitialization = false;
         } else {
-            mCurrentTime = currentPositionInfo.timeInSeconds;
+            mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0);
         }
     }
 
