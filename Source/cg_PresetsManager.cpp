@@ -174,8 +174,7 @@ bool PresetsManager::contains(int const presetNumber) const
 //==============================================================================
 std::optional<juce::XmlElement *> PresetsManager::getPresetData(int const presetNumber) const
 {
-    forEachXmlChildElement(mData, element)
-    {
+    for (auto * element : mData.getChildIterator()) {
         if (element->getIntAttribute("ID") == presetNumber) {
             return element;
         }
@@ -281,8 +280,7 @@ std::array<bool, NUMBER_OF_POSITION_PRESETS> PresetsManager::getSavedPresets() c
 
     std::fill(std::begin(result), std::end(result), false);
 
-    forEachXmlChildElement(mData, presetData)
-    {
+    for (auto * presetData : mData.getChildIterator()) {
         auto const presetNumber{ presetData->getIntAttribute("ID") };
         result[static_cast<size_t>(presetNumber) - 1u] = true;
     }

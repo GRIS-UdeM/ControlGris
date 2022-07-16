@@ -179,7 +179,7 @@ juce::Point<float> TrajectoryManager::getCurrentTrajectoryPoint() const
 }
 
 //==============================================================================
-void TrajectoryManager::sourceMoved(Source & source)
+void TrajectoryManager::sourceMoved([[maybe_unused]] Source & source)
 {
     jassert(source.isPrimarySource());
     recomputeTrajectory();

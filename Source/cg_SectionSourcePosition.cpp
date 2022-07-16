@@ -39,7 +39,7 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     mElevationSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
-        mCurrentElevation = MAX_ELEVATION * (1.0f - mElevationSlider.getValue());
+        mCurrentElevation = MAX_ELEVATION * (1.0f - static_cast<float>(mElevationSlider.getValue()));
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
             l.sourcePositionChangedCallback(mSourceBoxComponent.mSelectedSource,
                                             std::nullopt,

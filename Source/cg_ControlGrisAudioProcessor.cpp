@@ -32,80 +32,54 @@ enum class FixedPositionType { terminal, initial };
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
 {
     using Parameter = juce::AudioProcessorValueTreeState::Parameter;
+    using Attributes = juce::AudioProcessorValueTreeStateParameterAttributes;
 
-    std::vector<std::unique_ptr<Parameter>> parameters;
+    juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::X,
-                                                     juce::String("Recording Trajectory X"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Y,
-                                                     juce::String("Recording Trajectory Y"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::Z,
-                                                     juce::String("Recording Trajectory Z"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
+    layout.add(
+        std::make_unique<Parameter>(Automation::Ids::X,
+                                    juce::String("Recording Trajectory X"),
+                                    juce::NormalisableRange<float>(0.0f, 1.0f),
+                                    0.0f,
+                                    Attributes()),
+        std::make_unique<Parameter>(Automation::Ids::Y,
+                                    juce::String("Recording Trajectory Y"),
+                                    juce::NormalisableRange<float>(0.0f, 1.0f),
+                                    0.0f,
+                                    Attributes()),
+        std::make_unique<Parameter>(Automation::Ids::Z,
+                                    juce::String("Recording Trajectory Z"),
+                                    juce::NormalisableRange<float>(0.0f, 1.0f),
+                                    0.0f,
+                                    Attributes()),
+        std::make_unique<Parameter>(
+            Automation::Ids::POSITION_SOURCE_LINK,
+            juce::String("Source Link"),
+            juce::NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
+            0.0f,
+            Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
+        std::make_unique<Parameter>(Automation::Ids::ELEVATION_SOURCE_LINK,
+                                    juce::String("Source Link Alt"),
+                                    juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
+                                    0.0f,
+                                    Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
+        std::make_unique<Parameter>(Automation::Ids::POSITION_PRESET,
+                                    juce::String("Position Preset"),
+                                    juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
+                                    0.0f,
+                                    Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
+        std::make_unique<Parameter>(Automation::Ids::AZIMUTH_SPAN,
+                                    juce::String("Azimuth Span"),
+                                    juce::NormalisableRange<float>(0.0f, 1.0f),
+                                    0.0f,
+                                    Attributes()),
+        std::make_unique<Parameter>(Automation::Ids::ELEVATION_SPAN,
+                                    juce::String("Elevation Span"),
+                                    juce::NormalisableRange<float>(0.0f, 1.0f),
+                                    0.0f,
+                                    Attributes()));
 
-    parameters.push_back(std::make_unique<Parameter>(
-        Automation::Ids::POSITION_SOURCE_LINK,
-        juce::String("Source Link"),
-        juce::String(),
-        juce::NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
-        0.0f,
-        nullptr,
-        nullptr,
-        false,
-        true,
-        true));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SOURCE_LINK,
-                                                     juce::String("Source Link Alt"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr,
-                                                     false,
-                                                     true,
-                                                     true));
-
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::POSITION_PRESET,
-                                                     juce::String("Position Preset"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr,
-                                                     false,
-                                                     true,
-                                                     true));
-
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::AZIMUTH_SPAN,
-                                                     juce::String("Azimuth Span"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-    parameters.push_back(std::make_unique<Parameter>(Automation::Ids::ELEVATION_SPAN,
-                                                     juce::String("Elevation Span"),
-                                                     juce::String(),
-                                                     juce::NormalisableRange<float>(0.0f, 1.0f),
-                                                     0.0f,
-                                                     nullptr,
-                                                     nullptr));
-
-    return { parameters.begin(), parameters.end() };
+    return layout;
 }
 
 //==============================================================================
@@ -215,7 +189,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
 //==============================================================================
 ControlGrisAudioProcessor::~ControlGrisAudioProcessor()
 {
-    disconnectOsc();
+    [[maybe_unused]] auto const success{ disconnectOsc() };
 }
 
 //==============================================================================
@@ -329,7 +303,7 @@ void ControlGrisAudioProcessor::setOscPortNumber(int const oscPortNumber)
 {
     mCurrentOscPort = oscPortNumber;
     mAudioProcessorValueTreeState.state.setProperty("oscPortNumber", oscPortNumber, nullptr);
-    createOscConnection(mCurrentOscAddress, oscPortNumber);
+    [[maybe_unused]] auto const success{ createOscConnection(mCurrentOscAddress, oscPortNumber) };
 }
 
 //==============================================================================
@@ -337,7 +311,7 @@ void ControlGrisAudioProcessor::setOscAddress(juce::String const & address)
 {
     mCurrentOscAddress = address;
     mAudioProcessorValueTreeState.state.setProperty("oscAddress", address, nullptr);
-    createOscConnection(address, mCurrentOscPort);
+    [[maybe_unused]] auto const success{ createOscConnection(address, mCurrentOscPort) };
 }
 
 //==============================================================================
@@ -460,7 +434,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscInputConnection(int const oscPort)
 {
-    disconnectOscInput(oscPort);
+    [[maybe_unused]] auto const success{ disconnectOscInput(oscPort) };
 
     mOscInputConnected = mOscInputReceiver.connect(oscPort);
     if (!mOscInputConnected) {
@@ -632,7 +606,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
 //==============================================================================
 bool ControlGrisAudioProcessor::createOscOutputConnection(juce::String const & oscAddress, int const oscPort)
 {
-    disconnectOscOutput(oscAddress, oscPort);
+    [[maybe_unused]] auto const success{ disconnectOscOutput(oscAddress, oscPort) };
 
     mOscOutputConnected = mOscOutputSender.connect(oscAddress, oscPort);
     if (!mOscOutputConnected)
@@ -1149,12 +1123,14 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         setOscOutputPluginId(valueTree.getProperty("oscOutputPluginId", 1));
 
         if (valueTree.getProperty("oscInputConnected", false)) {
-            createOscInputConnection(valueTree.getProperty("oscInputPortNumber", 9000));
+            [[maybe_unused]] auto const success{ createOscInputConnection(
+                valueTree.getProperty("oscInputPortNumber", 9000)) };
         }
 
         if (valueTree.getProperty("oscOutputConnected", false)) {
-            createOscOutputConnection(valueTree.getProperty("oscOutputAddress", "192.168.1.100"),
-                                      valueTree.getProperty("oscOutputPortNumber", 8000));
+            [[maybe_unused]] auto const success{ createOscOutputConnection(
+                valueTree.getProperty("oscOutputAddress", "192.168.1.100"),
+                valueTree.getProperty("oscOutputPortNumber", 8000)) };
         }
 
         // Load saved fixed positions.

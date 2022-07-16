@@ -30,7 +30,7 @@ static constexpr auto BOX_HEIGHT = 22;
 SpatTextEditor::SpatTextEditor(juce::String const & label,
                                juce::String const & tooltip,
                                Listener & listener,
-                               GrisLookAndFeel & lookAndFeel)
+                               GrisLookAndFeel & /*lookAndFeel*/)
     : mListener(listener)
     , mLabel("", label)
 {

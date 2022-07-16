@@ -375,7 +375,7 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
 
     auto const isCubeMode{ mProcessor.getSpatMode() == SpatMode::cube };
 
-    auto const offset{ Degrees{ 360.0f } / numOfSources / 2.0f };
+    auto const offset{ Degrees{ 360.0f } / static_cast<float>(numOfSources) / 2.0f };
     auto const distance{ isCubeMode ? 0.7f : 1.0f };
 
     auto const getAzimuths = [&]() {
@@ -400,17 +400,17 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
         case SourcePlacement::rightAlternate:
             return -azimuths[sourceIndex];
         case SourcePlacement::leftClockwise:
-            return Degrees{ 360.0f } / numOfSources * sourceIndex - offset;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(sourceIndex) - offset;
         case SourcePlacement::leftCounterClockwise:
-            return Degrees{ 360.0f } / numOfSources * -sourceIndex - offset;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(-sourceIndex) - offset;
         case SourcePlacement::rightClockwise:
-            return Degrees{ 360.0f } / numOfSources * sourceIndex + offset;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(sourceIndex) + offset;
         case SourcePlacement::rightCounterClockwise:
-            return Degrees{ 360.0f } / numOfSources * -sourceIndex + offset;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(-sourceIndex) + offset;
         case SourcePlacement::topClockwise:
-            return Degrees{ 360.0f } / numOfSources * sourceIndex;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(sourceIndex);
         case SourcePlacement::topCounterClockwise:
-            return Degrees{ 360.0f } / numOfSources * -sourceIndex;
+            return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(-sourceIndex);
         default:
             jassertfalse;
             break;
@@ -723,9 +723,9 @@ void ControlGrisAudioProcessorEditor::oscOutputPluginIdChangedCallback(int const
 void ControlGrisAudioProcessorEditor::oscInputConnectionChangedCallback(bool const state, int const oscPort)
 {
     if (state) {
-        mProcessor.createOscInputConnection(oscPort);
+        [[maybe_unused]] auto const success{ mProcessor.createOscInputConnection(oscPort) };
     } else {
-        mProcessor.disconnectOscInput(oscPort);
+        [[maybe_unused]] auto const success{ mProcessor.disconnectOscInput(oscPort) };
     }
 }
 
@@ -735,9 +735,9 @@ void ControlGrisAudioProcessorEditor::oscOutputConnectionChangedCallback(bool co
                                                                          int const oscPort)
 {
     if (state) {
-        mProcessor.createOscOutputConnection(oscAddress, oscPort);
+        [[maybe_unused]] auto const success{ mProcessor.createOscOutputConnection(oscAddress, oscPort) };
     } else {
-        mProcessor.disconnectOscOutput(oscAddress, oscPort);
+        [[maybe_unused]] auto const success{ mProcessor.disconnectOscOutput(oscAddress, oscPort) };
     }
 }
 
