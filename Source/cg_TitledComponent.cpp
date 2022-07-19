@@ -22,8 +22,6 @@
 #include "cg_ControlGrisLookAndFeel.hpp"
 namespace gris
 {
-static constexpr auto RIGHT_PADDING = 5;
-
 //==============================================================================
 TitledComponent::TitledComponent(juce::String title,
                                  MinSizedComponent * contentComponent,
