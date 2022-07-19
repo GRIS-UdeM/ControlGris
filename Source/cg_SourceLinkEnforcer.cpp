@@ -201,10 +201,12 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
                 mLinkStrategy = source_link_strategies::Base::make(mElevationSourceLink); // how can we reach this ?
             } else {
                 mLinkStrategy = source_link_strategies::Base::make(mPositionSourceLink);
-                source_link_strategies::CircularFixedAngle * circularFixedLinkStrategy
-                    = static_cast<source_link_strategies::CircularFixedAngle *>(mLinkStrategy.get());
-                circularFixedLinkStrategy->setSecSourcesLengthRatio(tmpFixedAngleSecSourcesLengthRatio);
-                circularFixedLinkStrategy->setSecSourcesLengthRatioInitialized();
+                if (mPositionSourceLink == PositionSourceLink::circularFixedAngle) {
+                    source_link_strategies::CircularFixedAngle * circularFixedLinkStrategy
+                        = static_cast<source_link_strategies::CircularFixedAngle *>(mLinkStrategy.get());
+                    circularFixedLinkStrategy->setSecSourcesLengthRatio(tmpFixedAngleSecSourcesLengthRatio);
+                    circularFixedLinkStrategy->setSecSourcesLengthRatioInitialized();
+                }
             }
         }
         mSnapshots.primary = primaryStart;
