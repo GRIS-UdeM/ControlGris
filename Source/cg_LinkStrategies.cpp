@@ -317,7 +317,6 @@ SourceSnapshot
     auto const newInitialRadius{ finalStates[sourceIndex].getPos().getDistanceFromOrigin() / divisor };
 
     Radians const finalAngle{ std::atan2(finalStates[sourceIndex].getY(), finalStates[sourceIndex].getX()) };
-    auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const newInitialAngle{ finalAngle - mRotation };
 
@@ -354,9 +353,6 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
     auto const & primarySourceInitialState{ initialStates.primary };
     auto const & primarySourceFinalState{ finalStates.getPrimarySource() };
 
-    auto const notQuiteZero{ std::nextafter(0.0f, 1.0f) }; // dont divide by zero!
-    auto const primarySourceInitialRadius{ std::max(primarySourceInitialState.position.getDistanceFromOrigin(),
-                                                    notQuiteZero) };
     mRadius = primarySourceFinalState.getPos().getDistanceFromOrigin();
 
     auto const primarySourceFinalPosition{ primarySourceFinalState.getPos() };
