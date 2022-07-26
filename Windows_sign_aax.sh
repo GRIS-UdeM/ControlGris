@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Developer: Samuel Béland
+# Developer: Gaël Lane Lépine, Samuel Béland
 
 #==============================================================================
 export USAGE="usage:\n\tWindows_regroup_and_sign.sh --cert <certificate-path> --pass <certificate-password>"
@@ -33,7 +33,6 @@ case $key in
     shift # past value
     ;;
     *)    # unknown option
-	echo "lol"
     print_usage_and_exit
     ;;
 esac
@@ -48,7 +47,7 @@ fi
 
 #==============================================================================
 # sign the aax plugin
-export PLUGIN_PATH="Builds/VisualStudio2019/x64/Release/AAX/ControlGris.aaxplugin"
+export PLUGIN_PATH="Builds/VisualStudio2022/x64/Release/AAX/ControlGris.aaxplugin"
 wraptool sign \
 		 --verbose \
 		 --account grisresearch \
