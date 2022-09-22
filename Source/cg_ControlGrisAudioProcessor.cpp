@@ -37,43 +37,43 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
     juce::AudioProcessorValueTreeState::ParameterLayout layout;
 
     layout.add(
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::X, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::X, 1 },
                                     juce::String("Recording Trajectory X"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
                                     Attributes()),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::Y, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::Y, 1 },
                                     juce::String("Recording Trajectory Y"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
                                     Attributes()),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::Z, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::Z, 1 },
                                     juce::String("Recording Trajectory Z"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
                                     Attributes()),
         std::make_unique<Parameter>(
-                                    juce::ParameterID{Automation::Ids::POSITION_SOURCE_LINK, 1},
+            juce::ParameterID{ Automation::Ids::POSITION_SOURCE_LINK, 1 },
             juce::String("Source Link"),
             juce::NormalisableRange<float>(0.0f, static_cast<float>(POSITION_SOURCE_LINK_TYPES.size() - 1), 1.0f),
             0.0f,
             Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::ELEVATION_SOURCE_LINK, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::ELEVATION_SOURCE_LINK, 1 },
                                     juce::String("Source Link Alt"),
                                     juce::NormalisableRange<float>(0.0f, 4.0f, 1.0f),
                                     0.0f,
                                     Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::POSITION_PRESET, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::POSITION_PRESET, 1 },
                                     juce::String("Position Preset"),
                                     juce::NormalisableRange<float>(0.0f, 50.0f, 1.0f),
                                     0.0f,
                                     Attributes().withMeta(false).withAutomatable(true).withDiscrete(true)),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::AZIMUTH_SPAN, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::AZIMUTH_SPAN, 1 },
                                     juce::String("Azimuth Span"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
                                     Attributes()),
-               std::make_unique<Parameter>(juce::ParameterID{Automation::Ids::ELEVATION_SPAN, 1},
+        std::make_unique<Parameter>(juce::ParameterID{ Automation::Ids::ELEVATION_SPAN, 1 },
                                     juce::String("Elevation Span"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
@@ -119,6 +119,8 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("numberOfSources", 2, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("firstSourceId", 1, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscOutputPluginId", 1, nullptr);
+
+    mAudioProcessorValueTreeState.state.setProperty("elevationMode", static_cast<int>(ElevationMode::normal), nullptr);
 
     // Trajectory box persitent settings.
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType",
@@ -410,24 +412,61 @@ void ControlGrisAudioProcessor::sendOscMessage()
     juce::OSCAddressPattern const oscPattern("/spat/serv");
     juce::OSCMessage message(oscPattern);
 
-    for (auto const & source : mSources) {
-        auto const azimuth{ source.getAzimuth().getAsRadians() };
-        auto const elevation{ source.getElevation().getAsRadians() };
-        auto const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
-        auto const elevationSpan{ source.getElevationSpan() * 0.5f };
-        auto const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
+    if (mSpatMode == SpatMode::cube) {
+        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        ElevationMode elevationMode{ ElevationMode::normal };
 
-        message.clear();
-        message.addInt32(source.getId().get() - 1); // osc id starts at 0
-        message.addFloat32(azimuth);
-        message.addFloat32(elevation);
-        message.addFloat32(azimuthSpan.get());
-        message.addFloat32(elevationSpan.get());
-        message.addFloat32(distance);
-        message.addFloat32(0.0);
+        if (editor != nullptr) {
+            elevationMode = editor->getElevationMode();
+        }
 
-        auto const success{ mOscSender.send(message) };
-        jassert(success);
+        auto constexpr Z_MIN_IN{ 0.0f };
+        auto constexpr Z_MAX_IN{ HALF_PI.get() };
+        auto constexpr Z_MAX_OUT{ 0.0f };
+        auto const Z_MIN_OUT{ elevationMode == ElevationMode::extended ? LBAP_FAR_FIELD : 1.0f };
+
+        for (auto const & source : mSources) {
+            auto const cartesianMessage{ juce::String("car") };
+            auto const x{ source.getX() * LBAP_FAR_FIELD };
+            auto const y{ source.getY() * -LBAP_FAR_FIELD };
+            auto const z{ (source.getElevation().getAsRadians() - Z_MIN_IN) * (Z_MAX_OUT - Z_MIN_OUT)
+                              / (Z_MAX_IN - Z_MIN_IN)
+                          + Z_MIN_OUT };
+            auto const azimuthSpan{ source.getAzimuthSpan() };
+            auto const elevationSpan{ source.getElevationSpan() };
+
+            message.clear();
+            message.addString(cartesianMessage);
+            message.addInt32(source.getId().get());
+            message.addFloat32(x);
+            message.addFloat32(y);
+            message.addFloat32(z);
+            message.addFloat32(azimuthSpan.get());
+            message.addFloat32(elevationSpan.get());
+
+            auto const success{ mOscSender.send(message) };
+            jassert(success);
+        }
+    } else {
+        for (auto const & source : mSources) {
+            auto const azimuth{ source.getAzimuth().getAsRadians() };
+            auto const elevation{ source.getElevation().getAsRadians() };
+            auto const azimuthSpan{ source.getAzimuthSpan() * 2.0f };
+            auto const elevationSpan{ source.getElevationSpan() * 0.5f };
+            auto const distance{ mSpatMode == SpatMode::cube ? source.getDistance() / 0.6f : source.getDistance() };
+
+            message.clear();
+            message.addInt32(source.getId().get() - 1); // osc id starts at 0
+            message.addFloat32(azimuth);
+            message.addFloat32(elevation);
+            message.addFloat32(azimuthSpan.get());
+            message.addFloat32(elevationSpan.get());
+            message.addFloat32(distance);
+            message.addFloat32(0.0); // gain ?
+
+            auto const success{ mOscSender.send(message) };
+            jassert(success);
+        }
     }
 }
 

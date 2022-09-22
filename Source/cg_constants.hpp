@@ -39,6 +39,10 @@ constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 // Spatialisation modes.
 enum class SpatMode { dome, cube };
 
+//==============================================================================
+// Elevation modes.
+enum class ElevationMode { normal = 1, extended };
+
 extern juce::String const SOURCE_SELECTION_WARNING;
 
 //==============================================================================
@@ -98,7 +102,6 @@ enum class PositionTrajectoryType {
 };
 
 extern juce::StringArray const POSITION_TRAJECTORY_TYPE_TYPES;
-;
 
 enum class ElevationTrajectoryType { undefined, realtime, drawing, downUp, upDown };
 extern juce::StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES;

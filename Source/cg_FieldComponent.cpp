@@ -228,6 +228,15 @@ void ElevationFieldComponent::drawBackground(juce::Graphics & g) const
         g.setColour(grisLookAndFeel->getLightColor());
         g.drawVerticalLine(5, 5, fieldComponentSize_f - 5);
         g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
+
+        // Draw horizontal lines.
+        if (mElevationMode == ElevationMode::extended) {
+            auto const lbapAttenuationHeight{ fieldComponentSize_f - fieldComponentSize_f * (LBAP_FAR_FIELD - 1.0f) };
+            auto const domeTopLimit{ lbapAttenuationHeight + SOURCE_FIELD_COMPONENT_DIAMETER };
+
+            g.setColour(grisLookAndFeel->getLightColor());
+            g.drawHorizontalLine(static_cast<int>(domeTopLimit), 10.0f, fieldComponentSize_f - 10.0f);
+        }
     }
 }
 
@@ -703,6 +712,12 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(juce::Point<
     auto const result{ elevation.clamped(MIN_ELEVATION, MAX_ELEVATION) };
 
     return result;
+}
+
+//==============================================================================
+void ElevationFieldComponent::setElevationMode(ElevationMode const & elevationMode)
+{
+    mElevationMode = elevationMode;
 }
 
 //==============================================================================
