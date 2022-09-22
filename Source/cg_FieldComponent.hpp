@@ -197,6 +197,7 @@ class ElevationFieldComponent final : public FieldComponent
     ElevationTrajectoryManager & mAutomationManager;
     ElevationDrawingHandle mDrawingHandle{ *this };
     juce::OwnedArray<ElevationSourceComponent> mSourceComponents{};
+    ElevationMode mElevationMode{};
 
 public:
     //==============================================================================
@@ -215,6 +216,8 @@ public:
     [[nodiscard]] juce::Point<float> sourceElevationToComponentPosition(Radians sourceElevation,
                                                                         SourceIndex index) const;
     [[nodiscard]] Radians componentPositionToSourceElevation(juce::Point<float> const & componentPosition) const;
+    //==============================================================================
+    void setElevationMode(ElevationMode const & elevationMode);
     //==============================================================================
     void paint(juce::Graphics & g) override;
     void resized() override;

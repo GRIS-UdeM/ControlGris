@@ -60,6 +60,23 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mElevationBanner.setText("Elevation", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationBanner);
 
+    mElevationModeLabel.setEditable(false, false);
+    mElevationModeLabel.setText("Mode", juce::dontSendNotification);
+    mElevationModeLabel.setJustificationType(juce::Justification::centredRight);
+    addAndMakeVisible(&mElevationModeLabel);
+
+    mElevationModeCombobox.setLookAndFeel(&mGrisLookAndFeel);
+    mElevationModeCombobox.addItem("Normal", static_cast<int>(ElevationMode::normal));
+    mElevationModeCombobox.addItem("Extended", static_cast<int>(ElevationMode::extended));
+    mElevationModeCombobox.onChange = [this] {
+        mElevationField.setElevationMode(static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId()));
+        mAudioProcessorValueTreeState.state.setProperty("elevationMode",
+                                                        mElevationModeCombobox.getSelectedId(),
+                                                        nullptr);
+        mElevationField.repaint();
+    };
+    addAndMakeVisible(&mElevationModeCombobox);
+
     mTrajectoryBanner.setLookAndFeel(&mGrisLookAndFeel);
     mTrajectoryBanner.setText("Trajectories", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryBanner);
@@ -196,6 +213,8 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
         Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
     mSectionTrajectory.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
     mSectionTrajectory.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
+    mElevationModeCombobox.setSelectedId(
+        mAudioProcessorValueTreeState.state.getProperty("elevationMode", static_cast<int>(ElevationMode::normal)));
 
     // Update the position preset box.
     //--------------------------------
@@ -762,11 +781,23 @@ void ControlGrisAudioProcessorEditor::resized()
         mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);
+        mElevationModeCombobox.setVisible(true);
         mElevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
+        mElevationModeLabel.setVisible(true);
+        mElevationModeCombobox.setBounds(fieldSize + mElevationBanner.getBounds().getWidth() / 2,
+                                         (mElevationBanner.getHeight() - mElevationModeCombobox.getHeight()) / 2,
+                                         (mElevationBanner.getBounds().getWidth() / 2) - 4,
+                                         16);
+        mElevationModeLabel.setBounds(mElevationModeCombobox.getBounds().getX() - 60,
+                                      (mElevationBanner.getHeight() - mElevationModeLabel.getHeight()) / 2,
+                                      60,
+                                      12);
         mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
     } else {
         mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(false);
+        mElevationModeLabel.setVisible(false);
+        mElevationModeCombobox.setVisible(false);
         mElevationField.setVisible(false);
     }
 
@@ -789,6 +820,12 @@ void ControlGrisAudioProcessorEditor::resized()
 void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 {
     mSectionSourcePosition.setSpatMode(spatMode);
+}
+
+//==============================================================================
+ElevationMode ControlGrisAudioProcessorEditor::getElevationMode() const
+{
+    return static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId());
 }
 
 } // namespace gris

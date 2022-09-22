@@ -44,6 +44,8 @@ class ControlGrisAudioProcessorEditor final
     , public SectionOscController::Listener
     , public PositionPresetComponent::Listener
 {
+private:
+    //==============================================================================
     ControlGrisAudioProcessor & mProcessor;
     GrisLookAndFeel mGrisLookAndFeel;
     juce::AudioProcessorValueTreeState & mAudioProcessorValueTreeState;
@@ -56,6 +58,9 @@ class ControlGrisAudioProcessorEditor final
     BannerComponent mTrajectoryBanner;
     BannerComponent mSettingsBanner;
     BannerComponent mPositionPresetBanner;
+
+    juce::ComboBox mElevationModeCombobox;
+    juce::Label mElevationModeLabel;
 
     PositionFieldComponent mPositionField;
     ElevationFieldComponent mElevationField;
@@ -159,6 +164,8 @@ public:
     void refresh();
 
     void setSpatMode(SpatMode spatMode);
+
+    ElevationMode getElevationMode() const;
 
 private:
     //==============================================================================
