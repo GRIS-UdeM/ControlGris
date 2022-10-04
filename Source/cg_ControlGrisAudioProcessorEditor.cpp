@@ -76,6 +76,17 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
         mElevationField.repaint();
     };
     addAndMakeVisible(&mElevationModeCombobox);
+    auto const width{ getWidth() - 50 }; // Remove position preset space.
+    auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
+    // only setting positions in resized() is not sufficient
+    mElevationModeCombobox.setBounds(fieldSize + mElevationBanner.getBounds().getWidth() / 2,
+                                     (mElevationBanner.getHeight() - mElevationModeCombobox.getHeight()) / 2,
+                                     (mElevationBanner.getBounds().getWidth() / 2) - 4,
+                                     16);
+    mElevationModeLabel.setBounds(mElevationModeCombobox.getBounds().getX() - 60,
+                                  (mElevationBanner.getHeight() - mElevationModeLabel.getHeight()) / 2,
+                                  60,
+                                  12);
 
     mTrajectoryBanner.setLookAndFeel(&mGrisLookAndFeel);
     mTrajectoryBanner.setText("Trajectories", juce::NotificationType::dontSendNotification);
