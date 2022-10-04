@@ -230,7 +230,7 @@ void ElevationFieldComponent::drawBackground(juce::Graphics & g) const
         g.drawHorizontalLine(fieldComponentSize - 5, 5, fieldComponentSize_f - 5);
 
         // Draw horizontal lines.
-        if (mElevationMode == ElevationMode::extended) {
+        if (mElevationMode == ElevationMode::extendedTop) {
             auto const lbapAttenuationHeight{ fieldComponentSize_f - fieldComponentSize_f * (LBAP_FAR_FIELD - 1.0f) };
             auto const domeTopLimit{ lbapAttenuationHeight + SOURCE_FIELD_COMPONENT_DIAMETER };
 
