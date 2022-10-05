@@ -444,7 +444,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
             message.addFloat32(azimuthSpan.get());
             message.addFloat32(elevationSpan.get());
 
-            auto const success{ mOscSender.send(message) };
+            [[maybe_unused]] auto const success{ mOscSender.send(message) };
             jassert(success);
         }
     } else {
