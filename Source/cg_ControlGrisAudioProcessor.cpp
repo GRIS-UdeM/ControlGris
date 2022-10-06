@@ -1131,7 +1131,7 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
         if (childExist) {
             xmlState->removeChildElement(childExist, true);
         }
-        if (mFixPositionData.getNumChildElements() > 0) {
+        if (mFixPositionData.getNumChildElements() > 0) { // TODO : It looks like we never reach this code...
             auto * positionData{ new juce::XmlElement{ mFixPositionData } };
             xmlState->addChildElement(positionData);
         }
@@ -1172,10 +1172,27 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
                 valueTree.getProperty("oscOutputPortNumber", 8000)) };
         }
 
+        // Load stored sources positions
+        for (int sourceIndex{}; sourceIndex < MAX_NUMBER_OF_SOURCES; ++sourceIndex) {
+            juce::String const id{ sourceIndex };
+            juce::Identifier const azimuthId{ juce::String{ "p_azimuth_" } + id };
+            juce::Identifier const elevationId{ juce::String{ "p_elevation_" } + id };
+            juce::Identifier const distanceId{ juce::String{ "p_distance_" } + id };
+            auto & source{ mSources[sourceIndex] };
+
+            const Radians azimuth{ valueTree.getProperty(azimuthId) };
+            const Radians elevation{ valueTree.getProperty(elevationId) };
+            const float distance{ valueTree.getProperty(distanceId) };
+
+            source.setAzimuth(azimuth, Source::OriginOfChange::userAnchorMove);
+            source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
+            source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
+        }
+
         // Load saved fixed positions.
         //----------------------------
         auto * positionData{ xmlState->getChildByName(FIXED_POSITION_DATA_TAG) };
-        if (positionData) {
+        if (positionData) { // TODO : It looks like we never reach this code...
             mFixPositionData.deleteAllChildElements();
             mFixPositionData = *positionData;
             mPositionSourceLinkEnforcer.enforceSourceLink();
