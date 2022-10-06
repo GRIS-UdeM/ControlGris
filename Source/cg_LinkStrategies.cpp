@@ -388,9 +388,14 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
                      std::begin(initialAngles) + finalStates.size(),
                      [](auto const & a, auto const & b) -> bool { return a.first < b.first; });
     // store ordering
-    for (int i{}; i < finalStates.size(); ++i) {
-        auto const sourceIndex{ initialAngles[i].second };
-        mOrdering[sourceIndex.get()] = i;
+    if (primarySourceInitialAngle == Radians::angleOf(juce::Point(0.0f, 0.0f))) {
+        mOrdering = mOrderingBackup;
+    } else {
+        for (int i{}; i < finalStates.size(); ++i) {
+            auto const sourceIndex{ initialAngles[i].second };
+            mOrdering[sourceIndex.get()] = i;
+        }
+        mOrderingBackup = mOrdering;
     }
     jassert(mOrdering[0ull] == 0);
 }

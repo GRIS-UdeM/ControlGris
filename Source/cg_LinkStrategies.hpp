@@ -167,6 +167,7 @@ class CircularFullyFixed final : public Base
     Radians mRotation{};
     float mRadius{};
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
+    std::array<int, MAX_NUMBER_OF_SOURCES> mOrderingBackup{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
     void enforce_implementation(Sources & finalStates,
