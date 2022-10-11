@@ -293,9 +293,9 @@ void CircularFixedAngle::enforce_implementation(Sources & finalStates,
     auto const ordering{ mOrdering[sourceIndex.get()] };
 
     auto const finalAngle{ mPrimarySourceFinalAngle + mDeviationPerSource * static_cast<float>(ordering) };
-    auto const primaryDistFromOrig{ initialStates.primary.position.getDistanceFromOrigin() == 0.0f
+    auto const primaryDistFromOrig{ finalStates.getPrimarySource().getPos().getDistanceFromOrigin() == 0.0f
                                         ? notQuiteZero
-                                        : initialStates.primary.position.getDistanceFromOrigin() };
+                                        : finalStates.getPrimarySource().getPos().getDistanceFromOrigin() };
     auto const radiusRatio = mSecSourcesLengthRatio[sourceIndex.get()];
     auto const finalRadius{ primaryDistFromOrig * radiusRatio };
     juce::Point<float> const finalPosition{ std::cos(finalAngle.getAsRadians()) * finalRadius,
