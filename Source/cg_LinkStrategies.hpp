@@ -167,7 +167,7 @@ class CircularFullyFixed final : public Base
     Radians mRotation{};
     float mRadius{};
     std::array<int, MAX_NUMBER_OF_SOURCES> mOrdering{};
-    std::array<int, MAX_NUMBER_OF_SOURCES> mOrderingBackup{};
+    bool mOrderingInitialized{};
     //==============================================================================
     void computeParameters_implementation(Sources const & finalStates, SourcesSnapshots const & initialStates) override;
     void enforce_implementation(Sources & finalStates,
@@ -177,6 +177,11 @@ class CircularFullyFixed final : public Base
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
                                                          SourceIndex sourceIndex) const override;
+    //==============================================================================
+public:
+    std::array<int, MAX_NUMBER_OF_SOURCES> getOrdering();
+    void setOrdering(std::array<int, MAX_NUMBER_OF_SOURCES> & ordering);
+    void setOrderingInitialized();
     //==============================================================================
     JUCE_LEAK_DETECTOR(CircularFullyFixed)
 };

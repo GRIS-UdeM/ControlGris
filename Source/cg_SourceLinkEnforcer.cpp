@@ -169,6 +169,16 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
             }
         }
 
+        // take a snapshot of source ordering if mLinkStrategy is circularFullyFixed
+        std::array<int, MAX_NUMBER_OF_SOURCES> tmpCircularFullyFixedOrdering;
+        if (mLinkStrategy.get()->isInitialized()) {
+            if (mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
+                source_link_strategies::CircularFullyFixed * circularFullyFixedLinkStrategy
+                    = static_cast<source_link_strategies::CircularFullyFixed *>(mLinkStrategy.get());
+                tmpCircularFullyFixedOrdering = circularFullyFixedLinkStrategy->getOrdering();
+            }
+        }
+
         if (mPositionSourceLink == PositionSourceLink::circularFixedAngle
             || mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
             mLinkStrategy = source_link_strategies::Base::make(PositionSourceLink::circular);
@@ -206,6 +216,11 @@ void SourceLinkEnforcer::secondarySourceMoved(SourceIndex const sourceIndex)
                         = static_cast<source_link_strategies::CircularFixedAngle *>(mLinkStrategy.get());
                     circularFixedLinkStrategy->setSecSourcesLengthRatio(tmpFixedAngleSecSourcesLengthRatio);
                     circularFixedLinkStrategy->setSecSourcesLengthRatioInitialized();
+                } else if (mPositionSourceLink == PositionSourceLink::circularFullyFixed) {
+                    source_link_strategies::CircularFullyFixed * circularFullyFixedStrategy
+                        = static_cast<source_link_strategies::CircularFullyFixed *>(mLinkStrategy.get());
+                    circularFullyFixedStrategy->setOrdering(tmpCircularFullyFixedOrdering);
+                    circularFullyFixedStrategy->setOrderingInitialized();
                 }
             }
         }

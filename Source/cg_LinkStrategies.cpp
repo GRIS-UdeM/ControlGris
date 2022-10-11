@@ -361,41 +361,39 @@ void CircularFullyFixed::computeParameters_implementation(Sources const & finalS
     auto const primarySourceInitialAngle{ Radians::angleOf(primarySourceInitialState.position) };
     mRotation = mPrimarySourceFinalAngle - primarySourceInitialAngle;
 
-    // copy initialAngles
-    std::array<std::pair<Degrees, SourceIndex>, MAX_NUMBER_OF_SOURCES> initialAngles{};
-    for (auto const & finalState : finalStates) {
-        auto const sourceIndex{ finalState.getIndex() };
+    if (!mOrderingInitialized) {
+        // copy initialAngles
+        std::array<std::pair<Degrees, SourceIndex>, MAX_NUMBER_OF_SOURCES> initialAngles{};
+        for (auto const & finalState : finalStates) {
+            auto const sourceIndex{ finalState.getIndex() };
 
-        auto const & initialState{ initialStates[sourceIndex] };
-        auto const initialAngle{ Radians::angleOf(initialState.position) };
+            auto const & initialState{ initialStates[sourceIndex] };
+            auto const initialAngle{ Radians::angleOf(initialState.position) };
 
-        initialAngles[sourceIndex.get()] = std::make_pair(initialAngle, sourceIndex);
-    }
-    // make all initialAngles bigger than the primary source's
-    auto const minAngle{ Radians::angleOf(initialStates.primary.position) };
-    auto const maxAngle{ minAngle + TWO_PI };
-    std::for_each(std::begin(initialAngles),
-                  std::begin(initialAngles) + finalStates.size(),
-                  [&](std::pair<Degrees, SourceIndex> & data) {
-                      if (data.first < minAngle) {
-                          data.first += TWO_PI;
-                      }
-                      jassert(data.first >= minAngle);
-                      jassert(data.first < maxAngle);
-                  });
-    // sort
-    std::stable_sort(std::begin(initialAngles),
-                     std::begin(initialAngles) + finalStates.size(),
-                     [](auto const & a, auto const & b) -> bool { return a.first < b.first; });
-    // store ordering
-    if (primarySourceInitialAngle == Radians::angleOf(juce::Point(0.0f, 0.0f))) {
-        mOrdering = mOrderingBackup;
-    } else {
+            initialAngles[sourceIndex.get()] = std::make_pair(initialAngle, sourceIndex);
+        }
+        // make all initialAngles bigger than the primary source's
+        auto const minAngle{ Radians::angleOf(initialStates.primary.position) };
+        auto const maxAngle{ minAngle + TWO_PI };
+        std::for_each(std::begin(initialAngles),
+                      std::begin(initialAngles) + finalStates.size(),
+                      [&](std::pair<Degrees, SourceIndex> & data) {
+                          if (data.first < minAngle) {
+                              data.first += TWO_PI;
+                          }
+                          jassert(data.first >= minAngle);
+                          jassert(data.first < maxAngle);
+                      });
+        // sort
+        std::stable_sort(std::begin(initialAngles),
+                         std::begin(initialAngles) + finalStates.size(),
+                         [](auto const & a, auto const & b) -> bool { return a.first < b.first; });
+        // store ordering
         for (int i{}; i < finalStates.size(); ++i) {
             auto const sourceIndex{ initialAngles[i].second };
             mOrdering[sourceIndex.get()] = i;
         }
-        mOrderingBackup = mOrdering;
+        mOrderingInitialized = true;
     }
     jassert(mOrdering[0ull] == 0);
 }
@@ -431,6 +429,24 @@ SourceSnapshot
     newInitialState.position = newInitialPosition;
 
     return newInitialState;
+}
+
+//==============================================================================
+std::array<int, MAX_NUMBER_OF_SOURCES> CircularFullyFixed::getOrdering()
+{
+    return mOrdering;
+}
+
+//==============================================================================
+void CircularFullyFixed::setOrdering(std::array<int, MAX_NUMBER_OF_SOURCES> & ordering)
+{
+    mOrdering = ordering;
+}
+
+//==============================================================================
+void CircularFullyFixed::setOrderingInitialized()
+{
+    mOrderingInitialized = true;
 }
 
 //==============================================================================
