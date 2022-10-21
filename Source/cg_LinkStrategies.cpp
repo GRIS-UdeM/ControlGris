@@ -286,7 +286,7 @@ void CircularFixedAngle::computeParameters_implementation(Sources const & finalS
 
 //==============================================================================
 void CircularFixedAngle::enforce_implementation(Sources & finalStates,
-                                                SourcesSnapshots const & initialStates,
+                                                SourcesSnapshots const & /*initialStates*/,
                                                 SourceIndex const sourceIndex) const
 {
     auto constexpr notQuiteZero{ 0.0000001f };

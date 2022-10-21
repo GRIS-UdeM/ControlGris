@@ -464,7 +464,7 @@ void ControlGrisAudioProcessor::sendOscMessage()
             message.addFloat32(distance);
             message.addFloat32(0.0); // gain ?
 
-            auto const success{ mOscSender.send(message) };
+            [[maybe_unused]] auto const success{ mOscSender.send(message) };
             jassert(success);
         }
     }
