@@ -68,6 +68,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mElevationModeCombobox.setLookAndFeel(&mGrisLookAndFeel);
     mElevationModeCombobox.addItem("Normal", static_cast<int>(ElevationMode::normal));
     mElevationModeCombobox.addItem("Extended Top", static_cast<int>(ElevationMode::extendedTop));
+    mElevationModeCombobox.addItem("Extended Top And Bottom", static_cast<int>(ElevationMode::extendedTopAndBottom));
     mElevationModeCombobox.onChange = [this] {
         mElevationField.setElevationMode(static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId()));
         mAudioProcessorValueTreeState.state.setProperty("elevationMode",

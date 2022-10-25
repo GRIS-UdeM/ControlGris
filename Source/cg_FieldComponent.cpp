@@ -231,11 +231,21 @@ void ElevationFieldComponent::drawBackground(juce::Graphics & g) const
 
         // Draw horizontal lines.
         if (mElevationMode == ElevationMode::extendedTop) {
-            auto const lbapAttenuationHeight{ fieldComponentSize_f - fieldComponentSize_f * (LBAP_FAR_FIELD - 1.0f) };
-            auto const domeTopLimit{ lbapAttenuationHeight + SOURCE_FIELD_COMPONENT_DIAMETER };
+            auto const lbapAttenuationHeight{ (fieldComponentSize_f * (LBAP_FAR_FIELD - 1.0f) / LBAP_FAR_FIELD) };
+            auto const domeTopLimit{ lbapAttenuationHeight + SOURCE_FIELD_COMPONENT_RADIUS / 2.0f };
 
             g.setColour(grisLookAndFeel->getLightColor());
             g.drawHorizontalLine(static_cast<int>(domeTopLimit), 10.0f, fieldComponentSize_f - 10.0f);
+        } else if (mElevationMode == ElevationMode::extendedTopAndBottom) {
+            auto const lbapAttenuationHeight{ (fieldComponentSize_f * (LBAP_FAR_FIELD - 1.0f)
+                                               / (LBAP_FAR_FIELD + LBAP_FAR_FIELD - 1.0f))
+                                              + SOURCE_FIELD_COMPONENT_RADIUS };
+            auto const domeTopLimit{ lbapAttenuationHeight };
+            auto const domeBottomLimit{ fieldComponentSize_f - lbapAttenuationHeight };
+
+            g.setColour(grisLookAndFeel->getLightColor());
+            g.drawHorizontalLine(static_cast<int>(domeTopLimit), 10.0f, fieldComponentSize_f - 10.0f);
+            g.drawHorizontalLine(static_cast<int>(domeBottomLimit), 10.0f, fieldComponentSize_f - 10.0f);
         }
     }
 }

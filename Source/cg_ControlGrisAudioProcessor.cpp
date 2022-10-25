@@ -422,8 +422,25 @@ void ControlGrisAudioProcessor::sendOscMessage()
 
         auto constexpr Z_MIN_IN{ 0.0f };
         auto constexpr Z_MAX_IN{ HALF_PI.get() };
-        auto constexpr Z_MAX_OUT{ 0.0f };
-        auto const Z_MIN_OUT{ elevationMode == ElevationMode::extendedTop ? LBAP_FAR_FIELD : 1.0f };
+        float Z_MIN_OUT{};
+        float Z_MAX_OUT{};
+
+        switch (elevationMode) {
+        case gris::ElevationMode::normal:
+            Z_MIN_OUT = 1.0f;
+            Z_MAX_OUT = 0.0f;
+            break;
+        case gris::ElevationMode::extendedTop:
+            Z_MIN_OUT = LBAP_FAR_FIELD;
+            Z_MAX_OUT = 0.0f;
+            break;
+        case gris::ElevationMode::extendedTopAndBottom:
+            Z_MIN_OUT = LBAP_FAR_FIELD;
+            Z_MAX_OUT = 1.0f - LBAP_FAR_FIELD;
+            break;
+        default:
+            break;
+        }
 
         for (auto const & source : mSources) {
             auto const cartesianMessage{ juce::String("car") };

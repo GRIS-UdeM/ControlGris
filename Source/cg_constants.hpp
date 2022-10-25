@@ -41,7 +41,7 @@ enum class SpatMode { dome, cube };
 
 //==============================================================================
 // Elevation modes.
-enum class ElevationMode { normal = 1, extendedTop };
+enum class ElevationMode { normal = 1, extendedTop, extendedTopAndBottom };
 
 extern juce::String const SOURCE_SELECTION_WARNING;
 
