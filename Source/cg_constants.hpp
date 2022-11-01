@@ -41,7 +41,8 @@ enum class SpatMode { dome, cube };
 
 //==============================================================================
 // Elevation modes.
-enum class ElevationMode { normal = 1, extendedTop, extendedTopAndBottom };
+enum class ElevationMode { normal, extendedTop, extendedTopAndBottom };
+extern juce::StringArray const ELEVATION_MODE_TYPES;
 
 extern juce::String const SOURCE_SELECTION_WARNING;
 
@@ -124,9 +125,20 @@ juce::String extern const ELEVATION_SOURCE_LINK;
 juce::String extern const AZIMUTH_SPAN;
 juce::String extern const ELEVATION_SPAN;
 juce::String extern const POSITION_PRESET;
+juce::String extern const ELEVATION_MODE;
 } // namespace Ids
 
-enum class Enum { x, y, z, positionSourceLink, elevationSourceLink, azimuthSpan, elevationSpan, positionPreset };
+enum class Enum {
+    x,
+    y,
+    z,
+    positionSourceLink,
+    elevationSourceLink,
+    azimuthSpan,
+    elevationSpan,
+    positionPreset,
+    elevationMode
+};
 
 Enum idToEnum(juce::String const & name);
 

@@ -66,17 +66,22 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     addAndMakeVisible(&mElevationModeLabel);
 
     mElevationModeCombobox.setLookAndFeel(&mGrisLookAndFeel);
-    mElevationModeCombobox.addItem("Normal", static_cast<int>(ElevationMode::normal));
-    mElevationModeCombobox.addItem("Extended Top", static_cast<int>(ElevationMode::extendedTop));
-    mElevationModeCombobox.addItem("Extended Top And Bottom", static_cast<int>(ElevationMode::extendedTopAndBottom));
+    mElevationModeCombobox.addItemList(ELEVATION_MODE_TYPES, 1);
     mElevationModeCombobox.onChange = [this] {
-        mElevationField.setElevationMode(static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId()));
-        mAudioProcessorValueTreeState.state.setProperty("elevationMode",
-                                                        mElevationModeCombobox.getSelectedId(),
-                                                        nullptr);
-        mElevationField.repaint();
+        elevationModeChangedStartedCallback();
+        auto const howMany{ static_cast<float>(ELEVATION_MODE_TYPES.size() - 1) };
+        auto const value{ (static_cast<float>(mElevationModeCombobox.getSelectedId()) - 1.0f) / howMany };
+        auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_MODE) };
+        auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(
+            Automation::Ids::ELEVATION_MODE) };
+        parameter->setValueNotifyingHost(value);
+        elevationModeChangedEndedCallback();
     };
+    auto const elevModeValue{ mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::ELEVATION_MODE) };
+    auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
+    updateElevationMode(elevMode);
     addAndMakeVisible(&mElevationModeCombobox);
+
     auto const width{ getWidth() - 50 }; // Remove position preset space.
     auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
     // only setting positions in resized() is not sufficient
@@ -225,8 +230,6 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
         Degrees{ mAudioProcessorValueTreeState.state.getProperty("deviationPerCycle", 0) });
     mSectionTrajectory.setCycleDuration(mAudioProcessorValueTreeState.state.getProperty("cycleDuration", 5.0));
     mSectionTrajectory.setDurationUnit(mAudioProcessorValueTreeState.state.getProperty("durationUnit", 1));
-    mElevationModeCombobox.setSelectedId(
-        mAudioProcessorValueTreeState.state.getProperty("elevationMode", static_cast<int>(ElevationMode::normal)));
 
     // Update the position preset box.
     //--------------------------------
@@ -287,6 +290,27 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int const presetNumbe
 {
     juce::MessageManagerLock mml{};
     mPositionPresetComponent.setPreset(presetNumber, true);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::updateElevationMode(ElevationMode mode)
+{
+    juce::MessageManager::callAsync([=] {
+        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::dontSendNotification);
+        mElevationField.setElevationMode(mode);
+    });
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::elevationModeChangedStartedCallback()
+{
+    mProcessor.getChangeGestureManager().beginGesture(Automation::Ids::ELEVATION_MODE);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::elevationModeChangedEndedCallback()
+{
+    mProcessor.getChangeGestureManager().endGesture(Automation::Ids::ELEVATION_MODE);
 }
 
 //==============================================================================
@@ -837,7 +861,7 @@ void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 //==============================================================================
 ElevationMode ControlGrisAudioProcessorEditor::getElevationMode() const
 {
-    return static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId());
+    return static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId() - 1);
 }
 
 } // namespace gris

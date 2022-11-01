@@ -728,6 +728,7 @@ Radians ElevationFieldComponent::componentPositionToSourceElevation(juce::Point<
 void ElevationFieldComponent::setElevationMode(ElevationMode const & elevationMode)
 {
     mElevationMode = elevationMode;
+    repaint();
 }
 
 //==============================================================================

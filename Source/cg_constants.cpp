@@ -30,6 +30,7 @@ juce::String const Automation::Ids::ELEVATION_SOURCE_LINK{ "sourceLinkAlt" };
 juce::String const Automation::Ids::AZIMUTH_SPAN{ "azimuthSpan" };
 juce::String const Automation::Ids::ELEVATION_SPAN{ "elevationSpan" };
 juce::String const Automation::Ids::POSITION_PRESET{ "positionPreset" };
+juce::String const Automation::Ids::ELEVATION_MODE{ "elevationMode" };
 
 Automation::Enum Automation::idToEnum(const juce::String & name)
 {
@@ -56,6 +57,9 @@ Automation::Enum Automation::idToEnum(const juce::String & name)
     }
     if (name.compare(Ids::POSITION_PRESET) == 0) {
         return Enum::positionPreset;
+    }
+    if (name.compare(Ids::ELEVATION_MODE) == 0) {
+        return Enum::elevationMode;
     }
 
     jassertfalse;
@@ -103,6 +107,10 @@ juce::StringArray const ELEVATION_TRAJECTORY_TYPE_TYPES{ juce::String("Realtime"
                                                          juce::String("Drawing"),
                                                          juce::String("Up Down"),
                                                          juce::String("Down Up") };
+
+juce::StringArray const ELEVATION_MODE_TYPES{ juce::String("Normal"),
+                                              juce::String("Extended Top"),
+                                              juce::String("Extended Top and Bottom") };
 
 juce::StringArray const FIXED_POSITION_DATA_HEADERS{
     // TODO: is this useful?

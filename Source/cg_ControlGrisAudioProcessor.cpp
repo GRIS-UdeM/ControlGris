@@ -77,7 +77,13 @@ juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()
                                     juce::String("Elevation Span"),
                                     juce::NormalisableRange<float>(0.0f, 1.0f),
                                     0.0f,
-                                    Attributes()));
+                                    Attributes()),
+        std::make_unique<Parameter>(
+            juce::ParameterID{ Automation::Ids::ELEVATION_MODE, 1 },
+            juce::String("Elevation Mode"),
+            juce::NormalisableRange<float>(0.0f, static_cast<float>(ELEVATION_MODE_TYPES.size() - 1), 1.0f),
+            0.0f,
+            Attributes().withDiscrete(true).withAutomatable(true)));
 
     return layout;
 }
@@ -120,7 +126,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("firstSourceId", 1, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscOutputPluginId", 1, nullptr);
 
-    mAudioProcessorValueTreeState.state.setProperty("elevationMode", static_cast<int>(ElevationMode::normal), nullptr);
 
     // Trajectory box persitent settings.
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType",
@@ -182,6 +187,7 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::POSITION_PRESET, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::AZIMUTH_SPAN, this);
     mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_SPAN, this);
+    mAudioProcessorValueTreeState.addParameterListener(Automation::Ids::ELEVATION_MODE, this);
 
     // The timer's callback send OSC messages periodically.
     //-----------------------------------------------------
@@ -235,6 +241,14 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
     } else if (parameterId.startsWith(Automation::Ids::ELEVATION_SPAN)) {
         for (auto & source : mSources) {
             source.setElevationSpan(normalized);
+        }
+    }
+
+    if (parameterId.compare(Automation::Ids::ELEVATION_MODE) == 0) {
+        auto const val{ static_cast<ElevationMode>(newValue) };
+        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        if (editor != nullptr) {
+            editor->updateElevationMode(val);
         }
     }
 }

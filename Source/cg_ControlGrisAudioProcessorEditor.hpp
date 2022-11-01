@@ -160,6 +160,10 @@ public:
     void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);
+    void updateElevationMode(ElevationMode mode);
+
+    void elevationModeChangedStartedCallback();
+    void elevationModeChangedEndedCallback();
 
     void refresh();
 
