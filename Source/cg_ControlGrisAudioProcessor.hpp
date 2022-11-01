@@ -99,6 +99,8 @@ class ControlGrisAudioProcessor final
     PositionTrajectoryManager mPositionTrajectoryManager{ *this, mSources.getPrimarySource() };
     ElevationTrajectoryManager mElevationTrajectoryManager{ *this, mSources.getPrimarySource() };
 
+    ElevationMode mElevationMode{};
+
 public:
     //==============================================================================
     ControlGrisAudioProcessor();

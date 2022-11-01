@@ -72,8 +72,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
         auto const howMany{ static_cast<float>(ELEVATION_MODE_TYPES.size() - 1) };
         auto const value{ (static_cast<float>(mElevationModeCombobox.getSelectedId()) - 1.0f) / howMany };
         auto * parameter{ mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_MODE) };
-        auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(
-            Automation::Ids::ELEVATION_MODE) };
+        auto const gestureLock{ mProcessor.getChangeGestureManager().getScopedLock(Automation::Ids::ELEVATION_MODE) };
         parameter->setValueNotifyingHost(value);
         elevationModeChangedEndedCallback();
     };
@@ -856,12 +855,6 @@ void ControlGrisAudioProcessorEditor::resized()
 void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 {
     mSectionSourcePosition.setSpatMode(spatMode);
-}
-
-//==============================================================================
-ElevationMode ControlGrisAudioProcessorEditor::getElevationMode() const
-{
-    return static_cast<ElevationMode>(mElevationModeCombobox.getSelectedId() - 1);
 }
 
 } // namespace gris

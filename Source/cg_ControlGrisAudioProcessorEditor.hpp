@@ -169,8 +169,6 @@ public:
 
     void setSpatMode(SpatMode spatMode);
 
-    ElevationMode getElevationMode() const;
-
 private:
     //==============================================================================
     JUCE_LEAK_DETECTOR(ControlGrisAudioProcessorEditor)

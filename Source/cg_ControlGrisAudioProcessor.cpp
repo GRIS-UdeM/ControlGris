@@ -126,7 +126,6 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     mAudioProcessorValueTreeState.state.setProperty("firstSourceId", 1, nullptr);
     mAudioProcessorValueTreeState.state.setProperty("oscOutputPluginId", 1, nullptr);
 
-
     // Trajectory box persitent settings.
     mAudioProcessorValueTreeState.state.setProperty("trajectoryType",
                                                     static_cast<int>(PositionTrajectoryType::realtime),
@@ -245,10 +244,10 @@ void ControlGrisAudioProcessor::parameterChanged(juce::String const & parameterI
     }
 
     if (parameterId.compare(Automation::Ids::ELEVATION_MODE) == 0) {
-        auto const val{ static_cast<ElevationMode>(newValue) };
+        mElevationMode = static_cast<ElevationMode>(newValue);
         auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
         if (editor != nullptr) {
-            editor->updateElevationMode(val);
+            editor->updateElevationMode(mElevationMode);
         }
     }
 }
@@ -427,19 +426,12 @@ void ControlGrisAudioProcessor::sendOscMessage()
     juce::OSCMessage message(oscPattern);
 
     if (mSpatMode == SpatMode::cube) {
-        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-        ElevationMode elevationMode{ ElevationMode::normal };
-
-        if (editor != nullptr) {
-            elevationMode = editor->getElevationMode();
-        }
-
         auto constexpr Z_MIN_IN{ 0.0f };
         auto constexpr Z_MAX_IN{ HALF_PI.get() };
         float Z_MIN_OUT{};
         float Z_MAX_OUT{};
 
-        switch (elevationMode) {
+        switch (mElevationMode) {
         case gris::ElevationMode::normal:
             Z_MIN_OUT = 1.0f;
             Z_MAX_OUT = 0.0f;
