@@ -636,6 +636,13 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         if (ed != nullptr) {
             ed->updatePositionPreset(newPreset);
         }
+    } else if (address == pluginInstance + "/elevationmode") {
+        auto newElevationMode{ static_cast<ElevationMode>(message[0].getFloat32()) }; // 0 -> 2
+        mElevationMode = newElevationMode;
+        auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        if (ed != nullptr) {
+            ed->updateElevationMode(newElevationMode);
+        }
     }
 
     if (x && y) {
@@ -843,6 +850,14 @@ void ControlGrisAudioProcessor::sendOscOutputMessage()
         message.clear();
 
         mLastPresetNumber = currentPreset;
+    }
+
+    if (mElevationMode != mLastElevationMode) {
+        message.setAddressPattern(juce::OSCAddressPattern(pluginInstance + "/elevationmode"));
+        message.addInt32(static_cast<juce::int32>(mElevationMode));
+        mOscOutputSender.send(message);
+        message.clear();
+        mLastElevationMode = mElevationMode;
     }
 }
 

@@ -77,6 +77,7 @@ class ControlGrisAudioProcessor final
     PositionSourceLink mLastPositionLink{ PositionSourceLink::undefined };
     ElevationSourceLink mLastElevationLink{ ElevationSourceLink::undefined };
     int mLastPresetNumber{ std::numeric_limits<int>::min() };
+    ElevationMode mLastElevationMode{};
 
     juce::OSCSender mOscSender;
     juce::OSCSender mOscOutputSender;
