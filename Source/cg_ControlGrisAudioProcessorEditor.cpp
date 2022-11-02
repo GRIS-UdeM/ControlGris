@@ -295,7 +295,7 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int const presetNumbe
 void ControlGrisAudioProcessorEditor::updateElevationMode(ElevationMode mode)
 {
     juce::MessageManager::callAsync([=] {
-        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::dontSendNotification);
+        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::sendNotificationAsync);
         mElevationField.setElevationMode(mode);
     });
 }
