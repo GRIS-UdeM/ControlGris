@@ -9,6 +9,7 @@ export LINE=":::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::"
 
 export INSTALLER_SIGNATURE="Developer ID Installer: Gael Lane Lepine (62PMMWH49Z)"
 export APP_SIGNATURE="Developer ID Application: Gael Lane Lepine (62PMMWH49Z)"
+export TEAM_ID="62PMMWH49Z"
 export NOTARIZE_USER="glanelepine@gmail.com"
 export PASS="$1"
 export IDENTIFIER="ca.umontreal.musique.gris.controlgris.pkg"
@@ -21,9 +22,11 @@ export TEMP_PATH="$PROJECT_PATH/out"
 export PLIST_PATH="$PROJECT_PATH/Application.plist"
 export ZIP_PATH="$TEMP_PATH/plugins.zip"
 
+Projucer=~/JUCE/Projucer.app/Contents/MacOS/Projucer
+
 #==============================================================================
 # get app version
-export VERSION=`Projucer --get-version "$PROJECT_FILE"`
+export VERSION=`$Projucer --get-version "$PROJECT_FILE"`
 echo -e "$LINE\nVersion is $VERSION"
 export PKG_PATH="$TEMP_PATH/ControlGris_$VERSION.pkg"
 
@@ -31,7 +34,7 @@ export PKG_PATH="$TEMP_PATH/ControlGris_$VERSION.pkg"
 function generate_project() {
 	# NOTE : this creates the project file with unusable file permissions...
 	echo "Generating project files..."
-	Projucer --resave "$PROJECT_FILE" || exit 1
+	$Projucer --resave "$PROJECT_FILE" || exit 1
 	cd "$PROJECT_PATH"
 }
 
@@ -66,6 +69,7 @@ function sign() {
 	cd "$TEMP_PATH"
 	for filename in *; do
 		codesign \
+			--force \
 			-s "$APP_SIGNATURE" \
 			-v "$filename" \
 			--options=runtime \
@@ -139,21 +143,19 @@ function notarize_pkg()
 
 	cd "$TEMP_PATH" || exit 1
 
-	xcrun altool \
-		--notarize-app \
-		--primary-bundle-id "$IDENTIFIER" \
-		-u "$NOTARIZE_USER" \
-		-p "$PASS" \
-		--file "$PKG_PATH" \
-		|| exit 1
+	xcrun notarytool submit --apple-id "$NOTARIZE_USER" \
+							--password "$PASS" \
+							--team-id $TEAM_ID \
+							"ControlGris_$VERSION.pkg" || exit 1
+
 	wait_for_notarization
 	xcrun stapler staple "$PKG_PATH" || exit 1
 }
 
 #==============================================================================
 function get_last_request_uuid() {
-	history=`xcrun altool --notarization-history 0 -u "$NOTARIZE_USER" -p "$PASS"`
-	echo "$history" | head -n 6 | tail -n 1 | cut -d' ' -f 4
+	checkHistory=`xcrun notarytool history --apple-id "$NOTARIZE_USER" --password "$PASS" --team-id $TEAM_ID`
+	echo "$checkHistory" | head -n 5 | tail -n 1 | cut -d' ' -f 6
 }
 
 #==============================================================================
@@ -161,22 +163,20 @@ function wait_for_notarization() {
 	echo -e "$LINE\nChecking for notarization success...\n$LINE"
 	echo "waiting a bit..."
 	sleep 30
-	WAITING=" in progress"
-	SUCCESS=" success"
+	WAITING=" In Progress"
+	SUCCESS=" Accepted"
 	uuid=`get_last_request_uuid`
-	status="$WAITING"
-	while [[ "$status" == "$WAITING" ]];do
+	checkStatus="$WAITING"
+	while [[ "$checkStatus" == "$WAITING" ]];do
 		sleep 10
-		history=`xcrun altool --notarization-info "$uuid" -u "$NOTARIZE_USER" -p "$PASS"`
-		status=`echo "$history" | grep Status | head -n 1 | cut -d: -f 2`
-		echo "Status is \"$status\""
+		checkHistory=`xcrun notarytool info "$uuid" --apple-id "$NOTARIZE_USER" --password "$PASS" --team-id $TEAM_ID`
+		checkStatus=`echo "$checkHistory" | grep status | head -n 1 | cut -d: -f 2`
+		echo "Status is \"$checkStatus\""
 	done
-	if [[ "$status" != "$SUCCESS" ]];then
+	if [[ "$checkStatus" != "$SUCCESS" ]];then
 		echo -e "Error : notarization was refused, see the report:\n"
-		xcrun altool \
-			--notarization-info "$uuid" \
-			-u "$NOTARIZE_USER" \
-			-p "$PASS"
+		xcrun notarytool info "$uuid" --apple-id "$NOTARIZE_USER" --password "$PASS" --team-id $TEAM_ID
+		xcrun notarytool log "$uuid" --apple-id "$NOTARIZE_USER" --password "$PASS" --team-id $TEAM_ID
 		exit 1
 	fi
 }
