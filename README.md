@@ -7,7 +7,7 @@ Spatialization plugin (SpatGris version 2)
 ### Install dependencies
 
 ```
-sudo apt-get install clang-10 git ladspa-sdk freeglut3-dev libasound2-dev libcurl4-openssl-dev libfreetype6-dev libjack-jackd2-dev libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev libxrandr-dev mesa-common-dev juce-tools
+sudo apt-get install clang-15 git ladspa-sdk freeglut3-dev libasound2-dev libcurl4-openssl-dev libfreetype6-dev libjack-jackd2-dev libx11-dev libxcomposite-dev libxcursor-dev libxinerama-dev libxrandr-dev mesa-common-dev
 ```
 
 ### Download Juce
@@ -38,7 +38,7 @@ git clone git@github.com:GRIS-UdeM/ControlGris.git
 
 ```
 cd ControlGris/Builds/LinuxMakeFile
-make CXX=clang++-10 CONFIG=Release && cp build/*.so ~/.vst/
+make CXX=clang++ CONFIG=Release && cp build/*.so ~/.vst/
 ```
 
 4. Start Reaper and load the plugin!
