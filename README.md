@@ -38,7 +38,7 @@ git clone git@github.com:GRIS-UdeM/ControlGris.git
 
 ```
 cd ControlGris/Builds/LinuxMakeFile
-make CXX=clang++ CONFIG=Release && cp build/*.so ~/.vst/
+make CXX=clang++-15 CONFIG=Release && cp build/*.so ~/.vst/
 ```
 
 4. Start Reaper and load the plugin!
