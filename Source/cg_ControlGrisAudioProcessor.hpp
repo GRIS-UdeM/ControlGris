@@ -52,6 +52,12 @@ class ControlGrisAudioProcessor final
     int mCurrentOscOutputPort{ 9000 };
     juce::String mCurrentOscOutputAddress{ "192.168.1.100" };
     bool mNeedsInitialization{ true };
+    float mOscElevationBuffer{};
+    float mOscHSpanBuffer{};
+    float mOscVSpanBuffer{};
+    float mOscXBuffer{};
+    float mOscYBuffer{};
+    float mOscZBuffer{};
 
     double mInitTimeOnPlay{ 0.0 };
     double mCurrentTime{ 0.0 };
