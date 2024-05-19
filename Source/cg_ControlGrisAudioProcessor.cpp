@@ -621,10 +621,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
             source.setElevationSpan(Normalized{ newVSpanVal });
         }
         auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        auto currentAziSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        auto currentEleSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
     }
     else if (address == pluginInstance + "/desc/1/cubeparams"
@@ -725,10 +723,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
             source.setElevationSpan(Normalized{ newVSpanVal });
         }
         auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        auto currentAziSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        auto currentEleSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
     }
     else if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
