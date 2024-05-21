@@ -621,10 +621,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
             source.setElevationSpan(Normalized{ newVSpanVal });
         }
         auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        auto currentAziSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        auto currentEleSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
     }
     else if (address == pluginInstance + "/desc/1/cubeparams"
@@ -634,8 +632,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         auto & pSource{ mSources.getPrimarySource() };
 
         // X, Y
-        auto oscX = message[0].getFloat32();
-        auto oscY = -1.0 * message[1].getFloat32(); // Y is inverted in GUI
+        auto oscX = static_cast<float>(message[0].getFloat32());
+        auto oscY = static_cast<float>(-1.0 * message[1].getFloat32()); // Y is inverted in GUI
         auto sourceXYPosition{ pSource.getPositionFromAngle(pSource.getAzimuth(), pSource.getDistance()) };
         auto diffX = sourceXYPosition.x - oscX;
         auto diffY = sourceXYPosition.y - oscY;
@@ -667,7 +665,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         pSource.setPosition({ newX, newY }, gris::Source::OriginOfChange::osc);
 
         // Z
-        auto oscZ = -1.0 * message[2].getFloat32(); // Z is inverted in GUI
+        auto oscZ = static_cast<float>(-1.0 * message[2].getFloat32()); // Z is inverted in GUI
         auto sourceZPosition{ pSource.getNormalizedElevation().get() };
         auto diffZ = sourceZPosition - oscZ;
         float newZ{};
@@ -725,10 +723,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
             source.setElevationSpan(Normalized{ newVSpanVal });
         }
         auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        auto currentAziSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        auto currentEleSpan = mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->getValue();
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
     }
     else if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
