@@ -246,11 +246,11 @@ juce::Point<float> Source::getPositionFromAngle(Radians const angle, float const
 //==============================================================================
 Radians Source::getAngleFromPosition(juce::Point<float> const & position)
 {
-    auto const getAngle = [](juce::Point<float> const & position) {
-        if (position.getX() == 0.0f && position.getY() == 0.0f) {
+    auto const getAngle = [](juce::Point<float> const & pos) {
+        if (pos.getX() == 0.0f && pos.getY() == 0.0f) {
             return 0.0f;
         }
-        return std::atan2(position.getY(), position.getX());
+        return std::atan2(pos.getY(), pos.getX());
     };
     Radians const angle{ getAngle(position) };
     auto const rotatedAngle{ angle + HALF_PI };

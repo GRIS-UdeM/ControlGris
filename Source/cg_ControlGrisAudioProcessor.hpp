@@ -31,6 +31,7 @@
 
 namespace gris
 {
+juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout();
 //==============================================================================
 class ControlGrisAudioProcessor final
     : public juce::AudioProcessor

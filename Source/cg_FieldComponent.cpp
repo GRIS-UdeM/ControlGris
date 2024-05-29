@@ -560,15 +560,15 @@ void PositionFieldComponent::mouseMove(juce::MouseEvent const & event)
 //==============================================================================
 void ElevationFieldComponent::drawSpans(juce::Graphics & g) const
 {
-    auto drawAnchor = [](juce::Graphics & g,
+    auto drawAnchor = [](juce::Graphics & graph,
                          juce::Point<float> const & position,
                          juce::Colour const colour,
                          float const saturation,
                          float const componentSize) {
         constexpr auto anchorThickness = 5;
         juce::Line<float> anchor{ position, position.translated(0, componentSize) };
-        g.setColour(colour.withSaturation(saturation).withAlpha(0.5f));
-        g.drawLine(anchor, anchorThickness);
+        graph.setColour(colour.withSaturation(saturation).withAlpha(0.5f));
+        graph.drawLine(anchor, anchorThickness);
     };
 
     jassert(getWidth() == getHeight());

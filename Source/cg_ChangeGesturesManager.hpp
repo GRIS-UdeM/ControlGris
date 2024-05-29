@@ -58,7 +58,7 @@ public:
 
     private:
         //==============================================================================
-        JUCE_LEAK_DETECTOR(ScopedLock);
+        JUCE_LEAK_DETECTOR(ScopedLock)
 
     }; // class ScopedLock
 

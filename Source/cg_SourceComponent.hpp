@@ -60,7 +60,7 @@ public:
     void paint(juce::Graphics & g) final;
 
     juce::Colour getColour() const { return mColour; }
-    virtual void updatePositionInParent(){}; // TEMP
+    virtual void updatePositionInParent(){} // TEMP
 protected:
     //==============================================================================
     static DisplacementMode getDisplacementMode(juce::MouseEvent const & event);

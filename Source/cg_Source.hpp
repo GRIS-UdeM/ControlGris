@@ -46,7 +46,7 @@ public:
     public:
         //==============================================================================
         Listener() = default;
-        virtual ~Listener() = default;
+        virtual ~Listener() override = default;
 
         Listener(Listener const &) = delete;
         Listener(Listener &&) = delete;

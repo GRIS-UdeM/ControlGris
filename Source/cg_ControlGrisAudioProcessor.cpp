@@ -25,8 +25,6 @@
 
 namespace gris
 {
-enum class FixedPositionType { terminal, initial };
-
 //==============================================================================
 // The parameter Layout creates the automatable mAudioProcessorValueTreeState.
 juce::AudioProcessorValueTreeState::ParameterLayout createParameterLayout()

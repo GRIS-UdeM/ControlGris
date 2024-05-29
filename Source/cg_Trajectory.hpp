@@ -70,7 +70,7 @@ private:
     static juce::Array<juce::Point<float>> getBasicTrianglePoints();
     static juce::Array<juce::Point<float>> getBasicDownUpPoints();
     //=========
-    JUCE_LEAK_DETECTOR(Trajectory);
+    JUCE_LEAK_DETECTOR(Trajectory)
 };
 
 } // namespace gris

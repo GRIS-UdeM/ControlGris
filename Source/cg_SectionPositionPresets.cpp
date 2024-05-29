@@ -61,7 +61,7 @@ void PresetButton::clicked(juce::ModifierKeys const & mods)
         mLoaded = getToggleState();
     }
     refresh();
-};
+}
 
 //==============================================================================
 void PresetButton::internalClickCallback(juce::ModifierKeys const & mods)
@@ -77,7 +77,7 @@ void PresetButton::internalClickCallback(juce::ModifierKeys const & mods)
         TextButton::internalClickCallback(mods);
     }
     refresh();
-};
+}
 
 //===============================================================================
 PositionPresetComponent::PositionPresetComponent(PresetsManager & presetsManager) : mPresetsManager(presetsManager)

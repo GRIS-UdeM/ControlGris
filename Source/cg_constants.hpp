@@ -61,7 +61,6 @@ enum class SourcePlacement {
 };
 
 extern juce::StringArray const SOURCE_PLACEMENT_SKETCH;
-;
 
 //==============================================================================
 // Trajectories -> Source Link popup choices.

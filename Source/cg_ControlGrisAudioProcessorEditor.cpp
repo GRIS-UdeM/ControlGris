@@ -465,6 +465,7 @@ void ControlGrisAudioProcessorEditor::sourcesPlacementChangedCallback(SourcePlac
             return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(sourceIndex);
         case SourcePlacement::topCounterClockwise:
             return Degrees{ 360.0f } / static_cast<float>(numOfSources) * static_cast<float>(-sourceIndex);
+        case SourcePlacement::undefined:
         default:
             jassertfalse;
             break;

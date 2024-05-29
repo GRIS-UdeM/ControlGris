@@ -24,8 +24,6 @@
 
 namespace gris
 {
-enum class FixedPositionType { terminal, initial };
-
 //==============================================================================
 juce::String
     getFixedPosSourceName(FixedPositionType const fixedPositionType, SourceIndex const index, int const dimension)
