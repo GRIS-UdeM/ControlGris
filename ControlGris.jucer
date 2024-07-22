@@ -85,6 +85,9 @@
               file="Source/cg_MinSizedTextEditor.cpp"/>
         <FILE id="OzeJGV" name="cg_MinSizedTextEditor.hpp" compile="0" resource="0"
               file="Source/cg_MinSizedTextEditor.hpp"/>
+        <FILE id="E9r13e" name="cg_NumSlider.cpp" compile="1" resource="0"
+              file="Source/cg_NumSlider.cpp"/>
+        <FILE id="gwrKZJ" name="cg_NumSlider.h" compile="0" resource="0" file="Source/cg_NumSlider.h"/>
         <FILE id="HI1dem" name="cg_SectionGeneralSettings.cpp" compile="1"
               resource="0" file="Source/cg_SectionGeneralSettings.cpp"/>
         <FILE id="qBqct9" name="cg_SectionGeneralSettings.hpp" compile="0"
