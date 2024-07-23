@@ -25,7 +25,10 @@
 namespace gris
 {
 //==============================================================================
-DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent, GrisLookAndFeel & grisLookAndFeel)
+    : mSourceBoxComponent(sourceBoxComponent)
+    , mElevationSlider(grisLookAndFeel)
+    , mAzimuthSlider(grisLookAndFeel)
 {
     mCurrentAzimuth = {};
     mCurrentElevation = MAX_ELEVATION;
@@ -35,8 +38,6 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
 
     mElevationSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.01f));
     mElevationSlider.setValue(1.0, juce::NotificationType::dontSendNotification);
-    mElevationSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
-    mElevationSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
         mCurrentElevation = MAX_ELEVATION * (1.0f - static_cast<float>(mElevationSlider.getValue()));
@@ -55,8 +56,6 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent) : mSource
 
     mAzimuthSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 360.0f, 0.01f));
     mAzimuthSlider.setValue(0.0, juce::NotificationType::dontSendNotification);
-    mAzimuthSlider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 20);
-    mAzimuthSlider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
     addAndMakeVisible(&mAzimuthSlider);
     mAzimuthSlider.onValueChange = [this] {
         mCurrentAzimuth = Degrees{ static_cast<float>(mAzimuthSlider.getValue()) };
@@ -91,7 +90,11 @@ void DomeControls::updateSliderValues(Source * source)
 }
 
 //==============================================================================
-CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSourceBoxComponent(sourceBoxComponent)
+CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookAndFeel & grisLookAndFeel)
+    : mSourceBoxComponent(sourceBoxComponent)
+    , mXSlider(grisLookAndFeel)
+    , mYSlider(grisLookAndFeel)
+    , mZSlider(grisLookAndFeel)
 {
     auto const initLabel = [&](juce::Label & label, juce::String const & text) {
         label.setText(text + ":", juce::NotificationType::dontSendNotification);
@@ -99,11 +102,9 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
         addAndMakeVisible(label);
     };
 
-    auto const initSlider = [&](juce::Slider & slider, double const minValue) {
-        slider.setNormalisableRange(juce::NormalisableRange<double>{ minValue, 1.0, 0.01 });
+    auto const initSlider = [&](NumSlider & slider, double const minValue) {
+        slider.setNormalisableRange(juce::NormalisableRange<double>{ minValue, 1.0, 0.001 });
         slider.setValue(0.0, juce::dontSendNotification);
-        slider.setColour(juce::Slider::textBoxOutlineColourId, juce::Colours::transparentBlack);
-        slider.setTextBoxStyle(juce::Slider::TextBoxRight, false, 40, 15);
         addAndMakeVisible(slider);
     };
 
@@ -149,7 +150,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
         });
     };
 
-    auto const setLine = [&](juce::Label & label, juce::Slider & slider, int const line) {
+    auto const setLine = [&](juce::Label & label, NumSlider & slider, double const line) {
         static constexpr auto LINE_HEIGHT = 20;
         auto const y{ line * LINE_HEIGHT };
         label.setBounds(0, y, 70, LINE_HEIGHT);
@@ -157,8 +158,8 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent) : mSource
     };
 
     setLine(mXLabel, mXSlider, 0);
-    setLine(mYLabel, mYSlider, 1);
-    setLine(mZLabel, mZSlider, 2);
+    setLine(mYLabel, mYSlider, 1.5);
+    setLine(mZLabel, mZSlider, 3);
 }
 
 //==============================================================================
@@ -176,8 +177,8 @@ void CubeControls::updateSliderValues(Source * source)
 //==============================================================================
 SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode const spatMode)
     : mGrisLookAndFeel(grisLookAndFeel)
-    , mDomeControls(*this)
-    , mCubeControls(*this)
+    , mDomeControls(*this, grisLookAndFeel)
+    , mCubeControls(*this, grisLookAndFeel)
 {
     mSelectedSource = SourceIndex{};
 

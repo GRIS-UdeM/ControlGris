@@ -27,6 +27,7 @@
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_Source.hpp"
 #include "cg_constants.hpp"
+#include "cg_NumSlider.h"
 
 namespace gris
 {
@@ -41,12 +42,12 @@ class DomeControls final : public juce::Component
     Radians mCurrentElevation;
     juce::Label mElevationLabel;
     juce::Label mAzimuthLabel;
-    juce::Slider mElevationSlider;
-    juce::Slider mAzimuthSlider;
+    NumSlider mElevationSlider;
+    NumSlider mAzimuthSlider;
 
 public:
     //==============================================================================
-    explicit DomeControls(SectionSourcePosition & sourceBoxComponent);
+    explicit DomeControls(SectionSourcePosition & sourceBoxComponent, GrisLookAndFeel & grisLookAndFeel);
     ~DomeControls() override = default;
 
     DomeControls(DomeControls const &) = delete;
@@ -73,13 +74,13 @@ class CubeControls final : public juce::Component
     juce::Label mXLabel{};
     juce::Label mYLabel{};
     juce::Label mZLabel{};
-    juce::Slider mXSlider{};
-    juce::Slider mYSlider{};
-    juce::Slider mZSlider{};
+    NumSlider mXSlider;
+    NumSlider mYSlider;
+    NumSlider mZSlider;
 
 public:
     //==============================================================================
-    explicit CubeControls(SectionSourcePosition & sourceBoxComponent);
+    explicit CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookAndFeel & grisLookAndFeel);
     ~CubeControls() override = default;
 
     CubeControls(CubeControls const &) = delete;

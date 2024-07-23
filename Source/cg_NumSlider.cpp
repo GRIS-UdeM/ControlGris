@@ -65,27 +65,37 @@ void NumSlider::paint(juce::Graphics & g)
     auto val{ getValue() };
     auto bounds{ getLocalBounds() };
 
-    if (val > 0) {
+    if (val > rangeVals.getStart()) {
         juce::Rectangle<float> drawRec;
         g.setColour(mGrisLookAndFeel.getOnColor());
+        double xLimitProportion{};
+
+        if (rangeVals.getStart() < 0) {
+            xLimitProportion = (val + rangeVals.getLength() / 2) / rangeVals.getLength();
+        } else {
+            xLimitProportion = val / rangeVals.getLength();
+        }
+
         drawRec = juce::Rectangle<float>{ 0,
                                           0,
-                                          static_cast<float>(bounds.getWidth() * (val / rangeVals.getLength())),
+                                          static_cast<float>(bounds.getWidth() * xLimitProportion),
                                           static_cast<float>(bounds.getHeight()) };
         g.fillRect(drawRec);
 
         g.setColour(mGrisLookAndFeel.getLightColor());
-        drawRec = juce::Rectangle<float>{ static_cast<float>(bounds.getWidth() * (val / rangeVals.getLength())),
+        drawRec = juce::Rectangle<float>{ static_cast<float>(bounds.getWidth() * xLimitProportion),
                                           0,
                                           static_cast<float>(bounds.getWidth()),
                                           static_cast<float>(bounds.getHeight()) };
         g.fillRect(drawRec);
-    } else {
+    }
+    else {
         g.setColour(mGrisLookAndFeel.getLightColor());
         g.fillRect(bounds);
     }
 
     g.setColour(mGrisLookAndFeel.getDarkColor());
+    g.setFont(mGrisLookAndFeel.getFont());
     g.drawText(getTextFromValue(getValue()), bounds, juce::Justification::centred);
 }
 
@@ -103,9 +113,13 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
         sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
         sliderEditor->setJustification(juce::Justification::centred);
         sliderEditor->addListener(this);
-        sliderEditor->setInputRestrictions(5, "0123456789,.");
         sliderEditor->setMultiLine(false);
         sliderEditor->setSize(60, 20);
+        if (getRange().getStart() < 0) {
+            sliderEditor->setInputRestrictions(5, "0123456789,.-");
+        } else {
+            sliderEditor->setInputRestrictions(5, "0123456789,.");
+        }
 
         auto& box = juce::CallOutBox::launchAsynchronously(std::move(sliderEditor), getScreenBounds(), nullptr);
         box.setLookAndFeel(&mGrisLookAndFeel);
