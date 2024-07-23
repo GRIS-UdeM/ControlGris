@@ -24,13 +24,14 @@
 
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_Source.hpp"
+#include "cg_NumSlider.h"
 
 namespace gris
 {
 //==============================================================================
 class SectionSourceSpan final
     : public juce::Component
-    , public juce::Slider::Listener
+    , public NumSlider::Slider::Listener
 {
 public:
     //==============================================================================
@@ -58,8 +59,8 @@ private:
 
     juce::Label mAzimuthLabel{};
     juce::Label mElevationLabel{};
-    juce::Slider mAzimuthSpan{};
-    juce::Slider mElevationSpan{};
+    NumSlider mAzimuthSpan;
+    NumSlider mElevationSpan;
 
 public:
     //==============================================================================
@@ -75,7 +76,7 @@ public:
     SectionSourceSpan & operator=(SectionSourceSpan &&) = delete;
     //==============================================================================
     void mouseDown(juce::MouseEvent const & event) override;
-    void sliderValueChanged(juce::Slider * slider) override;
+    void sliderValueChanged(NumSlider::Slider * slider) override;
     void paint(juce::Graphics &) override;
     void resized() override;
 

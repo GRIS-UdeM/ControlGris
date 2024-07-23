@@ -23,7 +23,10 @@
 namespace gris
 {
 //==============================================================================
-SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel)
+    : mGrisLookAndFeel(grisLookAndFeel)
+    , mAzimuthSpan(grisLookAndFeel)
+    , mElevationSpan(grisLookAndFeel)
 {
     mAzimuthLabel.setText("Azimuth Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mAzimuthLabel);
@@ -31,19 +34,16 @@ SectionSourceSpan::SectionSourceSpan(GrisLookAndFeel & grisLookAndFeel) : mGrisL
     mElevationLabel.setText("Elevation Span", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationLabel);
 
-    mAzimuthSpan.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    mAzimuthSpan.setRange(0.0, 1.0);
     mAzimuthSpan.addListener(this);
+    mElevationSpan.addListener(this);
+
     mAzimuthSpan.onDragStart = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragStartedCallback(); }); };
     mAzimuthSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.azimuthSpanDragEndedCallback(); }); };
     mElevationSpan.onDragStart
         = [&]() { mListeners.call([&](Listener & l) { l.elevationSpanDragStartedCallback(); }); };
     mElevationSpan.onDragEnd = [&]() { mListeners.call([&](Listener & l) { l.elevationSpanDragEndedCallback(); }); };
-    addAndMakeVisible(&mAzimuthSpan);
 
-    mElevationSpan.setTextBoxStyle(juce::Slider::NoTextBox, true, 0, 0);
-    mElevationSpan.setRange(0.0, 1.0);
-    mElevationSpan.addListener(this);
+    addAndMakeVisible(&mAzimuthSpan);
     addAndMakeVisible(&mElevationSpan);
 }
 
@@ -94,7 +94,7 @@ void SectionSourceSpan::mouseDown(juce::MouseEvent const & event)
 }
 
 //==============================================================================
-void SectionSourceSpan::sliderValueChanged(juce::Slider * slider)
+void SectionSourceSpan::sliderValueChanged(NumSlider::Slider * slider)
 {
     auto const value{ slider->getValue() };
     auto const parameterId{ (slider == &mAzimuthSpan) ? SourceParameter::azimuthSpan : SourceParameter::elevationSpan };

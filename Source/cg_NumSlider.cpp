@@ -18,9 +18,9 @@
  * <https://www.gnu.org/licenses/>.                                       *
  *************************************************************************/
 
+#include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_NumSlider.h"
 
-#include "cg_ControlGrisLookAndFeel.hpp"
 namespace gris
 {
 
@@ -43,11 +43,14 @@ NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel)
 //==============================================================================
 void NumSlider::mouseWheelMove(const juce::MouseEvent & event, const juce::MouseWheelDetails & wheel)
 {
+    mLastValue = getValue();
     juce::Time currentTime = juce::Time::getCurrentTime();
     double timeDiff = (currentTime - mLastTime).inMilliseconds();
+    if (timeDiff <= 0.0001) timeDiff = 1.0;
     double valueDiff = wheel.deltaY * getInterval();
     double velocity = valueDiff / timeDiff * 1000;
     double newValue = mLastValue - velocity;
+    newValue = std::clamp(newValue, getRange().getStart(), getRange().getEnd());
 
     setValue(newValue);
 
@@ -97,14 +100,15 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 {
     if (event.mods.isRightButtonDown()) {
         auto sliderEditor{ std::make_unique<juce::TextEditor>("SliderEditor") };
+        sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
+        sliderEditor->setJustification(juce::Justification::centred);
         sliderEditor->addListener(this);
-        sliderEditor->setColour(juce::ColourSelector::backgroundColourId, juce::Colours::transparentBlack);
         sliderEditor->setInputRestrictions(5, "0123456789,.");
         sliderEditor->setMultiLine(false);
-        sliderEditor->setJustification(juce::Justification::centred);
         sliderEditor->setSize(60, 20);
 
-        juce::CallOutBox::launchAsynchronously(std::move(sliderEditor), getScreenBounds(), nullptr);
+        auto& box = juce::CallOutBox::launchAsynchronously(std::move(sliderEditor), getScreenBounds(), nullptr);
+        box.setLookAndFeel(&mGrisLookAndFeel);
     }
 
     Slider::mouseUp(event);
