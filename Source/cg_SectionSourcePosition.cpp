@@ -284,7 +284,7 @@ void SectionSourcePosition::paint(juce::Graphics & g)
 void SectionSourcePosition::resized()
 {
     mSourceNumberLabel.setBounds(5, 10, 150, 10);
-    mSourceNumberCombo.setBounds(93, 7, 27, 15);
+    mSourceNumberCombo.setBounds(85, 7, 35, 15);
 
     mDomeControls.setBounds(5, 30, 300, 15);
     mCubeControls.setBounds(105, 370, 275, 20); // adjust for Cube mode
@@ -292,10 +292,10 @@ void SectionSourcePosition::resized()
     mSectionSourceSpan.setBounds(0, 50, getWidth(), 25);
 
     mSourceLinkLabel.setBounds(5, 81, 150, 10);
-    mPositionSourceLinkCombo.setBounds(120, 77, 165, 17);
+    mPositionSourceLinkCombo.setBounds(120, 77, 165, 15);
 
     mSourcePlacementLabel.setBounds(5, 105, 150, 10);
-    mSourcePlacementCombo.setBounds(120, 102, 165, 17);
+    mSourcePlacementCombo.setBounds(120, 102, 165, 15);
 }
 
 //==============================================================================

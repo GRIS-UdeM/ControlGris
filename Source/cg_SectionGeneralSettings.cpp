@@ -42,6 +42,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     addAndMakeVisible(mOscPortLabel);
 
     juce::String defaultPort("18032");
+    mOscPortEditor.setFont(grisLookAndFeel.getFont());
     mOscPortEditor.setExplicitFocusOrder(4);
     mOscPortEditor.setText(defaultPort);
     mOscPortEditor.setInputRestrictions(5, "0123456789");
@@ -62,6 +63,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     addAndMakeVisible(mOscAddressLabel);
 
     juce::String const defaultAddress{ "127.0.0.1" };
+    mOscAddressEditor.setFont(grisLookAndFeel.getFont());
     mOscAddressEditor.setExplicitFocusOrder(5);
     mOscAddressEditor.setText(defaultAddress);
     mOscAddressEditor.setInputRestrictions(15, "0123456789.");
@@ -82,6 +84,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     addAndMakeVisible(&mNumOfSourcesLabel);
 
     mNumOfSourcesEditor.setExplicitFocusOrder(2);
+    mNumOfSourcesEditor.setFont(grisLookAndFeel.getFont());
     mNumOfSourcesEditor.setText("2");
     mNumOfSourcesEditor.setInputRestrictions(1, "12345678");
     mNumOfSourcesEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
@@ -102,6 +105,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     addAndMakeVisible(&mFirstSourceIdLabel);
 
     mFirstSourceIdEditor.setExplicitFocusOrder(3);
+    mFirstSourceIdEditor.setFont(grisLookAndFeel.getFont());
     mFirstSourceIdEditor.setText("1");
     mFirstSourceIdEditor.setInputRestrictions(3, "0123456789");
     mFirstSourceIdEditor.onReturnKey = [this] { mOscFormatCombo.grabKeyboardFocus(); };
@@ -172,22 +176,22 @@ void SectionGeneralSettings::paint(juce::Graphics & g)
 //==============================================================================
 void SectionGeneralSettings::resized()
 {
-    mOscFormatLabel.setBounds(5, 10, 90, 15);
-    mOscFormatCombo.setBounds(95, 10, 150, 20);
+    mOscFormatLabel.setBounds(5, 15, 90, 10);
+    mOscFormatCombo.setBounds(65, 9, 110, 15);
 
-    mOscPortLabel.setBounds(5, 40, 90, 15);
-    mOscPortEditor.setBounds(95, 40, 150, 20);
+    mOscPortLabel.setBounds(5, 37, 90, 10);
+    mOscPortEditor.setBounds(65, 31, 110, 15);
 
-    mOscAddressLabel.setBounds(5, 70, 90, 15);
-    mOscAddressEditor.setBounds(95, 70, 150, 20);
+    mOscAddressLabel.setBounds(5, 59, 90, 10);
+    mOscAddressEditor.setBounds(65, 53, 110, 15);
 
-    mPositionActivateButton.setBounds(5, 100, 150, 20);
+    mNumOfSourcesLabel.setBounds(5, 81, 130, 10);
+    mNumOfSourcesEditor.setBounds(105, 75, 24, 15);
 
-    mNumOfSourcesLabel.setBounds(265, 10, 130, 15);
-    mNumOfSourcesEditor.setBounds(395, 10, 40, 15);
+    mFirstSourceIdLabel.setBounds(5, 103, 130, 10);
+    mFirstSourceIdEditor.setBounds(105, 97, 24, 15);
 
-    mFirstSourceIdLabel.setBounds(265, 40, 130, 15);
-    mFirstSourceIdEditor.setBounds(395, 40, 40, 15);
+    mPositionActivateButton.setBounds(175, 100, 150, 15);
 }
 
 } // namespace gris

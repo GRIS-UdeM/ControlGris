@@ -141,6 +141,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
     mConfigurationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
+    mConfigurationComponent.setTabBarDepth(24);
     mConfigurationComponent.addTab("Settings", bg, &mSectionGeneralSettings, false);
     mConfigurationComponent.addTab("Controllers", bg, &mSectionOscController, false);
     addAndMakeVisible(mConfigurationComponent);
@@ -846,11 +847,11 @@ void ControlGrisAudioProcessorEditor::resized()
         mSectionSourcePosition.setBounds(fieldSize + 1, fieldSize / 2 + 41, fieldSize, 130);
     }
 
-    mTrajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
-    mSectionTrajectory.setBounds(0, fieldSize + 90, width, 160);
+    mTrajectoryBanner.setBounds(0, fieldSize + 70 + 100, width, 20);
+    mSectionTrajectory.setBounds(0, fieldSize + 90 + 100, width, 160);
 
-    mSettingsBanner.setBounds(0, fieldSize + 250, width, 20);
-    mConfigurationComponent.setBounds(0, fieldSize + 270, width, 160);
+    mSettingsBanner.setBounds(fieldSize, 0, width, 20);
+    mConfigurationComponent.setBounds(fieldSize, 20, fieldSize, 150);
 
     mLastUiWidth = getWidth();
     mLastUiHeight = getHeight();
