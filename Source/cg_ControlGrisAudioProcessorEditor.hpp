@@ -27,7 +27,6 @@
 #include "cg_SectionOscController.hpp"
 #include "cg_SectionPositionPresets.hpp"
 #include "cg_SectionSourcePosition.hpp"
-#include "cg_SectionSourceSpan.hpp"
 #include "cg_SectionTrajectory.hpp"
 
 namespace gris
@@ -58,6 +57,7 @@ private:
     BannerComponent mTrajectoryBanner;
     BannerComponent mSettingsBanner;
     BannerComponent mPositionPresetBanner;
+    BannerComponent mSourcesBanner;
 
     juce::ComboBox mElevationModeCombobox;
     juce::Label mElevationModeLabel;
@@ -105,7 +105,6 @@ public:
     void fieldSourcePositionChangedCallback(SourceIndex sourceIndex, int whichField) override;
 
     // SectionSourceSpan::Listeners
-    void selectedSourceClickedCallback() override;
     void parameterChangedCallback(SourceParameter sourceParameter, double value) override;
     void azimuthSpanDragStartedCallback() override;
     void azimuthSpanDragEndedCallback() override;
@@ -129,9 +128,10 @@ public:
                                        std::optional<float> x,
                                        std::optional<float> y,
                                        std::optional<float> z) override;
+    void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
+    void selectedSourceClickedCallback() override;
 
     // SectionTrajectory::Listeners
-    void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
     void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
     void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
     void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;

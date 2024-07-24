@@ -42,7 +42,6 @@ public:
         virtual void azimuthSpanDragEndedCallback() = 0;
         virtual void elevationSpanDragStartedCallback() = 0;
         virtual void elevationSpanDragEndedCallback() = 0;
-        virtual void selectedSourceClickedCallback() = 0;
         virtual void parameterChangedCallback(SourceParameter sourceId, double value) = 0;
     };
 
@@ -84,6 +83,7 @@ public:
     void setDistanceEnabled(bool distanceEnabled);
     void setSpanLinkState(bool spanLinkState);
     bool getSpanLinkState() const { return mSpanLinked; }
+    Source * getSectionSourceSpanSelectedSource() { return mSelectedSource; }
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

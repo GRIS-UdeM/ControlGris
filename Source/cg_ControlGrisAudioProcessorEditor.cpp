@@ -41,7 +41,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mSectionSourceSpan(mGrisLookAndFeel)
     , mSectionTrajectory(mGrisLookAndFeel)
     , mSectionGeneralSettings(mGrisLookAndFeel)
-    , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode())
+    , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode(), mSectionSourceSpan)
     , mSectionOscController(mGrisLookAndFeel)
     , mPositionPresetComponent(controlGrisAudioProcessor.getPresetsManager())
 {
@@ -59,6 +59,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mElevationBanner.setLookAndFeel(&mGrisLookAndFeel);
     mElevationBanner.setText("Elevation", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationBanner);
+
+    mSourcesBanner.setLookAndFeel(&mGrisLookAndFeel);
+    mSourcesBanner.setText("Sources", juce::dontSendNotification);
+    addAndMakeVisible(&mSourcesBanner);
 
     mElevationModeLabel.setEditable(false, false);
     mElevationModeLabel.setText("Mode", juce::dontSendNotification);
@@ -115,12 +119,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     mSectionSourceSpan.setLookAndFeel(&mGrisLookAndFeel);
     mSectionSourceSpan.addListener(this);
-    addAndMakeVisible(&mSectionSourceSpan);
 
     mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
     mSectionTrajectory.addListener(this);
     addAndMakeVisible(mSectionTrajectory);
-    mSectionTrajectory.setPositionSourceLink(mPositionTrajectoryManager.getSourceLink());
     mSectionTrajectory.setElevationSourceLink(
         static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
@@ -129,6 +131,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     mSectionSourcePosition.setLookAndFeel(&mGrisLookAndFeel);
     mSectionSourcePosition.addListener(this);
+    addAndMakeVisible(&mSectionSourcePosition);
+    mSectionSourcePosition.setPositionSourceLink(mPositionTrajectoryManager.getSourceLink());
 
     mSectionOscController.setLookAndFeel(&mGrisLookAndFeel);
     mSectionOscController.addListener(this);
@@ -138,7 +142,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mConfigurationComponent.setLookAndFeel(&mGrisLookAndFeel);
     mConfigurationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
     mConfigurationComponent.addTab("Settings", bg, &mSectionGeneralSettings, false);
-    mConfigurationComponent.addTab("Sources", bg, &mSectionSourcePosition, false);
     mConfigurationComponent.addTab("Controllers", bg, &mSectionOscController, false);
     addAndMakeVisible(mConfigurationComponent);
 
@@ -264,7 +267,7 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
     auto action = [=]() {
-        mSectionTrajectory.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
+        mSectionSourcePosition.getPositionSourceLinkCombo().setSelectedId(static_cast<int>(value),
                                                                       juce::NotificationType::dontSendNotification);
     };
     auto const isMessageThread{ juce::MessageManager::getInstance()->isThisTheMessageThread() };
@@ -361,7 +364,7 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
         auto const initSourcePlacement{ mProcessor.getSources().size() != numOfSources };
         auto const currentPositionSourceLink{ mPositionTrajectoryManager.getSourceLink() };
         auto const symmetricLinkAllowed{ numOfSources == 2 };
-        mSectionTrajectory.setSymmetricLinkComboState(symmetricLinkAllowed);
+        mSectionSourcePosition.setSymmetricLinkComboState(symmetricLinkAllowed);
         if (!symmetricLinkAllowed) {
             auto const isCurrentPositionSourceLinkSymmetric{ currentPositionSourceLink == PositionSourceLink::symmetricX
                                                              || currentPositionSourceLink
@@ -829,15 +832,19 @@ void ControlGrisAudioProcessorEditor::resized()
                                       60,
                                       12);
         mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+        mSourcesBanner.setVisible(false);
+        mSectionSourcePosition.setVisible(false);
     } else {
         mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(false);
         mElevationModeLabel.setVisible(false);
         mElevationModeCombobox.setVisible(false);
         mElevationField.setVisible(false);
+        mSourcesBanner.setVisible(true);
+        mSourcesBanner.setBounds(fieldSize, fieldSize / 2 + 20, fieldSize, 20);
+        mSectionSourcePosition.setVisible(true);
+        mSectionSourcePosition.setBounds(fieldSize + 1, fieldSize / 2 + 41, fieldSize, 130);
     }
-
-    mSectionSourceSpan.setBounds(0, fieldSize + 20, width, 50);
 
     mTrajectoryBanner.setBounds(0, fieldSize + 70, width, 20);
     mSectionTrajectory.setBounds(0, fieldSize + 90, width, 160);

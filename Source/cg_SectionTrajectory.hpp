@@ -44,7 +44,6 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
         virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
         virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
         virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
@@ -65,7 +64,6 @@ private:
     juce::ListenerList<Listener> mListeners;
     SpatMode mSpatMode;
 
-    juce::Label mSourceLinkLabel;
     juce::Label mTrajectoryTypeLabel;
 
     juce::ComboBox mPositionTrajectoryTypeCombo;
@@ -91,7 +89,6 @@ private:
     juce::TextButton mPositionActivateButton;
     juce::TextButton mElevationActivateButton;
 
-    juce::ComboBox mPositionSourceLinkCombo;
     juce::ComboBox mElevationSourceLinkCombo;
 
 public:
@@ -120,7 +117,6 @@ public:
     void setElevationDampeningEnabled(bool state);
     void setPositionDampeningCycles(int value);
     void setElevationDampeningCycles(int value);
-    void setPositionSourceLink(PositionSourceLink value);
     void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
@@ -131,13 +127,10 @@ public:
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
 
-    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
-    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
     juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
     juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
 
     enum class SymmetricLinkComboState { enabled, disabled };
-    void setSymmetricLinkComboState(bool allowed);
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }

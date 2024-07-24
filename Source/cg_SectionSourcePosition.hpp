@@ -28,6 +28,7 @@
 #include "cg_Source.hpp"
 #include "cg_constants.hpp"
 #include "cg_NumSlider.h"
+#include "cg_SectionSourceSpan.hpp"
 
 namespace gris
 {
@@ -116,11 +117,14 @@ public:
                                                    std::optional<float> y,
                                                    std::optional<float> z)
             = 0;
+        virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
+        virtual void selectedSourceClickedCallback() = 0;
     };
 
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
+    SectionSourceSpan & mSectionSourceSpan;
 
     juce::ListenerList<Listener> mListeners;
 
@@ -132,12 +136,15 @@ private:
     juce::Label mSourceNumberLabel;
     juce::ComboBox mSourceNumberCombo;
 
+    juce::Label mSourceLinkLabel;
+    juce::ComboBox mPositionSourceLinkCombo;
+
     DomeControls mDomeControls;
     CubeControls mCubeControls;
 
 public:
     //==============================================================================
-    explicit SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode);
+    explicit SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel, SpatMode spatMode, SectionSourceSpan & sectionSourceSpan);
     //==============================================================================
     SectionSourcePosition() = delete;
     ~SectionSourcePosition() override = default;
@@ -156,8 +163,16 @@ public:
 
     void setSpatMode(SpatMode spatMode);
     //==============================================================================
+    void mouseDown(juce::MouseEvent const & event) override;
     void paint(juce::Graphics &) override;
     void resized() override;
+
+    //==============================================================================
+    void setPositionSourceLink(PositionSourceLink value);
+    void setSymmetricLinkComboState(bool allowed);
+
+    juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
+    juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
 
 private:
     //==============================================================================

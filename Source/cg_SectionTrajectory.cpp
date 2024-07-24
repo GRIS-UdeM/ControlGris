@@ -27,20 +27,9 @@ namespace gris
 //==============================================================================
 SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
+    setName("SectionTrajectory");
+
     mSpatMode = SpatMode::dome;
-
-    mSourceLinkLabel.setText("Sources Link:", juce::NotificationType::dontSendNotification);
-    addAndMakeVisible(&mSourceLinkLabel);
-
-    mPositionSourceLinkCombo.addItemList(POSITION_SOURCE_LINK_TYPES, 1);
-    mPositionSourceLinkCombo.setSelectedId(1);
-    addAndMakeVisible(&mPositionSourceLinkCombo);
-    mPositionSourceLinkCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.positionSourceLinkChangedCallback(
-                static_cast<PositionSourceLink>(mPositionSourceLinkCombo.getSelectedId()));
-        });
-    };
 
     mElevationSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
     mElevationSourceLinkCombo.setSelectedId(1);
@@ -207,21 +196,10 @@ void SectionTrajectory::setSpatMode(SpatMode const spatMode)
 void SectionTrajectory::setNumberOfSources(int const numOfSources)
 {
     if (numOfSources == 1) {
-        mPositionSourceLinkCombo.setSelectedId(1);
-        mPositionSourceLinkCombo.setEnabled(false);
         mElevationSourceLinkCombo.setSelectedId(1);
         mElevationSourceLinkCombo.setEnabled(false);
     } else {
-        mPositionSourceLinkCombo.setEnabled(true);
         mElevationSourceLinkCombo.setEnabled(true);
-    }
-
-    if (numOfSources == 2) {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), true);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), true);
-    } else {
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), false);
-        mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), false);
     }
 }
 
@@ -296,12 +274,6 @@ void SectionTrajectory::setDeviationPerCycle(float const value)
 }
 
 //==============================================================================
-void SectionTrajectory::setPositionSourceLink(PositionSourceLink const value)
-{
-    mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
-}
-
-//==============================================================================
 void SectionTrajectory::setElevationSourceLink(ElevationSourceLink const value)
 {
     mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
@@ -317,13 +289,6 @@ void SectionTrajectory::setPositionActivateState(bool const state)
 void SectionTrajectory::setElevationActivateState(bool const state)
 {
     mElevationActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
-}
-
-//==============================================================================
-void SectionTrajectory::setSymmetricLinkComboState(bool const allowed)
-{
-    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricX), allowed);
-    mPositionSourceLinkCombo.setItemEnabled(static_cast<int>(PositionSourceLink::symmetricY), allowed);
 }
 
 //==============================================================================
@@ -355,8 +320,6 @@ void SectionTrajectory::paint(juce::Graphics & g)
 //==============================================================================
 void SectionTrajectory::resized()
 {
-    mSourceLinkLabel.setBounds(5, 10, 150, 20);
-    mPositionSourceLinkCombo.setBounds(115, 10, 175, 20);
     mTrajectoryTypeLabel.setBounds(5, 40, 150, 20);
     mPositionTrajectoryTypeCombo.setBounds(115, 40, 175, 20);
     mPositionBackAndForthToggle.setBounds(196, 70, 94, 20);

@@ -82,6 +82,8 @@ void PresetButton::internalClickCallback(juce::ModifierKeys const & mods)
 //===============================================================================
 PositionPresetComponent::PositionPresetComponent(PresetsManager & presetsManager) : mPresetsManager(presetsManager)
 {
+    setName("PositionPresetComponent");
+
     constexpr int groupId = 1;
 
     for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
