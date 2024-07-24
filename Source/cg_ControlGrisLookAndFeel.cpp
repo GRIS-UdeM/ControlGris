@@ -79,7 +79,7 @@ void GrisLookAndFeel::drawComboBox(juce::Graphics & g,
                                    int const buttonX,
                                    int const buttonY,
                                    int const buttonW,
-                                   int const /*buttonH*/,
+                                   int const buttonH,
                                    juce::ComboBox & box)
 {
     box.setColour(juce::ColourSelector::backgroundColourId, mOnColor);
@@ -92,7 +92,7 @@ void GrisLookAndFeel::drawComboBox(juce::Graphics & g,
     auto const buttonXFloat{ static_cast<float>(buttonX) };
     auto const buttonYFloat{ static_cast<float>(buttonY) };
     auto const buttonWFloat{ static_cast<float>(buttonW) };
-    auto const buttonHFloat{ static_cast<float>(buttonX) };
+    auto const buttonHFloat{ static_cast<float>(buttonH) };
 
     juce::Path p;
     p.addTriangle(buttonXFloat + buttonWFloat * 0.5f,
@@ -487,7 +487,7 @@ void GrisLookAndFeel::drawToggleButton(juce::Graphics & g,
 
         g.drawFittedText(button.getButtonText(),
                          textX,
-                         0,
+                         1,
                          button.getWidth() - (textX - 5),
                          button.getHeight(),
                          juce::Justification::centredLeft,
