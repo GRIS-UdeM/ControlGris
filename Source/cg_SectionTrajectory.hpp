@@ -44,7 +44,6 @@ public:
         Listener & operator=(Listener const &) = default;
         Listener & operator=(Listener &&) = default;
         //==============================================================================
-        virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
         virtual void positionTrajectoryTypeChangedCallback(PositionTrajectoryType trajectoryType) = 0;
         virtual void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType trajectoryType) = 0;
         virtual void positionTrajectoryBackAndForthChangedCallback(bool value) = 0;
@@ -89,8 +88,6 @@ private:
     juce::TextButton mPositionActivateButton;
     juce::TextButton mElevationActivateButton;
 
-    juce::ComboBox mElevationSourceLinkCombo;
-
 public:
     //==============================================================================
     explicit SectionTrajectory(GrisLookAndFeel & grisLookAndFeel);
@@ -107,7 +104,6 @@ public:
     void paint(juce::Graphics &) override;
     void resized() override;
 
-    void setNumberOfSources(int numOfSources);
     void setSpatMode(SpatMode spatMode);
     void setTrajectoryType(int type);
     void setElevationTrajectoryType(int type);
@@ -117,7 +113,6 @@ public:
     void setElevationDampeningEnabled(bool state);
     void setPositionDampeningCycles(int value);
     void setElevationDampeningCycles(int value);
-    void setElevationSourceLink(ElevationSourceLink value);
     void setCycleDuration(double value);
     void setDurationUnit(int value);
     void setDeviationPerCycle(float value);
@@ -126,9 +121,6 @@ public:
     bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
-
-    juce::ComboBox const & getElevationSourceLinkCombo() const { return mElevationSourceLinkCombo; }
-    juce::ComboBox & getElevationSourceLinkCombo() { return mElevationSourceLinkCombo; }
 
     enum class SymmetricLinkComboState { enabled, disabled };
 

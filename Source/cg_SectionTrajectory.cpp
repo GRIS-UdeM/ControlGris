@@ -31,16 +31,6 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
 
     mSpatMode = SpatMode::dome;
 
-    mElevationSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
-    mElevationSourceLinkCombo.setSelectedId(1);
-    addChildComponent(&mElevationSourceLinkCombo);
-    mElevationSourceLinkCombo.onChange = [this] {
-        mListeners.call([&](Listener & l) {
-            l.elevationSourceLinkChangedCallback(
-                static_cast<ElevationSourceLink>(mElevationSourceLinkCombo.getSelectedId()));
-        });
-    };
-
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
 
@@ -193,17 +183,6 @@ void SectionTrajectory::setSpatMode(SpatMode const spatMode)
 }
 
 //==============================================================================
-void SectionTrajectory::setNumberOfSources(int const numOfSources)
-{
-    if (numOfSources == 1) {
-        mElevationSourceLinkCombo.setSelectedId(1);
-        mElevationSourceLinkCombo.setEnabled(false);
-    } else {
-        mElevationSourceLinkCombo.setEnabled(true);
-    }
-}
-
-//==============================================================================
 void SectionTrajectory::setTrajectoryType(int const type)
 {
     mPositionTrajectoryTypeCombo.setSelectedId(type);
@@ -274,12 +253,6 @@ void SectionTrajectory::setDeviationPerCycle(float const value)
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationSourceLink(ElevationSourceLink const value)
-{
-    mElevationSourceLinkCombo.setSelectedId(static_cast<int>(value));
-}
-
-//==============================================================================
 void SectionTrajectory::setPositionActivateState(bool const state)
 {
     mPositionActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
@@ -330,18 +303,15 @@ void SectionTrajectory::resized()
     mPositionActivateButton.setBounds(114, 130, 176, 20);
 
     if (mSpatMode == SpatMode::cube) {
-        mElevationSourceLinkCombo.setVisible(true);
         mElevationTrajectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);
         mElevationBackAndForthToggle.setVisible(true);
         mElevationDampeningEditor.setVisible(true);
-        mElevationSourceLinkCombo.setBounds(305, 10, 175, 20);
         mElevationTrajectoryTypeCombo.setBounds(305, 40, 175, 20);
         mElevationBackAndForthToggle.setBounds(386, 70, 94, 20);
         mElevationDampeningEditor.setBounds(305, 70, 75, 20);
         mElevationActivateButton.setBounds(304, 130, 176, 20);
     } else {
-        mElevationSourceLinkCombo.setVisible(false);
         mElevationTrajectoryTypeCombo.setVisible(false);
         mElevationActivateButton.setVisible(false);
         mElevationBackAndForthToggle.setVisible(false);

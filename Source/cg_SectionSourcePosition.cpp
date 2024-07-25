@@ -151,16 +151,15 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookA
         });
     };
 
-    auto const setLine = [&](juce::Label & label, NumSlider & slider, double const line) {
-        static constexpr auto LINE_HEIGHT = 10;
-        auto const y{ line * LINE_HEIGHT };
-        label.setBounds(0, y, 70, LINE_HEIGHT);
-        slider.setBounds(75, y, 200, LINE_HEIGHT);
+    auto const setLine = [&](juce::Label & label, NumSlider & slider, int x, int y) {
+        constexpr auto X_SPACE = 30;
+        label.setBounds(x, y + 1, 30, 10);
+        slider.setBounds(x + X_SPACE, y, 35, 12);
     };
 
-    setLine(mXLabel, mXSlider, 0);
-    setLine(mYLabel, mYSlider, 1.5);
-    setLine(mZLabel, mZSlider, 3);
+    setLine(mXLabel, mXSlider, -10, 3); // why -10 ?
+    setLine(mYLabel, mYSlider, 50, 3);
+    setLine(mZLabel, mZSlider, 110, 3);
 }
 
 //==============================================================================
@@ -230,6 +229,19 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel,
         });
     };
 
+    mZSourceLinkLabel.setText("Z Sources Link", juce::dontSendNotification);
+    addAndMakeVisible(&mZSourceLinkLabel);
+
+    mZSourceLinkCombo.addItemList(ELEVATION_SOURCE_LINK_TYPES, 1);
+    mZSourceLinkCombo.setSelectedId(1);
+    addChildComponent(&mZSourceLinkCombo);
+    mZSourceLinkCombo.onChange = [this] {
+        mListeners.call([&](Listener & l) {
+            l.elevationSourceLinkChangedCallback(
+                static_cast<ElevationSourceLink>(mZSourceLinkCombo.getSelectedId()));
+        });
+    };
+
     addAndMakeVisible(&mDomeControls);
     addAndMakeVisible(&mCubeControls);
     addAndMakeVisible(&mSectionSourceSpan);
@@ -287,21 +299,38 @@ void SectionSourcePosition::resized()
     mSourceNumberCombo.setBounds(85, 7, 35, 15);
 
     mDomeControls.setBounds(5, 30, 300, 15);
-    mCubeControls.setBounds(105, 370, 275, 20); // adjust for Cube mode
+    mCubeControls.setBounds(5, 30, 300, 15);
     
     mSectionSourceSpan.setBounds(0, 50, getWidth(), 25);
 
     mSourceLinkLabel.setBounds(5, 81, 150, 10);
     mPositionSourceLinkCombo.setBounds(120, 77, 165, 15);
 
-    mSourcePlacementLabel.setBounds(5, 105, 150, 10);
-    mSourcePlacementCombo.setBounds(120, 102, 165, 15);
+    if (mSpatMode == SpatMode::cube) {
+        mZSourceLinkLabel.setVisible(true);
+        mZSourceLinkCombo.setVisible(true);
+        mZSourceLinkLabel.setBounds(5, 107, 150, 10);
+        mZSourceLinkCombo.setBounds(120, 102, 165, 15);
+        mSourcePlacementLabel.setBounds(5, 130, 150, 10);
+        mSourcePlacementCombo.setBounds(120, 127, 165, 15);
+    } else {
+        mZSourceLinkLabel.setVisible(false);
+        mZSourceLinkCombo.setVisible(false);
+        mSourcePlacementLabel.setBounds(5, 105, 150, 10);
+        mSourcePlacementCombo.setBounds(120, 102, 165, 15);
+    }
 }
 
 //==============================================================================
 void SectionSourcePosition::setPositionSourceLink(PositionSourceLink value)
 {
     mPositionSourceLinkCombo.setSelectedId(static_cast<int>(value));
+}
+
+//==============================================================================
+void SectionSourcePosition::setElevationSourceLink(ElevationSourceLink value)
+{
+    mZSourceLinkCombo.setSelectedId(static_cast<int>(value));
 }
 
 //==============================================================================
@@ -325,8 +354,11 @@ void SectionSourcePosition::setNumberOfSources(int const numOfSources, SourceId 
     if (numOfSources == 1) {
         mPositionSourceLinkCombo.setSelectedId(1);
         mPositionSourceLinkCombo.setEnabled(false);
+        mZSourceLinkCombo.setSelectedId(1);
+        mZSourceLinkCombo.setEnabled(false);
     } else {
         mPositionSourceLinkCombo.setEnabled(true);
+        mZSourceLinkCombo.setEnabled(true);
     }
 
     if (numOfSources == 2) {
@@ -350,6 +382,8 @@ void SectionSourcePosition::updateSelectedSource(Source * source, SourceIndex co
 //==============================================================================
 void SectionSourcePosition::setSpatMode(SpatMode const spatMode)
 {
+    mSpatMode = spatMode;
+
     switch (spatMode) {
     case SpatMode::dome:
         mDomeControls.setVisible(true);
@@ -362,6 +396,8 @@ void SectionSourcePosition::setSpatMode(SpatMode const spatMode)
     default:
         jassertfalse;
     }
+
+    resized();
 }
 
 } // namespace gris

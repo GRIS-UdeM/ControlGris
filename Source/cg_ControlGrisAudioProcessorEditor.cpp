@@ -123,8 +123,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSectionTrajectory.setLookAndFeel(&mGrisLookAndFeel);
     mSectionTrajectory.addListener(this);
     addAndMakeVisible(mSectionTrajectory);
-    mSectionTrajectory.setElevationSourceLink(
-        static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
     mSectionGeneralSettings.setLookAndFeel(&mGrisLookAndFeel);
     mSectionGeneralSettings.addListener(this);
@@ -133,6 +131,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSectionSourcePosition.addListener(this);
     addAndMakeVisible(&mSectionSourcePosition);
     mSectionSourcePosition.setPositionSourceLink(mPositionTrajectoryManager.getSourceLink());
+    mSectionSourcePosition.setElevationSourceLink(
+        static_cast<ElevationSourceLink>(mElevationTrajectoryManager.getSourceLink()));
 
     mSectionOscController.setLookAndFeel(&mGrisLookAndFeel);
     mSectionOscController.addListener(this);
@@ -283,7 +283,7 @@ void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink v
 void ControlGrisAudioProcessorEditor::updateElevationSourceLinkCombo(ElevationSourceLink value)
 {
     juce::MessageManager::callAsync([=] {
-        mSectionTrajectory.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
+        mSectionSourcePosition.getElevationSourceLinkCombo().setSelectedId(static_cast<int>(value),
                                                                        juce::NotificationType::dontSendNotification);
     });
 }
@@ -379,7 +379,6 @@ void ControlGrisAudioProcessorEditor::numberOfSourcesChangedCallback(int const n
         mSelectedSource = {};
         mProcessor.setNumberOfSources(numOfSources);
         mSectionGeneralSettings.setNumberOfSources(numOfSources);
-        mSectionTrajectory.setNumberOfSources(numOfSources);
         mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
         mPositionField.refreshSources();
         mElevationField.refreshSources();
@@ -833,8 +832,14 @@ void ControlGrisAudioProcessorEditor::resized()
                                       60,
                                       12);
         mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
-        mSourcesBanner.setVisible(false);
-        mSectionSourcePosition.setVisible(false);
+        mSourcesBanner.setVisible(true);
+        mSectionSourcePosition.setVisible(true);
+        mSourcesBanner.setBounds(0, fieldSize + 20, fieldSize, 20);
+        mSectionSourcePosition.setBounds(0, fieldSize + 40, fieldSize, 150);
+        mSettingsBanner.setBounds(fieldSize, fieldSize + 20, width, 20);
+        mConfigurationComponent.setBounds(fieldSize, fieldSize + 40, fieldSize, 150);
+        mTrajectoryBanner.setBounds(0, fieldSize + 70 + 100 + 20, width, 20);
+        mSectionTrajectory.setBounds(0, fieldSize + 90 + 100 + 20, width, 160);
     } else {
         mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(false);
@@ -844,14 +849,12 @@ void ControlGrisAudioProcessorEditor::resized()
         mSourcesBanner.setVisible(true);
         mSourcesBanner.setBounds(fieldSize, fieldSize / 2 + 20, fieldSize, 20);
         mSectionSourcePosition.setVisible(true);
-        mSectionSourcePosition.setBounds(fieldSize + 1, fieldSize / 2 + 41, fieldSize, 130);
+        mSectionSourcePosition.setBounds(fieldSize + 1, fieldSize / 2 + 41, fieldSize, 129);
+        mSettingsBanner.setBounds(fieldSize, 0, width, 20);
+        mConfigurationComponent.setBounds(fieldSize, 20, fieldSize, 150);
+        mTrajectoryBanner.setBounds(0, fieldSize + 20, width, 20);
+        mSectionTrajectory.setBounds(0, fieldSize + 40, width, 160);
     }
-
-    mTrajectoryBanner.setBounds(0, fieldSize + 70 + 100, width, 20);
-    mSectionTrajectory.setBounds(0, fieldSize + 90 + 100, width, 160);
-
-    mSettingsBanner.setBounds(fieldSize, 0, width, 20);
-    mConfigurationComponent.setBounds(fieldSize, 20, fieldSize, 150);
 
     mLastUiWidth = getWidth();
     mLastUiHeight = getHeight();

@@ -118,6 +118,7 @@ public:
                                                    std::optional<float> z)
             = 0;
         virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
+        virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
         virtual void selectedSourceClickedCallback() = 0;
     };
 
@@ -128,6 +129,7 @@ private:
 
     juce::ListenerList<Listener> mListeners;
 
+    SpatMode mSpatMode;
     SourceIndex mSelectedSource;
 
     juce::Label mSourcePlacementLabel;
@@ -138,6 +140,9 @@ private:
 
     juce::Label mSourceLinkLabel;
     juce::ComboBox mPositionSourceLinkCombo;
+
+    juce::Label mZSourceLinkLabel;
+    juce::ComboBox mZSourceLinkCombo;
 
     DomeControls mDomeControls;
     CubeControls mCubeControls;
@@ -169,10 +174,13 @@ public:
 
     //==============================================================================
     void setPositionSourceLink(PositionSourceLink value);
+    void setElevationSourceLink(ElevationSourceLink value);
     void setSymmetricLinkComboState(bool allowed);
 
     juce::ComboBox const & getPositionSourceLinkCombo() const { return mPositionSourceLinkCombo; }
     juce::ComboBox & getPositionSourceLinkCombo() { return mPositionSourceLinkCombo; }
+    juce::ComboBox const & getElevationSourceLinkCombo() const { return mZSourceLinkCombo; }
+    juce::ComboBox & getElevationSourceLinkCombo() { return mZSourceLinkCombo; }
 
 private:
     //==============================================================================
