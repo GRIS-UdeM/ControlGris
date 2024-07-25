@@ -108,10 +108,10 @@
               file="Source/cg_SectionSourceSpan.cpp"/>
         <FILE id="qmk3iz" name="cg_SectionSourceSpan.hpp" compile="0" resource="0"
               file="Source/cg_SectionSourceSpan.hpp"/>
-        <FILE id="avAyHe" name="cg_SectionTrajectory.cpp" compile="1" resource="0"
-              file="Source/cg_SectionTrajectory.cpp"/>
-        <FILE id="PxuaoO" name="cg_SectionTrajectory.hpp" compile="0" resource="0"
-              file="Source/cg_SectionTrajectory.hpp"/>
+        <FILE id="avAyHe" name="cg_SectionAbstractSpatialization.cpp" compile="1"
+              resource="0" file="Source/cg_SectionAbstractSpatialization.cpp"/>
+        <FILE id="PxuaoO" name="cg_SectionAbstractSpatialization.hpp" compile="0"
+              resource="0" file="Source/cg_SectionAbstractSpatialization.hpp"/>
         <FILE id="acz4Ei" name="cg_TitledComponent.cpp" compile="1" resource="0"
               file="Source/cg_TitledComponent.cpp"/>
         <FILE id="ZPfmQN" name="cg_TitledComponent.hpp" compile="0" resource="0"

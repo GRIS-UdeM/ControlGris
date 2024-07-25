@@ -28,7 +28,7 @@
 namespace gris
 {
 //==============================================================================
-class SectionTrajectory final : public juce::Component
+class SectionAbstractSpatialization final : public juce::Component
 {
 public:
     //==============================================================================
@@ -90,16 +90,16 @@ private:
 
 public:
     //==============================================================================
-    explicit SectionTrajectory(GrisLookAndFeel & grisLookAndFeel);
+    explicit SectionAbstractSpatialization(GrisLookAndFeel & grisLookAndFeel);
     //==============================================================================
-    SectionTrajectory() = delete;
-    ~SectionTrajectory() override = default;
+    SectionAbstractSpatialization() = delete;
+    ~SectionAbstractSpatialization() override = default;
 
-    SectionTrajectory(SectionTrajectory const &) = delete;
-    SectionTrajectory(SectionTrajectory &&) = delete;
+    SectionAbstractSpatialization(SectionAbstractSpatialization const &) = delete;
+    SectionAbstractSpatialization(SectionAbstractSpatialization &&) = delete;
 
-    SectionTrajectory & operator=(SectionTrajectory const &) = delete;
-    SectionTrajectory & operator=(SectionTrajectory &&) = delete;
+    SectionAbstractSpatialization & operator=(SectionAbstractSpatialization const &) = delete;
+    SectionAbstractSpatialization & operator=(SectionAbstractSpatialization &&) = delete;
     //==============================================================================
     void paint(juce::Graphics &) override;
     void resized() override;
@@ -129,7 +129,7 @@ public:
 
 private:
     //==============================================================================
-    JUCE_LEAK_DETECTOR(SectionTrajectory)
+    JUCE_LEAK_DETECTOR(SectionAbstractSpatialization)
 };
 
 } // namespace gris

@@ -18,16 +18,16 @@
  * <http://www.gnu.org/licenses/>.                                        *
  *************************************************************************/
 
-#include "cg_SectionTrajectory.hpp"
+#include "cg_SectionAbstractSpatialization.hpp"
 
 #include "cg_constants.hpp"
 
 namespace gris
 {
 //==============================================================================
-SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
+SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    setName("SectionTrajectory");
+    setName("SectionAbstractSpatialization");
 
     mSpatMode = SpatMode::dome;
 
@@ -176,40 +176,40 @@ SectionTrajectory::SectionTrajectory(GrisLookAndFeel & grisLookAndFeel) : mGrisL
 }
 
 //==============================================================================
-void SectionTrajectory::setSpatMode(SpatMode const spatMode)
+void SectionAbstractSpatialization::setSpatMode(SpatMode const spatMode)
 {
     mSpatMode = spatMode;
     resized();
 }
 
 //==============================================================================
-void SectionTrajectory::setTrajectoryType(int const type)
+void SectionAbstractSpatialization::setTrajectoryType(int const type)
 {
     mPositionTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationTrajectoryType(int const type)
+void SectionAbstractSpatialization::setElevationTrajectoryType(int const type)
 {
     mElevationTrajectoryTypeCombo.setSelectedId(type);
 }
 
 //==============================================================================
-void SectionTrajectory::setPositionBackAndForth(bool const state)
+void SectionAbstractSpatialization::setPositionBackAndForth(bool const state)
 {
     mPositionBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setPositionDampeningEnabled(state);
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationBackAndForth(bool const state)
+void SectionAbstractSpatialization::setElevationBackAndForth(bool const state)
 {
     mElevationBackAndForthToggle.setToggleState(state, juce::NotificationType::sendNotification);
     setElevationDampeningEnabled(state);
 }
 
 //==============================================================================
-void SectionTrajectory::setPositionDampeningEnabled(bool const state)
+void SectionAbstractSpatialization::setPositionDampeningEnabled(bool const state)
 {
     mPositionDampeningEditor.setEnabled(state);
     juce::String text = mPositionDampeningEditor.getText();
@@ -222,7 +222,7 @@ void SectionTrajectory::setPositionDampeningEnabled(bool const state)
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationDampeningEnabled(bool const state)
+void SectionAbstractSpatialization::setElevationDampeningEnabled(bool const state)
 {
     mElevationDampeningEditor.setEnabled(state);
     juce::String text = mElevationDampeningEditor.getText();
@@ -235,37 +235,37 @@ void SectionTrajectory::setElevationDampeningEnabled(bool const state)
 }
 
 //==============================================================================
-void SectionTrajectory::setPositionDampeningCycles(int const value)
+void SectionAbstractSpatialization::setPositionDampeningCycles(int const value)
 {
     mPositionDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationDampeningCycles(int const value)
+void SectionAbstractSpatialization::setElevationDampeningCycles(int const value)
 {
     mElevationDampeningEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void SectionTrajectory::setDeviationPerCycle(float const value)
+void SectionAbstractSpatialization::setDeviationPerCycle(float const value)
 {
     mDeviationEditor.setText(juce::String(value));
 }
 
 //==============================================================================
-void SectionTrajectory::setPositionActivateState(bool const state)
+void SectionAbstractSpatialization::setPositionActivateState(bool const state)
 {
     mPositionActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionTrajectory::setElevationActivateState(bool const state)
+void SectionAbstractSpatialization::setElevationActivateState(bool const state)
 {
     mElevationActivateButton.setToggleState(state, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================
-void SectionTrajectory::setCycleDuration(double const value)
+void SectionAbstractSpatialization::setCycleDuration(double const value)
 {
     mDurationEditor.setText(juce::String(value));
     mListeners.call([&](Listener & l) {
@@ -275,7 +275,7 @@ void SectionTrajectory::setCycleDuration(double const value)
 }
 
 //==============================================================================
-void SectionTrajectory::setDurationUnit(int const value)
+void SectionAbstractSpatialization::setDurationUnit(int const value)
 {
     mDurationUnitCombo.setSelectedId(value, juce::NotificationType::sendNotificationSync);
     mListeners.call([&](Listener & l) {
@@ -285,32 +285,32 @@ void SectionTrajectory::setDurationUnit(int const value)
 }
 
 //==============================================================================
-void SectionTrajectory::paint(juce::Graphics & g)
+void SectionAbstractSpatialization::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 }
 
 //==============================================================================
-void SectionTrajectory::resized()
+void SectionAbstractSpatialization::resized()
 {
-    mTrajectoryTypeLabel.setBounds(5, 40, 150, 20);
-    mPositionTrajectoryTypeCombo.setBounds(115, 40, 175, 20);
-    mPositionBackAndForthToggle.setBounds(196, 70, 94, 20);
-    mDampeningLabel.setBounds(5, 70, 150, 20);
-    mPositionDampeningEditor.setBounds(115, 70, 75, 20);
-    mDeviationLabel.setBounds(5, 100, 150, 20);
-    mDeviationEditor.setBounds(115, 100, 75, 20);
-    mPositionActivateButton.setBounds(114, 130, 176, 20);
+    mTrajectoryTypeLabel.setBounds(5, 5, 150, 20);
+    mPositionTrajectoryTypeCombo.setBounds(115, 5, 175, 20);
+    mPositionBackAndForthToggle.setBounds(196, 35, 94, 20);
+    mDampeningLabel.setBounds(5, 35, 150, 20);
+    mPositionDampeningEditor.setBounds(115, 35, 75, 20);
+    mDeviationLabel.setBounds(5, 65, 150, 20);
+    mDeviationEditor.setBounds(115, 65, 75, 20);
+    mPositionActivateButton.setBounds(114, 95, 176, 20);
 
     if (mSpatMode == SpatMode::cube) {
         mElevationTrajectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);
         mElevationBackAndForthToggle.setVisible(true);
         mElevationDampeningEditor.setVisible(true);
-        mElevationTrajectoryTypeCombo.setBounds(305, 40, 175, 20);
-        mElevationBackAndForthToggle.setBounds(386, 70, 94, 20);
-        mElevationDampeningEditor.setBounds(305, 70, 75, 20);
-        mElevationActivateButton.setBounds(304, 130, 176, 20);
+        mElevationTrajectoryTypeCombo.setBounds(305, 5, 175, 20);
+        mElevationBackAndForthToggle.setBounds(386, 35, 94, 20);
+        mElevationDampeningEditor.setBounds(305, 35, 75, 20);
+        mElevationActivateButton.setBounds(304, 95, 176, 20);
     } else {
         mElevationTrajectoryTypeCombo.setVisible(false);
         mElevationActivateButton.setVisible(false);
@@ -318,9 +318,9 @@ void SectionTrajectory::resized()
         mElevationDampeningEditor.setVisible(false);
     }
 
-    mDurationLabel.setBounds(490, 15, 90, 20);
-    mDurationEditor.setBounds(495, 40, 90, 20);
-    mDurationUnitCombo.setBounds(495, 70, 90, 20);
+    mDurationLabel.setBounds(490, 5, 90, 20);
+    mDurationEditor.setBounds(495, 30, 90, 20);
+    mDurationUnitCombo.setBounds(495, 60, 90, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
     mCycleSpeedLabel.setBounds(5, 100, 150, 20);

@@ -27,7 +27,7 @@
 #include "cg_SectionOscController.hpp"
 #include "cg_SectionPositionPresets.hpp"
 #include "cg_SectionSourcePosition.hpp"
-#include "cg_SectionTrajectory.hpp"
+#include "cg_SectionAbstractSpatialization.hpp"
 
 namespace gris
 {
@@ -39,7 +39,7 @@ class ControlGrisAudioProcessorEditor final
     , public SectionSourceSpan::Listener
     , public SectionGeneralSettings::Listener
     , public SectionSourcePosition::Listener
-    , public SectionTrajectory::Listener
+    , public SectionAbstractSpatialization::Listener
     , public SectionOscController::Listener
     , public PositionPresetComponent::Listener
 {
@@ -54,7 +54,7 @@ private:
 
     BannerComponent mMainBanner;
     BannerComponent mElevationBanner;
-    BannerComponent mTrajectoryBanner;
+    BannerComponent mSpatializationBanner;
     BannerComponent mSettingsBanner;
     BannerComponent mPositionPresetBanner;
     BannerComponent mSourcesBanner;
@@ -66,9 +66,10 @@ private:
     ElevationFieldComponent mElevationField;
 
     SectionSourceSpan mSectionSourceSpan;
-    SectionTrajectory mSectionTrajectory;
+    SectionAbstractSpatialization mSectionAbstractSpatialization;
 
     juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
+    juce::TabbedComponent mSpatializationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
 
     SectionGeneralSettings mSectionGeneralSettings;
     SectionSourcePosition mSectionSourcePosition;
@@ -131,7 +132,7 @@ public:
     void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) override;
     void selectedSourceClickedCallback() override;
 
-    // SectionTrajectory::Listeners
+    // SectionAbstractSpatialization::Listeners
     void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) override;
     void positionTrajectoryTypeChangedCallback(PositionTrajectoryType value) override;
     void elevationTrajectoryTypeChangedCallback(ElevationTrajectoryType value) override;
