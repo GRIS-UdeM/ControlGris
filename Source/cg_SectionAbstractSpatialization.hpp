@@ -64,6 +64,8 @@ private:
     SpatMode mSpatMode;
 
     juce::Label mTrajectoryTypeLabel;
+    juce::Label mTrajectoryTypeXYLabel;
+    juce::Label mTrajectoryTypeZLabel;
 
     juce::ComboBox mPositionTrajectoryTypeCombo;
     juce::ComboBox mElevationTrajectoryTypeCombo;
@@ -72,10 +74,12 @@ private:
     juce::ToggleButton mElevationBackAndForthToggle;
 
     juce::Label mDampeningLabel;
+    juce::Label mDampeningLabel2ndLine;
     juce::TextEditor mPositionDampeningEditor;
     juce::TextEditor mElevationDampeningEditor;
 
     juce::Label mDeviationLabel;
+    juce::Label mDeviationLabel2ndLine;
     juce::TextEditor mDeviationEditor;
 
     juce::Label mDurationLabel;
@@ -84,6 +88,20 @@ private:
 
     juce::Label mCycleSpeedLabel;
     juce::Slider mCycleSpeedSlider;
+
+    juce::Label mSpeedXYLabel;
+    juce::TextEditor mSpeedXYEditor;
+
+    juce::Label mRandomXYLabel;
+    juce::ToggleButton mRandomXYToggle;
+    juce::ComboBox mRandomXYCombo;
+
+    juce::Label mSpeedZLabel;
+    juce::TextEditor mSpeedZEditor;
+
+    juce::Label mRandomZLabel;
+    juce::ToggleButton mRandomZToggle;
+    juce::ComboBox mRandomZCombo;
 
     juce::TextButton mPositionActivateButton;
     juce::TextButton mElevationActivateButton;

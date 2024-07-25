@@ -34,6 +34,12 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
 
+    mTrajectoryTypeXYLabel.setText("X-Y:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(&mTrajectoryTypeXYLabel);
+
+    mTrajectoryTypeZLabel.setText("Z:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(&mTrajectoryTypeZLabel);
+
     mPositionTrajectoryTypeCombo.addItemList(POSITION_TRAJECTORY_TYPE_TYPES, 1);
     mPositionTrajectoryTypeCombo.setSelectedId(1);
     addAndMakeVisible(&mPositionTrajectoryTypeCombo);
@@ -58,6 +64,7 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     addAndMakeVisible(&mDurationLabel);
 
     addAndMakeVisible(&mDurationEditor);
+    mDurationEditor.setFont(mGrisLookAndFeel.getFont());
     mDurationEditor.setTextToShowWhenEmpty("1", juce::Colours::white);
     mDurationEditor.setText("5", false);
     mDurationEditor.setInputRestrictions(10, "0123456789.");
@@ -111,10 +118,13 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     };
     addAndMakeVisible(&mPositionBackAndForthToggle);
 
-    mDampeningLabel.setText("Number of cycles \ndampening:", juce::NotificationType::dontSendNotification);
+    mDampeningLabel.setText("Number of cycles", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDampeningLabel);
+    mDampeningLabel2ndLine.setText("dampening:", juce::dontSendNotification);
+    addAndMakeVisible(&mDampeningLabel2ndLine);
 
     addAndMakeVisible(&mPositionDampeningEditor);
+    mPositionDampeningEditor.setFont(mGrisLookAndFeel.getFont());
     mPositionDampeningEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mPositionDampeningEditor.setText("0", false);
     mPositionDampeningEditor.setInputRestrictions(10, "0123456789");
@@ -126,10 +136,13 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
         mDurationUnitCombo.grabKeyboardFocus();
     };
 
-    mDeviationLabel.setText("Deviation degrees\nper cycle:", juce::NotificationType::dontSendNotification);
+    mDeviationLabel.setText("Deviation degrees", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mDeviationLabel);
+    mDeviationLabel2ndLine.setText("per cycle:", juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(&mDeviationLabel2ndLine);
 
     addAndMakeVisible(&mDeviationEditor);
+    mDeviationEditor.setFont(mGrisLookAndFeel.getFont());
     mDeviationEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mDeviationEditor.setText("0", false);
     mDeviationEditor.setInputRestrictions(10, "-0123456789.");
@@ -163,6 +176,7 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     addAndMakeVisible(&mElevationBackAndForthToggle);
 
     addAndMakeVisible(&mElevationDampeningEditor);
+    mElevationDampeningEditor.setFont(mGrisLookAndFeel.getFont());
     mElevationDampeningEditor.setTextToShowWhenEmpty("0", juce::Colours::white);
     mElevationDampeningEditor.setText("0", false);
     mElevationDampeningEditor.setInputRestrictions(10, "0123456789");
@@ -173,6 +187,57 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
         });
         mDurationUnitCombo.grabKeyboardFocus();
     };
+
+    // temporary GUI elements
+    mSpeedXYLabel.setText("Speed", juce::dontSendNotification);
+    addAndMakeVisible(&mSpeedXYLabel);
+
+    addAndMakeVisible(&mSpeedXYEditor);
+    mSpeedXYEditor.setFont(mGrisLookAndFeel.getFont());
+    mSpeedXYEditor.setTextToShowWhenEmpty("1.0", juce::Colours::white);
+    mSpeedXYEditor.setText("1.0", false);
+    mSpeedXYEditor.setInputRestrictions(4, "0123456789.");
+
+    mRandomXYLabel.setText("Random", juce::dontSendNotification);
+    addAndMakeVisible(&mRandomXYLabel);
+
+    addAndMakeVisible(&mRandomXYToggle);
+
+    addAndMakeVisible(&mRandomXYCombo);
+    mRandomXYCombo.addItem("Sine", 1);
+    mRandomXYCombo.addItem("Square", 2);
+    mRandomXYCombo.setSelectedId(1);
+
+    mSpeedZLabel.setText("Speed", juce::dontSendNotification);
+    addAndMakeVisible(&mSpeedZLabel);
+
+    addAndMakeVisible(&mSpeedZEditor);
+    mSpeedZEditor.setFont(mGrisLookAndFeel.getFont());
+    mSpeedZEditor.setTextToShowWhenEmpty("1.0", juce::Colours::white);
+    mSpeedZEditor.setText("1.0", false);
+    mSpeedZEditor.setInputRestrictions(4, "0123456789.");
+
+    mRandomZLabel.setText("Random", juce::dontSendNotification);
+    addAndMakeVisible(&mRandomZLabel);
+
+    addAndMakeVisible(&mRandomZToggle);
+
+    addAndMakeVisible(&mRandomZCombo);
+    mRandomZCombo.addItem("Sine", 1);
+    mRandomZCombo.addItem("Square", 2);
+    mRandomZCombo.setSelectedId(1);
+
+    mSpeedZLabel.setEnabled(false);
+    mSpeedZEditor.setEnabled(false);
+    mRandomZLabel.setEnabled(false);
+    mRandomZToggle.setEnabled(false);
+    mRandomZCombo.setEnabled(false);
+
+    mSpeedXYLabel.setEnabled(false);
+    mSpeedXYEditor.setEnabled(false);
+    mRandomXYLabel.setEnabled(false);
+    mRandomXYToggle.setEnabled(false);
+    mRandomXYCombo.setEnabled(false);
 }
 
 //==============================================================================
@@ -293,34 +358,67 @@ void SectionAbstractSpatialization::paint(juce::Graphics & g)
 //==============================================================================
 void SectionAbstractSpatialization::resized()
 {
-    mTrajectoryTypeLabel.setBounds(5, 5, 150, 20);
-    mPositionTrajectoryTypeCombo.setBounds(115, 5, 175, 20);
-    mPositionBackAndForthToggle.setBounds(196, 35, 94, 20);
-    mDampeningLabel.setBounds(5, 35, 150, 20);
-    mPositionDampeningEditor.setBounds(115, 35, 75, 20);
-    mDeviationLabel.setBounds(5, 65, 150, 20);
-    mDeviationEditor.setBounds(115, 65, 75, 20);
-    mPositionActivateButton.setBounds(114, 95, 176, 20);
+    mTrajectoryTypeLabel.setBounds(5, 7, 150, 10);
+    mTrajectoryTypeXYLabel.setBounds(90, 7, 150, 10);
+    mPositionTrajectoryTypeCombo.setBounds(115, 5, 175, 15);
+    mPositionBackAndForthToggle.setBounds(196, 27, 94, 15);
+    mDampeningLabel.setBounds(5, 18, 150, 22);
+    mDampeningLabel2ndLine.setBounds(5, 26, 150, 22);
+    mPositionDampeningEditor.setBounds(115, 27, 75, 15);
+    mDeviationLabel.setBounds(110, 40, 150, 22);
+    mDeviationLabel2ndLine.setBounds(110, 48, 150, 22);
+    mDeviationEditor.setBounds(201, 49, 88, 15);
+
+    mSpeedXYLabel.setBounds(110, 72, 150, 10);
+    mSpeedXYEditor.setBounds(201, 70, 88, 15);
+    mRandomXYLabel.setBounds(110, 93, 150, 10);
+    mRandomXYToggle.setBounds(181, 92, 88, 15);
+    mRandomXYCombo.setBounds(201, 92, 88, 15);
+
+    mPositionActivateButton.setBounds(114, 112, 176, 20);
+
+    mTrajectoryTypeZLabel.setBounds(303, 7, 150, 10);
+    mElevationTrajectoryTypeCombo.setBounds(320, 5, 175, 15);
+    mElevationDampeningEditor.setBounds(320, 27, 75, 15);
+    mElevationBackAndForthToggle.setBounds(401, 27, 94, 15);
+
+    mSpeedZLabel.setBounds(315, 72, 150, 10);
+    mSpeedZEditor.setBounds(406, 70, 88, 15);
+    mRandomZLabel.setBounds(315, 93, 150, 10);
+    mRandomZToggle.setBounds(386, 92, 88, 15);
+    mRandomZCombo.setBounds(406, 92, 88, 15);
+
+    mElevationActivateButton.setBounds(319, 112, 176, 20);
 
     if (mSpatMode == SpatMode::cube) {
+        mTrajectoryTypeXYLabel.setVisible(true);
+        mTrajectoryTypeZLabel.setVisible(true);
         mElevationTrajectoryTypeCombo.setVisible(true);
         mElevationActivateButton.setVisible(true);
         mElevationBackAndForthToggle.setVisible(true);
         mElevationDampeningEditor.setVisible(true);
-        mElevationTrajectoryTypeCombo.setBounds(305, 5, 175, 20);
-        mElevationBackAndForthToggle.setBounds(386, 35, 94, 20);
-        mElevationDampeningEditor.setBounds(305, 35, 75, 20);
-        mElevationActivateButton.setBounds(304, 95, 176, 20);
+        mSpeedZLabel.setVisible(true);
+        mSpeedZEditor.setVisible(true);
+        mRandomZLabel.setVisible(true);
+        mRandomZToggle.setVisible(true);
+        mRandomZCombo.setVisible(true);
     } else {
+        mTrajectoryTypeXYLabel.setVisible(false);
+        mTrajectoryTypeZLabel.setVisible(false);
         mElevationTrajectoryTypeCombo.setVisible(false);
         mElevationActivateButton.setVisible(false);
         mElevationBackAndForthToggle.setVisible(false);
         mElevationDampeningEditor.setVisible(false);
+        mSpeedZLabel.setVisible(false);
+        mSpeedZEditor.setVisible(false);
+        mRandomZLabel.setVisible(false);
+        mRandomZToggle.setVisible(false);
+        mRandomZCombo.setVisible(false);
     }
 
-    mDurationLabel.setBounds(490, 5, 90, 20);
-    mDurationEditor.setBounds(495, 30, 90, 20);
-    mDurationUnitCombo.setBounds(495, 60, 90, 20);
+    mDurationLabel.setBounds(495, 5, 90, 20);
+    mDurationEditor.setBounds(500, 30, 90, 20);
+    mDurationUnitCombo.setBounds(500, 60, 90, 20);
 
     // Hide Cycle Speed slider until we found the good way to handle it!
     mCycleSpeedLabel.setBounds(5, 100, 150, 20);
