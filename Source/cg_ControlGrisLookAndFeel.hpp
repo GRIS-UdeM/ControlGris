@@ -81,6 +81,7 @@ public:
     [[nodiscard]] juce::Colour getOffColor() const { return this->mOffColor; }
     [[nodiscard]] juce::Colour getGreenColor() const { return this->mGreenColor; }
     [[nodiscard]] juce::Colour getRedColor() const { return this->mRedColor; }
+    [[nodiscard]] juce::Colour getGreyColor() const { return this->mGreyColor; }
 
     // https://github.com/audioplastic/Juce-look-and-feel-examples/blob/master/JuceLibraryCode/modules/juce_gui_basics/lookandfeel/juce_LookAndFeel.cpp
 

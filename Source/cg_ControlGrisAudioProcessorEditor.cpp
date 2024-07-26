@@ -43,7 +43,8 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mSectionGeneralSettings(mGrisLookAndFeel)
     , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode(), mSectionSourceSpan)
     , mSectionOscController(mGrisLookAndFeel)
-    , mPositionPresetComponent(controlGrisAudioProcessor.getPresetsManager())
+    , mPositionPresetComponent(controlGrisAudioProcessor.getPresetsManager(), mPositionPresetInfoComponent)
+    , mPositionPresetInfoComponent(mGrisLookAndFeel)
 {
     setLookAndFeel(&mGrisLookAndFeel);
 
@@ -154,7 +155,15 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
 
     mPositionPresetComponent.setLookAndFeel(&mGrisLookAndFeel);
     mPositionPresetComponent.addListener(this);
-    addAndMakeVisible(&mPositionPresetComponent);
+    //addAndMakeVisible(&mPositionPresetComponent);
+
+    mPositionPresetViewport.setViewedComponent(&mPositionPresetComponent);
+    mPositionPresetViewport.setScrollBarsShown(false, false, true, true);
+    addAndMakeVisible(&mPositionPresetViewport);
+
+    mPositionPresetInfoComponent.setAppVersionLabelText(juce::String("v. ") + JucePlugin_VersionString,
+                                                         juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(&mPositionPresetInfoComponent);
 
     // Add sources to the fields.
     //---------------------------
@@ -328,6 +337,7 @@ void ControlGrisAudioProcessorEditor::elevationModeChangedEndedCallback()
 void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 {
     setSize(mLastUiWidth.getValue(), mLastUiHeight.getValue());
+    //DBG("gui size: " << juce::int64(mLastUiWidth.getValue()) << ", " << juce::int64(mLastUiHeight.getValue()));
 }
 
 //==============================================================================
@@ -817,8 +827,12 @@ void ControlGrisAudioProcessorEditor::resized()
 {
     auto const width{ getWidth() - 50 }; // Remove position preset space.
     auto const height{ getHeight() };
-
     auto const fieldSize{ std::max(width / 2, MIN_FIELD_WIDTH) };
+    auto preseHeight{ 645 };
+    
+    if (height >= 665) {
+        preseHeight = height - 20;
+    }
 
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
@@ -866,8 +880,10 @@ void ControlGrisAudioProcessorEditor::resized()
     mLastUiWidth = getWidth();
     mLastUiHeight = getHeight();
 
+    mPositionPresetViewport.setBounds(width, 20, 50, height - 20);
     mPositionPresetBanner.setBounds(width, 0, 50, 20);
-    mPositionPresetComponent.setBounds(width, 20, 50, height - 20);
+    mPositionPresetComponent.setBounds(width, 20, 50, preseHeight);
+    mPositionPresetInfoComponent.setBounds(width, height - 45, 50, 60);
 }
 
 //==============================================================================

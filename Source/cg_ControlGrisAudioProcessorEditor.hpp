@@ -75,7 +75,9 @@ private:
     SectionSourcePosition mSectionSourcePosition;
     SectionOscController mSectionOscController;
 
+    juce::Viewport mPositionPresetViewport;
     PositionPresetComponent mPositionPresetComponent;
+    PositionPresetInfoComponent mPositionPresetInfoComponent;
 
     bool mIsInsideSetPluginState;
     SourceIndex mSelectedSource{};
