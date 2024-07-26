@@ -40,6 +40,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     , mElevationField(controlGrisAudioProcessor.getSources(), elevationAutomationManager)
     , mSectionSourceSpan(mGrisLookAndFeel)
     , mSectionAbstractSpatialization(mGrisLookAndFeel)
+    , mSectionSoundReactiveSpatialization(mGrisLookAndFeel)
     , mSectionGeneralSettings(mGrisLookAndFeel)
     , mSectionSourcePosition(mGrisLookAndFeel, controlGrisAudioProcessor.getSpatMode(), mSectionSourceSpan)
     , mSectionOscController(mGrisLookAndFeel)
@@ -149,7 +150,10 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mSpatializationComponent.setLookAndFeel(&mGrisLookAndFeel);
     mSpatializationComponent.setColour(juce::TabbedComponent::backgroundColourId, bg);
     mSpatializationComponent.setTabBarDepth(24);
-    mSpatializationComponent.addTab("Sound Reactive Spatialization", bg, /*&mSectionGeneralSettings*/ nullptr, false);
+    mSpatializationComponent.addTab(mSectionSoundReactiveSpatialization.getName(),
+                                    bg,
+                                    &mSectionSoundReactiveSpatialization,
+                                    false);
     mSpatializationComponent.addTab("Abstract Spatialization", bg, &mSectionAbstractSpatialization, false);
     addAndMakeVisible(mSpatializationComponent);
 

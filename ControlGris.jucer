@@ -100,6 +100,10 @@
               resource="0" file="Source/cg_SectionPositionPresets.cpp"/>
         <FILE id="fzL7XR" name="cg_SectionPositionPresets.hpp" compile="0"
               resource="0" file="Source/cg_SectionPositionPresets.hpp"/>
+        <FILE id="ukgkiJ" name="cg_SectionSoundReactiveSpatialization.cpp"
+              compile="1" resource="0" file="Source/cg_SectionSoundReactiveSpatialization.cpp"/>
+        <FILE id="dxj6DN" name="cg_SectionSoundReactiveSpatialization.h" compile="0"
+              resource="0" file="Source/cg_SectionSoundReactiveSpatialization.h"/>
         <FILE id="tr9Qib" name="cg_SectionSourcePosition.cpp" compile="1" resource="0"
               file="Source/cg_SectionSourcePosition.cpp"/>
         <FILE id="nU1MFT" name="cg_SectionSourcePosition.hpp" compile="0" resource="0"

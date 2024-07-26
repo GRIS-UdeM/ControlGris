@@ -28,6 +28,7 @@
 #include "cg_SectionPositionPresets.hpp"
 #include "cg_SectionSourcePosition.hpp"
 #include "cg_SectionAbstractSpatialization.hpp"
+#include "cg_SectionSoundReactiveSpatialization.h"
 
 namespace gris
 {
@@ -67,6 +68,7 @@ private:
 
     SectionSourceSpan mSectionSourceSpan;
     SectionAbstractSpatialization mSectionAbstractSpatialization;
+    SectionSoundReactiveSpatialization mSectionSoundReactiveSpatialization;
 
     juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
     juce::TabbedComponent mSpatializationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
