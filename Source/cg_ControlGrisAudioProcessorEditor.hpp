@@ -149,6 +149,7 @@ public:
     void trajectoryDurationUnitChangedCallback(double duration, int mode) override;
     void positionTrajectoryStateChangedCallback(bool value) override;
     void elevationTrajectoryStateChangedCallback(bool value) override;
+    void speedStateChangedCallback(double value) override;
 
     // PositionPresetComponent::Listeners
     void positionPresetChangedCallback(int presetNumber) override;
@@ -162,6 +163,7 @@ public:
 
     void reloadUiState();
     void updateSpanLinkButton(bool state);
+    void updateSpeedLinkButton(bool state);
     void updateSourceLinkCombo(PositionSourceLink value);
     void updateElevationSourceLinkCombo(ElevationSourceLink value);
     void updatePositionPreset(int presetNumber);

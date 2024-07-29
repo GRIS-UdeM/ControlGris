@@ -28,7 +28,7 @@
 namespace gris
 {
 //==============================================================================
-class SectionAbstractSpatialization final : public juce::Component
+class SectionAbstractSpatialization final : public juce::Component, private juce::TextEditor::Listener
 {
 public:
     //==============================================================================
@@ -55,6 +55,7 @@ public:
         virtual void trajectoryDurationUnitChangedCallback(double duration, int mode) = 0;
         virtual void positionTrajectoryStateChangedCallback(bool value) = 0;
         virtual void elevationTrajectoryStateChangedCallback(bool value) = 0;
+        virtual void speedStateChangedCallback(double value) = 0;
     };
 
 private:
@@ -106,6 +107,8 @@ private:
     juce::TextButton mPositionActivateButton;
     juce::TextButton mElevationActivateButton;
 
+    bool mSpeedLinked{ false };
+
 public:
     //==============================================================================
     explicit SectionAbstractSpatialization(GrisLookAndFeel & grisLookAndFeel);
@@ -119,6 +122,9 @@ public:
     SectionAbstractSpatialization & operator=(SectionAbstractSpatialization const &) = delete;
     SectionAbstractSpatialization & operator=(SectionAbstractSpatialization &&) = delete;
     //==============================================================================
+    void mouseDown(juce::MouseEvent const & event) override;
+    void textEditorReturnKeyPressed(juce::TextEditor & textEd) override;
+    void textEditorFocusLost(juce::TextEditor & textEd) override;
     void paint(juce::Graphics &) override;
     void resized() override;
 
@@ -139,6 +145,7 @@ public:
     bool getElevationActivateState() const { return mElevationActivateButton.getToggleState(); }
     void setPositionActivateState(bool state);
     void setElevationActivateState(bool state);
+    void setSpeedLinkState(bool state);
 
     enum class SymmetricLinkComboState { enabled, disabled };
 

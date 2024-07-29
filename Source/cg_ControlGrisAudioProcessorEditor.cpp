@@ -285,6 +285,12 @@ void ControlGrisAudioProcessorEditor::updateSpanLinkButton(bool state)
 }
 
 //==============================================================================
+void ControlGrisAudioProcessorEditor::updateSpeedLinkButton(bool state)
+{
+    mSectionAbstractSpatialization.setSpeedLinkState(state);
+}
+
+//==============================================================================
 void ControlGrisAudioProcessorEditor::updateSourceLinkCombo(PositionSourceLink value)
 {
     auto action = [=]() {
@@ -724,6 +730,12 @@ void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(boo
 void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool value)
 {
     mElevationTrajectoryManager.setPositionActivateState(value);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::speedStateChangedCallback(double value)
+{
+    DBG("speedStateChangedCallback");
 }
 
 //==============================================================================

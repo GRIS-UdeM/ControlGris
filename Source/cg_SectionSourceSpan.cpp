@@ -78,12 +78,8 @@ void SectionSourceSpan::setSpanLinkState(bool const spanLinkState)
 //==============================================================================
 void SectionSourceSpan::mouseDown(juce::MouseEvent const & event)
 {
-    float const x{ 267.0f };
-    float constexpr y = 15;
-
     // Area where the spanLinked arrow is shown.
     juce::Rectangle<float> const spanLinkedArrowArea{ 132.0f, 5.0f, 30.0f, 17.0f };
-    auto const boundsInParent{ getParentComponent()->getLocalBounds() };
     if (spanLinkedArrowArea.contains(event.getMouseDownPosition().toFloat())) {
         mSpanLinked = !mSpanLinked;
         repaint();
@@ -112,9 +108,6 @@ void SectionSourceSpan::sliderValueChanged(NumSlider::Slider * slider)
 //==============================================================================
 void SectionSourceSpan::paint(juce::Graphics & g)
 {
-    auto constexpr y = 15.0f;
-    auto const x{ getWidth() - 35.0f };
-
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
 
     if (mSpanLinked)

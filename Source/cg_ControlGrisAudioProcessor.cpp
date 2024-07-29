@@ -1060,6 +1060,7 @@ void ControlGrisAudioProcessor::timerCallback()
 
         if (editor != nullptr) {
             editor->updateSpanLinkButton(false);
+            editor->updateSpeedLinkButton(false);
         }
     }
 

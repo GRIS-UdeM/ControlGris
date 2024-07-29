@@ -193,6 +193,7 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     addAndMakeVisible(&mSpeedXYLabel);
 
     addAndMakeVisible(&mSpeedXYEditor);
+    mSpeedXYEditor.addListener(this);
     mSpeedXYEditor.setFont(mGrisLookAndFeel.getFont());
     mSpeedXYEditor.setTextToShowWhenEmpty("1.0", juce::Colours::white);
     mSpeedXYEditor.setText("1.0", false);
@@ -212,6 +213,7 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     addAndMakeVisible(&mSpeedZLabel);
 
     addAndMakeVisible(&mSpeedZEditor);
+    mSpeedZEditor.addListener(this);
     mSpeedZEditor.setFont(mGrisLookAndFeel.getFont());
     mSpeedZEditor.setTextToShowWhenEmpty("1.0", juce::Colours::white);
     mSpeedZEditor.setText("1.0", false);
@@ -330,6 +332,13 @@ void SectionAbstractSpatialization::setElevationActivateState(bool const state)
 }
 
 //==============================================================================
+void SectionAbstractSpatialization::setSpeedLinkState(bool state)
+{
+    mSpeedLinked = state;
+    repaint();
+}
+
+//==============================================================================
 void SectionAbstractSpatialization::setCycleDuration(double const value)
 {
     mDurationEditor.setText(juce::String(value));
@@ -350,9 +359,59 @@ void SectionAbstractSpatialization::setDurationUnit(int const value)
 }
 
 //==============================================================================
+void SectionAbstractSpatialization::mouseDown(juce::MouseEvent const & event)
+{
+    if (mSpatMode == SpatMode::cube) {
+        // Area where the speedLinked arrow is shown.
+        juce::Rectangle<float> const speedLinkedArrowArea{ 292.0f, 70.0f, 30.0f, 17.0f };
+        if (speedLinkedArrowArea.contains(event.getMouseDownPosition().toFloat())) {
+            mSpeedLinked = !mSpeedLinked;
+            repaint();
+        }
+    }
+}
+
+//==============================================================================
+void SectionAbstractSpatialization::textEditorReturnKeyPressed(juce::TextEditor & textEd)
+{
+    const auto value{ textEd.getText().getDoubleValue() };
+    const auto paramName{ textEd.getName() };
+
+    //mListeners.call([&](Listener & l) { l.speedStateChangedCallback(value); }); // TODO: add a parameter to modify
+    // AudioProcessorValueTreeState
+
+    if (mSpeedLinked) {
+        if (&textEd == &mSpeedXYEditor) {
+            mSpeedZEditor.setText(textEd.getText());
+            // mListeners.call([&](Listener & l) { l.speedStateChangedCallback(value); }); // TODO: call parameter
+            // Z AudioProcessorValueTreeState
+        } else if (&textEd == &mSpeedZEditor) {
+            mSpeedXYEditor.setText(textEd.getText());
+            // mListeners.call([&](Listener & l) { l.speedStateChangedCallback(value); }); // TODO: call parameter
+            // XY AudioProcessorValueTreeState
+        }
+    }
+}
+
+//==============================================================================
+void SectionAbstractSpatialization::textEditorFocusLost(juce::TextEditor & textEd)
+{
+    textEditorReturnKeyPressed(textEd);
+}
+
+//==============================================================================
 void SectionAbstractSpatialization::paint(juce::Graphics & g)
 {
     g.fillAll(mGrisLookAndFeel.findColour(juce::ResizableWindow::backgroundColourId));
+
+    if (mSpatMode == SpatMode::cube) {
+        if (mSpeedLinked)
+            g.setColour(juce::Colours::orange);
+        else
+            g.setColour(juce::Colours::black);
+        g.drawArrow(juce::Line<float>(302.0f, 78.0f, 292.0f, 78.0f), 4, 10, 7);
+        g.drawArrow(juce::Line<float>(297.0f, 78.0f, 317.0f, 78.0f), 4, 10, 7);
+    }
 }
 
 //==============================================================================
