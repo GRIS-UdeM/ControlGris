@@ -23,6 +23,17 @@
 //==============================================================================
 gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(GrisLookAndFeel & grisLookAndFeel)
     : mGrisLookAndFeel(grisLookAndFeel)
+    , mDescriptorFactorSlider(grisLookAndFeel)
+    , mDescriptorThresholdSlider(grisLookAndFeel)
+    , mDescriptorMinFreqSlider(grisLookAndFeel)
+    , mDescriptorMaxFreqSlider(grisLookAndFeel)
+    , mDescriptorMinTimeSlider(grisLookAndFeel)
+    , mDescriptorMaxTimeSlider(grisLookAndFeel)
+    , mDescriptorSmoothSlider(grisLookAndFeel)
+    , mDescriptorSmoothCoefSlider(grisLookAndFeel)
+    , mDescriptorOffsetSlider(grisLookAndFeel)
+    , mDescriptorRangeSlider(grisLookAndFeel)
+    , mDescriptorLapSlider(grisLookAndFeel)
 {
     setName("Sound Reactive Spatialization");
 }

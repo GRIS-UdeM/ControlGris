@@ -24,6 +24,7 @@
 
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
+#include "cg_NumSlider.h"
 
 namespace gris
 {
@@ -44,6 +45,72 @@ private:
 
     juce::ListenerList<Listener> mListeners;
 
+    SpatMode mSpatMode;
+
+    // Audio anaylysis section
+    juce::Label mAnalyzedSourceMixLabel;
+    juce::ComboBox mAnalyzedSourceMixCombo;
+
+    juce::Label mAudioAnalysisLabel;
+    juce::ComboBox mAudioDescriptorCombo;
+
+    juce::Label mDescriptorFactorLabel;
+    juce::Label mDescriptorThresholdLabel;
+    juce::Label mDescriptorMinFreqLabel;
+    juce::Label mDescriptorMaxFreqLabel;
+    juce::Label mDescriptorMinTimeLabel;
+    juce::Label mDescriptorMaxTimeLabel;
+    juce::Label mDescriptorSmoothLabel;
+    juce::Label mDescriptorSmoothCoefLabel;
+
+    juce::ComboBox mDescriptorMetricComboBox;
+
+    NumSlider mDescriptorFactorSlider;
+    NumSlider mDescriptorThresholdSlider;
+    NumSlider mDescriptorMinFreqSlider;
+    NumSlider mDescriptorMaxFreqSlider;
+    NumSlider mDescriptorMinTimeSlider;
+    NumSlider mDescriptorMaxTimeSlider;
+    NumSlider mDescriptorSmoothSlider;
+    NumSlider mDescriptorSmoothCoefSlider;
+
+    juce::TextButton mClickTimerButton;
+
+    // Spatial parameters section
+    juce::Label mSpatialParameterLabel;
+
+    juce::Label mParameterAzimuthLabel;
+    juce::Label mParameterElevationLabel;
+    juce::Label mParameterXLabel;
+    juce::Label mParameterYLabel;
+    juce::Label mParameterZLabel;
+    juce::Label mParameterAzimuthOrXYSpanLabel;
+    juce::Label mParameterElevationOrZSpanLabel;
+
+    juce::Label mParameterAzimuthLapLabel;
+
+    juce::Label mParameterElevationAndZOffsetLabel;
+    juce::Label mParameterElevationAndZSpanOffsetLabel;
+
+    juce::Label mParameterAzimuthRangeLabel;
+    juce::Label mParameterElevationRangeLabel;
+    juce::Label mParameterXRangeLabel;
+    juce::Label mParameterYRangeLabel;
+    juce::Label mParameterZRangeLabel;
+    juce::Label mParameterAzimuthOrXYSpanRangeLabel;
+    juce::Label mParameterElevationOrZSpanRangeLabel;
+
+    juce::ComboBox mParameterAzimuthCombo;
+    juce::ComboBox mParameterElevationCombo;
+    juce::ComboBox mParameterXCombo;
+    juce::ComboBox mParameterYCombo;
+    juce::ComboBox mParameterZCombo;
+    juce::ComboBox mParameterAzimuthOrXYSpanCombo;
+    juce::ComboBox mParameterElevationOrZSpanCombo;
+
+    NumSlider mDescriptorOffsetSlider;
+    NumSlider mDescriptorRangeSlider;
+    NumSlider mDescriptorLapSlider;
 public:
     //==============================================================================
     explicit SectionSoundReactiveSpatialization(GrisLookAndFeel & grisLookAndFeel);
