@@ -853,44 +853,37 @@ void ControlGrisAudioProcessorEditor::resized()
     mMainBanner.setBounds(0, 0, fieldSize, 20);
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
+    mSourcesBanner.setBounds(0, fieldSize + 20, fieldSize, 20);
+    mSectionSourcePosition.setBounds(0, fieldSize + 40, fieldSize, 150);
+    mSettingsBanner.setBounds(fieldSize - 1, fieldSize + 20, width, 20);
+    mConfigurationComponent.setBounds(fieldSize - 1, fieldSize + 40, fieldSize, 151);
+
+    mElevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
+    mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
+    mElevationModeCombobox.setBounds(fieldSize + mElevationBanner.getBounds().getWidth() / 2,
+                                        (mElevationBanner.getHeight() - mElevationModeCombobox.getHeight()) / 2,
+                                        (mElevationBanner.getBounds().getWidth() / 2) - 4,
+                                        16);
+    mElevationModeLabel.setBounds(mElevationModeCombobox.getBounds().getX() - 60,
+                                    (mElevationBanner.getHeight() - mElevationModeLabel.getHeight()) / 2,
+                                    60,
+                                    12);
+
+    mSpatializationBanner.setBounds(0, fieldSize + 70 + 100 + 20, width, 20);
+    mSpatializationComponent.setBounds(0, fieldSize + 90 + 100 + 20, width, 190);
+
     if (mProcessor.getSpatMode() == SpatMode::cube) {
         mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);
         mElevationModeCombobox.setVisible(true);
-        mElevationBanner.setBounds(fieldSize, 0, fieldSize, 20);
         mElevationModeLabel.setVisible(true);
-        mElevationModeCombobox.setBounds(fieldSize + mElevationBanner.getBounds().getWidth() / 2,
-                                         (mElevationBanner.getHeight() - mElevationModeCombobox.getHeight()) / 2,
-                                         (mElevationBanner.getBounds().getWidth() / 2) - 4,
-                                         16);
-        mElevationModeLabel.setBounds(mElevationModeCombobox.getBounds().getX() - 60,
-                                      (mElevationBanner.getHeight() - mElevationModeLabel.getHeight()) / 2,
-                                      60,
-                                      12);
-        mElevationField.setBounds(fieldSize, 20, fieldSize, fieldSize);
-        mSourcesBanner.setVisible(true);
-        mSectionSourcePosition.setVisible(true);
-        mSourcesBanner.setBounds(0, fieldSize + 20, fieldSize, 20);
-        mSectionSourcePosition.setBounds(0, fieldSize + 40, fieldSize, 150);
-        mSettingsBanner.setBounds(fieldSize, fieldSize + 20, width, 20);
-        mConfigurationComponent.setBounds(fieldSize, fieldSize + 40, fieldSize, 150);
-        mSpatializationBanner.setBounds(0, fieldSize + 70 + 100 + 20, width, 20);
-        mSpatializationComponent.setBounds(0, fieldSize + 90 + 100 + 20, width, 160);
     } else {
         mMainBanner.setText("Azimuth - Elevation", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(false);
         mElevationModeLabel.setVisible(false);
         mElevationModeCombobox.setVisible(false);
         mElevationField.setVisible(false);
-        mSourcesBanner.setVisible(true);
-        mSourcesBanner.setBounds(fieldSize, fieldSize / 2 + 20, fieldSize, 20);
-        mSectionSourcePosition.setVisible(true);
-        mSectionSourcePosition.setBounds(fieldSize + 1, fieldSize / 2 + 41, fieldSize, 129);
-        mSettingsBanner.setBounds(fieldSize, 0, width, 20);
-        mConfigurationComponent.setBounds(fieldSize, 20, fieldSize, 150);
-        mSpatializationBanner.setBounds(0, fieldSize + 20, width, 20);
-        mSpatializationComponent.setBounds(0, fieldSize + 40, width, 160);
     }
 
     mLastUiWidth = getWidth();
