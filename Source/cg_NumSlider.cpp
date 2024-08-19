@@ -41,11 +41,11 @@ NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel)
 }
 
 //==============================================================================
-void NumSlider::mouseWheelMove(const juce::MouseEvent & event, const juce::MouseWheelDetails & wheel)
+void NumSlider::mouseWheelMove(const juce::MouseEvent & /*event*/, const juce::MouseWheelDetails & wheel)
 {
     mLastValue = getValue();
     juce::Time currentTime = juce::Time::getCurrentTime();
-    double timeDiff = (currentTime - mLastTime).inMilliseconds();
+    auto timeDiff = static_cast<double>((currentTime - mLastTime).inMilliseconds());
     if (timeDiff <= 0.0001) timeDiff = 1.0;
     double valueDiff = wheel.deltaY * getInterval();
     double velocity = valueDiff / timeDiff * 1000;
@@ -65,9 +65,17 @@ void NumSlider::paint(juce::Graphics & g)
     auto val{ getValue() };
     auto bounds{ getLocalBounds() };
 
+    auto onColor{ mGrisLookAndFeel.getOnColor() };
+    auto lightColor{ mGrisLookAndFeel.getLightColor() };
+
+    if (!isEnabled()) {
+        onColor = onColor.withBrightness(0.8f);
+        lightColor = lightColor.withBrightness(0.8f);
+    }
+
     if (val > rangeVals.getStart()) {
         juce::Rectangle<float> drawRec;
-        g.setColour(mGrisLookAndFeel.getOnColor());
+        g.setColour(onColor);
         double xLimitProportion{};
 
         if (rangeVals.getStart() < 0) {
@@ -82,7 +90,7 @@ void NumSlider::paint(juce::Graphics & g)
                                           static_cast<float>(bounds.getHeight()) };
         g.fillRect(drawRec);
 
-        g.setColour(mGrisLookAndFeel.getLightColor());
+        g.setColour(lightColor);
         drawRec = juce::Rectangle<float>{ static_cast<float>(bounds.getWidth() * xLimitProportion),
                                           0,
                                           static_cast<float>(bounds.getWidth()),
@@ -90,7 +98,7 @@ void NumSlider::paint(juce::Graphics & g)
         g.fillRect(drawRec);
     }
     else {
-        g.setColour(mGrisLookAndFeel.getLightColor());
+        g.setColour(lightColor);
         g.fillRect(bounds);
     }
 
