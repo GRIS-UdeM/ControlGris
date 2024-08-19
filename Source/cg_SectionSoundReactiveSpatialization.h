@@ -1,35 +1,70 @@
-/**************************************************************************
- * Copyright 2024 UdeM - GRIS - Gaël LANE LÉPINE                          *
- *                                                                        *
- * This file is part of ControlGris, a multi-source spatialization plugin *
- *                                                                        *
- * ControlGris is free software: you can redistribute it and/or modify    *
- * it under the terms of the GNU Lesser General Public License as         *
- * published by the Free Software Foundation, either version 3 of the     *
- * License, or (at your option) any later version.                        *
- *                                                                        *
- * ControlGris is distributed in the hope that it will be useful,         *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- * GNU Lesser General Public License for more details.                    *
- *                                                                        *
- * You should have received a copy of the GNU Lesser General Public       *
- * License along with ControlGris.  If not, see                           *
- * <https://www.gnu.org/licenses/>.                                       *
- *************************************************************************/
+/*
+ This file is part of ControlGris.
+
+ Developers: Gaël LANE LÉPINE
+
+ ControlGris is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ ControlGris is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with ControlGris.  If not, see
+ <http://www.gnu.org/licenses/>.
+*/
+
+//==============================================================================
 
 #pragma once
 
 #include <JuceHeader.h>
 
+#include "cg_ControlGrisAudioProcessor.hpp"
 #include "cg_ControlGrisLookAndFeel.hpp"
 #include "cg_constants.hpp"
 #include "cg_NumSlider.h"
+#include "SpatialParameters/cg_SpatialParameter.h"
 
 namespace gris
 {
 //==============================================================================
-class SectionSoundReactiveSpatialization final : public juce::Component
+class DataGraph
+    : public juce::Component
+    , private juce::Timer
+{
+public:
+    //==============================================================================
+    DataGraph();
+    ~DataGraph() override;
+
+    void paint(juce::Graphics &) override;
+    void resized() override;
+    void timerCallback() override;
+
+    void addToBuffer(double value);
+    double readBufferMean();
+    void setSpatialParameter(std::optional<std::reference_wrapper<SpatialParameter>> param);
+
+private:
+    //==============================================================================
+    std::optional<std::reference_wrapper<SpatialParameter>> mParam;
+    std::deque<double> mGUIBuffer;
+    double mBuffer{};
+    int mBufferCount{};
+
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(DataGraph)
+}; // class DataGraph
+
+//==============================================================================
+class SectionSoundReactiveSpatialization final
+    : public juce::Component
+    , private juce::Timer
 {
 public:
     //==============================================================================
@@ -42,17 +77,61 @@ public:
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
+    ControlGrisAudioProcessor & mAudioProcessor;
 
     juce::ListenerList<Listener> mListeners;
-
     SpatMode mSpatMode;
 
+    //==============================================================================
+    // Spatial parameters section
+    bool mXYParamLinked{};
+
+    juce::Label mSpatialParameterLabel;
+
+    juce::TextButton mParameterAzimuthButton;
+    juce::TextButton mParameterElevationButton;
+    juce::TextButton mParameterXButton;
+    juce::TextButton mParameterYButton;
+    juce::TextButton mParameterZButton;
+    juce::TextButton mParameterAzimuthOrXYSpanButton;
+    juce::TextButton mParameterElevationOrZSpanButton;
+
+    juce::ComboBox mParameterAzimuthDescriptorCombo;
+    juce::ComboBox mParameterElevationDescriptorCombo;
+    juce::ComboBox mParameterXDescriptorCombo;
+    juce::ComboBox mParameterYDescriptorCombo;
+    juce::ComboBox mParameterZDescriptorCombo;
+    juce::ComboBox mParameterAzimuthOrXYSpanDescriptorCombo;
+    juce::ComboBox mParameterElevationOrZSpanDescriptorCombo;
+
+    juce::Label mParameterRangeLabel;
+
+    NumSlider mParameterAzimuthRangeSlider;
+    NumSlider mParameterElevationRangeSlider;
+    NumSlider mParameterXRangeSlider;
+    NumSlider mParameterYRangeSlider;
+    NumSlider mParameterZRangeSlider;
+    NumSlider mParameterAzimuthOrXYSpanRangeSlider;
+    NumSlider mParameterElevationOrZSpanRangeSlider;
+
+    juce::Label mParameterOffsetLabel;
+
+    NumSlider mParameterElevationZOffsetSlider;
+    NumSlider mParameterEleZSpanOffsetSlider;
+    
+    juce::Label mParameterLapLabel;
+    //NumSlider mParameterLapSlider;
+    juce::ComboBox mParameterLapCombo;
+
+    //==============================================================================
     // Audio anaylysis section
+    juce::Label mAudioAnalysisLabel;
+    std::optional<std::reference_wrapper<SpatialParameter>> mParameterToShow;
+    DataGraph mDataGraph;
+    //juce::ComboBox mAudioDescriptorCombo;
+
     juce::Label mAnalyzedSourceMixLabel;
     juce::ComboBox mAnalyzedSourceMixCombo;
-
-    juce::Label mAudioAnalysisLabel;
-    juce::ComboBox mAudioDescriptorCombo;
 
     juce::Label mDescriptorFactorLabel;
     juce::Label mDescriptorThresholdLabel;
@@ -75,45 +154,12 @@ private:
     NumSlider mDescriptorSmoothCoefSlider;
 
     juce::TextButton mClickTimerButton;
+    int mOnsetDetectiontimerCounter{};
 
-    // Spatial parameters section
-    juce::Label mSpatialParameterLabel;
-
-    juce::Label mParameterAzimuthLabel;
-    juce::Label mParameterElevationLabel;
-    juce::Label mParameterXLabel;
-    juce::Label mParameterYLabel;
-    juce::Label mParameterZLabel;
-    juce::Label mParameterAzimuthOrXYSpanLabel;
-    juce::Label mParameterElevationOrZSpanLabel;
-
-    juce::Label mParameterAzimuthLapLabel;
-
-    juce::Label mParameterElevationAndZOffsetLabel;
-    juce::Label mParameterElevationAndZSpanOffsetLabel;
-
-    juce::Label mParameterAzimuthRangeLabel;
-    juce::Label mParameterElevationRangeLabel;
-    juce::Label mParameterXRangeLabel;
-    juce::Label mParameterYRangeLabel;
-    juce::Label mParameterZRangeLabel;
-    juce::Label mParameterAzimuthOrXYSpanRangeLabel;
-    juce::Label mParameterElevationOrZSpanRangeLabel;
-
-    juce::ComboBox mParameterAzimuthCombo;
-    juce::ComboBox mParameterElevationCombo;
-    juce::ComboBox mParameterXCombo;
-    juce::ComboBox mParameterYCombo;
-    juce::ComboBox mParameterZCombo;
-    juce::ComboBox mParameterAzimuthOrXYSpanCombo;
-    juce::ComboBox mParameterElevationOrZSpanCombo;
-
-    NumSlider mDescriptorOffsetSlider;
-    NumSlider mDescriptorRangeSlider;
-    NumSlider mDescriptorLapSlider;
 public:
     //==============================================================================
-    explicit SectionSoundReactiveSpatialization(GrisLookAndFeel & grisLookAndFeel);
+    explicit SectionSoundReactiveSpatialization(GrisLookAndFeel & grisLookAndFeel,
+                                                ControlGrisAudioProcessor & audioProcessor);
     //==============================================================================
     SectionSoundReactiveSpatialization() = delete;
     ~SectionSoundReactiveSpatialization() override = default;
@@ -129,12 +175,19 @@ public:
     // overrides
     void paint(juce::Graphics & g) override;
     void resized() override;
+    void mouseDown(juce::MouseEvent const & event) override;
+    void timerCallback() override;
 
     //==============================================================================
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
 
+    void setSpatMode(SpatMode spatMode);
+
 private:
+    //==============================================================================
+    void refreshDescriptorPanel();
+
     //==============================================================================
     JUCE_LEAK_DETECTOR(SectionSoundReactiveSpatialization)
 };

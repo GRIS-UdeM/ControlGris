@@ -1,22 +1,22 @@
-/**************************************************************************
- * Copyright 2018 UdeM - GRIS - Olivier Belanger                          *
- *                                                                        *
- * This file is part of ControlGris, a multi-source spatialization plugin *
- *                                                                        *
- * ControlGris is free software: you can redistribute it and/or modify    *
- * it under the terms of the GNU Lesser General Public License as         *
- * published by the Free Software Foundation, either version 3 of the     *
- * License, or (at your option) any later version.                        *
- *                                                                        *
- * ControlGris is distributed in the hope that it will be useful,         *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of         *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the          *
- * GNU Lesser General Public License for more details.                    *
- *                                                                        *
- * You should have received a copy of the GNU Lesser General Public       *
- * License along with ControlGris.  If not, see                           *
- * <http://www.gnu.org/licenses/>.                                        *
- *************************************************************************/
+/*
+ This file is part of ControlGris.
+
+ Developers: Olivier BELANGER, Gaël LANE LÉPINE
+
+ ControlGris is free software: you can redistribute it and/or modify
+ it under the terms of the GNU Lesser General Public License as
+ published by the Free Software Foundation, either version 3 of the
+ License, or (at your option) any later version.
+
+ ControlGris is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU Lesser General Public License for more details.
+
+ You should have received a copy of the GNU Lesser General Public
+ License along with ControlGris.  If not, see
+ <http://www.gnu.org/licenses/>.
+*/
 
 #include "cg_constants.hpp"
 
@@ -124,5 +124,15 @@ juce::StringArray const FIXED_POSITION_DATA_HEADERS{
 };
 
 juce::String const FIXED_POSITION_DATA_TAG("Fix_Position_Data");
+
+juce::StringArray const AUDIO_DESCRIPTOR_TYPES{
+    juce::String("-"),      juce::String("Loudness"), juce::String("Pitch"),           juce::String("Centroid"),
+    juce::String("Spread"), juce::String("Noise"),    juce::String("Iterations Speed")
+};
+
+juce::StringArray const ONSET_DETECTION_METRIC_TYPES{ juce::String("Energy"),
+                                                      juce::String("High Frequency Content"),
+                                                      juce::String("Spectral Flux"),
+                                                      juce::String("Rectified Complex Domain") };
 
 } // namespace gris

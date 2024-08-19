@@ -101,6 +101,28 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
     ,
 #endif // JucePlugin_PreferredChannelConfigurations
     mAudioProcessorValueTreeState(*this, nullptr, juce::Identifier(JucePlugin_Name), createParameterLayout())
+    , mAzimuthDome(mAudioProcessorValueTreeState, mParamFunctions)
+    , mElevationDome(mAudioProcessorValueTreeState, mParamFunctions)
+    , mHSpanDome(mAudioProcessorValueTreeState, mParamFunctions)
+    , mVSpanDome(mAudioProcessorValueTreeState, mParamFunctions)
+    , mXCube(mAudioProcessorValueTreeState, mParamFunctions)
+    , mYCube(mAudioProcessorValueTreeState, mParamFunctions)
+    , mZCube(mAudioProcessorValueTreeState, mParamFunctions)
+    , mHSpanCube(mAudioProcessorValueTreeState, mParamFunctions)
+    , mVSpanCube(mAudioProcessorValueTreeState, mParamFunctions)
+    , mSpatParametersDomeRefs{ &mAzimuthDome, &mElevationDome, &mHSpanDome, &mVSpanDome }
+    , mSpatParametersCubeRefs{ &mXCube, &mYCube, &mZCube, &mHSpanCube, &mVSpanCube }
+    , mSpatParametersDomeValueRefs{ &mAzimuthDomeValue, &mElevationDomeValue, &mHspanDomeValue, &mVspanDomeValue }
+    , mSpatParametersCubeValueRefs{ &mXCubeValue, &mYCubeValue, &mZCubeValue, &mHspanCubeValue, &mVspanCubeValue }
+    , mDomeOnsetDetectionRefs{ &mOnsetDetectionAzimuth,
+                               &mOnsetDetectionElevation,
+                               &mOnsetDetectionHSpan,
+                               &mOnsetDetectionVSpan }
+    , mCubeOnsetDetectionRefs{ &mOnsetDetectionX,
+                               &mOnsetDetectionY,
+                               &mOnsetDetectionZ,
+                               &mOnsetDetectionHSpan,
+                               &mOnsetDetectionVSpan }
 
 {
     setLatencySamples(0);
@@ -1527,6 +1549,242 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
     default:
         jassertfalse;
     }
+}
+
+//==============================================================================
+AzimuthDome & ControlGrisAudioProcessor::getAzimuthDome()
+{
+    return mAzimuthDome;
+}
+
+//==============================================================================
+ElevationDome & ControlGrisAudioProcessor::getElevationDome()
+{
+    return mElevationDome;
+}
+
+//==============================================================================
+HspanDome & ControlGrisAudioProcessor::getHSpanDome()
+{
+    return mHSpanDome;
+}
+
+//==============================================================================
+VspanDome & ControlGrisAudioProcessor::getVSpanDome()
+{
+    return mVSpanDome;
+}
+
+//==============================================================================
+XCube & ControlGrisAudioProcessor::getXCube()
+{
+    return mXCube;
+}
+
+//==============================================================================
+YCube & ControlGrisAudioProcessor::getYCube()
+{
+    return mYCube;
+}
+
+//==============================================================================
+ZCube & ControlGrisAudioProcessor::getZCube()
+{
+    return mZCube;
+}
+
+//==============================================================================
+HspanCube & ControlGrisAudioProcessor::getHSpanCube()
+{
+    return mHSpanCube;
+}
+
+//==============================================================================
+VspanCube & ControlGrisAudioProcessor::getVSpanCube()
+{
+    return mVSpanCube;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeSpectralAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->needsSpectralAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeLoudnessAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessLoudnessAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomePitchAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessPitchAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeCentroidAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessCentroidAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeSpreadAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessSpreadAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeNoiseAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessNoiseAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessDomeOnsetDetectionAnalysis()
+{
+    if (mSpatMode == SpatMode::dome) {
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            if (spatParam->shouldProcessOnsetDetectionAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeSpectralAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->needsSpectralAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeLoudnessAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessLoudnessAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubePitchAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessPitchAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeCentroidAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessCentroidAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeSpreadAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessSpreadAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeNoiseAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessNoiseAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::shouldProcessCubeOnsetDetectionAnalysis()
+{
+    if (mSpatMode == SpatMode::cube) {
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            if (spatParam->shouldProcessOnsetDetectionAnalysis()) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 
 } // namespace gris

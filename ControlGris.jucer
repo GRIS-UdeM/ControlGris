@@ -7,9 +7,46 @@
               pluginChannelConfigs="{1,1}, {1,2}, {1,4}, {1,6}, {1,8}, {1,12}, {1,16}, {2,2}, {2,4}, {2,6}, {2,8}, {2,12}, {2,16}, {4,4}, {4,6}, {4,8}, {4,12}, {4,16}, {6,6}, {6,8}, {6,12}, {6,16}, {8,8}, {8,12}, {8,16}"
               cppLanguageStandard="17" projectLineFeed="&#10;" jucerFormatVersion="1"
               companyWebsite="ca.umontreal.musique.gris.controlgris" addUsingNamespaceToJuceHeader="0"
-              displaySplashScreen="1" defines="JUCE_DISPLAY_SPLASH_SCREEN=0&#10;JUCE_MODAL_LOOPS_PERMITTED=1">
+              displaySplashScreen="1" defines="JUCE_DISPLAY_SPLASH_SCREEN=0&#10;JUCE_MODAL_LOOPS_PERMITTED=1&#10;_USE_MATH_DEFINES=1">
   <MAINGROUP id="gDqxm3" name="ControlGris">
     <GROUP id="{2E3D0AD8-9A99-8E89-6614-B686569C7108}" name="Source">
+      <GROUP id="{84670BD1-D750-4129-B3DC-1ABD8B2CD51E}" name="SpatialParameters">
+        <FILE id="wS32gx" name="cg_AzimuthDome.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_AzimuthDome.hpp"/>
+        <FILE id="KaCny4" name="cg_ElevationDome.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_ElevationDome.hpp"/>
+        <FILE id="fn0cdn" name="cg_HspanCube.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_HspanCube.hpp"/>
+        <FILE id="wDy9dR" name="cg_HspanDome.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_HspanDome.hpp"/>
+        <FILE id="llzRxY" name="cg_Smooth.hpp" compile="0" resource="0" file="Source/SpatialParameters/cg_Smooth.hpp"/>
+        <FILE id="TJi1Tm" name="cg_SpatialParameter.cpp" compile="1" resource="0"
+              file="Source/SpatialParameters/cg_SpatialParameter.cpp"/>
+        <FILE id="hIdVQd" name="cg_SpatialParameter.h" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_SpatialParameter.h"/>
+        <FILE id="DUoQxx" name="cg_SpatParamHelperFunctions.h" compile="0"
+              resource="0" file="Source/SpatialParameters/cg_SpatParamHelperFunctions.h"/>
+        <FILE id="IHxUnW" name="cg_VspanCube.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_VspanCube.hpp"/>
+        <FILE id="gi0YYM" name="cg_VspanDome.hpp" compile="0" resource="0"
+              file="Source/SpatialParameters/cg_VspanDome.hpp"/>
+        <FILE id="jxJ5OV" name="cg_XCube.hpp" compile="0" resource="0" file="Source/SpatialParameters/cg_XCube.hpp"/>
+        <FILE id="cVH7or" name="cg_YCube.hpp" compile="0" resource="0" file="Source/SpatialParameters/cg_YCube.hpp"/>
+        <FILE id="knE7II" name="cg_ZCube.hpp" compile="0" resource="0" file="Source/SpatialParameters/cg_ZCube.hpp"/>
+      </GROUP>
+      <GROUP id="{20245429-CB0E-7DD7-5CB2-E8A1821DB0C3}" name="Descriptors">
+        <FILE id="grnO5w" name="cg_Centroid.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Centroid.hpp"/>
+        <FILE id="ZORACt" name="cg_Descriptors.hpp" compile="0" resource="0"
+              file="Source/Descriptors/cg_Descriptors.hpp"/>
+        <FILE id="EMyAej" name="cg_Flatness.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Flatness.hpp"/>
+        <FILE id="YrJdFo" name="cg_Loudness.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Loudness.hpp"/>
+        <FILE id="ybyVMo" name="cg_OnsetDetection.hpp" compile="0" resource="0"
+              file="Source/Descriptors/cg_OnsetDetection.hpp"/>
+        <FILE id="vhJJdN" name="cg_Pitch.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Pitch.hpp"/>
+        <FILE id="GfBk6b" name="cg_Shape.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Shape.hpp"/>
+        <FILE id="Masp68" name="cg_Spread.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Spread.hpp"/>
+        <FILE id="kerVOL" name="cg_Stats.hpp" compile="0" resource="0" file="Source/Descriptors/cg_Stats.hpp"/>
+      </GROUP>
       <GROUP id="{32F49E20-AD3C-BA30-3DC6-5BBC5846D431}" name="Misc">
         <FILE id="MrPims" name="cg_CartesianVector.cpp" compile="1" resource="0"
               file="Source/cg_CartesianVector.cpp"/>
@@ -207,10 +244,14 @@
         <MODULEPATH id="juce_audio_devices" path="../../../../../dev/JUCE/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <VS2022 targetFolder="Builds/VisualStudio2022">
+    <VS2022 targetFolder="Builds/VisualStudio2022" externalLibraries="flucoma_VERSION_LIB.lib&#10;fmt.lib&#10;foonathan_memory-0.7.3.lib">
       <CONFIGURATIONS>
-        <CONFIGURATION isDebug="1" name="Debug" enablePluginBinaryCopyStep="0"/>
-        <CONFIGURATION isDebug="0" name="Release"/>
+        <CONFIGURATION isDebug="1" name="Debug" enablePluginBinaryCopyStep="0" headerPath="..\..\Source\libs\include&#10;..\..\Source\libs\include\flucoma&#10;..\..\Source\libs\include\Eigen&#10;..\..\Source\libs\include\hisstools&#10;..\..\Source\libs\include\Spectra&#10;..\..\Source\libs\include\tl&#10;..\..\Source\libs\include\nlohmann&#10;..\..\Source\libs\include\fmt&#10;..\..\Source\libs\include\foonathan"
+                       libraryPath="..\..\Source\libs\lib\flucoma\windows\Debug" usePrecompiledHeaderFile="1"
+                       precompiledHeaderFile="Source\PCH.h"/>
+        <CONFIGURATION isDebug="0" name="Release" headerPath="..\..\Source\libs\include&#10;..\..\Source\libs\include\flucoma&#10;..\..\Source\libs\include\Eigen&#10;..\..\Source\libs\include\hisstools&#10;..\..\Source\libs\include\Spectra&#10;..\..\Source\libs\include\tl&#10;..\..\Source\libs\include\nlohmann&#10;..\..\Source\libs\include\fmt&#10;..\..\Source\libs\include\foonathan"
+                       libraryPath="..\..\Source\libs\lib\flucoma\windows\Release" usePrecompiledHeaderFile="1"
+                       precompiledHeaderFile="Source\PCH.h"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_audio_basics"/>
