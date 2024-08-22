@@ -1606,6 +1606,168 @@ VspanCube & ControlGrisAudioProcessor::getVSpanCube()
 }
 
 //==============================================================================
+void ControlGrisAudioProcessor::setOnsetDetectionMetric(ParameterID paramID, const int metric)
+{
+    int transposedMetric{};
+    switch (metric) {
+    case 1: // Energy
+    case 2: // High Frequency Content
+    case 3: // Spectral Flux
+        transposedMetric = metric - 1;
+        break;
+    default: // case 4 : // Rectified Complex Phase Deviation
+        transposedMetric = 9;
+        break;
+    }
+
+    switch (paramID) {
+    case ParameterID::azimuth:
+        mOnsetDetectionAzimuth.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::elevation:
+        mOnsetDetectionElevation.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::x:
+        mOnsetDetectionX.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::y:
+        mOnsetDetectionY.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::z:
+        mOnsetDetectionZ.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::azimuthspan:
+        mOnsetDetectionHSpan.setOnesetDetectionMetric(transposedMetric);
+        break;
+    case ParameterID::elevationspan:
+        mOnsetDetectionVSpan.setOnesetDetectionMetric(transposedMetric);
+        break;
+    default:
+        break;
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOnsetDetectionThreshold(ParameterID paramID, const float tresh)
+{
+    switch (paramID) {
+    case ParameterID::azimuth:
+        mOnsetDetectionAzimuth.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::elevation:
+        mOnsetDetectionElevation.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::x:
+        mOnsetDetectionX.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::y:
+        mOnsetDetectionY.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::z:
+        mOnsetDetectionZ.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::azimuthspan:
+        mOnsetDetectionHSpan.setOnsetDetectionThreshold(tresh);
+        break;
+    case ParameterID::elevationspan:
+        mOnsetDetectionVSpan.setOnsetDetectionThreshold(tresh);
+        break;
+    default:
+        break;
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOnsetDetectionMinTime(ParameterID paramID, const double minTime)
+{
+    switch (paramID) {
+    case ParameterID::azimuth:
+        mOnsetDetectionAzimuth.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::elevation:
+        mOnsetDetectionElevation.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::x:
+        mOnsetDetectionX.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::y:
+        mOnsetDetectionY.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::z:
+        mOnsetDetectionZ.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::azimuthspan:
+        mOnsetDetectionHSpan.setOnsetDetectionMinTime(minTime);
+        break;
+    case ParameterID::elevationspan:
+        mOnsetDetectionVSpan.setOnsetDetectionMinTime(minTime);
+        break;
+    default:
+        break;
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOnsetDetectionMaxTime(ParameterID paramID, const double maxTime)
+{
+    switch (paramID) {
+    case ParameterID::azimuth:
+        mOnsetDetectionAzimuth.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::elevation:
+        mOnsetDetectionElevation.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::x:
+        mOnsetDetectionX.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::y:
+        mOnsetDetectionY.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::z:
+        mOnsetDetectionZ.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::azimuthspan:
+        mOnsetDetectionHSpan.setOnsetDetectionMaxTime(maxTime);
+        break;
+    case ParameterID::elevationspan:
+        mOnsetDetectionVSpan.setOnsetDetectionMaxTime(maxTime);
+        break;
+    default:
+        break;
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setOnsetDetectionFromClick(ParameterID paramID, const double timeValue)
+{
+    switch (paramID) {
+    case ParameterID::azimuth:
+        mOnsetDetectionAzimuth.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::elevation:
+        mOnsetDetectionElevation.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::x:
+        mOnsetDetectionX.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::y:
+        mOnsetDetectionY.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::z:
+        mOnsetDetectionZ.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::azimuthspan:
+        mOnsetDetectionHSpan.setOnsetDetectionFromClick(timeValue);
+        break;
+    case ParameterID::elevationspan:
+        mOnsetDetectionVSpan.setOnsetDetectionFromClick(timeValue);
+        break;
+    default:
+        break;
+    }
+}
+
+//==============================================================================
 bool ControlGrisAudioProcessor::shouldProcessDomeSpectralAnalysis()
 {
     if (mSpatMode == SpatMode::dome) {

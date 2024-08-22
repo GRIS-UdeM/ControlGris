@@ -318,6 +318,12 @@ public:
     HspanCube & getHSpanCube();
     VspanCube & getVSpanCube();
 
+    void setOnsetDetectionMetric(ParameterID paramID, const int metric);
+    void setOnsetDetectionThreshold(ParameterID paramID, const float tresh);
+    void setOnsetDetectionMinTime(ParameterID paramID, const double minTime);
+    void setOnsetDetectionMaxTime(ParameterID paramID, const double maxTime);
+    void setOnsetDetectionFromClick(ParameterID paramID, const double timeValue);
+
     bool shouldProcessDomeSpectralAnalysis();
     bool shouldProcessDomeLoudnessAnalysis();
     bool shouldProcessDomePitchAnalysis();

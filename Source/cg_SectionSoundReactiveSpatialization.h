@@ -64,7 +64,7 @@ private:
 //==============================================================================
 class SectionSoundReactiveSpatialization final
     : public juce::Component
-    , private juce::Timer
+    , private juce::MultiTimer
 {
 public:
     //==============================================================================
@@ -76,6 +76,8 @@ public:
 
 private:
     //==============================================================================
+    enum timerParamID { azimuth = 1, elevation, x, y, z, azimuthSpan, elevationSpan };
+
     GrisLookAndFeel & mGrisLookAndFeel;
     ControlGrisAudioProcessor & mAudioProcessor;
 
@@ -87,6 +89,9 @@ private:
     bool mXYParamLinked{};
 
     juce::Label mSpatialParameterLabel;
+
+    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterDome;
+    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterCube;
 
     juce::TextButton mParameterAzimuthButton;
     juce::TextButton mParameterElevationButton;
@@ -120,15 +125,14 @@ private:
     NumSlider mParameterEleZSpanOffsetSlider;
     
     juce::Label mParameterLapLabel;
-    //NumSlider mParameterLapSlider;
     juce::ComboBox mParameterLapCombo;
 
     //==============================================================================
     // Audio anaylysis section
     juce::Label mAudioAnalysisLabel;
     std::optional<std::reference_wrapper<SpatialParameter>> mParameterToShow;
+    DescriptorID mDescriptorIdToUse{ DescriptorID::invalid };
     DataGraph mDataGraph;
-    //juce::ComboBox mAudioDescriptorCombo;
 
     juce::Label mAnalyzedSourceMixLabel;
     juce::ComboBox mAnalyzedSourceMixCombo;
@@ -141,8 +145,9 @@ private:
     juce::Label mDescriptorMaxTimeLabel;
     juce::Label mDescriptorSmoothLabel;
     juce::Label mDescriptorSmoothCoefLabel;
+    juce::Label mDescriptorMetricLabel;
 
-    juce::ComboBox mDescriptorMetricComboBox;
+    juce::ComboBox mDescriptorMetricCombo;
 
     NumSlider mDescriptorFactorSlider;
     NumSlider mDescriptorThresholdSlider;
@@ -154,7 +159,16 @@ private:
     NumSlider mDescriptorSmoothCoefSlider;
 
     juce::TextButton mClickTimerButton;
-    int mOnsetDetectiontimerCounter{};
+
+    int mOnsetDetectiontimerCounterAzimuth{};
+    int mOnsetDetectiontimerCounterElevation{};
+    int mOnsetDetectiontimerCounterX{};
+    int mOnsetDetectiontimerCounterY{};
+    int mOnsetDetectiontimerCounterZ{};
+    int mOnsetDetectiontimerCounterAzimuthSpan{};
+    int mOnsetDetectiontimerCounterElevationSpan{};
+
+    juce::Rectangle<int> mAreaAudioAnalysis;
 
 public:
     //==============================================================================
@@ -176,7 +190,7 @@ public:
     void paint(juce::Graphics & g) override;
     void resized() override;
     void mouseDown(juce::MouseEvent const & event) override;
-    void timerCallback() override;
+    void timerCallback(int timerID) override;
 
     //==============================================================================
     void addListener(Listener * l) { mListeners.add(l); }
@@ -186,10 +200,14 @@ public:
 
 private:
     //==============================================================================
+    void unselectAllParamButtons();
     void refreshDescriptorPanel();
+    void loudnessSpreadNoiseDescriptorLayout();
+    void pitchCentroidDescriptorLayout();
+    void iterSpeedDescriptorLayout();
+    void setAudioAnalysisComponentsInvisible();
 
     //==============================================================================
     JUCE_LEAK_DETECTOR(SectionSoundReactiveSpatialization)
 };
-
 } // namespace gris
