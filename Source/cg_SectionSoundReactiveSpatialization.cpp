@@ -27,6 +27,16 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     ControlGrisAudioProcessor & audioProcessor)
     : mGrisLookAndFeel(grisLookAndFeel)
     , mAudioProcessor(audioProcessor)
+    , mAPVTS(mAudioProcessor.getValueTreeState())
+    , mParameterButtonDomeRefs{ &mParameterAzimuthButton,
+                                &mParameterElevationButton,
+                                &mParameterAzimuthOrXYSpanButton,
+                                &mParameterElevationOrZSpanButton }
+    , mParameterButtonCubeRefs{ &mParameterXButton,
+                                &mParameterYButton,
+                                &mParameterZButton,
+                                &mParameterAzimuthOrXYSpanButton,
+                                &mParameterElevationOrZSpanButton }
     , mDescriptorFactorSlider(grisLookAndFeel)
     , mDescriptorThresholdSlider(grisLookAndFeel)
     , mDescriptorMinFreqSlider(grisLookAndFeel)
@@ -47,16 +57,70 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 {
     auto const initRangeSlider = [&](NumSlider & slider) {
         slider.setNormalisableRange(juce::NormalisableRange<double>{ -100.0, 100.0, 0.1 });
-        slider.setValue(100.0, juce::dontSendNotification);
+        //slider.setValue(100.0, juce::dontSendNotification);
         slider.setNumDecimalPlacesToDisplay(1);
         addAndMakeVisible(slider);
     };
 
     auto const initParameterDescCombo = [&](juce::ComboBox & combo) {
         combo.addItemList(AUDIO_DESCRIPTOR_TYPES, 1);
-        combo.setSelectedId(1, juce::dontSendNotification);
+        //combo.setSelectedId(1, juce::dontSendNotification);
         addAndMakeVisible(combo);
     };
+
+    auto const rangeSliderOnValueChange
+        = [&](juce::ComboBox & descriptorCombo, NumSlider & rangeSlider, SpatialParameter & param) {
+              switch (Descriptor::fromInt(descriptorCombo.getSelectedId())) {
+              case DescriptorID::loudness:
+                  param.setParamRangeLoudness(rangeSlider.getValue());
+                  break;
+              case DescriptorID::pitch:
+                  param.setParamRangePitch(rangeSlider.getValue());
+                  break;
+              case DescriptorID::centroid:
+                  param.setParamRangeCentroid(rangeSlider.getValue());
+                  break;
+              case DescriptorID::spread:
+                  param.setParamRangeSpread(rangeSlider.getValue());
+                  break;
+              case DescriptorID::noise:
+                  param.setParamRangeNoise(rangeSlider.getValue());
+                  break;
+              case DescriptorID::iterationsSpeed:
+                  param.setParamRangeOnsetDetection(rangeSlider.getValue());
+                  break;
+              case DescriptorID::invalid:
+              default:
+                  break;
+              }
+          };
+
+    auto const offsetSliderOnValueChange
+        = [&](juce::ComboBox & descriptorCombo, NumSlider & offsetSlider, SpatialParameter & param) {
+              switch (Descriptor::fromInt(descriptorCombo.getSelectedId())) {
+              case DescriptorID::loudness:
+                  param.setParamOffsetLoudness(offsetSlider.getValue());
+                  break;
+              case DescriptorID::pitch:
+                  param.setParamOffsetPitch(offsetSlider.getValue());
+                  break;
+              case DescriptorID::centroid:
+                  param.setParamOffsetCentroid(offsetSlider.getValue());
+                  break;
+              case DescriptorID::spread:
+                  param.setParamOffsetSpread(offsetSlider.getValue());
+                  break;
+              case DescriptorID::noise:
+                  param.setParamOffsetNoise(offsetSlider.getValue());
+                  break;
+              case DescriptorID::iterationsSpeed:
+                  param.setParamOffsetOnsetDetection(offsetSlider.getValue());
+                  break;
+              case DescriptorID::invalid:
+              default:
+                  break;
+              }
+          };
 
     setName("Sound Reactive Spatialization");
 
@@ -89,15 +153,140 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterElevationZOffsetSlider.setNumDecimalPlacesToDisplay(3);
     mParameterEleZSpanOffsetSlider.setNumDecimalPlacesToDisplay(3);
 
+    // range sliders
+    mParameterAzimuthRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        rangeSliderOnValueChange(mParameterAzimuthDescriptorCombo,
+                                 mParameterAzimuthRangeSlider,
+                                 mAudioProcessor.getAzimuthDome());
+    };
+
+    mParameterElevationRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        rangeSliderOnValueChange(mParameterElevationDescriptorCombo,
+                                 mParameterElevationRangeSlider,
+                                 mAudioProcessor.getElevationDome());
+    };
+
+    mParameterXRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        rangeSliderOnValueChange(mParameterXDescriptorCombo, mParameterXRangeSlider, mAudioProcessor.getXCube());
+    };
+
+    mParameterYRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        rangeSliderOnValueChange(mParameterYDescriptorCombo, mParameterYRangeSlider, mAudioProcessor.getYCube());
+    };
+
+    mParameterZRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        rangeSliderOnValueChange(mParameterZDescriptorCombo, mParameterZRangeSlider, mAudioProcessor.getZCube());
+    };
+
+    mParameterAzimuthOrXYSpanRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            rangeSliderOnValueChange(mParameterAzimuthOrXYSpanDescriptorCombo,
+                                     mParameterAzimuthOrXYSpanRangeSlider,
+                                     mAudioProcessor.getHSpanDome());
+        } else {
+            rangeSliderOnValueChange(mParameterAzimuthOrXYSpanDescriptorCombo,
+                                     mParameterAzimuthOrXYSpanRangeSlider,
+                                     mAudioProcessor.getHSpanCube());        
+        }
+    };
+
+    mParameterElevationOrZSpanRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            rangeSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                     mParameterElevationOrZSpanRangeSlider,
+                                     mAudioProcessor.getVSpanDome());
+        } else {
+            rangeSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                     mParameterElevationOrZSpanRangeSlider,
+                                     mAudioProcessor.getVSpanCube());
+        }
+    };
+
+    // offset sliders
+    mParameterElevationZOffsetSlider.onValueChange = [this, offsetSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            offsetSliderOnValueChange(mParameterElevationDescriptorCombo,
+                                     mParameterElevationZOffsetSlider,
+                                     mAudioProcessor.getElevationDome());
+        } else {
+            offsetSliderOnValueChange(mParameterZDescriptorCombo,
+                                     mParameterElevationZOffsetSlider,
+                                     mAudioProcessor.getZCube());
+        }
+    };
+
+    mParameterEleZSpanOffsetSlider.onValueChange = [this, offsetSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            offsetSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                      mParameterEleZSpanOffsetSlider,
+                                      mAudioProcessor.getVSpanDome());
+        } else {
+            offsetSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                      mParameterEleZSpanOffsetSlider,
+                                      mAudioProcessor.getVSpanCube());
+        }
+    };
+
+    addAndMakeVisible(&mParameterLapLabel);
+    mParameterLapLabel.setText("Lap", juce::dontSendNotification);
+
+    // lap combo
+    addAndMakeVisible(&mParameterLapCombo);
+    mParameterLapCombo.addItemList({ "1", "2", "3", "4" }, 1);
+    mParameterLapCombo.onChange = [this] {
+        auto descriptor = DescriptorID::invalid;
+        std::optional<std::reference_wrapper<SpatialParameter>> usedParam;
+
+        if (mSpatMode == SpatMode::dome) {
+            descriptor = Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId());
+            usedParam = mAudioProcessor.getAzimuthDome();
+        } else {
+            // XYParamLinked should be true...
+            descriptor = Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId());
+            usedParam = mAudioProcessor.getXCube();
+        }
+
+        auto & param{ usedParam->get() };
+        auto value = static_cast<double>(mParameterLapCombo.getSelectedId());
+        switch (descriptor) {
+        case DescriptorID::loudness:
+            param.setParamLapLoudness(value);
+            break;
+        case DescriptorID::pitch:
+            param.setParamLapPitch(value);
+            break;
+        case DescriptorID::centroid:
+            param.setParamLapCentroid(value);
+            break;
+        case DescriptorID::spread:
+            param.setParamLapSpread(value);
+            break;
+        case DescriptorID::noise:
+            param.setParamLapNoise(value);
+            break;
+        case DescriptorID::iterationsSpeed:
+            param.setParamLapOnsetDetection(value);
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+    };
+
     addAndMakeVisible(&mParameterAzimuthButton);
     mParameterAzimuthButton.setButtonText("Azimuth");
     mParameterAzimuthButton.setClickingTogglesState(true);
     mParameterAzimuthButton.onClick = [this] {
         if (mParameterAzimuthButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterAzimuthButton.setToggleState(true, juce::dontSendNotification);
+            mLastUsedParameterDomeButton = mParameterAzimuthButton;
             mParameterAzimuthDescriptorCombo.onChange();
-            mLastUsedParameterDome = mParameterAzimuthButton;
+            mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", 0, nullptr);
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            mLastUsedParameterDomeButton.reset();
+            setAudioAnalysisComponentsInvisible();
+            mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", "", nullptr);
         }
     };
 
@@ -106,10 +295,15 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterElevationButton.setClickingTogglesState(true);
     mParameterElevationButton.onClick = [this] {
         if (mParameterElevationButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterElevationButton.setToggleState(true, juce::dontSendNotification);
+            mLastUsedParameterDomeButton = mParameterElevationButton;
             mParameterElevationDescriptorCombo.onChange();
-            mLastUsedParameterDome = mParameterElevationButton;
+            mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", 1, nullptr);
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            mLastUsedParameterDomeButton.reset();
+            setAudioAnalysisComponentsInvisible();
+            mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", "", nullptr);
         }
     };
 
@@ -118,10 +312,15 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterXButton.setClickingTogglesState(true);
     mParameterXButton.onClick = [this] {
         if (mParameterXButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterXButton.setToggleState(true, juce::dontSendNotification);
+            mLastUsedParameterCubeButton = mParameterXButton;
             mParameterXDescriptorCombo.onChange();
-            mLastUsedParameterCube = mParameterXButton;
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", 0, nullptr);
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            mLastUsedParameterCubeButton.reset();
+            setAudioAnalysisComponentsInvisible();
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
         }
     };
 
@@ -130,10 +329,15 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterYButton.setClickingTogglesState(true);
     mParameterYButton.onClick = [this] {
         if (mParameterYButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterYButton.setToggleState(true, juce::dontSendNotification);
+            mLastUsedParameterCubeButton = mParameterYButton;
             mParameterYDescriptorCombo.onChange();
-            mLastUsedParameterCube = mParameterYButton;
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", 1, nullptr);
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            mLastUsedParameterCubeButton.reset();
+            setAudioAnalysisComponentsInvisible();
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
         }
     };
     
@@ -142,10 +346,15 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterZButton.setClickingTogglesState(true);
     mParameterZButton.onClick = [this] {
         if (mParameterZButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterZButton.setToggleState(true, juce::dontSendNotification);
+            mLastUsedParameterCubeButton = mParameterZButton;
             mParameterZDescriptorCombo.onChange();
-            mLastUsedParameterCube = mParameterZButton;
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", 2, nullptr);
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            mLastUsedParameterCubeButton.reset();
+            setAudioAnalysisComponentsInvisible();
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
         }
     };
 
@@ -154,14 +363,24 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterAzimuthOrXYSpanButton.setClickingTogglesState(true);
     mParameterAzimuthOrXYSpanButton.onClick = [this] {
         if (mParameterAzimuthOrXYSpanButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterAzimuthOrXYSpanButton.setToggleState(true, juce::dontSendNotification);
-            mParameterAzimuthOrXYSpanDescriptorCombo.onChange();
             if (mSpatMode == SpatMode::dome) {
-                mLastUsedParameterDome = mParameterAzimuthOrXYSpanButton;
+                mLastUsedParameterDomeButton = mParameterAzimuthOrXYSpanButton;
+                mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", 2, nullptr);
+            } else {
+                mLastUsedParameterCubeButton = mParameterAzimuthOrXYSpanButton;
+                mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", 3, nullptr); 
             }
-            else {
-                mLastUsedParameterCube = mParameterAzimuthOrXYSpanButton;
+            mParameterAzimuthOrXYSpanDescriptorCombo.onChange();
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            setAudioAnalysisComponentsInvisible();
+            if (mSpatMode == SpatMode::dome) {
+                mLastUsedParameterDomeButton.reset();
+                mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", "", nullptr);
+            } else {
+                mLastUsedParameterCubeButton.reset();
+                mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
             }
         }
     };
@@ -171,13 +390,24 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mParameterElevationOrZSpanButton.setClickingTogglesState(true);
     mParameterElevationOrZSpanButton.onClick = [this] {
         if (mParameterElevationOrZSpanButton.getToggleState()) {
-            unselectAllParamButtons();
-            mParameterElevationOrZSpanButton.setToggleState(true, juce::dontSendNotification);
-            mParameterElevationOrZSpanDescriptorCombo.onChange();
             if (mSpatMode == SpatMode::dome) {
-                mLastUsedParameterDome = mParameterElevationOrZSpanButton;
+                mLastUsedParameterDomeButton = mParameterElevationOrZSpanButton;
+                mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", 3, nullptr);
             } else {
-                mLastUsedParameterCube = mParameterElevationOrZSpanButton;
+                mLastUsedParameterCubeButton = mParameterElevationOrZSpanButton;
+                mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", 4, nullptr);
+            }
+            mParameterElevationOrZSpanDescriptorCombo.onChange();
+        } else {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+            setAudioAnalysisComponentsInvisible();
+            if (mSpatMode == SpatMode::dome) {
+                mLastUsedParameterDomeButton.reset();
+                mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", "", nullptr);
+            } else {
+                mLastUsedParameterCubeButton.reset();
+                mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
             }
         }
     };
@@ -185,71 +415,387 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     initParameterDescCombo(mParameterAzimuthDescriptorCombo);
     mParameterAzimuthDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterAzimuthButton.setToggleState(true, juce::dontSendNotification);
-        mParameterToShow = mAudioProcessor.getAzimuthDome();
-        mDescriptorIdToUse = Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId()); 
+        if (mParameterAzimuthDescriptorCombo.getSelectedId() == 1) {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+        } else {
+            mParameterToShow = mAudioProcessor.getAzimuthDome();
+            mDescriptorIdToUse = Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId());
+        }
+        if (mLastUsedParameterDomeButton != std::nullopt) {
+            mParameterAzimuthButton.setToggleState(true, juce::dontSendNotification);
+        }
+        mAPVTS.state.setProperty("LastUsedAzimuthDescriptor",
+                                 mParameterAzimuthDescriptorCombo.getSelectedId(),
+                                 nullptr);
+        auto & param{ mAudioProcessor.getAzimuthDome() };
+
+        switch (mDescriptorIdToUse) {
+        case DescriptorID::loudness:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangeLoudness());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapLoudness()));
+            break;
+        case DescriptorID::pitch:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangePitch());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapPitch()));
+            break;
+        case DescriptorID::centroid:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangeCentroid());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapCentroid()));
+            break;
+        case DescriptorID::spread:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangeSpread());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapSpread()));
+            break;
+        case DescriptorID::noise:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangeNoise());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapNoise()));
+            break;
+        case DescriptorID::iterationsSpeed:
+            mParameterAzimuthRangeSlider.setValue(param.getParamRangeOnsetDetection());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapOnsetDetection()));
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+        if (mParameterLapCombo.getSelectedId() == 0) {
+            mParameterLapCombo.setSelectedId(1);
+        }
+
         refreshDescriptorPanel();
     };
 
     initParameterDescCombo(mParameterElevationDescriptorCombo);
     mParameterElevationDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterElevationButton.setToggleState(true, juce::dontSendNotification);
-        mParameterToShow = mAudioProcessor.getElevationDome();
-        mDescriptorIdToUse = Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId());
+        if (mParameterElevationDescriptorCombo.getSelectedId() == 1) {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+        } else {
+            mParameterToShow = mAudioProcessor.getElevationDome();
+            mDescriptorIdToUse = Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId());
+        }
+        if (mLastUsedParameterDomeButton != std::nullopt) {
+            mParameterElevationButton.setToggleState(true, juce::dontSendNotification);
+        }
+        mAPVTS.state.setProperty("LastUsedElevationDescriptor",
+                                 mParameterElevationDescriptorCombo.getSelectedId(),
+                                 nullptr);
+        auto & param{ mAudioProcessor.getElevationDome() };
+
+        switch (mDescriptorIdToUse) {
+        case DescriptorID::loudness:
+            mParameterElevationRangeSlider.setValue(param.getParamRangeLoudness());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetLoudness());
+            break;
+        case DescriptorID::pitch:
+            mParameterElevationRangeSlider.setValue(param.getParamRangePitch());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetPitch());
+            break;
+        case DescriptorID::centroid:
+            mParameterElevationRangeSlider.setValue(param.getParamRangeCentroid());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetCentroid());
+            break;
+        case DescriptorID::spread:
+            mParameterElevationRangeSlider.setValue(param.getParamRangeSpread());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetSpread());
+            break;
+        case DescriptorID::noise:
+            mParameterElevationRangeSlider.setValue(param.getParamRangeNoise());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetNoise());
+            break;
+        case DescriptorID::iterationsSpeed:
+            mParameterElevationRangeSlider.setValue(param.getParamRangeOnsetDetection());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+
         refreshDescriptorPanel();
     };
 
     initParameterDescCombo(mParameterXDescriptorCombo);
     mParameterXDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterXButton.setToggleState(true, juce::dontSendNotification);
-        mParameterToShow = mAudioProcessor.getXCube();
-        mDescriptorIdToUse = Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId());
+        if (mParameterXDescriptorCombo.getSelectedId() == 1) {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+        } else {
+            mParameterToShow = mAudioProcessor.getXCube();
+            mDescriptorIdToUse = Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId());
+        }
+        if (mLastUsedParameterCubeButton != std::nullopt) {
+            mParameterXButton.setToggleState(true, juce::dontSendNotification);
+        }
+        mAPVTS.state.setProperty("LastUsedXDescriptor", mParameterXDescriptorCombo.getSelectedId(), nullptr);
+        auto & param{ mAudioProcessor.getXCube() };
+
+        switch (mDescriptorIdToUse) {
+        // mParameterLapCombo is visible only if mXYParamLinked is true
+        case DescriptorID::loudness:
+            mParameterXRangeSlider.setValue(param.getParamRangeLoudness());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapLoudness()));
+            break;
+        case DescriptorID::pitch:
+            mParameterXRangeSlider.setValue(param.getParamRangePitch());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapPitch()));
+            break;
+        case DescriptorID::centroid:
+            mParameterXRangeSlider.setValue(param.getParamRangeCentroid());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapCentroid()));
+            break;
+        case DescriptorID::spread:
+            mParameterXRangeSlider.setValue(param.getParamRangeSpread());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapSpread()));
+            break;
+        case DescriptorID::noise:
+            mParameterXRangeSlider.setValue(param.getParamRangeNoise());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapNoise()));
+            break;
+        case DescriptorID::iterationsSpeed:
+            mParameterXRangeSlider.setValue(param.getParamRangeOnsetDetection());
+            mParameterLapCombo.setSelectedId(static_cast<int>(param.getParamLapOnsetDetection()));
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+
         refreshDescriptorPanel();
     };
     
     initParameterDescCombo(mParameterYDescriptorCombo);
     mParameterYDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterYButton.setToggleState(true, juce::dontSendNotification);
-        mParameterToShow = mAudioProcessor.getYCube();
-        mDescriptorIdToUse = Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId());
+        if (mParameterYDescriptorCombo.getSelectedId() == 1) {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+        } else {
+            mParameterToShow = mAudioProcessor.getYCube();
+            mDescriptorIdToUse = Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId());
+        }
+        if (mLastUsedParameterCubeButton != std::nullopt) {
+            mParameterYButton.setToggleState(true, juce::dontSendNotification);
+        }
+        mAPVTS.state.setProperty("LastUsedYDescriptor", mParameterYDescriptorCombo.getSelectedId(), nullptr);
+        auto & param{ mAudioProcessor.getYCube() };
+
+        switch (mDescriptorIdToUse) {
+        case DescriptorID::loudness:
+            mParameterYRangeSlider.setValue(param.getParamRangeLoudness());
+            break;
+        case DescriptorID::pitch:
+            mParameterYRangeSlider.setValue(param.getParamRangePitch());
+            break;
+        case DescriptorID::centroid:
+            mParameterYRangeSlider.setValue(param.getParamRangeCentroid());
+            break;
+        case DescriptorID::spread:
+            mParameterYRangeSlider.setValue(param.getParamRangeSpread());
+            break;
+        case DescriptorID::noise:
+            mParameterYRangeSlider.setValue(param.getParamRangeNoise());
+            break;
+        case DescriptorID::iterationsSpeed:
+            mParameterYRangeSlider.setValue(param.getParamRangeOnsetDetection());
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+
         refreshDescriptorPanel();
     };
 
     initParameterDescCombo(mParameterZDescriptorCombo);
     mParameterZDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterZButton.setToggleState(true, juce::dontSendNotification);
-        mParameterToShow = mAudioProcessor.getZCube();
-        mDescriptorIdToUse = Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId());
+        if (mParameterZDescriptorCombo.getSelectedId() == 1) {
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
+        } else {
+            mParameterToShow = mAudioProcessor.getZCube();
+            mDescriptorIdToUse = Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId());
+        }
+        if (mLastUsedParameterCubeButton != std::nullopt) {
+            mParameterZButton.setToggleState(true, juce::dontSendNotification);
+        }
+        mAPVTS.state.setProperty("LastUsedZDescriptor", mParameterZDescriptorCombo.getSelectedId(), nullptr);
+        auto & param{ mAudioProcessor.getZCube() };
+
+        switch (mDescriptorIdToUse) {
+        case DescriptorID::loudness:
+            mParameterZRangeSlider.setValue(param.getParamRangeLoudness());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetLoudness());
+            break;
+        case DescriptorID::pitch:
+            mParameterZRangeSlider.setValue(param.getParamRangePitch());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetPitch());
+            break;
+        case DescriptorID::centroid:
+            mParameterZRangeSlider.setValue(param.getParamRangeCentroid());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetCentroid());
+            break;
+        case DescriptorID::spread:
+            mParameterZRangeSlider.setValue(param.getParamRangeSpread());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetSpread());
+            break;
+        case DescriptorID::noise:
+            mParameterZRangeSlider.setValue(param.getParamRangeNoise());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetNoise());
+            break;
+        case DescriptorID::iterationsSpeed:
+            mParameterZRangeSlider.setValue(param.getParamRangeOnsetDetection());
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+
         refreshDescriptorPanel();
     };
 
     initParameterDescCombo(mParameterAzimuthOrXYSpanDescriptorCombo);
     mParameterAzimuthOrXYSpanDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterAzimuthOrXYSpanButton.setToggleState(true, juce::dontSendNotification);
-        if (mSpatMode == SpatMode::dome) {
-            mParameterToShow = mAudioProcessor.getHSpanDome();
+        if (mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId() == 1) {
+            //if (mSpatMode == SpatMode::dome) {
+            //    mLastUsedParameterDomeButton.reset();
+            //} else {
+            //    mLastUsedParameterCubeButton.reset();
+            //}
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
         } else {
-            mParameterToShow = mAudioProcessor.getHSpanCube();
+            if (mSpatMode == SpatMode::dome) {
+                //mLastUsedParameterDomeButton = mParameterAzimuthOrXYSpanButton;
+                mParameterToShow = mAudioProcessor.getHSpanDome();
+            } else {
+                //mLastUsedParameterCubeButton = mParameterAzimuthOrXYSpanButton;
+                mParameterToShow = mAudioProcessor.getHSpanCube();
+            }
+        }
+        if (mSpatMode == SpatMode::dome) {
+            if (mLastUsedParameterDomeButton != std::nullopt) {
+                mParameterAzimuthOrXYSpanButton.setToggleState(true, juce::dontSendNotification);
+            }
+            mAPVTS.state.setProperty("LastUsedHSpanDomeDescriptor",
+                                     mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId(),
+                                     nullptr);
+        } else {
+            if (mLastUsedParameterCubeButton != std::nullopt) {
+                mParameterAzimuthOrXYSpanButton.setToggleState(true, juce::dontSendNotification);
+            }
+            mAPVTS.state.setProperty("LastUsedHSpanCubeDescriptor",
+                                     mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId(),
+                                     nullptr);
         }
         mDescriptorIdToUse = Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId());
+        if (mParameterToShow) {
+            auto & param{ mParameterToShow->get() };
+
+            switch (mDescriptorIdToUse) {
+            case DescriptorID::loudness:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeLoudness());
+                break;
+            case DescriptorID::pitch:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangePitch());
+                break;
+            case DescriptorID::centroid:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeCentroid());
+                break;
+            case DescriptorID::spread:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeSpread());
+                break;
+            case DescriptorID::noise:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeNoise());
+                break;
+            case DescriptorID::iterationsSpeed:
+                mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeOnsetDetection());
+                break;
+            case DescriptorID::invalid:
+            default:
+                break;
+            }
+        }
+
         refreshDescriptorPanel();
     };
 
     initParameterDescCombo(mParameterElevationOrZSpanDescriptorCombo);
     mParameterElevationOrZSpanDescriptorCombo.onChange = [this] {
         unselectAllParamButtons();
-        mParameterElevationOrZSpanButton.setToggleState(true, juce::dontSendNotification);
-        if (mSpatMode == SpatMode::dome) {
-            mParameterToShow = mAudioProcessor.getVSpanDome();
+        if (mParameterElevationOrZSpanDescriptorCombo.getSelectedId() == 1) {
+            //if (mSpatMode == SpatMode::dome) {
+            //    mLastUsedParameterDomeButton.reset();
+            //} else {
+            //    mLastUsedParameterCubeButton.reset();
+            //}
+            mParameterToShow.reset();
+            mDescriptorIdToUse = DescriptorID::invalid;
         } else {
-            mParameterToShow = mAudioProcessor.getVSpanCube();
+            if (mSpatMode == SpatMode::dome) {
+                //mLastUsedParameterDomeButton = mParameterElevationOrZSpanButton;
+                mParameterToShow = mAudioProcessor.getVSpanDome();
+            } else {
+                //mLastUsedParameterCubeButton = mParameterElevationOrZSpanButton;
+                mParameterToShow = mAudioProcessor.getVSpanCube();
+            }
+        }
+        if (mSpatMode == SpatMode::dome) {
+            if (mLastUsedParameterDomeButton != std::nullopt) {
+                mParameterElevationOrZSpanButton.setToggleState(true, juce::dontSendNotification);
+            }
+            mAPVTS.state.setProperty("LastUsedVSpanDomeDescriptor",
+                                     mParameterElevationOrZSpanDescriptorCombo.getSelectedId(),
+                                     nullptr);
+        } else {
+            if (mLastUsedParameterCubeButton != std::nullopt) {
+                mParameterElevationOrZSpanButton.setToggleState(true, juce::dontSendNotification);
+            }
+            mAPVTS.state.setProperty("LastUsedVSpanCubeDescriptor",
+                                     mParameterElevationOrZSpanDescriptorCombo.getSelectedId(),
+                                     nullptr);
         }
         mDescriptorIdToUse = Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId());
+        if (mParameterToShow) {
+            auto & param{ mParameterToShow->get() };
+
+            switch (mDescriptorIdToUse) {
+            case DescriptorID::loudness:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeLoudness());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetLoudness());
+                break;
+            case DescriptorID::pitch:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangePitch());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetPitch());
+                break;
+            case DescriptorID::centroid:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeCentroid());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetCentroid());
+                break;
+            case DescriptorID::spread:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeSpread());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetSpread());
+                break;
+            case DescriptorID::noise:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeNoise());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetNoise());
+                break;
+            case DescriptorID::iterationsSpeed:
+                mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeOnsetDetection());
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+                break;
+            case DescriptorID::invalid:
+            default:
+                break;
+            }
+        }
+
         refreshDescriptorPanel();
     };
 
@@ -281,13 +827,6 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     addAndMakeVisible(&mParameterEleZSpanOffsetSlider);
     mParameterEleZSpanOffsetSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 1.0, 0.01 });
     mParameterEleZSpanOffsetSlider.setValue(0.0, juce::dontSendNotification);
-
-    addAndMakeVisible(&mParameterLapLabel);
-    mParameterLapLabel.setText("Lap", juce::dontSendNotification);
-
-    addAndMakeVisible(&mParameterLapCombo);
-    mParameterLapCombo.addItemList({ "1", "2", "3", "4" }, 1);
-    mParameterLapCombo.setSelectedId(1);
 
     //==============================================================================
     // Audio Analysis
@@ -564,6 +1103,20 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     addAndMakeVisible(&mDataGraph);
 
+
+    auto domeButtonIdx = mAPVTS.state.getProperty("LastUsedParameterDomeButtonRefIdx");
+    auto cubeButtonIdx = mAPVTS.state.getProperty("LastUsedParameterCubeButtonRefIdx");
+    if (domeButtonIdx.isVoid() || domeButtonIdx == juce::String("")) {
+        mLastUsedParameterDomeButton.reset();
+    } else {
+        mLastUsedParameterDomeButton = *mParameterButtonDomeRefs[static_cast<int>(domeButtonIdx)];
+    }
+    if (cubeButtonIdx.isVoid() || cubeButtonIdx == juce::String("")) {
+        mLastUsedParameterCubeButton.reset();
+    } else {
+        mLastUsedParameterCubeButton = *mParameterButtonCubeRefs[static_cast<int>(cubeButtonIdx)];
+    }
+
     setSpatMode(mAudioProcessor.getSpatMode());
 }
 
@@ -604,6 +1157,13 @@ void gris::SectionSoundReactiveSpatialization::resized()
     auto bannerAudioAnalysis{ bannerArea };
     auto areaSpatParams{ area.removeFromLeft(350) };
     mAreaAudioAnalysis = area; // we're using it in the audio analysis ui section
+    auto const showAziXYSpanRangeSlider{ Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId())
+                                         != DescriptorID::invalid };
+    auto const showEleZSpanRangeSlider{ Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId())
+                                        != DescriptorID::invalid };
+    auto const showEleZSpanOffsetSlider{ Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId())
+                                         != DescriptorID::invalid };
+    bool showEleZOffsetSlider{};
 
     mSpatialParameterLabel.setBounds(5, 3, 140, 15);
     mAudioAnalysisLabel.setBounds(bannerAudioAnalysis.getTopLeft().getX() + 5, 3, 140, 15);
@@ -612,7 +1172,30 @@ void gris::SectionSoundReactiveSpatialization::resized()
     mParameterYDescriptorCombo.setEnabled(true);
     mParameterYRangeSlider.setEnabled(true);
 
+    mParameterAzimuthOrXYSpanRangeSlider.setVisible(showAziXYSpanRangeSlider);
+    mParameterElevationOrZSpanRangeSlider.setVisible(showEleZSpanRangeSlider);
+
     if (mSpatMode == SpatMode::dome) {
+        if (Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId()) != DescriptorID::invalid) {
+            showEleZOffsetSlider = true;
+        }
+    } else {
+        if (Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId()) != DescriptorID::invalid) {
+            showEleZOffsetSlider = true;
+        }
+    }
+
+    mParameterElevationZOffsetSlider.setVisible(showEleZOffsetSlider);
+    mParameterEleZSpanOffsetSlider.setVisible(showEleZSpanOffsetSlider);
+
+    if (mSpatMode == SpatMode::dome) {
+        auto const showAziRangeSlider{ Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId())
+                                       != DescriptorID::invalid };
+        auto const showEleRangeSlider{ Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId())
+                                       != DescriptorID::invalid };
+        auto const showLapCombo{ Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId())
+                                 != DescriptorID::invalid };
+
         mParameterXButton.setVisible(false);
         mParameterYButton.setVisible(false);
         mParameterZButton.setVisible(false);
@@ -623,13 +1206,13 @@ void gris::SectionSoundReactiveSpatialization::resized()
         mParameterXDescriptorCombo.setVisible(false);
         mParameterYDescriptorCombo.setVisible(false);
         mParameterZDescriptorCombo.setVisible(false);
-        mParameterAzimuthRangeSlider.setVisible(true);
-        mParameterElevationRangeSlider.setVisible(true);
+        mParameterAzimuthRangeSlider.setVisible(showAziRangeSlider);
+        mParameterElevationRangeSlider.setVisible(showEleRangeSlider);
         mParameterXRangeSlider.setVisible(false);
         mParameterYRangeSlider.setVisible(false);
         mParameterZRangeSlider.setVisible(false);
         mParameterLapLabel.setVisible(true);
-        mParameterLapCombo.setVisible(true);
+        mParameterLapCombo.setVisible(showLapCombo);
 
         mParameterAzimuthButton.setBounds(areaSpatParams.getTopLeft().getX() + 17,
                                           areaSpatParams.getTopLeft().getY() + 15,
@@ -713,6 +1296,13 @@ void gris::SectionSoundReactiveSpatialization::resized()
                                      30,
                                      15);
     } else {
+        auto const showXRangeSlider{ Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId())
+                                     != DescriptorID::invalid };
+        auto const showYRangeSlider{ Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId())
+                                     != DescriptorID::invalid };
+        auto const showZRangeSlider{ Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId())
+                                     != DescriptorID::invalid };
+
         mParameterXButton.setVisible(true);
         mParameterYButton.setVisible(true);
         mParameterZButton.setVisible(true);
@@ -725,9 +1315,9 @@ void gris::SectionSoundReactiveSpatialization::resized()
         mParameterZDescriptorCombo.setVisible(true);
         mParameterAzimuthRangeSlider.setVisible(false);
         mParameterElevationRangeSlider.setVisible(false);
-        mParameterXRangeSlider.setVisible(true);
-        mParameterYRangeSlider.setVisible(true);
-        mParameterZRangeSlider.setVisible(true);
+        mParameterXRangeSlider.setVisible(showXRangeSlider);
+        mParameterYRangeSlider.setVisible(showYRangeSlider);
+        mParameterZRangeSlider.setVisible(showZRangeSlider);
         mParameterLapLabel.setVisible(false);
         mParameterLapCombo.setVisible(false);
 
@@ -822,8 +1412,11 @@ void gris::SectionSoundReactiveSpatialization::resized()
                                      15);
 
         if (mXYParamLinked) {
+            auto const showLapCombo{ Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId())
+                                         != DescriptorID::invalid };
+
             mParameterLapLabel.setVisible(true);
-            mParameterLapCombo.setVisible(true);
+            mParameterLapCombo.setVisible(showLapCombo);
 
             mParameterYButton.setEnabled(false);
             mParameterYDescriptorCombo.setEnabled(false);
@@ -840,8 +1433,8 @@ void gris::SectionSoundReactiveSpatialization::mouseDown(juce::MouseEvent const 
     if (xyLinkedLineArea.contains(event.getMouseDownPosition().toFloat())) {
         mXYParamLinked = !mXYParamLinked;
 
-        if (mLastUsedParameterCube) {
-            auto & param = mLastUsedParameterCube->get();
+        if (mLastUsedParameterCubeButton) {
+            auto & param = mLastUsedParameterCubeButton->get();
             if (&param == &mParameterYButton && mParameterYButton.getToggleState()) {
                 mParameterXButton.triggerClick();
             }
@@ -952,27 +1545,170 @@ void gris::SectionSoundReactiveSpatialization::timerCallback(int timerID)
 //==============================================================================
 void gris::SectionSoundReactiveSpatialization::setSpatMode(SpatMode spatMode)
 {
+    auto const updateParameterCombo = [&](juce::ComboBox & combo, juce::String APVTSProperty) {
+        combo.setSelectedId(mAPVTS.state.getProperty(APVTSProperty), juce::dontSendNotification);
+        if (combo.getSelectedId() == 0)
+            combo.setSelectedId(1, juce::dontSendNotification);
+    };
+
+    auto const updateOffsetSlider = [&](NumSlider & slider, SpatialParameter & param, DescriptorID descID) {
+        switch (descID) {
+        case DescriptorID::loudness:
+            slider.setValue(param.getParamOffsetLoudness());
+            break;
+        case DescriptorID::pitch:
+            slider.setValue(param.getParamOffsetPitch());
+            break;
+        case DescriptorID::centroid:
+            slider.setValue(param.getParamOffsetCentroid());
+            break;
+        case DescriptorID::spread:
+            slider.setValue(param.getParamOffsetSpread());
+            break;
+        case DescriptorID::noise:
+            slider.setValue(param.getParamOffsetNoise());
+            break;
+        case DescriptorID::iterationsSpeed:
+            slider.setValue(param.getParamOffsetOnsetDetection());
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+    };
+
+    auto const updateRangeSlider = [&](NumSlider & slider, SpatialParameter & param, DescriptorID descID) {
+        switch (descID) {
+        case DescriptorID::loudness:
+            slider.setValue(param.getParamRangeLoudness());
+            break;
+        case DescriptorID::pitch:
+            slider.setValue(param.getParamRangePitch());
+            break;
+        case DescriptorID::centroid:
+            slider.setValue(param.getParamRangeCentroid());
+            break;
+        case DescriptorID::spread:
+            slider.setValue(param.getParamRangeSpread());
+            break;
+        case DescriptorID::noise:
+            slider.setValue(param.getParamRangeNoise());
+            break;
+        case DescriptorID::iterationsSpeed:
+            slider.setValue(param.getParamRangeOnsetDetection());
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+    };
+
+    auto const updateLapCombo = [&](juce::ComboBox & combo, SpatialParameter & param, DescriptorID descID) {
+        switch (descID) {
+        case DescriptorID::loudness:
+            combo.setSelectedId(static_cast<int>(param.getParamLapLoudness()));
+            break;
+        case DescriptorID::pitch:
+            combo.setSelectedId(static_cast<int>(param.getParamLapPitch()));
+            break;
+        case DescriptorID::centroid:
+            combo.setSelectedId(static_cast<int>(param.getParamLapCentroid()));
+            break;
+        case DescriptorID::spread:
+            combo.setSelectedId(static_cast<int>(param.getParamLapSpread()));
+            break;
+        case DescriptorID::noise:
+            combo.setSelectedId(static_cast<int>(param.getParamLapNoise()));
+            break;
+        case DescriptorID::iterationsSpeed:
+            combo.setSelectedId(static_cast<int>(param.getParamLapOnsetDetection()));
+            break;
+        case DescriptorID::invalid:
+        default:
+            break;
+        }
+    };
+
     mSpatMode = spatMode;
 
     unselectAllParamButtons();
 
-    if (mSpatMode == SpatMode::cube) {
-        mParameterAzimuthOrXYSpanButton.setButtonText("X-Y Span");
-        mParameterElevationOrZSpanButton.setButtonText("Z Span");
-        if (mLastUsedParameterCube) {
-            auto & button = mLastUsedParameterCube->get();
-            button.triggerClick();
-        }
-    } else {
+    if (mSpatMode == SpatMode::dome) {
         mParameterAzimuthOrXYSpanButton.setButtonText("Azimuth Span");
         mParameterElevationOrZSpanButton.setButtonText("Elevation Span");
-        if (mLastUsedParameterDome) {
-            auto & button = mLastUsedParameterDome->get();
-            button.triggerClick();
+
+        updateParameterCombo(mParameterAzimuthDescriptorCombo, "LastUsedAzimuthDescriptor");
+        updateParameterCombo(mParameterElevationDescriptorCombo, "LastUsedElevationDescriptor");
+        updateParameterCombo(mParameterAzimuthOrXYSpanDescriptorCombo, "LastUsedHSpanDomeDescriptor");
+        updateParameterCombo(mParameterElevationOrZSpanDescriptorCombo, "LastUsedVSpanDomeDescriptor");
+
+        if (mLastUsedParameterDomeButton) {
+            auto & button = mLastUsedParameterDomeButton->get();
+            button.setToggleState(true, juce::sendNotification);
         }
+
+        updateRangeSlider(mParameterAzimuthRangeSlider,
+                          mAudioProcessor.getAzimuthDome(),
+                          Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterElevationRangeSlider,
+                          mAudioProcessor.getElevationDome(),
+                          Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterAzimuthOrXYSpanRangeSlider,
+                          mAudioProcessor.getHSpanDome(),
+                          Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterElevationOrZSpanRangeSlider,
+                          mAudioProcessor.getVSpanDome(),
+                          Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
+        updateOffsetSlider(mParameterElevationZOffsetSlider,
+                           mAudioProcessor.getElevationDome(),
+                           Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId()));
+        updateOffsetSlider(mParameterEleZSpanOffsetSlider,
+                           mAudioProcessor.getVSpanDome(),
+                           Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
+        updateLapCombo(mParameterLapCombo,
+                       mAudioProcessor.getAzimuthDome(),
+                       Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId()));
+    } else {
+        mParameterAzimuthOrXYSpanButton.setButtonText("X-Y Span");
+        mParameterElevationOrZSpanButton.setButtonText("Z Span");
+
+        updateParameterCombo(mParameterXDescriptorCombo, "LastUsedXDescriptor");
+        updateParameterCombo(mParameterYDescriptorCombo, "LastUsedYDescriptor");
+        updateParameterCombo(mParameterZDescriptorCombo, "LastUsedZDescriptor");
+        updateParameterCombo(mParameterAzimuthOrXYSpanDescriptorCombo, "LastUsedHSpanCubeDescriptor");
+        updateParameterCombo(mParameterElevationOrZSpanDescriptorCombo, "LastUsedVSpanCubeDescriptor");
+
+        if (mLastUsedParameterCubeButton) {
+            auto & button = mLastUsedParameterCubeButton->get();
+            button.setToggleState(true, juce::sendNotification);
+        }
+
+        updateRangeSlider(mParameterXRangeSlider,
+                          mAudioProcessor.getXCube(),
+                          Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterYRangeSlider,
+                          mAudioProcessor.getYCube(),
+                          Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterZRangeSlider,
+                          mAudioProcessor.getZCube(),
+                          Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterAzimuthOrXYSpanRangeSlider,
+                          mAudioProcessor.getHSpanCube(),
+                          Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId()));
+        updateRangeSlider(mParameterElevationOrZSpanRangeSlider,
+                          mAudioProcessor.getVSpanCube(),
+                          Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
+        updateOffsetSlider(mParameterElevationZOffsetSlider,
+                           mAudioProcessor.getZCube(),
+                           Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId()));
+        updateOffsetSlider(mParameterEleZSpanOffsetSlider,
+                           mAudioProcessor.getVSpanCube(),
+                           Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
+        updateLapCombo(mParameterLapCombo,
+                       mAudioProcessor.getXCube(),
+                       Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId()));
     }
 
-    resized();
     refreshDescriptorPanel();
 }
 
@@ -991,9 +1727,16 @@ void gris::SectionSoundReactiveSpatialization::unselectAllParamButtons()
 //==============================================================================
 void gris::SectionSoundReactiveSpatialization::refreshDescriptorPanel()
 {
+    bool shouldShowDescriptorPanel{};
+    if (mSpatMode == SpatMode::dome) {
+        shouldShowDescriptorPanel = mLastUsedParameterDomeButton != std::nullopt;
+    } else {
+        shouldShowDescriptorPanel = mLastUsedParameterCubeButton != std::nullopt;
+    }
+
     mDataGraph.setSpatialParameter(mParameterToShow);
 
-    if (mParameterToShow) {
+    if (shouldShowDescriptorPanel) {
         switch (mDescriptorIdToUse) {
         case DescriptorID::loudness:
             if (mParameterToShow) {
@@ -1059,7 +1802,10 @@ void gris::SectionSoundReactiveSpatialization::refreshDescriptorPanel()
             setAudioAnalysisComponentsInvisible();
             break;
         }
+    } else {
+        setAudioAnalysisComponentsInvisible();
     }
+    resized();
 }
 
 //==============================================================================

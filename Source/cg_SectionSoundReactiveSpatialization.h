@@ -80,6 +80,7 @@ private:
 
     GrisLookAndFeel & mGrisLookAndFeel;
     ControlGrisAudioProcessor & mAudioProcessor;
+    juce::AudioProcessorValueTreeState & mAPVTS;
 
     juce::ListenerList<Listener> mListeners;
     SpatMode mSpatMode;
@@ -90,8 +91,8 @@ private:
 
     juce::Label mSpatialParameterLabel;
 
-    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterDome;
-    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterCube;
+    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterDomeButton;
+    std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterCubeButton;
 
     juce::TextButton mParameterAzimuthButton;
     juce::TextButton mParameterElevationButton;
@@ -100,6 +101,9 @@ private:
     juce::TextButton mParameterZButton;
     juce::TextButton mParameterAzimuthOrXYSpanButton;
     juce::TextButton mParameterElevationOrZSpanButton;
+
+    std::array<juce::TextButton *, 4> mParameterButtonDomeRefs; // just an array of references to dome parameter buttons
+    std::array<juce::TextButton *, 5> mParameterButtonCubeRefs; // just an array of references to cube parameter buttons
 
     juce::ComboBox mParameterAzimuthDescriptorCombo;
     juce::ComboBox mParameterElevationDescriptorCombo;

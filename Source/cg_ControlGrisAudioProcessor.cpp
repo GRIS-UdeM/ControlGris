@@ -1436,6 +1436,14 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         // Replace the state and call automated parameter current values.
         //---------------------------------------------------------------
         mAudioProcessorValueTreeState.replaceState(juce::ValueTree::fromXml(*xmlState));
+        // Load/refresh stored spatial parameters values
+        //---------------------------------------------------------------
+        for (const auto & spatParam : mSpatParametersDomeRefs) {
+            spatParam->updateParameterState();
+        }
+        for (const auto & spatParam : mSpatParametersCubeRefs) {
+            spatParam->updateParameterState();
+        }
     }
 
     setPluginState();
