@@ -955,14 +955,19 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     mDescriptorMinFreqSlider.onValueChange = [this] {
         if (mParameterToShow) {
+            auto minVal{ mDescriptorMinFreqSlider.getValue() };
+            auto maxVal{ mDescriptorMaxFreqSlider.getValue() };
+            if (minVal > maxVal) {
+                minVal = maxVal;
+                mDescriptorMinFreqSlider.setValue(minVal);
+            }
             auto & param = mParameterToShow->get();
-            auto value = mDescriptorMinFreqSlider.getValue();
             switch (mDescriptorIdToUse) {
             case DescriptorID::pitch:
-                param.setParamMinFreqPitch(value);
+                param.setParamMinFreqPitch(minVal);
                 break;
             case DescriptorID::centroid:
-                param.setParamMinFreqCentroid(value);
+                param.setParamMinFreqCentroid(minVal);
                 break;
             case DescriptorID::loudness:
             case DescriptorID::spread:
@@ -977,14 +982,19 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     mDescriptorMaxFreqSlider.onValueChange = [this] {
         if (mParameterToShow) {
+            auto minVal{ mDescriptorMinFreqSlider.getValue() };
+            auto maxVal{ mDescriptorMaxFreqSlider.getValue() };
+            if (maxVal < minVal) {
+                maxVal = minVal;
+                mDescriptorMaxFreqSlider.setValue(maxVal);
+            }
             auto & param = mParameterToShow->get();
-            auto value = mDescriptorMaxFreqSlider.getValue();
             switch (mDescriptorIdToUse) {
             case DescriptorID::pitch:
-                param.setParamMaxFreqPitch(value);
+                param.setParamMaxFreqPitch(maxVal);
                 break;
             case DescriptorID::centroid:
-                param.setParamMaxFreqCentroid(value);
+                param.setParamMaxFreqCentroid(maxVal);
                 break;
             case DescriptorID::loudness:
             case DescriptorID::spread:
@@ -1007,17 +1017,29 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     mDescriptorMinTimeSlider.onValueChange = [this] {
         if (mParameterToShow) {
+            auto minVal{ mDescriptorMinTimeSlider.getValue() };
+            auto maxVal{ mDescriptorMaxTimeSlider.getValue() };
+            if (minVal > maxVal) {
+                minVal = maxVal - ALMOST_ZERO;
+                mDescriptorMinTimeSlider.setValue(minVal);
+            }
             auto & param = mParameterToShow->get();
-            auto value = mDescriptorMinTimeSlider.getValue();
-            param.setParamMinTime(value);
+            param.setParamMinTime(minVal);
+            mAudioProcessor.setOnsetDetectionMinTime(param.getParameterID(), minVal);
         }
     };
 
     mDescriptorMaxTimeSlider.onValueChange = [this] {
         if (mParameterToShow) {
+            auto minVal{ mDescriptorMinTimeSlider.getValue() };
+            auto maxVal{ mDescriptorMaxTimeSlider.getValue() };
+            if (maxVal < minVal) {
+                maxVal = minVal + ALMOST_ZERO;
+                mDescriptorMaxTimeSlider.setValue(maxVal);
+            }
             auto & param = mParameterToShow->get();
-            auto value = mDescriptorMaxTimeSlider.getValue();
-            param.setParamMaxTime(value);
+            param.setParamMaxTime(maxVal);
+            mAudioProcessor.setOnsetDetectionMaxTime(param.getParameterID(), maxVal);
         }
     };
 
