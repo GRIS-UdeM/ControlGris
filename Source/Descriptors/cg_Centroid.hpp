@@ -44,10 +44,12 @@ public:
         fluid::RealVector centroidMeanRes = fluid::RealVector(1);
         fluid::RealVector centroidStdDevRes = fluid::RealVector(1);
         fluid::RealVectorView centroidData = fluid::RealVectorView(shapeStats(fluid::Slice(0, 1)));
-        fluid::RealVectorView centroidMeanOut = fluid::RealVectorView(centroidMeanRes);
-        fluid::RealVectorView centroidStdDevOut = fluid::RealVectorView(centroidStdDevRes);
-        mCentroidRunningStats->process(centroidData, centroidMeanOut, centroidStdDevOut);
-        mDescCentroid = centroidMeanOut[0];
+        // we don't really need mean and stdDev...
+        //fluid::RealVectorView centroidMeanOut = fluid::RealVectorView(centroidMeanRes);
+        //fluid::RealVectorView centroidStdDevOut = fluid::RealVectorView(centroidStdDevRes);
+        //mCentroidRunningStats->process(centroidData, centroidMeanOut, centroidStdDevOut);
+        //mDescCentroid = centroidMeanOut[0];
+        mDescCentroid = centroidData[0];
     }
 
 private:

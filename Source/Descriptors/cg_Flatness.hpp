@@ -44,10 +44,12 @@ public:
         fluid::RealVector flatnessMeanRes = fluid::RealVector(1);
         fluid::RealVector flatnessStdDevRes = fluid::RealVector(1);
         fluid::RealVectorView flatnessData = fluid::RealVectorView(shapeStats(fluid::Slice(5 * 7, 1)));
-        fluid::RealVectorView flatnessMeanOut = fluid::RealVectorView(flatnessMeanRes);
-        fluid::RealVectorView flatnessStdDevOut = fluid::RealVectorView(flatnessStdDevRes);
-        mFlatnessRunningStats->process(flatnessData, flatnessMeanOut, flatnessStdDevOut);
-        mDescFlatness = flatnessMeanOut[0];
+        // we don't really need mean and stdDev...
+        //fluid::RealVectorView flatnessMeanOut = fluid::RealVectorView(flatnessMeanRes);
+        //fluid::RealVectorView flatnessStdDevOut = fluid::RealVectorView(flatnessStdDevRes);
+        //mFlatnessRunningStats->process(flatnessData, flatnessMeanOut, flatnessStdDevOut);
+        //mDescFlatness = flatnessMeanOut[0];
+        mDescFlatness = flatnessData[0];
     }
 
 private:
