@@ -131,6 +131,8 @@ private:
     juce::Label mParameterLapLabel;
     juce::ComboBox mParameterLapCombo;
 
+    juce::TextButton mAudioAnalysisActivateButton;
+
     //==============================================================================
     // Audio anaylysis section
     juce::Label mAudioAnalysisLabel;
@@ -201,6 +203,9 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
     void setSpatMode(SpatMode spatMode);
+
+    bool getAudioAnalysisActivateState();
+    void setAudioAnalysisActivateState(bool state);
 
 private:
     //==============================================================================

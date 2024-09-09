@@ -1078,6 +1078,7 @@ void ControlGrisAudioProcessor::timerCallback()
             mPositionTrajectoryManager.setPositionActivateState(false);
         if (mElevationTrajectoryManager.getPositionActivateState())
             mElevationTrajectoryManager.setPositionActivateState(false);
+        mAudioAnalysisActivateState = false;
         mCanStopActivate = false;
 
         if (editor != nullptr) {
@@ -1246,6 +1247,38 @@ void ControlGrisAudioProcessor::initialize()
 void ControlGrisAudioProcessor::prepareToPlay([[maybe_unused]] double const sampleRate,
                                               [[maybe_unused]] int const samplesPerBlock)
 {
+    mSampleRate = sampleRate;
+    mBlockSize = samplesPerBlock;
+
+    mPitch.reset();
+    mLoudness.reset();
+    mStats.reset();
+    mShape.reset();
+    mCentroid.reset();
+    mSpread.reset();
+    mFlatness.reset();
+    mOnsetDetectionAzimuth.reset();
+    mOnsetDetectionElevation.reset();
+    mOnsetDetectionHSpan.reset();
+    mOnsetDetectionVSpan.reset();
+    mOnsetDetectionX.reset();
+    mOnsetDetectionY.reset();
+    mOnsetDetectionZ.reset();
+
+    mPitch.init();
+    mLoudness.init(mSampleRate);
+    mStats.init();
+    mCentroid.init();
+    mSpread.init();
+    mFlatness.init();
+    mOnsetDetectionAzimuth.init();
+    mOnsetDetectionElevation.init();
+    mOnsetDetectionHSpan.init();
+    mOnsetDetectionVSpan.init();
+    mOnsetDetectionX.init();
+    mOnsetDetectionY.init();
+    mOnsetDetectionZ.init();
+
     if (!mIsPlaying) {
         initialize();
     }
@@ -1327,6 +1360,257 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
     }
 
     mLastTime = mCurrentTime;
+
+    // Audio Descriptors section
+    if (mSelectedSoundSpatializationTabIdx == 0 && mAudioAnalysisActivateState && !isPositionTrajectoryActive
+        && !isElevationTrajectoryActive) {
+        mAzimuthDomeValue = 0.0;
+        mElevationDomeValue = 0.0;
+        mHspanDomeValue = 0.0;
+        mVspanDomeValue = 0.0;
+
+        mXCubeValue = 0.0;
+        mYCubeValue = 0.0;
+        mZCubeValue = 0.0;
+        mHspanCubeValue = 0.0;
+        mVspanCubeValue = 0.0;
+
+        juce::ScopedNoDenormals noDenormals;
+        auto totalNumInputChannels = getTotalNumInputChannels();
+        auto totalNumOutputChannels = getTotalNumOutputChannels();
+
+        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+            buffer.clear(i, 0, buffer.getNumSamples());
+
+        mDescriptorsBuffer.clear();
+        mDescriptorsBuffer.setSize(1, buffer.getNumSamples());
+        for (int i{}; i < totalNumInputChannels; ++i) {
+            mDescriptorsBuffer.addFrom(0, 0, buffer, i, 0, buffer.getNumSamples());
+        }
+        if (totalNumInputChannels > 0)
+            mDescriptorsBuffer.applyGain(1.0f / totalNumInputChannels);
+
+        auto bufferMagnitude = mDescriptorsBuffer.getMagnitude(0, mDescriptorsBuffer.getNumSamples());
+        auto * channelData = mDescriptorsBuffer.getReadPointer(0);
+
+        // FLUCOMA
+        if (shouldProcessDomeLoudnessAnalysis() || shouldProcessCubeLoudnessAnalysis()) {
+            fluid::RealVector inLoudness(mBlockSize);
+
+            for (int i{}; i < mDescriptorsBuffer.getNumSamples(); ++i) {
+                inLoudness[i] = channelData[i];
+            }
+
+            fluid::RealVector paddedLoudness = mLoudness.calculatePadded(inLoudness);
+            fluid::index nFramesLoudness = mLoudness.calculateFrames(paddedLoudness);
+            fluid::RealMatrix loudnessMat(nFramesLoudness, 2);
+            std::fill(paddedLoudness.begin(), paddedLoudness.end(), 0);
+            paddedLoudness(mLoudness.paddedValue(inLoudness)) <<= inLoudness;
+
+            for (int i{}; i < nFramesLoudness; i++) {
+                fluid::RealVector loudnessDesc(2);
+                fluid::RealVectorView windowLoudness = mLoudness.calculateWindow(paddedLoudness, i);
+                mLoudness.loudnessProcess(windowLoudness, loudnessDesc);
+                loudnessMat.row(i) <<= loudnessDesc;
+            }
+
+            mLoudness.process(loudnessMat, *mStats.getStats());
+            double loudnessValue = mLoudness.getValue();
+            loudnessValue = juce::Decibels::decibelsToGain(loudnessValue);
+
+            if (mSpatMode == SpatMode::dome) {
+                for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                    if (mSpatParametersDomeRefs[i]->shouldProcessLoudnessAnalysis()) {
+                        mSpatParametersDomeRefs[i]->process(mLoudness.getID(), loudnessValue);
+                        *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                    }
+                }
+            } else {
+                for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                    if (mSpatParametersCubeRefs[i]->shouldProcessLoudnessAnalysis()) {
+                        mSpatParametersCubeRefs[i]->process(mLoudness.getID(), loudnessValue);
+                        *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                    }
+                }
+            }
+        }
+
+        if (shouldProcessDomePitchAnalysis() || shouldProcessCubePitchAnalysis()) {
+            fluid::RealVector inPitch(mBlockSize);
+
+            for (int i{}; i < mDescriptorsBuffer.getNumSamples(); ++i) {
+                inPitch[i] = channelData[i];
+            }
+
+            fluid::RealVector paddedPitch = mPitch.calculatePadded(inPitch);
+            fluid::index nFramesPitch = mPitch.calculateFrames(paddedPitch);
+            fluid::RealMatrix pitchMat(nFramesPitch, 2);
+            std::fill(paddedPitch.begin(), paddedPitch.end(), 0);
+            paddedPitch(mPitch.paddedValue(inPitch)) <<= inPitch;
+
+            fluid::ComplexVector framePitch;
+            fluid::RealVector magnitudePitch;
+            for (int i{}; i < nFramesPitch; i++) {
+                mPitch.setFrame(framePitch);
+                mPitch.setMagnitude(magnitudePitch);
+                fluid::RealVector pitch(2);
+                fluid::RealVectorView windowPitch = mPitch.calculateWindow(paddedPitch, i);
+
+                mPitch.stftProcess(windowPitch, framePitch);
+                mPitch.stftMagnitude(framePitch, magnitudePitch);
+                mPitch.yinProcess(magnitudePitch, pitch, mSampleRate);
+                pitchMat.row(i) <<= pitch;
+            }
+
+            mPitch.process(pitchMat, *mStats.getStats());
+            double pitchValue = mPitch.getValue();
+            pitchValue = mParamFunctions.frequencyToMidiNoteNumber(pitchValue);
+
+            if (mSpatMode == SpatMode::dome) {
+                for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                    if (mSpatParametersDomeRefs[i]->shouldProcessPitchAnalysis()) {
+                        mSpatParametersDomeRefs[i]->process(mPitch.getID(), pitchValue);
+                        *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                    }
+                }
+            } else {
+                for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                    if (mSpatParametersCubeRefs[i]->shouldProcessPitchAnalysis()) {
+                        mSpatParametersCubeRefs[i]->process(mPitch.getID(), pitchValue);
+                        *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                    }
+                }
+            }
+        }
+
+        if (shouldProcessDomeSpectralAnalysis() || shouldProcessCubeSpectralAnalysis()) {
+            fluid::RealVector inSpectral(mBlockSize);
+
+            for (int i{}; i < mDescriptorsBuffer.getNumSamples(); ++i) {
+                inSpectral[i] = channelData[i];
+            }
+
+            fluid::RealVector paddedSpectral = mShape.calculatePadded(inSpectral);
+            fluid::index nFramesSpectral = mShape.calculateFrames(paddedSpectral);
+            fluid::RealMatrix shapeMat(nFramesSpectral, 7);
+            std::fill(paddedSpectral.begin(), paddedSpectral.end(), 0);
+            paddedSpectral(mShape.paddedValue(inSpectral)) <<= inSpectral;
+            fluid::RealVector shapeStats;
+
+            fluid::ComplexVector frameSpectral;
+            fluid::RealVector magnitudeSpectral;
+            for (int i{}; i < nFramesSpectral; i++) {
+                mShape.setFrame(frameSpectral);
+                mShape.setMagnitude(magnitudeSpectral);
+                fluid::RealVector shapeDesc(7);
+                fluid::RealVectorView windowSpectral = mShape.calculateWindow(paddedSpectral, i);
+                mShape.stftProcess(windowSpectral, frameSpectral);
+                mShape.stftMagnitude(frameSpectral, magnitudeSpectral);
+                mShape.shapeProcess(magnitudeSpectral, shapeDesc, mSampleRate);
+                shapeMat.row(i) <<= shapeDesc;
+            }
+
+            shapeStats = mShape.process(shapeMat, *mStats.getStats());
+
+            if (shouldProcessDomeCentroidAnalysis() || shouldProcessCubeCentroidAnalysis()) {
+                mCentroid.process(shapeStats);
+                double centroidValue = mCentroid.getValue(); // centroidValue when silence = 118.02870609942256
+                if (bufferMagnitude == 0.0f) {
+                    centroidValue = 0.0;
+                }
+                if (mSpatMode == SpatMode::dome) {
+                    for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                        if (mSpatParametersDomeRefs[i]->shouldProcessCentroidAnalysis()) {
+                            mSpatParametersDomeRefs[i]->process(mCentroid.getID(), centroidValue);
+                            *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                        }
+                    }
+                } else {
+                    for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                        if (mSpatParametersCubeRefs[i]->shouldProcessCentroidAnalysis()) {
+                            mSpatParametersCubeRefs[i]->process(mCentroid.getID(), centroidValue);
+                            *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                        }
+                    }
+                }
+            }
+
+            if (shouldProcessDomeSpreadAnalysis() || shouldProcessCubeSpreadAnalysis()) {
+                mSpread.process(shapeStats);
+                double spreadValue = mSpread.getValue(); // spreadValue when silence  = 16.520351353896057
+                if (bufferMagnitude == 0.0f) {
+                    spreadValue = 0.0;
+                }
+                spreadValue = mParamFunctions.zmap(spreadValue, 0.0, 16.0);
+
+                if (mSpatMode == SpatMode::dome) {
+                    for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                        if (mSpatParametersDomeRefs[i]->shouldProcessSpreadAnalysis()) {
+                            mSpatParametersDomeRefs[i]->process(mSpread.getID(), spreadValue);
+                            *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                        }
+                    }
+                } else {
+                    for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                        if (mSpatParametersCubeRefs[i]->shouldProcessSpreadAnalysis()) {
+                            mSpatParametersCubeRefs[i]->process(mSpread.getID(), spreadValue);
+                            *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                        }
+                    }
+                }
+            }
+
+            if (shouldProcessDomeNoiseAnalysis() || shouldProcessCubeNoiseAnalysis()) {
+                mFlatness.process(shapeStats);
+                double flatnessValue = mFlatness.getValue(); // flatnessValue when silence = -6.9624443085150120e-13
+                if (bufferMagnitude == 0.0f) {
+                    flatnessValue = -160.0;
+                }
+                flatnessValue = juce::Decibels::decibelsToGain(flatnessValue);
+                flatnessValue = mParamFunctions.zmap(flatnessValue, 0.0, 0.5);
+                flatnessValue = mParamFunctions.power(flatnessValue);
+
+                if (mSpatMode == SpatMode::dome) {
+                    for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                        if (mSpatParametersDomeRefs[i]->shouldProcessNoiseAnalysis()) {
+                            mSpatParametersDomeRefs[i]->process(mFlatness.getID(), flatnessValue);
+                            *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                        }
+                    }
+                } else {
+                    for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                        if (mSpatParametersCubeRefs[i]->shouldProcessNoiseAnalysis()) {
+                            mSpatParametersCubeRefs[i]->process(mFlatness.getID(), flatnessValue);
+                            *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                        }
+                    }
+                }
+            }
+        }
+
+        if (shouldProcessDomeOnsetDetectionAnalysis() || shouldProcessCubeOnsetDetectionAnalysis()) {
+            if (mSpatMode == SpatMode::dome) {
+                for (int i{}; i < mSpatParametersDomeRefs.size(); ++i) {
+                    if (mSpatParametersDomeRefs[i]->shouldProcessOnsetDetectionAnalysis()) {
+                        mDomeOnsetDetectionRefs[i]->process(mDescriptorsBuffer, mSampleRate, mBlockSize);
+                        mSpatParametersDomeRefs[i]->process(mDomeOnsetDetectionRefs[i]->getID(),
+                                                            mDomeOnsetDetectionRefs[i]->getValue());
+                        *mSpatParametersDomeValueRefs[i] = mSpatParametersDomeRefs[i]->getDiffValue();
+                    }
+                }
+            } else {
+                for (int i{}; i < mSpatParametersCubeRefs.size(); ++i) {
+                    if (mSpatParametersCubeRefs[i]->shouldProcessOnsetDetectionAnalysis()) {
+                        mCubeOnsetDetectionRefs[i]->process(mDescriptorsBuffer, mSampleRate, mBlockSize);
+                        mSpatParametersCubeRefs[i]->process(mCubeOnsetDetectionRefs[i]->getID(),
+                                                            mCubeOnsetDetectionRefs[i]->getValue());
+                        *mSpatParametersCubeValueRefs[i] = mSpatParametersCubeRefs[i]->getDiffValue();
+                    }
+                }
+            }
+        }
+        processParameterValues();
+    }
 }
 
 //==============================================================================
@@ -1444,6 +1728,7 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
         for (const auto & spatParam : mSpatParametersCubeRefs) {
             spatParam->updateParameterState();
         }
+        setXYParamLink(mAudioProcessorValueTreeState.state.getProperty("XYParamLinked"));
     }
 
     setPluginState();
@@ -1517,6 +1802,12 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
             trajectoryManager.sourceMoved(source);
         }
         return;
+    case Source::OriginOfChange::audioAnalysis:
+        jassert(isPrimarySource);
+        sourceLinkEnforcer.sourceMoved(source);
+        //trajectoryManager.sourceMoved(source);
+        updatePrimarySourceParameters(changeType);
+        return;
     }
     jassertfalse;
 }
@@ -1556,6 +1847,172 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
     }
     default:
         jassertfalse;
+    }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setSelectedSoundSpatializationTab(int newCurrentTabIndex)
+{
+    mSelectedSoundSpatializationTabIdx = newCurrentTabIndex;
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::processParameterValues()
+{
+    auto & pSource{ mSources.getPrimarySource() };
+
+    if (mSpatMode == SpatMode::dome) {
+        // Azimuth
+        auto aziDeg{ pSource.getAzimuth().getAsDegrees() };
+        pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mAzimuthDomeValue) } },
+                           gris::Source::OriginOfChange::audioAnalysis);
+        // Elevation
+        auto eleDeg{ pSource.getElevation().getAsDegrees() };
+
+        auto diffElev = eleDeg + static_cast<float>(mElevationDomeValue);
+        if (mOscElevationBuffer + diffElev < 0.0f) {
+            pSource.setElevation(Radians{ Degrees{ 0.0f } }, gris::Source::OriginOfChange::audioAnalysis);
+            mOscElevationBuffer += diffElev;
+        } else if (mOscElevationBuffer + diffElev > 90.0f) {
+            pSource.setElevation(Radians{ Degrees{ 90.0f } }, gris::Source::OriginOfChange::audioAnalysis);
+            mOscElevationBuffer += diffElev - 90.0f;
+        } else if (mOscElevationBuffer + diffElev >= 0.0f && mOscElevationBuffer + diffElev <= 90.0f) {
+            pSource.setElevation(Radians{ Degrees{ mOscElevationBuffer + diffElev } },
+                                 gris::Source::OriginOfChange::audioAnalysis);
+            mOscElevationBuffer = 0.0f;
+        }
+    }
+    else {
+        if (mXYParamLinked) {
+            // X param behaves like Azimuth
+            auto aziDeg{ pSource.getAzimuth().getAsDegrees() };
+            pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mXCubeValue) } },
+                               gris::Source::OriginOfChange::audioAnalysis);
+        } else {
+            // X, Y
+            auto descX = static_cast<float>(mXCubeValue);
+            auto descY = static_cast<float>(-1.0 * mYCubeValue); // Y is inverted in GUI
+            auto sourceXYPosition{ pSource.getPositionFromAngle(pSource.getAzimuth(), pSource.getDistance()) };
+            auto diffX = sourceXYPosition.x - descX;
+            auto diffY = sourceXYPosition.y - descY;
+            float newX{};
+            float newY{};
+
+            if (mOscXBuffer + diffX < -1.0f) {
+                newX = -1.0f;
+                mOscXBuffer += diffX + 1.0f;
+            } else if (mOscXBuffer + diffX > 1.0f) {
+                newX = 1.0f;
+                mOscXBuffer += diffX - 1.0f;
+            } else if (mOscXBuffer + diffX >= -1.0f && mOscXBuffer + diffX <= 1.0f) {
+                newX = mOscXBuffer + diffX;
+                mOscXBuffer = 0.0f;
+            }
+
+            if (mOscYBuffer + diffY < -1.0f) {
+                newY = -1.0f;
+                mOscYBuffer += diffY + 1.0f;
+            } else if (mOscYBuffer + diffY > 1.0f) {
+                newY = 1.0f;
+                mOscYBuffer += diffY - 1.0f;
+            } else if (mOscYBuffer + diffY >= -1.0f && mOscYBuffer + diffY <= 1.0f) {
+                newY = mOscYBuffer + diffY;
+                mOscYBuffer = 0.0f;
+            }
+
+            pSource.setPosition({ newX, newY }, gris::Source::OriginOfChange::audioAnalysis);
+        }
+
+        // Z
+        auto descZ = static_cast<float>(-1.0 * mZCubeValue); // Z is inverted in GUI
+        auto sourceZPosition{ pSource.getNormalizedElevation().get() };
+        auto diffZ = sourceZPosition - descZ;
+        float newZ{};
+
+        if (mOscZBuffer + diffZ < 0.0f) {
+            newZ = 0.0f;
+            mOscZBuffer += diffZ;
+        } else if (mOscZBuffer + diffZ > 1.0f) {
+            newZ = 1.0f;
+            mOscZBuffer += diffZ - 1.0f;
+        } else if (mOscZBuffer + diffZ >= 0.0f && mOscZBuffer + diffZ <= 1.0f) {
+            newZ = mOscZBuffer + diffZ;
+            mOscZBuffer = 0.0f;
+        }
+        pSource.setElevation(Normalized{ newZ }, Source::OriginOfChange::audioAnalysis);
+    }
+    // Spans
+    double hSpanVal{ mSpatMode == SpatMode::dome ? mHspanDomeValue : mHspanCubeValue };
+    double vSpanVal{ mSpatMode == SpatMode::dome ? mVspanDomeValue : mVspanCubeValue };
+    // // HSpan
+    auto hSpan = pSource.getAzimuthSpan().get();
+    auto diffHSpan = hSpan + static_cast<float>(hSpanVal) * -0.01f;
+    float newHSpanVal{};
+
+    if (mOscHSpanBuffer + diffHSpan < 0.0f) {
+        newHSpanVal = 0.0f;
+        mOscHSpanBuffer += diffHSpan;
+    } else if (mOscHSpanBuffer + diffHSpan > 1.0f) {
+        newHSpanVal = 1.0f;
+        mOscHSpanBuffer += diffHSpan - 1.0f;
+    } else if (mOscHSpanBuffer + diffHSpan >= 0.0f && mOscHSpanBuffer + diffHSpan <= 1.0f) {
+        newHSpanVal = mOscHSpanBuffer + diffHSpan;
+        mOscHSpanBuffer = 0.0f;
+    }
+    for (auto & source : mSources) {
+        source.setAzimuthSpan(Normalized{ newHSpanVal });
+    }
+    auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
+    mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
+
+    // // VSpan
+    auto vSpan = pSource.getElevationSpan().get();
+    auto diffVSpan = vSpan + static_cast<float>(vSpanVal) * -0.01f;
+    float newVSpanVal{};
+
+    if (mOscVSpanBuffer + diffVSpan < 0.0f) {
+        newVSpanVal = 0.0f;
+        mOscVSpanBuffer += diffVSpan;
+    } else if (mOscVSpanBuffer + diffVSpan > 1.0f) {
+        newVSpanVal = 1.0f;
+        mOscVSpanBuffer += diffVSpan - 1.0f;
+    } else if (mOscVSpanBuffer + diffVSpan >= 0.0f && mOscVSpanBuffer + diffVSpan <= 1.0f) {
+        newVSpanVal = mOscVSpanBuffer + diffVSpan;
+        mOscVSpanBuffer = 0.0f;
+    }
+    for (auto & source : mSources) {
+        source.setElevationSpan(Normalized{ newVSpanVal });
+    }
+    auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
+    mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
+}
+
+bool ControlGrisAudioProcessor::getXYParamLink()
+{
+    return mXYParamLinked;
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setXYParamLink(bool isXYParamLinked)
+{
+    mXYParamLinked = isXYParamLinked;
+    mXCube.setActingLikeAzimuth(mXYParamLinked);
+    mAudioProcessorValueTreeState.state.setProperty("XYParamLinked", mXYParamLinked, nullptr);
+}
+
+//==============================================================================
+bool ControlGrisAudioProcessor::getAudioAnalysisState()
+{
+    return mAudioAnalysisActivateState;
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setAudioAnalysisState(bool state)
+{
+    mAudioAnalysisActivateState = state;
+    if (state) {
+        mPositionTrajectoryManager.setPositionActivateState(false);
+        mElevationTrajectoryManager.setPositionActivateState(false);
     }
 }
 

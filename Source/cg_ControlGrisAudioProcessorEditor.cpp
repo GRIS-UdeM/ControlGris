@@ -726,12 +726,18 @@ void ControlGrisAudioProcessorEditor::trajectoryDurationUnitChangedCallback(doub
 void ControlGrisAudioProcessorEditor::positionTrajectoryStateChangedCallback(bool value)
 {
     mPositionTrajectoryManager.setPositionActivateState(value);
+    if (value) {
+        mProcessor.setAudioAnalysisState(!value);
+    }
 }
 
 //==============================================================================
 void ControlGrisAudioProcessorEditor::elevationTrajectoryStateChangedCallback(bool value)
 {
     mElevationTrajectoryManager.setPositionActivateState(value);
+    if (value) {
+        mProcessor.setAudioAnalysisState(!value);
+    }
 }
 
 //==============================================================================
@@ -757,6 +763,9 @@ void ControlGrisAudioProcessorEditor::refresh()
     }
     if (mSectionAbstractSpatialization.getElevationActivateState() != mElevationTrajectoryManager.getPositionActivateState()) {
         mSectionAbstractSpatialization.setElevationActivateState(mElevationTrajectoryManager.getPositionActivateState());
+    }
+    if (mSectionSoundReactiveSpatialization.getAudioAnalysisActivateState() != mProcessor.getAudioAnalysisState()) {
+        mSectionSoundReactiveSpatialization.setAudioAnalysisActivateState(mProcessor.getAudioAnalysisState());
     }
 }
 
@@ -902,6 +911,20 @@ void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 {
     mSectionSourcePosition.setSpatMode(spatMode);
     mSectionSoundReactiveSpatialization.setSpatMode(spatMode);
+}
+
+//==============================================================================
+TabbedSpatializationComponent::TabbedSpatializationComponent(juce::TabbedButtonBar::Orientation orientation,
+                                                       ControlGrisAudioProcessor & audioProcessor)
+    : juce::TabbedComponent(orientation)
+    , mAudioProcessor(audioProcessor)
+{
+}
+
+//==============================================================================
+void TabbedSpatializationComponent::currentTabChanged(int newCurrentTabIndex, const juce::String & newCurrentTabName)
+{
+    mAudioProcessor.setSelectedSoundSpatializationTab(newCurrentTabIndex);
 }
 
 } // namespace gris

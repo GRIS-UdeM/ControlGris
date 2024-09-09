@@ -33,6 +33,26 @@
 namespace gris
 {
 //==============================================================================
+class TabbedSpatializationComponent final : public juce::TabbedComponent
+{
+private:
+    //==============================================================================
+    ControlGrisAudioProcessor & mAudioProcessor;
+public:
+    //==============================================================================
+    TabbedSpatializationComponent() = delete;
+    TabbedSpatializationComponent(juce::TabbedButtonBar::Orientation orientation,
+                               ControlGrisAudioProcessor & audioProcessor);
+    //==============================================================================
+    TabbedSpatializationComponent(TabbedSpatializationComponent const &) = delete;
+    TabbedSpatializationComponent(TabbedSpatializationComponent &&) = delete;
+    TabbedSpatializationComponent & operator=(TabbedSpatializationComponent const &) = delete;
+    TabbedSpatializationComponent & operator=(TabbedSpatializationComponent &&) = delete;
+    //==============================================================================
+    void currentTabChanged(int newCurrentTabIndex, const juce::String & newCurrentTabName) override;
+};
+
+//==============================================================================
 class ControlGrisAudioProcessorEditor final
     : public juce::AudioProcessorEditor
     , private juce::Value::Listener
@@ -71,7 +91,7 @@ private:
     SectionSoundReactiveSpatialization mSectionSoundReactiveSpatialization;
 
     juce::TabbedComponent mConfigurationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
-    juce::TabbedComponent mSpatializationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop };
+    TabbedSpatializationComponent mSpatializationComponent{ juce::TabbedButtonBar::Orientation::TabsAtTop, mProcessor };
 
     SectionGeneralSettings mSectionGeneralSettings;
     SectionSourcePosition mSectionSourcePosition;

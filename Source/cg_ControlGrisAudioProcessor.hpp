@@ -132,8 +132,15 @@ class ControlGrisAudioProcessor final
 
     ElevationMode mElevationMode{};
 
+    int mSelectedSoundSpatializationTabIdx{};
+
     //==============================================================================
     // Audio Descriptors
+    double mSampleRate{};
+    int mBlockSize{};
+    juce::AudioBuffer<float> mDescriptorsBuffer;
+    bool mXYParamLinked{};
+    bool mAudioAnalysisActivateState{};
 
     double mAzimuthDomeValue{};
     double mElevationDomeValue{};
@@ -304,6 +311,12 @@ public:
     void sourceChanged(Source & source, Source::ChangeType changeType, Source::OriginOfChange origin);
     void setSelectedSource(Source const & source);
     void updatePrimarySourceParameters(Source::ChangeType changeType);
+    void setSelectedSoundSpatializationTab(int newCurrentTabIndex);
+    void processParameterValues();
+    bool getXYParamLink();
+    void setXYParamLink(bool isXYParamLinked);
+    bool getAudioAnalysisState();
+    void setAudioAnalysisState(bool state);
 
     //=================================================================================
     // Audio Descriptors
