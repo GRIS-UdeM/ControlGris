@@ -1362,8 +1362,7 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
     mLastTime = mCurrentTime;
 
     // Audio Descriptors section
-    if (mSelectedSoundSpatializationTabIdx == 0 && mAudioAnalysisActivateState && !isPositionTrajectoryActive
-        && !isElevationTrajectoryActive) {
+    if (mSelectedSoundSpatializationTabIdx == 0) {
         mAzimuthDomeValue = 0.0;
         mElevationDomeValue = 0.0;
         mHspanDomeValue = 0.0;
@@ -1609,6 +1608,12 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
                 }
             }
         }
+
+        auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+        if (editor != nullptr) {
+            editor->addNewParamValueToDataGraph();
+        }
+
         processParameterValues();
     }
 }
@@ -1805,7 +1810,10 @@ void ControlGrisAudioProcessor::sourceChanged(Source & source,
     case Source::OriginOfChange::audioAnalysis:
         jassert(isPrimarySource);
         sourceLinkEnforcer.sourceMoved(source);
-        //trajectoryManager.sourceMoved(source);
+        return;
+    case Source::OriginOfChange::audioAnalysisRecAutomation:
+        jassert(isPrimarySource);
+        sourceLinkEnforcer.sourceMoved(source);
         updatePrimarySourceParameters(changeType);
         return;
     }
@@ -1860,25 +1868,25 @@ void ControlGrisAudioProcessor::setSelectedSoundSpatializationTab(int newCurrent
 void ControlGrisAudioProcessor::processParameterValues()
 {
     auto & pSource{ mSources.getPrimarySource() };
+    auto originOfChange{ mAudioAnalysisActivateState ? gris::Source::OriginOfChange::audioAnalysisRecAutomation
+                                                     : gris::Source::OriginOfChange::audioAnalysis };
 
     if (mSpatMode == SpatMode::dome) {
         // Azimuth
         auto aziDeg{ pSource.getAzimuth().getAsDegrees() };
-        pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mAzimuthDomeValue) } },
-                           gris::Source::OriginOfChange::audioAnalysis);
+        pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mAzimuthDomeValue) } }, originOfChange);
         // Elevation
         auto eleDeg{ pSource.getElevation().getAsDegrees() };
 
         auto diffElev = eleDeg + static_cast<float>(mElevationDomeValue);
         if (mOscElevationBuffer + diffElev < 0.0f) {
-            pSource.setElevation(Radians{ Degrees{ 0.0f } }, gris::Source::OriginOfChange::audioAnalysis);
+            pSource.setElevation(Radians{ Degrees{ 0.0f } }, originOfChange);
             mOscElevationBuffer += diffElev;
         } else if (mOscElevationBuffer + diffElev > 90.0f) {
-            pSource.setElevation(Radians{ Degrees{ 90.0f } }, gris::Source::OriginOfChange::audioAnalysis);
+            pSource.setElevation(Radians{ Degrees{ 90.0f } }, originOfChange);
             mOscElevationBuffer += diffElev - 90.0f;
         } else if (mOscElevationBuffer + diffElev >= 0.0f && mOscElevationBuffer + diffElev <= 90.0f) {
-            pSource.setElevation(Radians{ Degrees{ mOscElevationBuffer + diffElev } },
-                                 gris::Source::OriginOfChange::audioAnalysis);
+            pSource.setElevation(Radians{ Degrees{ mOscElevationBuffer + diffElev } }, originOfChange);
             mOscElevationBuffer = 0.0f;
         }
     }
@@ -1886,8 +1894,8 @@ void ControlGrisAudioProcessor::processParameterValues()
         if (mXYParamLinked) {
             // X param behaves like Azimuth
             auto aziDeg{ pSource.getAzimuth().getAsDegrees() };
-            pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mXCubeValue) } },
-                               gris::Source::OriginOfChange::audioAnalysis);
+            pSource.setDistance(juce::jmin(1.0f, pSource.getDistance()), originOfChange);
+            pSource.setAzimuth(Radians{ Degrees{ aziDeg - static_cast<float>(mXCubeValue) } }, originOfChange);
         } else {
             // X, Y
             auto descX = static_cast<float>(mXCubeValue);
@@ -1920,7 +1928,7 @@ void ControlGrisAudioProcessor::processParameterValues()
                 mOscYBuffer = 0.0f;
             }
 
-            pSource.setPosition({ newX, newY }, gris::Source::OriginOfChange::audioAnalysis);
+            pSource.setPosition({ newX, newY }, originOfChange);
         }
 
         // Z
@@ -1939,7 +1947,7 @@ void ControlGrisAudioProcessor::processParameterValues()
             newZ = mOscZBuffer + diffZ;
             mOscZBuffer = 0.0f;
         }
-        pSource.setElevation(Normalized{ newZ }, Source::OriginOfChange::audioAnalysis);
+        pSource.setElevation(Normalized{ newZ }, originOfChange);
     }
     // Spans
     double hSpanVal{ mSpatMode == SpatMode::dome ? mHspanDomeValue : mHspanCubeValue };
@@ -1962,8 +1970,6 @@ void ControlGrisAudioProcessor::processParameterValues()
     for (auto & source : mSources) {
         source.setAzimuthSpan(Normalized{ newHSpanVal });
     }
-    auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-    mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
 
     // // VSpan
     auto vSpan = pSource.getElevationSpan().get();
@@ -1983,10 +1989,18 @@ void ControlGrisAudioProcessor::processParameterValues()
     for (auto & source : mSources) {
         source.setElevationSpan(Normalized{ newVSpanVal });
     }
-    auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-    mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
+
+    if (mAudioAnalysisActivateState) {
+        // recording automation for spans
+        auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
+
+        auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
+        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
+    }
 }
 
+//==============================================================================
 bool ControlGrisAudioProcessor::getXYParamLink()
 {
     return mXYParamLinked;

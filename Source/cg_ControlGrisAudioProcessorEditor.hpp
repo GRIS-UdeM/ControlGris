@@ -194,6 +194,8 @@ public:
 
     void refresh();
 
+    void addNewParamValueToDataGraph();
+
     void setSpatMode(SpatMode spatMode);
 
 private:

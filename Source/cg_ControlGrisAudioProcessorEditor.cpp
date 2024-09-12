@@ -770,6 +770,13 @@ void ControlGrisAudioProcessorEditor::refresh()
 }
 
 //==============================================================================
+void ControlGrisAudioProcessorEditor::addNewParamValueToDataGraph()
+{
+    // called by the audio thread
+    mSectionSoundReactiveSpatialization.addNewParamValueToDataGraph();
+}
+
+//==============================================================================
 // FieldComponent::Listener callback.
 void ControlGrisAudioProcessorEditor::fieldSourcePositionChangedCallback(SourceIndex const sourceIndex, int whichField)
 {

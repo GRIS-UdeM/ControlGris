@@ -35,6 +35,7 @@ bool Source::shouldForceNotifications(Source::OriginOfChange const origin) const
     case Source::OriginOfChange::automation:
     case Source::OriginOfChange::osc:
     case Source::OriginOfChange::audioAnalysis:
+    case Source::OriginOfChange::audioAnalysisRecAutomation:
         return false;
     case Source::OriginOfChange::trajectory:
     case Source::OriginOfChange::link:

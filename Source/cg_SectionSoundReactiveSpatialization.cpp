@@ -37,6 +37,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
                                 &mParameterZButton,
                                 &mParameterAzimuthOrXYSpanButton,
                                 &mParameterElevationOrZSpanButton }
+    , mDataGraph(grisLookAndFeel)
     , mDescriptorFactorSlider(grisLookAndFeel)
     , mDescriptorThresholdSlider(grisLookAndFeel)
     , mDescriptorMinFreqSlider(grisLookAndFeel)
@@ -433,7 +434,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         }
         if (mLastUsedParameterDomeButton != std::nullopt) {
             mParameterAzimuthButton.setToggleState(true, juce::dontSendNotification);
-            mLastUsedParameterDomeButton = mLastUsedParameterDomeButton;
+            mLastUsedParameterDomeButton = mParameterAzimuthButton;
             mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", 0, nullptr);
         }
         mAPVTS.state.setProperty("LastUsedAzimuthDescriptor",
@@ -1204,10 +1205,10 @@ void gris::SectionSoundReactiveSpatialization::paint(juce::Graphics & g)
     if (mSpatMode == SpatMode::dome) {
         if (mLastUsedParameterDomeButton) {
             auto & button = mLastUsedParameterDomeButton->get();
-            g.drawArrow(juce::Line<float>(button.getBounds().getRight(),
-                                          button.getBounds().getCentreY() + 1,
+            g.drawArrow(juce::Line<float>(static_cast<float>(button.getBounds().getRight()),
+                                          static_cast<float>(button.getBounds().getCentreY() + 1.0f),
                                           355.0f,
-                                          button.getBounds().getCentreY() + 1),
+                                          static_cast<float>(button.getBounds().getCentreY() + 1.0f)),
                         2.0f,
                         7.0f,
                         7.0f);
@@ -1215,10 +1216,10 @@ void gris::SectionSoundReactiveSpatialization::paint(juce::Graphics & g)
     } else {
         if (mLastUsedParameterCubeButton) {
             auto & button = mLastUsedParameterCubeButton->get();
-            g.drawArrow(juce::Line<float>(button.getBounds().getRight(),
-                                          button.getBounds().getCentreY() + 1,
+            g.drawArrow(juce::Line<float>(static_cast<float>(button.getBounds().getRight()),
+                                          static_cast<float>(button.getBounds().getCentreY() + 1),
                                           355.0f,
-                                          button.getBounds().getCentreY() + 1),
+                                          static_cast<float>(button.getBounds().getCentreY() + 1)),
                         2.0f,
                         7.0f,
                         7.0f);
@@ -1741,6 +1742,8 @@ void gris::SectionSoundReactiveSpatialization::setSpatMode(SpatMode spatMode)
         }
         if (domeButtonIdx.isVoid() || domeButtonIdx == juce::String("")) {
             mLastUsedParameterDomeButton.reset();
+            mAPVTS.state.setProperty("LastUsedParameterDomeButtonRefIdx", "", nullptr);
+            unselectAllParamButtons();
         } else {
             mLastUsedParameterDomeButton = *mParameterButtonDomeRefs[static_cast<int>(domeButtonIdx)];
         }
@@ -1790,6 +1793,8 @@ void gris::SectionSoundReactiveSpatialization::setSpatMode(SpatMode spatMode)
         }
         if (cubeButtonIdx.isVoid() || cubeButtonIdx == juce::String("")) {
             mLastUsedParameterCubeButton.reset();
+            mAPVTS.state.setProperty("LastUsedParameterCubeButtonRefIdx", "", nullptr);
+            unselectAllParamButtons();
         } else {
             mLastUsedParameterCubeButton = *mParameterButtonCubeRefs[static_cast<int>(cubeButtonIdx)];
         }
@@ -1826,6 +1831,50 @@ void gris::SectionSoundReactiveSpatialization::setSpatMode(SpatMode spatMode)
     }
 
     refreshDescriptorPanel();
+}
+
+//==============================================================================
+void gris::SectionSoundReactiveSpatialization::addNewParamValueToDataGraph()
+{
+    // this is called by the audio thread
+
+    if (mParameterToShow) {
+        auto & param{ mParameterToShow->get() };
+        auto value{ param.getValue() };
+        auto lap{ static_cast<int>(mParameterLapCombo.getSelectedIdAsValue().getValue()) };
+
+        switch (param.getParameterID()) {
+        case ParameterID::azimuth:
+            value = juce::jmap(std::abs(value), 0.0, 360.0 * lap, 0.0, 1.0);
+            break;
+        case ParameterID::elevation:
+            value = juce::jmap(value, -90.0, 90.0, -1.0, 1.0);
+            break;
+        case ParameterID::x:
+            if (mAudioProcessor.getXYParamLink()) {
+                value = juce::jmap(std::abs(value), 0.0, 360.0 * lap, 0.0, 1.0);
+            } else {
+                value = juce::jmap(std::abs(value), 0.0, 1.66, 0.0, 1.0);
+            }
+            break;
+        case ParameterID::y:
+            value = juce::jmap(std::abs(value), 0.0, 1.66, 0.0, 1.0);
+            break;
+        case ParameterID::azimuthspan:
+            value = juce::jmap(std::abs(value), 0.0, 100.0, 0.0, 1.0);
+            break;
+        case ParameterID::elevationspan:
+            value = juce::jmap(value, -100.0, 100.0, -1.0, 1.0);
+            break;
+        case ParameterID::z:
+            value = juce::jmap(value, -1.0, 1.0, -1.0, 1.0);
+        case ParameterID::invalid:
+        default:
+            break;
+        }
+
+        mDataGraph.addToBuffer(value);
+    }
 }
 
 //==============================================================================
@@ -2135,7 +2184,7 @@ void gris::SectionSoundReactiveSpatialization::setAudioAnalysisComponentsInvisib
 }
 
 //==============================================================================
-gris::DataGraph::DataGraph()
+gris::DataGraph::DataGraph(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
     mGUIBuffer.resize(100);
     std::fill(mGUIBuffer.begin(), mGUIBuffer.end(), 0.0);
@@ -2151,12 +2200,12 @@ gris::DataGraph::~DataGraph()
 //==============================================================================
 void gris::DataGraph::paint(juce::Graphics & g)
 {
-    g.fillAll(juce::Colour(200, 200, 102));
+    g.fillAll(mGrisLookAndFeel.getWinBackgroundColor());
 
     g.setOpacity(1.0f);
-    g.setColour(juce::Colours::black);
+    g.setColour(mGrisLookAndFeel.getOnColor());
 
-    auto area = getLocalBounds().reduced(1);
+    auto area = getLocalBounds().reduced(2);
     juce::RectangleList<float> rectList{};
 
     if (mParam) {
@@ -2168,22 +2217,23 @@ void gris::DataGraph::paint(juce::Graphics & g)
             if (param.getParameterID() == ParameterID::elevation || param.getParameterID() == ParameterID::elevationspan
                 || param.getParameterID() == ParameterID::z) {
                 // parameter has an offset option, the graph can have negative values
-                initialX = (static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1);
+                initialX = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1))
+                           + area.getX();
                 width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
                 height = static_cast<float>(area.getHeight() * std::abs(valueToPaint) / 2);
                 if (valueToPaint < 0) {
                     // bottom half
-                    initialY = static_cast<float>((area.getHeight() / 2) + 1.0f);
+                    initialY = static_cast<float>((area.getHeight() / 2) + 1.0f) + area.getY();
                     rectList.add(initialX, initialY, width, height);
                 } else {
                     // top half
-                    initialY = static_cast<float>((area.getHeight() / 2) - height + 1.0f);
+                    initialY = static_cast<float>((area.getHeight() / 2) - height + 1.0f) + area.getY();
                     rectList.add(initialX, initialY, width, height);
                 }
             } else {
                 // the graph uses only positive values
-                initialX = (static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1);
-                initialY = static_cast<float>(area.getHeight() - (area.getHeight() * std::abs(mGUIBuffer.at(i))) + 1);
+                initialX = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1)) + area.getX();
+                initialY = (static_cast<float>(area.getHeight() - (area.getHeight() * std::abs(mGUIBuffer.at(i))) + 1)) + area.getY();
                 width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
                 height = static_cast<float>(area.getHeight() * std::abs(mGUIBuffer.at(i)));
                 rectList.add(initialX, initialY, width, height);
@@ -2214,17 +2264,19 @@ void gris::DataGraph::timerCallback()
 //==============================================================================
 void gris::DataGraph::addToBuffer(double value)
 {
-    mBuffer += value;
-    mBufferCount++;
+    // this is called by the audio thread.
+    mBuffer = mBuffer.get() + value;
+    ++mBufferCount;
 }
 
 //==============================================================================
 double gris::DataGraph::readBufferMean()
 {
+    // this is called by the timer thread.
     double mean{};
 
-    if (mBufferCount > 0) {
-        mean = mBuffer / mBufferCount;
+    if (mBufferCount.get() > 0) {
+        mean = mBuffer.get() / mBufferCount.get();
         mBuffer = 0.0;
         mBufferCount = 0;
     }

@@ -39,7 +39,7 @@ class DataGraph
 {
 public:
     //==============================================================================
-    DataGraph();
+    DataGraph(GrisLookAndFeel & grisLookAndFeel);
     ~DataGraph() override;
 
     void paint(juce::Graphics &) override;
@@ -52,10 +52,11 @@ public:
 
 private:
     //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
     std::optional<std::reference_wrapper<SpatialParameter>> mParam;
     std::deque<double> mGUIBuffer;
-    double mBuffer{};
-    int mBufferCount{};
+    juce::Atomic<double> mBuffer{};
+    juce::Atomic<int> mBufferCount{};
 
     //==============================================================================
     JUCE_LEAK_DETECTOR(DataGraph)
@@ -203,6 +204,7 @@ public:
     void removeListener(Listener * l) { mListeners.remove(l); }
 
     void setSpatMode(SpatMode spatMode);
+    void addNewParamValueToDataGraph();
 
     bool getAudioAnalysisActivateState();
     void setAudioAnalysisActivateState(bool state);
