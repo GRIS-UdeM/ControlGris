@@ -2226,23 +2226,23 @@ void gris::DataGraph::paint(juce::Graphics & g)
             if (param.getParameterID() == ParameterID::elevation || param.getParameterID() == ParameterID::elevationspan
                 || param.getParameterID() == ParameterID::z) {
                 // parameter has an offset option, the graph can have negative values
-                initialX = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1))
+                initialX = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * i)
                            + area.getX();
                 width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
                 height = static_cast<float>(area.getHeight() * std::abs(valueToPaint) / 2);
                 if (valueToPaint < 0) {
                     // bottom half
-                    initialY = static_cast<float>((area.getHeight() / 2) + 1.0f) + area.getY();
+                    initialY = static_cast<float>(area.getHeight() / 2) + area.getY();
                     rectList.add(initialX, initialY, width, height);
                 } else {
                     // top half
-                    initialY = static_cast<float>((area.getHeight() / 2) - height + 1.0f) + area.getY();
+                    initialY = static_cast<float>((area.getHeight() / 2) - height) + area.getY();
                     rectList.add(initialX, initialY, width, height);
                 }
             } else {
                 // the graph uses only positive values
-                initialX = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * (i + 1)) + area.getX();
-                initialY = (static_cast<float>(area.getHeight() - (area.getHeight() * std::abs(mGUIBuffer.at(i))) + 1)) + area.getY();
+                initialX = (static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size()) * i) + area.getX();
+                initialY = (static_cast<float>(area.getHeight() - (area.getHeight() * std::abs(mGUIBuffer.at(i))))) + area.getY();
                 width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
                 height = static_cast<float>(area.getHeight() * std::abs(mGUIBuffer.at(i)));
                 rectList.add(initialX, initialY, width, height);
