@@ -431,6 +431,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             mParameterToShow = mAudioProcessor.getAzimuthDome();
             mDescriptorIdToUse = Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId());
+            mLastUsedParameterDomeButton = mParameterAzimuthButton;
         }
         if (mLastUsedParameterDomeButton != std::nullopt) {
             mParameterAzimuthButton.setToggleState(true, juce::dontSendNotification);
@@ -488,6 +489,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             mParameterToShow = mAudioProcessor.getElevationDome();
             mDescriptorIdToUse = Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId());
+            mLastUsedParameterDomeButton = mParameterElevationButton;
         }
         if (mLastUsedParameterDomeButton != std::nullopt) {
             mParameterElevationButton.setToggleState(true, juce::dontSendNotification);
@@ -542,6 +544,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             mParameterToShow = mAudioProcessor.getXCube();
             mDescriptorIdToUse = Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId());
+            mLastUsedParameterCubeButton = mParameterXButton;
         }
         if (mLastUsedParameterCubeButton != std::nullopt) {
             mParameterXButton.setToggleState(true, juce::dontSendNotification);
@@ -595,6 +598,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             mParameterToShow = mAudioProcessor.getYCube();
             mDescriptorIdToUse = Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId());
+            mLastUsedParameterCubeButton = mParameterYButton;
         }
         if (mLastUsedParameterCubeButton != std::nullopt) {
             mParameterYButton.setToggleState(true, juce::dontSendNotification);
@@ -641,6 +645,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             mParameterToShow = mAudioProcessor.getZCube();
             mDescriptorIdToUse = Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId());
+            mLastUsedParameterCubeButton = mParameterZButton;
         }
         if (mLastUsedParameterCubeButton != std::nullopt) {
             mParameterZButton.setToggleState(true, juce::dontSendNotification);
@@ -693,8 +698,10 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             if (mSpatMode == SpatMode::dome) {
                 mParameterToShow = mAudioProcessor.getHSpanDome();
+                mLastUsedParameterDomeButton = mParameterAzimuthOrXYSpanButton;
             } else {
                 mParameterToShow = mAudioProcessor.getHSpanCube();
+                mLastUsedParameterCubeButton = mParameterAzimuthOrXYSpanButton;
             }
         }
         if (mSpatMode == SpatMode::dome) {
@@ -760,8 +767,10 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         } else {
             if (mSpatMode == SpatMode::dome) {
                 mParameterToShow = mAudioProcessor.getVSpanDome();
+                mLastUsedParameterDomeButton = mParameterElevationOrZSpanButton;
             } else {
                 mParameterToShow = mAudioProcessor.getVSpanCube();
+                mLastUsedParameterCubeButton = mParameterElevationOrZSpanButton;
             }
         }
         if (mSpatMode == SpatMode::dome) {
