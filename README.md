@@ -1,6 +1,6 @@
 # ControlGris
 
-Spatialization plugin (SpatGris version 2)
+Spatialization plugin for [SpatGris](https://github.com/GRIS-UdeM/SpatGRIS)
 
 ## Building the ControlGris VST plugin on Debian (Ubuntu)
 
