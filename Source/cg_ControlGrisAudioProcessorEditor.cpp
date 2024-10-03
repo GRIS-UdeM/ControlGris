@@ -303,9 +303,7 @@ void ControlGrisAudioProcessorEditor::updateElevationMode(ElevationMode mode)
     if (juce::MessageManager::getInstance()->isThisTheMessageThread()) {
         updateElevMode();
     } else {
-        juce::MessageManager::callAsync([=] {
-            updateElevMode();
-        });
+        juce::MessageManager::callAsync([=] { updateElevMode(); });
     }
 }
 

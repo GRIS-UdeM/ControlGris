@@ -622,8 +622,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
-    }
-    else if (address == pluginInstance + "/desc/1/cubeparams"
+    } else if (address == pluginInstance + "/desc/1/cubeparams"
                && positionTrajectory == PositionTrajectoryType::realtime
                && elevationTrajectory == ElevationTrajectoryType::realtime) { // x y z aziSpan eleSpan
 
@@ -724,9 +723,8 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
         auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
         mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
-    }
-    else if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
-        && positionTrajectory == PositionTrajectoryType::realtime) {
+    } else if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
+               && positionTrajectory == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
     } else if ((address == pluginInstance + "/traj/1/y" || address == pluginInstance + "/traj/1/xyz/2")
                && positionTrajectory == PositionTrajectoryType::realtime) {

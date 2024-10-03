@@ -69,11 +69,13 @@ private:
         = 0;
     virtual void enforce_implementation(Sources & finalStates,
                                         SourcesSnapshots const & initialStates,
-                                        SourceIndex sourceIndex) const = 0;
+                                        SourceIndex sourceIndex) const
+        = 0;
     [[nodiscard]] virtual SourceSnapshot
         computeInitialStateFromFinalState_implementation(Sources const & finalStates,
                                                          SourcesSnapshots const & initialStates,
-                                                         SourceIndex sourceIndex) const = 0;
+                                                         SourceIndex sourceIndex) const
+        = 0;
     //==============================================================================
     JUCE_LEAK_DETECTOR(Base)
 
