@@ -76,9 +76,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
         parameter->setValueNotifyingHost(value);
         elevationModeChangedEndedCallback();
     };
-    auto const elevModeValue{ mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::ELEVATION_MODE) };
-    auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
-    updateElevationMode(elevMode);
     addAndMakeVisible(&mElevationModeCombobox);
 
     auto const width{ getWidth() - 50 }; // Remove position preset space.
@@ -251,6 +248,10 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
         mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::POSITION_PRESET).getValue())) };
     mPositionPresetComponent.setPreset(preset, false);
 
+    auto const elevModeValue{ mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::ELEVATION_MODE) };
+    auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
+    updateElevationMode(elevMode);
+
     mIsInsideSetPluginState = false;
 }
 
@@ -294,10 +295,18 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int const presetNumbe
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationMode(ElevationMode mode)
 {
-    juce::MessageManager::callAsync([=] {
-        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::sendNotificationAsync);
+    auto const updateElevMode = [=]() {
+        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::dontSendNotification);
         mElevationField.setElevationMode(mode);
-    });
+    };
+
+    if (juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+        updateElevMode();
+    } else {
+        juce::MessageManager::callAsync([=] {
+            updateElevMode();
+        });
+    }
 }
 
 //==============================================================================
