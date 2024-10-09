@@ -1101,9 +1101,9 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
         }
     }
 
-    if (!wasPlaying && mIsPlaying) {         // Initialization here only for Logic (also Reaper and Live), which are not
-        juce::PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
-        if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
+    if (!wasPlaying && mIsPlaying) {         // Initialization here only for Logic, Reaper, Live and Digital Performer,
+        juce::PluginHostType const hostType; // which are not calling prepareToPlay every time the sequence starts.
+        if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive() || hostType.isDigitalPerformer()) {
             initialize();
         }
     }
