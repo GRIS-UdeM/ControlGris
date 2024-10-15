@@ -1092,12 +1092,15 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
         mIsPlaying = currentPositionInfo->getIsPlaying();
         mBpm = currentPositionInfo->getBpm().orFallback(120.0);
         if (mNeedsInitialization) {
-            mInitTimeOnPlay = mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0) < 0.0
-                                                 ? 0.0
-                                                 : currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            auto timeInSeconds = currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            mCurrentTime = (timeInSeconds < 0.0) ? 0.0 : timeInSeconds;
+            mInitTimeOnPlay = mCurrentTime;
             mNeedsInitialization = false;
         } else {
             mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            if (mInitTimeOnPlay > mCurrentTime) {
+                mInitTimeOnPlay = mCurrentTime;
+            }
         }
     }
 
