@@ -57,7 +57,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     addAndMakeVisible(&mMainBanner);
 
     mElevationBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mElevationBanner.setText("Elevation", juce::NotificationType::dontSendNotification);
+    mElevationBanner.setText("Z", juce::dontSendNotification);
     addAndMakeVisible(&mElevationBanner);
 
     mElevationModeLabel.setEditable(false, false);
@@ -821,7 +821,7 @@ void ControlGrisAudioProcessorEditor::resized()
     mPositionField.setBounds(0, 20, fieldSize, fieldSize);
 
     if (mProcessor.getSpatMode() == SpatMode::cube) {
-        mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
+        mMainBanner.setText("X - Y", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);
         mElevationModeCombobox.setVisible(true);
