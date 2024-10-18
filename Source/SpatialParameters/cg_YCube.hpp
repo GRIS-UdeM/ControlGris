@@ -79,7 +79,7 @@ public:
         double inputRange = range * 0.01;
         res = clip * inputRange;
         res = juce::jlimit(-1.0, 1.0, res);
-        res = juce::jmap(res, -1.0, 1.0, -1.66, 1.66);
+        res = juce::jmap(res, -1.0, 1.0, -2.0, 2.0);
 
         if (std::isnan(res)) {
             res = 0.0;
