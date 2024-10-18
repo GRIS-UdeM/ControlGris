@@ -104,7 +104,7 @@ double SpatialParameter::processPitch(double valueToProcess)
     auto val{ 0.0 };
     double minFreq = mFunctions.frequencyToMidiNoteNumber(paramMinFreqPitch);
     double maxFreq = mFunctions.frequencyToMidiNoteNumber(paramMaxFreqPitch);
-    double zmap = mFunctions.zmap(valueToProcess, minFreq, maxFreq);
+    double zmap = mFunctions.zmap(valueToProcess, minFreq, maxFreq); // zmap can be nan if frequency range for analysis is not wide enough...
     val = processSmoothedPitch(zmap);
     return val;
 }

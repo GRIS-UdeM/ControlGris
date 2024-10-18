@@ -37,6 +37,8 @@ constexpr Radians MIN_ELEVATION = Degrees{ 0.0f };
 constexpr Radians MAX_ELEVATION = Degrees{ 90.0f };
 
 constexpr double ALMOST_ZERO{ 0.0000000000001 };
+constexpr double MIN_FREQ_RANGE_ANALYSIS_BELOW_1000{ 50.0 };
+constexpr double MIN_FREQ_RANGE_ANALYSIS_ABOVE_1000{ 1000.0 };
 
 //==============================================================================
 // Spatialisation modes.

@@ -53,6 +53,11 @@ public:
 
             mCurrentValue += adjustment;
         }
+
+        if (std::isnan(mCurrentValue)) {
+            // Just a safety. Processing pitch can output nan value if range of min and max frequencies is too small
+            mCurrentValue = -1.0;
+        }
         return mCurrentValue;
     }
 

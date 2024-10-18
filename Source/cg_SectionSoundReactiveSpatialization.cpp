@@ -1032,8 +1032,11 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         if (mParameterToShow) {
             auto minVal{ mDescriptorMinFreqSlider.getValue() };
             auto maxVal{ mDescriptorMaxFreqSlider.getValue() };
-            if (minVal > maxVal) {
-                minVal = maxVal;
+            if (maxVal <= 1000 && maxVal - minVal < MIN_FREQ_RANGE_ANALYSIS_BELOW_1000) {
+                minVal = maxVal - MIN_FREQ_RANGE_ANALYSIS_BELOW_1000;
+                mDescriptorMinFreqSlider.setValue(minVal);
+            } else if (maxVal > 1000 && maxVal - minVal < MIN_FREQ_RANGE_ANALYSIS_ABOVE_1000) {
+                minVal = maxVal - MIN_FREQ_RANGE_ANALYSIS_ABOVE_1000;
                 mDescriptorMinFreqSlider.setValue(minVal);
             }
             auto & param = mParameterToShow->get();
@@ -1059,8 +1062,11 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
         if (mParameterToShow) {
             auto minVal{ mDescriptorMinFreqSlider.getValue() };
             auto maxVal{ mDescriptorMaxFreqSlider.getValue() };
-            if (maxVal < minVal) {
-                maxVal = minVal;
+            if (minVal < 1000 && maxVal - minVal < MIN_FREQ_RANGE_ANALYSIS_BELOW_1000) {
+                maxVal = minVal + MIN_FREQ_RANGE_ANALYSIS_BELOW_1000;
+                mDescriptorMaxFreqSlider.setValue(maxVal);
+            } else if (minVal >= 1000 && maxVal - minVal < MIN_FREQ_RANGE_ANALYSIS_ABOVE_1000) {
+                maxVal = minVal + MIN_FREQ_RANGE_ANALYSIS_ABOVE_1000;
                 mDescriptorMaxFreqSlider.setValue(maxVal);
             }
             auto & param = mParameterToShow->get();
