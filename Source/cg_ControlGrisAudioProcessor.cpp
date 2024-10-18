@@ -1279,6 +1279,11 @@ void ControlGrisAudioProcessor::prepareToPlay([[maybe_unused]] double const samp
     mOnsetDetectionY.init();
     mOnsetDetectionZ.init();
 
+    auto * ed{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
+    if (ed != nullptr) {
+        ed->updateAudioAnalysisNumInputChannels();
+    }
+
     if (!mIsPlaying) {
         initialize();
     }
@@ -1383,11 +1388,10 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
 
         mDescriptorsBuffer.clear();
         mDescriptorsBuffer.setSize(1, buffer.getNumSamples());
-        for (int i{}; i < totalNumInputChannels; ++i) {
+        for (int i{}; i < mNumChannelsToAnalyse; ++i) {
             mDescriptorsBuffer.addFrom(0, 0, buffer, i, 0, buffer.getNumSamples());
         }
-        if (totalNumInputChannels > 0)
-            mDescriptorsBuffer.applyGain(1.0f / totalNumInputChannels);
+        mDescriptorsBuffer.applyGain(mAudioAnalysisInputGain);
 
         auto bufferMagnitude = mDescriptorsBuffer.getMagnitude(0, mDescriptorsBuffer.getNumSamples());
         auto * channelData = mDescriptorsBuffer.getReadPointer(0);
@@ -1856,6 +1860,18 @@ void ControlGrisAudioProcessor::updatePrimarySourceParameters(Source::ChangeType
     default:
         jassertfalse;
     }
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setGainForAudioAnalysis(double gain)
+{
+    mAudioAnalysisInputGain = gain;
+}
+
+//==============================================================================
+void ControlGrisAudioProcessor::setNumChannelsForAudioAnalysis(int numChannels)
+{
+    mNumChannelsToAnalyse = numChannels;
 }
 
 //==============================================================================

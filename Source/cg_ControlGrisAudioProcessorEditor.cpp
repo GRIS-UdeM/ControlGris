@@ -345,11 +345,16 @@ void ControlGrisAudioProcessorEditor::elevationModeChangedEndedCallback()
 }
 
 //==============================================================================
+void ControlGrisAudioProcessorEditor::updateAudioAnalysisNumInputChannels()
+{
+    mSectionSoundReactiveSpatialization.updateChannelMixCombo();
+}
+
+//==============================================================================
 // Value::Listener callback. Called when the stored window size changes.
 void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
 {
     setSize(mLastUiWidth.getValue(), mLastUiHeight.getValue());
-    //DBG("gui size: " << juce::int64(mLastUiWidth.getValue()) << ", " << juce::int64(mLastUiHeight.getValue()));
 }
 
 //==============================================================================

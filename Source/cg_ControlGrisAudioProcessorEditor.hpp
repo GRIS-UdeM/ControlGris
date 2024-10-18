@@ -192,6 +192,8 @@ public:
     void elevationModeChangedStartedCallback();
     void elevationModeChangedEndedCallback();
 
+    void updateAudioAnalysisNumInputChannels();
+
     void refresh();
 
     void addNewParamValueToDataGraph();

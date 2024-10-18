@@ -92,6 +92,11 @@ private:
 
     juce::Label mSpatialParameterLabel;
 
+    juce::Label mChannelMixLabel;
+    juce::ComboBox mChannelMixCombo;
+    juce::Label mGainLabel;
+    NumSlider mGainSlider;
+
     std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterDomeButton;
     std::optional<std::reference_wrapper<juce::TextButton>> mLastUsedParameterCubeButton;
 
@@ -208,6 +213,8 @@ public:
 
     bool getAudioAnalysisActivateState();
     void setAudioAnalysisActivateState(bool state);
+
+    void updateChannelMixCombo();
 
 private:
     //==============================================================================

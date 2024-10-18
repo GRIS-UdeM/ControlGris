@@ -28,6 +28,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     : mGrisLookAndFeel(grisLookAndFeel)
     , mAudioProcessor(audioProcessor)
     , mAPVTS(mAudioProcessor.getValueTreeState())
+    , mGainSlider(grisLookAndFeel)
     , mParameterButtonDomeRefs{ &mParameterAzimuthButton,
                                 &mParameterElevationButton,
                                 &mParameterAzimuthOrXYSpanButton,
@@ -134,6 +135,39 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     //==============================================================================
     // Spatial Parameters
+
+    addAndMakeVisible(&mChannelMixLabel);
+    mChannelMixLabel.setText("Ch. Mix", juce::dontSendNotification);
+
+    addAndMakeVisible(&mChannelMixCombo);
+    updateChannelMixCombo();
+    mChannelMixCombo.onChange = [this] {
+        auto numChannels{ mChannelMixCombo.getSelectedId() };
+        auto newGain{ 1.0 / numChannels };
+        mAPVTS.state.setProperty("numInputChannelsForAnalysis", numChannels, nullptr);
+        mAudioProcessor.setNumChannelsForAudioAnalysis(numChannels);
+        mAudioProcessor.setGainForAudioAnalysis(newGain);
+        mGainSlider.setRange(0.0, 2.0 / numChannels, 0.001);
+        mGainSlider.setValue(newGain);
+    };
+
+    addAndMakeVisible(&mGainLabel);
+    mGainLabel.setText("Gain", juce::dontSendNotification);
+
+    addAndMakeVisible(&mGainSlider);
+    mGainSlider.setNumDecimalPlacesToDisplay(3);
+    mGainSlider.setRange(0.0, 2.0, 0.001);
+    auto gain{ mAPVTS.state.getProperty("audioGainForAnalysis") };
+    if (gain.isVoid()) {
+        mGainSlider.setValue(1.0 / mAudioProcessor.getNumInputChannels());
+    } else {
+        mGainSlider.setValue(gain, juce::sendNotification);
+    }
+    mGainSlider.onValueChange = [this] {
+        auto gainSliderVal{ mGainSlider.getValue() };
+        mAPVTS.state.setProperty("audioGainForAnalysis", gainSliderVal, nullptr);
+        mAudioProcessor.setGainForAudioAnalysis(gainSliderVal);
+    };
 
     // default values
     mParameterAzimuthRangeSlider.setDoubleClickReturnValue(true, 100.0);
@@ -1105,7 +1139,6 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
 
     addAndMakeVisible(&mDescriptorMetricCombo);
     mDescriptorMetricCombo.addItemList(ONSET_DETECTION_METRIC_TYPES, 1);
-    mDescriptorMetricCombo.setSelectedId(1);
     mDescriptorMetricCombo.onChange = [this] {
         if (mParameterToShow) {
             auto& param = mParameterToShow->get();
@@ -1255,6 +1288,11 @@ void gris::SectionSoundReactiveSpatialization::resized()
 
     mSpatialParameterLabel.setBounds(5, 3, 140, 15);
     mAudioAnalysisLabel.setBounds(bannerAudioAnalysis.getTopLeft().getX() + 5, 3, 140, 15);
+
+    mChannelMixLabel.setBounds(mSpatialParameterLabel.getRight() + 60, 3, 50, 15);
+    mChannelMixCombo.setBounds(mChannelMixLabel.getRight() - 10, 2, 30, 15);
+    mGainLabel.setBounds(350 - 35 - 3 - 30, 3, 30, 15);
+    mGainSlider.setBounds(350 - 35 - 3, 4, 35, 12);
 
     mParameterYButton.setEnabled(true);
     mParameterYDescriptorCombo.setEnabled(true);
@@ -1896,6 +1934,27 @@ bool gris::SectionSoundReactiveSpatialization::getAudioAnalysisActivateState()
 void gris::SectionSoundReactiveSpatialization::setAudioAnalysisActivateState(bool state)
 {
     mAudioAnalysisActivateButton.setToggleState(state, juce::dontSendNotification);
+}
+
+//==============================================================================
+void gris::SectionSoundReactiveSpatialization::updateChannelMixCombo()
+{
+    auto numInputChannels{ mAudioProcessor.getNumInputChannels() };
+    juce::StringArray chanArray;
+
+    for (int i{}; i < numInputChannels; ++i) {
+        chanArray.add(juce::String(i + 1));
+    }
+    mChannelMixCombo.clear();
+    mChannelMixCombo.addItemList(chanArray, 1);
+
+    int selectedId{ mAPVTS.state.getProperty("numInputChannelsForAnalysis") };
+    if (selectedId == 0 || selectedId > numInputChannels) {
+        selectedId = numInputChannels;
+        mAPVTS.state.setProperty("numInputChannelsForAnalysis", selectedId, nullptr);
+    }
+    mChannelMixCombo.setSelectedId(selectedId, juce::dontSendNotification);
+    mAudioProcessor.setNumChannelsForAudioAnalysis(selectedId);
 }
 
 //==============================================================================
