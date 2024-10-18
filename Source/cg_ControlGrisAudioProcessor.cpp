@@ -575,179 +575,7 @@ void ControlGrisAudioProcessor::oscMessageReceived(juce::OSCMessage const & mess
     auto const positionTrajectory{ mPositionTrajectoryManager.getTrajectoryType() };
     auto const elevationTrajectory{ mElevationTrajectoryManager.getTrajectoryType() };
 
-    if (address == pluginInstance + "/desc/1/domeparams"
-        && positionTrajectory == PositionTrajectoryType::realtime) { // azi ele aziSpan eleSpan
-
-        auto & pSource{ mSources.getPrimarySource() };
-
-        // Azimuth
-        auto aziDeg{ pSource.getAzimuth().getAsDegrees() };
-
-        pSource.setAzimuth(Radians{ Degrees{ aziDeg - message[0].getFloat32() } }, gris::Source::OriginOfChange::osc);
-
-        // Elevation
-        auto eleDeg{ pSource.getElevation().getAsDegrees() };
-
-        auto diffElev = eleDeg + message[1].getFloat32();
-        if (mOscElevationBuffer + diffElev < 0.0f) {
-            pSource.setElevation(Radians{ Degrees{ 0.0f } }, gris::Source::OriginOfChange::osc);
-            mOscElevationBuffer += diffElev;
-        } else if (mOscElevationBuffer + diffElev > 90.0f) {
-            pSource.setElevation(Radians{ Degrees{ 90.0f } }, gris::Source::OriginOfChange::osc);
-            mOscElevationBuffer += diffElev - 90.0f;
-        } else if (mOscElevationBuffer + diffElev >= 0.0f && mOscElevationBuffer + diffElev <= 90.0f) {
-            pSource.setElevation(Radians{ Degrees{ mOscElevationBuffer + diffElev } },
-                                 gris::Source::OriginOfChange::osc);
-            mOscElevationBuffer = 0.0f;
-        }
-
-        // Spans
-        // // HSpan
-        auto oscHSpan = message[2].getFloat32() * -0.01f;
-        auto hSpan = pSource.getAzimuthSpan().get();
-        auto diffHSpan = hSpan + oscHSpan;
-        float newHSpanVal{};
-
-        if (mOscHSpanBuffer + diffHSpan < 0.0f) {
-            newHSpanVal = 0.0f;
-            mOscHSpanBuffer += diffHSpan;
-        } else if (mOscHSpanBuffer + diffHSpan > 1.0f) {
-            newHSpanVal = 1.0f;
-            mOscHSpanBuffer += diffHSpan - 1.0f;
-        } else if (mOscHSpanBuffer + diffHSpan >= 0.0f && mOscHSpanBuffer + diffHSpan <= 1.0f) {
-            newHSpanVal = mOscHSpanBuffer + diffHSpan;
-            mOscHSpanBuffer = 0.0f;
-        }
-
-        // // VSpan
-        auto oscVSpan = message[3].getFloat32() * -0.01f;
-        auto vSpan = pSource.getElevationSpan().get();
-        auto diffVSpan = vSpan + oscVSpan;
-        float newVSpanVal{};
-
-        if (mOscVSpanBuffer + diffVSpan < 0.0f) {
-            newVSpanVal = 0.0f;
-            mOscVSpanBuffer += diffVSpan;
-        } else if (mOscVSpanBuffer + diffVSpan > 1.0f) {
-            newVSpanVal = 1.0f;
-            mOscVSpanBuffer += diffVSpan - 1.0f;
-        } else if (mOscVSpanBuffer + diffVSpan >= 0.0f && mOscVSpanBuffer + diffVSpan <= 1.0f) {
-            newVSpanVal = mOscVSpanBuffer + diffVSpan;
-            mOscVSpanBuffer = 0.0f;
-        }
-
-        for (auto & source : mSources) {
-            source.setAzimuthSpan(Normalized{ newHSpanVal });
-            source.setElevationSpan(Normalized{ newVSpanVal });
-        }
-        auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
-        auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
-    }
-    else if (address == pluginInstance + "/desc/1/cubeparams"
-               && positionTrajectory == PositionTrajectoryType::realtime
-               && elevationTrajectory == ElevationTrajectoryType::realtime) { // x y z aziSpan eleSpan
-
-        auto & pSource{ mSources.getPrimarySource() };
-
-        // X, Y
-        auto oscX = static_cast<float>(message[0].getFloat32());
-        auto oscY = static_cast<float>(-1.0 * message[1].getFloat32()); // Y is inverted in GUI
-        auto sourceXYPosition{ pSource.getPositionFromAngle(pSource.getAzimuth(), pSource.getDistance()) };
-        auto diffX = sourceXYPosition.x - oscX;
-        auto diffY = sourceXYPosition.y - oscY;
-        float newX{};
-        float newY{};
-
-        if (mOscXBuffer + diffX < -1.0f) {
-            newX = -1.0f;
-            mOscXBuffer += diffX + 1.0f;
-        } else if (mOscXBuffer + diffX > 1.0f) {
-            newX = 1.0f;
-            mOscXBuffer += diffX - 1.0f;
-        } else if (mOscXBuffer + diffX >= -1.0f && mOscXBuffer + diffX <= 1.0f) {
-            newX = mOscXBuffer + diffX;
-            mOscXBuffer = 0.0f;
-        }
-
-        if (mOscYBuffer + diffY < -1.0f) {
-            newY = -1.0f;
-            mOscYBuffer += diffY + 1.0f;
-        } else if (mOscYBuffer + diffY > 1.0f) {
-            newY = 1.0f;
-            mOscYBuffer += diffY - 1.0f;
-        } else if (mOscYBuffer + diffY >= -1.0f && mOscYBuffer + diffY <= 1.0f) {
-            newY = mOscYBuffer + diffY;
-            mOscYBuffer = 0.0f;
-        }
-
-        pSource.setPosition({ newX, newY }, gris::Source::OriginOfChange::osc);
-
-        // Z
-        auto oscZ = static_cast<float>(-1.0 * message[2].getFloat32()); // Z is inverted in GUI
-        auto sourceZPosition{ pSource.getNormalizedElevation().get() };
-        auto diffZ = sourceZPosition - oscZ;
-        float newZ{};
-
-        if (mOscZBuffer + diffZ < 0.0f) {
-            newZ = 0.0f;
-            mOscZBuffer += diffZ;
-        } else if (mOscZBuffer + diffZ > 1.0f) {
-            newZ = 1.0f;
-            mOscZBuffer += diffZ - 1.0f;
-        } else if (mOscZBuffer + diffZ >= 0.0f && mOscZBuffer + diffZ <= 1.0f) {
-            newZ = mOscZBuffer + diffZ;
-            mOscZBuffer = 0.0f;
-        }
-
-        pSource.setElevation(Normalized{ newZ }, Source::OriginOfChange::osc);
-
-        // Spans
-        // // HSpan
-        auto oscHSpan = message[3].getFloat32() * -0.01f;
-        auto hSpan = pSource.getAzimuthSpan().get();
-        auto diffHSpan = hSpan + oscHSpan;
-        float newHSpanVal{};
-
-        if (mOscHSpanBuffer + diffHSpan < 0.0f) {
-            newHSpanVal = 0.0f;
-            mOscHSpanBuffer += diffHSpan;
-        } else if (mOscHSpanBuffer + diffHSpan > 1.0f) {
-            newHSpanVal = 1.0f;
-            mOscHSpanBuffer += diffHSpan - 1.0f;
-        } else if (mOscHSpanBuffer + diffHSpan >= 0.0f && mOscHSpanBuffer + diffHSpan <= 1.0f) {
-            newHSpanVal = mOscHSpanBuffer + diffHSpan;
-            mOscHSpanBuffer = 0.0f;
-        }
-
-        // // VSpan
-        auto oscVSpan = message[4].getFloat32() * -0.01f;
-        auto vSpan = pSource.getElevationSpan().get();
-        auto diffVSpan = vSpan + oscVSpan;
-        float newVSpanVal{};
-
-        if (mOscVSpanBuffer + diffVSpan < 0.0f) {
-            newVSpanVal = 0.0f;
-            mOscVSpanBuffer += diffVSpan;
-        } else if (mOscVSpanBuffer + diffVSpan > 1.0f) {
-            newVSpanVal = 1.0f;
-            mOscVSpanBuffer += diffVSpan - 1.0f;
-        } else if (mOscVSpanBuffer + diffVSpan >= 0.0f && mOscVSpanBuffer + diffVSpan <= 1.0f) {
-            newVSpanVal = mOscVSpanBuffer + diffVSpan;
-            mOscVSpanBuffer = 0.0f;
-        }
-
-        for (auto & source : mSources) {
-            source.setAzimuthSpan(Normalized{ newHSpanVal });
-            source.setElevationSpan(Normalized{ newVSpanVal });
-        }
-        auto const gestureLockAzimuth{ mChangeGesturesManager.getScopedLock(Automation::Ids::AZIMUTH_SPAN) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::AZIMUTH_SPAN)->setValueNotifyingHost(newHSpanVal);
-        auto const gestureLockElevation{ mChangeGesturesManager.getScopedLock(Automation::Ids::ELEVATION_SPAN) };
-        mAudioProcessorValueTreeState.getParameter(Automation::Ids::ELEVATION_SPAN)->setValueNotifyingHost(newVSpanVal);
-    }
-    else if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
+    if ((address == pluginInstance + "/traj/1/x" || address == pluginInstance + "/traj/1/xyz/1")
         && positionTrajectory == PositionTrajectoryType::realtime) {
         x = message[0].getFloat32();
     } else if ((address == pluginInstance + "/traj/1/y" || address == pluginInstance + "/traj/1/xyz/2")
@@ -1325,18 +1153,22 @@ void ControlGrisAudioProcessor::processBlock([[maybe_unused]] juce::AudioBuffer<
         mIsPlaying = currentPositionInfo->getIsPlaying();
         mBpm = currentPositionInfo->getBpm().orFallback(120.0);
         if (mNeedsInitialization) {
-            mInitTimeOnPlay = mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0) < 0.0
-                                                 ? 0.0
-                                                 : currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            auto timeInSeconds = currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            mCurrentTime = (timeInSeconds < 0.0) ? 0.0 : timeInSeconds;
+            mInitTimeOnPlay = mCurrentTime;
             mNeedsInitialization = false;
         } else {
             mCurrentTime = currentPositionInfo->getTimeInSeconds().orFallback(0.0);
+            if (mInitTimeOnPlay > mCurrentTime) {
+                mInitTimeOnPlay = mCurrentTime;
+            }
         }
     }
 
-    if (!wasPlaying && mIsPlaying) {         // Initialization here only for Logic (also Reaper and Live), which are not
-        juce::PluginHostType const hostType; // calling prepareToPlay every time the sequence starts.
-        if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive()) {
+    if (!wasPlaying && mIsPlaying) {         // Initialization here only for Logic, Reaper, Live and Digital Performer,
+        juce::PluginHostType const hostType; // which are not calling prepareToPlay every time the sequence starts.
+        if (hostType.isLogic() || hostType.isReaper() || hostType.isAbletonLive() || hostType.isDigitalPerformer()
+            || juce::String(hostType.getHostDescription()).compare(juce::String("Unknown")) == 0) {
             initialize();
         }
     }
@@ -1895,15 +1727,15 @@ void ControlGrisAudioProcessor::processParameterValues()
         auto eleDeg{ pSource.getElevation().getAsDegrees() };
 
         auto diffElev = eleDeg + static_cast<float>(mElevationDomeValue);
-        if (mOscElevationBuffer + diffElev < 0.0f) {
+        if (mSpatParamElevationBuffer + diffElev < 0.0f) {
             pSource.setElevation(Radians{ Degrees{ 0.0f } }, originOfChange);
-            mOscElevationBuffer += diffElev;
-        } else if (mOscElevationBuffer + diffElev > 90.0f) {
+            mSpatParamElevationBuffer += diffElev;
+        } else if (mSpatParamElevationBuffer + diffElev > 90.0f) {
             pSource.setElevation(Radians{ Degrees{ 90.0f } }, originOfChange);
-            mOscElevationBuffer += diffElev - 90.0f;
-        } else if (mOscElevationBuffer + diffElev >= 0.0f && mOscElevationBuffer + diffElev <= 90.0f) {
-            pSource.setElevation(Radians{ Degrees{ mOscElevationBuffer + diffElev } }, originOfChange);
-            mOscElevationBuffer = 0.0f;
+            mSpatParamElevationBuffer += diffElev - 90.0f;
+        } else if (mSpatParamElevationBuffer + diffElev >= 0.0f && mSpatParamElevationBuffer + diffElev <= 90.0f) {
+            pSource.setElevation(Radians{ Degrees{ mSpatParamElevationBuffer + diffElev } }, originOfChange);
+            mSpatParamElevationBuffer = 0.0f;
         }
     }
     else {
@@ -1922,26 +1754,26 @@ void ControlGrisAudioProcessor::processParameterValues()
             float newX{};
             float newY{};
 
-            if (mOscXBuffer + diffX < -1.0f) {
+            if (mSpatParamXBuffer + diffX < -1.0f) {
                 newX = -1.0f;
-                mOscXBuffer += diffX + 1.0f;
-            } else if (mOscXBuffer + diffX > 1.0f) {
+                mSpatParamXBuffer += diffX + 1.0f;
+            } else if (mSpatParamXBuffer + diffX > 1.0f) {
                 newX = 1.0f;
-                mOscXBuffer += diffX - 1.0f;
-            } else if (mOscXBuffer + diffX >= -1.0f && mOscXBuffer + diffX <= 1.0f) {
-                newX = mOscXBuffer + diffX;
-                mOscXBuffer = 0.0f;
+                mSpatParamXBuffer += diffX - 1.0f;
+            } else if (mSpatParamXBuffer + diffX >= -1.0f && mSpatParamXBuffer + diffX <= 1.0f) {
+                newX = mSpatParamXBuffer + diffX;
+                mSpatParamXBuffer = 0.0f;
             }
 
-            if (mOscYBuffer + diffY < -1.0f) {
+            if (mSpatParamYBuffer + diffY < -1.0f) {
                 newY = -1.0f;
-                mOscYBuffer += diffY + 1.0f;
-            } else if (mOscYBuffer + diffY > 1.0f) {
+                mSpatParamYBuffer += diffY + 1.0f;
+            } else if (mSpatParamYBuffer + diffY > 1.0f) {
                 newY = 1.0f;
-                mOscYBuffer += diffY - 1.0f;
-            } else if (mOscYBuffer + diffY >= -1.0f && mOscYBuffer + diffY <= 1.0f) {
-                newY = mOscYBuffer + diffY;
-                mOscYBuffer = 0.0f;
+                mSpatParamYBuffer += diffY - 1.0f;
+            } else if (mSpatParamYBuffer + diffY >= -1.0f && mSpatParamYBuffer + diffY <= 1.0f) {
+                newY = mSpatParamYBuffer + diffY;
+                mSpatParamYBuffer = 0.0f;
             }
 
             pSource.setPosition({ newX, newY }, originOfChange);
@@ -1953,15 +1785,15 @@ void ControlGrisAudioProcessor::processParameterValues()
         auto diffZ = sourceZPosition - descZ;
         float newZ{};
 
-        if (mOscZBuffer + diffZ < 0.0f) {
+        if (mSpatParamZBuffer + diffZ < 0.0f) {
             newZ = 0.0f;
-            mOscZBuffer += diffZ;
-        } else if (mOscZBuffer + diffZ > 1.0f) {
+            mSpatParamZBuffer += diffZ;
+        } else if (mSpatParamZBuffer + diffZ > 1.0f) {
             newZ = 1.0f;
-            mOscZBuffer += diffZ - 1.0f;
-        } else if (mOscZBuffer + diffZ >= 0.0f && mOscZBuffer + diffZ <= 1.0f) {
-            newZ = mOscZBuffer + diffZ;
-            mOscZBuffer = 0.0f;
+            mSpatParamZBuffer += diffZ - 1.0f;
+        } else if (mSpatParamZBuffer + diffZ >= 0.0f && mSpatParamZBuffer + diffZ <= 1.0f) {
+            newZ = mSpatParamZBuffer + diffZ;
+            mSpatParamZBuffer = 0.0f;
         }
         pSource.setElevation(Normalized{ newZ }, originOfChange);
     }
@@ -1973,15 +1805,15 @@ void ControlGrisAudioProcessor::processParameterValues()
     auto diffHSpan = hSpan + static_cast<float>(hSpanVal) * -0.01f;
     float newHSpanVal{};
 
-    if (mOscHSpanBuffer + diffHSpan < 0.0f) {
+    if (mSpatParamHSpanBuffer + diffHSpan < 0.0f) {
         newHSpanVal = 0.0f;
-        mOscHSpanBuffer += diffHSpan;
-    } else if (mOscHSpanBuffer + diffHSpan > 1.0f) {
+        mSpatParamHSpanBuffer += diffHSpan;
+    } else if (mSpatParamHSpanBuffer + diffHSpan > 1.0f) {
         newHSpanVal = 1.0f;
-        mOscHSpanBuffer += diffHSpan - 1.0f;
-    } else if (mOscHSpanBuffer + diffHSpan >= 0.0f && mOscHSpanBuffer + diffHSpan <= 1.0f) {
-        newHSpanVal = mOscHSpanBuffer + diffHSpan;
-        mOscHSpanBuffer = 0.0f;
+        mSpatParamHSpanBuffer += diffHSpan - 1.0f;
+    } else if (mSpatParamHSpanBuffer + diffHSpan >= 0.0f && mSpatParamHSpanBuffer + diffHSpan <= 1.0f) {
+        newHSpanVal = mSpatParamHSpanBuffer + diffHSpan;
+        mSpatParamHSpanBuffer = 0.0f;
     }
     for (auto & source : mSources) {
         source.setAzimuthSpan(Normalized{ newHSpanVal });
@@ -1992,15 +1824,15 @@ void ControlGrisAudioProcessor::processParameterValues()
     auto diffVSpan = vSpan + static_cast<float>(vSpanVal) * -0.01f;
     float newVSpanVal{};
 
-    if (mOscVSpanBuffer + diffVSpan < 0.0f) {
+    if (mSpatParamVSpanBuffer + diffVSpan < 0.0f) {
         newVSpanVal = 0.0f;
-        mOscVSpanBuffer += diffVSpan;
-    } else if (mOscVSpanBuffer + diffVSpan > 1.0f) {
+        mSpatParamVSpanBuffer += diffVSpan;
+    } else if (mSpatParamVSpanBuffer + diffVSpan > 1.0f) {
         newVSpanVal = 1.0f;
-        mOscVSpanBuffer += diffVSpan - 1.0f;
-    } else if (mOscVSpanBuffer + diffVSpan >= 0.0f && mOscVSpanBuffer + diffVSpan <= 1.0f) {
-        newVSpanVal = mOscVSpanBuffer + diffVSpan;
-        mOscVSpanBuffer = 0.0f;
+        mSpatParamVSpanBuffer += diffVSpan - 1.0f;
+    } else if (mSpatParamVSpanBuffer + diffVSpan >= 0.0f && mSpatParamVSpanBuffer + diffVSpan <= 1.0f) {
+        newVSpanVal = mSpatParamVSpanBuffer + diffVSpan;
+        mSpatParamVSpanBuffer = 0.0f;
     }
     for (auto & source : mSources) {
         source.setElevationSpan(Normalized{ newVSpanVal });

@@ -65,7 +65,7 @@ class ControlGrisAudioProcessor final
     //==============================================================================
     SpatMode mSpatMode{ SpatMode::dome };
     bool mOscActivated{ true };
-    bool mOscConnected{ true };
+    bool mOscConnected{ false };
     bool mOscInputConnected{ false };
     bool mOscOutputConnected{ false };
     SourceId mFirstSourceId{ 1 };
@@ -76,12 +76,6 @@ class ControlGrisAudioProcessor final
     int mCurrentOscOutputPort{ 9000 };
     juce::String mCurrentOscOutputAddress{ "192.168.1.100" };
     bool mNeedsInitialization{ true };
-    float mOscElevationBuffer{};
-    float mOscHSpanBuffer{};
-    float mOscVSpanBuffer{};
-    float mOscXBuffer{};
-    float mOscYBuffer{};
-    float mOscZBuffer{};
 
     double mInitTimeOnPlay{ 0.0 };
     double mCurrentTime{ 0.0 };
@@ -143,6 +137,13 @@ class ControlGrisAudioProcessor final
     int mNumChannelsToAnalyse{};
     bool mXYParamLinked{};
     bool mAudioAnalysisActivateState{};
+
+    float mSpatParamElevationBuffer{};
+    float mSpatParamHSpanBuffer{};
+    float mSpatParamVSpanBuffer{};
+    float mSpatParamXBuffer{};
+    float mSpatParamYBuffer{};
+    float mSpatParamZBuffer{};
 
     double mAzimuthDomeValue{};
     double mElevationDomeValue{};

@@ -61,7 +61,7 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     addAndMakeVisible(&mMainBanner);
 
     mElevationBanner.setLookAndFeel(&mGrisLookAndFeel);
-    mElevationBanner.setText("Elevation", juce::NotificationType::dontSendNotification);
+    mElevationBanner.setText("Z", juce::dontSendNotification);
     addAndMakeVisible(&mElevationBanner);
 
     mSourcesBanner.setLookAndFeel(&mGrisLookAndFeel);
@@ -84,9 +84,6 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
         parameter->setValueNotifyingHost(value);
         elevationModeChangedEndedCallback();
     };
-    auto const elevModeValue{ mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::ELEVATION_MODE) };
-    auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
-    updateElevationMode(elevMode);
     addAndMakeVisible(&mElevationModeCombobox);
 
     auto const width{ getWidth() - 50 }; // Remove position preset space.
@@ -277,6 +274,10 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
         mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::POSITION_PRESET).getValue())) };
     mPositionPresetComponent.setPreset(preset, false);
 
+    auto const elevModeValue{ mAudioProcessorValueTreeState.getParameterAsValue(Automation::Ids::ELEVATION_MODE) };
+    auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
+    updateElevationMode(elevMode);
+
     mIsInsideSetPluginState = false;
 }
 
@@ -326,10 +327,16 @@ void ControlGrisAudioProcessorEditor::updatePositionPreset(int const presetNumbe
 //==============================================================================
 void ControlGrisAudioProcessorEditor::updateElevationMode(ElevationMode mode)
 {
-    juce::MessageManager::callAsync([=] {
-        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::sendNotificationAsync);
+    auto const updateElevMode = [=]() {
+        mElevationModeCombobox.setSelectedId(static_cast<int>(mode) + 1, juce::dontSendNotification);
         mElevationField.setElevationMode(mode);
-    });
+    };
+
+    if (juce::MessageManager::getInstance()->isThisTheMessageThread()) {
+        updateElevMode();
+    } else {
+        juce::MessageManager::callAsync([=] { updateElevMode(); });
+    }
 }
 
 //==============================================================================
@@ -896,7 +903,7 @@ void ControlGrisAudioProcessorEditor::resized()
     mSpatializationComponent.setBounds(0, fieldSize + 90 + 100 + 20, width, 190);
 
     if (mProcessor.getSpatMode() == SpatMode::cube) {
-        mMainBanner.setText("Azimuth - Distance", juce::NotificationType::dontSendNotification);
+        mMainBanner.setText("X - Y", juce::NotificationType::dontSendNotification);
         mElevationBanner.setVisible(true);
         mElevationField.setVisible(true);
         mElevationModeCombobox.setVisible(true);
