@@ -93,7 +93,7 @@ DescriptorID SpatialParameter::getDescriptorToUse()
 //==============================================================================
 double SpatialParameter::processLoudness(double valueToProcess)
 {
-    valueToProcess = valueToProcess * (paramFactorLoudness * 0.01);
+    valueToProcess = valueToProcess * (paramFactorLoudness * 0.02);
     valueToProcess = processSmoothedLoudness(valueToProcess);
     return valueToProcess;
 }
