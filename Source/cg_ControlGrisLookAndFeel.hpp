@@ -76,6 +76,7 @@ public:
     [[nodiscard]] juce::Colour getDarkColor() const { return this->mDarkColor; }
     [[nodiscard]] juce::Colour getLightColor() const { return this->mLightColor; }
     [[nodiscard]] juce::Colour getEditBackgroundColor() const { return this->mEditBackgroundColor; }
+    [[nodiscard]] juce::Colour getDisableBackgroundColor() const { return this->mDisableBackgroundColor; }
     [[nodiscard]] juce::Colour getHighlightColor() const { return this->mHlBackgroundColor; }
     [[nodiscard]] juce::Colour getOnColor() const { return this->mOnColor; }
     [[nodiscard]] juce::Colour getOffColor() const { return this->mOffColor; }
