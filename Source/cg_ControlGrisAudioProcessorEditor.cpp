@@ -164,8 +164,9 @@ ControlGrisAudioProcessorEditor::ControlGrisAudioProcessorEditor(
     mPositionPresetViewport.setScrollBarsShown(false, false, true, true);
     addAndMakeVisible(&mPositionPresetViewport);
 
-    mPositionPresetInfoComponent.setAppVersionLabelText(juce::String("v. ") + JucePlugin_VersionString,
-                                                         juce::NotificationType::dontSendNotification);
+    mPositionPresetInfoComponent.setAppVersionLabelText(juce::String("v. ") + JucePlugin_VersionString
+                                                            + juce::String("\n") + juce::String("RC.1"),
+                                                        juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mPositionPresetInfoComponent);
 
     // Add sources to the fields.
