@@ -262,6 +262,9 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
         mPositionPresetComponent.presetSaved(index++, saved);
     }
 
+    // Update the Spatialization Tab
+    mSpatializationComponent.setCurrentTabIndex(mAudioProcessorValueTreeState.state.getProperty("soundSpatSelTab", 0));
+
     // Update the interface.
     //----------------------
     mSectionSourceSpan.setSelectedSource(&mProcessor.getSources()[mSelectedSource]);
@@ -935,7 +938,7 @@ void ControlGrisAudioProcessorEditor::setSpatMode(SpatMode spatMode)
 
 //==============================================================================
 TabbedSpatializationComponent::TabbedSpatializationComponent(juce::TabbedButtonBar::Orientation orientation,
-                                                       ControlGrisAudioProcessor & audioProcessor)
+                                                             ControlGrisAudioProcessor & audioProcessor)
     : juce::TabbedComponent(orientation)
     , mAudioProcessor(audioProcessor)
 {

@@ -42,7 +42,7 @@ public:
     //==============================================================================
     TabbedSpatializationComponent() = delete;
     TabbedSpatializationComponent(juce::TabbedButtonBar::Orientation orientation,
-                               ControlGrisAudioProcessor & audioProcessor);
+                                  ControlGrisAudioProcessor & audioProcessor);
     //==============================================================================
     TabbedSpatializationComponent(TabbedSpatializationComponent const &) = delete;
     TabbedSpatializationComponent(TabbedSpatializationComponent &&) = delete;

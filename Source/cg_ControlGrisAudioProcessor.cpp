@@ -1480,6 +1480,9 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
         mAudioProcessorValueTreeState.state.setProperty(elevationId, normalizedElevation, nullptr);
         mAudioProcessorValueTreeState.state.setProperty(distanceId, distance, nullptr);
     }
+
+    mAudioProcessorValueTreeState.state.setProperty("soundSpatSelTab", mSelectedSoundSpatializationTabIdx, nullptr);
+
     auto const state{ mAudioProcessorValueTreeState.copyState() };
 
     auto xmlState{ state.createXml() };
@@ -1529,6 +1532,10 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
                 valueTree.getProperty("oscOutputAddress", "192.168.1.100"),
                 valueTree.getProperty("oscOutputPortNumber", 8000)) };
         }
+
+        // Load last used Sound Spatialization tab
+        auto tabIdx{ valueTree.getProperty("soundSpatSelTab", 0) };
+        setSelectedSoundSpatializationTab(tabIdx);
 
         // Load stored sources positions
         for (int sourceIndex{}; sourceIndex < MAX_NUMBER_OF_SOURCES; ++sourceIndex) {
