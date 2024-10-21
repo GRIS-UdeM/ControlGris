@@ -31,6 +31,9 @@ class GrisLookAndFeel final : public juce::LookAndFeel_V3
     juce::Font mFont{ juce::CustomTypeface::createSystemTypefaceFor(
         BinaryData::SinkinSans400Regular_otf,
         static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
+    juce::Font mNumSliderFont{ juce::CustomTypeface::createSystemTypefaceFor(
+        BinaryData::SinkinSans400Regular_otf,
+        static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
     juce::Font mBigFont{ juce::CustomTypeface::createSystemTypefaceFor(
         BinaryData::SinkinSans400Regular_otf,
         static_cast<size_t>(BinaryData::SinkinSans400Regular_otfSize)) };
@@ -58,6 +61,7 @@ public:
     GrisLookAndFeel();
 
     [[nodiscard]] juce::Font getFont() const { return this->mFont; }
+    [[nodiscard]] juce::Font getNumSliderFont() const { return this->mNumSliderFont; }
     juce::Font getLabelFont([[maybe_unused]] juce::Label & label) override { return this->mFont; }
     juce::Font getComboBoxFont([[maybe_unused]] juce::ComboBox & comboBox) override { return this->mFont; }
     juce::Font getTextButtonFont(juce::TextButton &, [[maybe_unused]] int buttonHeight) override { return this->mFont; }

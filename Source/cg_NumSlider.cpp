@@ -103,8 +103,8 @@ void NumSlider::paint(juce::Graphics & g)
     }
 
     g.setColour(mGrisLookAndFeel.getDarkColor());
-    g.setFont(mGrisLookAndFeel.getFont());
-    g.drawText(getTextFromValue(getValue()), bounds, juce::Justification::centred);
+    g.setFont(mGrisLookAndFeel.getNumSliderFont());
+    g.drawText(getTextFromValue(getValue()), bounds.translated(0, 1), juce::Justification::centred);
 }
 
 //==============================================================================

@@ -67,6 +67,7 @@ GrisLookAndFeel::GrisLookAndFeel()
     mFontSize = 10.0f;
 #endif
     mFont.setHeight(mFontSize);
+    mNumSliderFont.setHeight(mFontSize - 1);
     mBigFont.setHeight(mFontSize + 3.0f);
     mBiggerFont.setHeight(mFontSize + 6.0f);
 }
