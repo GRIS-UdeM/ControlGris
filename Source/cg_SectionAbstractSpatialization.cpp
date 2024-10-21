@@ -374,7 +374,7 @@ void SectionAbstractSpatialization::mouseDown(juce::MouseEvent const & event)
 //==============================================================================
 void SectionAbstractSpatialization::textEditorReturnKeyPressed(juce::TextEditor & textEd)
 {
-    const auto value{ textEd.getText().getDoubleValue() };
+//    const auto value{ textEd.getText().getDoubleValue() };
     const auto paramName{ textEd.getName() };
 
     //mListeners.call([&](Listener & l) { l.speedStateChangedCallback(value); }); // TODO: add a parameter to modify

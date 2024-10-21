@@ -82,8 +82,8 @@ void PresetButton::internalClickCallback(juce::ModifierKeys const & mods)
 //===============================================================================
 PositionPresetComponent::PositionPresetComponent(PresetsManager & presetsManager,
                                                  PositionPresetInfoComponent & positionPresetStateComponent)
-    : mPresetsManager(presetsManager)
-    , mPositionPresetStateComponent(positionPresetStateComponent)
+    : mPositionPresetStateComponent(positionPresetStateComponent)
+    , mPresetsManager(presetsManager)
 {
     setName("PositionPresetComponent");
 
@@ -176,8 +176,6 @@ void PositionPresetComponent::deletingPresetClickedCallback(PresetButton * butto
 //==============================================================================
 void PositionPresetComponent::resized()
 {
-    auto const width{ getWidth() };
-
     for (int i{}; i < NUMBER_OF_POSITION_PRESETS; ++i) {
         auto const x{ i % 2 == 0 ? 1 : 25 };
         auto const y{ (i / 2) * 24 + 1 };

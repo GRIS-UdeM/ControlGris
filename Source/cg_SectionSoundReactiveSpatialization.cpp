@@ -38,15 +38,6 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
                                 &mParameterZButton,
                                 &mParameterAzimuthOrXYSpanButton,
                                 &mParameterElevationOrZSpanButton }
-    , mDataGraph(grisLookAndFeel)
-    , mDescriptorFactorSlider(grisLookAndFeel)
-    , mDescriptorThresholdSlider(grisLookAndFeel)
-    , mDescriptorMinFreqSlider(grisLookAndFeel)
-    , mDescriptorMaxFreqSlider(grisLookAndFeel)
-    , mDescriptorMinTimeSlider(grisLookAndFeel)
-    , mDescriptorMaxTimeSlider(grisLookAndFeel)
-    , mDescriptorSmoothSlider(grisLookAndFeel)
-    , mDescriptorSmoothCoefSlider(grisLookAndFeel)
     , mParameterAzimuthRangeSlider(grisLookAndFeel)
     , mParameterElevationRangeSlider(grisLookAndFeel)
     , mParameterXRangeSlider(grisLookAndFeel)
@@ -56,6 +47,15 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     , mParameterElevationOrZSpanRangeSlider(grisLookAndFeel)
     , mParameterElevationZOffsetSlider(grisLookAndFeel)
     , mParameterEleZSpanOffsetSlider(grisLookAndFeel)
+    , mDataGraph(grisLookAndFeel)
+    , mDescriptorFactorSlider(grisLookAndFeel)
+    , mDescriptorThresholdSlider(grisLookAndFeel)
+    , mDescriptorMinFreqSlider(grisLookAndFeel)
+    , mDescriptorMaxFreqSlider(grisLookAndFeel)
+    , mDescriptorMinTimeSlider(grisLookAndFeel)
+    , mDescriptorMaxTimeSlider(grisLookAndFeel)
+    , mDescriptorSmoothSlider(grisLookAndFeel)
+    , mDescriptorSmoothCoefSlider(grisLookAndFeel)
 {
     auto const initRangeSlider = [&](NumSlider & slider) {
         slider.setNormalisableRange(juce::NormalisableRange<double>{ -100.0, 100.0, 0.1 });
@@ -159,7 +159,7 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mGainSlider.setRange(0.0, 2.0, 0.001);
     auto gain{ mAPVTS.state.getProperty("audioGainForAnalysis") };
     if (gain.isVoid()) {
-        mGainSlider.setValue(1.0 / mAudioProcessor.getNumInputChannels());
+        mGainSlider.setValue(1.0 / mAudioProcessor.getTotalNumInputChannels());
     } else {
         mGainSlider.setValue(gain, juce::sendNotification);
     }
@@ -1280,7 +1280,6 @@ void gris::SectionSoundReactiveSpatialization::resized()
 {
     auto area{ getLocalBounds() };
     auto bannerArea{ area.removeFromTop(20) };
-    auto bannerSpatParam{ bannerArea.removeFromLeft(350) };
     auto bannerAudioAnalysis{ bannerArea };
     auto areaSpatParams{ area.removeFromLeft(350) };
     mAreaAudioAnalysis = area; // we're using it in the audio analysis ui section
@@ -1945,7 +1944,7 @@ void gris::SectionSoundReactiveSpatialization::setAudioAnalysisActivateState(boo
 //==============================================================================
 void gris::SectionSoundReactiveSpatialization::updateChannelMixCombo()
 {
-    auto numInputChannels{ mAudioProcessor.getNumInputChannels() };
+    auto numInputChannels{ mAudioProcessor.getTotalNumInputChannels() };
     juce::StringArray chanArray;
 
     for (int i{}; i < numInputChannels; ++i) {

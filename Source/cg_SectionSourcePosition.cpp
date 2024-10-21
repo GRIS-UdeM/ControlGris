@@ -179,9 +179,9 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel,
                                              SpatMode const spatMode,
                                              SectionSourceSpan & sectionSourceSpan)
     : mGrisLookAndFeel(grisLookAndFeel)
+    , mSectionSourceSpan(sectionSourceSpan)
     , mDomeControls(*this, grisLookAndFeel)
     , mCubeControls(*this, grisLookAndFeel)
-    , mSectionSourceSpan(sectionSourceSpan)
 {
     setName("SectionSourcePosition");
 
