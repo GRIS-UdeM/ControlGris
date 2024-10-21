@@ -221,7 +221,7 @@ void PositionPresetInfoComponent::timerCallback()
 }
 
 //==============================================================================
-void PositionPresetInfoComponent::setActionLogText(juce::String & text, juce::NotificationType notificationType)
+void PositionPresetInfoComponent::setActionLogText(juce::String const & text, juce::NotificationType notificationType)
 {
     mActionLog.setText(text, notificationType);
     stopTimer();
@@ -231,7 +231,7 @@ void PositionPresetInfoComponent::setActionLogText(juce::String & text, juce::No
 }
 
 //==============================================================================
-void PositionPresetInfoComponent::setAppVersionLabelText(juce::String & text,
+void PositionPresetInfoComponent::setAppVersionLabelText(juce::String const & text,
                                                           juce::NotificationType notificationType)
 {
     mAppVersionLabel.setText(text, notificationType);

@@ -117,8 +117,8 @@ public:
     void resized() override;
     void timerCallback() override;
     //==============================================================================
-    void setActionLogText(juce::String & text, juce::NotificationType notificationType);
-    void setAppVersionLabelText(juce::String & text, juce::NotificationType notificationType);
+    void setActionLogText(juce::String const & text, juce::NotificationType notificationType);
+    void setAppVersionLabelText(juce::String const & text, juce::NotificationType notificationType);
 
 private:
     void resetTimer();
