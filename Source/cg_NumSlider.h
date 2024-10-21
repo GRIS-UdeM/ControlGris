@@ -40,6 +40,8 @@ public:
     void valueChanged() override;
     void mouseUp(const juce::MouseEvent & event) override;
 
+    void setDefaultNumDecimalPlacesToDisplay(int numDec);
+
 private:
     //==============================================================================
     void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
@@ -50,6 +52,7 @@ private:
     //==============================================================================
     juce::Time mLastTime{ 0 };
     double mLastValue{ 0 };
+    int mDefaultNumDecimalToDisplay{ 1 };
 
     //==============================================================================
     JUCE_LEAK_DETECTOR(NumSlider)

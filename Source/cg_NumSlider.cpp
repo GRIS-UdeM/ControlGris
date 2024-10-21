@@ -111,6 +111,12 @@ void NumSlider::paint(juce::Graphics & g)
 void NumSlider::valueChanged()
 {
     mLastValue = getValue();
+
+    if (mLastValue >= 10000 && getNumDecimalPlacesToDisplay() > 0) {
+        setNumDecimalPlacesToDisplay(0);
+    } else if (mLastValue < 10000 && getNumDecimalPlacesToDisplay() == 0) {
+        setNumDecimalPlacesToDisplay(mDefaultNumDecimalToDisplay);
+    }
 }
 
 //==============================================================================
@@ -134,6 +140,13 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
     }
 
     Slider::mouseUp(event);
+}
+
+//==============================================================================
+void NumSlider::setDefaultNumDecimalPlacesToDisplay(int numDec)
+{
+    mDefaultNumDecimalToDisplay = numDec;
+    setNumDecimalPlacesToDisplay(mDefaultNumDecimalToDisplay);
 }
 
 //==============================================================================

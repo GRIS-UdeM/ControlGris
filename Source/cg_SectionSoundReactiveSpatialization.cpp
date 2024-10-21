@@ -926,14 +926,14 @@ gris::SectionSoundReactiveSpatialization::SectionSoundReactiveSpatialization(Gri
     mDescriptorMinTimeSlider.setDoubleClickReturnValue(true, 0.1);
     mDescriptorMaxTimeSlider.setDoubleClickReturnValue(true, 10.0);
 
-    mDescriptorFactorSlider.setNumDecimalPlacesToDisplay(1);
-    mDescriptorSmoothSlider.setNumDecimalPlacesToDisplay(3);
-    mDescriptorSmoothCoefSlider.setNumDecimalPlacesToDisplay(3);
-    mDescriptorMinFreqSlider.setNumDecimalPlacesToDisplay(1);
-    mDescriptorMaxFreqSlider.setNumDecimalPlacesToDisplay(3);
-    mDescriptorThresholdSlider.setNumDecimalPlacesToDisplay(3);
-    mDescriptorMinTimeSlider.setNumDecimalPlacesToDisplay(3);
-    mDescriptorMaxTimeSlider.setNumDecimalPlacesToDisplay(3);
+    mDescriptorFactorSlider.setDefaultNumDecimalPlacesToDisplay(1);
+    mDescriptorSmoothSlider.setDefaultNumDecimalPlacesToDisplay(2);
+    mDescriptorSmoothCoefSlider.setDefaultNumDecimalPlacesToDisplay(2);
+    mDescriptorMinFreqSlider.setDefaultNumDecimalPlacesToDisplay(1);
+    mDescriptorMaxFreqSlider.setDefaultNumDecimalPlacesToDisplay(1);
+    mDescriptorThresholdSlider.setDefaultNumDecimalPlacesToDisplay(3);
+    mDescriptorMinTimeSlider.setDefaultNumDecimalPlacesToDisplay(3);
+    mDescriptorMaxTimeSlider.setDefaultNumDecimalPlacesToDisplay(3);
 
     mDescriptorFactorSlider.setRange(0, 500);
     mDescriptorSmoothSlider.setRange(0, 100);
