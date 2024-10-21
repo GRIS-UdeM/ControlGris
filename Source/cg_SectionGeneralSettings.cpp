@@ -176,19 +176,19 @@ void SectionGeneralSettings::paint(juce::Graphics & g)
 //==============================================================================
 void SectionGeneralSettings::resized()
 {
-    mOscFormatLabel.setBounds(5, 15, 90, 10);
+    mOscFormatLabel.setBounds(5, 12, 90, 10);
     mOscFormatCombo.setBounds(65, 9, 110, 15);
 
-    mOscPortLabel.setBounds(5, 37, 90, 10);
+    mOscPortLabel.setBounds(5, 34, 90, 10);
     mOscPortEditor.setBounds(65, 31, 110, 15);
 
-    mOscAddressLabel.setBounds(5, 59, 90, 10);
+    mOscAddressLabel.setBounds(5, 56, 90, 10);
     mOscAddressEditor.setBounds(65, 53, 110, 15);
 
-    mNumOfSourcesLabel.setBounds(5, 81, 130, 10);
+    mNumOfSourcesLabel.setBounds(5, 78, 130, 10);
     mNumOfSourcesEditor.setBounds(105, 75, 24, 15);
 
-    mFirstSourceIdLabel.setBounds(5, 103, 130, 10);
+    mFirstSourceIdLabel.setBounds(5, 100, 130, 10);
     mFirstSourceIdEditor.setBounds(105, 97, 24, 15);
 
     mPositionActivateButton.setBounds(175, 100, 150, 15);

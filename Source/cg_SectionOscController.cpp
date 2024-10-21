@@ -187,7 +187,7 @@ void SectionOscController::paint(juce::Graphics & g)
 //==============================================================================
 void SectionOscController::resized()
 {
-    mOscOutputPluginIdLabel.setBounds(5, 15, 135, 10);
+    mOscOutputPluginIdLabel.setBounds(5, 13, 135, 10);
     mOscOutputPluginIdEditor.setBounds(130, 10, 24, 15);
 
     mOscReceiveToggle.setBounds(5, 30, 200, 15);
