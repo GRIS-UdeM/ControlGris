@@ -25,7 +25,7 @@ namespace gris
 //==============================================================================
 SectionOscController::SectionOscController(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
-    mOscOutputPluginIdLabel.setText("OSC output plugin ID:", juce::NotificationType::dontSendNotification);
+    mOscOutputPluginIdLabel.setText("OSC plugin ID:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mOscOutputPluginIdLabel);
 
     mOscOutputPluginIdEditor.setFont(grisLookAndFeel.getFont());
