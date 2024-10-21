@@ -1280,6 +1280,7 @@ void gris::SectionSoundReactiveSpatialization::resized()
 {
     auto area{ getLocalBounds() };
     auto bannerArea{ area.removeFromTop(20) };
+    auto bannerSpatParam{ bannerArea.removeFromLeft(350) };
     auto bannerAudioAnalysis{ bannerArea };
     auto areaSpatParams{ area.removeFromLeft(350) };
     mAreaAudioAnalysis = area; // we're using it in the audio analysis ui section
