@@ -64,10 +64,10 @@ GrisLookAndFeel::GrisLookAndFeel()
 #if WIN32
     mFontSize = 13.0f;
 #else
-    mFontSize = 10.0f;
+    mFontSize = 9.0f;
 #endif
     mFont.setHeight(mFontSize);
-    mNumSliderFont.setHeight(mFontSize - 1);
+    mNumSliderFont.setHeight(mFontSize);
     mBigFont.setHeight(mFontSize + 3.0f);
     mBiggerFont.setHeight(mFontSize + 6.0f);
 }
