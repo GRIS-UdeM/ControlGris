@@ -1280,7 +1280,7 @@ void gris::SectionSoundReactiveSpatialization::resized()
 {
     auto area{ getLocalBounds() };
     auto bannerArea{ area.removeFromTop(20) };
-    auto bannerSpatParam{ bannerArea.removeFromLeft(350) };
+    bannerArea.removeFromLeft(350);
     auto bannerAudioAnalysis{ bannerArea };
     auto areaSpatParams{ area.removeFromLeft(350) };
     mAreaAudioAnalysis = area; // we're using it in the audio analysis ui section
@@ -1296,8 +1296,8 @@ void gris::SectionSoundReactiveSpatialization::resized()
     mAudioAnalysisLabel.setBounds(bannerAudioAnalysis.getTopLeft().getX() + 5, 3, 140, 15);
 
     mChannelMixLabel.setBounds(mSpatialParameterLabel.getRight() + 60, 3, 50, 15);
-    mChannelMixCombo.setBounds(mChannelMixLabel.getRight() - 10, 2, 30, 15);
-    mGainLabel.setBounds(350 - 35 - 3 - 30, 3, 30, 15);
+    mChannelMixCombo.setBounds(mChannelMixLabel.getRight() - 3, 2, 30, 15);
+    mGainLabel.setBounds(350 - 35 - 3 - 30, 3, 33, 15);
     mGainSlider.setBounds(350 - 35 - 3, 4, 35, 12);
 
     mParameterYButton.setEnabled(true);

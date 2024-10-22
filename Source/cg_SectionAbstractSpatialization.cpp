@@ -34,10 +34,10 @@ SectionAbstractSpatialization::SectionAbstractSpatialization(GrisLookAndFeel & g
     mTrajectoryTypeLabel.setText("Trajectory Type:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeLabel);
 
-    mTrajectoryTypeXYLabel.setText("X-Y:", juce::NotificationType::dontSendNotification);
+    mTrajectoryTypeXYLabel.setText("X-Y", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeXYLabel);
 
-    mTrajectoryTypeZLabel.setText("Z:", juce::NotificationType::dontSendNotification);
+    mTrajectoryTypeZLabel.setText("Z", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mTrajectoryTypeZLabel);
 
     mPositionTrajectoryTypeCombo.addItemList(POSITION_TRAJECTORY_TYPE_TYPES, 1);
@@ -426,13 +426,13 @@ void SectionAbstractSpatialization::resized()
     mPositionDampeningEditor.setBounds(115, 27, 75, 15);
     mDeviationLabel.setBounds(110, 40, 150, 22);
     mDeviationLabel2ndLine.setBounds(110, 48, 150, 22);
-    mDeviationEditor.setBounds(201, 49, 88, 15);
+    mDeviationEditor.setBounds(211, 49, 78, 15);
 
     mSpeedXYLabel.setBounds(110, 72, 150, 10);
-    mSpeedXYEditor.setBounds(201, 70, 88, 15);
+    mSpeedXYEditor.setBounds(211, 70, 78, 15);
     mRandomXYLabel.setBounds(110, 93, 150, 10);
     mRandomXYToggle.setBounds(181, 92, 88, 15);
-    mRandomXYCombo.setBounds(201, 92, 88, 15);
+    mRandomXYCombo.setBounds(211, 92, 78, 15);
 
     mPositionActivateButton.setBounds(114, 112, 176, 20);
 
@@ -442,10 +442,10 @@ void SectionAbstractSpatialization::resized()
     mElevationBackAndForthToggle.setBounds(401, 27, 94, 15);
 
     mSpeedZLabel.setBounds(315, 72, 150, 10);
-    mSpeedZEditor.setBounds(406, 70, 88, 15);
+    mSpeedZEditor.setBounds(416, 70, 78, 15);
     mRandomZLabel.setBounds(315, 93, 150, 10);
     mRandomZToggle.setBounds(386, 92, 88, 15);
-    mRandomZCombo.setBounds(406, 92, 88, 15);
+    mRandomZCombo.setBounds(416, 92, 78, 15);
 
     mElevationActivateButton.setBounds(319, 112, 176, 20);
 
