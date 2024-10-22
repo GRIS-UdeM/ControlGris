@@ -64,6 +64,7 @@ public:
     [[nodiscard]] juce::Font getNumSliderFont() const { return this->mNumSliderFont; }
     juce::Font getLabelFont([[maybe_unused]] juce::Label & label) override { return this->mFont; }
     juce::Font getComboBoxFont([[maybe_unused]] juce::ComboBox & comboBox) override { return this->mFont; }
+    juce::Font getPopupMenuFont() override { return this->mFont; }
     juce::Font getTextButtonFont(juce::TextButton &, [[maybe_unused]] int buttonHeight) override { return this->mFont; }
     juce::Font getMenuBarFont(juce::MenuBarComponent &,
                               [[maybe_unused]] int itemIndex,
