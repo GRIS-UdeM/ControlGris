@@ -66,6 +66,10 @@ function prepare_for_dev_build() {
         cd $PROJECT_PATH
         echo -e "$LINE\nPrepare project file for a dev plugin build\n$LINE"
 
+        IDENTIFIER="ca.umontreal.musique.gris.controlgrisdev.pkg"
+
+        sed -i '' 's|bundleIdentifier="ca.umontreal.musique.gris.controlgris.pkg"|bundleIdentifier="ca.umontreal.musique.gris.controlgrisdev.pkg"|g' \
+            ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginName="ControlGRIS2"|pluginName="ControlGRIS2_dev"|g' ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginDesc="ControlGRIS2"|pluginDesc="ControlGRIS2_dev"|g' ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginCode="Xzz2"|pluginCode="Xzb2"|g' ./ControlGRIS.jucer || exit 1
@@ -83,6 +87,8 @@ function reset_dev_build() {
         cd $PROJECT_PATH
         echo -e "$LINE\nReset project file after a dev plugin build\n$LINE"
 
+        sed -i '' 's|bundleIdentifier="ca.umontreal.musique.gris.controlgrisdev.pkg"|bundleIdentifier="ca.umontreal.musique.gris.controlgris.pkg"|g' \
+            ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginName="ControlGRIS2_dev"|pluginName="ControlGRIS2"|g' ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginDesc="ControlGRIS2_dev"|pluginDesc="ControlGRIS2"|g' ./ControlGRIS.jucer || exit 1
         sed -i '' 's|pluginCode="Xzb2"|pluginCode="Xzz2"|g' ./ControlGRIS.jucer || exit 1
