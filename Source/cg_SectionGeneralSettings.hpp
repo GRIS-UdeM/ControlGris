@@ -33,6 +33,27 @@ namespace gris
 class SourcesTableListComponent;
 class SectionGeneralSettings;
 //==============================================================================
+class SourceColourSelector : public juce::PopupMenu::CustomComponent
+{
+public:
+    //==============================================================================
+    SourceColourSelector();
+    ~SourceColourSelector() override;
+
+    //==============================================================================
+    void getIdealSize(int &idealWidth, int &idealHeight) override;
+
+    void setColourSelector(std::unique_ptr<juce::ColourSelector> colourSelector);
+
+private:
+    //==============================================================================
+    std::unique_ptr<juce::ColourSelector> mColourSelector;
+
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourceColourSelector)
+};
+
+//==============================================================================
 class SourcesTableListBoxModel
     : public juce::TableListBoxModel
     , private juce::ChangeListener
@@ -44,7 +65,7 @@ public:
                                       SourcesTableListComponent & parentComponent);
     //==============================================================================
     SourcesTableListBoxModel() = delete;
-    ~SourcesTableListBoxModel() override = default;
+    ~SourcesTableListBoxModel() override;
 
     SourcesTableListBoxModel(const SourcesTableListBoxModel & other) = delete;
     SourcesTableListBoxModel(SourcesTableListBoxModel && other) = delete;
@@ -66,13 +87,14 @@ private:
     SourcesTableListComponent & mSourcesTableListComponent;
 
     SourceIndex mEditedColourSrcIndex;
+    juce::PopupMenu mColourPopupMenu;
 
     //==============================================================================
     JUCE_LEAK_DETECTOR(SourcesTableListBoxModel)
 };
 
 //==============================================================================
-class SourcesTableListComponent : public juce::Component
+class SourcesTableListComponent : public juce::PopupMenu::CustomComponent
 {
     //==============================================================================
     class TableHeader : public juce::TableHeaderComponent
@@ -97,6 +119,9 @@ class SourcesTableListComponent : public juce::Component
     private:
         //==============================================================================
         SourcesTableListComponent & mSourcesTableListComponent;
+
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(TableHeader)
     };
 
 public:
@@ -115,6 +140,8 @@ public:
     SourcesTableListComponent & operator=(SourcesTableListComponent &&) = delete;
 
     //==============================================================================
+    void getIdealSize(int &idealWidth, int &idealHeight) override;
+
     juce::TableListBox & getTableListBox();
     SectionGeneralSettings & getSectionGeneralSettings();
 
@@ -172,6 +199,7 @@ private:
     TextEd mFirstSourceIdEditor{ mGrisLookAndFeel };
 
     juce::TextButton mSourcesColourEditButton;
+    juce::PopupMenu mPopupMenu;
 
     juce::ToggleButton mPositionActivateButton;
 
@@ -180,7 +208,7 @@ public:
     explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel, ControlGrisAudioProcessor & processor);
     //==============================================================================
     SectionGeneralSettings() = delete;
-    ~SectionGeneralSettings() override = default;
+    ~SectionGeneralSettings() override;
 
     SectionGeneralSettings(SectionGeneralSettings const &) = delete;
     SectionGeneralSettings(SectionGeneralSettings &&) = delete;
