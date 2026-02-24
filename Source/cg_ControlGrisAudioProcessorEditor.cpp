@@ -422,6 +422,7 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
     setSize(mLastUiWidth.getValue(), mLastUiHeight.getValue());
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::scrollBarMoved(juce::ScrollBar * scrollBarThatHasMoved, double newRangeStart)
 {
     auto horizScrollPos{ mMainWindowViewport.getHorizontalScrollBar().getCurrentRangeStart() };
