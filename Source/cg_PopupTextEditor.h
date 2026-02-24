@@ -20,34 +20,35 @@
 
 #pragma once
 
-#include <JuceHeader.h>
 #include "cg_ControlGrisLookAndFeel.hpp"
+#include <JuceHeader.h>
 
 namespace gris
 {
 //==============================================================================
 class PopupTextEditor
-: public juce::PopupMenu::CustomComponent
-, public juce::Timer
+    : public juce::PopupMenu::CustomComponent
+    , public juce::Timer
 {
 public:
-    enum class popupMenuItems{ copy = 100, paste };
+    enum class popupMenuItems { copy = 100, paste };
     //==============================================================================
     class InnerTextEditor : public juce::TextEditor
     {
     public:
         //==============================================================================
-        explicit InnerTextEditor(std::function<void(const juce::String&)> fn, const juce::String& name);
+        explicit InnerTextEditor(std::function<void(const juce::String &)> fn, const juce::String & name);
         InnerTextEditor() = delete;
         ~InnerTextEditor() override = default;
         //==============================================================================
         void addPopupMenuItems(juce::PopupMenu & menuToAddTo, const juce::MouseEvent * mouseClickEvent) override;
         void performPopupMenuAction(int menuItemID) override;
         void returnPressed() override;
+
     private:
         //==============================================================================
         GrisLookAndFeel mGrisLookAndFeel;
-        std::function<void(const juce::String&)> setValFn;
+        std::function<void(const juce::String &)> setValFn;
 
         //==============================================================================
         JUCE_LEAK_DETECTOR(InnerTextEditor)
@@ -55,17 +56,17 @@ public:
     //==============================================================================
     PopupTextEditor();
     ~PopupTextEditor() override;
-    
+
     //==============================================================================
-    void getIdealSize(int &idealWidth, int &idealHeight) override;
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
     void timerCallback() override;
-    
+
     void initPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor);
-    
+
 private:
     //==============================================================================
     std::unique_ptr<InnerTextEditor> mPopupTextEditor;
-    
+
     //==============================================================================
     JUCE_LEAK_DETECTOR(PopupTextEditor)
 };

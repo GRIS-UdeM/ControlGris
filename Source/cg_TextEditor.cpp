@@ -56,8 +56,10 @@ void TextEd::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     if (!isEnabled() || !mIsEditable)
         return;
 
-    auto setTextFromPopupTextEditorLambda = [this](const juce::String& newText){ this->setTextFromPopupTextEditor(newText); };
-    auto popupEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda, "TextEdEditor") };
+    auto setTextFromPopupTextEditorLambda
+        = [this](const juce::String & newText) { this->setTextFromPopupTextEditor(newText); };
+    auto popupEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda,
+                                                                         "TextEdEditor") };
     popupEditor->setJustification(juce::Justification::centred);
     popupEditor->setMultiLine(false);
     popupEditor->setSize(getWidth() + 20, 20);
@@ -76,7 +78,7 @@ void TextEd::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 //==============================================================================
 void TextEd::setTextFromPopupTextEditor(juce::String newText)
 {
-    if (! newText.isEmpty()) {
+    if (!newText.isEmpty()) {
         auto text = newText.replace(",", ".");
         setText(text, juce::sendNotification);
         onFocusLost();

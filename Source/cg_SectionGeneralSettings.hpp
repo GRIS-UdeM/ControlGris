@@ -41,7 +41,7 @@ public:
     ~SourceColourSelector() override;
 
     //==============================================================================
-    void getIdealSize(int &idealWidth, int &idealHeight) override;
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
 
     void setColourSelector(std::unique_ptr<juce::ColourSelector> colourSelector);
 
@@ -140,7 +140,7 @@ public:
     SourcesTableListComponent & operator=(SourcesTableListComponent &&) = delete;
 
     //==============================================================================
-    void getIdealSize(int &idealWidth, int &idealHeight) override;
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
 
     juce::TableListBox & getTableListBox();
     SectionGeneralSettings & getSectionGeneralSettings();

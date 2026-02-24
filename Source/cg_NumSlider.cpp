@@ -194,8 +194,10 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 {
-    auto setTextFromPopupTextEditorLambda = [this](const juce::String& newText){ this->setTextFromPopupTextEditor(newText); };
-    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda, "SliderEditor") };
+    auto setTextFromPopupTextEditorLambda
+        = [this](const juce::String & newText) { this->setTextFromPopupTextEditor(newText); };
+    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda,
+                                                                          "SliderEditor") };
     sliderEditor->setJustification(juce::Justification::centred);
     sliderEditor->setMultiLine(false);
     sliderEditor->setSize(60, 20);
@@ -206,7 +208,7 @@ void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     }
     sliderEditor->setText(juce::String(getValue()), false);
     sliderEditor->selectAll();
-    
+
     auto numSliderTextEditor{ std::make_unique<PopupTextEditor>() };
     numSliderTextEditor->initPopupTextEditor(std::move(sliderEditor));
 
@@ -230,7 +232,7 @@ void NumSlider::setDefaultReturnValue(double value)
 //==============================================================================
 void NumSlider::setTextFromPopupTextEditor(juce::String newText)
 {
-    if (! newText.isEmpty()) {
+    if (!newText.isEmpty()) {
         auto val = newText.replace(",", ".").getDoubleValue();
         mLastValue = val;
         setValue(val, juce::sendNotification);

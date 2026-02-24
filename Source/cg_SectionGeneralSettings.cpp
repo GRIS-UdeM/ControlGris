@@ -36,7 +36,7 @@ SourceColourSelector::~SourceColourSelector()
 }
 
 //==============================================================================
-void SourceColourSelector::getIdealSize(int &idealWidth, int &idealHeight)
+void SourceColourSelector::getIdealSize(int & idealWidth, int & idealHeight)
 {
     idealWidth = mColourSelector->getWidth();
     idealHeight = mColourSelector->getHeight();
@@ -153,9 +153,9 @@ void SourcesTableListBoxModel::cellClicked(int rowNumber, int columnId, const ju
             generalSettings.updateSourcesColour(srcIndex);
         } else {
             auto srcColour{ src.getColour() };
-            auto colourSelector{ std::make_unique<juce::ColourSelector>(
-                                                                        juce::ColourSelector::showColourAtTop | juce::ColourSelector::showSliders
-                                                                        | juce::ColourSelector::showColourspace,
+            auto colourSelector{ std::make_unique<juce::ColourSelector>(juce::ColourSelector::showColourAtTop
+                                                                            | juce::ColourSelector::showSliders
+                                                                            | juce::ColourSelector::showColourspace,
                                                                         4,
                                                                         4) };
             colourSelector->setName("source colour");
@@ -248,8 +248,7 @@ void SourcesTableListComponent::TableHeader::columnClicked(int columnId, const j
             mSourcesTableListComponent.repaint();
         }
         mSourcesTableListComponent.mSectionGeneralSettings.updateAllSourcesColour();
-    }
-    else if (isRightButtonDown && columnId == 1) {
+    } else if (isRightButtonDown && columnId == 1) {
         mSourcesTableListComponent.mSectionGeneralSettings.updateAllSourcesColour();
     }
 }

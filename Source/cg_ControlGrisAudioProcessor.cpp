@@ -1590,11 +1590,9 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
         juce::String const id{ i };
         juce::Identifier const colourId{ juce::String{ "colour_" } + id };
 
-        if (! mAudioProcessorValueTreeState.state.hasProperty(colourId)) {
+        if (!mAudioProcessorValueTreeState.state.hasProperty(colourId)) {
             source.setColorFromIndex(mSources.size());
-            mAudioProcessorValueTreeState.state.setProperty(colourId,
-                                                            source.getColour().toString(),
-                                                            nullptr);
+            mAudioProcessorValueTreeState.state.setProperty(colourId, source.getColour().toString(), nullptr);
         }
     }
     auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };

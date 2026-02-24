@@ -23,39 +23,39 @@
 namespace gris
 {
 //==============================================================================
-PopupTextEditor::InnerTextEditor::InnerTextEditor(std::function<void(const juce::String&)> fn, const juce::String& name)
-    : juce::TextEditor (name)
+PopupTextEditor::InnerTextEditor::InnerTextEditor(std::function<void(const juce::String &)> fn,
+                                                  const juce::String & name)
+    : juce::TextEditor(name)
     , setValFn(std::move(fn))
 {
     setLookAndFeel(&mGrisLookAndFeel);
 }
 
 //==============================================================================
-void PopupTextEditor::InnerTextEditor::addPopupMenuItems(juce::PopupMenu & menuToAddTo, const juce::MouseEvent * mouseClickEvent)
+void PopupTextEditor::InnerTextEditor::addPopupMenuItems(juce::PopupMenu & menuToAddTo,
+                                                         const juce::MouseEvent * mouseClickEvent)
 {
-    menuToAddTo.addItem (static_cast<int>(popupMenuItems::copy), "Copy");
-    menuToAddTo.addItem (static_cast<int>(popupMenuItems::paste), "Paste");
+    menuToAddTo.addItem(static_cast<int>(popupMenuItems::copy), "Copy");
+    menuToAddTo.addItem(static_cast<int>(popupMenuItems::paste), "Paste");
 }
 
 //==============================================================================
 void PopupTextEditor::InnerTextEditor::performPopupMenuAction(int menuItemID)
 {
     switch (menuItemID) {
-        case static_cast<int>(popupMenuItems::copy):
-            copy();
-            break;
-        case static_cast<int>(popupMenuItems::paste):
-        {
-            juce::TextEditor tempEd;
-            auto text{ juce::SystemClipboard::getTextFromClipboard() };
-            auto inputFilter{ getInputFilter() };
-            juce::String filtered{ inputFilter->filterNewText(tempEd, text) };
-            setValFn(filtered);
-        }
-            break;
-            
-        default:
-            break;
+    case static_cast<int>(popupMenuItems::copy):
+        copy();
+        break;
+    case static_cast<int>(popupMenuItems::paste): {
+        juce::TextEditor tempEd;
+        auto text{ juce::SystemClipboard::getTextFromClipboard() };
+        auto inputFilter{ getInputFilter() };
+        juce::String filtered{ inputFilter->filterNewText(tempEd, text) };
+        setValFn(filtered);
+    } break;
+
+    default:
+        break;
     }
 }
 
@@ -82,7 +82,7 @@ PopupTextEditor::~PopupTextEditor()
 }
 
 //==============================================================================
-void PopupTextEditor::getIdealSize(int &idealWidth, int &idealHeight)
+void PopupTextEditor::getIdealSize(int & idealWidth, int & idealHeight)
 {
     idealWidth = mPopupTextEditor->getWidth();
     idealHeight = mPopupTextEditor->getHeight();
@@ -99,7 +99,7 @@ void PopupTextEditor::initPopupTextEditor(std::unique_ptr<InnerTextEditor> textE
 void PopupTextEditor::timerCallback()
 {
     if (isShowing()) {
-        if (! hasKeyboardFocus(true)) {
+        if (!hasKeyboardFocus(true)) {
             grabKeyboardFocus();
         }
     }
