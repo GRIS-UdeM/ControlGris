@@ -122,6 +122,10 @@
         <FILE id="XbxMpG" name="cg_NumSlider.cpp" compile="1" resource="0"
               file="Source/cg_NumSlider.cpp"/>
         <FILE id="Q07Drf" name="cg_NumSlider.h" compile="0" resource="0" file="Source/cg_NumSlider.h"/>
+        <FILE id="HTySjD" name="cg_PopupTextEditor.cpp" compile="1" resource="0"
+              file="Source/cg_PopupTextEditor.cpp"/>
+        <FILE id="sCLyGo" name="cg_PopupTextEditor.h" compile="0" resource="0"
+              file="Source/cg_PopupTextEditor.h"/>
         <FILE id="ea4JnT" name="cg_TextEditor.cpp" compile="1" resource="0"
               file="Source/cg_TextEditor.cpp"/>
         <FILE id="pWr7bJ" name="cg_TextEditor.hpp" compile="0" resource="0"
