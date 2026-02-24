@@ -26,9 +26,7 @@ namespace gris
 {
 class GrisLookAndFeel;
 //==============================================================================
-class NumSlider
-    : public juce::Slider
-    , private juce::TextEditor::Listener
+class NumSlider : public juce::Slider
 {
 public:
     //==============================================================================
@@ -48,9 +46,7 @@ public:
 
 private:
     //==============================================================================
-    void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
-    void textEditorEscapeKeyPressed(juce::TextEditor & ed) override;
-    void textEditorFocusLost(juce::TextEditor & ed) override;
+    void setTextFromPopupTextEditor(juce::String newText);
 
     void startFineClickDragging(const juce::MouseEvent & event);
     void stopFineClickDragging(const juce::MouseEvent & event);

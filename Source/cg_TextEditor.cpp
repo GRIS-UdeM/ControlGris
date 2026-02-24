@@ -33,6 +33,7 @@ TextEd::TextEd(GrisLookAndFeel & glaf) : mGrisLookAndFeel(glaf)
 //==============================================================================
 TextEd::~TextEd()
 {
+    juce::PopupMenu::dismissAllActiveMenus();
     setLookAndFeel(nullptr);
 }
 
@@ -55,10 +56,9 @@ void TextEd::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     if (!isEnabled() || !mIsEditable)
         return;
 
-    auto popupEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>("TextEdEditor") };
-    popupEditor->setLookAndFeel(&mGrisLookAndFeel);
+    auto setTextFromPopupTextEditorLambda = [this](const juce::String& newText){ this->setTextFromPopupTextEditor(newText); };
+    auto popupEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda, "TextEdEditor") };
     popupEditor->setJustification(juce::Justification::centred);
-    popupEditor->addListener(this);
     popupEditor->setMultiLine(false);
     popupEditor->setSize(getWidth() + 20, 20);
     popupEditor->setInputFilter(getInputFilter(), false);
@@ -66,7 +66,7 @@ void TextEd::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     popupEditor->selectAll();
 
     auto popupTextEditor{ std::make_unique<PopupTextEditor>() };
-    popupTextEditor->setPopupTextEditor(std::move(popupEditor));
+    popupTextEditor->initPopupTextEditor(std::move(popupEditor));
 
     mEditorPopupMenu.clear();
     mEditorPopupMenu.addCustomItem(1, std::move(popupTextEditor));
@@ -74,44 +74,14 @@ void TextEd::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 }
 
 //==============================================================================
-void TextEd::textEditorReturnKeyPressed(juce::TextEditor & ed)
+void TextEd::setTextFromPopupTextEditor(juce::String newText)
 {
-    if (!ed.getText().isEmpty()) {
-        auto text = ed.getText().replace(",", ".");
+    if (! newText.isEmpty()) {
+        auto text = newText.replace(",", ".");
         setText(text, juce::sendNotification);
         onFocusLost();
     }
-
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        popupTextEd->removeListener(this);
-    }
-
     juce::PopupMenu::dismissAllActiveMenus();
-}
-
-//==============================================================================
-void TextEd::textEditorEscapeKeyPressed(juce::TextEditor & ed)
-{
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        popupTextEd->removeListener(this);
-    }
-
-    juce::PopupMenu::dismissAllActiveMenus();
-}
-
-//==============================================================================
-void TextEd::textEditorFocusLost(juce::TextEditor & ed)
-{
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        auto text = ed.getText();
-        if (getText() != text) {
-            setText(text, juce::sendNotification);
-            onFocusLost();
-        }
-    }
 }
 
 //==============================================================================

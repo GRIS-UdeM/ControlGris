@@ -28,7 +28,6 @@ namespace gris
 //==============================================================================
 class TextEd
     : public juce::TextEditor
-    , private juce::TextEditor::Listener
 {
 public:
     //==============================================================================
@@ -46,10 +45,6 @@ public:
     void mouseDown(const juce::MouseEvent & event) override;
     void mouseDoubleClick(const juce::MouseEvent & event) override;
 
-    void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
-    void textEditorEscapeKeyPressed(juce::TextEditor & ed) override;
-    void textEditorFocusLost(juce::TextEditor & ed) override;
-
     //==============================================================================
     void setEditable(bool isEditable);
 
@@ -60,6 +55,9 @@ private:
     bool mIsCurrentlyEditing{};
     juce::String mCurrentText;
     bool mIsEditable{ true };
+
+    //==============================================================================
+    void setTextFromPopupTextEditor(juce::String newText);
 
     //==============================================================================
     JUCE_LEAK_DETECTOR(TextEd)

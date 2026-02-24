@@ -23,6 +23,14 @@
 namespace gris
 {
 //==============================================================================
+PopupTextEditor::InnerTextEditor::InnerTextEditor(std::function<void(const juce::String&)> fn, const juce::String& name)
+    : juce::TextEditor (name)
+    , setValFn(std::move(fn))
+{
+    setLookAndFeel(&mGrisLookAndFeel);
+}
+
+//==============================================================================
 void PopupTextEditor::InnerTextEditor::addPopupMenuItems(juce::PopupMenu & menuToAddTo, const juce::MouseEvent * mouseClickEvent)
 {
     menuToAddTo.addItem (static_cast<int>(popupMenuItems::copy), "Copy");
@@ -42,13 +50,21 @@ void PopupTextEditor::InnerTextEditor::performPopupMenuAction(int menuItemID)
             auto text{ juce::SystemClipboard::getTextFromClipboard() };
             auto inputFilter{ getInputFilter() };
             juce::String filtered{ inputFilter->filterNewText(tempEd, text) };
-            setText(filtered);
+            setValFn(filtered);
         }
             break;
             
         default:
             break;
     }
+}
+
+//==============================================================================
+void PopupTextEditor::InnerTextEditor::returnPressed()
+{
+    auto newText{ getText() };
+    setValFn(newText);
+    juce::PopupMenu::dismissAllActiveMenus();
 }
 
 //==============================================================================
@@ -73,7 +89,7 @@ void PopupTextEditor::getIdealSize(int &idealWidth, int &idealHeight)
 }
 
 //==============================================================================
-void PopupTextEditor::setPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor)
+void PopupTextEditor::initPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor)
 {
     mPopupTextEditor = std::move(textEditor);
     addAndMakeVisible(*mPopupTextEditor);

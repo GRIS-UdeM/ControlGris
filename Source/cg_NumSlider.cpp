@@ -194,10 +194,9 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 {
-    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>("SliderEditor") };
-    sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
+    auto setTextFromPopupTextEditorLambda = [this](const juce::String& newText){ this->setTextFromPopupTextEditor(newText); };
+    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda, "SliderEditor") };
     sliderEditor->setJustification(juce::Justification::centred);
-    sliderEditor->addListener(this);
     sliderEditor->setMultiLine(false);
     sliderEditor->setSize(60, 20);
     if (getRange().getStart() < 0) {
@@ -209,7 +208,7 @@ void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     sliderEditor->selectAll();
     
     auto numSliderTextEditor{ std::make_unique<PopupTextEditor>() };
-    numSliderTextEditor->setPopupTextEditor(std::move(sliderEditor));
+    numSliderTextEditor->initPopupTextEditor(std::move(sliderEditor));
 
     mTextEditorPopupMenu.clear();
     mTextEditorPopupMenu.addCustomItem(1, std::move(numSliderTextEditor));
@@ -229,46 +228,14 @@ void NumSlider::setDefaultReturnValue(double value)
 }
 
 //==============================================================================
-void NumSlider::textEditorReturnKeyPressed(juce::TextEditor & ed)
+void NumSlider::setTextFromPopupTextEditor(juce::String newText)
 {
-    if (!ed.getText().isEmpty()) {
-        auto val = ed.getText().replace(",", ".").getDoubleValue();
+    if (! newText.isEmpty()) {
+        auto val = newText.replace(",", ".").getDoubleValue();
         mLastValue = val;
-        setValue(val);
+        setValue(val, juce::sendNotification);
     }
-
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        popupTextEd->removeListener(this);
-    }
-
     juce::PopupMenu::dismissAllActiveMenus();
-}
-
-//==============================================================================
-void NumSlider::textEditorEscapeKeyPressed(juce::TextEditor & ed)
-{
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        popupTextEd->removeListener(this);
-    }
-
-    juce::PopupMenu::dismissAllActiveMenus();
-}
-
-//==============================================================================
-void NumSlider::textEditorFocusLost(juce::TextEditor & ed)
-{
-    if (!ed.getText().isEmpty()) {
-        auto val = ed.getText().replace(",", ".").getDoubleValue();
-        mLastValue = val;
-        setValue(val);
-    }
-
-    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
-    if (popupTextEd != nullptr) {
-        popupTextEd->removeListener(this);
-    }
 }
 
 //==============================================================================

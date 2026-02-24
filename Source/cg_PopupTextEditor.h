@@ -21,6 +21,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "cg_ControlGrisLookAndFeel.hpp"
 
 namespace gris
 {
@@ -35,13 +36,20 @@ public:
     class InnerTextEditor : public juce::TextEditor
     {
     public:
-        explicit InnerTextEditor(const juce::String& name) : juce::TextEditor (name) {}
+        //==============================================================================
+        explicit InnerTextEditor(std::function<void(const juce::String&)> fn, const juce::String& name);
         InnerTextEditor() = delete;
         ~InnerTextEditor() override = default;
         //==============================================================================
         void addPopupMenuItems(juce::PopupMenu & menuToAddTo, const juce::MouseEvent * mouseClickEvent) override;
         void performPopupMenuAction(int menuItemID) override;
+        void returnPressed() override;
     private:
+        //==============================================================================
+        GrisLookAndFeel mGrisLookAndFeel;
+        std::function<void(const juce::String&)> setValFn;
+
+        //==============================================================================
         JUCE_LEAK_DETECTOR(InnerTextEditor)
     };
     //==============================================================================
@@ -52,7 +60,7 @@ public:
     void getIdealSize(int &idealWidth, int &idealHeight) override;
     void timerCallback() override;
     
-    void setPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor);
+    void initPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor);
     
 private:
     //==============================================================================
