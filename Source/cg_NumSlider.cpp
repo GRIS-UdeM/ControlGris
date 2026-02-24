@@ -20,10 +20,10 @@
 
 #include "cg_NumSlider.h"
 #include "cg_ControlGrisLookAndFeel.hpp"
+#include "cg_PopupTextEditor.h"
 
 namespace gris
 {
-
 //==============================================================================
 NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -36,6 +36,12 @@ NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisL
     setScrollWheelEnabled(true);
     setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, getWidth(), getHeight());
     setTextBoxIsEditable(false);
+}
+
+//==============================================================================
+NumSlider::~NumSlider()
+{
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -188,7 +194,7 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 {
-    auto sliderEditor{ std::make_unique<juce::TextEditor>("SliderEditor") };
+    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>("SliderEditor") };
     sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
     sliderEditor->setJustification(juce::Justification::centred);
     sliderEditor->addListener(this);
@@ -201,9 +207,13 @@ void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
     }
     sliderEditor->setText(juce::String(getValue()), false);
     sliderEditor->selectAll();
+    
+    auto numSliderTextEditor{ std::make_unique<PopupTextEditor>() };
+    numSliderTextEditor->setPopupTextEditor(std::move(sliderEditor));
 
-    auto & box = juce::CallOutBox::launchAsynchronously(std::move(sliderEditor), getScreenBounds(), nullptr);
-    box.setLookAndFeel(&mGrisLookAndFeel);
+    mTextEditorPopupMenu.clear();
+    mTextEditorPopupMenu.addCustomItem(1, std::move(numSliderTextEditor));
+    mTextEditorPopupMenu.showMenuAsync(juce::PopupMenu::Options(), [](int result) {});
 }
 
 //==============================================================================
@@ -227,20 +237,37 @@ void NumSlider::textEditorReturnKeyPressed(juce::TextEditor & ed)
         setValue(val);
     }
 
-    auto callOutBox = dynamic_cast<juce::CallOutBox *>(ed.getParentComponent());
-
-    if (callOutBox != nullptr) {
-        callOutBox->dismiss();
+    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
+    if (popupTextEd != nullptr) {
+        popupTextEd->removeListener(this);
     }
+
+    juce::PopupMenu::dismissAllActiveMenus();
 }
 
 //==============================================================================
 void NumSlider::textEditorEscapeKeyPressed(juce::TextEditor & ed)
 {
-    auto callOutBox = dynamic_cast<juce::CallOutBox *>(ed.getParentComponent());
+    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
+    if (popupTextEd != nullptr) {
+        popupTextEd->removeListener(this);
+    }
 
-    if (callOutBox != nullptr) {
-        callOutBox->dismiss();
+    juce::PopupMenu::dismissAllActiveMenus();
+}
+
+//==============================================================================
+void NumSlider::textEditorFocusLost(juce::TextEditor & ed)
+{
+    if (!ed.getText().isEmpty()) {
+        auto val = ed.getText().replace(",", ".").getDoubleValue();
+        mLastValue = val;
+        setValue(val);
+    }
+
+    auto popupTextEd = dynamic_cast<juce::TextEditor*>(&ed);
+    if (popupTextEd != nullptr) {
+        popupTextEd->removeListener(this);
     }
 }
 
