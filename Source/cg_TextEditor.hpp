@@ -35,7 +35,7 @@ public:
     TextEd() = delete;
     explicit TextEd(GrisLookAndFeel & glaf);
 
-    ~TextEd() override = default;
+    ~TextEd() override;
     //==============================================================================
     TextEd(TextEd const &) = delete;
     TextEd(TextEd &&) = delete;
@@ -48,6 +48,7 @@ public:
 
     void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
     void textEditorEscapeKeyPressed(juce::TextEditor & ed) override;
+    void textEditorFocusLost(juce::TextEditor & ed) override;
 
     //==============================================================================
     void setEditable(bool isEditable);
@@ -55,6 +56,7 @@ public:
 private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
+    juce::PopupMenu mEditorPopupMenu;
     bool mIsCurrentlyEditing{};
     juce::String mCurrentText;
     bool mIsEditable{ true };
