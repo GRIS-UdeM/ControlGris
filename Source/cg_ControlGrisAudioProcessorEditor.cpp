@@ -1237,6 +1237,8 @@ void ControlGrisAudioProcessorEditor::refresh()
     if (mSectionSoundReactiveTrajectories.getAudioAnalysisActivateState() != mProcessor.getAudioAnalysisState()) {
         mSectionSoundReactiveTrajectories.setAudioAnalysisActivateState(mProcessor.getAudioAnalysisState());
     }
+
+    updateAllSourcesColour();
 }
 
 //==============================================================================

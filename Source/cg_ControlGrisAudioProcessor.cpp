@@ -1600,10 +1600,6 @@ void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData
             mAudioProcessorValueTreeState.state.setProperty(colourId, source.getColour().toString(), nullptr);
         }
     }
-    auto * editor{ dynamic_cast<ControlGrisAudioProcessorEditor *>(getActiveEditor()) };
-    if (editor != nullptr) {
-        juce::MessageManager::callAsync([=] { editor->updateAllSourcesColour(); });
-    }
 
     for (int sourceIndex{}; sourceIndex < mSources.MAX_NUMBER_OF_SOURCES; ++sourceIndex) {
         juce::String const id{ sourceIndex };
