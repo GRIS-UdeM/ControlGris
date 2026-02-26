@@ -200,7 +200,12 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id...
         auto & source{ mSources.get(i) };
         source.setId(SourceId{ i + mFirstSourceId.get() });
-        // (colour will be defined in getStateInformation)
+        // and colour...
+        juce::Identifier const colourId{ juce::String{ "colour_" } + oscId };
+        if (!mAudioProcessorValueTreeState.state.hasProperty(colourId)) {
+            source.setColorFromIndex(mSources.size());
+            mAudioProcessorValueTreeState.state.setProperty(colourId, source.getColour().toString(), nullptr);
+        }
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
         source.setCoordinates(Radians{ azimuth },
