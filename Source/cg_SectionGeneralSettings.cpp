@@ -147,7 +147,17 @@ void SourcesTableListBoxModel::cellClicked(int rowNumber, int columnId, const ju
             auto srcColour{ src.getColour() };
             juce::SystemClipboard::copyTextToClipboard(srcColour.toString());
         } else if (isCtrlDown) {
-            auto colour{ juce::Colour::fromString(juce::SystemClipboard::getTextFromClipboard()) };
+            auto clipboardText{ juce::SystemClipboard::getTextFromClipboard() };
+            if (!clipboardText.containsOnly("0123456789abcdefABCDEF")) {
+                return;
+            }
+            if (clipboardText.length() == 6) {
+                clipboardText = juce::String("FF") + clipboardText;
+            }
+            if (clipboardText.length() != 8) {
+                return;
+            }
+            auto colour{ juce::Colour::fromString(clipboardText) };
             src.setColour(colour);
             mSourcesTableListComponent.repaint();
             generalSettings.updateSourcesColour(srcIndex);
