@@ -351,7 +351,7 @@ void Source::setColorFromIndex(int const numTotalSources)
     if (hue > 1.0f) {
         hue -= 1.0f;
     }
-    mColour = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 0.85f);
+    mColour = juce::Colour::fromHSV(hue, 1.0f, 1.0f, 1.0f);
     notifyGuiListeners();
 }
 
@@ -388,14 +388,14 @@ void Source::setRandomColour(std::vector<Source> & sourcesWithColoursToKeep)
         }
     }
 
-    mColour = juce::Colour::fromHSV(newHue, 1.0f, 1.0f, 0.85f);
+    mColour = juce::Colour::fromHSV(newHue, 1.0f, 1.0f, 1.0f);
     notifyGuiListeners();
 }
 
 //==============================================================================
 void Source::setRandomColour()
 {
-    mColour = juce::Colour::fromHSV(mRand.nextDouble(), 1.0f, 1.0f, 0.85f);
+    mColour = juce::Colour::fromHSV(mRand.nextDouble(), 1.0f, 1.0f, 1.0f);
     notifyGuiListeners();
 }
 

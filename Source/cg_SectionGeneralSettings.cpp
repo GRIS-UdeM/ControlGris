@@ -152,7 +152,7 @@ void SourcesTableListBoxModel::cellClicked(int rowNumber, int columnId, const ju
                 return;
             }
             if (clipboardText.length() == 6) {
-                clipboardText = juce::String("FF") + clipboardText;
+                clipboardText = juce::String("FF") + clipboardText; // alpha channel
             }
             if (clipboardText.length() != 8) {
                 return;
