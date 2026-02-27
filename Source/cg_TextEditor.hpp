@@ -30,6 +30,8 @@ class TextEd : public juce::TextEditor
 {
 public:
     //==============================================================================
+    enum class popupMenuItems { copy = 100, paste };
+    //==============================================================================
     TextEd() = delete;
     explicit TextEd(GrisLookAndFeel & glaf);
 
@@ -51,6 +53,7 @@ private:
     //==============================================================================
     GrisLookAndFeel & mGrisLookAndFeel;
     juce::PopupMenu mEditorPopupMenu;
+    juce::PopupMenu mCopyPasteMenu;
     bool mIsCurrentlyEditing{};
     juce::String mCurrentText;
     bool mIsEditable{ true };

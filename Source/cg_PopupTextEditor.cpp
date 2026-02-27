@@ -32,34 +32,6 @@ PopupTextEditor::InnerTextEditor::InnerTextEditor(std::function<void(const juce:
 }
 
 //==============================================================================
-void PopupTextEditor::InnerTextEditor::addPopupMenuItems(juce::PopupMenu & menuToAddTo,
-                                                         const juce::MouseEvent * mouseClickEvent)
-{
-    menuToAddTo.addItem(static_cast<int>(popupMenuItems::copy), "Copy");
-    menuToAddTo.addItem(static_cast<int>(popupMenuItems::paste), "Paste");
-}
-
-//==============================================================================
-void PopupTextEditor::InnerTextEditor::performPopupMenuAction(int menuItemID)
-{
-    switch (menuItemID) {
-    case static_cast<int>(popupMenuItems::copy):
-        copy();
-        break;
-    case static_cast<int>(popupMenuItems::paste): {
-        juce::TextEditor tempEd;
-        auto text{ juce::SystemClipboard::getTextFromClipboard() };
-        auto inputFilter{ getInputFilter() };
-        juce::String filtered{ inputFilter->filterNewText(tempEd, text) };
-        setValFn(filtered);
-    } break;
-
-    default:
-        break;
-    }
-}
-
-//==============================================================================
 void PopupTextEditor::InnerTextEditor::returnPressed()
 {
     auto newText{ getText() };

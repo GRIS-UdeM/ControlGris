@@ -36,6 +36,10 @@ NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisL
     setScrollWheelEnabled(true);
     setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, getWidth(), getHeight());
     setTextBoxIsEditable(false);
+
+    mCopyPasteMenu.setLookAndFeel(&mGrisLookAndFeel);
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::copy), "Copy");
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::paste), "Paste");
 }
 
 //==============================================================================
@@ -128,6 +132,30 @@ void NumSlider::valueChanged()
 //==============================================================================
 void NumSlider::mouseDown(const juce::MouseEvent & event)
 {
+    if (event.mods.isRightButtonDown()) {
+        mCopyPasteMenu.showMenuAsync(juce::PopupMenu::Options(), [this](int result) {
+            switch (result) {
+                case static_cast<int>(popupMenuItems::copy):
+                    juce::SystemClipboard::copyTextToClipboard(juce::String(getValue()));
+                    break;
+                case static_cast<int>(popupMenuItems::paste):
+                {
+                    juce::TextEditor tempEd;
+                    auto text{ juce::SystemClipboard::getTextFromClipboard() };
+                    if (!text.containsOnly("0123456789.")) {
+                        return;
+                    }
+                    auto clipboardVal{ text.getDoubleValue() };
+                    setValue(clipboardVal, juce::sendNotification);
+                }
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    }
+
     mMouseDragStartPos = event.getMouseDownPosition();
     mMouseDiffFromStartY = 0;
 }

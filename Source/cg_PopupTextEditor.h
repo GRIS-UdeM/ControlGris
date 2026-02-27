@@ -31,7 +31,6 @@ class PopupTextEditor
     , public juce::Timer
 {
 public:
-    enum class popupMenuItems { copy = 100, paste };
     //==============================================================================
     class InnerTextEditor : public juce::TextEditor
     {
@@ -41,8 +40,6 @@ public:
         InnerTextEditor() = delete;
         ~InnerTextEditor() override = default;
         //==============================================================================
-        void addPopupMenuItems(juce::PopupMenu & menuToAddTo, const juce::MouseEvent * mouseClickEvent) override;
-        void performPopupMenuAction(int menuItemID) override;
         void returnPressed() override;
 
     private:

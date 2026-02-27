@@ -28,6 +28,10 @@ TextEd::TextEd(GrisLookAndFeel & glaf) : mGrisLookAndFeel(glaf)
 {
     setReadOnly(true);
     setCaretVisible(false);
+
+    mCopyPasteMenu.setLookAndFeel(&mGrisLookAndFeel);
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::copy), "Copy");
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::paste), "Paste");
 }
 
 //==============================================================================
@@ -40,6 +44,31 @@ TextEd::~TextEd()
 //==============================================================================
 void TextEd::mouseDown(const juce::MouseEvent & event)
 {
+    if (event.mods.isRightButtonDown()) {
+        mCopyPasteMenu.showMenuAsync(juce::PopupMenu::Options(), [this](int result) {
+            switch (result) {
+                case static_cast<int>(popupMenuItems::copy):
+                    juce::SystemClipboard::copyTextToClipboard(getText());
+                    break;
+                case static_cast<int>(popupMenuItems::paste):
+                {
+                    juce::TextEditor tempEd;
+                    auto text{ juce::SystemClipboard::getTextFromClipboard() };
+                    auto inputFilter{ getInputFilter() };
+                    if (inputFilter == nullptr) {
+                        return;
+                    }
+                    juce::String filtered{ inputFilter->filterNewText(tempEd, text) };
+                    setTextFromPopupTextEditor(filtered);
+                }
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    }
+
     if (!mIsEditable)
         return;
 

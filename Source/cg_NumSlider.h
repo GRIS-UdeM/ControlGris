@@ -30,6 +30,8 @@ class NumSlider : public juce::Slider
 {
 public:
     //==============================================================================
+    enum class popupMenuItems { copy = 100, paste };
+    //==============================================================================
     NumSlider(GrisLookAndFeel & grisLookAndFeel);
     ~NumSlider() override;
 
@@ -53,6 +55,7 @@ private:
 
     GrisLookAndFeel & mGrisLookAndFeel;
     juce::PopupMenu mTextEditorPopupMenu;
+    juce::PopupMenu mCopyPasteMenu;
 
     //==============================================================================
     juce::Time mLastTime{ 0 };
