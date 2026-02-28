@@ -304,6 +304,8 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
     updateElevationMode(elevMode);
 
+    updateAllSourcesColour();
+
     mIsInsideSetPluginState = false;
 }
 
@@ -1237,8 +1239,6 @@ void ControlGrisAudioProcessorEditor::refresh()
     if (mSectionSoundReactiveTrajectories.getAudioAnalysisActivateState() != mProcessor.getAudioAnalysisState()) {
         mSectionSoundReactiveTrajectories.setAudioAnalysisActivateState(mProcessor.getAudioAnalysisState());
     }
-
-    updateAllSourcesColour();
 }
 
 //==============================================================================
