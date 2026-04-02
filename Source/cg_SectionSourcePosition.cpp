@@ -343,10 +343,10 @@ void SectionSourcePosition::paint(juce::Graphics & g)
         area.expand(3, 3);
         g.setColour(juce::Colour(.2f, .2f, .2f, 1.0f));
         g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(juce::ColourGradient(selectedSource->getColour().withSaturation(1.0f).darker(1.0f),
-                                               x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                               y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                               selectedSource->getColour().withSaturation(1.0f),
+        g.setGradientFill(juce::ColourGradient(selectedSource->getColour().darker(0.6f).withAlpha(0.85f),
+                                               x + 8.0f,
+                                               y + 8.0f,
+                                               selectedSource->getColour().withAlpha(0.85f),
                                                x,
                                                y,
                                                true));

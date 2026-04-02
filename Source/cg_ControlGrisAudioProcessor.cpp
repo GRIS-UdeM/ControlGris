@@ -200,8 +200,12 @@ ControlGrisAudioProcessor::ControlGrisAudioProcessor()
         // Gives the source an initial id...
         auto & source{ mSources.get(i) };
         source.setId(SourceId{ i + mFirstSourceId.get() });
-        // .. and colour
-        source.setColorFromIndex(mSources.size());
+        // and colour...
+        juce::Identifier const colourId{ juce::String{ "colour_" } + oscId };
+        if (!mAudioProcessorValueTreeState.state.hasProperty(colourId)) {
+            source.setColorFromIndex(mSources.size());
+            mAudioProcessorValueTreeState.state.setProperty(colourId, source.getColour().toString(), nullptr);
+        }
         // .. and coordinates.
         auto const azimuth{ i % 2 == 0 ? Degrees{ -45.0f } : Degrees{ 45.0f } };
         source.setCoordinates(Radians{ azimuth },
@@ -590,9 +594,6 @@ void ControlGrisAudioProcessor::sendOscMessage()
     }
 
     if (mShouldSendOSCSourceColour) {
-        juce::OSCAddressPattern const oscPattern("/spat/serv");
-        juce::OSCMessage message(oscPattern);
-
         const auto source{ mSources[mSourceIndexOSCColour] };
         juce::OSCColour colour{};
         message.clear();
@@ -607,9 +608,6 @@ void ControlGrisAudioProcessor::sendOscMessage()
     }
 
     if (mShouldSendOSCAllSourcesColour) {
-        juce::OSCAddressPattern const oscPattern("/spat/serv");
-        juce::OSCMessage message(oscPattern);
-
         for (auto & source : mSources) {
             juce::OSCColour colour{};
             message.clear();
@@ -1592,22 +1590,33 @@ juce::AudioProcessorEditor * ControlGrisAudioProcessor::createEditor()
 //==============================================================================
 void ControlGrisAudioProcessor::getStateInformation(juce::MemoryBlock & destData)
 {
+    for (int i{}; i < mSources.size(); ++i) {
+        auto & source{ mSources[i] };
+        juce::String const id{ i };
+        juce::Identifier const colourId{ juce::String{ "colour_" } + id };
+
+        if (!mAudioProcessorValueTreeState.state.hasProperty(colourId)) {
+            source.setColorFromIndex(mSources.size());
+            mAudioProcessorValueTreeState.state.setProperty(colourId, source.getColour().toString(), nullptr);
+        }
+    }
+
     for (int sourceIndex{}; sourceIndex < mSources.MAX_NUMBER_OF_SOURCES; ++sourceIndex) {
         juce::String const id{ sourceIndex };
         juce::Identifier const azimuthId{ juce::String{ "p_azimuth_" } + id };
         juce::Identifier const elevationId{ juce::String{ "p_elevation_" } + id };
         juce::Identifier const distanceId{ juce::String{ "p_distance_" } + id };
-        //        juce::Identifier const colourId{ juce::String{ "colour_" } + id };
+        juce::Identifier const colourId{ juce::String{ "colour_" } + id };
         auto const & source{ mSources[sourceIndex] };
         auto const normalizedAzimuth{ source.getNormalizedAzimuth().get() };
         auto const normalizedElevation{ source.getNormalizedElevation().get() };
         auto const distance{ source.getDistance() };
-        //        auto const colour{ source.getColour().toString() };
+        auto const colour{ source.getColour().toString() };
 
         mAudioProcessorValueTreeState.state.setProperty(azimuthId, normalizedAzimuth, nullptr);
         mAudioProcessorValueTreeState.state.setProperty(elevationId, normalizedElevation, nullptr);
         mAudioProcessorValueTreeState.state.setProperty(distanceId, distance, nullptr);
-        //        mAudioProcessorValueTreeState.state.setProperty(colourId, colour, nullptr);
+        mAudioProcessorValueTreeState.state.setProperty(colourId, colour, nullptr);
     }
 
     mAudioProcessorValueTreeState.state.setProperty("soundTrajSelTab", mSelectedSoundTrajectoriesTabIdx, nullptr);
@@ -1671,18 +1680,18 @@ void ControlGrisAudioProcessor::setStateInformation(void const * data, int const
             juce::Identifier const azimuthId{ juce::String{ "p_azimuth_" } + id };
             juce::Identifier const elevationId{ juce::String{ "p_elevation_" } + id };
             juce::Identifier const distanceId{ juce::String{ "p_distance_" } + id };
-            //            juce::Identifier const colourId{ juce::String{ "colour_" } + id };
+            juce::Identifier const colourId{ juce::String{ "colour_" } + id };
             auto & source{ mSources[sourceIndex] };
 
             const Radians azimuth{ valueTree.getProperty(azimuthId) };
             const Radians elevation{ valueTree.getProperty(elevationId) };
             const float distance{ valueTree.getProperty(distanceId) };
-            //            const juce::String colour{ valueTree.getProperty(colourId).toString() };
+            const juce::String colour{ valueTree.getProperty(colourId).toString() };
 
             source.setAzimuth(azimuth, Source::OriginOfChange::userAnchorMove);
             source.setElevation(elevation, Source::OriginOfChange::userAnchorMove);
             source.setDistance(distance, Source::OriginOfChange::userAnchorMove);
-            //            source.setColour(juce::Colour::fromString(colour));
+            source.setColour(juce::Colour::fromString(colour));
         }
 
         // Load saved fixed positions.

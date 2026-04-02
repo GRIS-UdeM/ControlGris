@@ -24,6 +24,32 @@
 namespace gris
 {
 //==============================================================================
+SourceColourSelector::SourceColourSelector() : juce::PopupMenu::CustomComponent(false)
+{
+}
+
+//==============================================================================
+SourceColourSelector::~SourceColourSelector()
+{
+    mColourSelector->removeAllChangeListeners();
+    mColourSelector.reset();
+}
+
+//==============================================================================
+void SourceColourSelector::getIdealSize(int & idealWidth, int & idealHeight)
+{
+    idealWidth = mColourSelector->getWidth();
+    idealHeight = mColourSelector->getHeight();
+}
+
+//==============================================================================
+void SourceColourSelector::setColourSelector(std::unique_ptr<juce::ColourSelector> colourSelector)
+{
+    mColourSelector = std::move(colourSelector);
+    addAndMakeVisible(*mColourSelector);
+}
+
+//==============================================================================
 SourcesTableListBoxModel::SourcesTableListBoxModel(GrisLookAndFeel & grisLookAndFeel,
                                                    ControlGrisAudioProcessor & processor,
                                                    SourcesTableListComponent & parentComponent)
@@ -31,6 +57,12 @@ SourcesTableListBoxModel::SourcesTableListBoxModel(GrisLookAndFeel & grisLookAnd
     , mProcessor(processor)
     , mSourcesTableListComponent(parentComponent)
 {
+}
+
+//==============================================================================
+SourcesTableListBoxModel::~SourcesTableListBoxModel()
+{
+    mColourPopupMenu.dismissAllActiveMenus();
 }
 
 //==============================================================================
@@ -87,12 +119,15 @@ void SourcesTableListBoxModel::paintCell(juce::Graphics & g,
 void SourcesTableListBoxModel::cellClicked(int rowNumber, int columnId, const juce::MouseEvent & event)
 {
     auto const isRightButton{ event.mods.isRightButtonDown() };
+    auto const isCtrlDown{ event.mods.isCtrlDown() };
+    auto const isShiftDown{ event.mods.isShiftDown() };
+
+    auto & generalSettings = mSourcesTableListComponent.getSectionGeneralSettings();
 
     if (isRightButton && columnId == 2) {
         SourceIndex srcIndex{ rowNumber };
         SourceIndex nextSrcIndex{ rowNumber + 1 };
         if (getNumRows() > nextSrcIndex.get()) {
-            auto & generalSettings = mSourcesTableListComponent.getSectionGeneralSettings();
             auto & src{ mProcessor.getSources()[srcIndex] };
             auto srcColour{ src.getColour() };
             auto & nextSrc{ mProcessor.getSources()[nextSrcIndex] };
@@ -107,22 +142,47 @@ void SourcesTableListBoxModel::cellClicked(int rowNumber, int columnId, const ju
     if (columnId == 2) {
         SourceIndex srcIndex{ rowNumber };
         auto & src{ mProcessor.getSources()[srcIndex] };
-        auto srcColour{ src.getColour() };
-        auto cellScreenBounds
-            = mSourcesTableListComponent.getTableListBox().getCellComponent(columnId, rowNumber)->getScreenBounds();
-        auto colourSelector{ std::make_unique<juce::ColourSelector>(juce::ColourSelector::showColourAtTop
-                                                                        | juce::ColourSelector::showSliders
-                                                                        | juce::ColourSelector::showColourspace,
-                                                                    4,
-                                                                    4) };
-        colourSelector->setName("source colour");
-        colourSelector->setCurrentColour(srcColour);
-        colourSelector->addChangeListener(this);
-        colourSelector->setColour(juce::ColourSelector::backgroundColourId, juce::Colours::transparentBlack);
-        colourSelector->setSize(300, 400);
-        juce::CallOutBox::launchAsynchronously(std::move(colourSelector), cellScreenBounds, nullptr);
 
-        mEditedColourSrcIndex = src.getIndex();
+        if (isShiftDown && isCtrlDown) {
+            auto srcColour{ src.getColour() };
+            juce::SystemClipboard::copyTextToClipboard(srcColour.toString());
+        } else if (isCtrlDown) {
+            auto clipboardText{ juce::SystemClipboard::getTextFromClipboard() };
+            if (!clipboardText.containsOnly("0123456789abcdefABCDEF")) {
+                return;
+            }
+            if (clipboardText.length() == 6) {
+                clipboardText = juce::String("FF") + clipboardText; // alpha channel
+            }
+            if (clipboardText.length() != 8) {
+                return;
+            }
+            auto colour{ juce::Colour::fromString(clipboardText) };
+            src.setColour(colour);
+            mSourcesTableListComponent.repaint();
+            generalSettings.updateSourcesColour(srcIndex);
+        } else {
+            auto srcColour{ src.getColour() };
+            auto colourSelector{ std::make_unique<juce::ColourSelector>(juce::ColourSelector::showColourAtTop
+                                                                            | juce::ColourSelector::showSliders
+                                                                            | juce::ColourSelector::showColourspace,
+                                                                        4,
+                                                                        4) };
+            colourSelector->setName("source colour");
+            colourSelector->setCurrentColour(srcColour);
+            colourSelector->addChangeListener(this);
+            colourSelector->setColour(juce::ColourSelector::backgroundColourId, juce::Colours::transparentBlack);
+            colourSelector->setSize(300, 400);
+
+            auto sourceColourSelector{ std::make_unique<SourceColourSelector>() };
+            sourceColourSelector->setColourSelector(std::move(colourSelector));
+
+            mColourPopupMenu.clear();
+            mColourPopupMenu.addCustomItem(1, std::move(sourceColourSelector));
+            mColourPopupMenu.showMenuAsync(juce::PopupMenu::Options(), [](int result) {});
+
+            mEditedColourSrcIndex = src.getIndex();
+        }
     }
 }
 
@@ -151,7 +211,8 @@ void SourcesTableListBoxModel::changeListenerCallback(juce::ChangeBroadcaster * 
 SourcesTableListComponent::SourcesTableListComponent(GrisLookAndFeel & grisLookAndFeel,
                                                      ControlGrisAudioProcessor & processor,
                                                      SectionGeneralSettings & sectionGeneralSettings)
-    : mGrisLookAndFeel(grisLookAndFeel)
+    : juce::PopupMenu::CustomComponent(false)
+    , mGrisLookAndFeel(grisLookAndFeel)
     , mProcessor(processor)
     , mSectionGeneralSettings(sectionGeneralSettings)
     , mSourcesTableModel(grisLookAndFeel, processor, *this)
@@ -171,6 +232,13 @@ SourcesTableListComponent::SourcesTableListComponent(GrisLookAndFeel & grisLookA
 }
 
 //==============================================================================
+void SourcesTableListComponent::getIdealSize(int & idealWidth, int & idealHeight)
+{
+    idealWidth = getWidth();
+    idealHeight = getHeight();
+}
+
+//==============================================================================
 SourcesTableListComponent::TableHeader::TableHeader(SourcesTableListComponent & parent)
     : mSourcesTableListComponent(parent)
 {
@@ -179,9 +247,9 @@ SourcesTableListComponent::TableHeader::TableHeader(SourcesTableListComponent & 
 //==============================================================================
 void SourcesTableListComponent::TableHeader::columnClicked(int columnId, const juce::ModifierKeys & mods)
 {
-    auto const isRightButton{ mods.isRightButtonDown() };
+    auto const isRightButtonDown{ mods.isRightButtonDown() };
 
-    if (isRightButton && columnId == 2) {
+    if (isRightButtonDown && columnId == 2) {
         // reset all colours
         auto & sources{ mSourcesTableListComponent.mProcessor.getSources() };
         auto numSources{ sources.size() };
@@ -189,6 +257,8 @@ void SourcesTableListComponent::TableHeader::columnClicked(int columnId, const j
             source.setColorFromIndex(numSources);
             mSourcesTableListComponent.repaint();
         }
+        mSourcesTableListComponent.mSectionGeneralSettings.updateAllSourcesColour();
+    } else if (isRightButtonDown && columnId == 1) {
         mSourcesTableListComponent.mSectionGeneralSettings.updateAllSourcesColour();
     }
 }
@@ -430,8 +500,10 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
     mFirstSourceIdEditor.onFocusLost = [this] {
         mFirstSourceIdEditor.moveCaretToEnd();
         if (!mFirstSourceIdEditor.isEmpty()) {
+            auto val{ mFirstSourceIdEditor.getText().getIntValue() };
+            val = val == 0 ? 1 : val;
             mListeners.call([&](Listener & l) {
-                l.firstSourceIdChangedCallback(SourceId{ mFirstSourceIdEditor.getText().getIntValue() });
+                l.firstSourceIdChangedCallback(SourceId{ val });
             });
         } else {
             mListeners.call([&](Listener & l) {
@@ -454,12 +526,11 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
 
         popupTableList->setSize(200, tableHeight);
 
-        auto & box = juce::CallOutBox::launchAsynchronously(std::move(popupTableList),
-                                                            mSourcesColourEditButton.getScreenBounds(),
-                                                            nullptr);
-        box.setLookAndFeel(&mGrisLookAndFeel);
+        mPopupMenu.clear();
+        mPopupMenu.addCustomItem(1, std::move(popupTableList));
+        mPopupMenu.showMenuAsync(juce::PopupMenu::Options(), [](int result) {});
     };
-    //    addAndMakeVisible(&mSourcesColourEditButton);
+    addAndMakeVisible(&mSourcesColourEditButton);
 
     mPositionActivateButton.setExplicitFocusOrder(1);
     mPositionActivateButton.setButtonText("Activate OSC");
@@ -467,6 +538,12 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
         mListeners.call([&](Listener & l) { l.oscStateChangedCallback(mPositionActivateButton.getToggleState()); });
     };
     addAndMakeVisible(&mPositionActivateButton);
+}
+
+//==============================================================================
+SectionGeneralSettings::~SectionGeneralSettings()
+{
+    mPopupMenu.dismissAllActiveMenus();
 }
 
 //==============================================================================

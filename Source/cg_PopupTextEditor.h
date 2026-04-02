@@ -26,42 +26,46 @@
 namespace gris
 {
 //==============================================================================
-class TextEd : public juce::TextEditor
+class PopupTextEditor
+    : public juce::PopupMenu::CustomComponent
+    , public juce::Timer
 {
 public:
     //==============================================================================
-    enum class popupMenuItems { copy = 100, paste };
-    //==============================================================================
-    TextEd() = delete;
-    explicit TextEd(GrisLookAndFeel & glaf);
+    class InnerTextEditor : public juce::TextEditor
+    {
+    public:
+        //==============================================================================
+        explicit InnerTextEditor(std::function<void(const juce::String &)> fn, const juce::String & name);
+        InnerTextEditor() = delete;
+        ~InnerTextEditor() override = default;
+        //==============================================================================
+        void returnPressed() override;
 
-    ~TextEd() override;
+    private:
+        //==============================================================================
+        GrisLookAndFeel mGrisLookAndFeel;
+        std::function<void(const juce::String &)> setValFn;
+
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(InnerTextEditor)
+    };
     //==============================================================================
-    TextEd(TextEd const &) = delete;
-    TextEd(TextEd &&) = delete;
-    TextEd & operator=(TextEd const &) = delete;
-    TextEd & operator=(TextEd &&) = delete;
+    PopupTextEditor();
+    ~PopupTextEditor() override;
 
     //==============================================================================
-    void mouseDown(const juce::MouseEvent & event) override;
-    void mouseDoubleClick(const juce::MouseEvent & event) override;
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
+    void timerCallback() override;
 
-    //==============================================================================
-    void setEditable(bool isEditable);
+    void initPopupTextEditor(std::unique_ptr<InnerTextEditor> textEditor);
 
 private:
     //==============================================================================
-    GrisLookAndFeel & mGrisLookAndFeel;
-    juce::PopupMenu mEditorPopupMenu;
-    juce::PopupMenu mCopyPasteMenu;
-    bool mIsCurrentlyEditing{};
-    juce::String mCurrentText;
-    bool mIsEditable{ true };
+    std::unique_ptr<InnerTextEditor> mPopupTextEditor;
 
     //==============================================================================
-    void setTextFromPopupTextEditor(juce::String newText);
-
-    //==============================================================================
-    JUCE_LEAK_DETECTOR(TextEd)
+    JUCE_LEAK_DETECTOR(PopupTextEditor)
 };
+
 } // namespace gris
