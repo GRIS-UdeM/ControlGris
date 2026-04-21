@@ -25,15 +25,15 @@
 namespace gris
 {
 class GrisLookAndFeel;
-
 //==============================================================================
-class NumSlider
-    : public juce::Slider
-    , private juce::TextEditor::Listener
+class NumSlider : public juce::Slider
 {
 public:
     //==============================================================================
+    enum class popupMenuItems { copy = 100, paste };
+    //==============================================================================
     NumSlider(GrisLookAndFeel & grisLookAndFeel);
+    ~NumSlider() override;
 
     void mouseWheelMove(const juce::MouseEvent & event, const juce::MouseWheelDetails & wheel) override;
     void paint(juce::Graphics & g) override;
@@ -48,13 +48,14 @@ public:
 
 private:
     //==============================================================================
-    void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
-    void textEditorEscapeKeyPressed(juce::TextEditor & ed) override;
+    void setTextFromPopupTextEditor(juce::String newText);
 
     void startFineClickDragging(const juce::MouseEvent & event);
     void stopFineClickDragging(const juce::MouseEvent & event);
 
     GrisLookAndFeel & mGrisLookAndFeel;
+    juce::PopupMenu mTextEditorPopupMenu;
+    juce::PopupMenu mCopyPasteMenu;
 
     //==============================================================================
     juce::Time mLastTime{ 0 };

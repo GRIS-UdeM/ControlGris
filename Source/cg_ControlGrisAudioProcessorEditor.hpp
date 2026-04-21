@@ -156,6 +156,8 @@ public:
     void oscStateChangedCallback(bool state) override;
     void numberOfSourcesChangedCallback(int numOfSources) override;
     void firstSourceIdChangedCallback(SourceId firstSourceId) override;
+    void sourcesColourChangedCallback(SourceIndex sourceIndex) override;
+    void allSourcesColourChangedCallback() override;
 
     // SectionSourcePosition::Listeners
     void sourceSelectionChangedCallback(SourceIndex sourceIndex) override;
@@ -228,6 +230,8 @@ public:
     void updateElevationMode(ElevationMode mode);
     void updatePositionSpeedSliderVal(float value);
     void updateElevationSpeedSliderVal(float value);
+
+    void updateAllSourcesColour();
 
     void setShowTrajectories(bool shouldShowTrajectories);
 

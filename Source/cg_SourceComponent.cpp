@@ -27,7 +27,7 @@ namespace gris
 //==============================================================================
 SourceComponent::SourceComponent(juce::Colour const colour, juce::String const & icon) : mColour(colour), mIcon(icon)
 {
-    if (colour == juce::Colours::black) {
+    if (colour == juce::Colours::black && colour.getAlpha() == 0.0f) {
         jassertfalse;
     }
     constexpr auto dimension = SOURCE_FIELD_COMPONENT_DIAMETER + MAX_LINE_THICKNESS * 2.0f;
@@ -47,7 +47,7 @@ void SourceComponent::paint(juce::Graphics & g)
 {
     auto const lineThickness{ static_cast<float>(mSelected ? MAX_LINE_THICKNESS : 1) };
     auto const saturation{ (mSelected) ? 1.0f : 0.8f };
-    auto const colour{ mColour.withMultipliedSaturation(saturation) };
+    auto const colour{ mColour.withMultipliedSaturation(saturation).withAlpha(0.85f) };
     auto const center{ getLocalBounds().getCentre().toFloat() };
     auto const area{
         juce::Rectangle<float>{ SOURCE_FIELD_COMPONENT_DIAMETER, SOURCE_FIELD_COMPONENT_DIAMETER }.withCentre(center)

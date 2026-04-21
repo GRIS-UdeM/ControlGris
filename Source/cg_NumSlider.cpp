@@ -20,10 +20,10 @@
 
 #include "cg_NumSlider.h"
 #include "cg_ControlGrisLookAndFeel.hpp"
+#include "cg_PopupTextEditor.h"
 
 namespace gris
 {
-
 //==============================================================================
 NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisLookAndFeel)
 {
@@ -36,6 +36,16 @@ NumSlider::NumSlider(GrisLookAndFeel & grisLookAndFeel) : mGrisLookAndFeel(grisL
     setScrollWheelEnabled(true);
     setTextBoxStyle(juce::Slider::TextEntryBoxPosition::NoTextBox, false, getWidth(), getHeight());
     setTextBoxIsEditable(false);
+
+    mCopyPasteMenu.setLookAndFeel(&mGrisLookAndFeel);
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::copy), "Copy");
+    mCopyPasteMenu.addItem(static_cast<int>(popupMenuItems::paste), "Paste");
+}
+
+//==============================================================================
+NumSlider::~NumSlider()
+{
+    setLookAndFeel(nullptr);
 }
 
 //==============================================================================
@@ -122,6 +132,30 @@ void NumSlider::valueChanged()
 //==============================================================================
 void NumSlider::mouseDown(const juce::MouseEvent & event)
 {
+    if (event.mods.isRightButtonDown()) {
+        mCopyPasteMenu.showMenuAsync(juce::PopupMenu::Options(), [this](int result) {
+            switch (result) {
+                case static_cast<int>(popupMenuItems::copy):
+                    juce::SystemClipboard::copyTextToClipboard(juce::String(getValue()));
+                    break;
+                case static_cast<int>(popupMenuItems::paste):
+                {
+                    juce::TextEditor tempEd;
+                    auto text{ juce::SystemClipboard::getTextFromClipboard() };
+                    if (!text.containsOnly("0123456789.")) {
+                        return;
+                    }
+                    auto clipboardVal{ text.getDoubleValue() };
+                    setValue(clipboardVal, juce::sendNotification);
+                }
+                    break;
+
+                default:
+                    break;
+            }
+        });
+    }
+
     mMouseDragStartPos = event.getMouseDownPosition();
     mMouseDiffFromStartY = 0;
 }
@@ -188,22 +222,27 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 {
-    auto sliderEditor{ std::make_unique<juce::TextEditor>("SliderEditor") };
-    sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
+    auto setTextFromPopupTextEditorLambda
+        = [this](const juce::String & newText) { this->setTextFromPopupTextEditor(newText); };
+    auto sliderEditor{ std::make_unique<PopupTextEditor::InnerTextEditor>(setTextFromPopupTextEditorLambda,
+                                                                          "SliderEditor") };
     sliderEditor->setJustification(juce::Justification::centred);
-    sliderEditor->addListener(this);
     sliderEditor->setMultiLine(false);
     sliderEditor->setSize(60, 20);
     if (getRange().getStart() < 0) {
-        sliderEditor->setInputRestrictions(5, "0123456789,.-");
+        sliderEditor->setInputRestrictions(6, "0123456789,.-");
     } else {
         sliderEditor->setInputRestrictions(5, "0123456789,.");
     }
     sliderEditor->setText(juce::String(getValue()), false);
     sliderEditor->selectAll();
 
-    auto & box = juce::CallOutBox::launchAsynchronously(std::move(sliderEditor), getScreenBounds(), nullptr);
-    box.setLookAndFeel(&mGrisLookAndFeel);
+    auto numSliderTextEditor{ std::make_unique<PopupTextEditor>() };
+    numSliderTextEditor->initPopupTextEditor(std::move(sliderEditor));
+
+    mTextEditorPopupMenu.clear();
+    mTextEditorPopupMenu.addCustomItem(1, std::move(numSliderTextEditor));
+    mTextEditorPopupMenu.showMenuAsync(juce::PopupMenu::Options(), [](int result) {});
 }
 
 //==============================================================================
@@ -219,29 +258,14 @@ void NumSlider::setDefaultReturnValue(double value)
 }
 
 //==============================================================================
-void NumSlider::textEditorReturnKeyPressed(juce::TextEditor & ed)
+void NumSlider::setTextFromPopupTextEditor(juce::String newText)
 {
-    if (!ed.getText().isEmpty()) {
-        auto val = ed.getText().replace(",", ".").getDoubleValue();
+    if (!newText.isEmpty()) {
+        auto val = newText.replace(",", ".").getDoubleValue();
         mLastValue = val;
-        setValue(val);
+        setValue(val, juce::sendNotification);
     }
-
-    auto callOutBox = dynamic_cast<juce::CallOutBox *>(ed.getParentComponent());
-
-    if (callOutBox != nullptr) {
-        callOutBox->dismiss();
-    }
-}
-
-//==============================================================================
-void NumSlider::textEditorEscapeKeyPressed(juce::TextEditor & ed)
-{
-    auto callOutBox = dynamic_cast<juce::CallOutBox *>(ed.getParentComponent());
-
-    if (callOutBox != nullptr) {
-        callOutBox->dismiss();
-    }
+    juce::PopupMenu::dismissAllActiveMenus();
 }
 
 //==============================================================================

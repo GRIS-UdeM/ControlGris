@@ -304,6 +304,8 @@ void ControlGrisAudioProcessorEditor::reloadUiState()
     auto const elevMode{ static_cast<ElevationMode>(static_cast<int>(elevModeValue.getValue())) };
     updateElevationMode(elevMode);
 
+    updateAllSourcesColour();
+
     mIsInsideSetPluginState = false;
 }
 
@@ -379,6 +381,14 @@ void ControlGrisAudioProcessorEditor::updateElevationSpeedSliderVal(float value)
 }
 
 //==============================================================================
+void ControlGrisAudioProcessorEditor::updateAllSourcesColour()
+{
+    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
+    mSectionSourcePosition.repaint();
+}
+
+//==============================================================================
 void ControlGrisAudioProcessorEditor::setShowTrajectories(bool shouldShowTrajectories)
 {
     mPositionField.setShowTrajectory(shouldShowTrajectories);
@@ -414,6 +424,7 @@ void ControlGrisAudioProcessorEditor::valueChanged(juce::Value &)
     setSize(mLastUiWidth.getValue(), mLastUiHeight.getValue());
 }
 
+//==============================================================================
 void ControlGrisAudioProcessorEditor::scrollBarMoved(juce::ScrollBar * scrollBarThatHasMoved, double newRangeStart)
 {
     auto horizScrollPos{ mMainWindowViewport.getHorizontalScrollBar().getCurrentRangeStart() };
@@ -532,6 +543,24 @@ void ControlGrisAudioProcessorEditor::firstSourceIdChangedCallback(SourceId cons
         mElevationField.repaint();
 
     mSectionSourceSpan.repaint();
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::sourcesColourChangedCallback(SourceIndex sourceIndex)
+{
+    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
+    mSectionSourcePosition.repaint();
+    mProcessor.setShouldSendOSCSourceColour(sourceIndex);
+}
+
+//==============================================================================
+void ControlGrisAudioProcessorEditor::allSourcesColourChangedCallback()
+{
+    mPositionField.rebuildSourceComponents(mProcessor.getSources().size());
+    mElevationField.rebuildSourceComponents(mProcessor.getSources().size());
+    mSectionSourcePosition.repaint();
+    mProcessor.setShouldSendOSCAllSourceColour();
 }
 
 //==============================================================================

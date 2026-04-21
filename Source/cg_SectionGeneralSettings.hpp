@@ -30,6 +30,134 @@
 
 namespace gris
 {
+class SourcesTableListComponent;
+class SectionGeneralSettings;
+//==============================================================================
+class SourceColourSelector : public juce::PopupMenu::CustomComponent
+{
+public:
+    //==============================================================================
+    SourceColourSelector();
+    ~SourceColourSelector() override;
+
+    //==============================================================================
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
+
+    void setColourSelector(std::unique_ptr<juce::ColourSelector> colourSelector);
+
+private:
+    //==============================================================================
+    std::unique_ptr<juce::ColourSelector> mColourSelector;
+
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourceColourSelector)
+};
+
+//==============================================================================
+class SourcesTableListBoxModel
+    : public juce::TableListBoxModel
+    , private juce::ChangeListener
+{
+public:
+    //==============================================================================
+    explicit SourcesTableListBoxModel(GrisLookAndFeel & grisLookAndFeel,
+                                      ControlGrisAudioProcessor & processor,
+                                      SourcesTableListComponent & parentComponent);
+    //==============================================================================
+    SourcesTableListBoxModel() = delete;
+    ~SourcesTableListBoxModel() override;
+
+    SourcesTableListBoxModel(const SourcesTableListBoxModel & other) = delete;
+    SourcesTableListBoxModel(SourcesTableListBoxModel && other) = delete;
+
+    SourcesTableListBoxModel & operator=(const SourcesTableListBoxModel & other) = delete;
+    SourcesTableListBoxModel & operator=(SourcesTableListBoxModel && other) = delete;
+
+    //==============================================================================
+    int getNumRows() override;
+    void paintRowBackground(juce::Graphics &, int rowNumber, int width, int height, bool rowIsSelected) override;
+    void paintCell(juce::Graphics &, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
+    void cellClicked(int rowNumber, int columnId, const juce::MouseEvent & event) override;
+    void changeListenerCallback(juce::ChangeBroadcaster * source) override;
+
+private:
+    //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+    ControlGrisAudioProcessor & mProcessor;
+    SourcesTableListComponent & mSourcesTableListComponent;
+
+    SourceIndex mEditedColourSrcIndex;
+    juce::PopupMenu mColourPopupMenu;
+
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourcesTableListBoxModel)
+};
+
+//==============================================================================
+class SourcesTableListComponent : public juce::PopupMenu::CustomComponent
+{
+    //==============================================================================
+    class TableHeader : public juce::TableHeaderComponent
+    {
+    public:
+        //==============================================================================
+        TableHeader() = delete;
+        ~TableHeader() override = default;
+
+        TableHeader(const TableHeader & other) = delete;
+        TableHeader(TableHeader && other) = delete;
+
+        TableHeader & operator=(TableHeader const &) = delete;
+        TableHeader & operator=(TableHeader &&) = delete;
+
+        //==============================================================================
+        explicit TableHeader(SourcesTableListComponent & parent);
+
+        //==============================================================================
+        void columnClicked(int columnId, const juce::ModifierKeys & mods) override;
+
+    private:
+        //==============================================================================
+        SourcesTableListComponent & mSourcesTableListComponent;
+
+        //==============================================================================
+        JUCE_LEAK_DETECTOR(TableHeader)
+    };
+
+public:
+    //==============================================================================
+    explicit SourcesTableListComponent(GrisLookAndFeel & grisLookAndFeel,
+                                       ControlGrisAudioProcessor & processor,
+                                       SectionGeneralSettings & sectionGeneralSettings);
+    //==============================================================================
+    SourcesTableListComponent() = delete;
+    ~SourcesTableListComponent() override = default;
+
+    SourcesTableListComponent(const SourcesTableListComponent & other) = delete;
+    SourcesTableListComponent(SourcesTableListComponent && other) = delete;
+
+    SourcesTableListComponent & operator=(SourcesTableListComponent const &) = delete;
+    SourcesTableListComponent & operator=(SourcesTableListComponent &&) = delete;
+
+    //==============================================================================
+    void getIdealSize(int & idealWidth, int & idealHeight) override;
+
+    juce::TableListBox & getTableListBox();
+    SectionGeneralSettings & getSectionGeneralSettings();
+
+private:
+    //==============================================================================
+    GrisLookAndFeel & mGrisLookAndFeel;
+    ControlGrisAudioProcessor & mProcessor;
+    SectionGeneralSettings & mSectionGeneralSettings;
+
+    SourcesTableListBoxModel mSourcesTableModel;
+    juce::TableListBox mSourcesTableListBox;
+
+    //==============================================================================
+    JUCE_LEAK_DETECTOR(SourcesTableListComponent)
+};
+
 //==============================================================================
 class SectionGeneralSettings final : public juce::Component
 {
@@ -44,6 +172,8 @@ public:
         virtual void oscStateChangedCallback(bool state) = 0;
         virtual void numberOfSourcesChangedCallback(int numOfSources) = 0;
         virtual void firstSourceIdChangedCallback(SourceId firstSourceId) = 0;
+        virtual void sourcesColourChangedCallback(SourceIndex sourceIndex) = 0;
+        virtual void allSourcesColourChangedCallback() = 0;
     };
 
 private:
@@ -68,6 +198,9 @@ private:
     juce::Label mFirstSourceIdLabel;
     TextEd mFirstSourceIdEditor{ mGrisLookAndFeel };
 
+    juce::TextButton mSourcesColourEditButton;
+    juce::PopupMenu mPopupMenu;
+
     juce::ToggleButton mPositionActivateButton;
 
 public:
@@ -75,7 +208,7 @@ public:
     explicit SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel, ControlGrisAudioProcessor & processor);
     //==============================================================================
     SectionGeneralSettings() = delete;
-    ~SectionGeneralSettings() override = default;
+    ~SectionGeneralSettings() override;
 
     SectionGeneralSettings(SectionGeneralSettings const &) = delete;
     SectionGeneralSettings(SectionGeneralSettings &&) = delete;
@@ -95,6 +228,9 @@ public:
 
     void addListener(Listener * l) { mListeners.add(l); }
     void removeListener(Listener * l) { mListeners.remove(l); }
+
+    void updateSourcesColour(SourceIndex sourceIndex);
+    void updateAllSourcesColour();
     //==============================================================================
     // overrides
     void resized() override;

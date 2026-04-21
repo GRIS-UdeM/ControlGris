@@ -118,6 +118,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookA
     initSlider(mYSlider, -1.0);
     initSlider(mZSlider, 0.0);
 
+    mXSlider.setDefaultNumDecimalPlacesToDisplay(3);
     mXSlider.onValueChange = [this] {
         mCurrentX = static_cast<float>(mXSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
@@ -129,6 +130,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookA
                                             std::nullopt);
         });
     };
+    mYSlider.setDefaultNumDecimalPlacesToDisplay(3);
     mYSlider.onValueChange = [this] {
         mCurrentY = static_cast<float>(mYSlider.getValue() * -1.0);
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
@@ -140,6 +142,7 @@ CubeControls::CubeControls(SectionSourcePosition & sourceBoxComponent, GrisLookA
                                             std::nullopt);
         });
     };
+    mZSlider.setDefaultNumDecimalPlacesToDisplay(3);
     mZSlider.onValueChange = [this] {
         mCurrentZ = static_cast<float>(mZSlider.getValue());
         mSourceBoxComponent.mListeners.call([&](SectionSourcePosition::Listener & l) {
@@ -275,7 +278,8 @@ SectionSourcePosition::SectionSourcePosition(GrisLookAndFeel & grisLookAndFeel,
             l.elevationSourceLinkChangedCallback(static_cast<ElevationSourceLink>(mZSourceLinkCombo.getSelectedId()));
         });
 
-        if (mZSourceLinkCombo.getSelectedItemIndex() == 2 || mZSourceLinkCombo.getSelectedItemIndex() == 3) {
+        if ((mZSourceLinkCombo.getSelectedItemIndex() == 2 || mZSourceLinkCombo.getSelectedItemIndex() == 3)
+            && mSpatMode == SpatMode::cube) {
             mZSourceLinkScaleLabel.setVisible(true);
             mZSourceLinkScaleSlider.setVisible(true);
             mZSourceLinkCombo.setBounds(120, 102 + titleHeight, 96, 15);
@@ -338,10 +342,10 @@ void SectionSourcePosition::paint(juce::Graphics & g)
         area.expand(3, 3);
         g.setColour(juce::Colour(.2f, .2f, .2f, 1.0f));
         g.drawEllipse(area.translated(.5f, .5f), 1.0f);
-        g.setGradientFill(juce::ColourGradient(selectedSource->getColour().withSaturation(1.0f).darker(1.0f),
-                                               x + SOURCE_FIELD_COMPONENT_RADIUS,
-                                               y + SOURCE_FIELD_COMPONENT_RADIUS,
-                                               selectedSource->getColour().withSaturation(1.0f),
+        g.setGradientFill(juce::ColourGradient(selectedSource->getColour().darker(0.6f).withAlpha(0.85f),
+                                               x + 8.0f,
+                                               y + 8.0f,
+                                               selectedSource->getColour().withAlpha(0.85f),
                                                x,
                                                y,
                                                true));
@@ -379,7 +383,7 @@ void SectionSourcePosition::resized()
         mZSourceLinkLabel.setVisible(true);
         mZSourceLinkCombo.setVisible(true);
         mZSourceLinkLabel.setBounds(5, 106 + titleHeight, 150, 10);
-        if (mZSourceLinkCombo.getSelectedItemIndex() == 3 || mZSourceLinkCombo.getSelectedItemIndex() == 4) {
+        if (mZSourceLinkCombo.getSelectedItemIndex() == 2 || mZSourceLinkCombo.getSelectedItemIndex() == 3) {
             mZSourceLinkScaleLabel.setVisible(true);
             mZSourceLinkScaleSlider.setVisible(true);
             mZSourceLinkCombo.setBounds(120, 102 + titleHeight, 96, 15);

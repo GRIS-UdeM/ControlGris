@@ -222,7 +222,8 @@ private:
     Normalized mAzimuthSpan{};
     Normalized mElevationSpan{};
 
-    juce::Colour mColour{ juce::Colours::black };
+    juce::Colour mColour{ juce::Colours::black.withAlpha(0.0f) };
+    juce::Random mRand;
     ControlGrisAudioProcessor * mProcessor{};
 
 public:
@@ -290,6 +291,9 @@ public:
     void computeAzimuthElevation();
 
     void setColorFromIndex(int numTotalSources);
+    void setRandomColour(std::vector<Source> & sourcesWithColoursToKeep);
+    void setRandomColour();
+    void setColour(juce::Colour colour);
     [[nodiscard]] juce::Colour getColour() const { return mColour; }
 
     void addGuiListener(Listener * listener) { mGuiListeners.add(listener); }
