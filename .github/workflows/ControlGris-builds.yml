@@ -116,6 +116,7 @@ jobs:
                       CONFIGURATION_BUILD_DIR=output/${safeFormat}-universal \
                       MACOSX_DEPLOYMENT_TARGET=10.13 \
                       ARCHS="arm64 x86_64" \
+                      ONLY_ACTIVE_ARCH=NO \
                       INSTALL_PATH=/tmp/fakeInstall \
                       DSTROOT=/tmp/fakeInstallRoot \
                       CODE_SIGNING_REQUIRED=YES \

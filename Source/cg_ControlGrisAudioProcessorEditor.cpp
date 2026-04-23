@@ -900,6 +900,10 @@ void ControlGrisAudioProcessorEditor::convertCartesianSpeakerPositionToSourcePos
         speakerX = groupX + rotatedVector[0];
         speakerY = groupY + rotatedVector[1];
         speakerZ = groupZ + rotatedVector[2];
+    } else {
+        speakerX += groupX;
+        speakerY += groupY;
+        speakerZ += groupZ;
     }
 
     storeXYZSpeakerPositionInPreset(savedSpatMode, speakerX, speakerY, speakerZ, presetXml, juce::String(sourceNumber));
