@@ -502,9 +502,7 @@ SectionGeneralSettings::SectionGeneralSettings(GrisLookAndFeel & grisLookAndFeel
         if (!mFirstSourceIdEditor.isEmpty()) {
             auto val{ mFirstSourceIdEditor.getText().getIntValue() };
             val = val == 0 ? 1 : val;
-            mListeners.call([&](Listener & l) {
-                l.firstSourceIdChangedCallback(SourceId{ val });
-            });
+            mListeners.call([&](Listener & l) { l.firstSourceIdChangedCallback(SourceId{ val }); });
         } else {
             mListeners.call([&](Listener & l) {
                 l.firstSourceIdChangedCallback(SourceId{ 1 });

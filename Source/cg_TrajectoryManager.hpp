@@ -49,8 +49,7 @@ public:
         Listener & operator=(Listener &&) = delete;
         //==============================================================================
         virtual void
-            trajectoryPositionChanged(TrajectoryManager * manager, juce::Point<float> position, Radians elevation)
-            = 0;
+            trajectoryPositionChanged(TrajectoryManager * manager, juce::Point<float> position, Radians elevation) = 0;
 
     private:
         //==============================================================================
