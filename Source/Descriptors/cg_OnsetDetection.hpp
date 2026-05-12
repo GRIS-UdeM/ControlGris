@@ -184,7 +184,7 @@ public:
                         auto maxValue = mTimeSinceLastOnsetDetection
                                             .max(); // Not the median. The longest time appears to give better results
 
-                        if (maxValue < mOnsetDetectionTimeMin || maxValue > mOnsetDetectionTimeMax) {
+                        if (maxValue > mOnsetDetectionTimeMax) {
                             continue;
                         }
 
