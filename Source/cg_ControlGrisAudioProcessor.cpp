@@ -438,7 +438,7 @@ void ControlGrisAudioProcessor::setFirstSourceId(SourceId const firstSourceId, b
 //==============================================================================
 void ControlGrisAudioProcessor::setNumberOfSources(int const numOfSources, bool const propagate)
 {
-    if (numOfSources == mSources.size()) {
+    if (numOfSources == mSources.size() && static_cast<int>(mAudioProcessorValueTreeState.state.getProperty("numberOfSources")) == mSources.size()) {
         return;
     }
 

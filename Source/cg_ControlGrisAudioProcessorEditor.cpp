@@ -821,7 +821,7 @@ void ControlGrisAudioProcessorEditor::speakerSetupSelectedCallback(const juce::F
     // and finally, load the speaker setup as a preset
     mProcessor.getPresetsManager().load(presetXml);
     firstSourceIdChangedCallback(SourceId{ 1 });
-    numberOfSourcesChangedCallback(mProcessor.getSources().size());
+    numberOfSourcesChangedCallback(sourceCount);
     mProcessor.updatePrimarySourceParameters(Source::ChangeType::position);
     if (mProcessor.getSpatMode() == SpatMode::cube)
         mProcessor.updatePrimarySourceParameters(Source::ChangeType::elevation);
