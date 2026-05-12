@@ -26,7 +26,9 @@
 namespace gris
 {
 //==============================================================================
-class TextEd : public juce::TextEditor
+class TextEd
+    : public juce::TextEditor
+    , private juce::TextEditor::Listener
 {
 public:
     //==============================================================================
@@ -45,6 +47,9 @@ public:
     //==============================================================================
     void mouseDown(const juce::MouseEvent & event) override;
     void mouseDoubleClick(const juce::MouseEvent & event) override;
+
+    void textEditorReturnKeyPressed(juce::TextEditor & ed) override;
+    void textEditorEscapeKeyPressed(juce::TextEditor & ed) override;
 
     //==============================================================================
     void setEditable(bool isEditable);
