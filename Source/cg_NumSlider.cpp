@@ -141,7 +141,7 @@ void NumSlider::mouseDown(const juce::MouseEvent & event)
             case static_cast<int>(popupMenuItems::paste): {
                 juce::TextEditor tempEd;
                 auto text{ juce::SystemClipboard::getTextFromClipboard() };
-                if (!text.containsOnly("0123456789.")) {
+                if (!text.containsOnly("-0123456789.") || !isEnabled()) {
                     return;
                 }
                 auto clipboardVal{ text.getDoubleValue() };
@@ -154,6 +154,9 @@ void NumSlider::mouseDown(const juce::MouseEvent & event)
         });
     }
 
+    if (!isEnabled())
+        return;
+
     mMouseDragStartPos = event.getMouseDownPosition();
     mMouseDiffFromStartY = 0;
 }
@@ -161,6 +164,9 @@ void NumSlider::mouseDown(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDrag(const juce::MouseEvent & event)
 {
+    if (!isEnabled())
+        return;
+
     const auto isShiftDown{ event.mods.isShiftDown() };
     const auto mouseDragCurrentPos{ event.getPosition() };
     const auto mouseDiffFromStartY{ mMouseDragStartPos.getY() - mouseDragCurrentPos.getY() };
@@ -220,6 +226,9 @@ void NumSlider::mouseUp(const juce::MouseEvent & event)
 //==============================================================================
 void NumSlider::mouseDoubleClick(const juce::MouseEvent & /*event*/)
 {
+    if (!isEnabled())
+        return;
+
     if (juce::JUCEApplicationBase::isStandaloneApp()) {
         auto sliderEditor{ std::make_unique<juce::TextEditor>("SliderEditor") };
         sliderEditor->setLookAndFeel(&mGrisLookAndFeel);
