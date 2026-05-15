@@ -1303,8 +1303,8 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     mDescriptorMaxTimeSlider.setDefaultNumDecimalPlacesToDisplay(3);
 
     mDescriptorThresholdSlider.setRange(0.0, 1.0);
-    mDescriptorMinTimeSlider.setRange(0.0, 30.0 + ALMOST_ZERO);
-    mDescriptorMaxTimeSlider.setRange(ALMOST_ZERO, 30.0);
+    mDescriptorMinTimeSlider.setRange(0.01, 30.0 + ALMOST_ZERO);
+    mDescriptorMaxTimeSlider.setRange(0.01 + ALMOST_ZERO, 30.0);
 
     mDescriptorMinFreqSlider.onValueChange = [this] {
         if (mParameterToShow) {
