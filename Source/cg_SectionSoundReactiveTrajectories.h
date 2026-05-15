@@ -129,8 +129,13 @@ private:
     NumSlider mParameterAziXYSpanOffsetSlider;
     NumSlider mParameterEleZSpanOffsetSlider;
 
-    juce::Label mParameterLapLabel;
-    TextEd mParameterLapEditor{ mGrisLookAndFeel };
+    juce::Label mParameterSmoothLabel;
+
+    NumSlider mParameterAzimuthXSmoothSlider;
+    NumSlider mParameterYSmoothSlider;
+    NumSlider mParameterElevationZSmoothSlider;
+    NumSlider mParameterAziXYSpanSmoothSlider;
+    NumSlider mParameterEleZSpanSmoothSlider;
 
     juce::TextButton mAudioAnalysisActivateButton;
 
@@ -142,26 +147,20 @@ private:
     DescriptorID mDescriptorIdToUse{ DescriptorID::invalid };
     DataGraph mDataGraph;
 
-    juce::Label mDescriptorExpanderLabel;
     juce::Label mDescriptorThresholdLabel;
     juce::Label mDescriptorMinFreqLabel;
     juce::Label mDescriptorMaxFreqLabel;
     juce::Label mDescriptorMinTimeLabel;
     juce::Label mDescriptorMaxTimeLabel;
-    juce::Label mDescriptorSmoothLabel;
-    juce::Label mDescriptorSmoothCoefLabel;
     juce::Label mDescriptorMetricLabel;
 
     juce::ComboBox mDescriptorMetricCombo;
 
-    NumSlider mDescriptorExpanderSlider;
     NumSlider mDescriptorThresholdSlider;
     NumSlider mDescriptorMinFreqSlider;
     NumSlider mDescriptorMaxFreqSlider;
     NumSlider mDescriptorMinTimeSlider;
     NumSlider mDescriptorMaxTimeSlider;
-    NumSlider mDescriptorSmoothSlider;
-    NumSlider mDescriptorSmoothCoefSlider;
 
     juce::TextButton mClickTimerButton;
 

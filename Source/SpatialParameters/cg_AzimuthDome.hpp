@@ -43,41 +43,37 @@ public:
     {
         auto range{ 0.0 };
         auto offset{ 0.0 };
-        // auto lap{ 1.0 };
         auto smooth{ 0.0 };
 
         switch (descID) {
         case DescriptorID::loudness:
             range = paramRangeLoudness;
             offset = paramOffsetLoudness;
-            // lap = paramLapLoudness;
             smooth = processLoudness(valueToProcess);
             break;
         case DescriptorID::pitch:
             range = paramRangePitch;
-            // lap = paramLapPitch;
+            offset = paramOffsetPitch;
             smooth = processPitch(valueToProcess);
             break;
         case DescriptorID::centroid:
             range = paramRangeCentroid;
-            // lap = paramLapCentroid;
+            offset = paramOffsetCentroid;
             smooth = processCentroid(valueToProcess);
             break;
         case DescriptorID::spread:
             range = paramRangeSpread;
             offset = paramOffsetSpread;
-            // lap = paramLapSpread;
             smooth = processSpread(valueToProcess);
             break;
         case DescriptorID::noise:
             range = paramRangeNoise;
             offset = paramOffsetNoise;
-            // lap = paramLapNoise;
             smooth = processNoise(valueToProcess);
             break;
         case DescriptorID::iterationsSpeed:
             range = paramRangeOD;
-            // lap = paramLapOD;
+            offset = paramOffsetOD;
             smooth = processSmoothedOnsetDetection(valueToProcess);
             break;
         case DescriptorID::invalid:
@@ -90,7 +86,7 @@ public:
 
         const double clip = juce::jlimit(0.0, clipMax, smooth);
         const double inputRange = range * 0.01;
-        res = clip * inputRange * multiplier /** lap*/;
+        res = clip * inputRange * multiplier;
         res += (offset / 360) * multiplier;
 
         if (std::isnan(res)) {

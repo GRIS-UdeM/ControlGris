@@ -52,15 +52,17 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     , mParameterElevationZOffsetSlider(grisLookAndFeel)
     , mParameterAziXYSpanOffsetSlider(grisLookAndFeel)
     , mParameterEleZSpanOffsetSlider(grisLookAndFeel)
+    , mParameterAzimuthXSmoothSlider(grisLookAndFeel)
+    , mParameterYSmoothSlider(grisLookAndFeel)
+    , mParameterElevationZSmoothSlider(grisLookAndFeel)
+    , mParameterAziXYSpanSmoothSlider(grisLookAndFeel)
+    , mParameterEleZSpanSmoothSlider(grisLookAndFeel)
     , mDataGraph(grisLookAndFeel)
-    , mDescriptorExpanderSlider(grisLookAndFeel)
     , mDescriptorThresholdSlider(grisLookAndFeel)
     , mDescriptorMinFreqSlider(grisLookAndFeel)
     , mDescriptorMaxFreqSlider(grisLookAndFeel)
     , mDescriptorMinTimeSlider(grisLookAndFeel)
     , mDescriptorMaxTimeSlider(grisLookAndFeel)
-    , mDescriptorSmoothSlider(grisLookAndFeel)
-    , mDescriptorSmoothCoefSlider(grisLookAndFeel)
 {
     auto const initRangeSlider = [&](NumSlider & slider) {
         slider.setNormalisableRange(juce::NormalisableRange<double>{ -10000.0, 10000.0, 0.1 });
@@ -122,6 +124,33 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
                   break;
               case DescriptorID::iterationsSpeed:
                   param.setParamOffsetOnsetDetection(offsetSlider.getValue());
+                  break;
+              case DescriptorID::invalid:
+              default:
+                  break;
+              }
+          };
+
+    auto const smoothSliderOnValueChange
+        = [&](juce::ComboBox & descriptorCombo, NumSlider & smoothSlider, SpatialParameter & param) {
+              switch (Descriptor::fromInt(descriptorCombo.getSelectedId())) {
+              case DescriptorID::loudness:
+                  param.setParamSmoothLoudness(smoothSlider.getValue());
+                  break;
+              case DescriptorID::pitch:
+                  param.setParamSmoothPitch(smoothSlider.getValue());
+                  break;
+              case DescriptorID::centroid:
+                  param.setParamSmoothCentroid(smoothSlider.getValue());
+                  break;
+              case DescriptorID::spread:
+                  param.setParamSmoothSpread(smoothSlider.getValue());
+                  break;
+              case DescriptorID::noise:
+                  param.setParamSmoothNoise(smoothSlider.getValue());
+                  break;
+              case DescriptorID::iterationsSpeed:
+                  param.setParamSmoothOnsetDetection(smoothSlider.getValue());
                   break;
               case DescriptorID::invalid:
               default:
@@ -234,6 +263,7 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         if (mLastUsedParameterCubeButton) {
             auto & param = mLastUsedParameterCubeButton->get();
             if (&param == &mParameterYButton && mParameterYButton.getToggleState()) {
+                mParameterYButton.setToggleState(false, juce::dontSendNotification);
                 mParameterXButton.triggerClick();
             }
         }
@@ -254,12 +284,22 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     mParameterElevationZOffsetSlider.setDefaultReturnValue(0.0);
     mParameterAziXYSpanOffsetSlider.setDefaultReturnValue(0.0);
     mParameterEleZSpanOffsetSlider.setDefaultReturnValue(0.0);
+    mParameterAzimuthXSmoothSlider.setDefaultReturnValue(5.0);
+    mParameterYSmoothSlider.setDefaultReturnValue(5.0);
+    mParameterElevationZSmoothSlider.setDefaultReturnValue(5.0);
+    mParameterAziXYSpanSmoothSlider.setDefaultReturnValue(5.0);
+    mParameterEleZSpanSmoothSlider.setDefaultReturnValue(5.0);
 
     mParameterAzimuthXOffsetSlider.setNumDecimalPlacesToDisplay(2);
     mParameterYOffsetSlider.setNumDecimalPlacesToDisplay(2);
     mParameterElevationZOffsetSlider.setNumDecimalPlacesToDisplay(2);
     mParameterAziXYSpanOffsetSlider.setNumDecimalPlacesToDisplay(2);
     mParameterEleZSpanOffsetSlider.setNumDecimalPlacesToDisplay(2);
+    mParameterAzimuthXSmoothSlider.setNumDecimalPlacesToDisplay(2);
+    mParameterYSmoothSlider.setNumDecimalPlacesToDisplay(2);
+    mParameterElevationZSmoothSlider.setNumDecimalPlacesToDisplay(2);
+    mParameterAziXYSpanSmoothSlider.setNumDecimalPlacesToDisplay(2);
+    mParameterEleZSpanSmoothSlider.setNumDecimalPlacesToDisplay(2);
 
     // range sliders
     mParameterAzimuthRangeSlider.onValueChange = [this, rangeSliderOnValueChange] {
@@ -363,60 +403,57 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         }
     };
 
-    // addAndMakeVisible(&mParameterLapLabel);
-    mParameterLapLabel.setText("Lap", juce::dontSendNotification);
-
-    // lap textEditor
-    // addAndMakeVisible(&mParameterLapEditor);
-    mParameterLapEditor.setLookAndFeel(&mGrisLookAndFeel);
-    mParameterLapEditor.setFont(grisLookAndFeel.getFont());
-    mParameterLapEditor.setInputRestrictions(2, "1234567890");
-    mParameterLapEditor.setText("1");
-    mParameterLapEditor.setJustification(juce::Justification::centred);
-    mParameterLapEditor.onFocusLost = [this] {
-        mParameterLapEditor.moveCaretToEnd();
-        auto descriptor = DescriptorID::invalid;
-        std::optional<std::reference_wrapper<SpatialParameter>> usedParam;
-
+    // smooth sliders
+    mParameterAzimuthXSmoothSlider.onValueChange = [this, smoothSliderOnValueChange] {
         if (mSpatMode == SpatMode::dome) {
-            descriptor = Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId());
-            usedParam = mAudioProcessor.getAzimuthDome();
+            smoothSliderOnValueChange(mParameterAzimuthDescriptorCombo,
+                                      mParameterAzimuthXSmoothSlider,
+                                      mAudioProcessor.getAzimuthDome());
         } else {
-            // XYParamLinked should be true...
-            descriptor = Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId());
-            usedParam = mAudioProcessor.getXCube();
+            smoothSliderOnValueChange(mParameterXDescriptorCombo,
+                                      mParameterAzimuthXSmoothSlider,
+                                      mAudioProcessor.getXCube());
         }
+    };
 
-        auto & param{ usedParam->get() };
-        auto value{ mParameterLapEditor.getText().getDoubleValue() };
-        if (value == 0.0) {
-            value = 1.0;
-            mParameterLapEditor.setText("1");
+    mParameterYSmoothSlider.onValueChange = [this, smoothSliderOnValueChange] {
+        smoothSliderOnValueChange(mParameterYDescriptorCombo, mParameterYSmoothSlider, mAudioProcessor.getYCube());
+    };
+
+    mParameterElevationZSmoothSlider.onValueChange = [this, smoothSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            smoothSliderOnValueChange(mParameterElevationDescriptorCombo,
+                                      mParameterElevationZSmoothSlider,
+                                      mAudioProcessor.getElevationDome());
+        } else {
+            smoothSliderOnValueChange(mParameterZDescriptorCombo,
+                                      mParameterElevationZSmoothSlider,
+                                      mAudioProcessor.getZCube());
         }
-        switch (descriptor) {
-        case DescriptorID::loudness:
-            param.setParamLapLoudness(value);
-            break;
-        case DescriptorID::pitch:
-            param.setParamLapPitch(value);
-            break;
-        case DescriptorID::centroid:
-            param.setParamLapCentroid(value);
-            break;
-        case DescriptorID::spread:
-            param.setParamLapSpread(value);
-            break;
-        case DescriptorID::noise:
-            param.setParamLapNoise(value);
-            break;
-        case DescriptorID::iterationsSpeed:
-            param.setParamLapOnsetDetection(value);
-            break;
-        case DescriptorID::invalid:
-        default:
-            break;
+    };
+
+    mParameterEleZSpanSmoothSlider.onValueChange = [this, smoothSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            smoothSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                      mParameterEleZSpanSmoothSlider,
+                                      mAudioProcessor.getVSpanDome());
+        } else {
+            smoothSliderOnValueChange(mParameterElevationOrZSpanDescriptorCombo,
+                                      mParameterEleZSpanSmoothSlider,
+                                      mAudioProcessor.getVSpanCube());
         }
-        unfocusAllComponents();
+    };
+
+    mParameterAziXYSpanSmoothSlider.onValueChange = [this, smoothSliderOnValueChange] {
+        if (mSpatMode == SpatMode::dome) {
+            smoothSliderOnValueChange(mParameterAzimuthOrXYSpanDescriptorCombo,
+                                      mParameterAziXYSpanSmoothSlider,
+                                      mAudioProcessor.getHSpanDome());
+        } else {
+            smoothSliderOnValueChange(mParameterAzimuthOrXYSpanDescriptorCombo,
+                                      mParameterAziXYSpanSmoothSlider,
+                                      mAudioProcessor.getHSpanCube());
+        }
     };
 
     addAndMakeVisible(&mParameterAzimuthButton);
@@ -594,45 +631,52 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
             mParameterAzimuthRangeSlider.setValue(param.getParamRangeLoudness());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetLoudness());
-            mParameterLapEditor.setText(juce::String(param.getParamLapLoudness()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
             mParameterAzimuthRangeSlider.setValue(param.getParamRangePitch());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapPitch()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetPitch());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothPitch());
             changeMinMaxSlidersRange(20, 5000);
             break;
         case DescriptorID::centroid:
             mParameterAzimuthRangeSlider.setValue(param.getParamRangeCentroid());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapCentroid()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetCentroid());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothCentroid());
             changeMinMaxSlidersRange(20, 20000);
             break;
         case DescriptorID::spread:
             mParameterAzimuthRangeSlider.setValue(param.getParamRangeSpread());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetSpread());
-            mParameterLapEditor.setText(juce::String(param.getParamLapSpread()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
             mParameterAzimuthRangeSlider.setValue(param.getParamRangeNoise());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetNoise());
-            mParameterLapEditor.setText(juce::String(param.getParamLapNoise()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
             mParameterAzimuthRangeSlider.setValue(param.getParamRangeOnsetDetection());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapOnsetDetection()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
             mParameterAzimuthXOffsetSlider.setVisible(false);
+            mParameterAzimuthXSmoothSlider.setVisible(false);
             break;
         default:
             break;
-        }
-        if (mParameterLapEditor.getText().getIntValue() == 0) {
-            mParameterLapEditor.setText("1");
         }
 
         refreshDescriptorPanel();
@@ -668,33 +712,49 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
             mParameterElevationRangeSlider.setValue(param.getParamRangeLoudness());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetLoudness());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
             mParameterElevationRangeSlider.setValue(param.getParamRangePitch());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetPitch());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothPitch());
             changeMinMaxSlidersRange(20, 5000);
             break;
         case DescriptorID::centroid:
             mParameterElevationRangeSlider.setValue(param.getParamRangeCentroid());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetCentroid());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothCentroid());
             changeMinMaxSlidersRange(20, 20000);
             break;
         case DescriptorID::spread:
             mParameterElevationRangeSlider.setValue(param.getParamRangeSpread());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetSpread());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
             mParameterElevationRangeSlider.setValue(param.getParamRangeNoise());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetNoise());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
             mParameterElevationRangeSlider.setValue(param.getParamRangeOnsetDetection());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
             mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZSmoothSlider.setVisible(false);
             break;
         default:
             break;
@@ -727,44 +787,53 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         param.setDescriptorToUse(mDescriptorIdToUse);
 
         switch (mDescriptorIdToUse) {
-        // mParameterLapCombo is visible only if mXYParamLinked is true
         case DescriptorID::loudness:
             mParameterXRangeSlider.setValue(param.getParamRangeLoudness());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetLoudness());
-            mParameterLapEditor.setText(juce::String(param.getParamLapLoudness()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
             mParameterXRangeSlider.setValue(param.getParamRangePitch());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapPitch()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetPitch());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothPitch());
             changeMinMaxSlidersRange(20, 5000);
             break;
         case DescriptorID::centroid:
             mParameterXRangeSlider.setValue(param.getParamRangeCentroid());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapCentroid()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetCentroid());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothCentroid());
             changeMinMaxSlidersRange(20, 20000);
             break;
         case DescriptorID::spread:
             mParameterXRangeSlider.setValue(param.getParamRangeSpread());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetSpread());
-            mParameterLapEditor.setText(juce::String(param.getParamLapSpread()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
             mParameterXRangeSlider.setValue(param.getParamRangeNoise());
             mParameterAzimuthXOffsetSlider.setVisible(true);
             mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetNoise());
-            mParameterLapEditor.setText(juce::String(param.getParamLapNoise()));
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
             mParameterXRangeSlider.setValue(param.getParamRangeOnsetDetection());
-            mParameterAzimuthXOffsetSlider.setVisible(false);
-            mParameterLapEditor.setText(juce::String(param.getParamLapOnsetDetection()));
+            mParameterAzimuthXOffsetSlider.setVisible(true);
+            mParameterAzimuthXOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            mParameterAzimuthXSmoothSlider.setVisible(true);
+            mParameterAzimuthXSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
             mParameterAzimuthXOffsetSlider.setVisible(false);
+            mParameterAzimuthXSmoothSlider.setVisible(false);
             break;
         default:
             break;
@@ -801,33 +870,49 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
             mParameterYRangeSlider.setValue(param.getParamRangeLoudness());
             mParameterYOffsetSlider.setVisible(true);
             mParameterYOffsetSlider.setValue(param.getParamOffsetLoudness());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
             mParameterYRangeSlider.setValue(param.getParamRangePitch());
-            mParameterYOffsetSlider.setVisible(false);
+            mParameterYOffsetSlider.setVisible(true);
+            mParameterYOffsetSlider.setValue(param.getParamOffsetPitch());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothPitch());
             changeMinMaxSlidersRange(20, 5000);
             break;
         case DescriptorID::centroid:
             mParameterYRangeSlider.setValue(param.getParamRangeCentroid());
-            mParameterYOffsetSlider.setVisible(false);
+            mParameterYOffsetSlider.setVisible(true);
+            mParameterYOffsetSlider.setValue(param.getParamOffsetCentroid());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothCentroid());
             changeMinMaxSlidersRange(20, 20000);
             break;
         case DescriptorID::spread:
             mParameterYRangeSlider.setValue(param.getParamRangeSpread());
             mParameterYOffsetSlider.setVisible(true);
             mParameterYOffsetSlider.setValue(param.getParamOffsetSpread());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
             mParameterYRangeSlider.setValue(param.getParamRangeNoise());
             mParameterYOffsetSlider.setVisible(true);
             mParameterYOffsetSlider.setValue(param.getParamOffsetNoise());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
             mParameterYRangeSlider.setValue(param.getParamRangeOnsetDetection());
-            mParameterYOffsetSlider.setVisible(false);
+            mParameterYOffsetSlider.setVisible(true);
+            mParameterYOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            mParameterYSmoothSlider.setVisible(true);
+            mParameterYSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
             mParameterYOffsetSlider.setVisible(false);
+            mParameterYSmoothSlider.setVisible(false);
             break;
         default:
             break;
@@ -864,33 +949,49 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
             mParameterZRangeSlider.setValue(param.getParamRangeLoudness());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetLoudness());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
             mParameterZRangeSlider.setValue(param.getParamRangePitch());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetPitch());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothPitch());
             changeMinMaxSlidersRange(20, 5000);
             break;
         case DescriptorID::centroid:
             mParameterZRangeSlider.setValue(param.getParamRangeCentroid());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetCentroid());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothCentroid());
             changeMinMaxSlidersRange(20, 20000);
             break;
         case DescriptorID::spread:
             mParameterZRangeSlider.setValue(param.getParamRangeSpread());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetSpread());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
             mParameterZRangeSlider.setValue(param.getParamRangeNoise());
             mParameterElevationZOffsetSlider.setVisible(true);
             mParameterElevationZOffsetSlider.setValue(param.getParamOffsetNoise());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
             mParameterZRangeSlider.setValue(param.getParamRangeOnsetDetection());
-            mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZOffsetSlider.setVisible(true);
+            mParameterElevationZOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+            mParameterElevationZSmoothSlider.setVisible(true);
+            mParameterElevationZSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
             mParameterElevationZOffsetSlider.setVisible(false);
+            mParameterElevationZSmoothSlider.setVisible(false);
             break;
         default:
             break;
@@ -908,6 +1009,7 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         if (mDescriptorIdToUse == DescriptorID::invalid) {
             mParameterToShow.reset();
             mParameterAziXYSpanOffsetSlider.setVisible(false);
+            mParameterAziXYSpanSmoothSlider.setVisible(false);
         } else {
             if (mSpatMode == SpatMode::dome) {
                 mParameterToShow = mAudioProcessor.getHSpanDome();
@@ -949,33 +1051,49 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeLoudness());
                 mParameterAziXYSpanOffsetSlider.setVisible(true);
                 mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetLoudness());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothLoudness());
                 break;
             case DescriptorID::pitch:
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangePitch());
-                mParameterAziXYSpanOffsetSlider.setVisible(false);
+                mParameterAziXYSpanOffsetSlider.setVisible(true);
+                mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetPitch());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothPitch());
                 changeMinMaxSlidersRange(20, 5000);
                 break;
             case DescriptorID::centroid:
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeCentroid());
-                mParameterAziXYSpanOffsetSlider.setVisible(false);
+                mParameterAziXYSpanOffsetSlider.setVisible(true);
+                mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetCentroid());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothCentroid());
                 changeMinMaxSlidersRange(20, 20000);
                 break;
             case DescriptorID::spread:
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeSpread());
                 mParameterAziXYSpanOffsetSlider.setVisible(true);
                 mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetSpread());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothSpread());
                 break;
             case DescriptorID::noise:
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeNoise());
                 mParameterAziXYSpanOffsetSlider.setVisible(true);
                 mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetNoise());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothNoise());
                 break;
             case DescriptorID::iterationsSpeed:
                 mParameterAzimuthOrXYSpanRangeSlider.setValue(param.getParamRangeOnsetDetection());
-                mParameterAziXYSpanOffsetSlider.setVisible(false);
+                mParameterAziXYSpanOffsetSlider.setVisible(true);
+                mParameterAziXYSpanOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+                mParameterAziXYSpanSmoothSlider.setVisible(true);
+                mParameterAziXYSpanSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
                 break;
             case DescriptorID::invalid:
                 mParameterAziXYSpanOffsetSlider.setVisible(false);
+                mParameterAziXYSpanSmoothSlider.setVisible(false);
                 break;
             default:
                 break;
@@ -995,6 +1113,7 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         if (mDescriptorIdToUse == DescriptorID::invalid) {
             mParameterToShow.reset();
             mParameterEleZSpanOffsetSlider.setVisible(false);
+            mParameterEleZSpanSmoothSlider.setVisible(false);
         } else {
             if (mSpatMode == SpatMode::dome) {
                 mParameterToShow = mAudioProcessor.getVSpanDome();
@@ -1036,33 +1155,49 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeLoudness());
                 mParameterEleZSpanOffsetSlider.setVisible(true);
                 mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetLoudness());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothLoudness());
                 break;
             case DescriptorID::pitch:
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangePitch());
-                mParameterEleZSpanOffsetSlider.setVisible(false);
+                mParameterEleZSpanOffsetSlider.setVisible(true);
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetPitch());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothPitch());
                 changeMinMaxSlidersRange(20, 5000);
                 break;
             case DescriptorID::centroid:
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeCentroid());
-                mParameterEleZSpanOffsetSlider.setVisible(false);
+                mParameterEleZSpanOffsetSlider.setVisible(true);
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetCentroid());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothCentroid());
                 changeMinMaxSlidersRange(20, 20000);
                 break;
             case DescriptorID::spread:
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeSpread());
                 mParameterEleZSpanOffsetSlider.setVisible(true);
                 mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetSpread());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothSpread());
                 break;
             case DescriptorID::noise:
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeNoise());
                 mParameterEleZSpanOffsetSlider.setVisible(true);
                 mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetNoise());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothNoise());
                 break;
             case DescriptorID::iterationsSpeed:
                 mParameterElevationOrZSpanRangeSlider.setValue(param.getParamRangeOnsetDetection());
-                mParameterEleZSpanOffsetSlider.setVisible(false);
+                mParameterEleZSpanOffsetSlider.setVisible(true);
+                mParameterEleZSpanOffsetSlider.setValue(param.getParamOffsetOnsetDetection());
+                mParameterEleZSpanSmoothSlider.setVisible(true);
+                mParameterEleZSpanSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
                 break;
             case DescriptorID::invalid:
                 mParameterEleZSpanOffsetSlider.setVisible(false);
+                mParameterEleZSpanSmoothSlider.setVisible(false);
                 break;
             default:
                 break;
@@ -1108,6 +1243,29 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     mParameterEleZSpanOffsetSlider.setNormalisableRange(juce::NormalisableRange<double>{ -1.0, 1.0, 0.01 });
     mParameterEleZSpanOffsetSlider.setValue(0.0, juce::dontSendNotification);
 
+    addAndMakeVisible(&mParameterSmoothLabel);
+    mParameterSmoothLabel.setText("Smooth", juce::dontSendNotification);
+
+    addAndMakeVisible(&mParameterAzimuthXSmoothSlider);
+    mParameterAzimuthXSmoothSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 100.0, 0.01 });
+    mParameterAzimuthXSmoothSlider.setValue(0.0, juce::dontSendNotification);
+
+    addAndMakeVisible(&mParameterElevationZSmoothSlider);
+    mParameterElevationZSmoothSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 100.0, 0.01 });
+    mParameterElevationZSmoothSlider.setValue(0.0, juce::dontSendNotification);
+
+    addAndMakeVisible(&mParameterYSmoothSlider);
+    mParameterYSmoothSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 100.0, 0.01 });
+    mParameterYSmoothSlider.setValue(0.0, juce::dontSendNotification);
+
+    addAndMakeVisible(&mParameterAziXYSpanSmoothSlider);
+    mParameterAziXYSpanSmoothSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 100.0, 0.01 });
+    mParameterAziXYSpanSmoothSlider.setValue(0.0, juce::dontSendNotification);
+
+    addAndMakeVisible(&mParameterEleZSpanSmoothSlider);
+    mParameterEleZSpanSmoothSlider.setNormalisableRange(juce::NormalisableRange<double>{ 0.0, 100.0, 0.01 });
+    mParameterEleZSpanSmoothSlider.setValue(0.0, juce::dontSendNotification);
+
     addAndMakeVisible(&mAudioAnalysisActivateButton);
     mAudioAnalysisActivateButton.setButtonText("Activate");
     mAudioAnalysisActivateButton.setClickingTogglesState(true);
@@ -1127,122 +1285,26 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     // Audio Analysis
 
     mDescriptorMetricLabel.setText("Metric", juce::dontSendNotification);
-    mDescriptorExpanderLabel.setText("Expander", juce::dontSendNotification);
     mDescriptorThresholdLabel.setText("Threshold", juce::dontSendNotification);
     mDescriptorMinFreqLabel.setText("Min. Freq", juce::dontSendNotification);
     mDescriptorMaxFreqLabel.setText("Max. Freq", juce::dontSendNotification);
     mDescriptorMinTimeLabel.setText("Min. Time", juce::dontSendNotification);
     mDescriptorMaxTimeLabel.setText("Max. Time", juce::dontSendNotification);
-    mDescriptorSmoothLabel.setText("Smooth", juce::dontSendNotification);
-    mDescriptorSmoothCoefLabel.setText("Smooth Coef.", juce::dontSendNotification);
 
     // default values
-    mDescriptorExpanderSlider.setDefaultReturnValue(100.0);
-    mDescriptorSmoothSlider.setDefaultReturnValue(5.0);
-    mDescriptorSmoothCoefSlider.setDefaultReturnValue(0.0);
     mDescriptorThresholdSlider.setDefaultReturnValue(0.1);
     mDescriptorMinTimeSlider.setDefaultReturnValue(0.1);
     mDescriptorMaxTimeSlider.setDefaultReturnValue(10.0);
 
-    mDescriptorExpanderSlider.setDefaultNumDecimalPlacesToDisplay(1);
-    mDescriptorSmoothSlider.setDefaultNumDecimalPlacesToDisplay(2);
-    mDescriptorSmoothCoefSlider.setDefaultNumDecimalPlacesToDisplay(2);
     mDescriptorMinFreqSlider.setDefaultNumDecimalPlacesToDisplay(1);
     mDescriptorMaxFreqSlider.setDefaultNumDecimalPlacesToDisplay(1);
     mDescriptorThresholdSlider.setDefaultNumDecimalPlacesToDisplay(3);
     mDescriptorMinTimeSlider.setDefaultNumDecimalPlacesToDisplay(3);
     mDescriptorMaxTimeSlider.setDefaultNumDecimalPlacesToDisplay(3);
 
-    mDescriptorExpanderSlider.setRange(0, 500);
-    mDescriptorSmoothSlider.setRange(0, 100);
-    mDescriptorSmoothCoefSlider.setRange(0, 100);
     mDescriptorThresholdSlider.setRange(0.0, 1.0);
     mDescriptorMinTimeSlider.setRange(0.0, 30.0 + ALMOST_ZERO);
     mDescriptorMaxTimeSlider.setRange(ALMOST_ZERO, 30.0);
-
-    mDescriptorExpanderSlider.onValueChange = [this] {
-        if (mParameterToShow) {
-            auto & param = mParameterToShow->get();
-            auto value = mDescriptorExpanderSlider.getValue();
-            switch (mDescriptorIdToUse) {
-            case DescriptorID::loudness:
-                param.setParamExpanderLoudness(value);
-                break;
-            case DescriptorID::spread:
-                param.setParamExpanderSpread(value);
-                break;
-            case DescriptorID::noise:
-                param.setParamExpanderNoise(value);
-                break;
-            case DescriptorID::pitch:
-            case DescriptorID::centroid:
-            case DescriptorID::iterationsSpeed:
-            case DescriptorID::invalid:
-            default:
-                break;
-            }
-        }
-    };
-
-    mDescriptorSmoothSlider.onValueChange = [this] {
-        if (mParameterToShow) {
-            auto & param = mParameterToShow->get();
-            auto value = mDescriptorSmoothSlider.getValue();
-            switch (mDescriptorIdToUse) {
-            case DescriptorID::loudness:
-                param.setParamSmoothLoudness(value);
-                break;
-            case DescriptorID::spread:
-                param.setParamSmoothSpread(value);
-                break;
-            case DescriptorID::noise:
-                param.setParamSmoothNoise(value);
-                break;
-            case DescriptorID::pitch:
-                param.setParamSmoothPitch(value);
-                break;
-            case DescriptorID::centroid:
-                param.setParamSmoothCentroid(value);
-                break;
-            case DescriptorID::iterationsSpeed:
-                param.setParamSmoothOnsetDetection(value);
-                break;
-            case DescriptorID::invalid:
-            default:
-                break;
-            }
-        }
-    };
-
-    mDescriptorSmoothCoefSlider.onValueChange = [this] {
-        if (mParameterToShow) {
-            auto & param = mParameterToShow->get();
-            auto value = mDescriptorSmoothCoefSlider.getValue();
-            switch (mDescriptorIdToUse) {
-            case DescriptorID::loudness:
-                param.setParamSmoothCoefLoudness(value);
-                break;
-            case DescriptorID::spread:
-                param.setParamSmoothCoefSpread(value);
-                break;
-            case DescriptorID::noise:
-                param.setParamSmoothCoefNoise(value);
-                break;
-            case DescriptorID::pitch:
-                param.setParamSmoothCoefPitch(value);
-                break;
-            case DescriptorID::centroid:
-                param.setParamSmoothCoefCentroid(value);
-                break;
-            case DescriptorID::iterationsSpeed:
-                param.setParamSmoothCoefOnsetDetection(value);
-                break;
-            case DescriptorID::invalid:
-            default:
-                break;
-            }
-        }
-    };
 
     mDescriptorMinFreqSlider.onValueChange = [this] {
         if (mParameterToShow) {
@@ -1340,9 +1402,6 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
         }
     };
 
-    addAndMakeVisible(&mDescriptorExpanderSlider);
-    addAndMakeVisible(&mDescriptorSmoothSlider);
-    // addAndMakeVisible(&mDescriptorSmoothCoefSlider);
     addAndMakeVisible(&mDescriptorMinFreqSlider);
     addAndMakeVisible(&mDescriptorMaxFreqSlider);
     addAndMakeVisible(&mDescriptorThresholdSlider);
@@ -1350,14 +1409,11 @@ SectionSoundReactiveTrajectories::SectionSoundReactiveTrajectories(GrisLookAndFe
     addAndMakeVisible(&mDescriptorMaxTimeSlider);
 
     addAndMakeVisible(&mDescriptorMetricLabel);
-    addAndMakeVisible(&mDescriptorExpanderLabel);
     addAndMakeVisible(&mDescriptorThresholdLabel);
     addAndMakeVisible(&mDescriptorMinFreqLabel);
     addAndMakeVisible(&mDescriptorMaxFreqLabel);
     addAndMakeVisible(&mDescriptorMinTimeLabel);
     addAndMakeVisible(&mDescriptorMaxTimeLabel);
-    addAndMakeVisible(&mDescriptorSmoothLabel);
-    // addAndMakeVisible(&mDescriptorSmoothCoefLabel);
 
     addAndMakeVisible(&mDescriptorMetricCombo);
     mDescriptorMetricCombo.addItemList(ONSET_DETECTION_METRIC_TYPES, 1);
@@ -1517,17 +1573,16 @@ void SectionSoundReactiveTrajectories::resized()
     mParameterYDescriptorCombo.setEnabled(true);
     mParameterYRangeSlider.setEnabled(true);
     mParameterYOffsetSlider.setEnabled(true);
+    mParameterYSmoothSlider.setEnabled(true);
 
     mParameterAzimuthOrXYSpanRangeSlider.setVisible(showAziXYSpanRangeSlider);
     mParameterElevationOrZSpanRangeSlider.setVisible(showEleZSpanRangeSlider);
 
     if (mSpatMode == SpatMode::dome) {
-        auto const showAziRangeSlider{ Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId())
-                                       != DescriptorID::invalid };
-        auto const showEleRangeSlider{ Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId())
-                                       != DescriptorID::invalid };
-        auto const showLapEd{ Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId())
-                              != DescriptorID::invalid };
+        auto const showAziRangeSliders{ Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId())
+                                        != DescriptorID::invalid };
+        auto const showEleRangeSliders{ Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId())
+                                        != DescriptorID::invalid };
 
         mPadLockButton.setVisible(false);
         mParameterXButton.setVisible(false);
@@ -1540,13 +1595,13 @@ void SectionSoundReactiveTrajectories::resized()
         mParameterXDescriptorCombo.setVisible(false);
         mParameterYDescriptorCombo.setVisible(false);
         mParameterZDescriptorCombo.setVisible(false);
-        mParameterAzimuthRangeSlider.setVisible(showAziRangeSlider);
-        mParameterElevationRangeSlider.setVisible(showEleRangeSlider);
+        mParameterAzimuthRangeSlider.setVisible(showAziRangeSliders);
+        mParameterElevationRangeSlider.setVisible(showEleRangeSliders);
         mParameterXRangeSlider.setVisible(false);
         mParameterYRangeSlider.setVisible(false);
         mParameterZRangeSlider.setVisible(false);
-        mParameterLapLabel.setVisible(true);
-        mParameterLapEditor.setVisible(showLapEd);
+        mParameterYOffsetSlider.setVisible(false);
+        mParameterYSmoothSlider.setVisible(false);
 
         mParameterAzimuthButton.setBounds(areaSpatParams.getTopLeft().getX() + 30,
                                           areaSpatParams.getTopLeft().getY() + 15,
@@ -1630,15 +1685,27 @@ void SectionSoundReactiveTrajectories::resized()
                                                  35,
                                                  12);
 
-        mParameterLapLabel.setBounds(mParameterOffsetLabel.getRight() + 7,
-                                     areaSpatParams.getTopLeft().getY() + 2,
-                                     40,
-                                     15);
+        mParameterSmoothLabel.setBounds(mParameterOffsetLabel.getRight() - 1,
+                                        areaSpatParams.getTopLeft().getY() + 2,
+                                        40,
+                                        15);
 
-        mParameterLapEditor.setBounds(mParameterOffsetLabel.getRight() + 5,
-                                      mParameterAzimuthDescriptorCombo.getBounds().getTopLeft().getY() + 1,
-                                      30,
-                                      13);
+        mParameterAzimuthXSmoothSlider.setBounds(mParameterAzimuthXOffsetSlider.getRight() + 5,
+                                                 mParameterAzimuthXOffsetSlider.getBounds().getTopLeft().getY(),
+                                                 35,
+                                                 12);
+        mParameterElevationZSmoothSlider.setBounds(mParameterElevationZOffsetSlider.getRight() + 5,
+                                                   mParameterElevationZOffsetSlider.getBounds().getTopLeft().getY(),
+                                                   35,
+                                                   12);
+        mParameterAziXYSpanSmoothSlider.setBounds(mParameterAziXYSpanOffsetSlider.getRight() + 5,
+                                                  mParameterAziXYSpanOffsetSlider.getBounds().getTopLeft().getY(),
+                                                  35,
+                                                  12);
+        mParameterEleZSpanSmoothSlider.setBounds(mParameterEleZSpanOffsetSlider.getRight() + 5,
+                                                 mParameterEleZSpanOffsetSlider.getBounds().getTopLeft().getY(),
+                                                 35,
+                                                 12);
 
         mAudioAnalysisActivateButton.setBounds(mParameterElevationOrZSpanButton.getBounds().getBottomLeft().getX() + 70,
                                                mParameterElevationOrZSpanButton.getBounds().getBottomLeft().getY() + 17,
@@ -1647,8 +1714,8 @@ void SectionSoundReactiveTrajectories::resized()
     } else {
         auto const showXRangeSlider{ Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId())
                                      != DescriptorID::invalid };
-        auto const showYRangeSlider{ Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId())
-                                     != DescriptorID::invalid };
+        auto const showYSliders{ Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId())
+                                 != DescriptorID::invalid };
         auto const showZRangeSlider{ Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId())
                                      != DescriptorID::invalid };
 
@@ -1666,10 +1733,10 @@ void SectionSoundReactiveTrajectories::resized()
         mParameterAzimuthRangeSlider.setVisible(false);
         mParameterElevationRangeSlider.setVisible(false);
         mParameterXRangeSlider.setVisible(showXRangeSlider);
-        mParameterYRangeSlider.setVisible(showYRangeSlider);
+        mParameterYRangeSlider.setVisible(showYSliders);
         mParameterZRangeSlider.setVisible(showZRangeSlider);
-        mParameterLapLabel.setVisible(false);
-        mParameterLapEditor.setVisible(false);
+        mParameterYOffsetSlider.setVisible(showYSliders);
+        mParameterYSmoothSlider.setVisible(showYSliders);
 
         mPadLockButton.setBounds(areaSpatParams.getTopLeft().getX() + 11, 44, 15, 15);
 
@@ -1769,15 +1836,31 @@ void SectionSoundReactiveTrajectories::resized()
                                                  35,
                                                  12);
 
-        mParameterLapLabel.setBounds(mParameterOffsetLabel.getRight() + 7,
-                                     areaSpatParams.getTopLeft().getY() + 2,
-                                     40,
-                                     15);
+        mParameterSmoothLabel.setBounds(mParameterOffsetLabel.getRight() - 1,
+                                        areaSpatParams.getTopLeft().getY() + 2,
+                                        40,
+                                        15);
 
-        mParameterLapEditor.setBounds(mParameterOffsetLabel.getRight() + 5,
-                                      mParameterXDescriptorCombo.getBounds().getTopLeft().getY() + 1,
-                                      30,
-                                      13);
+        mParameterAzimuthXSmoothSlider.setBounds(mParameterAzimuthXOffsetSlider.getRight() + 5,
+                                                 mParameterAzimuthXOffsetSlider.getBounds().getTopLeft().getY(),
+                                                 35,
+                                                 12);
+        mParameterYSmoothSlider.setBounds(mParameterYOffsetSlider.getRight() + 5,
+                                          mParameterYOffsetSlider.getBounds().getTopLeft().getY(),
+                                          35,
+                                          12);
+        mParameterElevationZSmoothSlider.setBounds(mParameterElevationZOffsetSlider.getRight() + 5,
+                                                   mParameterElevationZOffsetSlider.getBounds().getTopLeft().getY(),
+                                                   35,
+                                                   12);
+        mParameterAziXYSpanSmoothSlider.setBounds(mParameterAziXYSpanOffsetSlider.getRight() + 5,
+                                                  mParameterAziXYSpanOffsetSlider.getBounds().getTopLeft().getY(),
+                                                  35,
+                                                  12);
+        mParameterEleZSpanSmoothSlider.setBounds(mParameterEleZSpanOffsetSlider.getRight() + 5,
+                                                 mParameterEleZSpanOffsetSlider.getBounds().getTopLeft().getY(),
+                                                 35,
+                                                 12);
 
         mAudioAnalysisActivateButton.setBounds(mParameterElevationOrZSpanButton.getBounds().getBottomLeft().getX() + 70,
                                                mParameterElevationOrZSpanButton.getBounds().getBottomLeft().getY() + 7,
@@ -1785,16 +1868,11 @@ void SectionSoundReactiveTrajectories::resized()
                                                20);
 
         if (mXYParamLinked) {
-            auto const showLapEd{ Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId())
-                                  != DescriptorID::invalid };
-
-            mParameterLapLabel.setVisible(true);
-            mParameterLapEditor.setVisible(showLapEd);
-
             mParameterYButton.setEnabled(false);
             mParameterYDescriptorCombo.setEnabled(false);
             mParameterYRangeSlider.setEnabled(false);
             mParameterYOffsetSlider.setEnabled(false);
+            mParameterYSmoothSlider.setEnabled(false);
         }
     }
 }
@@ -1912,7 +1990,6 @@ void SectionSoundReactiveTrajectories::setSpatMode(SpatMode spatMode)
 
     auto const updateOffsetSlider = [&](NumSlider & slider, SpatialParameter & param, DescriptorID descID) {
         switch (descID) {
-        // should be only for loudness, spread and noise
         case DescriptorID::loudness:
             slider.setValue(param.getParamOffsetLoudness());
             break;
@@ -1963,25 +2040,25 @@ void SectionSoundReactiveTrajectories::setSpatMode(SpatMode spatMode)
         }
     };
 
-    auto const updateLapEditor = [&](juce::TextEditor & ed, SpatialParameter & param, DescriptorID descID) {
+    auto const updateSmoothSlider = [&](NumSlider & slider, SpatialParameter & param, DescriptorID descID) {
         switch (descID) {
         case DescriptorID::loudness:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapLoudness())));
+            slider.setValue(param.getParamSmoothLoudness());
             break;
         case DescriptorID::pitch:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapPitch())));
+            slider.setValue(param.getParamSmoothPitch());
             break;
         case DescriptorID::centroid:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapCentroid())));
+            slider.setValue(param.getParamSmoothCentroid());
             break;
         case DescriptorID::spread:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapSpread())));
+            slider.setValue(param.getParamSmoothSpread());
             break;
         case DescriptorID::noise:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapNoise())));
+            slider.setValue(param.getParamSmoothNoise());
             break;
         case DescriptorID::iterationsSpeed:
-            ed.setText(juce::String(static_cast<int>(param.getParamLapOnsetDetection())));
+            slider.setValue(param.getParamSmoothOnsetDetection());
             break;
         case DescriptorID::invalid:
         default:
@@ -1998,7 +2075,9 @@ void SectionSoundReactiveTrajectories::setSpatMode(SpatMode spatMode)
         mParameterElevationOrZSpanButton.setButtonText("Elevation Span");
         mParameterElevationZOffsetSlider.setNormalisableRange(juce::NormalisableRange<double>{ -1.0, 1.0, 0.01 });
         mParameterAzimuthXOffsetSlider.setNormalisableRange(juce::NormalisableRange<double>{ -360.0, 360.0, 0.01 });
+        mParameterYRangeSlider.setVisible(false);
         mParameterYOffsetSlider.setVisible(false);
+        mParameterYSmoothSlider.setVisible(false);
 
         updateParameterCombo(mParameterAzimuthDescriptorCombo, "LastUsedAzimuthDescriptor");
         updateParameterCombo(mParameterElevationDescriptorCombo, "LastUsedElevationDescriptor");
@@ -2047,9 +2126,19 @@ void SectionSoundReactiveTrajectories::setSpatMode(SpatMode spatMode)
         updateOffsetSlider(mParameterEleZSpanOffsetSlider,
                            mAudioProcessor.getVSpanDome(),
                            Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
-        updateLapEditor(mParameterLapEditor,
-                        mAudioProcessor.getAzimuthDome(),
-                        Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterAzimuthXSmoothSlider,
+                           mAudioProcessor.getAzimuthDome(),
+                           Descriptor::fromInt(mParameterAzimuthDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterElevationZSmoothSlider,
+                           mAudioProcessor.getElevationDome(),
+                           Descriptor::fromInt(mParameterElevationDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterAziXYSpanSmoothSlider,
+                           mAudioProcessor.getHSpanDome(),
+                           Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterEleZSpanSmoothSlider,
+                           mAudioProcessor.getVSpanDome(),
+                           Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
+
     } else {
         mParameterAzimuthOrXYSpanButton.setButtonText("X-Y Span");
         mParameterElevationOrZSpanButton.setButtonText("Z Span");
@@ -2114,9 +2203,21 @@ void SectionSoundReactiveTrajectories::setSpatMode(SpatMode spatMode)
         updateOffsetSlider(mParameterEleZSpanOffsetSlider,
                            mAudioProcessor.getVSpanCube(),
                            Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
-        updateLapEditor(mParameterLapEditor,
-                        mAudioProcessor.getXCube(),
-                        Descriptor::fromInt(mParameterXDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterAzimuthXSmoothSlider,
+                           mAudioProcessor.getXCube(),
+                           Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterYSmoothSlider,
+                           mAudioProcessor.getYCube(),
+                           Descriptor::fromInt(mParameterYDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterElevationZSmoothSlider,
+                           mAudioProcessor.getZCube(),
+                           Descriptor::fromInt(mParameterZDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterAziXYSpanSmoothSlider,
+                           mAudioProcessor.getHSpanCube(),
+                           Descriptor::fromInt(mParameterAzimuthOrXYSpanDescriptorCombo.getSelectedId()));
+        updateSmoothSlider(mParameterEleZSpanSmoothSlider,
+                           mAudioProcessor.getVSpanCube(),
+                           Descriptor::fromInt(mParameterElevationOrZSpanDescriptorCombo.getSelectedId()));
     }
 
     refreshDescriptorPanel();
@@ -2128,21 +2229,17 @@ void SectionSoundReactiveTrajectories::addNewParamValueToDataGraph()
     if (mParameterToShow) {
         auto & param{ mParameterToShow->get() };
         auto value{ param.getValue() };
-        auto lap{ mParameterLapEditor.getText().getIntValue() };
-        if (lap == 0) {
-            lap = 1;
-        }
 
         switch (param.getParameterID()) {
         case ParameterID::azimuth:
-            value = juce::jmap(value, -360.0 * lap, 360.0 * lap, -1.0, 1.0);
+            value = juce::jmap(value, -360.0, 360.0, -1.0, 1.0);
             break;
         case ParameterID::elevation:
             value = juce::jmap(value, -90.0, 90.0, -1.0, 1.0);
             break;
         case ParameterID::x:
             if (mAudioProcessor.getXYParamLink()) {
-                value = juce::jmap(value, -360.0 * lap, 360.0 * lap, -1.0, 1.0);
+                value = juce::jmap(value, -360.0, 360.0, -1.0, 1.0);
             } else {
                 value *= 0.5;
             }
@@ -2247,32 +2344,14 @@ void SectionSoundReactiveTrajectories::refreshDescriptorPanel()
     if (shouldShowDescriptorPanel) {
         switch (mDescriptorIdToUse) {
         case DescriptorID::loudness:
-            if (mParameterToShow) {
-                auto & param = mParameterToShow->get();
-                mDescriptorExpanderSlider.setValue(param.getParamExpanderLoudness());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothLoudness());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefLoudness());
-            }
             mAudioAnalysisSelectedDescriptor.setText("Loudness", juce::dontSendNotification);
             loudnessSpreadNoiseDescriptorLayout();
             break;
         case DescriptorID::spread:
-            if (mParameterToShow) {
-                auto & param = mParameterToShow->get();
-                mDescriptorExpanderSlider.setValue(param.getParamExpanderSpread());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothSpread());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefSpread());
-            }
             mAudioAnalysisSelectedDescriptor.setText("Spread", juce::dontSendNotification);
             loudnessSpreadNoiseDescriptorLayout();
             break;
         case DescriptorID::noise:
-            if (mParameterToShow) {
-                auto & param = mParameterToShow->get();
-                mDescriptorExpanderSlider.setValue(param.getParamExpanderNoise());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothNoise());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefNoise());
-            }
             mAudioAnalysisSelectedDescriptor.setText("Noise", juce::dontSendNotification);
             loudnessSpreadNoiseDescriptorLayout();
             break;
@@ -2281,8 +2360,6 @@ void SectionSoundReactiveTrajectories::refreshDescriptorPanel()
                 auto & param = mParameterToShow->get();
                 mDescriptorMinFreqSlider.setValue(param.getParamMinFreqPitch());
                 mDescriptorMaxFreqSlider.setValue(param.getParamMaxFreqPitch());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothPitch());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefPitch());
             }
             mAudioAnalysisSelectedDescriptor.setText("Pitch", juce::dontSendNotification);
             pitchCentroidDescriptorLayout();
@@ -2292,8 +2369,6 @@ void SectionSoundReactiveTrajectories::refreshDescriptorPanel()
                 auto & param = mParameterToShow->get();
                 mDescriptorMinFreqSlider.setValue(param.getParamMinFreqCentroid());
                 mDescriptorMaxFreqSlider.setValue(param.getParamMaxFreqCentroid());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothCentroid());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefCentroid());
             }
             mAudioAnalysisSelectedDescriptor.setText("Centroid", juce::dontSendNotification);
             pitchCentroidDescriptorLayout();
@@ -2305,8 +2380,6 @@ void SectionSoundReactiveTrajectories::refreshDescriptorPanel()
                 mDescriptorThresholdSlider.setValue(param.getParamThreshold());
                 mDescriptorMinTimeSlider.setValue(param.getParamMinTime());
                 mDescriptorMaxTimeSlider.setValue(param.getParamMaxTime());
-                mDescriptorSmoothSlider.setValue(param.getParamSmoothOnsetDetection());
-                mDescriptorSmoothCoefSlider.setValue(param.getParamSmoothCoefOnsetDetection());
             }
             mAudioAnalysisSelectedDescriptor.setText("Iterations Speed", juce::dontSendNotification);
             iterSpeedDescriptorLayout();
@@ -2327,42 +2400,8 @@ void SectionSoundReactiveTrajectories::refreshDescriptorPanel()
 void SectionSoundReactiveTrajectories::loudnessSpreadNoiseDescriptorLayout()
 {
     setAudioAnalysisComponentsInvisible();
-
     mAudioAnalysisSelectedDescriptor.setVisible(true);
-
-    mDescriptorExpanderLabel.setVisible(true);
-    mDescriptorSmoothLabel.setVisible(true);
-    mDescriptorSmoothCoefLabel.setVisible(true);
-
-    mDescriptorExpanderSlider.setVisible(true);
-    mDescriptorSmoothSlider.setVisible(true);
-    mDescriptorSmoothCoefSlider.setVisible(true);
-
     mDataGraph.setVisible(true);
-
-    auto area = mAreaAudioAnalysis;
-
-    mDescriptorExpanderLabel.setBounds(area.getTopLeft().getX() + 5, area.getTopLeft().getY() + 15, 75, 15);
-    mDescriptorSmoothLabel.setBounds(mDescriptorExpanderLabel.getBounds().getTopLeft().getX(),
-                                     mDescriptorExpanderLabel.getBounds().getBottom() + 5,
-                                     75,
-                                     15);
-    mDescriptorSmoothCoefLabel.setBounds(mDescriptorSmoothLabel.getBounds().getTopLeft().getX(),
-                                         mDescriptorSmoothLabel.getBounds().getBottom() + 5,
-                                         75,
-                                         15);
-    mDescriptorExpanderSlider.setBounds(mDescriptorExpanderLabel.getBounds().getRight(),
-                                        mDescriptorExpanderLabel.getBounds().getY(),
-                                        35,
-                                        12);
-    mDescriptorSmoothSlider.setBounds(mDescriptorSmoothLabel.getBounds().getRight(),
-                                      mDescriptorSmoothLabel.getBounds().getY(),
-                                      35,
-                                      12);
-    mDescriptorSmoothCoefSlider.setBounds(mDescriptorSmoothCoefLabel.getBounds().getRight(),
-                                          mDescriptorSmoothCoefLabel.getBounds().getY(),
-                                          35,
-                                          12);
 
     mDataGraph.setBounds(mAreaAudioAnalysis.getX() + 150, mAreaAudioAnalysis.getY() + 15, 80, 80);
 }
@@ -2376,13 +2415,9 @@ void SectionSoundReactiveTrajectories::pitchCentroidDescriptorLayout()
 
     mDescriptorMinFreqLabel.setVisible(true);
     mDescriptorMaxFreqLabel.setVisible(true);
-    mDescriptorSmoothLabel.setVisible(true);
-    mDescriptorSmoothCoefLabel.setVisible(true);
 
     mDescriptorMinFreqSlider.setVisible(true);
     mDescriptorMaxFreqSlider.setVisible(true);
-    mDescriptorSmoothSlider.setVisible(true);
-    mDescriptorSmoothCoefSlider.setVisible(true);
 
     mDataGraph.setVisible(true);
 
@@ -2393,14 +2428,6 @@ void SectionSoundReactiveTrajectories::pitchCentroidDescriptorLayout()
                                       mDescriptorMinFreqLabel.getBounds().getBottom() + 5,
                                       75,
                                       15);
-    mDescriptorSmoothLabel.setBounds(mDescriptorMaxFreqLabel.getBounds().getTopLeft().getX(),
-                                     mDescriptorMaxFreqLabel.getBounds().getBottom() + 5,
-                                     75,
-                                     15);
-    mDescriptorSmoothCoefLabel.setBounds(mDescriptorSmoothLabel.getBounds().getTopLeft().getX(),
-                                         mDescriptorSmoothLabel.getBounds().getBottom() + 5,
-                                         75,
-                                         15);
     mDescriptorMinFreqSlider.setBounds(mDescriptorMinFreqLabel.getBounds().getRight(),
                                        mDescriptorMinFreqLabel.getBounds().getY(),
                                        35,
@@ -2409,14 +2436,6 @@ void SectionSoundReactiveTrajectories::pitchCentroidDescriptorLayout()
                                        mDescriptorMaxFreqLabel.getBounds().getY(),
                                        35,
                                        12);
-    mDescriptorSmoothSlider.setBounds(mDescriptorSmoothLabel.getBounds().getRight(),
-                                      mDescriptorSmoothLabel.getBounds().getY(),
-                                      35,
-                                      12);
-    mDescriptorSmoothCoefSlider.setBounds(mDescriptorSmoothCoefLabel.getBounds().getRight(),
-                                          mDescriptorSmoothCoefLabel.getBounds().getY(),
-                                          35,
-                                          12);
 
     mDataGraph.setBounds(mAreaAudioAnalysis.getX() + 150, mAreaAudioAnalysis.getY() + 15, 80, 80);
 }
@@ -2432,16 +2451,12 @@ void SectionSoundReactiveTrajectories::iterSpeedDescriptorLayout()
     mDescriptorThresholdLabel.setVisible(true);
     mDescriptorMinTimeLabel.setVisible(true);
     mDescriptorMaxTimeLabel.setVisible(true);
-    mDescriptorSmoothLabel.setVisible(true);
-    mDescriptorSmoothCoefLabel.setVisible(true);
 
     mDescriptorMetricCombo.setVisible(true);
 
     mDescriptorThresholdSlider.setVisible(true);
     mDescriptorMinTimeSlider.setVisible(true);
     mDescriptorMaxTimeSlider.setVisible(true);
-    mDescriptorSmoothSlider.setVisible(true);
-    mDescriptorSmoothCoefSlider.setVisible(true);
 
     mDataGraph.setVisible(true);
     mClickTimerButton.setVisible(true);
@@ -2461,14 +2476,6 @@ void SectionSoundReactiveTrajectories::iterSpeedDescriptorLayout()
                                       mDescriptorMinTimeLabel.getBounds().getBottom() + 5,
                                       75,
                                       15);
-    mDescriptorSmoothLabel.setBounds(mDescriptorMaxTimeLabel.getBounds().getTopLeft().getX(),
-                                     mDescriptorMaxTimeLabel.getBounds().getBottom() + 5,
-                                     75,
-                                     15);
-    mDescriptorSmoothCoefLabel.setBounds(mDescriptorSmoothLabel.getBounds().getTopLeft().getX(),
-                                         mDescriptorSmoothLabel.getBounds().getBottom() + 5,
-                                         75,
-                                         15);
 
     mDescriptorMetricCombo.setBounds(mDescriptorMetricLabel.getRight(), area.getTopLeft().getY() + 15, 150, 15);
 
@@ -2484,14 +2491,6 @@ void SectionSoundReactiveTrajectories::iterSpeedDescriptorLayout()
                                        mDescriptorMaxTimeLabel.getBounds().getY(),
                                        35,
                                        12);
-    mDescriptorSmoothSlider.setBounds(mDescriptorSmoothLabel.getBounds().getRight(),
-                                      mDescriptorSmoothLabel.getBounds().getY(),
-                                      35,
-                                      12);
-    mDescriptorSmoothCoefSlider.setBounds(mDescriptorSmoothCoefLabel.getBounds().getRight(),
-                                          mDescriptorSmoothCoefLabel.getBounds().getY(),
-                                          35,
-                                          12);
 
     mDataGraph.setBounds(mAreaAudioAnalysis.getX() + 150, mAreaAudioAnalysis.getY() + 35, 80, 80);
     mClickTimerButton.setBounds(mDataGraph.getBounds().getX() + 15, mDataGraph.getBottom() + 3, 50, 15);
@@ -2503,25 +2502,19 @@ void SectionSoundReactiveTrajectories::setAudioAnalysisComponentsInvisible()
     mAudioAnalysisSelectedDescriptor.setVisible(false);
 
     mDescriptorMetricLabel.setVisible(false);
-    mDescriptorExpanderLabel.setVisible(false);
     mDescriptorThresholdLabel.setVisible(false);
     mDescriptorMinFreqLabel.setVisible(false);
     mDescriptorMaxFreqLabel.setVisible(false);
     mDescriptorMinTimeLabel.setVisible(false);
     mDescriptorMaxTimeLabel.setVisible(false);
-    mDescriptorSmoothLabel.setVisible(false);
-    mDescriptorSmoothCoefLabel.setVisible(false);
 
     mDescriptorMetricCombo.setVisible(false);
 
-    mDescriptorExpanderSlider.setVisible(false);
     mDescriptorThresholdSlider.setVisible(false);
     mDescriptorMinFreqSlider.setVisible(false);
     mDescriptorMaxFreqSlider.setVisible(false);
     mDescriptorMinTimeSlider.setVisible(false);
     mDescriptorMaxTimeSlider.setVisible(false);
-    mDescriptorSmoothSlider.setVisible(false);
-    mDescriptorSmoothCoefSlider.setVisible(false);
 
     mDataGraph.setVisible(false);
     mClickTimerButton.setVisible(false);
@@ -2581,31 +2574,17 @@ void DataGraph::paint(juce::Graphics & g)
         for (int i{}; i < mGUIBuffer.size(); ++i) {
             float initialX{}, initialY{}, width{}, height{};
             float valueToPaint{ static_cast<float>(mGUIBuffer.at(i)) };
-
-            if (mDescId == DescriptorID::loudness || mDescId == DescriptorID::spread
-                || mDescId == DescriptorID::noise) {
-                // parameter has an offset option, the graph can have negative values
-                initialX
-                    = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * i) + area.getX();
-                width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
-                height = static_cast<float>(area.getHeight() * std::abs(valueToPaint) / 2);
-                if (valueToPaint < 0) {
-                    // bottom half
-                    initialY = static_cast<float>(area.getHeight() / 2) + area.getY();
-                    rectList.add(initialX, initialY, width, height);
-                } else {
-                    // top half
-                    initialY = static_cast<float>((area.getHeight() / 2) - height) + area.getY();
-                    rectList.add(initialX, initialY, width, height);
-                }
+            initialX
+                = ((static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size())) * i) + area.getX();
+            width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
+            height = static_cast<float>(area.getHeight() * std::abs(valueToPaint) / 2);
+            if (valueToPaint < 0) {
+                // bottom half
+                initialY = static_cast<float>(area.getHeight() / 2) + area.getY();
+                rectList.add(initialX, initialY, width, height);
             } else {
-                // the graph uses only positive values
-                initialX
-                    = (static_cast<float>(area.getWidth()) / static_cast<float>(mGUIBuffer.size()) * i) + area.getX();
-                initialY = (static_cast<float>(area.getHeight() - (area.getHeight() * std::abs(mGUIBuffer.at(i)))))
-                           + area.getY();
-                width = static_cast<float>(area.getWidth()) / mGUIBuffer.size();
-                height = static_cast<float>(area.getHeight() * std::abs(mGUIBuffer.at(i)));
+                // top half
+                initialY = static_cast<float>((area.getHeight() / 2) - height) + area.getY();
                 rectList.add(initialX, initialY, width, height);
             }
         }

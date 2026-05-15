@@ -45,34 +45,37 @@ public:
         auto range{ 0.0 };
         auto offset{ 0.0 };
         auto smooth{ 0.0 };
-        auto aziInDegrees{ 90.0 };
+        auto eleInDegrees{ 90.0 };
 
         switch (descID) {
         case DescriptorID::loudness:
             range = paramRangeLoudness;
-            offset = paramOffsetLoudness * aziInDegrees;
+            offset = paramOffsetLoudness * eleInDegrees;
             smooth = processLoudness(valueToProcess);
             break;
         case DescriptorID::pitch:
             range = paramRangePitch;
+            offset = paramOffsetPitch * eleInDegrees;
             smooth = processPitch(valueToProcess);
             break;
         case DescriptorID::centroid:
             range = paramRangeCentroid;
+            offset = paramOffsetCentroid * eleInDegrees;
             smooth = processCentroid(valueToProcess);
             break;
         case DescriptorID::spread:
             range = paramRangeSpread;
-            offset = paramOffsetSpread * aziInDegrees;
+            offset = paramOffsetSpread * eleInDegrees;
             smooth = processSpread(valueToProcess);
             break;
         case DescriptorID::noise:
             range = paramRangeNoise;
-            offset = paramOffsetNoise * aziInDegrees;
+            offset = paramOffsetNoise * eleInDegrees;
             smooth = processNoise(valueToProcess);
             break;
         case DescriptorID::iterationsSpeed:
             range = paramRangeOD;
+            offset = paramOffsetOD * eleInDegrees;
             smooth = processSmoothedOnsetDetection(valueToProcess);
             break;
         case DescriptorID::invalid:

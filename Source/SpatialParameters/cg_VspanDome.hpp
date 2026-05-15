@@ -53,10 +53,12 @@ public:
             break;
         case DescriptorID::pitch:
             range = paramRangePitch;
+            offset = paramOffsetPitch;
             smooth = processPitch(valueToProcess);
             break;
         case DescriptorID::centroid:
             range = paramRangeCentroid;
+            offset = paramOffsetCentroid;
             smooth = processCentroid(valueToProcess);
             break;
         case DescriptorID::spread:
@@ -71,6 +73,7 @@ public:
             break;
         case DescriptorID::iterationsSpeed:
             range = paramRangeOD;
+            offset = paramOffsetOD;
             smooth = processSmoothedOnsetDetection(valueToProcess);
             break;
         case DescriptorID::invalid:
