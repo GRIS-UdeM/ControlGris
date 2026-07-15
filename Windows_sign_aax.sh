@@ -11,7 +11,7 @@ function print_usage_and_exit()
 	exit 1
 }
 
-export CERT_PATH=""
+export CERT=""
 export PASS=""
 
 #==============================================================================
@@ -47,8 +47,9 @@ fi
 
 #==============================================================================
 # sign the aax plugin
-export PLUGIN_PATH="Builds/VisualStudio2022/x64/Release/AAX/ControlGRIS2.aaxplugin"
-wraptool sign \
+export PLUGIN_PATH="Builds/VisualStudio2026/x64/Release/AAX/ControlGRIS2.aaxplugin"
+export PATH="$PATH:/c/Program Files/PACEAntiPiracy/Eden/Fusion/Versions/6/bin"
+wraptool.exe sign \
 		 --verbose \
 		 --account grisresearch \
 		 --keyfile "$CERT" \
