@@ -36,7 +36,7 @@ DomeControls::DomeControls(SectionSourcePosition & sourceBoxComponent, GrisLookA
     mElevationLabel.setText("Elevation:", juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationLabel);
 
-    mElevationSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.01f));
+    mElevationSlider.setNormalisableRange(juce::NormalisableRange<double>(0.0f, 1.0f, 0.001f));
     mElevationSlider.setValue(1.0, juce::NotificationType::dontSendNotification);
     addAndMakeVisible(&mElevationSlider);
     mElevationSlider.onValueChange = [this] {
