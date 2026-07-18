@@ -117,7 +117,8 @@ public:
                                                    std::optional<Radians> elevation,
                                                    std::optional<float> x,
                                                    std::optional<float> y,
-                                                   std::optional<float> z) = 0;
+                                                   std::optional<float> z)
+            = 0;
         virtual void positionSourceLinkChangedCallback(PositionSourceLink sourceLink) = 0;
         virtual void elevationSourceLinkChangedCallback(ElevationSourceLink sourceLink) = 0;
         virtual void elevationSourceLinkScaleChangedCallback(double scale) = 0;
